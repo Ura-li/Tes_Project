@@ -1,13 +1,19 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.jsx'
-import Lorem from './Lorem'
 import { BrowserRouter, Routes, Route } from "react-router";
+import App from './App';
+import Landing from './landing';
+import Lorem from './Lorem';
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-    <App />
+      <Routes>
+        <Route path='/' element={<App />}>
+          <Route index element={<Landing />} /> 
+        </Route>
+        <Route path="/route" element={<Lorem />}/>
+      </Routes>
   </BrowserRouter>
   </StrictMode>,
 )
