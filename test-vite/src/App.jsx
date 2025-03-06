@@ -15,7 +15,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+
+import { BrowserRouter, Routes, Route, Link } from 'react-router'
+import Lorem from './Lorem'
 const App = () => {
+  
   return (
     <div className='bg-purple-300'>
       <SidebarProvider>
@@ -28,9 +32,11 @@ const App = () => {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Application
-                  </BreadcrumbLink>
+                  <Link to="/lorem">
+                    {/* <BreadcrumbLink href="#"> */}
+                      Building Your Application
+                    {/* </BreadcrumbLink> */}
+                  </Link>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
