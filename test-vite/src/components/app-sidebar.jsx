@@ -50,7 +50,7 @@ const data = {
   ],
   navMain: [
     {
-      title: "Playground",
+      title: "Case",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
@@ -137,17 +137,17 @@ const data = {
   ],
   projects: [
     {
-      name: "Design Engineering",
+      name: "Home",
       url: "#",
       icon: Frame,
     },
     {
-      name: "Sales & Marketing",
+      name: "Case",
       url: "#",
       icon: PieChart,
     },
     {
-      name: "Travel",
+      name: "Recent",
       url: "#",
       icon: Map,
     },
@@ -163,8 +163,8 @@ export function AppSidebar({
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
+        <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
