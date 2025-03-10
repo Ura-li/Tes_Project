@@ -82,3 +82,24 @@ export async function PATCH(request, { params }) {
         }
     )
 }
+
+//delete data
+export async function DELETE(request, { params }) {
+    const siteAccountID = parseInt(params.id);
+    
+    await prisma.caseinformation.delete({
+        where: {
+            SiteAccountID: siteAccountID,
+        }
+    });
+
+    return NextResponse.json(
+        {
+        success: true,
+        message: "Data Site Account Information Deleted"
+        },
+        {
+            status: 200
+        }
+    );
+}

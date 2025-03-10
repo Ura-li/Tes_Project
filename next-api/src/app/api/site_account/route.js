@@ -2,10 +2,26 @@ import { NextResponse } from "next/server";
 
 import prisma  from "../../../../prisma/client";
 
-export async function GET() {
-    //get all data
-    const site_account = await prisma.site_account.findMany();
+export async function GET(request) {
+    //get search parameter
+    const { searchParams } = new URL(request.url);
 
+    //extract query parameter
+    const company = searchParams.get("company")
+    const email = searchParams.get("email")
+
+    //prisma query filter
+    const filters = {};
+    if(company){
+        filters.Company = { contains: company }
+    }
+    if(email){
+        filters.Email = { contains: email }
+    }
+    //get all data
+    const site_account = await prisma.site_account.findMany({
+        where: Object.keys(filters).length > 0 ? filters : undefined
+    });
     return NextResponse.json(
         {
             success: true,
