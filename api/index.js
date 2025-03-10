@@ -33,6 +33,25 @@ server.get('/site-account', (req, res) =>{
         }
     })
 })
+//search data
+server.get('/site-account/search', (req, res)=>{
+    const param = req.query.q;
+    if (!param) {
+        return res.status(400).json({ error: "Search query is required" });
+    }
+
+    const sql = `SELECT * FROM site_account WHERE Company LIKE ? OR Email LIKE ? OR City LIKE ?`;
+
+    const searchValue = `%${param}%` ;
+
+    const dbquery = db.query(sql,[ searchValue, searchValue, searchValue ],(err, result) =>{
+        if(err){
+            res.status(500).send(err);
+        }else{
+            res.json(result)
+        }
+    })
+})
 // add new site-account
 server.post('/site-account', (req, res) => {
     const {
@@ -54,6 +73,18 @@ server.post('/site-account', (req, res) => {
       }
     });
   });
+
+  //fetch 
+  // fetch asset_information
+server.get('/asset-information', (req, res) =>{
+    db.query("SELECT * FROM asset_information", (err, result) =>{
+        if(err){
+            res.status(500).send(err);
+        }else{
+            res.json(result)
+        }
+    })
+})
 
 const port = 3010;
 server.listen(port, () => {
