@@ -54,7 +54,7 @@ CREATE TABLE `caseinformation` (
   `CaseStatus` varchar(50) DEFAULT NULL,
   `CasePriority` varchar(50) DEFAULT NULL,
   `CustomerSeverity` varchar(50) DEFAULT NULL,
-  `CreatedOn` datetime DEFAULT current_timestamp(),
+  `CreatedOn` timestamp DEFAULT current_timestamp(),
   `CaseClosedDate` datetime DEFAULT NULL,
   `CaseNote` text DEFAULT NULL,
   `SymptomCode` varchar(50) DEFAULT NULL,
@@ -76,7 +76,7 @@ CREATE TABLE `casenotes` (
   `VisibleExternally` tinyint(1) DEFAULT 0,
   `MinutesSpent` int(11) DEFAULT NULL,
   `Note` text DEFAULT NULL,
-  `CreatedOn` datetime DEFAULT current_timestamp()
+  `CreatedOn` timestamp DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -120,7 +120,7 @@ CREATE TABLE `materialorder` (
   `OrderNumber` varchar(100) DEFAULT NULL,
   `OrderStatus` varchar(50) DEFAULT NULL,
   `OrderType` varchar(50) DEFAULT NULL,
-  `CreatedOn` datetime DEFAULT current_timestamp(),
+  `CreatedOn` timestamp DEFAULT current_timestamp(),
   `SalesOrderNumber` varchar(100) DEFAULT NULL,
   `RMANumber` varchar(100) DEFAULT NULL,
   `ReadyForClosureDate` datetime DEFAULT NULL,
@@ -236,7 +236,7 @@ CREATE TABLE `workorder` (
   `PreferredTime` time DEFAULT NULL,
   `ShipmentCountry` varchar(50) DEFAULT NULL,
   `ShipmentState` varchar(50) DEFAULT NULL,
-  `CreatedOn` datetime DEFAULT current_timestamp(),
+  `CreatedOn` timestamp DEFAULT current_timestamp(),
   `Owner` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

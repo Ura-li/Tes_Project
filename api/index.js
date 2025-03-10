@@ -31,8 +31,8 @@ server.get('/site-account', (req, res) =>{
         }else{
             res.json(result)
         }
-    })
-})
+    });
+});
 //search data
 server.get('/site-account/search', (req, res)=>{
     const param = req.query.q;
@@ -40,7 +40,7 @@ server.get('/site-account/search', (req, res)=>{
         return res.status(400).json({ error: "Search query is required" });
     }
 
-    const sql = `SELECT * FROM site_account WHERE Company LIKE ? OR Email LIKE ? OR City LIKE ?`;
+    const sql = `SELECT * FROM site_account WHERE Company LIKE ? OR Country LIKE ? OR City LIKE ?`;
 
     const searchValue = `%${param}%` ;
 
@@ -50,8 +50,8 @@ server.get('/site-account/search', (req, res)=>{
         }else{
             res.json(result)
         }
-    })
-})
+    });
+});
 // add new site-account
 server.post('/site-account', (req, res) => {
     const {
@@ -74,8 +74,7 @@ server.post('/site-account', (req, res) => {
     });
   });
 
-  //fetch 
-  // fetch asset_information
+// fetch asset_information
 server.get('/asset-information', (req, res) =>{
     db.query("SELECT * FROM asset_information", (err, result) =>{
         if(err){
@@ -83,8 +82,191 @@ server.get('/asset-information', (req, res) =>{
         }else{
             res.json(result)
         }
-    })
-})
+    });
+});
+//search data asset_information
+server.get('/asset-account/search', (req, res)=>{
+    const param = req.query.q;
+    if (!param) {
+        return res.status(400).json({ error: "Search query is required" });
+    }
+
+    const sql = `SELECT * FROM asset_information WHERE SerialNumber LIKE ?`;
+
+    const searchValue = `%${param}%` ;
+
+    const dbquery = db.query(sql,[ searchValue, searchValue, searchValue ],(err, result) =>{
+        if(err){
+            res.status(500).send(err);
+        }else{
+            res.json(result)
+        }
+    });
+});
+// add new asset_information
+server.post('/asset-information', (req, res) => {
+    const {
+        SerialNumber,
+        ProductName,
+        ProductNumber,
+        ProductLine,
+        SiteAccountID
+    } = req.body;
+    db.query('INSERT INTO asset_information (SerialNumber, ProductName, ProductNumber, ProductLine, SiteAccountID) VALUES (?, ?, ?, ?, ?)', [SerialNumber, ProductName, ProductNumber, ProductLine, SiteAccountID], (err, results) => {
+      if (err) {
+        res.status(500).send(err);
+      } else {
+        res.json({ id: results.insertId, SerialNumber, ProductName, ProductNumber, ProductLine, SiteAccountID });
+      }
+    });
+  });
+
+// fetch contact_information
+server.get('/contact-information', (req, res) =>{
+    db.query("SELECT * FROM contact_information", (err, result) =>{
+        if(err){
+            res.status(500).send(err);
+        }else{
+            res.json(result)
+        }
+    });
+});
+//search data asset_information
+server.get('/asset-account/search', (req, res)=>{
+    const param = req.query.q;
+    if (!param) {
+        return res.status(400).json({ error: "Search query is required" });
+    }
+
+    const sql = `SELECT * FROM asset_information WHERE SerialNumber LIKE ?`;
+
+    const searchValue = `%${param}%` ;
+
+    const dbquery = db.query(sql,[ searchValue, searchValue, searchValue ],(err, result) =>{
+        if(err){
+            res.status(500).send(err);
+        }else{
+            res.json(result)
+        }
+    });
+});
+// add new contact_information
+server.post('/contact-information', (req, res) => {
+    const {
+        SiteAccountID,  
+        Salutation,
+        FirstName,
+        LastName,
+        Email,
+        PreferredLanguage,
+        Phone,
+        Mobile,
+        WorkPhone,
+        WorkExtension,
+        OtherPhone,
+        OtherExtension,
+        Fax,
+        AddressLine1,
+        AddressLine2,
+        City,
+        StateProvince,
+        Country,
+        ZipPostalCode
+    } = req.body;
+    
+    db.query(
+        'INSERT INTO contact_information (SiteAccountID, Salutation, FirstName, LastName, Email, PreferredLanguage, Phone, Mobile, WorkPhone, WorkExtension, OtherPhone, OtherExtension, Fax, AddressLine1, AddressLine2, City, StateProvince, Country, ZipPostalCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [SiteAccountID, Salutation, FirstName, LastName, Email, PreferredLanguage, Phone, Mobile, WorkPhone, WorkExtension, OtherPhone, OtherExtension, Fax, AddressLine1, AddressLine2, City, StateProvince, Country, ZipPostalCode],
+        (err, results) => {
+            if (err) {
+                res.status(500).send(err);
+            } else {
+                res.json({
+                    id: results.insertId,
+                    SiteAccountID,
+                    Salutation,
+                    FirstName,
+                    LastName,
+                    Email,
+                    PreferredLanguage,
+                    Phone,
+                    Mobile,
+                    WorkPhone,
+                    WorkExtension,
+                    OtherPhone,
+                    OtherExtension,
+                    Fax,
+                    AddressLine1,
+                    AddressLine2,
+                    City,
+                    StateProvince,
+                    Country,
+                    ZipPostalCode
+                });
+            }
+        }
+    );
+});
+
+// fetch caseinformation
+server.get('/case-information', (req, res) =>{
+    db.query("SELECT * FROM caseinformation", (err, result) =>{
+        if(err){
+            res.status(500).send(err);
+        }else{
+            res.json(result)
+        }
+    });
+});
+// add new caseinformation
+server.post('/case-information', (req, res) => {
+    const {
+        SiteAccountID,
+        ContactID,
+        AssetID,
+        CaseSubject,
+        CaseType,
+        KCI_Flag,
+        IncomingChannel,
+        CaseStatus,
+        CasePriority,
+        CustomerSeverity,
+        CaseClosedDate,
+        CaseNote,
+        SymptomCode,
+        CaseResolution
+    } = req.body;
+    
+    db.query(
+        'INSERT INTO caseinformation (SiteAccountID, ContactID, AssetID, CaseSubject, CaseType, KCI_Flag, IncomingChannel, CaseStatus, CasePriority, CustomerSeverity, CaseClosedDate, CaseNote, SymptomCode, CaseResolution) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [SiteAccountID, ContactID, AssetID, CaseSubject, CaseType, KCI_Flag, IncomingChannel, CaseStatus, CasePriority, CustomerSeverity, CaseClosedDate, CaseNote, SymptomCode, CaseResolution],
+        (err, results) => {
+            if (err) {
+                res.status(500).send(err);
+            } else {
+                res.json({
+                    id: results.insertId,
+                    SiteAccountID,
+                    ContactID,
+                    AssetID,
+                    CaseSubject,
+                    CaseType,
+                    KCI_Flag,
+                    IncomingChannel,
+                    CaseStatus,
+                    CasePriority,
+                    CustomerSeverity,
+                    CaseClosedDate,
+                    CaseNote,
+                    SymptomCode,
+                    CaseResolution
+                });
+            }
+        }
+    );
+});
+
+
 
 const port = 3010;
 server.listen(port, () => {
