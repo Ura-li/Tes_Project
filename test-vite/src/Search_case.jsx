@@ -6,6 +6,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
+  SidebarTrigger,
 } from './components/ui/sidebar' 
 
 import { Button } from "@/components/ui/button"
@@ -32,6 +33,18 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+
+import {
+  Sheet,
+  SheetTrigger,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetFooter,
+  SheetTitle,
+  SheetDescription 
+} from "@/components/ui/sheet"
+
 
 const data = {
   navMain: [
@@ -214,6 +227,7 @@ const Search_case = () => {
                   <Label htmlFor="new">New password</Label>
                   <Input id="new" type="password" />
                 </div>
+                
               </CardContent>
               <CardFooter>
                 <Button>Save password</Button>
@@ -224,6 +238,7 @@ const Search_case = () => {
       </div>
       <div className="flex  flex-col min-h-[100vh]  rounded-xl bg-muted/50 md:min-h-min">
         <Sidebar side='right' className="relative" collapsible='icon'>
+          <SidebarTrigger />
           <SidebarContent>
             <InfoSide items={data.navMain} />
           </SidebarContent>
