@@ -7,7 +7,6 @@ import {
   SidebarContent,
   SidebarHeader,
 } from './components/ui/sidebar' 
-
 import { Button } from "@/components/ui/button"
 import {
   AudioWaveform,
@@ -32,203 +31,370 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+import { SelectBar } from './components/sc-select'
+import { SelectBar1 } from './components/sc-select'
+import { SelectBar2 } from './components/sc-select'
+import { BtnModal } from './components/sc-modal'
+// const data = {
+//   navMain: [
+//     {
+//       title: "Account info",
+//       icon: SquareTerminal,
+//       isActive: true,
+//       items: [
+//         {
+//           title: "History",
+//           value: "#",
+//         },
+//         {
+//           title: "Starred",
+//           value: "#",
+//         },
+//         {
+//           title: "Settings",
+//           value: "#",
+//         },
+//       ],
+//     },
+//     {
+//       title: "Contact info",
+//       icon: Bot,
+//       items: [
+//         {
+//           title: "Genesis",
+//           value: "#",
+//         },
+//         {
+//           title: "Explorer",
+//           value: "#",
+//         },
+//         {
+//           title: "Quantum",
+//           value: "#",
+//         },
+//       ],
+//     },
+//     {
+//       title: "Asset info",
+//       icon: BookOpen,
+//       items: [
+//         {
+//           title: "Introduction",
+//           value: "#",
+//         },
+//         {
+//           title: "Get Started",
+//           value: "#",
+//         },
+//         {
+//           title: "Tutorials",
+//           value: "#",
+//         },
+//         {
+//           title: "Changelog",
+//           value: "#",
+//         },
+//       ],
+//     },
+//     {
+//       title: "Entitlement info",
+//       icon: Settings2,
+//       items: [
+//         {
+//           title: "General",
+//           value: "#",
+//         },
+//         {
+//           title: "Team",
+//           value: "#",
+//         },
+//         {
+//           title: "Billing",
+//           value: "#",
+//         },
+//         {
+//           title: "Limits",
+//           value: "#",
+//         },
+//       ],
+//     },
+//   ],
+// }
 
-const data = {
-  navMain: [
-    {
-      title: "Account info",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          value: "#",
-        },
-        {
-          title: "Starred",
-          value: "#",
-        },
-        {
-          title: "Settings",
-          value: "#",
-        },
-      ],
-    },
-    {
-      title: "Contact info",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          value: "#",
-        },
-        {
-          title: "Explorer",
-          value: "#",
-        },
-        {
-          title: "Quantum",
-          value: "#",
-        },
-      ],
-    },
-    {
-      title: "Asset info",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          value: "#",
-        },
-        {
-          title: "Get Started",
-          value: "#",
-        },
-        {
-          title: "Tutorials",
-          value: "#",
-        },
-        {
-          title: "Changelog",
-          value: "#",
-        },
-      ],
-    },
-    {
-      title: "Entitlement info",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          value: "#",
-        },
-        {
-          title: "Team",
-          value: "#",
-        },
-        {
-          title: "Billing",
-          value: "#",
-        },
-        {
-          title: "Limits",
-          value: "#",
-        },
-      ],
-    },
-  ],
-}
+
 const Search_case = () => {
   return (
-    
-    <div className="flex flex-1  gap-4 p-4 pt-0">
-      <div className="flex  min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
+    <div className="flex flex-1 mt-2  gap-4 p-4 pt-0">
+      <div className="flex min-h-[100vh] flex-1 rounded-xl md:min-h-min">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className=" w-full flex justify-between h-[3em]">
-            <div className="w-2xs">
-              <TabsTrigger value="search">Search</TabsTrigger>
-              <TabsTrigger value="ci">Costumer Information</TabsTrigger>
+          <TabsList className="drop-shadow-xl bg-sky-700 w-full h-15 flex justify-between">
+            <div className="w-2xs p-2 text-white ">
+              <TabsTrigger value="search" className="cursor-pointer">Search</TabsTrigger>
+              <TabsTrigger value="ci" className="cursor-pointer">Costumer Information</TabsTrigger>
             </div>
-            <Button><span><Plus></Plus></span>Create Case</Button>
+            {/* <Button className="ml-50 cursor-pointer "><span></span>Customer Complaint</Button>
+            <Button className="cursor-pointer"><span></span>Customer Complaint Legal</Button> */}
+            {/* <Button className="mr-1.5 cursor-pointer"><span><Plus></Plus></span>Create Case</Button> */}
+            <BtnModal></BtnModal>
           </TabsList>
           <TabsContent value="search">
-            <Card>
-              <CardContent className="space-y-2 grid gap-1 grid-cols-3">
-                <div className="space-y-1">
+            <Card className="drop-shadow-md">
+              <CardContent className="grid gap-5 grid-cols-3">
+                <div className="space-y-0.5"> 
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email"  />
+                  <Input id="email" className="border-b-black p-1"  />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="serialnumber">Serial Number</Label>
-                  <Input id="serialnumber" />
+                  <Input id="serialnumber" className="border-b-black p-1"  />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="country">Country</Label>
-                  <Input id="country" />
+                  <SelectBar></SelectBar>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="company">Company</Label>
-                  <Input id="company"  />
+                  <Input id="company" className="border-b-black p-1"   />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="zippostal">Zip/Postal</Label>
-                  <Input id="zippostal" />
+                  <Input id="zippostal" className="border-b-black p-1"  />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="city">City</Label>
-                  <Input id="city" />
+                  <Input id="city" className="border-b-black p-1"  />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone"  />
+                  <Input id="phone" className="border-b-black p-1"   />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="assettag">Asset Tag</Label>
-                  <Input id="assettag" />
+                  <Input id="assettag" className="border-b-black p-1" />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="contrackid">Contrack Id</Label>
-                  <Input id="contrackid" />
+                  <Input id="contrackid" className="border-b-black p-1"  />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="transactiontype">Transaction Type</Label>
-                  <Input id="transactiontype"  />
+                  <Input id="transactiontype" className="border-b-black p-1"  />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="transactiontid">Transaction Id</Label>
-                  <Input id="transactiontid" />
+                  <Input id="transactiontid" className="border-b-black p-1" />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="opsi">Opsi</Label>
-                  <Input id="opsi" />
+                  <Input id="opsi" className="border-b-black p-1" />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="lisensekey">Lisense key</Label>
-                  <Input id="lisensekey"  />
+                  <Input id="lisensekey" className="border-b-black p-1"  />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <Label htmlFor="pin">Pin</Label>
-                  <Input id="pin" />
+                  <Input id="pin" className="border-b-black p-1" />
                 </div>
-                
               </CardContent>
-              <CardFooter>
-                <Button>Save changes</Button>
+              <CardFooter className="flex justify-end">
+                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer w-40 h-11"><p className='text-2xl mb-1'>Search</p></Button>
               </CardFooter>
             </Card>
-          </TabsContent>
+          </TabsContent>  
+          
           <TabsContent value="ci">
-            <Card>
+          <TabsList className="bg-white float-right mr-5">   
+              <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
+          </TabsList>
+          </TabsContent>
+          
+          <TabsContent value="Account">
+          <TabsList className="flex h-[3em] bg-white">
+            <div className="w-2xs p-2 text-black">
+              <TabsTrigger value="Account" className="cursor-pointer">Account</TabsTrigger>
+              <TabsTrigger value="Contact" className="ml-2 cursor-pointer">Contact</TabsTrigger>
+            </div>
+          </TabsList>
+            <Card className="drop-shadow-md">
               {/* <CardHeader>
                 <CardTitle>Password</CardTitle>
                 <CardDescription>
                   Change your password here. After saving, you'll be logged out.
                 </CardDescription>
               </CardHeader> */}
-              <CardContent className="space-y-2">
-                <div className="space-y-1">
-                  <Label htmlFor="current">Current password</Label>
-                  <Input id="current" type="password" />
+              
+              <CardContent className="grid gap-5 grid-cols-3">
+              <div className="space-y-0.5">
+                  <Label htmlFor="current">Company</Label>
+                  <Input id="current" className="border-b-black p-1"/>
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="current">Email</Label>
+                  <Input id="current" type="email" className="border-b-black p-1" />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="new">Primary Phone</Label>
+                  <Input id="new" type="text" className="border-b-black p-1" />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="current">Addres Line 1</Label>
+                  <Input id="current" type="email" className="border-b-black p-1"  />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="current">Addres Line 2</Label>
+                  <Input id="current" type="email" className="border-b-black p-1" />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="new">New password</Label>
-                  <Input id="new" type="password" />
+                  <Label htmlFor="new">City</Label>
+                  <Input id="new" type="text" className="border-b-black p-1"  />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="current">State/Province</Label>
+                  <Input id="current" type="text" className="border-b-black p-1" />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="current">Country</Label>
+                  <Input id="current" type="text" className="border-b-black p-1" />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="new">Zip/Postal Code</Label>
+                  <Input id="new" type="text" className="border-b-black p-1" />
                 </div>
               </CardContent>
-              <CardFooter>
-                <Button>Save password</Button>
+              <CardFooter className="flex justify-end">
+                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer">Verify & Save</Button>
               </CardFooter>
             </Card>
           </TabsContent>
+
+          <TabsContent value="Contact">
+          <TabsList className="flex h-[3em] bg-white">
+            <div className="w-2xs p-2 text-black">
+              <TabsTrigger value="Account" className="cursor-pointer">Account</TabsTrigger>
+              <TabsTrigger value="Contact" className="ml-2 cursor-pointer">Contact</TabsTrigger>
+            </div>
+          </TabsList>
+            <Card className="drop-shadow-md">
+              {/* <CardHeader>
+                <CardTitle>Password</CardTitle>
+                <CardDescription>
+                  Change your password here. After saving, you'll be logged out.
+                </CardDescription>
+              </CardHeader> */}
+              
+              <CardHeader>
+                <CardTitle>
+                  Basic Information
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="grid gap-5 grid-cols-3">
+              <div className="space-y-0.5">
+                  <Label htmlFor="current">Salutation</Label>
+                  <SelectBar1></SelectBar1>
+                  <Label htmlFor="current" className="mt-2">Preferend Language</Label>
+                  <SelectBar2></SelectBar2>
+                </div>
+                <div className="space-y-0.5 absolute ml-42">
+                  <Label htmlFor="current">First Name</Label>
+                  <Input id="current" type="email"className="border-b-black p-1 w-40.5"/>
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="current">Last Name</Label>
+                  <Input id="current" type="email"className="border-b-black p-1"/>
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="new">EXTN</Label>
+                  <Input id="new" type="text" className="border-b-black p-1"/>
+                </div>
+              </CardContent>
+              
+              <CardHeader className="mt-2">
+                <CardTitle>
+                Phone preferences
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="grid gap-5 grid-cols-3">
+              <div className="space-y-0.5">
+                  <Label htmlFor="current">Phone</Label>
+                  <Input id="current" type="email" className="border-b-black p-1" />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="current">Mobile</Label>
+                  <Input id="current" type="email" className="border-b-black p-1" />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="new">Work</Label>
+                  <Input id="new" type="text" className="border-b-black p-1 w-38.5"/>
+                </div>
+                <div className="space-y-0.5 absolute ml-215">
+                  <Label htmlFor="current">EXTN</Label>
+                  <Input id="current" type="text" className="border-b-black p-1 w-38.5" />
+                </div>  
+                <div className="space-y-0.5">
+                  <Label htmlFor="current">Other</Label>
+                  <Input id="current" type="text" className="border-b-black p-1 w-38"/>
+                </div>
+                <div className="space-y-0.5 absolute mt-18 ml-43">
+                  <Label htmlFor="current">EXTN</Label>
+                  <Input id="current" type="text" className="border-b-black p-1 w-38" />
+                </div> 
+                <div className="space-y-0.5">
+                  <Label htmlFor="new">FAX</Label>
+                  <Input id="new" type="text" className="border-b-black p-1" />
+                </div>
+              </CardContent>
+
+              <CardHeader className="mt-2">
+                <CardTitle>
+                Address
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="grid gap-5 grid-cols-3">
+                <div className="space-y-0.5">
+                  <Label htmlFor="current">Addres Line 1</Label>
+                  <Input id="current" type="email" className="border-b-black p-1"  />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="current">Addres Line 2</Label>
+                  <Input id="current" type="email" className="border-b-black p-1" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="new">City</Label>
+                  <Input id="new" type="text" className="border-b-black p-1"  />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="current">State/Province</Label>
+                  <Input id="current" type="text" className="border-b-black p-1" />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="current">Country</Label>
+                  <Input id="current" type="text" className="border-b-black p-1" />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="new">Zip/Postal Code</Label>
+                  <Input id="new" type="text" className="border-b-black p-1" />
+                </div>
+              </CardContent>
+
+              <CardFooter className="flex justify-end">
+                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer">Verify & Save</Button>
+              </CardFooter>
+            </Card>
+            
+          </TabsContent>
         </Tabs>
       </div>
-      <div className="flex  flex-col min-h-[100vh]  rounded-xl bg-muted/50 md:min-h-min">
+      {/* <div className="flex  flex-col min-h-[100vh]  rounded-xl bg-muted/50 md:min-h-min">
         <Sidebar side='right' className="relative" collapsible='icon'>
           <SidebarContent>
             <InfoSide items={data.navMain} />
           </SidebarContent>
         </Sidebar>
-      </div>
+      </div> */}
     </div>
   )
 }

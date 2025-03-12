@@ -1,0 +1,64 @@
+import React from 'react'
+
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+  } from "@/components/ui/select"
+   
+  export function SelectBar() {
+    return (
+      <Select>
+        <SelectTrigger className="w-[330px] border-black">
+          <SelectValue/>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="Indonesia">Indonesia</SelectItem>
+            <SelectItem value="Malaysia">Malaysia</SelectItem>
+            <SelectItem value="Singapura">Singapura</SelectItem>
+            <SelectItem value="Inggris">Inggris</SelectItem>
+            <SelectItem value="Cina">Cina</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    )
+  }
+
+  export function SelectBar1() {
+    return (
+      <Select>
+        <SelectTrigger className="w-[150px] border-black">
+          <SelectValue/>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="Item">Item</SelectItem>
+            <SelectItem value="Item">Item</SelectItem>
+            <SelectItem value="Item">Item</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    )
+  }
+
+  export function SelectBar2() {
+    return (
+      <Select>
+        <SelectTrigger className="w-[330px]  border-black">
+          <SelectValue/>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="Item">Item</SelectItem>
+            <SelectItem value="Item">Item</SelectItem>
+            <SelectItem value="Item">Item</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    )
+  }

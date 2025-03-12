@@ -10,8 +10,13 @@ import {
   Home,
   Map,
   PieChart,
+  Pin,
+  Search,
+  ServerCogIcon,
+  ServerIcon,
   Settings2,
   SquareTerminal,
+  Table,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -52,27 +57,27 @@ const data = {
   ],
   navMain: [
     {
-      title: "Case",
+      title: "Service",
       url: "#",
-      icon: SquareTerminal,
+      icon: ServerIcon,
       isActive: true,
       items: [
         {
-          title: "History",
+          title: "Case",
+          url: "/Case",
+        },
+        {
+          title: "Work Order",
           url: "#",
         },
         {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
+          title: "Material Order",
           url: "#",
         },
       ],
     },
     {
-      title: "Models",
+      title: "Unnable",
       url: "#",
       icon: Bot,
       items: [
@@ -144,19 +149,19 @@ const data = {
       icon: Home,
     },
     {
-      name: "Case",
+      name: "Recent",
       url: "#",
       icon: PieChart,
     },
     {
-      name: "Recent",
+      name: "Pinned",
       url: "#",
-      icon: Map,
+      icon: Pin,
     },
     {
-      name: "Search Case",
+      name: "My work",
       url: "/search_case",
-      icon: Eye,
+      icon: Table,
     },
   ],
 }
