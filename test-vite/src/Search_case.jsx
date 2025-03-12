@@ -339,7 +339,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import TabsDialog from "@/components/Tabs-dialog"
 import {DialogDemo} from "@/components/modals-dialog"
@@ -455,7 +454,7 @@ const Search_case = () => {
               <AlertDialogTrigger asChild>
                 <Button className="bg-black text-white" variant="outline">Assets</Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="bg-gray-100 max-w-3xl w-full max-w-[90vw]">
+              <AlertDialogContent className="bg-gray-100 max-w-3xl w-full ">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Asset List</AlertDialogTitle>
                   <AlertDialogDescription className="max-h-[70vh] overflow-y-auto">
@@ -541,7 +540,7 @@ const Search_case = () => {
                   Site Accounts
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="bg-gray-100 max-w-5xl w-full max-w-[90vw]">
+              <AlertDialogContent className="bg-gray-100 max-w-5xl w-full ">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Site Accounts List</AlertDialogTitle>
                   <AlertDialogDescription className="max-h-[70vh] overflow-y-auto">
