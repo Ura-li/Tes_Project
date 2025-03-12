@@ -31,6 +31,9 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
+ 
+import { ScrollArea } from "@/components/ui/scroll-area"
+
 // This is sample data.
 const data = {
   user: {

@@ -60,7 +60,7 @@ import { SelectBar1 } from './components/sc-select'
 import { SelectBar2 } from './components/sc-select'
 import { BtnModal } from './components/sc-modal'
 
-
+import {DialogCloseButton} from "@/components/assets-modal"
 
 const Search_case = () => {
 
@@ -155,6 +155,7 @@ const Search_case = () => {
           <TabsContent value="ci">
           <TabsList className="bg-white float-right mr-5">   
               <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
+              <DialogCloseButton></DialogCloseButton>
           </TabsList>
           </TabsContent>
           
