@@ -1,4 +1,4 @@
-import React from 'react'
+import { React } from 'react'
 import  { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './components/ui/card'
 import { Input } from './components/ui/input'
 import { InfoSide } from './components/info-sidebar'
@@ -34,18 +34,34 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 
+// import {
+//   Sheet,
+//   SheetTrigger,
+//   SheetClose,
+//   SheetContent,
+//   SheetHeader,
+//   SheetFooter,
+//   SheetTitle,
+//   SheetDescription 
+// } from "@/components/ui/sheet"
+
 import {
-  Sheet,
-  SheetTrigger,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetFooter,
-  SheetTitle,
-  SheetDescription 
-} from "@/components/ui/sheet"
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
+import TabsDialog from "@/components/Tabs-dialog"
+import {DialogDemo} from "@/components/modals-dialog"
 const data = {
   navMain: [
     {
@@ -132,6 +148,15 @@ const data = {
   ],
 }
 const Search_case = () => {
+
+  // const [search, setSearch] = useState("");
+  
+  // // Filtered Data
+  // const filteredData = data.filter((item) =>
+  //   item.name.toLowerCase().includes(search.toLowerCase()) || 
+  //   item.email.toLowerCase().includes(search.toLowerCase())
+  // );
+
   return (
     
     <div className="flex flex-1  gap-4 p-4 pt-0">
@@ -212,26 +237,7 @@ const Search_case = () => {
           </TabsContent>
           <TabsContent value="ci">
             <Card>
-              {/* <CardHeader>
-                <CardTitle>Password</CardTitle>
-                <CardDescription>
-                  Change your password here. After saving, you'll be logged out.
-                </CardDescription>
-              </CardHeader> */}
-              <CardContent className="space-y-2">
-                <div className="space-y-1">
-                  <Label htmlFor="current">Current password</Label>
-                  <Input id="current" type="password" />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="new">New password</Label>
-                  <Input id="new" type="password" />
-                </div>
-                
-              </CardContent>
-              <CardFooter>
-                <Button>Save password</Button>
-              </CardFooter>
+              <DialogDemo></DialogDemo>
             </Card>
           </TabsContent>
         </Tabs>
