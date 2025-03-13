@@ -317,9 +317,12 @@ import { SelectBar } from './components/sc-select'
 import { SelectBar1 } from './components/sc-select'
 import { SelectBar2 } from './components/sc-select'
 import { BtnModal } from './components/sc-modal'
-import { ShelterBox } from './components/sc-shelter'
-import { ShelterContact } from './components/sc-shelter'
-import { ShelterAsset } from './components/sc-shelter'
+import { TableCompany } from './components/sc-table'
+import { TableContact } from './components/sc-table'
+import { TableAsset } from './components/sc-table'
+// import { ShelterBox } from './components/sc-shelter'
+// import { ShelterContact } from './components/sc-shelter'
+// import { ShelterAsset } from './components/sc-shelter'
 // const data = {
 //   navMain: [
 //     {
@@ -502,9 +505,12 @@ const Search_case = () => {
               <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
           </TabsList>
           <div className='mb-5'>
-            <ShelterBox></ShelterBox>
+            <TableCompany></TableCompany>
+            <TableContact></TableContact>
+            <TableAsset></TableAsset>
+            {/* <ShelterBox></ShelterBox>
             <ShelterContact></ShelterContact>
-            <ShelterAsset></ShelterAsset>
+            <ShelterAsset></ShelterAsset> */}
           </div>
           </TabsContent>
 
