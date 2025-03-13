@@ -1,4 +1,4 @@
-import { React } from 'react'
+import { React, useState, useEffect } from 'react'
 import  { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './components/ui/card'
 import { Input } from './components/ui/input'
 import { InfoSide } from './components/info-sidebar'
@@ -8,6 +8,10 @@ import {
   SidebarHeader,
   SidebarTrigger,
 } from './components/ui/sidebar' 
+
+//importing API
+import ApiCustomer from './api'
+
 import { Button } from "@/components/ui/button"
 import {
   AudioWaveform,
@@ -64,13 +68,92 @@ import {DialogCloseButton} from "@/components/assets-modal"
 
 const Search_case = () => {
 
-  // const [search, setSearch] = useState("");
+  //create search state
+  const [search, setSearch] = useState("");
+  const [isModalAssetOpen, setIsModalAssetOpen] = useState(false);
+  //tab
+
+  const [activeTab, setActiveTab] = useState("search"); // Default active tab
+
+  const handleSearchClick = () => {
+    console.log("BeforeChange" + activeTab)
+    setIsModalAssetOpen(true); // Open modal
+    setActiveTab('ci'); // Switch tab to target
+  };
+  useEffect(() => {
+    console.log("Updated Active Tab:", activeTab);
+  }, [activeTab]); // This runs every time activeTab changes
   
-  // // Filtered Data
-  // const filteredData = data.filter((item) =>
-  //   item.name.toLowerCase().includes(search.toLowerCase()) || 
-  //   item.email.toLowerCase().includes(search.toLowerCase())
-  // );
+  const handleInputChange = (e) =>{
+    // if (search.trim() !== "") { 
+      const searchQuery = e.target.value;
+      setSearch(searchQuery);
+      console.log("search" + search)
+    // }
+    // console.log(search)
+  }
+
+  //creating Asset Data
+  const [assets, setAssets] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [siteAccounts, setSiteAccounts] = useState([]);
+  
+  
+  //define method
+  const fetchDataAssets = async () => {
+
+    //fetch data from API with Axios
+    await ApiCustomer.get('/api/asset-information')
+        .then(response => {
+            // console.log("Asset");
+            // console.log(response.data.data)
+            //assign response data to state "asset"
+            setAssets(response.data.data);
+          })
+          
+        }
+        
+        const fetchDataContacts = async () => {
+          //fetch data from API with Axios
+          await ApiCustomer.get('/api/contact-information')
+          .then(response => {
+            // console.log("Contact");
+            // console.log(response.data.data)
+            //assign response data to state "asset"
+            setContacts(response.data.data);
+          })
+        }
+        
+        const fetchDataSiteAccounts = async () => {
+          //fetch data from API with Axios
+          await ApiCustomer.get('/api/site_account')
+          .then(response => {
+            // console.log("Site Account");
+            // console.log(response.data.data)
+            //assign response data to state "asset"
+            setSiteAccounts(response.data.data);
+        })
+  }
+
+  //run hook useEffect
+  useEffect(() => {
+    //call method
+    fetchDataAssets();
+    fetchDataContacts();
+    fetchDataSiteAccounts();
+  }, []);
+
+  //filter item
+  
+  const filteredAssets = assets.filter((asset) =>
+    asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
+    asset.ProductName?.toLowerCase().includes(search.toLowerCase())
+  );
+  // console.log("filtered Asset")
+  // console.log(filteredAssets);
+
+
+
 
   return (
     <div className="flex flex-1 mt-2  gap-4 p-4 pt-0">
@@ -86,6 +169,8 @@ const Search_case = () => {
             {/* <Button className="mr-1.5 cursor-pointer"><span><Plus></Plus></span>Create Case</Button> */}
             <BtnModal></BtnModal>
           </TabsList>
+
+          {/* search tab */}
           <TabsContent value="search">
             <Card className="drop-shadow-md">
               <CardContent className="grid gap-5 grid-cols-3">
@@ -95,7 +180,7 @@ const Search_case = () => {
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="serialnumber">Serial Number</Label>
-                  <Input id="serialnumber" className="border-b-black p-1"  />
+                  <Input id="serialnumber" onChange={handleInputChange} className="border-b-black p-1"/>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="country">Country</Label>
@@ -213,7 +298,7 @@ const Search_case = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer">Verify & Save</Button>
+                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer" onClick={handleSearchClick}>Verify & Save</Button>
               </CardFooter>
             </Card>
           </TabsContent>
@@ -340,7 +425,6 @@ const Search_case = () => {
       </div>
       {/* <div className="flex  flex-col min-h-[100vh]  rounded-xl bg-muted/50 md:min-h-min">
         <Sidebar side='right' className="relative" collapsible='icon'>
-          <SidebarTrigger />
           <SidebarContent>
             <InfoSide items={data.navMain} />
           </SidebarContent>
