@@ -500,7 +500,6 @@ const Search_case = () => {
       </div>
       <div className="flex  flex-col min-h-[100vh]  rounded-xl bg-muted/50 md:min-h-min">
         <Sidebar side='right' className="relative" collapsible='icon'>
-          <SidebarTrigger />
           <SidebarContent>
             <InfoSide items={data.navMain} />
           </SidebarContent>
