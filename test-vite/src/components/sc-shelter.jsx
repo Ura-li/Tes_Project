@@ -16,7 +16,7 @@ import { BtnModal2 } from './sc-modal';
  
 export function ShelterBox() {
   return (
-    <Card className="w-257 ml-5 h-30 mb-10 rounded-none">
+    <Card className="w-257 ml-5 h-30 mb-5 rounded-none">
       <CardHeader>
         <div className='flex gap-2'>
          <Checkbox id="terms" className="border-black border-3 w-5.5 h-5.5 "/>
@@ -38,7 +38,7 @@ export function ShelterBox() {
 
 export function ShelterContact() {
     return (
-      <Card className="w-257 ml-5 h-30 mb-10 rounded-none">
+      <Card className="w-257 ml-5 h-30 mb-6 rounded-none">
         <CardHeader>
           <div className='flex justify-between'>
               <label htmlFor="terms"

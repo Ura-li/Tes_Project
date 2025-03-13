@@ -16,8 +16,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { FolderSearch } from "lucide-react";
+import { NotebookText } from "lucide-react";
 import { Link } from "react-router";
+import { Archive } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 
 
 export function NavProjects({
@@ -41,7 +43,7 @@ export function NavProjects({
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
                   <MoreHorizontal />
-                  <span className="sr-only">More</span>
+                  {/* <span className="sr-only">More</span> */}
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -96,7 +98,7 @@ export function NavRecent({
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
                   <MoreHorizontal />
-                  <span className="sr-only">More</span>
+                  {/* <span className="sr-only">More</span> */}
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -151,7 +153,7 @@ export function NavPinned({
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
                   <MoreHorizontal />
-                  <span className="sr-only">More</span>
+                  {/* <span className="sr-only">More</span> */}
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -206,7 +208,7 @@ export function NavMywork({
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
                   <MoreHorizontal />
-                  <span className="sr-only">More</span>
+                  {/* <span className="sr-only">More</span> */}
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -214,17 +216,17 @@ export function NavMywork({
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}>
                 <DropdownMenuItem>
-                  <FolderSearch className="text-muted-foreground"></FolderSearch>
+                  <NotebookText className="text-muted-foreground"/>
                   <span><a href="/search_case">Search page</a></span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Forward className="text-muted-foreground" />
-                  <span>Share Project</span>
+                 <Archive className="text-muted-foreground"/>
+                  <span>Queues</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Trash2 className="text-muted-foreground" />
-                  <span>Delete Project</span>
+                  <LayoutDashboard className="text-muted-foreground" />
+                  <span>Dashboards</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
