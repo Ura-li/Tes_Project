@@ -145,10 +145,10 @@ const Search_case = () => {
 
   //filter item
   
-  const filteredAssets = assets.filter((asset) =>
-    asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
-    asset.ProductName?.toLowerCase().includes(search.toLowerCase())
-  );
+  // const filteredAssets = assets.filter((asset) =>
+  //   asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
+  //   asset.ProductName?.toLowerCase().includes(search.toLowerCase())
+  // );
   // console.log("filtered Asset")
   // console.log(filteredAssets);
 
@@ -182,7 +182,7 @@ const Search_case = () => {
   //handler submit
   // console.log(formData)
   const handlerSiteAccountSubmit = async () => {
-    console.log(formDataSiteAccount)
+    // console.log(formDataSiteAccount)
     try {
       const response = await ApiCustomer.post("/api/site_account", formDataSiteAccount);
       console.log("Success:", response.data);
@@ -278,14 +278,14 @@ const Search_case = () => {
           <TabsContent value="ci">
           <TabsList className="bg-white float-right mr-5">   
               <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
-              <DialogCloseButton isModalAssetOpen={isModalAssetOpen} setIsModalAssetOpen={setIsModalAssetOpen}></DialogCloseButton>
+              <DialogCloseButton isModalAssetOpen={isModalAssetOpen} setIsModalAssetOpen={setIsModalAssetOpen} search={search} setSearch={setSearch} ></DialogCloseButton>
           </TabsList>
           </TabsContent>
           
           <TabsContent value="Account">
           <TabsList className="flex h-[3em] bg-white">
             <div className="w-2xs p-2 text-black">
-              <TabsTrigger value="Account" className="cursor-pointer">Account</TabsTrigger>
+              <TabsTrigger value="Account" className="cursor-pointer" >Account</TabsTrigger>
               <TabsTrigger value="Contact" className="ml-2 cursor-pointer">Contact</TabsTrigger>
             </div>
           </TabsList>
