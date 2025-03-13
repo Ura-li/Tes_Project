@@ -68,7 +68,7 @@ export function DialogCloseButton() {
         
         <Table className="table-fixed border-spacing-0 mx-auto">
             <TableHeader>
-                <TableRow className="text-xl">
+                <TableRow className="text-xl bg-blue-200">
                     <TableHead>Assets</TableHead>
                     <TableHead>Serial Number</TableHead>
                     <TableHead>Product No</TableHead>
