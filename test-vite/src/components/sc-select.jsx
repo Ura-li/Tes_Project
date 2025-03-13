@@ -37,9 +37,8 @@ import {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="Item">Item</SelectItem>
-            <SelectItem value="Item">Item</SelectItem>
-            <SelectItem value="Item">Item</SelectItem>
+            <SelectItem value="Mr. ">Mr. </SelectItem>
+            <SelectItem value="Mrs. ">Mrs. </SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
@@ -54,9 +53,9 @@ import {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="Item">Item</SelectItem>
-            <SelectItem value="Item">Item</SelectItem>
-            <SelectItem value="Item">Item</SelectItem>
+            <SelectItem value="English">English</SelectItem>
+            <SelectItem value="Spanish">Spanish</SelectItem>
+            <SelectItem value="Bahasa Indonesia">Bahasa Indonesia</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
