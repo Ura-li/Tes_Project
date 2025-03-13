@@ -1,4 +1,4 @@
-import React from 'react'
+import { React } from 'react'
 import  { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './components/ui/card'
 import { Input } from './components/ui/input'
 import { InfoSide } from './components/info-sidebar'
@@ -6,6 +6,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
+  SidebarTrigger,
 } from './components/ui/sidebar' 
 import { Button } from "@/components/ui/button"
 import {
@@ -24,7 +25,288 @@ import {
   Plus,
 } from "lucide-react"
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+ 
+// const assets = [
+//   {
+//     AssetID: 1,
+//     SerialNumber: "SN123456",
+//     ProductName: "Laptop X100",
+//     ProductNumber: "PX100-2024",
+//     ProductLine: "Laptops",
+//     SiteAccountID: 101,
+//   },
+//   {
+//     AssetID: 2,
+//     SerialNumber: "SN654321",
+//     ProductName: "Smartphone Z5",
+//     ProductNumber: "SZ5-2024",
+//     ProductLine: "Smartphones",
+//     SiteAccountID: 102,
+//   },
+//   {
+//     AssetID: 3,
+//     SerialNumber: "SN789012",
+//     ProductName: "Tablet A10",
+//     ProductNumber: "TA10-2024",
+//     ProductLine: "Tablets",
+//     SiteAccountID: 103,
+//   },
+//   {
+//     AssetID: 4,
+//     SerialNumber: "SN345678",
+//     ProductName: "Monitor UltraWide",
+//     ProductNumber: "MUW-2024",
+//     ProductLine: "Monitors",
+//     SiteAccountID: 104,
+//   },
+//   {
+//     AssetID: 5,
+//     SerialNumber: "SN567890",
+//     ProductName: "Gaming Mouse GX500",
+//     ProductNumber: "GMGX500-2024",
+//     ProductLine: "Accessories",
+//     SiteAccountID: 105,
+//   },
+//   {
+//     AssetID: 6,
+//     SerialNumber: "SN908172",
+//     ProductName: "Mechanical Keyboard MK700",
+//     ProductNumber: "MKMK700-2024",
+//     ProductLine: "Accessories",
+//     SiteAccountID: 106,
+//   },
+//   {
+//     AssetID: 7,
+//     SerialNumber: "SN382910",
+//     ProductName: "External Hard Drive 1TB",
+//     ProductNumber: "EHD1TB-2024",
+//     ProductLine: "Storage",
+//     SiteAccountID: 107,
+//   },
+// ];
+
+// const contacts = [
+//   {
+//     ContactID: 1,
+//     SiteAccountID: 201,
+//     Salutation: "Mr.",
+//     FirstName: "John",
+//     LastName: "Doe",
+//     Email: "john.doe@example.com",
+//     PreferredLanguage: "English",
+//     Phone: "+1-123-456-7890",
+//     Mobile: "+1-987-654-3210",
+//     WorkPhone: "+1-555-123-4567",
+//     WorkExtension: "101",
+//     OtherPhone: null,
+//     OtherExtension: null,
+//     Fax: "+1-555-987-6543",
+//     AddressLine1: "123 Main St",
+//     AddressLine2: "Suite 400",
+//     City: "New York",
+//     StateProvince: "NY",
+//     Country: "USA",
+//     ZipPostalCode: "10001",
+//   },
+//   {
+//     ContactID: 2,
+//     SiteAccountID: 202,
+//     Salutation: "Ms.",
+//     FirstName: "Jane",
+//     LastName: "Smith",
+//     Email: "jane.smith@example.com",
+//     PreferredLanguage: "French",
+//     Phone: "+33-123-456-789",
+//     Mobile: "+33-987-654-321",
+//     WorkPhone: "+33-555-123-456",
+//     WorkExtension: "102",
+//     OtherPhone: null,
+//     OtherExtension: null,
+//     Fax: "+33-555-987-654",
+//     AddressLine1: "456 Rue de Paris",
+//     AddressLine2: null,
+//     City: "Paris",
+//     StateProvince: "Île-de-France",
+//     Country: "France",
+//     ZipPostalCode: "75001",
+//   },
+//   {
+//     ContactID: 3,
+//     SiteAccountID: 203,
+//     Salutation: "Dr.",
+//     FirstName: "Alice",
+//     LastName: "Brown",
+//     Email: "alice.brown@example.com",
+//     PreferredLanguage: "Spanish",
+//     Phone: "+34-123-456-789",
+//     Mobile: "+34-987-654-321",
+//     WorkPhone: "+34-555-123-456",
+//     WorkExtension: "103",
+//     OtherPhone: "+34-111-222-333",
+//     OtherExtension: "104",
+//     Fax: "+34-555-987-654",
+//     AddressLine1: "789 Calle Mayor",
+//     AddressLine2: "Piso 2",
+//     City: "Madrid",
+//     StateProvince: "Madrid",
+//     Country: "Spain",
+//     ZipPostalCode: "28001",
+//   },
+//   {
+//     ContactID: 4,
+//     SiteAccountID: 204,
+//     Salutation: "Mr.",
+//     FirstName: "Michael",
+//     LastName: "Johnson",
+//     Email: "michael.johnson@example.com",
+//     PreferredLanguage: "German",
+//     Phone: "+49-123-456-789",
+//     Mobile: "+49-987-654-321",
+//     WorkPhone: "+49-555-123-456",
+//     WorkExtension: "105",
+//     OtherPhone: null,
+//     OtherExtension: null,
+//     Fax: "+49-555-987-654",
+//     AddressLine1: "101 Berliner Straße",
+//     AddressLine2: "Apt 12",
+//     City: "Berlin",
+//     StateProvince: "Berlin",
+//     Country: "Germany",
+//     ZipPostalCode: "10115",
+//   },
+//   {
+//     ContactID: 5,
+//     SiteAccountID: 205,
+//     Salutation: "Mrs.",
+//     FirstName: "Emma",
+//     LastName: "Williams",
+//     Email: "emma.williams@example.com",
+//     PreferredLanguage: "Japanese",
+//     Phone: "+81-123-456-789",
+//     Mobile: "+81-987-654-321",
+//     WorkPhone: "+81-555-123-456",
+//     WorkExtension: "106",
+//     OtherPhone: "+81-111-222-333",
+//     OtherExtension: "107",
+//     Fax: "+81-555-987-654",
+//     AddressLine1: "5-1-1 Ginza",
+//     AddressLine2: "Chuo-ku",
+//     City: "Tokyo",
+//     StateProvince: "Tokyo",
+//     Country: "Japan",
+//     ZipPostalCode: "104-0061",
+//   },
+// ];
+
+// const siteAccounts = [
+//   {
+//     SiteAccountID: 1,
+//     Company: "Tech Solutions Inc.",
+//     Email: "contact@techsolutions.com",
+//     PrimaryPhone: "+1 555-1234",
+//     AddressLine1: "123 Innovation Drive",
+//     AddressLine2: "Suite 200",
+//     City: "San Francisco",
+//     StateProvince: "CA",
+//     Country: "USA",
+//     ZipPostalCode: "94107",
+//   },
+//   {
+//     SiteAccountID: 2,
+//     Company: "Global Logistics Ltd.",
+//     Email: "info@globallogistics.com",
+//     PrimaryPhone: "+44 20 7946 0123",
+//     AddressLine1: "456 Supply Chain Ave",
+//     AddressLine2: null,
+//     City: "London",
+//     StateProvince: null,
+//     Country: "UK",
+//     ZipPostalCode: "SW1A 1AA",
+//   },
+//   {
+//     SiteAccountID: 3,
+//     Company: "Green Energy Corp.",
+//     Email: "support@greenenergy.com",
+//     PrimaryPhone: "+33 1 23 45 67 89",
+//     AddressLine1: "789 Renewable Street",
+//     AddressLine2: "Building A",
+//     City: "Paris",
+//     StateProvince: null,
+//     Country: "France",
+//     ZipPostalCode: "75001",
+//   },
+//   {
+//     SiteAccountID: 4,
+//     Company: "Cyber Security Experts",
+//     Email: "security@cyberexperts.com",
+//     PrimaryPhone: "+49 30 9876 5432",
+//     AddressLine1: "321 Firewall Blvd",
+//     AddressLine2: "Floor 5",
+//     City: "Berlin",
+//     StateProvince: null,
+//     Country: "Germany",
+//     ZipPostalCode: "10115",
+//   },
+//   {
+//     SiteAccountID: 5,
+//     Company: "NextGen AI Solutions",
+//     Email: "hello@nextgenai.com",
+//     PrimaryPhone: "+81 3-1234-5678",
+//     AddressLine1: "101 AI Plaza",
+//     AddressLine2: "Room 303",
+//     City: "Tokyo",
+//     StateProvince: null,
+//     Country: "Japan",
+//     ZipPostalCode: "100-0001",
+//   },
+//   {
+//     SiteAccountID: 6,
+//     Company: "Cloud Storage Unlimited",
+//     Email: "sales@cloudstorage.com",
+//     PrimaryPhone: "+61 2 9876 5432",
+//     AddressLine1: "222 Cloud Lane",
+//     AddressLine2: null,
+//     City: "Sydney",
+//     StateProvince: "NSW",
+//     Country: "Australia",
+//     ZipPostalCode: "2000",
+//   },
+//   {
+//     SiteAccountID: 7,
+//     Company: "FinTech Innovators",
+//     Email: "finance@fintech.com",
+//     PrimaryPhone: "+1 212-555-6789",
+//     AddressLine1: "876 Wall Street",
+//     AddressLine2: "Suite 10",
+//     City: "New York",
+//     StateProvince: "NY",
+//     Country: "USA",
+//     ZipPostalCode: "10005",
+//   },
+// ];
+
 import {
   Tabs,
   TabsContent,
@@ -126,6 +408,15 @@ import { ShelterAsset } from './components/sc-shelter'
 
 
 const Search_case = () => {
+
+  // const [search, setSearch] = useState("");
+  
+  // // Filtered Data
+  // const filteredData = data.filter((item) =>
+  //   item.name.toLowerCase().includes(search.toLowerCase()) || 
+  //   item.email.toLowerCase().includes(search.toLowerCase())
+  // );
+
   return (
     <div className="flex flex-1 mt-2  gap-4 p-4 pt-0">
       <div className="flex min-h-[100vh] flex-1 rounded-xl md:min-h-min">
@@ -420,6 +711,7 @@ const Search_case = () => {
       </div>
       {/* <div className="flex  flex-col min-h-[100vh]  rounded-xl bg-muted/50 md:min-h-min">
         <Sidebar side='right' className="relative" collapsible='icon'>
+          <SidebarTrigger />
           <SidebarContent>
             <InfoSide items={data.navMain} />
           </SidebarContent>
