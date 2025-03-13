@@ -21,6 +21,9 @@ import {
 
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
+import { NavRecent } from "@/components/nav-projects"
+import { NavPinned } from "@/components/nav-projects"
+import { NavMywork } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 import {
@@ -148,21 +151,30 @@ const data = {
       url: "/",
       icon: Home,
     },
+  ],
+
+  recent: [
     {
       name: "Recent",
       url: "#",
       icon: PieChart,
-    },
-    {
-      name: "Pinned",
-      url: "#",
-      icon: Pin,
-    },
+    }
+  ],
+
+  mywork: [
     {
       name: "My work",
       url: "/search_case",
       icon: Table,
-    },
+    }
+  ],
+
+  pinned: [
+    {
+      name: "Pinned",
+      url: "#",
+      icon: Pin
+    }
   ],
 }
 
@@ -176,6 +188,9 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavProjects projects={data.projects} />
+        <NavRecent recent={data.recent}/>
+        <NavPinned pinned={data.pinned}></NavPinned>
+        <NavMywork mywork={data.mywork}/>
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>

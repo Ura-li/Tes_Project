@@ -35,6 +35,9 @@ import { SelectBar } from './components/sc-select'
 import { SelectBar1 } from './components/sc-select'
 import { SelectBar2 } from './components/sc-select'
 import { BtnModal } from './components/sc-modal'
+import { ShelterBox } from './components/sc-shelter'
+import { ShelterContact } from './components/sc-shelter'
+import { ShelterAsset } from './components/sc-shelter'
 // const data = {
 //   navMain: [
 //     {
@@ -207,8 +210,14 @@ const Search_case = () => {
           <TabsList className="bg-white float-right mr-5">   
               <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
           </TabsList>
+          <div className='mb-5'>
+            <ShelterBox></ShelterBox>
+            <ShelterContact></ShelterContact>
+            <ShelterAsset></ShelterAsset>
+          </div>
           </TabsContent>
-          
+
+         
           <TabsContent value="Account">
           <TabsList className="flex h-[3em] bg-white">
             <div className="w-2xs p-2 text-black">
@@ -223,6 +232,14 @@ const Search_case = () => {
                   Change your password here. After saving, you'll be logged out.
                 </CardDescription>
               </CardHeader> */}
+              <CardHeader>
+                <CardTitle className="flex justify-end">
+                  
+                </CardTitle>
+                <CardTitle >
+                  Basic Information
+                </CardTitle>
+              </CardHeader>
               
               <CardContent className="grid gap-5 grid-cols-3">
               <div className="space-y-0.5">
@@ -237,7 +254,16 @@ const Search_case = () => {
                   <Label htmlFor="new">Primary Phone</Label>
                   <Input id="new" type="text" className="border-b-black p-1" />
                 </div>
-                <div className="space-y-0.5">
+              </CardContent>
+
+              <CardHeader className="mt-4">
+                <CardTitle>
+                  Address
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="grid gap-5 grid-cols-3">
+              <div className="space-y-0.5">
                   <Label htmlFor="current">Addres Line 1</Label>
                   <Input id="current" type="email" className="border-b-black p-1"  />
                 </div>
@@ -255,7 +281,7 @@ const Search_case = () => {
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="current">Country</Label>
-                  <Input id="current" type="text" className="border-b-black p-1" />
+                  <SelectBar></SelectBar>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="new">Zip/Postal Code</Label>
@@ -284,6 +310,9 @@ const Search_case = () => {
               </CardHeader> */}
               
               <CardHeader>
+              <CardTitle className="flex justify-end">
+                  Clear All
+                </CardTitle>  
                 <CardTitle>
                   Basic Information
                 </CardTitle>
@@ -372,7 +401,7 @@ const Search_case = () => {
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="current">Country</Label>
-                  <Input id="current" type="text" className="border-b-black p-1" />
+                  <SelectBar></SelectBar>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="new">Zip/Postal Code</Label>
@@ -380,7 +409,8 @@ const Search_case = () => {
                 </div>
               </CardContent>
 
-              <CardFooter className="flex justify-end">
+              <CardFooter className="flex justify-end gap-4">
+              <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer w-20">Save</Button>
                 <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer">Verify & Save</Button>
               </CardFooter>
             </Card>
