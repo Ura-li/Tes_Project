@@ -70,8 +70,8 @@ const Search_case = () => {
 
   //create search state
   const [search, setSearch] = useState("");
+  
   const [isModalAssetOpen, setIsModalAssetOpen] = useState(false);
-  //tab
 
   const [activeTab, setActiveTab] = useState("search"); // Default active tab
 
@@ -155,10 +155,48 @@ const Search_case = () => {
 
 
 
+  //form section
+  // section account
+  //set Form Data
+  const [formDataSiteAccount, setFormDataSiteAccount] = useState({
+    Company: '',
+    Email: '',
+    PrimaryPhone: '',
+    AddressLine1: '',
+    AddressLine2: '',
+    City: '',
+    StateProvince: '',
+    Country: '',
+    ZipPostalCode: ''
+  })
+
+  //make handler
+  const handlerInputSiteAccountChange = (e) => {
+    const { id, value } = e.target
+    setFormDataSiteAccount(prevState => ({
+      ...prevState,
+      [id]:value
+    }))
+  }
+
+  //handler submit
+  // console.log(formData)
+  const handlerSiteAccountSubmit = async () => {
+    console.log(formDataSiteAccount)
+    try {
+      const response = await ApiCustomer.post("/api/site_account", formDataSiteAccount);
+      console.log("Success:", response.data);
+      alert("Customer Saved successfully")
+    } catch (err){
+      console.error("Error saving customer: ", err)
+      alert("Failed to save customer")
+    }
+  }
+
   return (
     <div className="flex flex-1 mt-2  gap-4 p-4 pt-0">
       <div className="flex min-h-[100vh] flex-1 rounded-xl md:min-h-min">
-        <Tabs defaultValue="search" className="w-full">
+        <Tabs defaultValue="search" className="w-full" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="drop-shadow-xl bg-sky-700 w-full h-15 flex justify-between">
             <div className="w-2xs p-2 text-white ">
               <TabsTrigger value="search" className="cursor-pointer">Search</TabsTrigger>
@@ -232,7 +270,7 @@ const Search_case = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer w-40 h-11"><p className='text-2xl mb-1'>Search</p></Button>
+                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer w-40 h-11"><p className='text-2xl mb-1' onClick={handleSearchClick}>Search</p></Button>
               </CardFooter>
             </Card>
           </TabsContent>  
@@ -240,7 +278,7 @@ const Search_case = () => {
           <TabsContent value="ci">
           <TabsList className="bg-white float-right mr-5">   
               <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
-              <DialogCloseButton></DialogCloseButton>
+              <DialogCloseButton isModalAssetOpen={isModalAssetOpen} setIsModalAssetOpen={setIsModalAssetOpen}></DialogCloseButton>
           </TabsList>
           </TabsContent>
           
@@ -261,44 +299,44 @@ const Search_case = () => {
               
               <CardContent className="grid gap-5 grid-cols-3">
               <div className="space-y-0.5">
-                  <Label htmlFor="current">Company</Label>
-                  <Input id="current" className="border-b-black p-1"/>
+                  <Label htmlFor="Company">Company</Label>
+                  <Input id="Company" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.Company}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Email</Label>
-                  <Input id="current" type="email" className="border-b-black p-1" />
+                  <Label htmlFor="Email">Email</Label>
+                  <Input id="Email" type="email" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.Email}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="new">Primary Phone</Label>
-                  <Input id="new" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="PrimaryPhone">Primary Phone</Label>
+                  <Input id="PrimaryPhone" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.PrimaryPhone}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Addres Line 1</Label>
-                  <Input id="current" type="email" className="border-b-black p-1"  />
+                  <Label htmlFor="AddressLine1">Addres Line 1</Label>
+                  <Input id="AddressLine1" type="email" className="border-b-black p-1"  onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.AddressLine1}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Addres Line 2</Label>
-                  <Input id="current" type="email" className="border-b-black p-1" />
+                  <Label htmlFor="AddressLine2">Addres Line 2</Label>
+                  <Input id="AddressLine2" type="email" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.AddressLine2}/>
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="new">City</Label>
-                  <Input id="new" type="text" className="border-b-black p-1"  />
+                  <Label htmlFor="City">City</Label>
+                  <Input id="City" type="text" className="border-b-black p-1"  onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.City}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">State/Province</Label>
-                  <Input id="current" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="StateProvince">State/Province</Label>
+                  <Input id="StateProvince" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.StateProvince}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Country</Label>
-                  <Input id="current" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="Country">Country</Label>
+                  <Input id="Country" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.Country}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="new">Zip/Postal Code</Label>
-                  <Input id="new" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
+                  <Input id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.ZipPostalCode}/>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer" onClick={handleSearchClick}>Verify & Save</Button>
+                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer" onClick={handlerSiteAccountSubmit}>Verify & Save</Button>
               </CardFooter>
             </Card>
           </TabsContent>
