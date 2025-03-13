@@ -193,6 +193,49 @@ const Search_case = () => {
     }
   }
 
+  const [formDataContact, setFormDataContact] = useState({
+    Salutation: '',
+    FirstName: '',
+    LastName: '',
+    Email: '',
+    PreferredLanguage: '',
+    Phone: '',
+    Mobile: '',
+    WorkPhone: '',
+    WorkExtension: '',
+    OtherPhone: '',
+    OtherExtension: '',
+    Fax: '',
+    AddressLine1: '',
+    AddressLine2: '',
+    City: '',
+    StateProvince: '',
+    Country: '',
+    ZipPostalCode: ''
+  });
+  
+  const handlerInputContactChange = (e) => {
+    const { id, value } = e.target;
+    setFormDataContact(prevState => ({
+      ...prevState,
+      [id]: value
+    }));
+  };
+  
+  const handlerContactSubmit = async () => {
+    console.log(formDataContact);
+    console.log("formDataContact");
+    try {
+      const response = await ApiCustomer.post("/api/contact-information", formDataContact);
+      console.log("Success:", response.data);
+      alert("Contact Information Saved Successfully");
+    } catch (err) {
+      console.error("Error saving contact information: ", err);
+      alert("Failed to save contact information");
+    }
+  };
+  
+
   return (
     <div className="flex flex-1 mt-2  gap-4 p-4 pt-0">
       <div className="flex min-h-[100vh] flex-1 rounded-xl md:min-h-min">
@@ -342,122 +385,98 @@ const Search_case = () => {
           </TabsContent>
 
           <TabsContent value="Contact">
-          <TabsList className="flex h-[3em] bg-white">
-            <div className="w-2xs p-2 text-black">
-              <TabsTrigger value="Account" className="cursor-pointer">Account</TabsTrigger>
-              <TabsTrigger value="Contact" className="ml-2 cursor-pointer">Contact</TabsTrigger>
-            </div>
-          </TabsList>
+            <TabsList className="flex h-[3em] bg-white">
+              <div className="w-2xs p-2 text-black">
+                <TabsTrigger value="Account" className="cursor-pointer">Account</TabsTrigger>
+                <TabsTrigger value="Contact" className="ml-2 cursor-pointer">Contact</TabsTrigger>
+              </div>
+            </TabsList>
             <Card className="drop-shadow-md">
-              {/* <CardHeader>
-                <CardTitle>Password</CardTitle>
-                <CardDescription>
-                  Change your password here. After saving, you'll be logged out.
-                </CardDescription>
-              </CardHeader> */}
-              
               <CardHeader>
-                <CardTitle>
-                  Basic Information
-                </CardTitle>
+                <CardTitle>Basic Information</CardTitle>
               </CardHeader>
-
               <CardContent className="grid gap-5 grid-cols-3">
-              <div className="space-y-0.5">
-                  <Label htmlFor="current">Salutation</Label>
-                  <SelectBar1></SelectBar1>
-                  <Label htmlFor="current" className="mt-2">Preferend Language</Label>
-                  <SelectBar2></SelectBar2>
-                </div>
-                <div className="space-y-0.5 absolute ml-42">
-                  <Label htmlFor="current">First Name</Label>
-                  <Input id="current" type="email"className="border-b-black p-1 w-40.5"/>
+                <div className="space-y-0.5">
+                  <Label htmlFor="Salutation">Salutation</Label>
+                  <SelectBar1 id="Salutation" onChange={handlerInputContactChange} />
+                  <Label htmlFor="PreferredLanguage" className="mt-2">Preferred Language</Label>
+                  <SelectBar2 id="PreferredLanguage" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Last Name</Label>
-                  <Input id="current" type="email"className="border-b-black p-1"/>
+                  <Label htmlFor="FirstName">First Name</Label>
+                  <Input id="FirstName" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="new">EXTN</Label>
-                  <Input id="new" type="text" className="border-b-black p-1"/>
+                  <Label htmlFor="LastName">Last Name</Label>
+                  <Input id="LastName" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
               </CardContent>
-              
               <CardHeader className="mt-2">
-                <CardTitle>
-                Phone preferences
-                </CardTitle>
+                <CardTitle>Phone Preferences</CardTitle>
               </CardHeader>
-
               <CardContent className="grid gap-5 grid-cols-3">
-              <div className="space-y-0.5">
-                  <Label htmlFor="current">Phone</Label>
-                  <Input id="current" type="email" className="border-b-black p-1" />
+                <div className="space-y-0.5">
+                  <Label htmlFor="Phone">Phone</Label>
+                  <Input id="Phone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Mobile</Label>
-                  <Input id="current" type="email" className="border-b-black p-1" />
+                  <Label htmlFor="Mobile">Mobile</Label>
+                  <Input id="Mobile" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="new">Work</Label>
-                  <Input id="new" type="text" className="border-b-black p-1 w-38.5"/>
+                  <Label htmlFor="WorkPhone">Work</Label>
+                  <Input id="WorkPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
-                <div className="space-y-0.5 absolute ml-215">
-                  <Label htmlFor="current">EXTN</Label>
-                  <Input id="current" type="text" className="border-b-black p-1 w-38.5" />
-                </div>  
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Other</Label>
-                  <Input id="current" type="text" className="border-b-black p-1 w-38"/>
+                  <Label htmlFor="WorkExtension">EXTN</Label>
+                  <Input id="WorkExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
-                <div className="space-y-0.5 absolute mt-18 ml-43">
-                  <Label htmlFor="current">EXTN</Label>
-                  <Input id="current" type="text" className="border-b-black p-1 w-38" />
-                </div> 
                 <div className="space-y-0.5">
-                  <Label htmlFor="new">FAX</Label>
-                  <Input id="new" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="OtherPhone">Other</Label>
+                  <Input id="OtherPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="OtherExtension">EXTN</Label>
+                  <Input id="OtherExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="Fax">FAX</Label>
+                  <Input id="Fax" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
               </CardContent>
-
               <CardHeader className="mt-2">
-                <CardTitle>
-                Address
-                </CardTitle>
+                <CardTitle>Address</CardTitle>
               </CardHeader>
-
               <CardContent className="grid gap-5 grid-cols-3">
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Addres Line 1</Label>
-                  <Input id="current" type="email" className="border-b-black p-1"  />
+                  <Label htmlFor="AddressLine1">Address Line 1</Label>
+                  <Input id="AddressLine1" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Addres Line 2</Label>
-                  <Input id="current" type="email" className="border-b-black p-1" />
+                  <Label htmlFor="AddressLine2">Address Line 2</Label>
+                  <Input id="AddressLine2" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="new">City</Label>
-                  <Input id="new" type="text" className="border-b-black p-1"  />
+                  <Label htmlFor="City">City</Label>
+                  <Input id="City" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">State/Province</Label>
-                  <Input id="current" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="StateProvince">State/Province</Label>
+                  <Input id="StateProvince" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Country</Label>
-                  <Input id="current" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="Country">Country</Label>
+                  <SelectBar id="Country" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="new">Zip/Postal Code</Label>
-                  <Input id="new" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
+                  <Input id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
               </CardContent>
-
               <CardFooter className="flex justify-end">
-                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer">Verify & Save</Button>
+                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer" onClick={handlerContactSubmit}>Verify & Save</Button>
               </CardFooter>
             </Card>
-            
           </TabsContent>
         </Tabs>
       </div>
