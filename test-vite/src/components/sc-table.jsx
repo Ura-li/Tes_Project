@@ -22,7 +22,7 @@ const invoices = [
   },
   {
     text1: "Phone: |  Account Type: Site Account | Parent Company: | Account Tier: | Source: CRM"
-  }
+  },
 ];
 
 const contacts = [
@@ -55,15 +55,10 @@ export function TableCompany() {
     <Table className="w-255 ml-7 flex-col justify-center items-center drop-shadow-md">
       <TableHeader className="bg-blue-400">
         <TableRow>
-          <div className="mt-3 ml-3">
-          <Checkbox className="border-black border-3 w-7.5 h-7 fixed"></Checkbox>
-          </div>
-
-          <div className="flex ml-11">
           <TableHead className="text-white text-xl ">
+          <Checkbox className="border-black border-3 w-7.5 h-7 fixed"></Checkbox>
             PT KAPAL API SEJAHTERA
           </TableHead>
-          </div>
         </TableRow>
       </TableHeader>
       <TableBody className="bg-neutral-200">
@@ -84,13 +79,12 @@ export function TableContact() {
         <TableRow>
           <TableHead className="text-white h-12 text-xl">
            Contact
-          </TableHead>
-          <div className="flex gap-5">
+
           <Input placeholder="Search..." className="border-2 w-50 h-8 mt-2 p-2 border-black rounded-md"></Input>
-          <div className="mt-1">
+       
           <BtnModal1></BtnModal1>
-          </div>
-          </div>
+          </TableHead>
+        
         </TableRow>
       </TableHeader>
 
