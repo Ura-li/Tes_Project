@@ -217,7 +217,7 @@ export function NavMywork({
                 align={isMobile ? "end" : "start"}>
                 <DropdownMenuItem>
                   <NotebookText className="text-muted-foreground"/>
-                  <span><a href="/search_case">Search page</a></span>
+                  Search page
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                  <Archive className="text-muted-foreground"/>
