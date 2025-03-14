@@ -14,13 +14,8 @@ import {
   Search,
   ServerCogIcon,
   ServerIcon,
-  Pin,
-  Search,
-  ServerCogIcon,
-  ServerIcon,
   Settings2,
   SquareTerminal,
-  Table,
   Table,
 } from "lucide-react"
 
