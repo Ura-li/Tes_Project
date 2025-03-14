@@ -85,6 +85,7 @@ import {
 
 
 import TabsDialog from "@/components/Tabs-dialog"
+import {ModalAsset} from "@/components/modal"
 import {DialogDemo} from "@/components/modals-dialog"
 const data = {
   navMain: [
@@ -199,7 +200,7 @@ const Search_case = () => {
   }
 
   //creating Asset Data
-  const [assets, setAssets] = useState([]);
+  const [ass, setAssets] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [siteAccounts, setSiteAccounts] = useState([]);
   
@@ -250,15 +251,29 @@ const Search_case = () => {
 
   //filter item
   
-  const filteredAssets = assets.filter((asset) =>
-    asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
-    asset.ProductName?.toLowerCase().includes(search.toLowerCase())
-  );
   // console.log("filtered Asset")
   // console.log(filteredAssets);
 
-
-
+    // Contoh data asset
+    const assets = [
+      {
+        AssetID: 1,
+        SerialNumber: "SN-12345",
+        ProductName: "Laptop X",
+        ProductNumber: "P-001",
+        ProductLine: "Electronics",
+        SiteAccountID: "SA-7890",
+      },
+      {
+        AssetID: 2,
+        SerialNumber: "SN-67890",
+        ProductName: "Monitor Y",
+        ProductNumber: "P-002",
+        ProductLine: "Displays",
+        SiteAccountID: "SA-5678",
+      },
+    ];
+    const filteredAssets = assets.filter((asset) => asset.ProductLine === "Electronics");
 
   return (
     
@@ -273,64 +288,9 @@ const Search_case = () => {
             <Button><span><Plus></Plus></span>Create Case</Button>
 
             {/* Modal/Dialog Assets */}
-            <AlertDialog open={isModalAssetOpen} onOpenChange={setIsModalAssetOpen}>
-              <AlertDialogTrigger asChild>
-                <Button className="bg-black text-white" variant="outline">Assets</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-gray-100 max-w-3xl w-full ">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Asset List</AlertDialogTitle>
-                  <AlertDialogDescription className="max-h-[70vh] overflow-auto">
-                    <Table>
-                      <TableCaption>A list of your assets.</TableCaption>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[150px]">Serial Number</TableHead>
-                          <TableHead>Product Name</TableHead>
-                          <TableHead>Product Number</TableHead>
-                          <TableHead>Product Line</TableHead>
-                          <TableHead className="text-right">Site Account ID</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {
-                          filteredAssets.length > 0 ? (
-                            filteredAssets.map((asset, index) => (
-                              <TableRow key={asset.AssetID}>
-                                <TableCell className="font-medium">{asset.SerialNumber}</TableCell>
-                                <TableCell>{asset.ProductName}</TableCell>
-                                <TableCell>{asset.ProductNumber}</TableCell>
-                                <TableCell>{asset.ProductLine}</TableCell>
-                                <TableCell className="text-right">{asset.SiteAccountID}</TableCell>
-                              </TableRow>
-                            ))
-                          ) : assets.length > 0 ? (
-                            assets.map((asset, index) => (
-                              <TableRow key={asset.AssetID}>
-                                <TableCell className="font-medium">{asset.SerialNumber}</TableCell>
-                                <TableCell>{asset.ProductName}</TableCell>
-                                <TableCell>{asset.ProductNumber}</TableCell>
-                                <TableCell>{asset.ProductLine}</TableCell>
-                                <TableCell className="text-right">{asset.SiteAccountID}</TableCell>
-                              </TableRow>
-                            ))
-                          ) 
-                          :
-                          <TableRow>
-                              <TableCell className="font-medium">Data Belum Tersedia</TableCell>
-                            </TableRow>
-                        }
-                      </TableBody>
-                    </Table>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction>Continue</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-
+            <div className="p-10">
+      <ModalAsset assets={assets} filteredAssets={filteredAssets} />
+    </div>
             {/* Modal/Dialog Contacts */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
