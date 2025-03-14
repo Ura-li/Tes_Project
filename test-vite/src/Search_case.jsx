@@ -51,7 +51,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
- 
 
 import {
   Tabs,
@@ -59,12 +58,15 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+
+import { DialogCloseButton } from './components/assets-modal'
 import { SelectBar } from './components/sc-select'
 import { SelectBar1 } from './components/sc-select'
 import { SelectBar2 } from './components/sc-select'
 import { BtnModal } from './components/sc-modal'
-
-import {DialogCloseButton} from "@/components/assets-modal"
+import { TableCompany } from './components/sc-table'
+import { TableContact } from './components/sc-table'
+import { TableAsset } from './components/sc-table'
 
 const Search_case = () => {
 
@@ -257,7 +259,7 @@ const Search_case = () => {
               <CardContent className="grid gap-5 grid-cols-3">
                 <div className="space-y-0.5"> 
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" className="border-b-black p-1"  />
+                  <Input id="email" className="border-b-black p-1 "  />
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="serialnumber">Serial Number</Label>
@@ -323,8 +325,17 @@ const Search_case = () => {
               <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
               <DialogCloseButton isModalAssetOpen={isModalAssetOpen} setIsModalAssetOpen={setIsModalAssetOpen} search={search} setSearch={setSearch} ></DialogCloseButton>
           </TabsList>
+          <div className='mb-5'>
+            <TableCompany></TableCompany>
+            <TableContact></TableContact>
+            <TableAsset></TableAsset>
+            {/* <ShelterBox></ShelterBox>
+            <ShelterContact></ShelterContact>
+            <ShelterAsset></ShelterAsset> */}
+          </div>
           </TabsContent>
-          
+
+         
           <TabsContent value="Account">
           <TabsList className="flex h-[3em] bg-white">
             <div className="w-2xs p-2 text-black">
@@ -339,6 +350,14 @@ const Search_case = () => {
                   Change your password here. After saving, you'll be logged out.
                 </CardDescription>
               </CardHeader> */}
+              <CardHeader>
+                <CardTitle className="flex justify-end">
+                  
+                </CardTitle>
+                <CardTitle >
+                  Basic Information
+                </CardTitle>
+              </CardHeader>
               
               <CardContent className="grid gap-5 grid-cols-3">
               <div className="space-y-0.5">
@@ -353,9 +372,18 @@ const Search_case = () => {
                   <Label htmlFor="PrimaryPhone">Primary Phone</Label>
                   <Input id="PrimaryPhone" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.PrimaryPhone}/>
                 </div>
-                <div className="space-y-0.5">
+              </CardContent>
+
+              <CardHeader className="mt-4">
+                <CardTitle>
+                  Address
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="grid gap-5 grid-cols-3">
+              <div className="space-y-0.5">
                   <Label htmlFor="AddressLine1">Addres Line 1</Label>
-                  <Input id="AddressLine1" type="email" className="border-b-black p-1"  onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.AddressLine1}/>
+                  <Input id="AddressLine1" type="email" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.AddressLine1} />
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="AddressLine2">Addres Line 2</Label>
@@ -370,8 +398,8 @@ const Search_case = () => {
                   <Input id="StateProvince" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.StateProvince}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="Country">Country</Label>
-                  <Input id="Country" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.Country}/>
+                  <Label htmlFor="current">Country</Label>
+                  <SelectBar></SelectBar>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
@@ -393,7 +421,12 @@ const Search_case = () => {
             </TabsList>
             <Card className="drop-shadow-md">
               <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
+              <CardTitle className="flex justify-end">
+                  Clear All
+                </CardTitle>  
+                <CardTitle>
+                  Basic Information
+                </CardTitle>
               </CardHeader>
               <CardContent className="grid gap-5 grid-cols-3">
                 <div className="space-y-0.5">
@@ -465,15 +498,17 @@ const Search_case = () => {
                   <Input id="StateProvince" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="Country">Country</Label>
-                  <SelectBar id="Country" onChange={handlerInputContactChange} />
+                  <Label htmlFor="current">Country</Label>
+                  <SelectBar onChange={handlerInputContactChange}/>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
                   <Input id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-end">
+
+              <CardFooter className="flex justify-end gap-4">
+              <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer w-20" onClick={handlerContactSubmit}>Save</Button>
                 <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer" onClick={handlerContactSubmit}>Verify & Save</Button>
               </CardFooter>
             </Card>
