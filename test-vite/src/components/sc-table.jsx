@@ -52,7 +52,7 @@ const assets = [
 
 export function TableCompany() {
   return (
-    <Table className="w-255 ml-7 flex-col justify-center items-center drop-shadow-md ">
+    <Table className="w-255 ml-7 flex-col justify-center items-center drop-shadow-md">
       <TableHeader className="bg-blue-400">
         <TableRow>
           <div className="mt-3 ml-3">
