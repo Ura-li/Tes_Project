@@ -37,6 +37,7 @@ export function DialogCloseButton({
   setIsModalAssetOpen,
   search,
   setSearch,
+  onSelectAsset,
 }) {
   // console.log(isModalAssetOpen);
 
@@ -49,16 +50,21 @@ export function DialogCloseButton({
   const [contacts, setContacts] = useState([]);
   const [siteAccounts, setSiteAccounts] = useState([]);
 
-  //define method
-  // const fetchDataAssets = async () => {
-  //   //fetch data from API with Axios
-  //   await ApiCustomer.get("/api/asset-information").then((response) => {
-  //     // console.log("Asset");
-  //     // console.log(response.data.data)
-  //     //assign response data to state "asset"
-  //     setAssets(response.data.data);
-  //   });
-  // };
+  //set asset selected data
+  const [selectedAsset, setSelectedAsset] = useState(null);
+  const handleSelectAsset = (asset) => {
+    setSelectedAsset(asset);
+    onSelectAsset(asset); 
+    console.log("Selected asset in modal:", asset);
+  };
+
+  const handleConfirmSelection = () => {
+    if (selectedAsset) {
+      setIsModalAssetOpen(false);
+    }
+  };
+  console.log('selected asset')
+  console.log(selectedAsset)
 
   //run hook useEffect
   useEffect(() => {
@@ -76,17 +82,17 @@ export function DialogCloseButton({
 
   //filter item
 
-  const filteredAssets = assets.filter(
+  const filteredAssets = search !== "" ? assets.filter(
     (asset) =>
       asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
       asset.ProductName?.toLowerCase().includes(search.toLowerCase())
-  );
-  const filteredSearchAssets = assets.filter(
+  ): [];
+  const filteredSearchAssets = searchAsset !== "" ? assets.filter(
     (asset) =>
       asset.SerialNumber?.toLowerCase().includes(searchAsset.toLowerCase()) ||
-      asset.ProductName?.toLowerCase().includes(searchAsset.toLowerCase())
-  );
-
+    asset.ProductName?.toLowerCase().includes(searchAsset.toLowerCase())
+  ): [];
+  
   return (
     <Dialog open={isModalAssetOpen} onOpenChange={setIsModalAssetOpen}>
       <DialogTrigger asChild>
@@ -128,35 +134,49 @@ export function DialogCloseButton({
           <TableBody>
             {filteredSearchAssets.length > 0 ? (
               filteredSearchAssets.map((asset) => (
-                <TableRow key={asset.AssetID}>
+                <TableRow 
+                  key={asset.AssetID}
+                  onClick={()=>handleSelectAsset(asset)}
+                  className={selectedAsset?.AssetID === asset.AssetID ? "bg-gray-200" : ""}
+                >
                   <TableCell className="font-medium whitespace-break-spaces">
+                    
                     {asset.ProductName}
                   </TableCell>
                   <TableCell>{asset.SerialNumber}</TableCell>
                   <TableCell>{asset.ProductNumber}</TableCell>
                   <TableCell>{asset.ProductLine}</TableCell>
                   <TableCell className="text-right">
-                    {asset.SiteAccountID}
+                    {asset.site_account?.Company}
                   </TableCell>
                 </TableRow>
               ))
             ) : filteredAssets.length > 0 ? (
               filteredAssets.map((asset) => (
-                <TableRow key={asset.AssetID}>
+                <TableRow 
+                  key={asset.AssetID}
+                  className="cursor-pointer hover:bg-gray-200"
+                  onClick={()=>handleSelectAsset(asset)}
+                >
                   <TableCell className="font-medium whitespace-break-spaces">
+                    
                     {asset.ProductName}
                   </TableCell>
                   <TableCell>{asset.SerialNumber}</TableCell>
                   <TableCell>{asset.ProductNumber}</TableCell>
                   <TableCell>{asset.ProductLine}</TableCell>
                   <TableCell className="text-right">
-                    {asset.SiteAccountID}
+                    {asset.site_account?.Company}
                   </TableCell>
                 </TableRow>
               ))
             ) : assets.length > 0 ? (
               assets.map((asset) => (
-                <TableRow key={asset.AssetID}>
+                <TableRow 
+                  key={asset.AssetID}
+                  className="cursor-pointer hover:bg-gray-200"
+                  onClick={()=>handleSelectAsset(asset)}
+                >
                   <TableCell className="font-medium whitespace-break-spaces">
                     {asset.ProductName}
                   </TableCell>
@@ -164,7 +184,7 @@ export function DialogCloseButton({
                   <TableCell>{asset.ProductNumber}</TableCell>
                   <TableCell>{asset.ProductLine}</TableCell>
                   <TableCell className="text-right">
-                    {asset.SiteAccountID}
+                    {asset.site_account?.Company}
                   </TableCell>
                 </TableRow>
               ))
@@ -181,7 +201,11 @@ export function DialogCloseButton({
           </TableBody>
         </Table>
         <DialogFooter className="sm:justify-end">
-          <Button type="button" variant="secondary">
+          <Button 
+            type="button" 
+            variant="secondary"
+            onClick={handleConfirmSelection}
+          >
             Select
           </Button>
         </DialogFooter>

@@ -92,7 +92,7 @@ const Search_case = () => {
       setSearch(searchQuery);
       console.log("search" + search)
     // }
-    // console.log(search)
+    console.log(search)
   }
 
   //creating Asset Data
@@ -236,6 +236,14 @@ const Search_case = () => {
       alert("Failed to save contact information");
     }
   };
+
+  //handler table selected
+  const [selectedAsset, setSelectedAsset] = useState(null); // Store selected asset data
+
+  const handleSelectedAsset = (asset) => {
+    console.log("Asset received in parent:", asset);
+    setSelectedAsset(asset);
+  };
   
 
   return (
@@ -323,15 +331,19 @@ const Search_case = () => {
           <TabsContent value="ci">
           <TabsList className="bg-white float-right mr-5">   
               <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
-              <DialogCloseButton isModalAssetOpen={isModalAssetOpen} setIsModalAssetOpen={setIsModalAssetOpen} search={search} setSearch={setSearch} ></DialogCloseButton>
+              <DialogCloseButton 
+                isModalAssetOpen={isModalAssetOpen} 
+                setIsModalAssetOpen={setIsModalAssetOpen} 
+                search={search} 
+                setSearch={setSearch} 
+                onSelectAsset={handleSelectedAsset} 
+              />
           </TabsList>
           <div className='mb-5'>
-            <TableCompany></TableCompany>
-            <TableContact></TableContact>
-            <TableAsset></TableAsset>
-            {/* <ShelterBox></ShelterBox>
-            <ShelterContact></ShelterContact>
-            <ShelterAsset></ShelterAsset> */}
+            {/* TODO : Change this Variable Name */}
+            <TableCompany selectedAsset={selectedAsset} />
+            <TableContact selectedAsset={selectedAsset}></TableContact>
+            <TableAsset selectedAsset={selectedAsset}></TableAsset>
           </div>
           </TabsContent>
 
