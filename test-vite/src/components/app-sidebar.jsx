@@ -14,8 +14,13 @@ import {
   Search,
   ServerCogIcon,
   ServerIcon,
+  Pin,
+  Search,
+  ServerCogIcon,
+  ServerIcon,
   Settings2,
   SquareTerminal,
+  Table,
   Table,
 } from "lucide-react"
 
@@ -33,6 +38,9 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
+
+ 
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 // This is sample data.
 const data = {
@@ -61,25 +69,32 @@ const data = {
   navMain: [
     {
       title: "Service",
+      title: "Service",
       url: "#",
+      icon: ServerIcon,
       icon: ServerIcon,
       isActive: true,
       items: [
         {
           title: "Case",
           url: "/Case",
+          title: "Case",
+          url: "/Case",
         },
         {
+          title: "Work Order",
           title: "Work Order",
           url: "#",
         },
         {
+          title: "Material Order",
           title: "Material Order",
           url: "#",
         },
       ],
     },
     {
+      title: "Unnable",
       title: "Unnable",
       url: "#",
       icon: Bot,
@@ -155,7 +170,7 @@ const data = {
 
   recent: [
     {
-      name: "Recent",
+      name: "Pinned",
       url: "#",
       icon: PieChart,
     }
@@ -163,6 +178,7 @@ const data = {
 
   mywork: [
     {
+      name: "My work",
       name: "My work",
       url: "/search_case",
       icon: Table,
