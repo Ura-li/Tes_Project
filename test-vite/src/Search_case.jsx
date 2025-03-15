@@ -154,19 +154,19 @@ const Search_case = () => {
             </Card>
           </TabsContent>  
           
-          <TabsContent value="ci">
-          <TabsList className="bg-white float-right mr-5">   
+          <TabsContent value="ci" className="flex flex-col gap-1">
+          <TabsList className="bg-white float-right mr-5 self-end">   
               <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
-              <DialogCloseButton></DialogCloseButton>
+              {/* <DialogCloseButton></DialogCloseButton> */}
           </TabsList>
-          <div className='mb-5'>
+          
             <TableCompany></TableCompany>
             <TableContact></TableContact>
             <TableAsset></TableAsset>
             {/* <ShelterBox></ShelterBox>
             <ShelterContact></ShelterContact>
             <ShelterAsset></ShelterAsset> */}
-          </div>
+        
           </TabsContent>
 
          
