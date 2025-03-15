@@ -1,5 +1,13 @@
 import React from "react";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
   Table,
   TableBody,
   TableCaption,
@@ -9,20 +17,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { BtnModal1 } from "./sc-modal";
-import { BtnModal2 } from "./sc-modal";
+import { BtnModalContact } from "./sc-modal";
+import { BtnModalAsset } from "./sc-modal";
 import { ChevronDown } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import { ContactRound, User,Search, Laptop } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+
 
 const invoices = [
   {
@@ -84,7 +85,7 @@ export function TableCompany() {
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
               </div>
-              <BtnModal1 className=""></BtnModal1>
+              <BtnModalContact className=""></BtnModalContact>
               </div>
           <Table> 
             <TableHeader className="bg-gray-400">
@@ -109,7 +110,7 @@ export function TableCompany() {
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
               </div>
-              <BtnModal2></BtnModal2>
+              <BtnModalAsset></BtnModalAsset>
               </div>
           <Table> 
             <TableHeader className="bg-gray-400 text-black font-bold">
