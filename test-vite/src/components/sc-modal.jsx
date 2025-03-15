@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,16 +29,22 @@ import { SelectBarContact } from "@/components/sc-select";
 import { SelectBarContact2 } from "@/components/sc-select";
 import { SelectBarContact3 } from "@/components/sc-select";
 
-const assets = [
-  {
-    productname: "HP Victus 16 inch Gaming Laptop 16-r0555TX",
-    product: "9T92PA94-92",
-    HWPorfitCenter: "-",
-    contact: "Slamet Meisa Putra",
-  },
-];
+//import API
+import ApiCustomer from "@/api";
+import axios from "axios";
+
+// const assets = [
+//   {
+//     productname: "HP Victus 16 inch Gaming Laptop 16-r0555TX",
+//     product: "9T92PA94-92",
+//     HWPorfitCenter: "-",
+//     contact: "Slamet Meisa Putra",
+//   },
+// ];
 
 export function BtnModal() {
+  
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -241,6 +247,32 @@ export function BtnModalContact() {
 }
 
 export function BtnModalAsset() {
+  //set asset
+  const [assets, setAssets] = useState([])
+  //fetchDAta
+  const fetchDataAssets = async () => {
+    try {
+      const response = await ApiCustomer.get("/api/asset-information")
+      setAssets(response.data.data);
+    }catch (error)  {
+      console.error("Error fetching assets: ", error)
+    }
+  }
+  fetchDataAssets();
+
+  //set search state
+  const [searchAsset, setSearchAsset] = useState("");
+  //handle Change Input
+  const handleSearchInputAssetsChange = (e) =>{
+    const searchQuery = e.target.value;
+    setSearchAsset(searchQuery);
+    console.log("SearchInput : "+searchAsset)
+  }
+  const filteredAssets = searchAsset !== "" ? assets.filter(
+    (asset) => 
+      asset.ProductName?.toLowerCase().includes(searchAsset.toLowerCase()) || 
+      asset.ProductNumber?.toLowerCase().includes(searchAsset.toLowerCase())
+  ) : [];
   return (
     <Dialog>
     <DialogTrigger asChild>
@@ -263,7 +295,7 @@ export function BtnModalAsset() {
         </DialogHeader>
 
         <div className="flex gap-3">  
-          <Input className="border-2 border-black rounded-2xl w-55 text-md h-10" type="Search"></Input>
+          <Input className="border-2 border-black rounded-2xl w-55 text-md h-10" type="Search" onChange={handleSearchInputAssetsChange}></Input>
           <Button variant="outline" className="w-30 rounded-2xl h-10 border-blue-600 border-2">Search</Button>
           <div className="mt-2">
           <Checkbox id="terms" className="w-5 h-5 border-2 border-black"/>
@@ -279,6 +311,7 @@ export function BtnModalAsset() {
         <Table className="table-fixed border-spacing-0 mx-auto">
           <TableHeader>
             <TableRow className="bg-blue-200">
+              <TableHead className="text-black">Serial Number</TableHead>
               <TableHead className="text-black">Product Name</TableHead>
               <TableHead className="text-black">Product Number</TableHead>
               <TableHead className="text-black">HW Profit Center</TableHead>
@@ -287,14 +320,23 @@ export function BtnModalAsset() {
           </TableHeader>
 
           <TableBody >
-            {assets.map((asset) => (
-              <TableRow key={asset.productname}>
-              <TableCell className="whitespace-break-spaces ">{asset.productname}</TableCell>
-              <TableCell>{asset.product}</TableCell>
-              <TableCell>{asset.HWPorfitCenter}</TableCell>
-              <TableCell>{asset.contact}</TableCell>
-            </TableRow>
-             ))}
+            {assets.length > 0 ? ( assets.map((asset) => (
+              <TableRow key={asset?.AssetID}>
+                <TableCell className="whitespace-break-spaces ">{asset?.ProductName}</TableCell>
+                <TableCell>{asset?.ProductNumber}</TableCell>
+                <TableCell>{asset?.HWPorfitCenter ? asset?.HWPorfitCenter : '-' }</TableCell>
+                <TableCell>{asset?.contact_information !== null ? asset?.contact_information?.FirstName + ' ' + asset?.contact_information?.LastName : '-'   }</TableCell>
+              </TableRow>
+             )) ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center font-medium whitespace-break-spaces"
+                  >
+                    Data Belum Tersedia
+                  </TableCell>
+                </TableRow>
+             )}
           </TableBody>
           </Table>
 
