@@ -83,12 +83,12 @@ export function TableCompany({ selectedAsset = [] }) {
         </CardHeader>
         <CardContent className=" p-3">
         { companies !== null ? (
-          <div className="text-gray-500"key={selectedAsset.SerialNumber}>
+          <div className="text-gray-500"key={companies[0].key}>
               <p>{companies[1].text}</p>
           </div>
           
         ) : (
-          <div className="text-gray-500"key={selectedAsset.SerialNumber}>
+          <div className="text-gray-500">
               <p>No Company Available</p>
           </div>
         )}
@@ -114,6 +114,7 @@ export function TableCompany({ selectedAsset = [] }) {
                 <TableHead className=" text-black font-bold">Email</TableHead>
                 <TableHead className=" text-black font-bold">Phone</TableHead>
                 <TableHead className=" text-black font-bold">Country</TableHead>
+                <TableHead className=" text-black font-bold">Source</TableHead>
                 <TableHead className=" text-black font-bold">HP ID</TableHead>
               </TableRow>
             </TableHeader>

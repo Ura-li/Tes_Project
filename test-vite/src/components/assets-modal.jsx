@@ -206,7 +206,7 @@ export function DialogCloseButton({
             variant="secondary"
             onClick={handleConfirmSelection}
           >
-            Select
+            OK
           </Button>
         </DialogFooter>
       </DialogContent>
