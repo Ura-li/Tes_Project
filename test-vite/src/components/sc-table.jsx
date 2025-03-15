@@ -1,13 +1,5 @@
 import React from "react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   Table,
   TableBody,
   TableCaption,
@@ -17,8 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { BtnModalContact } from "./sc-modal";
-import { BtnModalAsset } from "./sc-modal";
+import { BtnModal1 } from "./sc-modal";
+import { BtnModal2 } from "./sc-modal";
 import { ChevronDown } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
@@ -58,20 +50,46 @@ const assets = [
   },
 ];
 
+export function TableCompany() {
+  return (
+    <Table className="w-255 ml-7 flex-col justify-center items-center drop-shadow-md">
+      <TableHeader className="bg-blue-400">
+        <TableRow>
+          <TableHead className="text-white text-xl ">
+          <Checkbox className="border-black border-3 w-7.5 h-7 fixed"></Checkbox>
+            PT KAPAL API SEJAHTERA
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody className="bg-neutral-200">
+        {invoices.map((invoice) => (
+          <TableRow key={invoice.text}>
+            <TableCell className="font-medium" colSpan={5}>{invoice.text}{invoice.text1}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
 
 export function TableContact() {
   return (
     <Table className="w-255 ml-7 drop-shadow-md">
-      <TableHeader className="bg-blue-400">
+        <TableHeader className="bg-blue-400">
         <TableRow>
-          <TableHead className="text-white h-12 text-xl" colSpan={6}>Contact</TableHead>
+          <TableHead className="text-white h-12 text-xl">
+           Contact
+
           <Input placeholder="Search..." className="border-2 w-50 h-8 mt-2 p-2 border-black rounded-md"></Input>
-          <BtnModalContact></BtnModalContact>
+       
+          <BtnModal1></BtnModal1>
+          </TableHead>
+        
         </TableRow>
       </TableHeader>
 
-      <TableBody>
-      <TableRow className="bg-green-500">
+      <TableHeader className="bg-neutral-300">
+        <TableRow>
           <TableHead className="text-black">First Name</TableHead>
           <TableHead className="text-black">Last Name</TableHead>
           <TableHead className="text-black">Email</TableHead>
@@ -79,7 +97,10 @@ export function TableContact() {
           <TableHead className="text-black">Country</TableHead>
           <TableHead className="text-black">Source</TableHead>
           <TableHead className="text-black">HP ID</TableHead>
-        </TableRow> 
+        </TableRow>
+      </TableHeader>
+
+      <TableBody className="bg-neutral-100">
         {contacts.map((contact) => (
           <TableRow key={contact.firstname}>
             <TableCell>{contact.firstname}</TableCell>
@@ -104,12 +125,13 @@ export function TableAsset() {
           <TableHead className="text-white text-xl">
           Asset
           </TableHead>
-          <BtnModalAsset></BtnModalAsset>
+          
         </TableRow>
+        
       </TableHeader>
 
-      <TableBody >
-      <TableRow className="bg-green-500">
+      <TableHeader className="bg-neutral-300">
+        <TableRow>
           <TableHead className="text-black">Product Name</TableHead>
           <TableHead className="text-black">Product</TableHead>
           <TableHead className="text-black">Serial Number</TableHead>
@@ -118,6 +140,9 @@ export function TableAsset() {
           <TableHead className="text-black">Parent Asset</TableHead>
           <TableHead className="text-black">Source</TableHead>
         </TableRow>
+      </TableHeader>
+
+      <TableBody className="bg-neutral-100">
         {assets.map((asset) => (
           <TableRow key={asset.productname}>
             <TableCell>{asset.productname}</TableCell>

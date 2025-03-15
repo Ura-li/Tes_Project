@@ -64,25 +64,32 @@ const data = {
   navMain: [
     {
       title: "Service",
+      title: "Service",
       url: "#",
+      icon: ServerIcon,
       icon: ServerIcon,
       isActive: true,
       items: [
         {
           title: "Case",
           url: "/Case",
+          title: "Case",
+          url: "/Case",
         },
         {
+          title: "Work Order",
           title: "Work Order",
           url: "#",
         },
         {
+          title: "Material Order",
           title: "Material Order",
           url: "#",
         },
       ],
     },
     {
+      title: "Unnable",
       title: "Unnable",
       url: "#",
       icon: Bot,
@@ -166,6 +173,7 @@ const data = {
 
   mywork: [
     {
+      name: "My work",
       name: "My work",
       url: "/search_case",
       icon: Table,
