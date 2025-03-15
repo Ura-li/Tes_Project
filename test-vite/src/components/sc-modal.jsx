@@ -34,7 +34,7 @@ const assets = [
     productname: "HP Victus 16 inch Gaming Laptop 16-r0555TX",
     product: "9T92PA94-92",
     HWPorfitCenter: "-",
-    contact: "Slamet",
+    contact: "Slamet Meisa Putra",
   },
 ];
 
@@ -276,9 +276,9 @@ export function BtnModalAsset() {
           </div>
         </div>
 
-        <Table>
+        <Table className="table-fixed border-spacing-0 mx-auto">
           <TableHeader>
-            <TableRow className="bg-blue-200 ">
+            <TableRow className="bg-blue-200">
               <TableHead className="text-black">Product Name</TableHead>
               <TableHead className="text-black">Product Number</TableHead>
               <TableHead className="text-black">HW Profit Center</TableHead>
@@ -286,10 +286,10 @@ export function BtnModalAsset() {
             </TableRow>
           </TableHeader>
 
-          <TableBody>
+          <TableBody >
             {assets.map((asset) => (
               <TableRow key={asset.productname}>
-              <TableCell>{asset.productname}</TableCell>
+              <TableCell className="whitespace-break-spaces ">{asset.productname}</TableCell>
               <TableCell>{asset.product}</TableCell>
               <TableCell>{asset.HWPorfitCenter}</TableCell>
               <TableCell>{asset.contact}</TableCell>

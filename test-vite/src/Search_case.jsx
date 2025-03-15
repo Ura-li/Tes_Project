@@ -55,7 +55,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 
-import { DialogCloseButton } from './components/assets-modal'
+import { DialogCloseButton, DialogCompanyBtn } from './components/assets-modal'
 import { SelectBar } from './components/sc-select'
 import { SelectBar1 } from './components/sc-select'
 import { SelectBar2 } from './components/sc-select'
@@ -155,6 +155,7 @@ const Search_case = () => {
           <TabsList className="bg-white float-right mr-5">   
               <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
               <DialogCloseButton></DialogCloseButton>
+              <DialogCompanyBtn></DialogCompanyBtn>
           </TabsList>
           <div className='mb-5'>
             <TableContact></TableContact>
