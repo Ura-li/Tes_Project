@@ -60,7 +60,6 @@ import { SelectBar } from './components/sc-select'
 import { SelectBar1 } from './components/sc-select'
 import { SelectBar2 } from './components/sc-select'
 import { BtnModal } from './components/sc-modal'
-import { TableCompany } from './components/sc-table'
 import { TableContact } from './components/sc-table'
 import { TableAsset } from './components/sc-table'
 
@@ -83,9 +82,7 @@ const Search_case = () => {
               <TabsTrigger value="search" className="cursor-pointer">Search</TabsTrigger>
               <TabsTrigger value="ci" className="cursor-pointer">Costumer Information</TabsTrigger>
             </div>
-            {/* <Button className="ml-50 cursor-pointer "><span></span>Customer Complaint</Button>
-            <Button className="cursor-pointer"><span></span>Customer Complaint Legal</Button> */}
-            {/* <Button className="mr-1.5 cursor-pointer"><span><Plus></Plus></span>Create Case</Button> */}
+
             <BtnModal></BtnModal>
           </TabsList>
           <TabsContent value="search">
@@ -160,12 +157,8 @@ const Search_case = () => {
               <DialogCloseButton></DialogCloseButton>
           </TabsList>
           <div className='mb-5'>
-            <TableCompany></TableCompany>
             <TableContact></TableContact>
-            <TableAsset></TableAsset>
-            {/* <ShelterBox></ShelterBox>
-            <ShelterContact></ShelterContact>
-            <ShelterAsset></ShelterAsset> */}
+            <TableAsset></TableAsset>  
           </div>
           </TabsContent>
 
@@ -184,12 +177,14 @@ const Search_case = () => {
                   Change your password here. After saving, you'll be logged out.
                 </CardDescription>
               </CardHeader> */}
-              <CardHeader>
-                <CardTitle className="flex justify-end">
+           
                   
-                </CardTitle>
-                <CardTitle >
+                <CardHeader className="flex-row justify-between">
+              <CardTitle>
                   Basic Information
+                </CardTitle>  
+                <CardTitle>
+                  Clear All
                 </CardTitle>
               </CardHeader>
               
@@ -261,12 +256,12 @@ const Search_case = () => {
                 </CardDescription>
               </CardHeader> */}
               
-              <CardHeader>
-              <CardTitle className="flex justify-end">
-                  Clear All
+              <CardHeader className="flex-row justify-between">
+              <CardTitle>
+                  Basic Information
                 </CardTitle>  
                 <CardTitle>
-                  Basic Information
+                  Clear All
                 </CardTitle>
               </CardHeader>
 

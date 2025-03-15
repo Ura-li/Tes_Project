@@ -79,3 +79,57 @@ import {
       </Select>
     )
   }
+
+
+  export function SelectBarContact() {
+    return (
+      <Select>
+        <SelectTrigger className="w-[150px] border-black h-8">
+          <SelectValue/>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="Item1">Item 1</SelectItem>
+            <SelectItem value="Item2">Item 2</SelectItem>
+            <SelectItem value="Item3">Item 3</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    )
+  }
+
+  export function SelectBarContact2() {
+    return (
+      <Select>
+        <SelectTrigger className="w-[330px]  border-black h-8">
+          <SelectValue/>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="Item1">Item 1</SelectItem>
+            <SelectItem value="Item2">Item 2</SelectItem>
+            <SelectItem value="Item3">Item 3</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    )
+  }
+
+  export function SelectBarContact3() {
+    return (
+      <Select>
+        <SelectTrigger className="w-[330px] border-black h-8">
+          <SelectValue/>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="Indonesia">Indonesia</SelectItem>
+            <SelectItem value="Malaysia">Malaysia</SelectItem>
+            <SelectItem value="Singapura">Singapura</SelectItem>
+            <SelectItem value="Inggris">Inggris</SelectItem>
+            <SelectItem value="Cina">Cina</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    )
+  }
