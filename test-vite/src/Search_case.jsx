@@ -225,8 +225,8 @@ const Search_case = () => {
   };
   
   const handlerContactSubmit = async () => {
-    console.log(formDataContact);
     console.log("formDataContact");
+    console.log(formDataContact);
     try {
       const response = await ApiCustomer.post("/api/contact-information", formDataContact);
       console.log("Success:", response.data);
@@ -275,7 +275,7 @@ const Search_case = () => {
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="country">Country</Label>
-                  <SelectBar></SelectBar>
+                  <SelectBar id="Country" onChange={handleInputChange}></SelectBar>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="company">Company</Label>
@@ -511,7 +511,7 @@ const Search_case = () => {
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="current">Country</Label>
-                  <SelectBar onChange={handlerInputContactChange}/>
+                  <SelectBar id="Country" onChange={handlerInputContactChange}/>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>

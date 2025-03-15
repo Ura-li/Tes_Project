@@ -87,7 +87,7 @@ export function BtnModal1() {
         <div className="flex">
           <div className="space-y-0.5">
             <Label htmlFor="current">Salutation</Label>
-            <SelectBar1></SelectBar1>
+            <SelectBar1 ></SelectBar1>
             <Label htmlFor="current" className="mt-2">
               Preferend Language
             </Label>

@@ -10,11 +10,11 @@ import {
     SelectValue,
   } from "@/components/ui/select"
    
-  export function SelectBar() {
+  export function SelectBar({ id, onChange }) {
     return (
-      <Select>
+      <Select onValueChange={(value) => onChange({ target: { id, value}})}>
         <SelectTrigger className="w-[330px] border-black">
-          <SelectValue/>
+          <SelectValue placeholder="Select a Country"/>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
@@ -29,11 +29,11 @@ import {
     )
   }
 
-  export function SelectBar1() {
+  export function SelectBar1({ id, onChange }) {
     return (
-      <Select>
+      <Select onValueChange={(value) => onChange({ target: { id, value}})}>
         <SelectTrigger className="w-[150px] border-black">
-          <SelectValue/>
+          <SelectValue placeholder="Select Salutation"/>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
@@ -45,11 +45,11 @@ import {
     )
   }
 
-  export function SelectBar2() {
+  export function SelectBar2({ id, onChange }) {
     return (
-      <Select>
+      <Select onValueChange={(value) => onChange({ target: { id, value}})}>
         <SelectTrigger className="w-[330px]  border-black">
-          <SelectValue/>
+          <SelectValue placeholder="Select Prefered Language"/>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
