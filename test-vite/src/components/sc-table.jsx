@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -25,57 +25,76 @@ import { Input } from "./ui/input";
 import { ContactRound, User,Search, Laptop } from "lucide-react";
 
 
-const invoices = [
-  {
-    text: "Kb.Kk 36 No 15 Jakarta  Jakarta Pusat Jakarta Indonesia-10240 | Email: | PIN: |",
-  },
-  {
-    text: "Phone: |  Account Type: Site Account | Parent Company: | Account Tier: | Source: CRM"
-  },
-];
 
-// const contacts = [
-//   {
-//     firstname: "Slamet",
-//     lastname: "Meisa",
-//     email: "pakrt@gmail.com",
-//     phone: "089677544227",
-//     country: "indonesia",
-//     source: "CRM",
-//     hpID: "526291",
-//   },
-// ];
 
-// const assets = [
-//   {
-//     productname: "HP Victus 16 inch Gaming Laptop 16-r0555TX",
-//     product: "9T92PA94-92",
-//     serialnumber: "892910312",
-//     productline: "M7",
-//     isparent: "-",
-//     parentasset: "-",
-//     source: "CRM",
+
+
+
+
+export function TableCompany({ selectedAsset = [] }) {
+  console.log("Received asset in TableCompany:", selectedAsset);
+  const companies = selectedAsset?.site_account ? [
+    {
+      key: selectedAsset?.SiteAccountID,
+      company: selectedAsset?.site_account?.Company,
+    },
+    {
+      text: `${selectedAsset?.site_account?.AddressLine1} ${selectedAsset?.site_account?.City} ${selectedAsset?.site_account?.StateProvince} ${selectedAsset?.site_account?.Country}-${selectedAsset?.site_account?.ZipPostalCode} | Email: ${selectedAsset?.site_account?.Email} | Phone : ${selectedAsset?.site_account?.PrimaryPhone}`,
+    },
+  ] : null;
+
+  const contacts = selectedAsset?.contact_information ? [
+    {
+      contactID: selectedAsset?.contact_information?.ContactID,
+      firstname: selectedAsset?.contact_information?.FirstName,
+      lastname: selectedAsset?.contact_information?.LastName,
+      email: selectedAsset?.contact_information?.Email,
+      phone: selectedAsset?.contact_information?.Phone || selectedAsset?.contact_information?.Mobile,
+      country: selectedAsset?.contact_information?.Country ,
+      source: "CRM",
+      hpID: "526291",
+    },
+  ] : null;
+
+  const assets = selectedAsset ? [
+    {
+      assetID : selectedAsset.AssetID,
+      serialNumber : selectedAsset.SerialNumber,
+      productName : selectedAsset.ProductName,
+      productNumber : selectedAsset.ProductNumber,
+      productLine : selectedAsset.ProductLine,
+      // TODO : Search what tf is this mean
+      isparent: "-",
+      parentasset: "-",
+      source: "CRM",
+    },
+  ] : null;
   
-//   },
-// ];
-
-export function TableCompany() {
+  console.log("Invoices")
+  console.log(companies)
   return (
-
+    // Company
       <Card className="m-0 p-0 gap-0">
         <CardHeader className="bg-blue-400 p-3 rounded-t-lg">
           <span className="flex items-center gap-2 text-xl">
             <Checkbox className="border-black border-3 w-7.5 h-7 "></Checkbox>
-            PT KAPAL API SEJAHTERA
+            { companies !== null ? companies[0].company : "" }
           </span>
         </CardHeader>
         <CardContent className=" p-3">
-          {invoices.map((invoice) => (
-          <div className="text-gray-500"key={invoice.text}>
-              <p>{invoice.text}</p>
+        { companies !== null ? (
+          <div className="text-gray-500"key={selectedAsset.SerialNumber}>
+              <p>{companies[1].text}</p>
           </div>
-          ))}
+          
+        ) : (
+          <div className="text-gray-500"key={selectedAsset.SerialNumber}>
+              <p>No Company Available</p>
+          </div>
+        )}
         </CardContent>
+
+        {/* Contact */}
         <CardFooter className="p-0 flex flex-col">
             <div className=" bg-blue-200 p-3 text-black font-bold text-xl flex w-full justify-between  ">
               <div className="flex items-center gap-2">
@@ -99,9 +118,25 @@ export function TableCompany() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              
+              {contacts !== null ? contacts.map((contact) => (
+                <TableRow key={contact.contactID}>
+                  <TableCell>{contact.firstname}</TableCell>
+                  <TableCell>{contact.lastname}</TableCell>
+                  <TableCell>{contact.email}</TableCell>
+                  <TableCell>{contact.phone}</TableCell>
+                  <TableCell>{contact.country}</TableCell>
+                  <TableCell>{contact.source}</TableCell>
+                  <TableCell>{contact.hpID}</TableCell>
+                </TableRow>
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={7}>No Contact Available</TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
+
+          {/* Asset */}
             <div className=" bg-blue-200 p-3 text-black font-bold text-xl flex w-full justify-between">
               <div className="flex items-center gap-2">
                 <Laptop></Laptop>
@@ -125,114 +160,65 @@ export function TableCompany() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              
+            {assets !== null? assets.map((asset) => (
+              <TableRow key={asset.assetID}>
+                <TableCell>{asset.productName}</TableCell>
+                <TableCell>{asset.productNumber}</TableCell>
+                <TableCell>{asset.serialNumber}</TableCell>
+                <TableCell>{asset.productLine}</TableCell>
+                <TableCell>{asset.isparent}</TableCell>
+                <TableCell>{asset.parentasset}</TableCell>
+                <TableCell>{asset.source}</TableCell>
+              </TableRow>
+            )) : (
+              <TableRow>
+                <TableCell colSpan={7}>No Assets Available</TableCell>
+              </TableRow>
+            )}
             </TableBody>
           </Table>
         </CardFooter>
       </Card>
-      // {/* <Table className="w-255 ml-7 flex-col justify-center items-center drop-shadow-md">
-      //   <TableHeader className="bg-blue-400">
-      //     <TableRow>
-      //       <TableHead className="text-white text-xl ">
-      //       <Checkbox className="border-black border-3 w-7.5 h-7 fixed"></Checkbox>
-      //         PT KAPAL API SEJAHTERA
-      //       </TableHead>
-      //     </TableRow>
-      //   </TableHeader>
-      //   <TableBody className="bg-neutral-200">
-      //     {invoices.map((invoice) => (
-      //       <TableRow key={invoice.text}>
-      //         <TableCell className="font-medium" colSpan={5}>{invoice.text}{invoice.text1}</TableCell>
-      //       </TableRow>
-      //     ))}
-      //   </TableBody>
-      // </Table> */}
     
   );
 }
 
-export function TableContact() {
+export function TableContact({ selectedAsset = [] }) {
+  // console.log("Received asset in TableCompany:", selectedAsset);
+  const contacts = selectedAsset?.contact_information ? [
+    {
+      contactID: selectedAsset?.contact_information?.ContactID,
+      firstname: selectedAsset?.contact_information?.FirstName,
+      lastname: selectedAsset?.contact_information?.LastName,
+      email: selectedAsset?.contact_information?.Email,
+      phone: selectedAsset?.contact_information?.Phone || selectedAsset?.contact_information?.Mobile,
+      country: selectedAsset?.contact_information?.Country ,
+      source: "CRM",
+      hpID: "526291",
+    },
+  ] : null;
   return (
     <div className="">
-      {/* <Table className="w-255 ml-7 drop-shadow-md">
-          <TableHeader className="bg-blue-400">
-          <TableRow>
-            <TableHead className="text-white h-12 text-xl">
-             Contact
-            <Input placeholder="Search..." className="border-2 w-50 h-8 mt-2 p-2 border-black rounded-md"></Input>
-      
-            
-            </TableHead>
-      
-          </TableRow>
-        </TableHeader>
-        <TableHeader className="bg-neutral-300">
-          <TableRow>
-            <TableHead className="text-black">First Name</TableHead>
-            <TableHead className="text-black">Last Name</TableHead>
-            <TableHead className="text-black">Email</TableHead>
-            <TableHead className="text-black">Phone</TableHead>
-            <TableHead className="text-black">Country</TableHead>
-            <TableHead className="text-black">Source</TableHead>
-            <TableHead className="text-black">HP ID</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody className="bg-neutral-100">
-          {contacts.map((contact) => (
-            <TableRow key={contact.firstname}>
-              <TableCell>{contact.firstname}</TableCell>
-              <TableCell>{contact.lastname}</TableCell>
-              <TableCell>{contact.email}</TableCell>
-              <TableCell>{contact.phone}</TableCell>
-              <TableCell>{contact.country}</TableCell>
-              <TableCell>{contact.source}</TableCell>
-              <TableCell>{contact.hpID}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table> */}
     </div>
   );
 }
 
-export function TableAsset() {
+export function TableAsset({ selectedAsset }) {
+  const assets = selectedAsset ? [
+    {
+      assetID : selectedAsset.AssetID,
+      serialNumber : selectedAsset.SerialNumber,
+      productName : selectedAsset.ProductName,
+      productNumber : selectedAsset.ProductNumber,
+      productLine : selectedAsset.ProductLine,
+      // TODO : Search what tf is this mean
+      isparent: "-",
+      parentasset: "-",
+      source: "CRM",
+    },
+  ] : null;
   return (
     <div className="">
-      {/* <Table className="w-255 ml-7 drop-shadow-md">
-          <TableHeader className="bg-blue-400">
-          <TableRow>
-            <TableHead className="text-white text-xl">
-            Asset
-            </TableHead>
-      
-          </TableRow>
-      
-        </TableHeader>
-        <TableHeader className="bg-neutral-300">
-          <TableRow>
-            <TableHead className="text-black">Product Name</TableHead>
-            <TableHead className="text-black">Product</TableHead>
-            <TableHead className="text-black">Serial Number</TableHead>
-            <TableHead className="text-black">Product Line</TableHead>
-            <TableHead className="text-black">Is Parent</TableHead>
-            <TableHead className="text-black">Parent Asset</TableHead>
-            <TableHead className="text-black">Source</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody className="bg-neutral-100">
-          {assets.map((asset) => (
-            <TableRow key={asset.productname}>
-              <TableCell>{asset.productname}</TableCell>
-              <TableCell>{asset.product}</TableCell>
-              <TableCell>{asset.serialnumber}</TableCell>
-              <TableCell>{asset.productline}</TableCell>
-              <TableCell>{asset.isparent}</TableCell>
-              <TableCell>{asset.parentasset}</TableCell>
-              <TableCell>{asset.source}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table> */}
     </div>
   );
 }

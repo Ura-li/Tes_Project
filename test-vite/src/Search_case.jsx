@@ -1,4 +1,4 @@
-import { React } from 'react'
+import { React, useState, useEffect } from 'react'
 import  { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './components/ui/card'
 import { Input } from './components/ui/input'
 import { InfoSide } from './components/info-sidebar'
@@ -8,6 +8,10 @@ import {
   SidebarHeader,
   SidebarTrigger,
 } from './components/ui/sidebar' 
+
+//importing API
+import ApiCustomer from './api'
+
 import { Button } from "@/components/ui/button"
 import {
   AudioWaveform,
@@ -64,18 +68,186 @@ import { TableContact, TableCompany, TableAsset } from './components/sc-table'
 
 const Search_case = () => {
 
-  // const [search, setSearch] = useState("");
+  //create search state
+  const [search, setSearch] = useState("");
   
-  // // Filtered Data
-  // const filteredData = data.filter((item) =>
-  //   item.name.toLowerCase().includes(search.toLowerCase()) || 
-  //   item.email.toLowerCase().includes(search.toLowerCase())
+  const [isModalAssetOpen, setIsModalAssetOpen] = useState(false);
+
+  const [activeTab, setActiveTab] = useState("search"); // Default active tab
+
+  const handleSearchClick = () => {
+    console.log("BeforeChange" + activeTab)
+    setIsModalAssetOpen(true); // Open modal
+    setActiveTab('ci'); // Switch tab to target
+  };
+  useEffect(() => {
+    console.log("Updated Active Tab:", activeTab);
+  }, [activeTab]); // This runs every time activeTab changes
+  
+  const handleInputChange = (e) =>{
+    // if (search.trim() !== "") { 
+      const searchQuery = e.target.value;
+      setSearch(searchQuery);
+      console.log("search" + search)
+    // }
+    // console.log(search)
+  }
+
+  //creating Asset Data
+  const [assets, setAssets] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [siteAccounts, setSiteAccounts] = useState([]);
+  
+  
+  //define method
+  const fetchDataAssets = async () => {
+
+    //fetch data from API with Axios
+    await ApiCustomer.get('/api/asset-information')
+        .then(response => {
+            // console.log("Asset");
+            // console.log(response.data.data)
+            //assign response data to state "asset"
+            setAssets(response.data.data);
+          })
+          
+        }
+        
+        const fetchDataContacts = async () => {
+          //fetch data from API with Axios
+          await ApiCustomer.get('/api/contact-information')
+          .then(response => {
+            // console.log("Contact");
+            // console.log(response.data.data)
+            //assign response data to state "asset"
+            setContacts(response.data.data);
+          })
+        }
+        
+        const fetchDataSiteAccounts = async () => {
+          //fetch data from API with Axios
+          await ApiCustomer.get('/api/site_account')
+          .then(response => {
+            // console.log("Site Account");
+            // console.log(response.data.data)
+            //assign response data to state "asset"
+            setSiteAccounts(response.data.data);
+        })
+  }
+
+  //run hook useEffect
+  useEffect(() => {
+    //call method
+    fetchDataAssets();
+    fetchDataContacts();
+    fetchDataSiteAccounts();
+  }, []);
+
+  //filter item
+  
+  // const filteredAssets = assets.filter((asset) =>
+  //   asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
+  //   asset.ProductName?.toLowerCase().includes(search.toLowerCase())
   // );
+  // console.log("filtered Asset")
+  // console.log(filteredAssets);
+
+
+
+
+  //form section
+  // section account
+  //set Form Data
+  const [formDataSiteAccount, setFormDataSiteAccount] = useState({
+    Company: '',
+    Email: '',
+    PrimaryPhone: '',
+    AddressLine1: '',
+    AddressLine2: '',
+    City: '',
+    StateProvince: '',
+    Country: '',
+    ZipPostalCode: ''
+  })
+
+  //make handler
+  const handlerInputSiteAccountChange = (e) => {
+    const { id, value } = e.target
+    setFormDataSiteAccount(prevState => ({
+      ...prevState,
+      [id]:value
+    }))
+  }
+
+  //handler submit
+  // console.log(formData)
+  const handlerSiteAccountSubmit = async () => {
+    // console.log(formDataSiteAccount)
+    try {
+      const response = await ApiCustomer.post("/api/site_account", formDataSiteAccount);
+      console.log("Success:", response.data);
+      alert("Customer Saved successfully")
+    } catch (err){
+      console.error("Error saving customer: ", err)
+      alert("Failed to save customer")
+    }
+  }
+
+  const [formDataContact, setFormDataContact] = useState({
+    Salutation: '',
+    FirstName: '',
+    LastName: '',
+    Email: '',
+    PreferredLanguage: '',
+    Phone: '',
+    Mobile: '',
+    WorkPhone: '',
+    WorkExtension: '',
+    OtherPhone: '',
+    OtherExtension: '',
+    Fax: '',
+    AddressLine1: '',
+    AddressLine2: '',
+    City: '',
+    StateProvince: '',
+    Country: '',
+    ZipPostalCode: ''
+  });
+  
+  const handlerInputContactChange = (e) => {
+    const { id, value } = e.target;
+    setFormDataContact(prevState => ({
+      ...prevState,
+      [id]: value
+    }));
+  };
+  
+  const handlerContactSubmit = async () => {
+    console.log("formDataContact");
+    console.log(formDataContact);
+    try {
+      const response = await ApiCustomer.post("/api/contact-information", formDataContact);
+      console.log("Success:", response.data);
+      alert("Contact Information Saved Successfully");
+    } catch (err) {
+      console.error("Error saving contact information: ", err);
+      alert("Failed to save contact information");
+    }
+  };
+
+  //handler table selected
+  const [selectedAsset, setSelectedAsset] = useState(null); // Store selected asset data
+
+  const handleSelectedAsset = (asset) => {
+    console.log("Asset received in parent:", asset);
+    setSelectedAsset(asset);
+  };
+  
 
   return (
     <div className="flex flex-1 mt-2  gap-4 p-4 pt-0">
       <div className="flex min-h-[100vh] flex-1 rounded-xl md:min-h-min">
-        <Tabs defaultValue="search" className="w-full">
+        <Tabs defaultValue="search" className="w-full" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="drop-shadow-xl bg-sky-700 w-full h-15 flex justify-between">
             <div className="w-2xs p-2 text-white ">
               <TabsTrigger value="search" className="cursor-pointer">Search</TabsTrigger>
@@ -84,6 +256,8 @@ const Search_case = () => {
 
             <BtnModal></BtnModal>
           </TabsList>
+
+          {/* search tab */}
           <TabsContent value="search">
             <Card className="drop-shadow-md">
               <CardContent className="grid gap-5 grid-cols-3">
@@ -93,11 +267,11 @@ const Search_case = () => {
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="serialnumber">Serial Number</Label>
-                  <Input id="serialnumber" className="border-b-black p-1"  />
+                  <Input id="serialnumber" onChange={handleInputChange} className="border-b-black p-1"/>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="country">Country</Label>
-                  <SelectBar></SelectBar>
+                  <SelectBar id="Country" onChange={handleInputChange}></SelectBar>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="company">Company</Label>
@@ -145,7 +319,7 @@ const Search_case = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer w-40 h-11"><p className='text-2xl mb-1'>Search</p></Button>
+                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer w-40 h-11"><p className='text-2xl mb-1' onClick={handleSearchClick}>Search</p></Button>
               </CardFooter>
             </Card>
           </TabsContent>  
@@ -153,23 +327,27 @@ const Search_case = () => {
           <TabsContent value="ci" className="flex flex-col gap-1">
           <TabsList className="bg-white float-right mr-5 self-end">   
               <TabsTrigger value="Account" className="cursor-pointer"><span><Plus></Plus></span>Create New</TabsTrigger>
-              {/* <DialogCloseButton></DialogCloseButton> */}
+              <DialogCloseButton 
+                isModalAssetOpen={isModalAssetOpen} 
+                setIsModalAssetOpen={setIsModalAssetOpen} 
+                search={search} 
+                setSearch={setSearch} 
+                onSelectAsset={handleSelectedAsset} 
+              />
           </TabsList>
-          
-            <TableCompany></TableCompany>
-            <TableContact></TableContact>
-            <TableAsset></TableAsset>
-            {/* <ShelterBox></ShelterBox>
-            <ShelterContact></ShelterContact>
-            <ShelterAsset></ShelterAsset> */}
-        
+          <div className='mb-5'>
+            {/* TODO : Change this Variable Name */}
+            <TableCompany selectedAsset={selectedAsset} />
+            <TableContact selectedAsset={selectedAsset}></TableContact>
+            <TableAsset selectedAsset={selectedAsset}></TableAsset>
+          </div>
           </TabsContent>
 
          
           <TabsContent value="Account">
           <TabsList className="flex h-[3em] bg-white">
             <div className="w-2xs p-2 text-black">
-              <TabsTrigger value="Account" className="cursor-pointer">Account</TabsTrigger>
+              <TabsTrigger value="Account" className="cursor-pointer" >Account</TabsTrigger>
               <TabsTrigger value="Contact" className="ml-2 cursor-pointer">Contact</TabsTrigger>
             </div>
           </TabsList>
@@ -193,16 +371,16 @@ const Search_case = () => {
               
               <CardContent className="grid gap-5 grid-cols-3">
               <div className="space-y-0.5">
-                  <Label htmlFor="current">Company</Label>
-                  <Input id="current" className="border-b-black p-1"/>
+                  <Label htmlFor="Company">Company</Label>
+                  <Input id="Company" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.Company}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Email</Label>
-                  <Input id="current" type="email" className="border-b-black p-1" />
+                  <Label htmlFor="Email">Email</Label>
+                  <Input id="Email" type="email" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.Email}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="new">Primary Phone</Label>
-                  <Input id="new" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="PrimaryPhone">Primary Phone</Label>
+                  <Input id="PrimaryPhone" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.PrimaryPhone}/>
                 </div>
               </CardContent>
 
@@ -214,157 +392,136 @@ const Search_case = () => {
 
               <CardContent className="grid gap-5 grid-cols-3">
               <div className="space-y-0.5">
-                  <Label htmlFor="current">Addres Line 1</Label>
-                  <Input id="current" type="email" className="border-b-black p-1"  />
+                  <Label htmlFor="AddressLine1">Addres Line 1</Label>
+                  <Input id="AddressLine1" type="email" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.AddressLine1} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Addres Line 2</Label>
-                  <Input id="current" type="email" className="border-b-black p-1" />
+                  <Label htmlFor="AddressLine2">Addres Line 2</Label>
+                  <Input id="AddressLine2" type="email" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.AddressLine2}/>
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="new">City</Label>
-                  <Input id="new" type="text" className="border-b-black p-1"  />
+                  <Label htmlFor="City">City</Label>
+                  <Input id="City" type="text" className="border-b-black p-1"  onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.City}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">State/Province</Label>
-                  <Input id="current" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="StateProvince">State/Province</Label>
+                  <Input id="StateProvince" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.StateProvince}/>
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="current">Country</Label>
                   <SelectBar></SelectBar>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="new">Zip/Postal Code</Label>
-                  <Input id="new" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
+                  <Input id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputSiteAccountChange} value={formDataSiteAccount.ZipPostalCode}/>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer">Verify & Save</Button>
+                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer" onClick={handlerSiteAccountSubmit}>Verify & Save</Button>
               </CardFooter>
             </Card>
           </TabsContent>
 
           <TabsContent value="Contact">
-          <TabsList className="flex h-[3em] bg-white">
-            <div className="w-2xs p-2 text-black">
-              <TabsTrigger value="Account" className="cursor-pointer">Account</TabsTrigger>
-              <TabsTrigger value="Contact" className="ml-2 cursor-pointer">Contact</TabsTrigger>
-            </div>
-          </TabsList>
+            <TabsList className="flex h-[3em] bg-white">
+              <div className="w-2xs p-2 text-black">
+                <TabsTrigger value="Account" className="cursor-pointer">Account</TabsTrigger>
+                <TabsTrigger value="Contact" className="ml-2 cursor-pointer">Contact</TabsTrigger>
+              </div>
+            </TabsList>
             <Card className="drop-shadow-md">
-              {/* <CardHeader>
-                <CardTitle>Password</CardTitle>
-                <CardDescription>
-                  Change your password here. After saving, you'll be logged out.
-                </CardDescription>
-              </CardHeader> */}
-              
-              <CardHeader className="flex-row justify-between">
-              <CardTitle>
-                  Basic Information
+              <CardHeader>
+              <CardTitle className="flex justify-end">
+               Basic Information
                 </CardTitle>  
                 <CardTitle>
                   Clear All
                 </CardTitle>
               </CardHeader>
-
               <CardContent className="grid gap-5 grid-cols-3">
-              <div className="space-y-0.5">
-                  <Label htmlFor="current">Salutation</Label>
-                  <SelectBar1></SelectBar1>
-                  <Label htmlFor="current" className="mt-2">Preferend Language</Label>
-                  <SelectBar2></SelectBar2>
-                </div>
-                <div className="space-y-0.5 absolute ml-42">
-                  <Label htmlFor="current">First Name</Label>
-                  <Input id="current" type="email"className="border-b-black p-1 w-40.5"/>
+                <div className="space-y-0.5">
+                  <Label htmlFor="Salutation">Salutation</Label>
+                  <SelectBar1 id="Salutation" onChange={handlerInputContactChange} />
+                  <Label htmlFor="PreferredLanguage" className="mt-2">Preferred Language</Label>
+                  <SelectBar2 id="PreferredLanguage" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Last Name</Label>
-                  <Input id="current" type="email"className="border-b-black p-1"/>
+                  <Label htmlFor="FirstName">First Name</Label>
+                  <Input id="FirstName" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="new">EXTN</Label>
-                  <Input id="new" type="text" className="border-b-black p-1"/>
+                  <Label htmlFor="LastName">Last Name</Label>
+                  <Input id="LastName" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
               </CardContent>
-              
               <CardHeader className="mt-2">
-                <CardTitle>
-                Phone preferences
-                </CardTitle>
+                <CardTitle>Phone Preferences</CardTitle>
               </CardHeader>
-
               <CardContent className="grid gap-5 grid-cols-3">
-              <div className="space-y-0.5">
-                  <Label htmlFor="current">Phone</Label>
-                  <Input id="current" type="email" className="border-b-black p-1" />
+                <div className="space-y-0.5">
+                  <Label htmlFor="Phone">Phone</Label>
+                  <Input id="Phone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Mobile</Label>
-                  <Input id="current" type="email" className="border-b-black p-1" />
+                  <Label htmlFor="Mobile">Mobile</Label>
+                  <Input id="Mobile" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="new">Work</Label>
-                  <Input id="new" type="text" className="border-b-black p-1 w-38.5"/>
+                  <Label htmlFor="WorkPhone">Work</Label>
+                  <Input id="WorkPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
-                <div className="space-y-0.5 absolute ml-215">
-                  <Label htmlFor="current">EXTN</Label>
-                  <Input id="current" type="text" className="border-b-black p-1 w-38.5" />
-                </div>  
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Other</Label>
-                  <Input id="current" type="text" className="border-b-black p-1 w-38"/>
+                  <Label htmlFor="WorkExtension">EXTN</Label>
+                  <Input id="WorkExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
-                <div className="space-y-0.5 absolute mt-18 ml-43">
-                  <Label htmlFor="current">EXTN</Label>
-                  <Input id="current" type="text" className="border-b-black p-1 w-38" />
-                </div> 
                 <div className="space-y-0.5">
-                  <Label htmlFor="new">FAX</Label>
-                  <Input id="new" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="OtherPhone">Other</Label>
+                  <Input id="OtherPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="OtherExtension">EXTN</Label>
+                  <Input id="OtherExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+                </div>
+                <div className="space-y-0.5">
+                  <Label htmlFor="Fax">FAX</Label>
+                  <Input id="Fax" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
               </CardContent>
-
               <CardHeader className="mt-2">
-                <CardTitle>
-                Address
-                </CardTitle>
+                <CardTitle>Address</CardTitle>
               </CardHeader>
-
               <CardContent className="grid gap-5 grid-cols-3">
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Addres Line 1</Label>
-                  <Input id="current" type="email" className="border-b-black p-1"  />
+                  <Label htmlFor="AddressLine1">Address Line 1</Label>
+                  <Input id="AddressLine1" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">Addres Line 2</Label>
-                  <Input id="current" type="email" className="border-b-black p-1" />
+                  <Label htmlFor="AddressLine2">Address Line 2</Label>
+                  <Input id="AddressLine2" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="new">City</Label>
-                  <Input id="new" type="text" className="border-b-black p-1"  />
+                  <Label htmlFor="City">City</Label>
+                  <Input id="City" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="current">State/Province</Label>
-                  <Input id="current" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="StateProvince">State/Province</Label>
+                  <Input id="StateProvince" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
                 <div className="space-y-0.5">
                   <Label htmlFor="current">Country</Label>
-                  <SelectBar></SelectBar>
+                  <SelectBar id="Country" onChange={handlerInputContactChange}/>
                 </div>
                 <div className="space-y-0.5">
-                  <Label htmlFor="new">Zip/Postal Code</Label>
-                  <Input id="new" type="text" className="border-b-black p-1" />
+                  <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
+                  <Input id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
                 </div>
               </CardContent>
 
               <CardFooter className="flex justify-end gap-4">
-              <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer w-20">Save</Button>
-                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer">Verify & Save</Button>
+              <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer w-20" onClick={handlerContactSubmit}>Save</Button>
+                <Button variant="secondary" className="bg-white drop-shadow-md border-1 cursor-pointer" onClick={handlerContactSubmit}>Verify & Save</Button>
               </CardFooter>
             </Card>
-            
           </TabsContent>
         </Tabs>
       </div>
