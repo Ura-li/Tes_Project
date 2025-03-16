@@ -71,11 +71,11 @@ const data = {
         },
         {
           title: "Assets",
-          url: "#",
+          url: "/master/Assets_table",
         },
         {
           title: "Contact",
-          url: "#",
+          url: "/master/Contact_table",
         },
       ],
     },

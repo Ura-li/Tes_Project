@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+import { BMCCompany } from "./components/sc-modal";
 
 export const Company_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 25; // Jumlah data per halaman
+  const itemsPerPage = 1; // Jumlah data per halaman
 
   const companies = [
     {
@@ -137,23 +138,19 @@ export const Company_table = () => {
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* Pagination */}      
       <div className="flex justify-center items-center mt-4 space-x-2">
-        <button
-          className="px-3 py-1 border rounded bg-gray-200 hover:bg-gray-300"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+        <button 
+          className="p-2 bg-gray-300 rounded disabled:opacity-50" 
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
           disabled={currentPage === 1}
         >
-          Prev
+          Previous
         </button>
-
-        <span className="px-4 py-2 border rounded">
-          Page {currentPage} of {totalPages}
-        </span>
-
-        <button
-          className="px-3 py-1 border rounded bg-gray-200 hover:bg-gray-300"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+        <span>Page {currentPage} of {totalPages}</span>
+        <button 
+          className="p-2 bg-gray-300 rounded disabled:opacity-50" 
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
           disabled={currentPage === totalPages}
         >
           Next
