@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
+import { Plus,PhoneCall } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { SelectBar3 } from "./sc-select";
 import { 
@@ -162,7 +162,7 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
       <DialogContent className="sm:max-w-[1000px] h-145 bg-white">
         <DialogHeader>
           <div className="flex justify-between">
-            <DialogTitle className="text-xl">Contact Information</DialogTitle>
+            <DialogTitle className="text-xl flex gap-2"><PhoneCall></PhoneCall>Contact Information</DialogTitle>
             <DialogTitle className="flex justify-end text-sm mt-2.5">
               Clear All
             </DialogTitle>
@@ -173,20 +173,24 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
           <DialogTitle className="text-md">Basic Information</DialogTitle>
         </DialogHeader>
 
-        <div className="flex">
-          <div className="space-y-0.5">
+        <div className="grid gap-5 grid-cols-5">
+          <div className="space-y-0.5 grid grid-cols-2 gap-x-2.5 col-span-2">
             <Label htmlFor="Salutation">Salutation</Label>
+            <Label htmlFor="PreferredLanguage" >Preferred Language</Label>
             <SelectBar1 id="Salutation" onChange={handlerInputContactChange} />
-            <Label htmlFor="PreferredLanguage" className="mt-2">Preferred Language</Label>
             <SelectBar2 id="PreferredLanguage" onChange={handlerInputContactChange} />
           </div>
-          <div className="space-y-0.5 absolute ml-40 w-42.5">
+          <div className="space-y-0.5">
             <Label htmlFor="FirstName">First Name</Label>
             <Input id="FirstName" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
-          <div className="space-y-0.5 ml-5">
+          <div className="space-y-0.5 col-span-2">
             <Label htmlFor="LastName">Last Name</Label>
             <Input id="LastName" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+          </div>
+          <div className="space-y-0.5 ">
+            <Label htmlFor="Email">Email</Label>
+            <Input id="Email" type="email" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           {/* <div className="space-y-0.4 ml-5">
             <Label htmlFor="new">EXTN</Label>
@@ -198,31 +202,34 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
           <DialogTitle className="text-md">Phone preferences</DialogTitle>
         </DialogHeader>
 
-        <div className="flex">
-          <div className="space-y-0.4">
+        <div className="grid grid-cols-6 gap-2">
+          <div className="space-y-0.4 col-span-2">
             <Label htmlFor="Phone">Phone</Label>
             <Input id="Phone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
-
-            <Label htmlFor="OtherPhone">Other</Label>
-            <Input id="OtherPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
-          <div className="space-y-0.4 ml-3">
+          <div className="space-y-0.4 col-span-2">
             <Label htmlFor="Mobile">Mobile</Label>
             <Input id="Mobile" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
-
+          </div> 
+          <div className="space-y-0.4">
+            <Label htmlFor="WorkPhone">Work</Label>
+            <Input id="WorkPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+          </div>
+          <div className="space-y-0.4">
             <Label htmlFor="WorkExtension">Work EXTN</Label>
             <Input id="WorkExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
-          <div className="space-y-0.4 ml-5">
-            <Label htmlFor="WorkPhone">Work</Label>
-            <Input id="WorkPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
-
-            <Label htmlFor="Fax">FAX</Label>
-            <Input id="Fax" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
-          </div>
-          <div className="space-y-0.4 ml-5">
+          <div className="space-y-0.4">
+            <Label htmlFor="OtherPhone">Other</Label>
+            <Input id="OtherPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+          </div> 
+          <div className="space-y-0.4 ">
             <Label htmlFor="OtherExtension"> Other EXTN</Label>
             <Input id="OtherExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+          </div>
+          <div className="space-y-0.4 col-span-2">
+            <Label htmlFor="Fax">FAX</Label>
+            <Input id="Fax" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
         </div>
 
