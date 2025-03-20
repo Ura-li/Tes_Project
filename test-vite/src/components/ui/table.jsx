@@ -111,11 +111,11 @@ function TableCaption({
 
 export {
   Table,
+  TableCaption,
   TableHeader,
   TableBody,
   TableFooter,
   TableHead,
   TableRow,
   TableCell,
-  TableCaption,
 }

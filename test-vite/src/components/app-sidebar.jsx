@@ -10,12 +10,20 @@ import {
   Home,
   Map,
   PieChart,
+  Pin,
+  Search,
+  ServerCogIcon,
+  ServerIcon,
   Settings2,
   SquareTerminal,
+  Table,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
+import { NavRecent } from "@/components/nav-projects"
+import { NavPinned } from "@/components/nav-projects"
+import { NavMywork } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 import {
@@ -25,6 +33,9 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
+
+ 
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 // This is sample data.
 const data = {
@@ -52,40 +63,40 @@ const data = {
   ],
   navMain: [
     {
-      title: "Case",
+      title: "Master",
       url: "#",
-      icon: SquareTerminal,
+      icon: Bot,
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Company",
+          url: "/master/Company_table",
         },
         {
-          title: "Starred",
-          url: "#",
+          title: "Assets",
+          url: "/master/Assets_table",
         },
         {
-          title: "Settings",
-          url: "#",
+          title: "Contact",
+          url: "/master/Contact_table",
         },
       ],
     },
     {
-      title: "Models",
+      title: "Service",
       url: "#",
-      icon: Bot,
+      icon: ServerIcon,
       items: [
         {
-          title: "Genesis",
+          title: "Case",
+          url: "/Case",
+        },
+        {
+          title: "Work Order",
           url: "#",
         },
         {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
+          title: "Material Order",
           url: "#",
         },
       ],
@@ -143,21 +154,30 @@ const data = {
       url: "/",
       icon: Home,
     },
+  ],
+
+  recent: [
     {
-      name: "Case",
+      name: "Pinned",
       url: "#",
       icon: PieChart,
-    },
+    }
+  ],
+
+  mywork: [
     {
-      name: "Recent",
-      url: "#",
-      icon: Map,
-    },
-    {
-      name: "Search Case",
+      name: "My work",
       url: "/search_case",
-      icon: Eye,
-    },
+      icon: Table,
+    }
+  ],
+
+  pinned: [
+    {
+      name: "Pinned",
+      url: "#",
+      icon: Pin
+    }
   ],
 }
 
@@ -171,6 +191,9 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavProjects projects={data.projects} />
+        <NavRecent recent={data.recent}/>
+        <NavPinned pinned={data.pinned}/>
+        <NavMywork mywork={data.mywork}/>
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
