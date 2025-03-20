@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -25,70 +25,162 @@ import { Input } from "./ui/input";
 import { ContactRound, User,Search, Laptop } from "lucide-react";
 
 
+import ApiCustomer from "@/api";
 
 
 
 
 
+export function TableCompany({ 
+  selectedAsset = [],
+  selectedCompany = [],
+  selectedContact = [],
+  setSelectedAsset,
+  setSelectedSiteAccounts,
+  setSelectedContact,
+}) {
 
-export function TableCompany({ selectedAsset = [] }) {
-  console.log("Received asset in TableCompany:", selectedAsset);
-  const companies = selectedAsset?.site_account ? [
+  
+  useEffect(() => {
+    console.log("Updated selectedContact 123:", selectedContact);
+  }, [selectedContact]); // ✅ Logs the updated value when `selectedAsset` changes
+
+  const [checkedCompanies, setCheckedCompanies] = useState({});
+  const [relatedData, setRelatedData] = useState({}); // Stores related contacts/assets
+  /// Check if both `selectedAsset` and `selectedCompany` are empty
+  const ifEmptyQuerySearch =
+  (!selectedAsset || selectedAsset.length === 0) &&
+  (!selectedCompany || Object.keys(selectedCompany).length === 0);
+
+
+  if (ifEmptyQuerySearch) return <p>No Record Found</p>;
+
+
+  // console.log("Received asset in TableCompany:", selectedAsset);
+
+  //refactor any Data to Arry for accepting table
+  const companyData = selectedCompany || selectedAsset?.site_account || null;
+
+  const companies = companyData ? [
     {
-      key: selectedAsset?.SiteAccountID,
-      company: selectedAsset?.site_account?.Company,
+      key: companyData.SiteAccountID,
+      company: companyData.Company,
     },
     {
-      text: `${selectedAsset?.site_account?.AddressLine1} ${selectedAsset?.site_account?.City} ${selectedAsset?.site_account?.StateProvince} ${selectedAsset?.site_account?.Country}-${selectedAsset?.site_account?.ZipPostalCode} | Email: ${selectedAsset?.site_account?.Email} | Phone : ${selectedAsset?.site_account?.PrimaryPhone}`,
+      text: `${companyData.AddressLine1} ${companyData.City} ${companyData.StateProvince} ${companyData.Country}-${companyData.ZipPostalCode} | Email: ${companyData.Email} | Phone : ${companyData.PrimaryPhone}`,
     },
   ] : null;
+    const contacts = selectedContact 
+    ? (Array.isArray(selectedContact) 
+        ? selectedContact 
+        : [selectedContact]) // ✅ Wrap object in an array if necessary
+    .map((contact) => ({
+        ContactID: contact.ContactID,
+        FirstName: contact.FirstName,
+        LastName: contact.LastName,
+        Email: contact.Email,
+        Phone: contact.Phone || contact.Mobile,
+        Country: contact.Country,
+        source: "CRM",
+        hpID: "526291",
+      }))
+    : [];
 
-  const contacts = selectedAsset?.contact_information ? [
-    {
-      contactID: selectedAsset?.contact_information?.ContactID,
-      firstname: selectedAsset?.contact_information?.FirstName,
-      lastname: selectedAsset?.contact_information?.LastName,
-      email: selectedAsset?.contact_information?.Email,
-      phone: selectedAsset?.contact_information?.Phone || selectedAsset?.contact_information?.Mobile,
-      country: selectedAsset?.contact_information?.Country ,
-      source: "CRM",
-      hpID: "526291",
-    },
-  ] : null;
 
-  const assets = selectedAsset ? [
-    {
-      assetID : selectedAsset.AssetID,
-      serialNumber : selectedAsset.SerialNumber,
-      productName : selectedAsset.ProductName,
-      productNumber : selectedAsset.ProductNumber,
-      productLine : selectedAsset.ProductLine,
-      // TODO : Search what tf is this mean
+  console.log("Final contact in TableCompany:", selectedContact); // ✅ Debugging log
+  
+
+  // const assets = Array.isArray(selectedAsset) ? selectedAsset : [];
+  const assets = Array.isArray(selectedAsset) && selectedAsset.length > 0 
+  ? selectedAsset.map((asset) => ({
+      AssetID: asset.AssetID,
+      SerialNumber: asset.SerialNumber,
+      ProductName: asset.ProductName,
+      ProductNumber: asset.ProductNumber,
+      ProductLine: asset.ProductLine,
       isparent: "-",
       parentasset: "-",
       source: "CRM",
-    },
-  ] : null;
+    }))
+  : [];
+
+
+
   
-  console.log("Invoices")
-  console.log(companies)
+  // const [se, setSelectedAsset] = useState([]);
+
+  //handle checkbox
+  const handleCheckBoxCompanyChange = async (company, newCheckedState) => {
+
+    setCheckedCompanies((prevChecked) => ({
+      ...prevChecked,
+      [company.key]: newCheckedState,
+    }));
+  
+    if (newCheckedState) {
+      try {
+        const response = await ApiCustomer(`/api/site_account/check-company-affiliations?siteAccountId=${company.key}`);
+        const result = response.data; // ✅ Ensure correct data extraction
+  
+        if (result.success) {
+          setRelatedData((prev) => ({
+            ...prev,
+            [company.key]: result.data,
+          }));
+  
+          // ✅ Ensure correct state updates
+          if (result.data.assets.length > 0) {
+            setSelectedAsset(result.data.assets);
+          } else {
+            setSelectedAsset([]);
+          }
+  
+          if (result.data.contacts.length > 0) {
+            setSelectedContact(result.data.contacts);
+          } else {
+            setSelectedContact([]);
+          }
+  
+          console.log(`Company ${company.company} has contact:`, result.data.contacts.length > 0);
+          console.log(result.data.contacts);
+        }
+      } catch (err) {
+        console.error("Error fetching company affiliations:", err);
+      }
+    } else {
+      setSelectedAsset([]);
+      setSelectedContact([]);
+
+    }
+  }
+
+  
+  
+  console.log("selectedAsset:", selectedAsset);
+  console.log("selectedCompany:", selectedCompany);
+  console.log("selectedContact:", selectedContact);
+
   return (
     // Company
       <Card className="m-0 p-0 gap-0">
         <CardHeader className="bg-blue-400 p-3 rounded-t-lg">
           <span className="flex items-center gap-2 text-xl">
-            <Checkbox className="border-black border-3 w-7.5 h-7 "></Checkbox>
+            <Checkbox 
+              className="border-black border-3 w-7.5 h-7 "
+              checked={checkedCompanies[companies?.[0]?.key] ?? false}
+              onCheckedChange={(checked) => handleCheckBoxCompanyChange(companies[0], checked)}
+            ></Checkbox>
             { companies !== null ? companies[0].company : "" }
           </span>
         </CardHeader>
         <CardContent className=" p-3">
         { companies !== null ? (
-          <div className="text-gray-500"key={companies[0].key}>
+          <div className="text-gray-500"key={selectedAsset?.SerialNumber}>
               <p>{companies[1].text}</p>
           </div>
           
         ) : (
-          <div className="text-gray-500">
+          <div className="text-gray-500"key={selectedAsset?.SerialNumber}>
               <p>No Company Available</p>
           </div>
         )}
@@ -104,7 +196,12 @@ export function TableCompany({ selectedAsset = [] }) {
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
               </div>
-              <BtnModalContact></BtnModalContact>
+              <BtnModalContact 
+                className="" 
+                selectedCompany={selectedCompany} 
+                selectedContact={selectedContact}
+                setSelectedContact={setSelectedContact}
+              />
               </div>
           <Table> 
             <TableHeader className="bg-gray-400">
@@ -119,13 +216,13 @@ export function TableCompany({ selectedAsset = [] }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {contacts !== null ? contacts.map((contact) => (
-                <TableRow key={contact.contactID}>
-                  <TableCell>{contact.firstname}</TableCell>
-                  <TableCell>{contact.lastname}</TableCell>
-                  <TableCell>{contact.email}</TableCell>
-                  <TableCell>{contact.phone}</TableCell>
-                  <TableCell>{contact.country}</TableCell>
+              {contacts.length > 0 ? contacts.map((contact) => (
+                <TableRow key={contact.ContactID}>
+                  <TableCell>{contact.FirstName}</TableCell>
+                  <TableCell>{contact.LastName}</TableCell>
+                  <TableCell>{contact.Email}</TableCell>
+                  <TableCell>{contact.Phone}</TableCell>
+                  <TableCell>{contact.Country}</TableCell>
                   <TableCell>{contact.source}</TableCell>
                   <TableCell>{contact.hpID}</TableCell>
                 </TableRow>
@@ -161,16 +258,16 @@ export function TableCompany({ selectedAsset = [] }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-            {assets !== null? assets.map((asset) => (
-              <TableRow key={asset.assetID}>
-                <TableCell>{asset.productName}</TableCell>
-                <TableCell>{asset.productNumber}</TableCell>
-                <TableCell>{asset.serialNumber}</TableCell>
-                <TableCell>{asset.productLine}</TableCell>
-                <TableCell>{asset.isparent}</TableCell>
-                <TableCell>{asset.parentasset}</TableCell>
-                <TableCell>{asset.source}</TableCell>
-              </TableRow>
+                {assets.length > 0 ? assets.map((asset) => (
+                  <TableRow key={asset.AssetID}>
+                    <TableCell>{asset.ProductName}</TableCell>
+                    <TableCell>{asset.ProductNumber}</TableCell>
+                    <TableCell>{asset.SerialNumber}</TableCell>
+                    <TableCell>{asset.ProductLine}</TableCell>
+                    <TableCell>{asset.isparent}</TableCell>
+                    <TableCell>{asset.parentasset}</TableCell>
+                    <TableCell>{asset.source}</TableCell>
+                  </TableRow>
             )) : (
               <TableRow>
                 <TableCell colSpan={7}>No Assets Available</TableCell>
