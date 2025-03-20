@@ -1,13 +1,8 @@
 import { React, useState, useEffect } from 'react'
 import  { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './components/ui/card'
 import { Input } from './components/ui/input'
-import { InfoSide } from './components/info-sidebar'
-import { 
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarTrigger,
-} from './components/ui/sidebar' 
+
+
 
 
 //importing API
@@ -30,29 +25,7 @@ import {
   Plus,
 } from "lucide-react"
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-
 import {
   Tabs,
   TabsContent,
@@ -60,38 +33,20 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 
-import { DialogCloseButton, DialogCompanyBtn } from './components/assets-modal'
+import { DialogCloseButton } from './components/assets-modal'
 import { SelectBar } from './components/sc-select'
 import { SelectBar1 } from './components/sc-select'
 import { SelectBar2 } from './components/sc-select'
-import { BtnModal, BtnModalContact, BtnModalAsset } from './components/sc-modal'
-import { TableContact, TableCompany, TableAsset } from './components/sc-table'
+import { TableCompany, TableContact, TableAsset } from './components/sc-table'
+import { BtnModal } from './components/sc-modal'
 
 const Search_case = () => {
 
   //create search state
-  const [search, setSearch] = useState({
-    Email: "",
-    SerialNumber: "",
-    Country: "",
-    Company: "",
-    ZipPostalCode: "",
-    City: "",
-    Phone: "",
-    AssetTag: "",
-    ContractID: "",
-    TransactionType: "",
-    TransactionID: "",
-    Opsi: "",
-    LicenseKey: "",
-    PIN: ""
-  });
-
+  const [search, setSearch] = useState("");
   
-  //state modal
   const [isModalAssetOpen, setIsModalAssetOpen] = useState(false);
-  const [isModalCompanyOpen, setIsModalCompanyOpen] = useState(false);
-  
+
   const [activeTab, setActiveTab] = useState("search"); // Default active tab
   
   const handleSearchClick = () => {
@@ -114,37 +69,33 @@ const Search_case = () => {
   
   const handleInputChange = (e) =>{
     // if (search.trim() !== "") { 
-      const { id, value } = e.target; // Get input field ID and value
-      setSearch((prev) => ({
-        ...prev,
-        [id]: value, // Update the corresponding field
-      }));
-      console.log(`Updated searchData:`, search);
-      // }
-      // console.log(search)
-      
-    }
-    
-    //creating Asset Data
-    const [assets, setAssets] = useState([]);
-    const [contacts, setContacts] = useState([]);
-    const [siteAccounts, setSiteAccounts] = useState([]);
-    
-    
-    //define method
-    const fetchDataAssets = async () => {
-      
-      //fetch data from API with Axios
-      await ApiCustomer.get('/api/asset-information')
-      .then(response => {
-        // console.log("Asset");
-        // console.log(response.data.data)
-        //assign response data to state "asset"
-        setAssets(response.data.data);
-      })
-      
-    }
-    
+      const searchQuery = e.target.value;
+      setSearch(searchQuery);
+      console.log("search" + search)
+    // }
+    console.log(search)
+  }
+
+  //creating Asset Data
+  const [ass, setAssets] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [siteAccounts, setSiteAccounts] = useState([]);
+  
+  
+  //define method
+  const fetchDataAssets = async () => {
+
+    //fetch data from API with Axios
+    await ApiCustomer.get('/api/asset-information')
+        .then(response => {
+            // console.log("Asset");
+            // console.log(response.data.data)
+            //assign response data to state "asset"
+            setAssets(response.data.data);
+          })
+          
+        }
+        
         const fetchDataContacts = async () => {
           //fetch data from API with Axios
           await ApiCustomer.get('/api/contact-information')
@@ -218,8 +169,9 @@ const Search_case = () => {
   }, [isModalCompanyOpen]); // Runs whenever modal state changes
 
   //filter item
-  // const filteredAssets = assets.filter((asset) =>
-    //   asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
+  
+    // const filteredAssets = assets.filter((asset) =>
+  //   asset.SerialNumber?.toLowerCase().includes(search.toLowerCase()) ||
   //   asset.ProductName?.toLowerCase().includes(search.toLowerCase())
   // );
   // console.log("filtered Asset")
@@ -243,6 +195,51 @@ const Search_case = () => {
     ZipPostalCode: ''
   })
   
+  //make handler
+  const handlerInputSiteAccountChange = (e) => {
+    const { id, value } = e.target
+    setFormDataSiteAccount(prevState => ({
+      ...prevState,
+      [id]:value
+    }))
+  }
+
+    // Contoh data asset
+    const assets = [
+      {
+        AssetID: 1,
+        SerialNumber: "SN-12345",
+        ProductName: "Laptop X",
+        ProductNumber: "P-001",
+        ProductLine: "Electronics",
+        SiteAccountID: "SA-7890",
+      },
+      {
+        AssetID: 2,
+        SerialNumber: "SN-67890",
+        ProductName: "Monitor Y",
+        ProductNumber: "P-002",
+        ProductLine: "Displays",
+        SiteAccountID: "SA-5678",
+      },
+    ];
+    const filteredAssets = assets.filter((asset) => asset.ProductLine === "Electronics");
+
+  //form section
+  // section account
+  //set Form Data
+  const [formDataSiteAccount, setFormDataSiteAccount] = useState({
+    Company: '',
+    Email: '',
+    PrimaryPhone: '',
+    AddressLine1: '',
+    AddressLine2: '',
+    City: '',
+    StateProvince: '',
+    Country: '',
+    ZipPostalCode: ''
+  })
+
   //make handler
   const handlerInputSiteAccountChange = (e) => {
     const { id, value } = e.target
@@ -296,8 +293,8 @@ const Search_case = () => {
   };
   
   const handlerContactSubmit = async () => {
-    console.log("formDataContact");
     console.log(formDataContact);
+    console.log("formDataContact");
     try {
       const response = await ApiCustomer.post("/api/contact-information", formDataContact);
       console.log("Success:", response.data);
@@ -309,47 +306,13 @@ const Search_case = () => {
   };
 
   //handler table selected
-  const [selectedAsset, setSelectedAsset] = useState([]); // Store selected asset data
+  const [selectedAsset, setSelectedAsset] = useState(null); // Store selected asset data
 
   const handleSelectedAsset = (asset) => {
-    if (Array.isArray(asset)) {
-      setSelectedAsset(asset);
-      setSelectedSiteAccounts(asset[0]?.site_account || null); // ✅ Update affiliated company
-      setSelectedContact(asset[0]?.contact_information || null); // ✅ Update affiliated contact
-    } else if (asset) {
-      setSelectedAsset([asset]);
-      setSelectedSiteAccounts(asset.site_account || null);
-      setSelectedContact(asset.contact_information || null)
-    } else {
-      setSelectedAsset([]);
-      setSelectedSiteAccounts(null);
-      setSelectedContact(null);
-    }
-  };
-
-  useEffect(() => {
-    console.log("Updated selectedAsset:", selectedAsset);
-  }, [selectedAsset]); // Runs when `selectedAsset` updates
-  
-  
-
-  useEffect(() => {
-    console.log("Updated selectedAsset:", selectedAsset);
-  }, [selectedAsset]); // Runs when `selectedAsset` updates
-  
-
-  //handler site accunt
-  const [selectedSiteAccounts, setSelectedSiteAccounts] = useState([]);
-  
-  const handleSelectedSiteAccount = (company) => {
-    setSelectedSiteAccounts(company);
-    console.log("Company Selected:", selectedSiteAccounts);
+    console.log("Asset received in parent:", asset);
+    setSelectedAsset(asset);
   };
   
-
-  //todo : handler selected contact
-  const [selectedContact, setSelectedContact] = useState([]);
-
 
   return (
     <div className="flex flex-1 mt-2  gap-4 p-4 pt-0">
@@ -360,7 +323,9 @@ const Search_case = () => {
               <TabsTrigger value="search" className="cursor-pointer">Search</TabsTrigger>
               <TabsTrigger value="ci" className="cursor-pointer">Costumer Information</TabsTrigger>
             </div>
-
+            {/* <Button className="ml-50 cursor-pointer "><span></span>Customer Complaint</Button>
+            <Button className="cursor-pointer"><span></span>Customer Complaint Legal</Button> */}
+            {/* <Button className="mr-1.5 cursor-pointer"><span><Plus></Plus></span>Create Case</Button> */}
             <BtnModal></BtnModal>
           </TabsList>
 
@@ -553,10 +518,10 @@ const Search_case = () => {
             <Card className="drop-shadow-md">
               <CardHeader className="flex-row justify-between">
               <CardTitle>
-               Basic Information
+               Basic Informationdsada
                 </CardTitle>  
                 <CardTitle>
-                  Clear All
+                  Basic Informationdad
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid gap-5 grid-cols-5">
@@ -639,7 +604,6 @@ const Search_case = () => {
                 <div className="space-y-0.5">
                   <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
                   <Input id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
-
                 </div>
               </CardContent>
 
