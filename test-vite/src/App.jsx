@@ -33,7 +33,7 @@ const App = () => {
       <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="border-2 rounded-b-xl flex h-14 items-center justify-between px-4 gap-2">
+        <header className="border-2  flex h-14 items-center justify-between px-4 gap-2">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
