@@ -166,14 +166,7 @@ const Search_case = () => {
               <TabsTrigger value="Contact" className="ml-2 cursor-pointer">Contact</TabsTrigger>
             </div>
           </TabsList>
-            <Card className="drop-shadow-md">
-              {/* <CardHeader>
-                <CardTitle>Password</CardTitle>
-                <CardDescription>
-                  Change your password here. After saving, you'll be logged out.
-                </CardDescription>
-              </CardHeader> */}
-              
+            <Card className="drop-shadow-md">              
               <CardContent className="grid gap-5 grid-cols-3">
               <div className="space-y-0.5">
                   <Label htmlFor="current">Company</Label>
