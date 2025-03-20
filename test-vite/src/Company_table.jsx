@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BMCCompany } from "./components/sc-modal";
+// import { BMCCompany } from "./components/sc-modal";
 
 export const Company_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
