@@ -104,7 +104,7 @@ export function TableCompany({ selectedAsset = [] }) {
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
               </div>
-              <BtnModalContact className=""></BtnModalContact>
+              <BtnModalContact></BtnModalContact>
               </div>
           <Table> 
             <TableHeader className="bg-gray-400">

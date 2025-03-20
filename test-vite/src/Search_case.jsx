@@ -9,6 +9,7 @@ import {
   SidebarTrigger,
 } from './components/ui/sidebar' 
 
+
 //importing API
 import ApiCustomer from './api'
 
@@ -334,6 +335,7 @@ const Search_case = () => {
                 setSearch={setSearch} 
                 onSelectAsset={handleSelectedAsset} 
               />
+              <DialogCompanyBtn></DialogCompanyBtn>
           </TabsList>
           <div className='mb-5'>
             {/* TODO : Change this Variable Name */}
@@ -430,9 +432,9 @@ const Search_case = () => {
               </div>
             </TabsList>
             <Card className="drop-shadow-md">
-              <CardHeader>
-              <CardTitle className="flex justify-end">
-               Basic Information
+            <CardHeader className="flex-row justify-between">
+              <CardTitle>
+                  Basic Information
                 </CardTitle>  
                 <CardTitle>
                   Clear All

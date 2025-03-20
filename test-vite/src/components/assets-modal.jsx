@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { Checkbox } from "@radix-ui/react-checkbox";
 import { Search } from "lucide-react";
 
 import {
@@ -123,7 +123,9 @@ export function DialogCloseButton({
 
         <Table className="table-fixed border-spacing-0 mx-auto">
           <TableHeader>
-            <TableRow className="text-xl bg-blue-200">
+            <TableRow className="text-md bg-blue-200">
+              
+              <TableHead></TableHead>
               <TableHead>Assets</TableHead>
               <TableHead>Serial Number</TableHead>
               <TableHead>Product No</TableHead>
@@ -138,11 +140,9 @@ export function DialogCloseButton({
                   key={asset.AssetID}
                   onClick={()=>handleSelectAsset(asset)}
                   className={selectedAsset?.AssetID === asset.AssetID ? "bg-gray-200" : ""}
-                >
-                  <TableCell className="font-medium whitespace-break-spaces">
-                    
-                    {asset.ProductName}
-                  </TableCell>
+                  >
+         
+                  <TableCell className="font-medium whitespace-break-spaces"> {asset.ProductName}</TableCell>
                   <TableCell>{asset.SerialNumber}</TableCell>
                   <TableCell>{asset.ProductNumber}</TableCell>
                   <TableCell>{asset.ProductLine}</TableCell>
@@ -158,6 +158,7 @@ export function DialogCloseButton({
                   className="cursor-pointer hover:bg-gray-200"
                   onClick={()=>handleSelectAsset(asset)}
                 >
+                    
                   <TableCell className="font-medium whitespace-break-spaces">
                     
                     {asset.ProductName}
@@ -177,6 +178,9 @@ export function DialogCloseButton({
                   className="cursor-pointer hover:bg-gray-200"
                   onClick={()=>handleSelectAsset(asset)}
                 >
+                  <TableCell>
+                  <input type="checkbox"/>
+                  </TableCell>
                   <TableCell className="font-medium whitespace-break-spaces">
                     {asset.ProductName}
                   </TableCell>
@@ -243,7 +247,7 @@ export function DialogCompanyBtn() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {accounts.map((account) => (
+                {/* {accounts.map((account) => (
             <TableRow key={account.accountname}>
                 <TableCell className="whitespace-break-spaces ">{account.accountname}</TableCell>
                 <TableCell>{account.addressline1}</TableCell>
@@ -254,7 +258,7 @@ export function DialogCompanyBtn() {
                 <TableCell >{account.opsi}</TableCell>
                 <TableCell >{account.source}</TableCell>
             </TableRow>
-                 ))} 
+                 ))}  */}
             </TableBody>
         </Table>
         <DialogFooter className="sm:justify-end">

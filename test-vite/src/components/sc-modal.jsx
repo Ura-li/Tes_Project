@@ -131,7 +131,7 @@ export function BtnModalContact() {
             />
           </div>
           <div className="space-y-0.4 ml-5">
-            <Label htmlFor="new">EXTN</Label>
+            <Label htmlFor="new">Email</Label>
             <Input id="new" type="text" className="border-b-black p-1 w-73 h-8 text-sm" />
           </div>
         </div>
@@ -258,7 +258,7 @@ export function BtnModalAsset() {
       console.error("Error fetching assets: ", error)
     }
   }
-  fetchDataAssets();
+  //fetchDataAssets();
 
   //set search state
   const [searchAsset, setSearchAsset] = useState("");
