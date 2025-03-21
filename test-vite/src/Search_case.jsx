@@ -183,47 +183,47 @@ const Search_case = () => {
   //form section
   // section account
   //set Form Data
-  const [formDataSiteAccount, setFormDataSiteAccount] = useState({
-    Company: '',
-    Email: '',
-    PrimaryPhone: '',
-    AddressLine1: '',
-    AddressLine2: '',
-    City: '',
-    StateProvince: '',
-    Country: '',
-    ZipPostalCode: ''
-  })
+  // const [formDataSiteAccount, setFormDataSiteAccount] = useState({
+  //   Company: '',
+  //   Email: '',
+  //   PrimaryPhone: '',
+  //   AddressLine1: '',
+  //   AddressLine2: '',
+  //   City: '',
+  //   StateProvince: '',
+  //   Country: '',
+  //   ZipPostalCode: ''
+  // })
   
-  //make handler
-  const handlerInputSiteAccountChange = (e) => {
-    const { id, value } = e.target
-    setFormDataSiteAccount(prevState => ({
-      ...prevState,
-      [id]:value
-    }))
-  }
+  // //make handler
+  // const handlerInputSiteAccountChange = (e) => {
+  //   const { id, value } = e.target
+  //   setFormDataSiteAccount(prevState => ({
+  //     ...prevState,
+  //     [id]:value
+  //   }))
+  // }
 
-    // Contoh data asset
-    const assets = [
-      {
-        AssetID: 1,
-        SerialNumber: "SN-12345",
-        ProductName: "Laptop X",
-        ProductNumber: "P-001",
-        ProductLine: "Electronics",
-        SiteAccountID: "SA-7890",
-      },
-      {
-        AssetID: 2,
-        SerialNumber: "SN-67890",
-        ProductName: "Monitor Y",
-        ProductNumber: "P-002",
-        ProductLine: "Displays",
-        SiteAccountID: "SA-5678",
-      },
-    ];
-    const filteredAssets = assets.filter((asset) => asset.ProductLine === "Electronics");
+  //   // Contoh data asset
+  //   const assets = [
+  //     {
+  //       AssetID: 1,
+  //       SerialNumber: "SN-12345",
+  //       ProductName: "Laptop X",
+  //       ProductNumber: "P-001",
+  //       ProductLine: "Electronics",
+  //       SiteAccountID: "SA-7890",
+  //     },
+  //     {
+  //       AssetID: 2,
+  //       SerialNumber: "SN-67890",
+  //       ProductName: "Monitor Y",
+  //       ProductNumber: "P-002",
+  //       ProductLine: "Displays",
+  //       SiteAccountID: "SA-5678",
+  //     },
+  //   ];
+  //   const filteredAssets = assets.filter((asset) => asset.ProductLine === "Electronics");
 
   //form section
   // section account
