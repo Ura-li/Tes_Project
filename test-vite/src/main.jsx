@@ -23,9 +23,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='/master/Company_table' element={<Company_table />} /> 
           <Route path='/master/Assets_table' element={<Assets_table />} />
           <Route path='/master/Contact_table' element={<Contact_table />} />
-          <Route path='/master/Case_table' element={<Case_table />} />
-
-          
+          <Route path='/master/Case_table' element={<Case_table />} />            
         </Route>
         <Route path="/lorem" element={<Lorem />}/>
       </Routes>

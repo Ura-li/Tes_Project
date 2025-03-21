@@ -81,7 +81,7 @@ const data = {
           url: "/master/Contact_table",
         },
         {
-          title: "Case",
+          title: "Case_Table",
           url: "/master/Case_table",
         },
       ],

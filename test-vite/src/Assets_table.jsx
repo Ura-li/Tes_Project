@@ -5,9 +5,6 @@ import { BtnModalAsset, AssetEdit, AssetDelete } from "@/components/sc-modal"
 export const Assets_table = () => {  
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const itemsPerPage = 10;
   const [assets, setAssets] = useState([]);
 
