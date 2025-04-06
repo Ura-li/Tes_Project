@@ -285,20 +285,7 @@ const Search_case = () => {
     console.log("Contacts Searched trhough Phone:", contacts);
   }, [contacts]); // This runs every time activeTab changes
 
-  const handleInputChange = (e) => {
-    // if (search.trim() !== "") {
-    const { id, value } = e.target; // Get input field ID and value
-    setSearch((prev) => ({
-      ...prev,
-      [id]: value, // Update the corresponding field
-    }));
-    console.log(`Updated searchData:`, search);
-    // }
-    // console.log(search)
 
-    // }
-    console.log(search);
-  };
 
 
   //define method
@@ -570,6 +557,67 @@ const Search_case = () => {
     }
   };
 
+  const updateFormFieldsInSearch = (fields) => {
+    setSearch((prev) => ({
+      ...prev,
+      ...fields,
+    }));
+  };
+
+  const handleInputChange = (e) => {
+    // if (search.trim() !== "") {
+    const { id, value } = e.target; // Get input field ID and value
+    // setSearch((prev) => ({
+    //   ...prev,
+    //   [id]: value, // Update the corresponding field
+    // }));
+    updateFormFieldsInSearch({ [id]: value });
+    console.log(`Updated searchData:`, search);
+    // }
+    // console.log(search)
+
+    // }
+    console.log(search);
+  };
+
+  // const initialSearchState = {
+  //   Email: "",
+  //   SerialNumber: "",
+  //   Country: "",
+  //   Company: "",
+  //   ZipPostalCode: "",
+  //   City: "",
+  //   Phone: "",
+  //   AssetTag: "",
+  //   ContractID: "",
+  //   TransactionType: "",
+  //   TransactiontID: "",
+  //   Opsi: "",
+  // };
+  
+  // const [initial, setInitialsearch] = useState(initialSearchState);
+  
+
+  const handleClearAll = () => {
+    updateFormFieldsInSearch({
+      Email: "",
+      SerialNumber: "",
+      Country: "",
+      Company: "",
+      ZipPostalCode: "",
+      City: "",
+      Phone: "",
+      AssetTag: "",
+      ContractID: "",
+      TransactionType: "",
+      TransactiontID: "",
+      Opsi: "",
+      LicenseKey: "",
+      PIN: "",
+    });
+  };
+  
+
   return (
     <div className="flex flex-1 p-2 pt-0">
       <SidebarProvider className=" overflow-auto min-h-[full]">
@@ -607,8 +655,9 @@ const Search_case = () => {
                   setCaseType={setCaseType}
                 ></BtnModal>
                 <SidebarTrigger
-                  className="-ml-1 bg-amber-50 scale-125 mr-1"
+                  className="-ml-1 scale-125 mr-1"
                   icon={PanelRight}
+                  color={"#ffffff"}
                 />
               </div>
             </TabsList>
@@ -616,11 +665,17 @@ const Search_case = () => {
             {/* search tab */}
             <TabsContent value="search">
               <Card className="drop-shadow-md">
+                <Button className="self-end mr-2" variant="ghost"
+                onClick={handleClearAll}
+                >
+                  Clear All
+                </Button>
                 <CardContent className="grid gap-5 grid-cols-3">
                   <div className="space-y-0.5">
                     <Label htmlFor="Email">Email</Label>
                     <Input
                       id="Email"
+                      value={search.Email || ""}
                       onChange={handleInputChange}
                       className="border-b-black p-1 "
                     />
@@ -629,6 +684,7 @@ const Search_case = () => {
                     <Label htmlFor="SerialNumber">Serial Number</Label>
                     <Input
                       id="SerialNumber"
+                      value={search.SerialNumber || ""}
                       onChange={handleInputChange}
                       className="border-b-black p-1"
                     />
@@ -637,6 +693,7 @@ const Search_case = () => {
                     <Label htmlFor="Country">Country</Label>
                     <SelectBar
                       id="Country"
+                      value={search.Country || ""}
                       onChange={handleInputChange}
                     ></SelectBar>
                   </div>
@@ -644,48 +701,82 @@ const Search_case = () => {
                     <Label htmlFor="Company">Company</Label>
                     <Input
                       id="Company"
+                      value={search.Company || ""}
                       className="border-b-black p-1"
                       onChange={handleInputChange}
                     />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="ZipPostalCode">Zip/Postal</Label>
-                    <Input id="ZipPostalCode" className="border-b-black p-1" />
+                    <Input 
+                      id="ZipPostalCode" 
+                      value={search.ZipPostalCode || ""}
+                      className="border-b-black p-1" 
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="City">City</Label>
-                    <Input id="City" className="border-b-black p-1" />
+                    <Input 
+                      id="City" 
+                      value={search.City || ""}
+                      className="border-b-black p-1"
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="Phone">Phone</Label>
                     <Input
                       id="Phone"
+                      value={search.Phone || ""}
                       onChange={handleInputChange}
                       className="border-b-black p-1"
                     />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="AssetTag">Asset Tag</Label>
-                    <Input id="AssetTag" className="border-b-black p-1" />
+                    <Input 
+                      id="AssetTag" 
+                      value={search.AssetTag || ""}
+                      className="border-b-black p-1"
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="ContractID">Contrack Id</Label>
-                    <Input id="ContractID" className="border-b-black p-1" />
+                    <Input 
+                      id="ContractID" 
+                      value={search.ContractID || ""}
+                      className="border-b-black p-1"
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="TransactionType">Transaction Type</Label>
                     <Input
                       id="TransactionType"
+                      value={search.TransactionType || ""}
                       className="border-b-black p-1"
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="TransactiontID">Transaction Id</Label>
-                    <Input id="TransactiontID" className="border-b-black p-1" />
+                    <Input 
+                    id="TransactiontID" 
+                    value={search.TransactiontID || ""}
+                    className="border-b-black p-1"
+                    onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="Opsi">Opsi</Label>
-                    <Input id="Opsi" className="border-b-black p-1" />
+                    <Input 
+                    id="Opsi" 
+                    value={search.Opsi || ""}
+                    className="border-b-black p-1"
+                    onChange={handleInputChange}
+                    />
                   </div>
                   {/* <div className="space-y-0.5">
                   <Label htmlFor="LicenseKey">Lisense key</Label>
