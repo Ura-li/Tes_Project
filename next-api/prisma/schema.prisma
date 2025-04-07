@@ -17,6 +17,7 @@ model asset_information {
   contact_information contact_information? @relation(fields: [ContactID], references: [ContactID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_2")
   product_information product_information  @relation(fields: [ProductNumber], references: [ProductNumber], onUpdate: Restrict, map: "asset_information_ibfk_3")
   caseinformation     caseinformation[]
+  confirm_service     confirm_service[]
 
   @@index([SiteAccountID], map: "SiteAccountID")
   @@index([ContactID], map: "ContactID")
@@ -142,26 +143,29 @@ model servicecatalog {
 }
 
 model servicecatalog_parts {
-  PartID              Int             @id @default(autoincrement())
+  PartID              Int               @id @default(autoincrement())
   ServiceCatalogID    Int?
-  PartNumber          String?         @db.VarChar(100)
-  Keyword             String?         @db.VarChar(100)
-  PartDescription     String?         @db.Text
-  Orderability        String?         @db.VarChar(50)
-  RestrictionReason   String?         @db.Text
-  CSR_Flag            Boolean?        @default(false)
-  ROHS_Flag           Boolean?        @default(false)
-  Returnable_Flag     Boolean?        @default(false)
-  HardRoll_Flag       Boolean?        @default(false)
-  DangerousGoods_Flag Boolean?        @default(false)
-  LithiumBattery_Flag Boolean?        @default(false)
-  Oversize_Flag       Boolean?        @default(false)
-  Heavy_Flag          Boolean?        @default(false)
-  Price               Decimal?        @db.Decimal(10, 2)
-  FreightPrice        Decimal?        @db.Decimal(10, 2)
-  Tax                 Decimal?        @db.Decimal(10, 2)
-  Total               Decimal?        @db.Decimal(10, 2)
-  servicecatalog      servicecatalog? @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID], onDelete: Restrict, onUpdate: Restrict, map: "servicecatalog_parts_ibfk_1")
+  PartNumber          String?           @db.VarChar(100)
+  Keyword             String?           @db.VarChar(100)
+  PartDescription     String?           @db.Text
+  Orderability        String?           @db.VarChar(50)
+  RestrictionReason   String?           @db.Text
+  CSR_Flag            Boolean?          @default(false)
+  ROHS_Flag           Boolean?          @default(false)
+  Returnable_Flag     Boolean?          @default(false)
+  HardRoll_Flag       Boolean?          @default(false)
+  DangerousGoods_Flag Boolean?          @default(false)
+  LithiumBattery_Flag Boolean?          @default(false)
+  Oversize_Flag       Boolean?          @default(false)
+  Heavy_Flag          Boolean?          @default(false)
+  Price               Decimal?          @db.Decimal(10, 2)
+  FreightPrice        Decimal?          @db.Decimal(10, 2)
+  Shipping_Fee        Float             @db.Float
+  qty_parts           Int
+  Tax                 Decimal?          @db.Decimal(10, 2)
+  Total               Decimal?          @db.Decimal(10, 2)
+  confirm_service     confirm_service[]
+  servicecatalog      servicecatalog?   @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID], onDelete: Restrict, onUpdate: Restrict, map: "servicecatalog_parts_ibfk_1")
 
   @@index([ServiceCatalogID], map: "ServiceCatalogID")
 }
@@ -223,6 +227,46 @@ model product_type {
   ProductTower        product_type_ProductTower?
   ProductGroup        product_type_ProductGroup?
   product_information product_information[]
+}
+
+model global_trade_check {
+  id_gtc              Int    @id @default(autoincrement())
+  global_trade_status String @db.VarChar(30)
+  embargoed_country   String @db.VarChar(30)
+  gt_override_reason  String @db.VarChar(30)
+  gt_details          String @db.VarChar(50)
+  screening_id        String @db.VarChar(25)
+  gt_active_listening String @db.VarChar(30)
+  gt_al_comments      String @db.VarChar(50)
+}
+
+model confirm_service {
+  id_confirmService    Int                  @id
+  AssetID              Int
+  Service_offerID      String               @db.VarChar(8)
+  PartID               Int
+  sub_total            Float                @db.Float
+  total                Float                @db.Float
+  Incident_Type        String               @db.VarChar(50)
+  asset_information    asset_information    @relation(fields: [AssetID], references: [AssetID], onDelete: Cascade, map: "asset_information")
+  servicecatalog_parts servicecatalog_parts @relation(fields: [PartID], references: [PartID], onDelete: Cascade, map: "servicecatalog_parts")
+  warranty_services    warranty_services    @relation(fields: [Service_offerID], references: [Service_offerID], onDelete: Cascade, map: "warranty_services")
+
+  @@index([AssetID], map: "asset_information")
+  @@index([PartID], map: "servicecatalog_parts")
+  @@index([Service_offerID], map: "warranty_services")
+}
+
+model warranty_services {
+  Service_offerID     String            @id @db.VarChar(8)
+  Service_description String            @db.VarChar(255)
+  CTat_RTime          String            @db.VarChar(5)
+  Price               Float             @db.Float
+  Shipping_Fee        Float             @db.Float
+  qty_ws              Int
+  Tax                 Float             @db.Float
+  Total               Float             @db.Float
+  confirm_service     confirm_service[]
 }
 
 enum product_type_ProductTower {

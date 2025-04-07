@@ -90,7 +90,7 @@ const data = {
         },
         {
           title: "Product Type",
-          url: "/master/Product_type",
+          url: "/master/ProductType_table ",
         },        
       ],
     },
