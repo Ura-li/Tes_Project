@@ -29,9 +29,9 @@ import {
     )
   }
 
-  export function SelectBar1({ id, onChange }) {
+  export function SelectBar1({ id, onChange, value }) {
     return (
-      <Select onValueChange={(value) => onChange({ target: { id, value}})}>
+      <Select value={value} onValueChange={(value) => onChange({ target: { id, value}})}>
         <SelectTrigger className="w-full border-black">
           <SelectValue placeholder="Select Salutation"/>
         </SelectTrigger>
@@ -45,9 +45,9 @@ import {
     )
   }
 
-  export function SelectBar2({ id, onChange }) {
+  export function SelectBar2({ id, onChange, value }) {
     return (
-      <Select onValueChange={(value) => onChange({ target: { id, value}})}>
+      <Select value={value} onValueChange={(value) => onChange({ target: { id, value}})}>
         <SelectTrigger className="w-full  border-black">
           <SelectValue placeholder="Select Prefered Language"/>
         </SelectTrigger>

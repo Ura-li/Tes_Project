@@ -395,6 +395,20 @@ const Search_case = () => {
     }));
   };
 
+  const handleClearAllAcconunt = () => {
+    setFormDataSiteAccount({
+    Company: "",
+    Email: "",
+    PrimaryPhone: "",
+    AddressLine1: "",
+    AddressLine2: "",
+    City: "",
+    StateProvince: "",
+    Country: "",
+    ZipPostalCode: "",
+    })
+  }
+
   //handler submit
   // console.log(formData)
   const handlerSiteAccountSubmit = async () => {
@@ -440,6 +454,29 @@ const Search_case = () => {
       [id]: value,
     }));
   };
+
+  const handleClearAllContact = () => {
+    setFormDataContact({
+    Salutation: "",
+    FirstName: "",
+    LastName: "",
+    Email: "",
+    PreferredLanguage: "",
+    Phone: "",
+    Mobile: "",
+    WorkPhone: "",
+    WorkExtension: "",
+    OtherPhone: "",
+    OtherExtension: "",
+    Fax: "",
+    AddressLine1: "",
+    AddressLine2: "",
+    City: "",
+    StateProvince: "",
+    Country: "",
+    ZipPostalCode: "",
+    });
+  }
 
   const handlerContactSubmit = async () => {
     console.log(formDataContact);
@@ -874,7 +911,7 @@ const Search_case = () => {
                     <span className="flex items-center">
                       <User2></User2>Basic Information
                     </span>
-                    <Button className="self-end mr-2" variant="ghost">
+                    <Button className="self-end mr-2" variant="ghost" onClick={handleClearAllAcconunt}>
                       Clear All
                     </Button>
                     <Button className="bg-white text-gray-400  self-end ">
@@ -962,7 +999,8 @@ const Search_case = () => {
                     <Label htmlFor="current">Country</Label>
                     <SelectBar
                       id="Country"
-                      onChange={handlerInputContactChange}
+                      value={formDataSiteAccount.Country}
+                      onChange={handlerInputSiteAccountChange}
                     />
                   </div>
                   <div className="space-y-0.5">
@@ -1005,7 +1043,11 @@ const Search_case = () => {
                   </CardTitle>
                   <div>
                     <Button className="bg-white text-gray-400  self-end "><Copy></Copy>Same in Account Adress </Button>
-                    <Button className="self-end mr-2" variant="ghost">Clear All</Button>
+                    <Button 
+                    className="self-end mr-2" 
+                    variant="ghost"
+                    onClick={handleClearAllContact}
+                    >Clear All</Button>
                   </div>
                 </CardHeader>
                 <CardContent className="grid gap-5 grid-cols-5">
@@ -1016,10 +1058,12 @@ const Search_case = () => {
                     </Label>
                     <SelectBar1
                       id="Salutation"
+                      value={formDataContact.Salutation}
                       onChange={handlerInputContactChange}
                     />
                     <SelectBar2
                       id="PreferredLanguage"
+                      value={formDataContact.PreferredLanguage}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1029,6 +1073,7 @@ const Search_case = () => {
                       id="FirstName"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.FirstName}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1038,6 +1083,7 @@ const Search_case = () => {
                       id="LastName"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.LastName}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1047,6 +1093,7 @@ const Search_case = () => {
                       id="Email"
                       type="email"
                       className="border-b-black p-1"
+                      value={formDataContact.Email}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1061,6 +1108,7 @@ const Search_case = () => {
                       id="Phone"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.Phone}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1070,6 +1118,7 @@ const Search_case = () => {
                       id="Mobile"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.Mobile}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1079,6 +1128,7 @@ const Search_case = () => {
                       id="WorkPhone"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.WorkPhone}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1088,6 +1138,7 @@ const Search_case = () => {
                       id="WorkExtension"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.WorkExtension}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1097,6 +1148,7 @@ const Search_case = () => {
                       id="OtherPhone"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.OtherPhone}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1106,6 +1158,7 @@ const Search_case = () => {
                       id="OtherExtension"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.OtherExtension}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1115,6 +1168,7 @@ const Search_case = () => {
                       id="Fax"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.Fax}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1129,6 +1183,7 @@ const Search_case = () => {
                       id="AddressLine1"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.AddressLine1}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1138,6 +1193,7 @@ const Search_case = () => {
                       id="AddressLine2"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.AddressLine2}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1147,6 +1203,7 @@ const Search_case = () => {
                       id="City"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.City}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1156,6 +1213,7 @@ const Search_case = () => {
                       id="StateProvince"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.StateProvince}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1163,6 +1221,7 @@ const Search_case = () => {
                     <Label htmlFor="current">Country</Label>
                     <SelectBar
                       id="Country"
+                      value={formDataContact.Country}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1172,6 +1231,7 @@ const Search_case = () => {
                       id="ZipPostalCode"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.ZipPostalCode}
                       onChange={handlerInputContactChange}
                     />
                   </div>
