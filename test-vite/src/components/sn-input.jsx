@@ -87,14 +87,14 @@ export const SnInput = ({
     }
   }, [selectedProductTower, selectedProductGroup]);
   const getDataProductType = async () => {
-    const response = await ApiCustomer.get("/api/product-information/product-type")
+    const response = await ApiCustomer.get("/api/product-type")
     
   }
 
   // API Call to fetch product type 
   const fetchProductTypes = async (tower, group) => {
     try{
-      const response = await ApiCustomer.get(`/api/product-information/product-type`, {
+      const response = await ApiCustomer.get(`/api/product-type`, {
         params: { ProductTower: tower, ProductGroup: group },
       })
       setProductTypeList(response.data.data); // Update state

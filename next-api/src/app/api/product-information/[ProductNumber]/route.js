@@ -59,7 +59,7 @@ export async function PATCH(request, { params }) {
 
         return NextResponse.json({
             success: true,
-            message: "Data pRODUCT Information Updated!",
+            message: "Data Product Information Updated!",
             data: updatedProductInformation
         }, { status: 200 });
 

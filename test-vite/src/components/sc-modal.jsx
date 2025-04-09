@@ -35,6 +35,15 @@ import {
   SelectBar1,
   SelectBar2,
  } from "@/components/sc-select";
+ import { 
+   Select,
+   SelectContent,
+   SelectGroup,
+   SelectItem,
+   SelectLabel,
+   SelectTrigger,
+   SelectValue,
+  } from '@/components/ui/select'
  import { SnInput } from "./sn-input";
 
 import { Pencil, Trash } from "lucide-react";
@@ -1274,5 +1283,265 @@ return (
 );
 };
 
+export function ProductTypeAdd () {
+  // Form ProductType
+   const [formDataProductType, setFormDataProductType] = useState({
+     ProductGroup: '',
+     ProductTower: '',
+     ProductType: '',
+    })
+    
+    // Make Handler ProductType
+    const handlerInputProductType = (e) => {
+      const { id, value } = e.target
+      setFormDataProductType(prevState => ({
+        ...prevState,
+        [id]:value
+      }));
+    };
+
+    // Handler Submit
+    const handlerProductType = async () => {
+      if (!formDataProductType.ProductTower || !formDataProductType.ProductGroup || !formDataProductType.ProductType) {
+        alert("Please fill in all fields");
+        return;
+      }
+      try {
+        const response = await ApiCustomer.post("/api/product-type", formDataProductType);
+        console.log("Success:", response.data);
+        alert("ProductType Saved successfully");
+      } catch (err) {
+        console.error("Error saving product: ", err);
+        alert("Failed to save productype");
+      }
+    };
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2"> ProductType Add</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add ProductType Information</DialogTitle>
+          <DialogDescription>
+            Add the productType Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+   
+          <Label>Product Tower</Label>
+          <Select  value={formDataProductType.ProductTower} onValueChange={(value) =>
+    setFormDataProductType((prev) => ({ ...prev, ProductTower: value }))
+  }>
+                      <SelectTrigger className="col-span-3 w-full">
+                        <SelectValue placeholder="Product Tower"/>
+                      </SelectTrigger>
+                      <SelectContent >
+                        <SelectGroup>
+                          <SelectLabel>Product tower</SelectLabel>
+                          {/* <SelectItem value="">.</SelectItem> */}
+                          <SelectItem value="PSG">PSG</SelectItem>
+                          <SelectItem value="IPG">IPG</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+            </Select>
+
+          <Label>Product Group</Label>
+          <Select   value={formDataProductType.ProductGroup}
+  onValueChange={(value) =>
+    setFormDataProductType((prev) => ({ ...prev, ProductGroup: value }))
+  }>
+                      <SelectTrigger className="col-span-3 w-full">
+                        <SelectValue placeholder="Product Group"/>
+                      </SelectTrigger>
+                      <SelectContent >
+                        <SelectGroup>
+                          <SelectLabel>Product group</SelectLabel>
+                          {/* <SelectItem value="">.</SelectItem> */}
+                          <SelectItem value="Commercial">Commercial</SelectItem>
+                          <SelectItem value="Consumer">Consumer</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+            </Select>
+
+          <Label>Product Type</Label>
+          <Input type="text" id="ProductType" value={formDataProductType.ProductType} onChange={handlerInputProductType} />
+        </div>
+        <DialogFooter>
+          <Button onClick={handlerProductType}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
+  const [producttypes, setProductTypes] = useState(null);
+  const [productTower, setProductTower] = useState("");
+  const [productGroup, setProductGroup] = useState("");
+  const [productType, setProductType] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchProductTypes = async () => {
+    if (!ProductTypeID) return;
+    try {
+      const response = await ApiCustomer.get(`/api/product-type/${ProductTypeID}`);
+      const data = response.data.data;
+      setProductTypes(data);
+      setProductTower(data?.ProductTower || "");
+      setProductGroup(data?.ProductGroup || "");
+      setProductType(data?.ProductType || "");
+    } catch (error) {
+      console.error("Error fetching productType information:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (ProductTypeID && isOpen) {
+      fetchProductTypes();
+    }
+  }, [ProductTypeID, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setProductTower("");
+      setProductGroup("");
+      setProductType("");
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!productTower || !productGroup || !productType) {
+      alert("Fields marked with * are required!");
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/product-type/${ProductTypeID}`, {
+        ProductTower: productTower,
+        ProductGroup: productGroup,
+        ProductType: productType,
+      });
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating productType:", error);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchProductTypes(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit ProductType Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the productType Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+   
+        <Label>Product Tower</Label>
+        <Select
+  value={productTower}
+  onValueChange={(value) => setProductTower(value)}
+>
+  <SelectTrigger className="col-span-3 w-full">
+    <SelectValue placeholder="Product Tower" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectGroup>
+      <SelectLabel>Product Tower</SelectLabel>
+      <SelectItem value="PSG">PSG</SelectItem>
+      <SelectItem value="IPG">IPG</SelectItem>
+    </SelectGroup>
+  </SelectContent>
+</Select>
+
+        <Label>Product Group</Label>
+        <Select
+  value={productGroup}
+  onValueChange={(value) => setProductGroup(value)}
+>
+  <SelectTrigger className="col-span-3 w-full">
+    <SelectValue placeholder="Product Tower" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectGroup>
+      <SelectLabel>Product Group</SelectLabel>
+      <SelectItem value="Commercial">Commercial</SelectItem>
+      <SelectItem value="Consumer">Consumer</SelectItem>
+    </SelectGroup>
+  </SelectContent>
+</Select>
+
+
+        <Label>Product Type</Label>
+        <Input type="text" id="ProductType" value={productType} onChange={(e) => setProductType(e.target.value)} />
+      </div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export function ProductTypeDelete ({ ProductTypeID, isModalOpen, setIsModalOpen, onUpdate }) {
+  //set modal
+const handleDelete = async () => {
+  try {
+    const response = await ApiCustomer.delete(`/api/product-type/${ProductTypeID}`);
+    
+    console.log("Server Response:", response.data);
+    if (response.status === 409 || response.data.success === false) {
+      // 🚨 Restriction triggered - Show alert message
+      alert(response.data.message || "Cannot delete this product due to restrictions.");
+      return;
+    }
+    
+    alert("ProductType deleted successfully! ✅");
+    // ✅ Close the modal if it's open
+    setIsModalOpen(false);
+    // ✅ Refresh the table by calling `onUpdate()`
+    if (onUpdate) {
+      onUpdate();
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 409) {
+      // 🚨 Handle 409 Conflict error from backend
+      alert(error.response.data.message || "Cannot delete! This product has related Product Type.");
+    } else {
+      alert("Failed to delete productType. Please try again.");
+    }
+  }
+};
+
+return (
+  <Dialog>
+    <DialogTrigger asChild>
+      <Button variant="outline" className="text-red-500 hover:text-red-700">
+        <Trash />
+      </Button>
+    </DialogTrigger>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Delete ProductType</DialogTitle>
+        <DialogDescription>
+          Delete ProductType confirm. 
+        </DialogDescription>
+      </DialogHeader>
+      <h1>Anda yakin ingin menghapus data ini?</h1>
+      <DialogFooter>
+        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
+};
 
   
