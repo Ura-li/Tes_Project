@@ -64,92 +64,27 @@ const data = {
   navModals: [
     {
       title: "Account Info",
-      url: "#",
+      key: "account",
       icon: User2,
-      // isActive: true,
-      items: [
-        {
-          title: "Company",
-          url: "/master/Company_table",
-        },
-        {
-          title: "Assets",
-          url: "/master/Assets_table",
-        },
-        {
-          title: "Contact",
-          url: "/master/Contact_table",
-        },
-        {
-          title: "Case",
-          url: "/master/Case_table",
-        },
-      ],
+      
     },
     {
       title: "Contact Info",
-      url: "#",
+      key: "contact",
       icon: PhoneCall,
-      items: [
-        {
-          title: "Case",
-          url: "/Case",
-        },
-        {
-          title: "Work Order",
-          url: "#",
-        },
-        {
-          title: "Material Order",
-          url: "#",
-        },
-      ],
+      
     },
     {
       title: "Asset Info",
-      url: "#",
+      key: "asset",
       icon: LucideLaptop,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
+      
     },
     {
       title: "Repair History",
-      url: "#",
+      key: "repair",
       icon: Clock,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
+      
     },
   ],
   navMain: [
@@ -225,6 +160,9 @@ const data = {
   ],
 };
 
+import ModalProvider from "./components/modal-provider";
+
+
 const Search_case = () => {
   //create search state
   const [search, setSearch] = useState("");
@@ -242,6 +180,8 @@ const Search_case = () => {
 
   //show state condiition where search by email / phone for special condition
   const [searchByEmailPhoneForGlobalSearch, setSearchByEmailPhoneForGlobalSearch] = useState(false);
+
+  const [activeModal, setActiveModal] = useState(null)
 
   const handleSearchClick = () => {
     let queryParams = [];
@@ -1258,9 +1198,10 @@ const Search_case = () => {
         </div>
         <Sidebar side="right" className="relative h-full" collapsible="icon">
           <SidebarContent>
-            <InfoCase items={data.navModals} items2={data.navMain} />
+            <InfoCase items={data.navModals} items2={data.navMain} onModalClick={setActiveModal} />
           </SidebarContent>
         </Sidebar>
+      <ModalProvider activeModal={activeModal} setActiveModal={setActiveModal} />
       </SidebarProvider>
     </div>
   );

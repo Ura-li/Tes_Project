@@ -18,28 +18,31 @@ import { Product_table } from './master_table';
 import { Bookings } from './bookings';
 import { ProductType_table } from './master_table';
 
+import { ModalProvider } from './components/modal-context';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<App />}>
-          <Route index element={<Landing />} /> 
-          <Route path='/search_case' element={<Search_case />} /> 
-          <Route path='/case/:caseId' element={<Case />} /> 
-          <Route path='/work' element={<Work />}/>
-          <Route path='/material_order' element={<MaterialOrder />}/>
-          <Route path='/mo_detail' element={<MoDetail />}/>
-          <Route path='/bookings' element={<Bookings/>}/>
-          <Route path='/master/Company_table' element={<Company_table />} /> 
-          <Route path='/master/Assets_table' element={<Assets_table />} />
-          <Route path='/master/Contact_table' element={<Contact_table />} />
-          <Route path='/master/Case_table' element={<Case_table />} />
-          <Route path='/master/Product_table' element={<Product_table/>}/>
-          <Route path='/master/ProductType_table' element={<ProductType_table/>}/>
-        </Route>
-        <Route path="/lorem" element={<Lorem />}/>
-      </Routes>
+      <ModalProvider>
+        <Routes>
+          <Route path='/' element={<App />}>
+            <Route index element={<Landing />} />
+            <Route path='/search_case' element={<Search_case />} />
+            <Route path='/case/:caseId' element={<Case />} />
+            <Route path='/work' element={<Work />}/>
+            <Route path='/material_order' element={<MaterialOrder />}/>
+            <Route path='/mo_detail' element={<MoDetail />}/>
+            <Route path='/bookings' element={<Bookings/>}/>
+            <Route path='/master/Company_table' element={<Company_table />} />
+            <Route path='/master/Assets_table' element={<Assets_table />} />
+            <Route path='/master/Contact_table' element={<Contact_table />} />
+            <Route path='/master/Case_table' element={<Case_table />} />
+            <Route path='/master/Product_table' element={<Product_table/>}/>
+            <Route path='/master/ProductType_table' element={<ProductType_table/>}/>
+          </Route>
+          <Route path="/lorem" element={<Lorem />}/>
+        </Routes>
+      </ModalProvider>
   </BrowserRouter>
   </StrictMode>,
 )

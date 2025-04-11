@@ -118,16 +118,36 @@ export function BtnModal({
   );
 }
 
+export function BtnModalAccount({
+  
+})
+{}
 /**
  * TODO 
  * VALIDATION WHERE INPUTED CONTACT ALREADY AVAILABLE
  * CHECK EMAIL OR PHONE
  */
 
-export function BtnModalContact({ selectedCompany, selectedContact, setSelectedContact }) {
+export function BtnModalContact({ 
+  selectedCompany, 
+  selectedContact, 
+  setSelectedContact, 
+  open : externalOpen, 
+  onOpenChange : externalOnChange,
+  }) {
   //set modal state 
   const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);
   
+  const open = externalOpen || isModalContactSearchInput;
+
+  const handleChange = (value) => {
+    if (externalOpen !== undefined) {
+      externalOnChange?.(false);
+    } else {
+      setIsModalContactSearchInput(value);
+    }
+  };
+
    const [formDataContact, setFormDataContact] = useState({
       Salutation: '',
       FirstName: '',
@@ -157,6 +177,29 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
       setFormDataContact((prev) => ({ ...prev, [id]: value }));
     };
     
+    const handleClearAllContact = () => {
+      setFormDataContact({
+        Salutation: '',
+        FirstName: '',
+        LastName: '',
+        Email: '',
+        PreferredLanguage: '',
+        Phone: '',
+        Mobile: '',
+        WorkPhone: '',
+        WorkExtension: '',
+        OtherPhone: '',
+        OtherExtension: '',
+        Fax: '',
+        AddressLine1: '',
+        AddressLine2: '',
+        City: '',
+        StateProvince: '',
+        Country: '',
+        ZipPostalCode: '',
+      })
+    }
+
   // Function to fetch updated contacts
   const fetchContacts = async (companyId) => {
     try {
@@ -211,18 +254,17 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
 
 
   return (
-    <Dialog open={isModalContactSearchInput} onOpenChange={setIsModalContactSearchInput}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="bg-white mt-0.5">
-          New Contacts
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[1000px] h-145 bg-white">
-        <DialogHeader>
-          <div className="flex justify-between">
-            <DialogTitle className="text-xl flex gap-2"><PhoneCall></PhoneCall>Contact Information</DialogTitle>
-            <Button className="self-end mr-2" variant="ghost">Clear All</Button>
-          </div>
+    <Dialog open={open} onOpenChange={handleChange}>
+      
+      <DialogContent className="sm:max-w-[1000px]  bg-white">
+        <DialogHeader className="flex-row items-center justify-between">
+          <DialogDescription className="text-xl font-semibold text-black gap-2 flex"><PhoneCall></PhoneCall>Contact Information</DialogDescription>
+            <Button 
+            className="self-end mr-2" 
+            variant="ghost"
+            onClick={handleClearAllContact}
+            >Clear All</Button>
+          
         </DialogHeader>
 
         <DialogHeader>
@@ -232,23 +274,23 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
         <div className="grid gap-2 grid-cols-6">
           <div className="space-y-0.5 flex flex-col">
             <Label htmlFor="Salutation">Salutation</Label>
-            <SelectBar1 id="Salutation" onChange={handlerInputContactChange} />
+            <SelectBar1 value={formDataContact.Salutation} id="Salutation" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.5 flex flex-col"> 
             <Label htmlFor="PreferredLanguage" >Preferred Language</Label>
-            <SelectBar2 id="PreferredLanguage" onChange={handlerInputContactChange} />
+            <SelectBar2 value={formDataContact.PreferredLanguage} id="PreferredLanguage" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.5">
             <Label htmlFor="FirstName">First Name</Label>
-            <Input id="FirstName" type="text" className="border-b-black p-1 " onChange={handlerInputContactChange} />
+            <Input value={formDataContact.FirstName} id="FirstName" type="text" className="border-b-black p-1 " onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.5 ">
             <Label htmlFor="LastName">Last Name</Label>
-            <Input id="LastName" type="text" className="border-b-black p-1 " onChange={handlerInputContactChange} />
+            <Input value={formDataContact.LastName} id="LastName" type="text" className="border-b-black p-1 " onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.5 col-span-2">
             <Label htmlFor="Email">Email</Label>
-            <Input id="Email" type="email" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.Email} id="Email" type="email" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           {/* <div className="space-y-0.4 ml-5">
             <Label htmlFor="new">EXTN</Label>
@@ -263,31 +305,34 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
         <div className="grid grid-cols-6 gap-2">
           <div className="space-y-0.4 col-span-2">
             <Label htmlFor="Phone">Phone</Label>
-            <Input id="Phone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input
+             value={formDataContact.Phone} id="Phone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 col-span-2">
             <Label htmlFor="Mobile">Mobile</Label>
-            <Input id="Mobile" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input
+             value={formDataContact.Mobile} id="Mobile" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div> 
           <div className="space-y-0.4">
             <Label htmlFor="WorkPhone">Work</Label>
-            <Input id="WorkPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input
+             value={formDataContact.WorkPhone} id="WorkPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4">
             <Label htmlFor="WorkExtension">Work EXTN</Label>
-            <Input id="WorkExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.WorkExtension} id="WorkExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4">
             <Label htmlFor="OtherPhone">Other</Label>
-            <Input id="OtherPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.OtherPhone} id="OtherPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div> 
           <div className="space-y-0.4 ">
             <Label htmlFor="OtherExtension"> Other EXTN</Label>
-            <Input id="OtherExtension" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.OtherExtension} id="OtherExtension" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 col-span-2">
             <Label htmlFor="Fax">FAX</Label>
-            <Input id="Fax" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.Fax} id="Fax" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
         </div>
 
@@ -299,29 +344,29 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-0.4">
             <Label htmlFor="AddressLine1">Address Line 1</Label>
-            <Input id="AddressLine1" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.AddressLine1} id="AddressLine1" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 flex flex-col">
             <Label htmlFor="current">Country</Label>
-            <SelectBar id="Country" onChange={handlerInputContactChange}/>
+            <SelectBar value={formDataContact.Country} id="Country" onChange={handlerInputContactChange}/>
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="AddressLine2">Address Line 2</Label>
-            <Input id="AddressLine2" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.AddressLine2} id="AddressLine2" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
-            <Input id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.ZipPostalCode} id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="City">City</Label>
-            <Input id="City" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.City} id="City" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
 
             
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="StateProvince">State/Province</Label>
-            <Input id="StateProvince" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.StateProvince} id="StateProvince" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
 
             
                   {/* Hidden Input for SiteAccountID */}
@@ -359,6 +404,8 @@ export function BtnModalAsset({
   selectedCompany,
   setSelectedAsset,
   selectedAsset,
+  open : externalOpen,
+  onOpenChange : externalOnChange,
 }) {
   //set asset
   console.log("BtnModalAsset ContactID : ",contactID)
@@ -402,6 +449,15 @@ export function BtnModalAsset({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
+  const open = externalOpen || isOpen;
+
+  const handleChange = (value) => {
+    if (externalOpen !== undefined) {
+      externalOnChange?.(false);
+    } else {
+      setIsOpen(value);
+    }
+  };
   
   useEffect(() => {
     if (!contactID) return;
@@ -509,18 +565,8 @@ export function BtnModalAsset({
   const [isCheckedForCreateProduct, setIsCheckedForCreateProduct] = useState(false);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
-          // className="bg-white mt-0.5"
-          className={`mt-0.5 ${(!selectedContactForCase && typeSearch !== 'individual') ? "bg-white cursor-not-allowed" : "bg-blue-500"}`} 
-          onClick={() => setIsOpen(true)}
-          disabled={!selectedContactForCase && typeSearch !== 'individual'} // 🔥 Button disabled if no contact selected
-        >
-          New Asset
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleChange}>
+      
       <DialogContent className="sm:max-w-[800px] bg-white">
         <DialogHeader>
           <DialogTitle className="text-xl">Asset Information</DialogTitle>
@@ -572,7 +618,7 @@ export function BtnModalAsset({
 
         {/* <h3 className="text-lg font-semibold mt-4">Unowned Assets</h3> */}
         
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           <Input
             className="border-2 border-black rounded-2xl w-55 text-md h-10 my-2"
             type="Search"
@@ -586,7 +632,7 @@ export function BtnModalAsset({
           >
             Search
           </Button>
-          <div className="mt-2">
+          <div className="mt-2 flex items-center">
           <Checkbox id="terms" className="w-5 h-5 border-2 border-black" checked={isCheckedForCreateProduct} onCheckedChange={setIsCheckedForCreateProduct} />
             <label
               htmlFor="terms"
@@ -655,6 +701,12 @@ export function BtnModalAsset({
     </Dialog>
   )
 };
+
+
+
+
+
+//? MODAL FOR MASTER SITE
 
 export function AssetEdit ({ assetId, onUpdate }) {
   const [asset, setAsset] = useState(null);
