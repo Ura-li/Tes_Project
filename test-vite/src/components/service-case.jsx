@@ -239,6 +239,18 @@ export const ServiceCase = ({ caseDetails }) => {
 
 
     const [selected, setSelected] = useState("apple"); // Default to 'apple'
+
+    
+const CaseField = ({ label, value, icon, span = 1 }) => (
+  <>
+    <CardTitle className={`font-medium flex items-center ${icon ? "gap-1" : ""}`}>
+      {icon && <Lock className="size-4" />}
+      {label}
+    </CardTitle>
+    <CardTitle className={`col-span-${span}`}>{value}</CardTitle>
+  </>
+);
+
   return (
     <Card className="mt-2 rounded-none p-0 border-0">
       <CardHeader className="p-0">
@@ -274,7 +286,7 @@ export const ServiceCase = ({ caseDetails }) => {
                   <p className="text-sm font-light ">Queue</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>Harva Anwar</h1>
+                  <h1 className='text-blue-500'>{caseDetails.CaseID}</h1>
                   <p className="text-sm font-light ">Contact</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
@@ -338,103 +350,52 @@ export const ServiceCase = ({ caseDetails }) => {
       
         <TabsContent value="case_info" >
           <Card className="flex-row">
-            <CardContent className="grid gap-10  grid-cols-6 p-3 ">
-              
-                <CardTitle className='flex font-medium'><Lock className='size-4'/>Case ID</CardTitle>
-                <CardTitle className="">{caseDetails.CaseID}</CardTitle>
-              
-
-              
-                <CardTitle  className="font-medium" >Case Subject</CardTitle>
-                <CardTitle className="col-span-3">{caseDetails.CaseSubject}</CardTitle>
-              
-
-              
-                <CardTitle   className='flex font-medium'><Lock className='size-4'/>Incoming Channel</CardTitle>
-                <CardTitle>{caseDetails.IncomingChannel}</CardTitle>
-              
-
-             
-                <CardTitle className='font-medium'>Business Segment</CardTitle>
-                <CardTitle >...</CardTitle>
-              
-              
-              
-                <CardTitle className='ml-4 font-medium'>Email Status</CardTitle>
-                <CardTitle>...</CardTitle>
-              
-
-              
-                <CardTitle className='ml-4 font-medium'>Case Status</CardTitle>
-                <CardTitle>{caseDetails.CaseStatus}</CardTitle>
-              
-
-              
-                <CardTitle   className='font-medium'>Case Type</CardTitle>
-                <CardTitle>{caseDetails.CaseType}</CardTitle>
-              
-
-              
-                <CardTitle   className='ml-4 font-medium '>KCI For Case?</CardTitle>
-                <CardTitle>{caseDetails.KCI_Flag ? 'Yes' : 'No'}</CardTitle>
-              
-
-              
-                <CardTitle   className='ml-4 font-medium'>Case Priority</CardTitle>
-                <CardTitle>{caseDetails.CasePriority}</CardTitle>
-              
-
-              
-                <CardTitle className='font-medium '>HPI Segment</CardTitle>
-                <CardTitle>...</CardTitle>
-              
-
-              
-                <CardTitle className='flex font-medium '><Lock className='size-4'/>Customer Tracking Number</CardTitle>
-                <CardTitle className="">...</CardTitle>
-              
-
-              
-                <CardTitle   className='ml-4 font-medium'>Customer Severity</CardTitle>
-                <CardTitle className="">{caseDetails.CustomerSeverity}</CardTitle>
-              
-
-              
-                <CardTitle className="font-medium">Update Customer Tracking Number</CardTitle>
-                <CardTitle className='col-span-3'>...</CardTitle>
-              
-
-              
-                
-                <CardTitle   className='flex font-medium'><Lock className='size-4'/>Created ON</CardTitle>
-                <CardTitle className="col-span-3 flex gap-[5em]">{new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')}<CalendarDays className='size-4 '/>{new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })}</CardTitle>
-                
-                
-              
-
-             
-                <CardTitle   className='ml-4 font-medium '>Alternate Customer Tracking Number</CardTitle>
-                <CardTitle>...</CardTitle>
-              
-
-              
-                
-                <CardTitle   className='flex font-medium'><Lock className='size-4'/>Case Closed Date</CardTitle>
-                <CardTitle className="flex col-span-3 gap-[5em]">...<CalendarDays className='size-4 '/>...</CardTitle>
-              
-
-              
-                <CardTitle   className='flex font-medium'><Lock className='size-4'/>Irrelevant</CardTitle>
-                <CardTitle>...</CardTitle>
-              
-
-                        
-
-              
-                
-                <CardTitle   className='flex font-medium'><Lock className='size-4'/>Submitted To Base</CardTitle>
-                <CardTitle className="flex col-span-3 gap-[5em]">...<CalendarDays className='size-4 '/>...</CardTitle>
-              
+            <CardContent className="grid gap-10  grid-cols-6 p-3 ">  
+              <CaseField label="Case ID" value={caseDetails.CaseID} icon />
+              <CaseField label="Case Subject" value={caseDetails.CaseSubject} span={3} />
+              <CaseField label="Incoming Channel" value={caseDetails.IncomingChannel} icon />
+              <CaseField label="Business Segment" value="..." />
+              <CaseField label="Email Status" value="..." />
+              <CaseField label="Case Status" value={caseDetails.CaseStatus} />
+              <CaseField label="Case Type" value={caseDetails.CaseType} />
+              <CaseField label="KCI For Case?" value={caseDetails.KCI_Flag ? "Yes" : "No"} />
+              <CaseField label="Case Priority" value={caseDetails.CasePriority} />
+              <CaseField label="HPI Segment" value="..." />
+              <CaseField label="Customer Tracking Number" value="..." icon />
+              <CaseField label="Customer Severity" value={caseDetails.CustomerSeverity} />
+              <CaseField label="Update Customer Tracking Number" value="..." span={3} />
+              <CaseField
+                label="Created ON"
+                value={
+                  <span className="flex gap-[5em]">
+                    {new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')} <CalendarDays className="size-4" /> {new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                }
+                icon
+                span={3}
+              />
+              <CaseField label="Alternate Customer Tracking Number" value="..." />
+              <CaseField
+                label="Case Closed Date"
+                value={
+                  <span className="flex gap-[5em]">
+                    ... <CalendarDays className="size-4" /> ...
+                  </span>
+                }
+                icon
+                span={3}
+              />
+              <CaseField label="Irrelevant" value="..." icon />
+              <CaseField
+                label="Submitted To Base"
+                value={
+                  <span className="flex gap-[5em]">
+                    ... <CalendarDays className="size-4" /> ...
+                  </span>
+                }
+                icon
+                span={3}
+              />
 
             </CardContent>
           </Card>
