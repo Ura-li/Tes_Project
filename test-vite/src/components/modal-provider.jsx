@@ -2,9 +2,14 @@
 import {BtnModalAsset, BtnModalContact} from "@/components/sc-modal"
 // import RepairModal from "@/components/modals/RepairModal"
 
-export default function ModalProvider({ activeModal, setActiveModal }) {
+export default function ModalProvider({ 
+  activeModal, 
+  setActiveModal,
+  selectedAssetForCase,
+  selectedContactForCase,
+ }) {
   const closeModal = () => setActiveModal(null)
-
+  console.log("Check for modal provide data",selectedContactForCase)
   return (
     <>
       {/* <AccountModal open={activeModal === "account"} onOpenChange={(open) => setActiveModal(open ? "account" : null)} /> */}

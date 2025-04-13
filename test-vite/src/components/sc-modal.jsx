@@ -69,7 +69,7 @@ export function BtnModal({
 }) {
   
   
-
+  // console.log("This is  the data",selectedAssetForCase.AssetID);
 
   return (
     <Dialog>
@@ -135,6 +135,8 @@ export function BtnModalContact({
   open : externalOpen, 
   onOpenChange : externalOnChange,
   }) {
+    console.log("CHECK DATA FORM BTN MOdAL",selectedContact)
+
   //set modal state 
   const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);
   

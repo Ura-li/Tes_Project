@@ -1201,7 +1201,11 @@ const Search_case = () => {
             <InfoCase items={data.navModals} items2={data.navMain} onModalClick={setActiveModal} />
           </SidebarContent>
         </Sidebar>
-      <ModalProvider activeModal={activeModal} setActiveModal={setActiveModal} />
+      <ModalProvider 
+        selectedAssetForCase={selectedAssetForCase}
+        selectedContactForCase={selectedContactForCase} 
+        activeModal={activeModal} 
+        setActiveModal={setActiveModal} />
       </SidebarProvider>
     </div>
   );

@@ -508,6 +508,7 @@ export const Assets_table = () => {
               <th className="border p-2">Product Number</th>
               <th className="border p-2">Product Line</th>
               <th className="border p-2">Site Account ID</th>
+              <th className="border p-2">Contact ID</th>
               <th className="border p-2">Actions</th>
             </tr>
           </thead>
@@ -524,6 +525,7 @@ export const Assets_table = () => {
                   <td className="border p-2">{asset.ProductNumber}</td>
                   <td className="border p-2">{asset.product_information?.ProductLine}</td>
                   <td className="border p-2">{asset.SiteAccountID}</td>
+                  <td className="border p-2">{asset.ContactID}</td>
                   <td className="border p-2 flex space-x-2">
                     <AssetEdit 
                     assetId={asset.AssetID} onUpdate={fetchAssets}/>
