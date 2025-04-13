@@ -1115,18 +1115,22 @@ export function ContactEdit({ contactID, onUpdate }) {
 };
 
 export function ContactDelete ({ contactID }) {
+  const [delecteContact, setDelecteContact] = useState(false)
+
   const handleDelete = async () => {
     try {
       await ApiCustomer.delete(`/api/contact-information/${contactID}`);
+      setDelecteContact(!delecteContact);
+      window.location.reload();
     } catch (error) {
       console.error("Error deleting contact:", error);
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={delecteContact}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="text-red-500 hover:text-red-700">
+        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setDelecteContact(true)}>
           <Trash />
         </Button>
       </DialogTrigger>

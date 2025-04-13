@@ -58,7 +58,7 @@ import { useModal } from "@/components/modal-context";
     companyBasedOnContactsSearch
   }) {
 
-    const { setActiveModal } = useModal();
+    const { setActiveModal, setModalData } = useModal();
 
     
     useEffect(() => {
@@ -376,9 +376,18 @@ import { useModal } from "@/components/modal-context";
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
               </div>
-              <Button variant="outline" className="bg-white mt-0.5" onClick={() => setActiveModal("contact")}>
-                New Contact
-              </Button>
+              <Button variant="outline" className="bg-white mt-0.5"
+  onClick={() => {
+    setModalData({
+      selectedCompany,
+      selectedContact,
+      setSelectedContact,
+    });
+    setActiveModal("contact");
+  }}
+>
+  New Contact
+</Button>
               <BtnModalContact 
                 className="" 
                 selectedCompany={selectedCompany} 

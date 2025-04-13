@@ -4,18 +4,18 @@ import { BtnModalAsset, BtnModalContact } from "@/components/sc-modal";
 
 const ModalContext = createContext();
 
-export function ModalProvider({ children }) {
+export function ModalContextProvider({ children }) {
   const [activeModal, setActiveModal] = useState(null);
-
+  const [modalData, setModalData] = useState(null);
   const closeModal = () => setActiveModal(null);
 
   return (
-    <ModalContext.Provider value={{ activeModal, setActiveModal }}>
+    <ModalContext.Provider value={{ activeModal, setActiveModal, modalData, setModalData  }}>
       {children}
 
       {/* Only render the modals when active */}
-      <BtnModalContact open={activeModal === "contact"} onOpenChange={closeModal} />
-      <BtnModalAsset open={activeModal === "asset"} onOpenChange={closeModal} />
+      <BtnModalContact open={activeModal === "contact"} onOpenChange={closeModal} {...modalData} />
+      <BtnModalAsset open={activeModal === "asset"} onOpenChange={closeModal} {...modalData}/>
     </ModalContext.Provider>
   );
 }
