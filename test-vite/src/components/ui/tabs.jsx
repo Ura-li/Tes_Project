@@ -15,7 +15,9 @@ const tabsVariants = cva(
           "data-[state=active]:bg-white data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         underline:
           "data-[state=active]: data-[state=active]:border-b-4 border-b-blue-500 px-1.5 py-3 font-semibold text-black",
-      },
+        fullsize:
+          "rounded-none data-[state=active]:bg-gray-300 p-5 hover:bg-gray-100"
+        },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",

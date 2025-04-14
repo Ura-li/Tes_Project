@@ -83,30 +83,32 @@ const partsorder = [
   },
 ]
 
+import { BtnModalsWorkOrder } from './sc-modal'
+
 
 export const TabsService = () => {
-  
+  const [openWorkOrder, setOpenWorkOrder] = useState(false);
 
   const { open } = useSidebar();
 
   
 
   const buttons = [
-    { icon: ArrowLeftFromLine, label: "" },
-    { icon: SquareArrowOutUpRight, label: "" },
-    { icon: Save, label: "Save" },
-    { icon: FileSymlink, label: "Save & Close" },
-    { icon: RotateCw, label: "Refresh" },
-    { icon: StepBack, label: "Complaint" },
-    { icon: StepBack, label: "CSR" },
-    { icon: StepBack, label: "Service Order" },
-    { icon: StepBack, label: "Work Order" },
-    { icon: StepBack, label: "Sales Offer" },
-    { icon: StepBack, label: "Close Case" },
-    { icon: StepBack, label: "Pick" },
-    { icon: StepBack, label: "Queue Details" },
-    { icon: UserPen, label: "Assign" },
-    { icon: StepBack, label: "Add to Queue" },
+    { icon: ArrowLeftFromLine, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: Save, label: "Save", onClick: () => alert("not now") },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now") },
+    { icon: RotateCw, label: "Refresh", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
+    { icon: StepBack, label: "CSR", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Service Order", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Work Order", onClick: () => setOpenWorkOrder(true) },
+    { icon: StepBack, label: "Sales Offer", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Close Case", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Queue Details", onClick: () => alert("not now") },
+    { icon: UserPen, label: "Assign", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Add to Queue", onClick: () => alert("not now") },
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
@@ -115,6 +117,7 @@ export const TabsService = () => {
        {visibleButtons.map((btn, index) => (
           <Button
             key={index}
+            onClick={btn.onClick}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
@@ -136,78 +139,7 @@ export const TabsService = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-      {/* <Button variant="outline" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-         <ArrowLeftFromLine></ArrowLeftFromLine>
-      </Button>
-
-      <Button variant="outline" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <SquareArrowOutUpRight></SquareArrowOutUpRight>
-      </Button>
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-         <Save></Save>
-         <span className='text-md'>Save</span>
-      </Button>
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-         <FileSymlink></FileSymlink>
-         <span className='text-md'>Save & Close</span>
-      </Button>
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <RotateCw></RotateCw>
-         <span className='text-md'>Refresh</span>
-      </Button>    
-
-       <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Complaint</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>CSR</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Service Order</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Work Order</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Sales Offer</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Close Case</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Pick</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Queue Details</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <UserPen></UserPen>
-         <span className='text-md'>Assign</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Add to Queue</span>
-      </Button>     */}
+    <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} />
     </div>
   )
 }
@@ -252,6 +184,7 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
 );
 
   return (
+    <>
     <Card className="mt-2 rounded-none p-0 border-0">
       <CardHeader className="p-0">
         <Tabs defaultValue="case_info"> 
@@ -1138,5 +1071,6 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
         </Tabs>
       </CardHeader>
     </Card>
+    </>            
   )
 }

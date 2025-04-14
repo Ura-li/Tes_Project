@@ -21,10 +21,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus,PhoneCall, Copy } from "lucide-react";
+import { Switch } from "@/components/ui/switch"
+import { Plus,PhoneCall, Copy, ExternalLink, XIcon } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { SelectBar3, SelectBarContact4 } from "./sc-select";
 import { 
@@ -50,6 +52,14 @@ import { Pencil, Trash } from "lucide-react";
 //import API
 import ApiCustomer from "@/api";
 import axios from "axios";
+
+
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 
 // const assets = [
 //   {
@@ -1602,4 +1612,560 @@ return (
 );
 };
 
+
+
+//? Service Case Tab List
+
+
+// export function BtnModalsWorkOrder(){
+//   const [workOpen, setWorkOpen] = useState(false);
+
+//   const SC = [
+//     {
+//       ServiceOfferID : "DEPOT2",
+//       SeriviceDescription : "DEPOT REPAIR - 2DAY",
+//       CostumerTAT:"002",
+//       Price:"0.00",
+//       Tax:"0.00",
+//       Total:"00.00"
+//     },
+//     {
+//       ServiceOfferID : "DEPOT1",
+//       SeriviceDescription : "DEPOT REPAIR",
+//       CostumerTAT:"001",
+//       Price:"0.00",
+//       Tax:"0.00",
+//       Total:"00.00"
+//     },
+//     {
+//       ServiceOfferID : "APBPRP",
+//       SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
+//       CostumerTAT:"001",
+//       Price:"0.00",
+//       Tax:"0.00",
+//       Total:"00.00"
+//     },
+//     {
+//       ServiceOfferID : "APBPRP",
+//       SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
+//       CostumerTAT:"003",
+//       Price:"0.00",
+//       Tax:"0.00",
+//       Total:"00.00"
+//     },
+//   ]
+
+//   return (
+//     <>
+//     <Dialog open={workOpen}>
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogDescription>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
+//         </DialogHeader>
+//         <DialogTitle>Service Catalog</DialogTitle>
+//         <div className="flex">
+//           <DialogTitle>Select From List of Service Options</DialogTitle>
+//           <div className="">
+//             <p>Product Number</p>
+//             <p>Product Name</p>
+//             <p>Serial Number</p>
+//             <p>Warranty Status</p>
+//             <p>Currency</p>
+//           </div>
+//         </div>
+//         <Table>
+//           <TableCaption>Warrenty Services</TableCaption>
+//           <TableHeader>
+//             <TableRow>
+//               <TableHead>Select</TableHead>
+//               <TableHead>Service OfferID</TableHead>
+//               <TableHead>Service Description</TableHead>
+//               <TableHead>Costumer TAT/ Response TIme</TableHead>
+//               <TableHead>Price</TableHead>
+//               <TableHead>Tax</TableHead>
+//               <TableHead>Total</TableHead>
+//             </TableRow>
+//           </TableHeader>
+//           <TableBody>
+//               {SC.map((service) => {
+//             <TableRow>
+//               <TableCell><Checkbox></Checkbox></TableCell>
+//               <TableCell>{service.ServiceOfferID}</TableCell>
+//               <TableCell>{service.SeriviceDescription}</TableCell>
+//               <TableCell>{service.CostumerTAT}</TableCell>
+//               <TableCell>{service.Price}</TableCell>
+//               <TableCell>{service.Tax}</TableCell>
+//               <TableCell>{service.Total}</TableCell>
+//             </TableRow>
+//               })}
+//           </TableBody>
+//         </Table>
+//         <DialogFooter>
+//               <button>Cancel</button>
+//               <button>Next</button>
+//         </DialogFooter>
+//       </DialogContent>
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogDescription>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
+//         </DialogHeader>
+//         <DialogTitle>Service Catalog</DialogTitle>
+//         <div className="flex">
+//           <DialogTitle>Select From List of Service Options</DialogTitle>
+//           <div className="">
+//             <p>Product Number</p>
+//             <p>Product Name</p>
+//             <p>Serial Number</p>
+//             <p>Warranty Status</p>
+//             <p>Currency</p>
+//           </div>
+//         </div>
+//         <Table>
+//           <TableCaption>Warrenty Services</TableCaption>
+//           <TableHeader>
+//             <TableRow>
+//               <TableHead>Select</TableHead>
+//               <TableHead>Service OfferID</TableHead>
+//               <TableHead>Service Description</TableHead>
+//               <TableHead>Costumer TAT/ Response TIme</TableHead>
+//               <TableHead>Price</TableHead>
+//               <TableHead>Tax</TableHead>
+//               <TableHead>Total</TableHead>
+//             </TableRow>
+//           </TableHeader>
+//           <TableBody>
+//               {SC.map((service) => {
+//             <TableRow>
+//               <TableCell><Checkbox></Checkbox></TableCell>
+//               <TableCell>{service.ServiceOfferID}</TableCell>
+//               <TableCell>{service.SeriviceDescription}</TableCell>
+//               <TableCell>{service.CostumerTAT}</TableCell>
+//               <TableCell>{service.Price}</TableCell>
+//               <TableCell>{service.Tax}</TableCell>
+//               <TableCell>{service.Total}</TableCell>
+//             </TableRow>
+//               })}
+//           </TableBody>
+//         </Table>
+//         <DialogFooter>
+//           <button>Cancel</button>
+//           <button>Next</button>
+//         </DialogFooter>
+//       </DialogContent>
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogDescription>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
+//         </DialogHeader>
+//         <DialogTitle>Service Catalog</DialogTitle>
+//         <div className="flex">
+//           <DialogTitle>Select From List of Service Options</DialogTitle>
+//           <div className="">
+//             <p>Product Number</p>
+//             <p>Product Name</p>
+//             <p>Serial Number</p>
+//             <p>Warranty Status</p>
+//             <p>Currency</p>
+//           </div>
+//         </div>
+//         <Table>
+//           <TableCaption>Warrenty Services</TableCaption>
+//           <TableHeader>
+//             <TableRow>
+//               <TableHead>Select</TableHead>
+//               <TableHead>Service OfferID</TableHead>
+//               <TableHead>Service Description</TableHead>
+//               <TableHead>Costumer TAT/ Response TIme</TableHead>
+//               <TableHead>Price</TableHead>
+//               <TableHead>Tax</TableHead>
+//               <TableHead>Total</TableHead>
+//             </TableRow>
+//           </TableHeader>
+//           <TableBody>
+//               {SC.map((service) => {
+//             <TableRow>
+//               <TableCell><Checkbox></Checkbox></TableCell>
+//               <TableCell>{service.ServiceOfferID}</TableCell>
+//               <TableCell>{service.SeriviceDescription}</TableCell>
+//               <TableCell>{service.CostumerTAT}</TableCell>
+//               <TableCell>{service.Price}</TableCell>
+//               <TableCell>{service.Tax}</TableCell>
+//               <TableCell>{service.Total}</TableCell>
+//             </TableRow>
+//               })}
+//           </TableBody>
+//         </Table>
+//         <DialogFooter>
+//           <button>Cancel</button>
+//           <button>Cancel</button>
+//           <button>AddPart</button> // open another dialogs modals
+//           <button>Create Order</button> //submit
+//         </DialogFooter>
+//       </DialogContent>
+      
+//   </Dialog>
+//     </>
+//   )
+// }
+
+export function BtnModalsWorkOrder({ open, setOpen}) {
+  const [step, setStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(1);
+  const SC = [
+    {
+      ServiceOfferID: "DEPOT2",
+      SeriviceDescription: "DEPOT REPAIR - 2DAY",
+      CostumerTAT: "002",
+      Price: "0.00",
+      Tax: "0.00",
+      Total: "00.00",
+    },
+    {
+      ServiceOfferID: "DEPOT1",
+      SeriviceDescription: "DEPOT REPAIR",
+      CostumerTAT: "001",
+      Price: "0.00",
+      Tax: "0.00",
+      Total: "00.00",
+    },
+    {
+      ServiceOfferID : "APBPRP",
+      SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
+      CostumerTAT:"001",
+      Price:"0.00",
+      Tax:"0.00",
+      Total:"00.00"
+    },
+    {
+      ServiceOfferID : "APBPRP",
+      SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
+      CostumerTAT:"003",
+      Price:"0.00",
+      Tax:"0.00",
+      Total:"00.00"
+    },
+  ];
+
+  const Parts = [
+    {
+      Part: "N42547-001",
+      Keyword: "INTER CONNECT CABLE",
+      PartDescription: "SPS-CABLE LCD FHD 40P",
+      Orderability: "Yes",
+      ResistrictionReason: "",
+      Csr: "N",
+      Rohs: "",
+      Returnable:"true",
+      Hardrolls:"",
+      Dangerousgoods: "false",
+      Lithiumbattry: "false",
+      Oversize: "false",
+      Heavy: "false",
+      Price: "00.00",
+      Freightprice: "00.00",
+      Tax:  "00.00",
+      Total: "00.00",
+    },
+    {
+      Part: "M91238-005",
+      Keyword: "WLAN WIRELESS ACCESS NETWORK E",
+      PartDescription: "SKO-WLAN 6 RTK ax 2x2+BT RTL88...",
+      Orderability: "Yes",
+      ResistrictionReason: "",
+      Csr: "N",
+      Rohs: "",
+      Returnable:"true",
+      Hardrolls:"",
+      Dangerousgoods: "false",
+      Lithiumbattry: "false",
+      Oversize: "false",
+      Heavy: "false",
+      Price: "00.00",
+      Freightprice: "00.00",
+      Tax:  "00.00",
+      Total: "00.00",
+    },
+    {
+      Part: "M51850-001",
+      Keyword: "POWER CORD ",
+      PartDescription: "SKO-CORD C13 1.83M STKR CONV...",
+      Orderability: "Yes",
+      ResistrictionReason: "",
+      Csr: "N",
+      Rohs: "",
+      Returnable:"true",
+      Hardrolls:"",
+      Dangerousgoods: "false",
+      Lithiumbattry: "false",
+      Oversize: "false",
+      Heavy: "false",
+      Price: "00.00",
+      Freightprice: "00.00",
+      Tax:  "00.00",
+      Total: "00.00",
+    },
+    {
+      Part: "M41711-005",
+      Keyword: "LITHIUM BATTERIES",
+      PartDescription: "SKO-BATT 6C83Wh 3.59Ah LI WK060...",
+      Orderability: "Yes",
+      ResistrictionReason: "",
+      Csr: "N",
+      Rohs: "",
+      Returnable:"true",
+      Hardrolls:"",
+      Dangerousgoods: "false",
+      Lithiumbattry: "false",
+      Oversize: "false",
+      Heavy: "false",
+      Price: "00.00",
+      Freightprice: "00.00",
+      Tax:  "00.00",
+      Total: "00.00",
+    },
+    {
+      Part: "N42541-001",
+      Keyword: "PLASTIC INJECTION MOLDINGS",
+      PartDescription: "SPS-BEZEL LCD FHD",
+      Orderability: "Yes",
+      ResistrictionReason: "",
+      Csr: "N",
+      Rohs: "",
+      Returnable:"true",
+      Hardrolls:"",
+      Dangerousgoods: "false",
+      Lithiumbattry: "false",
+      Oversize: "false",
+      Heavy: "false",
+      Price: "00.00",
+      Freightprice: "00.00",
+      Tax:  "00.00",
+      Total: "00.00",
+    },
+  ]
+
+
+  function renderStepContent() {
+    switch (currentStep) {
+      case 1:
+        return (
+          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit] flex flex-col justify-center gap-0 p-0 bg-white [&>button]:hidden" >
+            <DialogHeader>
+              <div className="flex items-end justify-end ">
+                <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
+                <DialogClose asChild>
+                <Button type="button" variant="secondary" className={'hover:bg-gray-200 active:bg-gray-700'}>
+                  <XIcon/>
+                </Button>
+                </DialogClose>
+              </div>
+              <DialogDescription className={'bg-red-200 p-3 font-bold '}>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
+              <DialogTitle className={'text-blue-600 text-3xl'}>Service Catalog</DialogTitle>
+            </DialogHeader>
+            <div className="flex gap-4 my-2 justify-between p-2">
+              <DialogTitle>Step 1: Select From List of Service Options</DialogTitle>
+              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+                <p>Product Number</p><p>: </p>
+                <p>Product Name</p><p>: </p>
+                <p>Serial Number</p><p>: </p>
+                <p>Warranty Status</p><p>: </p>
+                <p>Currency</p><p>: </p>
+              </div>
+            </div>
   
+            {/* Table */}
+            <Table>
+              <TableCaption className={'caption-top bg-blue-500 p-2 text-2xl text-left text-black'}>Warranty Services</TableCaption>
+              <TableHeader>
+                <TableRow className={'bg-gray-300'}>
+                  <TableHead className={'font-black text-black'}>Select</TableHead>
+                  <TableHead className={'font-black text-black'}>Service OfferID</TableHead>
+                  <TableHead className={'font-black text-black'}>Service Description</TableHead>
+                  <TableHead className={'font-black text-black'}>Customer TAT</TableHead>
+                  <TableHead className={'font-black text-black'}>Price</TableHead>
+                  <TableHead className={'font-black text-black'}>Tax</TableHead>
+                  <TableHead className={'font-black text-black'}>Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {SC.map((service, index) => (
+                  <TableRow key={index}>
+                    <TableCell><Checkbox /></TableCell>
+                    <TableCell>{service.ServiceOfferID}</TableCell>
+                    <TableCell>{service.SeriviceDescription}</TableCell>
+                    <TableCell>{service.CostumerTAT}</TableCell>
+                    <TableCell>{service.Price}</TableCell>
+                    <TableCell>{service.Tax}</TableCell>
+                    <TableCell>{service.Total}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+  
+            <DialogFooter className={'p-4'}>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => setOpen(false)}>Cancel</button>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => setCurrentStep(2)}>Next</button>
+            </DialogFooter>
+          </DialogContent>
+        );
+  
+      case 2:
+        return (
+          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit] flex flex-col  gap-0 p-0 bg-white [&>button]:hidden">
+            <DialogHeader className={'gap-0'}>
+              <div className="flex items-end justify-end">
+                <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary" className={'hover:bg-gray-200 active:bg-gray-700'}>
+                  <XIcon/>
+                  </Button>
+                </DialogClose>
+              </div>
+              <DialogTitle className={'text-blue-600 text-3xl'}>Service Catalog</DialogTitle>
+              <DialogDescription>Select parts required for the repair.</DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-between items-start p-2">
+              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+                <p>Service OfferID</p><p>: </p>
+                <p>Service Description</p><p>: </p>
+              </div>
+              <div className="flex items-center space-x-2 scale-200 gap-2">
+                <Label htmlFor="orderability">Orderability</Label>
+                <Switch id="orderability" />
+              </div>
+              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+                <p>Product Number</p><p>: </p>
+                <p>Product Name</p><p>: </p>
+                <p>Serial Number</p><p>: </p>
+                <p>Warranty Status</p><p>: </p>
+                <p>Currency</p><p>: </p>
+              </div>
+            </div>
+            {/* Your Custom Layout and Table for Step 2 */}
+
+            <Tabs
+            defaultValue="parts"
+            >
+              <TabsList className={'py-5 px-0 bg-white'}>
+                <TabsTrigger variant={'fullsize'} value="parts" className={'cursor-pointer '}>Parts</TabsTrigger>
+                <TabsTrigger variant={'fullsize'} value="snr" className={'cursor-pointer  text-blue-500'}>SNR</TabsTrigger>
+              </TabsList>
+              <TabsContent value="parts">
+              <Table>
+              <TableHeader>
+                <TableRow className={'bg-gray-300'}>
+                  <TableHead className={'font-black text-black'}>Select</TableHead>
+                  <TableHead className={'font-black text-black p-2'}>
+                    Parts #
+                    <span className="flex items-center"><Input className={'bg-white'}/><XIcon/></span>
+                    </TableHead>
+                  <TableHead className={'font-black text-black'}>
+                    Keyword
+                    <span className="flex items-center"><Input className={'bg-white'}/><XIcon/></span>
+                    </TableHead>
+                  <TableHead className={'font-black text-black'}>
+                    Part Description
+                    <span className="flex items-center"><Input className={'bg-white'}/><XIcon/></span>
+                  </TableHead>
+                  <TableHead className={'font-black text-black'}>Orderability</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Restriction Reason</TableHead>
+                  <TableHead className={'font-black text-black'}>CRS</TableHead>
+                  <TableHead className={'font-black text-black'}>ROHS</TableHead>
+                  <TableHead className={'font-black text-black'}>Retrunable</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Hard roll</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Dangerous Goods</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Lithium Battery</TableHead>
+                  <TableHead className={'font-black text-black'}>Oversize</TableHead>
+                  <TableHead className={'font-black text-black'}>Heavy</TableHead>
+                  <TableHead className={'font-black text-black'}>Price</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Friegh Price</TableHead>
+                  <TableHead className={'font-black text-black'}>Tax</TableHead>
+                  <TableHead className={'font-black text-black'}>Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Parts.map((part, index) => (
+                  <TableRow key={index}>
+                    <TableCell><Checkbox /></TableCell>
+                    <TableCell>{part.Part}</TableCell>
+                    <TableCell>{part.Keyword}</TableCell>
+                    <TableCell>{part.PartDescription}</TableCell>
+                    <TableCell>{part.Orderability}</TableCell>
+                    <TableCell>{part.ResistrictionReason}</TableCell>
+                    <TableCell>{part.Csr}</TableCell>
+                    <TableCell>{part.Rohs}</TableCell>
+                    <TableCell>{part.Returnable}</TableCell>
+                    <TableCell>{part.Hardrolls}</TableCell>
+                    <TableCell>{part.Dangerousgoods}</TableCell>
+                    <TableCell>{part.Lithiumbattry}</TableCell>
+                    <TableCell>{part.Oversize}</TableCell>
+                    <TableCell>{part.Heavy}</TableCell>
+                    <TableCell>{part.Price}</TableCell>
+                    <TableCell>{part.Freightprice}</TableCell>
+                    <TableCell>{part.Tax}</TableCell>
+                    <TableCell>{part.Total}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+              </TabsContent>
+              <TabsContent value="snr">
+                <p>tes</p>
+              </TabsContent>
+            </Tabs>
+  
+            <DialogFooter className={'p-4'}>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer"  onClick={() => setCurrentStep(1)}>Previous</button>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer"  onClick={() => setCurrentStep(3)}>Next</button>
+            </DialogFooter>
+          </DialogContent>
+        );
+  
+      case 3:
+        return (
+          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit]  bg-white [&>button]:hidden ">
+            <DialogHeader>
+              <div className="flex items-end justify-end">
+                <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary" className={'hover:bg-gray-200 active:bg-gray-700'}>
+                  <XIcon/>
+                  </Button>
+                </DialogClose>
+              </div>
+              <DialogTitle className={'text-blue-600 text-3xl'}>Service Catalog</DialogTitle>
+              <DialogDescription>Select parts required for the repair.</DialogDescription>
+            </DialogHeader>
+            <div className="flex gap-4 my-2 justify-end p-2">
+              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+                <p>Product Number</p><p>: </p>
+                <p>Product Name</p><p>: </p>
+                <p>Serial Number</p><p>: </p>
+                <p>Warranty Status</p><p>: </p>
+                <p>Currency</p><p>: </p>
+              </div>
+            </div>
+
+  
+            <DialogFooter className={' sm:justify-start'}>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => setCurrentStep(2)}>Previous</button>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => setOpen(false)}>Cancel</button>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => alert('Adding part...')}>Add Part</button>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => alert('Creating order...')}>Create Order</button>
+            </DialogFooter>
+          </DialogContent>
+        );
+  
+      default:
+        return null;
+    }
+  }
+  
+  return (
+    <>
+    <Dialog open={open} onOpenChange={setOpen} >
+      {renderStepContent()}
+    </Dialog>
+    {/* <Button onClick={() => setWorkOpen(true)}>Open Work Order</Button> */}
+  </>
+  );
+}
