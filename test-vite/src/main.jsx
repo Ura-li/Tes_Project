@@ -18,12 +18,12 @@ import { Product_table } from './master_table';
 import { Bookings } from './bookings';
 import { ProductType_table } from './master_table';
 
-import { ModalContextProvider } from './components/modal-context';
+// import { ModalContextProvider } from './components/modal-context';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <ModalContextProvider>
+      {/* <ModalContextProvider> */}
         <Routes>
           <Route path='/' element={<App />}>
             <Route index element={<Landing />} />
@@ -42,7 +42,7 @@ createRoot(document.getElementById('root')).render(
           </Route>
           <Route path="/lorem" element={<Lorem />}/>
         </Routes>
-      </ModalContextProvider>
+      {/* </ModalContextProvider> */}
   </BrowserRouter>
   </StrictMode>,
 )
