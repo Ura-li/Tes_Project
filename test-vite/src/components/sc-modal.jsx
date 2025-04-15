@@ -1847,142 +1847,101 @@ return (
 //   )
 // }
 
-export function BtnModalsWorkOrder({ open, setOpen}) {
+export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
   const [step, setStep] = useState(0);
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
   const [currentStep, setCurrentStep] = useState(1);
-  const SC = [
-    {
-      ServiceOfferID: "DEPOT2",
-      SeriviceDescription: "DEPOT REPAIR - 2DAY",
-      CostumerTAT: "002",
-      Price: "0.00",
-      Tax: "0.00",
-      Total: "00.00",
-    },
-    {
-      ServiceOfferID: "DEPOT1",
-      SeriviceDescription: "DEPOT REPAIR",
-      CostumerTAT: "001",
-      Price: "0.00",
-      Tax: "0.00",
-      Total: "00.00",
-    },
-    {
-      ServiceOfferID : "APBPRP",
-      SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
-      CostumerTAT:"001",
-      Price:"0.00",
-      Tax:"0.00",
-      Total:"00.00"
-    },
-    {
-      ServiceOfferID : "APBPRP",
-      SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
-      CostumerTAT:"003",
-      Price:"0.00",
-      Tax:"0.00",
-      Total:"00.00"
-    },
-  ];
+  const [assetForWorkOrderCreation, setAssetForWorkOrderCreation] = useState([]);
 
-  const Parts = [
-    {
-      Part: "N42547-001",
-      Keyword: "INTER CONNECT CABLE",
-      PartDescription: "SPS-CABLE LCD FHD 40P",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-    {
-      Part: "M91238-005",
-      Keyword: "WLAN WIRELESS ACCESS NETWORK E",
-      PartDescription: "SKO-WLAN 6 RTK ax 2x2+BT RTL88...",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-    {
-      Part: "M51850-001",
-      Keyword: "POWER CORD ",
-      PartDescription: "SKO-CORD C13 1.83M STKR CONV...",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-    {
-      Part: "M41711-005",
-      Keyword: "LITHIUM BATTERIES",
-      PartDescription: "SKO-BATT 6C83Wh 3.59Ah LI WK060...",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-    {
-      Part: "N42541-001",
-      Keyword: "PLASTIC INJECTION MOLDINGS",
-      PartDescription: "SPS-BEZEL LCD FHD",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-  ]
+  //product information
+  const fetchDataAssets = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
+      // console.log("Response fetch Asset Modal Work Order :",response)
+      return response.data.data
+    }catch(e){
+      console.error("error fetching Asset: ", e)
+    }
+  }
+  //waranty
+  //warranty state
+  const [warrantyOffer, setWarrantyOffer] = useState([])
+  //fetching data function
+  const fetchDataServiceOffer = async () => {
+    setLoading(true);
+    setError(null);
+    try{
+      const response = await ApiCustomer.get(`/api/service-log/warranty-services `)
+      return response.data.data;
+    }catch(e){
+      setError("Failed to load Warranty Service")
+      console.error("error fetching Service Offer: ", e)
+    }finally{
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+    fetchDataServiceOffer().then((data) => {
+      if (data) setWarrantyOffer(data);
+    });
+    fetchDataAssets().then((data) => {
+      if (data) setAssetForWorkOrderCreation(data);
+    });
+    fetchDataPartCatalog();
+  }, [])
+  // fetchDataServiceOffer().then((data) => {
+  //   if (data) setWarrantyOffer(data);
+  // });
 
+  //handles Warranty Service
+  const [selectedWarrantyServices, setSelectedWarrantyServices] = useState([]);
+  const handlerWarrantyServices = (service, checked) => {
+    if (checked) {
+      setSelectedWarrantyServices((prev) => [...prev, service])
+    }else{
+      setSelectedWarrantyServices((prev) => 
+        prev.filter((item) => item.Service_offerID !==service.Service_offerID)
+      )
+    }
+  }
+
+  useEffect(() => {
+    console.log("Selected Services:", selectedWarrantyServices);
+  }, [selectedWarrantyServices]);
+  
+
+
+  //part
+  //part state
+  const [partCatalog, setPartCatalog] = useState([])
+  //fetch data part catalog
+  const fetchDataPartCatalog = async () => {
+    try{
+      const response = await ApiCustomer.get(`/api/service-log/parts-catalog`)
+      setPartCatalog(response.data.data)
+      return response.data.data
+    }catch(e){
+
+    }
+  }
+
+  //handler part
+  const [selectedPartCatalog, setSelectedPartCatalog] = useState([])
+  const handlerPartCatalog = (part, checked) => {
+    if(checked){
+      setSelectedPartCatalog((prev) => [...prev, part])
+    }else{
+      setSelectedPartCatalog((prev) => 
+        prev.filter((item) => item.PartNumber !== part.PartNumber)
+      )
+    }
+  }
+  useEffect(() => {
+    console.log("Selected Parts:", selectedPartCatalog);
+    console.log("Selected Warranty:", selectedWarrantyServices);
+  }, [selectedPartCatalog]);
+  
 
   function renderStepContent() {
     switch (currentStep) {
@@ -2004,9 +1963,10 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
             <div className="flex gap-4 my-2 justify-between p-2">
               <DialogTitle>Step 1: Select From List of Service Options</DialogTitle>
               <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
-                <p>Product Number</p><p>: </p>
-                <p>Product Name</p><p>: </p>
-                <p>Serial Number</p><p>: </p>
+                
+                <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
+                <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
+                <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
                 <p>Warranty Status</p><p>: </p>
                 <p>Currency</p><p>: </p>
               </div>
@@ -2027,17 +1987,25 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {SC.map((service, index) => (
-                  <TableRow key={index}>
-                    <TableCell><Checkbox /></TableCell>
-                    <TableCell>{service.ServiceOfferID}</TableCell>
-                    <TableCell>{service.SeriviceDescription}</TableCell>
-                    <TableCell>{service.CostumerTAT}</TableCell>
-                    <TableCell>{service.Price}</TableCell>
-                    <TableCell>{service.Tax}</TableCell>
-                    <TableCell>{service.Total}</TableCell>
-                  </TableRow>
-                ))}
+                {warrantyOffer.map((service, index) => {
+                  const isChecked = selectedWarrantyServices.some((item) => item.Service_offerID === service.Service_offerID)
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Checkbox 
+                          checked={isChecked}
+                          onCheckedChange={(checked) => handlerWarrantyServices(service, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>{service.Service_offerID}</TableCell>
+                      <TableCell>{service.Service_description}</TableCell>
+                      <TableCell>{service.CTat_RTime}</TableCell>
+                      <TableCell>{service.Price}</TableCell>
+                      <TableCell>{service.Tax}</TableCell>
+                      <TableCell>{service.Total}</TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
   
@@ -2065,17 +2033,17 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
             </DialogHeader>
             <div className="flex justify-between items-start p-2">
               <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
-                <p>Service OfferID</p><p>: </p>
-                <p>Service Description</p><p>: </p>
+                <p>Service OfferID</p><p>: {selectedWarrantyServices[0].Service_offerID}</p>
+                <p>Service Description</p><p>: {selectedWarrantyServices[0].Service_description}</p>
               </div>
               <div className="flex items-center space-x-2 scale-200 gap-2">
                 <Label htmlFor="orderability">Orderability</Label>
                 <Switch id="orderability" />
               </div>
               <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
-                <p>Product Number</p><p>: </p>
-                <p>Product Name</p><p>: </p>
-                <p>Serial Number</p><p>: </p>
+                <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
+                <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
+                <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
                 <p>Warranty Status</p><p>: </p>
                 <p>Currency</p><p>: </p>
               </div>
@@ -2123,28 +2091,36 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {Parts.map((part, index) => (
-                  <TableRow key={index}>
-                    <TableCell><Checkbox /></TableCell>
-                    <TableCell>{part.Part}</TableCell>
-                    <TableCell>{part.Keyword}</TableCell>
-                    <TableCell>{part.PartDescription}</TableCell>
-                    <TableCell>{part.Orderability}</TableCell>
-                    <TableCell>{part.ResistrictionReason}</TableCell>
-                    <TableCell>{part.Csr}</TableCell>
-                    <TableCell>{part.Rohs}</TableCell>
-                    <TableCell>{part.Returnable}</TableCell>
-                    <TableCell>{part.Hardrolls}</TableCell>
-                    <TableCell>{part.Dangerousgoods}</TableCell>
-                    <TableCell>{part.Lithiumbattry}</TableCell>
-                    <TableCell>{part.Oversize}</TableCell>
-                    <TableCell>{part.Heavy}</TableCell>
-                    <TableCell>{part.Price}</TableCell>
-                    <TableCell>{part.Freightprice}</TableCell>
-                    <TableCell>{part.Tax}</TableCell>
-                    <TableCell>{part.Total}</TableCell>
-                  </TableRow>
-                ))}
+                {partCatalog.map((part, index) => {
+                  const isChecked = selectedPartCatalog.some((item) => item.PartNumber === part.PartNumber)
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Checkbox 
+                          checked={isChecked}
+                          onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>{part.PartNumber}</TableCell>
+                      <TableCell>{part.Keyword}</TableCell>
+                      <TableCell>{part.PartDescription}</TableCell>
+                      <TableCell>{part.Orderability ? 'Yes' : 'No'}</TableCell>
+                      <TableCell>{part.ResistrictionReason}</TableCell>
+                      <TableCell>{part.Csr ? 'Y' : 'N'}</TableCell>
+                      <TableCell>{part.Rohs}</TableCell>
+                      <TableCell>{part.Returnable ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Hardrolls}</TableCell>
+                      <TableCell>{part.Dangerousgoods ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Lithiumbattry ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Oversize ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Heavy ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Price}</TableCell>
+                      <TableCell>{part.Freightprice}</TableCell>
+                      <TableCell>{part.Tax}</TableCell>
+                      <TableCell>{part.Total}</TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
               </TabsContent>

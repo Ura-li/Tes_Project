@@ -86,7 +86,7 @@ const partsorder = [
 import { BtnModalsWorkOrder } from './sc-modal'
 
 
-export const TabsService = () => {
+export const TabsService = ({ caseDetails }) => {
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
 
   const { open } = useSidebar();
@@ -139,7 +139,7 @@ export const TabsService = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} />
+    <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/>
     </div>
   )
 }

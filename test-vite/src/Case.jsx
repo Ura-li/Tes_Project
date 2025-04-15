@@ -28,7 +28,9 @@ export const Case = () => {
 
   return (
     <div className="">
-      <TabsService></TabsService>
+      <TabsService
+        caseDetails={caseDetails}
+      ></TabsService>
       <ServiceCase
         caseDetails={caseDetails}
       ></ServiceCase>
