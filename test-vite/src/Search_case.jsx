@@ -160,7 +160,7 @@ const data = {
   ],
 };
 
-import ModalProvider from "./components/modal-provider";
+// import ModalProvider from "./components/modal-provider";
 
 
 const Search_case = () => {
@@ -1201,11 +1201,11 @@ const Search_case = () => {
             <InfoCase items={data.navModals} items2={data.navMain} onModalClick={setActiveModal} />
           </SidebarContent>
         </Sidebar>
-      <ModalProvider 
+      {/* <ModalProvider 
         selectedAssetForCase={selectedAssetForCase}
         selectedContactForCase={selectedContactForCase} 
         activeModal={activeModal} 
-        setActiveModal={setActiveModal} />
+        setActiveModal={setActiveModal} /> */}
       </SidebarProvider>
     </div>
   );

@@ -291,7 +291,11 @@ export function BtnModalContact({
 
   return (
     <Dialog open={open} onOpenChange={handleChange}>
-      
+      <DialogTrigger asChild>
+        <Button variant="outline" className="bg-white mt-0.5">
+          New Contacts
+        </Button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-[1000px]  bg-white">
         <DialogHeader className="flex-row items-center justify-between">
           <DialogDescription className="text-xl font-semibold text-black gap-2 flex"><PhoneCall></PhoneCall>Contact Information</DialogDescription>
@@ -603,7 +607,18 @@ BtnModalAsset({
 
   return (
     <Dialog open={open} onOpenChange={handleChange}>
-      
+      <DialogTrigger asChild>
+        <Button 
+          variant="outline" 
+          // className="bg-white mt-0.5"
+          className={`mt-0.5 ${(!selectedContactForCase && typeSearch !== 'individual') ? "bg-white cursor-not-allowed" : "bg-blue-500"}`} 
+          onClick={() => setIsOpen(true)}
+          disabled={!selectedContactForCase && typeSearch !== 'individual'} // 🔥 Button disabled if no contact selected
+        >
+          New Asset
+        </Button>
+      </DialogTrigger>
+
       <DialogContent className="sm:max-w-[800px] bg-white">
         <DialogHeader>
           <DialogTitle className="text-xl">Asset Information</DialogTitle>
@@ -711,7 +726,7 @@ BtnModalAsset({
                   }`}
                 >
                   <TableCell>{asset.SerialNumber}</TableCell>
-                  <TableCell>{asset.product_information?.ProductName}</TableCell>
+                  <TableCell className={'whitespace-break-spaces'}>{asset.product_information?.ProductName}</TableCell>
                   <TableCell>{asset.ProductNumber}</TableCell>
                   <TableCell>{asset.product_information?.ProductLine}</TableCell>
                 </TableRow>

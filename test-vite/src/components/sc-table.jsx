@@ -58,7 +58,7 @@ import { useModal } from "@/components/modal-context";
     companyBasedOnContactsSearch
   }) {
 
-    const { setActiveModal, setModalData } = useModal();
+    // const { setActiveModal, setModalData } = useModal();
 
     
     useEffect(() => {
@@ -377,7 +377,7 @@ import { useModal } from "@/components/modal-context";
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
               </div>
-              <Button variant="outline" className="bg-white mt-0.5"
+              {/* <Button variant="outline" className="bg-white mt-0.5"
   onClick={() => {
     setModalData({
       selectedCompany,
@@ -388,7 +388,7 @@ import { useModal } from "@/components/modal-context";
   }}
 >
   New Contact
-</Button>
+</Button> */}
               <BtnModalContact 
                 className="" 
                 selectedCompany={selectedCompany.length !== 0 ? selectedCompany : company.key} 
@@ -445,13 +445,13 @@ import { useModal } from "@/components/modal-context";
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
               </div>
-              <Button
+              {/* <Button
               onClick={() => setActiveModal("asset")}
               className={`mt-0.5 ${(!selectedContactForCase && company.type !== 'individual') ? "bg-white cursor-not-allowed" : "bg-blue-500"}`} 
               disabled={!selectedContactForCase && company.type !== 'individual'}
               >
                 New Asset
-              </Button>
+              </Button> */}
               <BtnModalAsset 
                 typeSearch={company.type}
                 contactID={selectedContact.ContactID || (company.type=='individual' ? company.key : null)}
@@ -483,7 +483,7 @@ import { useModal } from "@/components/modal-context";
                       selectedAssetForCase?.AssetID === asset.AssetID ? "bg-blue-300" : ""
                     }`}
                   >
-                    <TableCell>{asset.ProductName}</TableCell>
+                    <TableCell className={'whitespace-break-spaces'}>{asset.ProductName}</TableCell>
                     <TableCell>{asset.ProductNumber}</TableCell>
                     <TableCell>{asset.SerialNumber}</TableCell>
                     <TableCell>{asset.ProductLine}</TableCell>
