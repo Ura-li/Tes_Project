@@ -115,10 +115,14 @@ export function BtnModal({
  * CHECK EMAIL OR PHONE
  */
 
-export function BtnModalContact({ selectedCompany, selectedContact, setSelectedContact }) {
+export function BtnModalContact({ selectedCompany, selectedContact, setSelectedContact, companyData }) {
   //set modal state 
+
+  console.log("Company Data in Modal Contact : ",companyData)
   const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);
-  
+  console.log("Selected Company:", selectedCompany);
+  // console.log("type Selected Company:", typeof selectedCompany);
+
    const [formDataContact, setFormDataContact] = useState({
       Salutation: '',
       FirstName: '',
@@ -138,7 +142,9 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
       StateProvince: '',
       Country: '',
       ZipPostalCode: '',
-      SiteAccountID: selectedCompany?.SiteAccountID || null
+      SiteAccountID: typeof selectedCompany === "object" 
+      ? selectedCompany.SiteAccountID ?? "" 
+      : selectedCompany
     });
     
     
@@ -171,6 +177,7 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
         alert("Contact updated successfully!");
       } else {
         // ✅ Add new contact
+        console.log("Selected Company in ModalContactSubmit : ", selectedCompany)
         await ApiCustomer.post("/api/contact-information", formDataContact);
         setIsModalContactSearchInput(false)
         alert("Contact added successfully!");
@@ -179,9 +186,9 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
       // fetchContacts(); // ✅ Refresh contacts table
 
        // ✅ Ensure selectedCompany is not null before fetching contacts
-    if (selectedCompany?.SiteAccountID) {
+    if (selectedCompany.SiteAccountID || selectedCompany.length !== 0) {
       console.log("Selected Company :",selectedCompany);
-      const updatedContacts = await fetchContacts(selectedCompany.SiteAccountID);
+      const updatedContacts = await fetchContacts(selectedCompany.SiteAccountID ? selectedCompany.SiteAccountID : selectedCompany );
       setSelectedContact(updatedContacts); // ✅ Update state so table refreshes
       console.log("Updated Selected Contacts:", updatedContacts);
     }
@@ -191,6 +198,24 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
     }
   };
 
+  // make the 'same in account information' button :
+  const handleCopyFromAccount = () => {
+    if (companyData == null) return;
+  
+    const fieldsToCopy = [
+      "AddressLine1",
+      "AddressLine2",
+      "City",
+      "StateProvince",
+      "Country",
+      "ZipPostalCode"
+    ];
+  
+    fieldsToCopy.forEach((field) => {
+      const value = companyData[field] || "";
+      handlerInputContactChange({ target: { id: field, value } });
+    });
+  };
   
 
   // Edit function 
@@ -284,35 +309,35 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
 
         <DialogHeader className="flex-row justify-between items-center">
           <DialogTitle className="text-md">Address</DialogTitle>
-          <Button className="bg-white text-gray-400   "><Copy></Copy>Same in Account Adress </Button>
+          <Button className="bg-white text-gray-400   " onClick={handleCopyFromAccount}><Copy></Copy>Same in Account Adress </Button>
         </DialogHeader>
 
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-0.4">
             <Label htmlFor="AddressLine1">Address Line 1</Label>
-            <Input id="AddressLine1" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input id="AddressLine1" type="text" value={formDataContact.AddressLine1 || ""} className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 flex flex-col">
             <Label htmlFor="current">Country</Label>
-            <SelectBar id="Country" onChange={handlerInputContactChange}/>
+            <SelectBar id="Country" value={formDataContact.Country || ""} onChange={handlerInputContactChange}/>
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="AddressLine2">Address Line 2</Label>
-            <Input id="AddressLine2" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input id="AddressLine2" value={formDataContact.AddressLine2 || ""} type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
-            <Input id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input id="ZipPostalCode" value={formDataContact.ZipPostalCode || ""} type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="City">City</Label>
-            <Input id="City" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <Input id="City" type="text" value={formDataContact.City || ""} className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
 
             
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="StateProvince">State/Province</Label>
-            <Input id="StateProvince" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <Input id="StateProvince" value={formDataContact.StateProvince || ""} type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
 
             
                   {/* Hidden Input for SiteAccountID */}
@@ -342,7 +367,8 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
  * TODO 
  * MAKE ROUTE FOR PRODUCT
  */
-export function BtnModalAsset({
+export function 
+BtnModalAsset({
   typeSearch,
   contactID, 
   siteAccountID, 

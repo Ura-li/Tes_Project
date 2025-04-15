@@ -10,14 +10,15 @@ import {
     SelectValue,
   } from "@/components/ui/select"
    
-  export function SelectBar({ id, onChange }) {
+  export function SelectBar({ id, onChange, value }) {
     return (
-      <Select onValueChange={(value) => onChange({ target: { id, value}})}>
+      <Select value={value} onValueChange={(value) => onChange({ target: { id, value}})}>
         <SelectTrigger className="w-full border-black">
           <SelectValue placeholder="Select a Country"/>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
+            {/* <SelectItem value="">Select a Country</SelectItem> */}
             <SelectItem value="Indonesia">Indonesia</SelectItem>
             <SelectItem value="Malaysia">Malaysia</SelectItem>
             <SelectItem value="Singapura">Singapura</SelectItem>

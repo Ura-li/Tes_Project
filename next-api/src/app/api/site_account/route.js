@@ -94,6 +94,24 @@ export async function POST(request) {
             }, { status: 400 });
         }
 
+        
+        let whereCondition = {
+            OR: [
+                { Email: { contains: data.Email } },
+                { PrimaryPhone: { contains: data.PrimaryPhone } }
+            ]
+        }
+        const availableCompanyEmailPhoneDuplicate = await prisma.site_account.count({
+            where: whereCondition
+        })
+        
+        if(availableCompanyEmailPhoneDuplicate !== 0){
+            return NextResponse.json({
+                success: false,
+                message: "A company wit dis email or phone is alredy eksis",
+                error: error.message
+            }, { status: 409 });
+        }
         // Simpan ke database
         const newAccount = await prisma.site_account.create({
             data: {
