@@ -23,10 +23,12 @@ import { ChevronDown } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import { ContactRound, User,Search, Laptop } from "lucide-react";
-
+import { Button } from "./ui/button";
 
 
 import ApiCustomer from "@/api";
+
+import { useModal } from "@/components/modal-context";
 
 
 
@@ -55,6 +57,8 @@ import ApiCustomer from "@/api";
     contactsBasedOnContactsSearch,
     companyBasedOnContactsSearch
   }) {
+
+    const { setActiveModal, setModalData } = useModal();
 
     
     useEffect(() => {
@@ -330,7 +334,6 @@ import ApiCustomer from "@/api";
   
 
 
-
   return (
     // Company
     <>
@@ -374,6 +377,18 @@ import ApiCustomer from "@/api";
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
               </div>
+              <Button variant="outline" className="bg-white mt-0.5"
+  onClick={() => {
+    setModalData({
+      selectedCompany,
+      selectedContact,
+      setSelectedContact,
+    });
+    setActiveModal("contact");
+  }}
+>
+  New Contact
+</Button>
               <BtnModalContact 
                 className="" 
                 selectedCompany={selectedCompany.length !== 0 ? selectedCompany : company.key} 
@@ -400,9 +415,11 @@ import ApiCustomer from "@/api";
                 onClick={() => {
                   setSelectedContact(contact)
                   setSelectedContactForCase(contact);
-                }
-              }
-                className={`cursor-pointer hover:bg-gray-200 ${selectedContactForCase ?.ContactID === contact.ContactID ? "bg-blue-300" : "bg-white"}`}>
+                }}
+                className={`cursor-pointer hover:bg-gray-200 ${
+                selectedContactForCase ?.ContactID === contact.ContactID ? "bg-blue-300" : "bg-white"
+                }`}>
+                  
                   <TableCell>{contact.FirstName}</TableCell>
                   <TableCell>{contact.LastName}</TableCell>
                   <TableCell>{contact.Email}</TableCell>
@@ -428,6 +445,13 @@ import ApiCustomer from "@/api";
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
               </div>
+              <Button
+              onClick={() => setActiveModal("asset")}
+              className={`mt-0.5 ${(!selectedContactForCase && company.type !== 'individual') ? "bg-white cursor-not-allowed" : "bg-blue-500"}`} 
+              disabled={!selectedContactForCase && company.type !== 'individual'}
+              >
+                New Asset
+              </Button>
               <BtnModalAsset 
                 typeSearch={company.type}
                 contactID={selectedContact.ContactID || (company.type=='individual' ? company.key : null)}

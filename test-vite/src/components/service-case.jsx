@@ -83,30 +83,32 @@ const partsorder = [
   },
 ]
 
+import { BtnModalsWorkOrder } from './sc-modal'
+
 
 export const TabsService = () => {
-  
+  const [openWorkOrder, setOpenWorkOrder] = useState(false);
 
   const { open } = useSidebar();
 
   
 
   const buttons = [
-    { icon: ArrowLeftFromLine, label: "" },
-    { icon: SquareArrowOutUpRight, label: "" },
-    { icon: Save, label: "Save" },
-    { icon: FileSymlink, label: "Save & Close" },
-    { icon: RotateCw, label: "Refresh" },
-    { icon: StepBack, label: "Complaint" },
-    { icon: StepBack, label: "CSR" },
-    { icon: StepBack, label: "Service Order" },
-    { icon: StepBack, label: "Work Order" },
-    { icon: StepBack, label: "Sales Offer" },
-    { icon: StepBack, label: "Close Case" },
-    { icon: StepBack, label: "Pick" },
-    { icon: StepBack, label: "Queue Details" },
-    { icon: UserPen, label: "Assign" },
-    { icon: StepBack, label: "Add to Queue" },
+    { icon: ArrowLeftFromLine, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: Save, label: "Save", onClick: () => alert("not now") },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now") },
+    { icon: RotateCw, label: "Refresh", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
+    { icon: StepBack, label: "CSR", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Service Order", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Work Order", onClick: () => setOpenWorkOrder(true) },
+    { icon: StepBack, label: "Sales Offer", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Close Case", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Queue Details", onClick: () => alert("not now") },
+    { icon: UserPen, label: "Assign", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Add to Queue", onClick: () => alert("not now") },
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
@@ -115,6 +117,7 @@ export const TabsService = () => {
        {visibleButtons.map((btn, index) => (
           <Button
             key={index}
+            onClick={btn.onClick}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
@@ -136,78 +139,7 @@ export const TabsService = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-      {/* <Button variant="outline" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-         <ArrowLeftFromLine></ArrowLeftFromLine>
-      </Button>
-
-      <Button variant="outline" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <SquareArrowOutUpRight></SquareArrowOutUpRight>
-      </Button>
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-         <Save></Save>
-         <span className='text-md'>Save</span>
-      </Button>
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-         <FileSymlink></FileSymlink>
-         <span className='text-md'>Save & Close</span>
-      </Button>
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <RotateCw></RotateCw>
-         <span className='text-md'>Refresh</span>
-      </Button>    
-
-       <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Complaint</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>CSR</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Service Order</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Work Order</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Sales Offer</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Close Case</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Pick</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Queue Details</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <UserPen></UserPen>
-         <span className='text-md'>Assign</span>
-      </Button>    
-
-      <Button variant="link" className="rounded-none px-0 py-0 has-[>svg]:px-1.5 flex gap-0.5">
-        <StepBack></StepBack>
-         <span className='text-md'>Add to Queue</span>
-      </Button>     */}
+    <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} />
     </div>
   )
 }
@@ -239,7 +171,20 @@ export const ServiceCase = ({ caseDetails }) => {
 
 
     const [selected, setSelected] = useState("apple"); // Default to 'apple'
+
+    
+const CaseField = ({ label, value, icon, span = 1 }) => (
+  <>
+    <CardTitle className={`font-medium flex items-center ${icon ? "gap-1" : ""}`}>
+      {icon && <Lock className="size-4" />}
+      {label}
+    </CardTitle>
+    <CardTitle className={`col-span-${span}`}>{value}</CardTitle>
+  </>
+);
+
   return (
+    <>
     <Card className="mt-2 rounded-none p-0 border-0">
       <CardHeader className="p-0">
         <Tabs defaultValue="case_info"> 
@@ -274,7 +219,7 @@ export const ServiceCase = ({ caseDetails }) => {
                   <p className="text-sm font-light ">Queue</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>Harva Anwar</h1>
+                  <h1 className='text-blue-500'>{caseDetails.CaseID}</h1>
                   <p className="text-sm font-light ">Contact</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
@@ -338,103 +283,52 @@ export const ServiceCase = ({ caseDetails }) => {
       
         <TabsContent value="case_info" >
           <Card className="flex-row">
-            <CardContent className="grid gap-10  grid-cols-6 p-3 ">
-              
-                <CardTitle className='flex font-medium'><Lock className='size-4'/>Case ID</CardTitle>
-                <CardTitle className="">{caseDetails.CaseID}</CardTitle>
-              
-
-              
-                <CardTitle  className="font-medium" >Case Subject</CardTitle>
-                <CardTitle className="col-span-3">{caseDetails.CaseSubject}</CardTitle>
-              
-
-              
-                <CardTitle   className='flex font-medium'><Lock className='size-4'/>Incoming Channel</CardTitle>
-                <CardTitle>{caseDetails.IncomingChannel}</CardTitle>
-              
-
-             
-                <CardTitle className='font-medium'>Business Segment</CardTitle>
-                <CardTitle >...</CardTitle>
-              
-              
-              
-                <CardTitle className='ml-4 font-medium'>Email Status</CardTitle>
-                <CardTitle>...</CardTitle>
-              
-
-              
-                <CardTitle className='ml-4 font-medium'>Case Status</CardTitle>
-                <CardTitle>{caseDetails.CaseStatus}</CardTitle>
-              
-
-              
-                <CardTitle   className='font-medium'>Case Type</CardTitle>
-                <CardTitle>{caseDetails.CaseType}</CardTitle>
-              
-
-              
-                <CardTitle   className='ml-4 font-medium '>KCI For Case?</CardTitle>
-                <CardTitle>{caseDetails.KCI_Flag ? 'Yes' : 'No'}</CardTitle>
-              
-
-              
-                <CardTitle   className='ml-4 font-medium'>Case Priority</CardTitle>
-                <CardTitle>{caseDetails.CasePriority}</CardTitle>
-              
-
-              
-                <CardTitle className='font-medium '>HPI Segment</CardTitle>
-                <CardTitle>...</CardTitle>
-              
-
-              
-                <CardTitle className='flex font-medium '><Lock className='size-4'/>Customer Tracking Number</CardTitle>
-                <CardTitle className="">...</CardTitle>
-              
-
-              
-                <CardTitle   className='ml-4 font-medium'>Customer Severity</CardTitle>
-                <CardTitle className="">{caseDetails.CustomerSeverity}</CardTitle>
-              
-
-              
-                <CardTitle className="font-medium">Update Customer Tracking Number</CardTitle>
-                <CardTitle className='col-span-3'>...</CardTitle>
-              
-
-              
-                
-                <CardTitle   className='flex font-medium'><Lock className='size-4'/>Created ON</CardTitle>
-                <CardTitle className="col-span-3 flex gap-[5em]">{new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')}<CalendarDays className='size-4 '/>{new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })}</CardTitle>
-                
-                
-              
-
-             
-                <CardTitle   className='ml-4 font-medium '>Alternate Customer Tracking Number</CardTitle>
-                <CardTitle>...</CardTitle>
-              
-
-              
-                
-                <CardTitle   className='flex font-medium'><Lock className='size-4'/>Case Closed Date</CardTitle>
-                <CardTitle className="flex col-span-3 gap-[5em]">...<CalendarDays className='size-4 '/>...</CardTitle>
-              
-
-              
-                <CardTitle   className='flex font-medium'><Lock className='size-4'/>Irrelevant</CardTitle>
-                <CardTitle>...</CardTitle>
-              
-
-                        
-
-              
-                
-                <CardTitle   className='flex font-medium'><Lock className='size-4'/>Submitted To Base</CardTitle>
-                <CardTitle className="flex col-span-3 gap-[5em]">...<CalendarDays className='size-4 '/>...</CardTitle>
-              
+            <CardContent className="grid gap-10  grid-cols-6 p-3 ">  
+              <CaseField label="Case ID" value={caseDetails.CaseID} icon />
+              <CaseField label="Case Subject" value={caseDetails.CaseSubject} span={3} />
+              <CaseField label="Incoming Channel" value={caseDetails.IncomingChannel} icon />
+              <CaseField label="Business Segment" value="..." />
+              <CaseField label="Email Status" value="..." />
+              <CaseField label="Case Status" value={caseDetails.CaseStatus} />
+              <CaseField label="Case Type" value={caseDetails.CaseType} />
+              <CaseField label="KCI For Case?" value={caseDetails.KCI_Flag ? "Yes" : "No"} />
+              <CaseField label="Case Priority" value={caseDetails.CasePriority} />
+              <CaseField label="HPI Segment" value="..." />
+              <CaseField label="Customer Tracking Number" value="..." icon />
+              <CaseField label="Customer Severity" value={caseDetails.CustomerSeverity} />
+              <CaseField label="Update Customer Tracking Number" value="..." span={3} />
+              <CaseField
+                label="Created ON"
+                value={
+                  <span className="flex gap-[5em]">
+                    {new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')} <CalendarDays className="size-4" /> {new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                }
+                icon
+                span={3}
+              />
+              <CaseField label="Alternate Customer Tracking Number" value="..." />
+              <CaseField
+                label="Case Closed Date"
+                value={
+                  <span className="flex gap-[5em]">
+                    ... <CalendarDays className="size-4" /> ...
+                  </span>
+                }
+                icon
+                span={3}
+              />
+              <CaseField label="Irrelevant" value="..." icon />
+              <CaseField
+                label="Submitted To Base"
+                value={
+                  <span className="flex gap-[5em]">
+                    ... <CalendarDays className="size-4" /> ...
+                  </span>
+                }
+                icon
+                span={3}
+              />
 
             </CardContent>
           </Card>
@@ -1177,5 +1071,6 @@ export const ServiceCase = ({ caseDetails }) => {
         </Tabs>
       </CardHeader>
     </Card>
+    </>            
   )
 }

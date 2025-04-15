@@ -21,10 +21,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus,PhoneCall, Copy } from "lucide-react";
+import { Switch } from "@/components/ui/switch"
+import { Plus,PhoneCall, Copy, ExternalLink, XIcon } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { SelectBar3, SelectBarContact4 } from "./sc-select";
 import { 
@@ -35,12 +37,29 @@ import {
   SelectBar1,
   SelectBar2,
  } from "@/components/sc-select";
+ import { 
+   Select,
+   SelectContent,
+   SelectGroup,
+   SelectItem,
+   SelectLabel,
+   SelectTrigger,
+   SelectValue,
+  } from '@/components/ui/select'
  import { SnInput } from "./sn-input";
 
 import { Pencil, Trash } from "lucide-react";
 //import API
 import ApiCustomer from "@/api";
 import axios from "axios";
+
+
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 
 // const assets = [
 //   {
@@ -60,7 +79,7 @@ export function BtnModal({
 }) {
   
   
-
+  // console.log("This is  the data",selectedAssetForCase.AssetID);
 
   return (
     <Dialog>
@@ -109,19 +128,40 @@ export function BtnModal({
   );
 }
 
+export function BtnModalAccount({
+  
+})
+{}
 /**
  * TODO 
  * VALIDATION WHERE INPUTED CONTACT ALREADY AVAILABLE
  * CHECK EMAIL OR PHONE
  */
 
-export function BtnModalContact({ selectedCompany, selectedContact, setSelectedContact, companyData }) {
+export function BtnModalContact({ 
+  selectedCompany, 
+  selectedContact, 
+  setSelectedContact, 
+  open : externalOpen, 
+  onOpenChange : externalOnChange,
+  companyData
+  }) {
+    console.log("CHECK DATA FORM BTN MOdAL",selectedContact)
+
   //set modal state 
 
   console.log("Company Data in Modal Contact : ",companyData)
   const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);
-  console.log("Selected Company:", selectedCompany);
-  // console.log("type Selected Company:", typeof selectedCompany);
+  
+  const open = externalOpen || isModalContactSearchInput;
+
+  const handleChange = (value) => {
+    if (externalOpen !== undefined) {
+      externalOnChange?.(false);
+    } else {
+      setIsModalContactSearchInput(value);
+    }
+  };
 
    const [formDataContact, setFormDataContact] = useState({
       Salutation: '',
@@ -154,6 +194,29 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
       setFormDataContact((prev) => ({ ...prev, [id]: value }));
     };
     
+    const handleClearAllContact = () => {
+      setFormDataContact({
+        Salutation: '',
+        FirstName: '',
+        LastName: '',
+        Email: '',
+        PreferredLanguage: '',
+        Phone: '',
+        Mobile: '',
+        WorkPhone: '',
+        WorkExtension: '',
+        OtherPhone: '',
+        OtherExtension: '',
+        Fax: '',
+        AddressLine1: '',
+        AddressLine2: '',
+        City: '',
+        StateProvince: '',
+        Country: '',
+        ZipPostalCode: '',
+      })
+    }
+
   // Function to fetch updated contacts
   const fetchContacts = async (companyId) => {
     try {
@@ -227,18 +290,17 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
 
 
   return (
-    <Dialog open={isModalContactSearchInput} onOpenChange={setIsModalContactSearchInput}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="bg-white mt-0.5">
-          New Contacts
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[1000px] h-145 bg-white">
-        <DialogHeader>
-          <div className="flex justify-between">
-            <DialogTitle className="text-xl flex gap-2"><PhoneCall></PhoneCall>Contact Information</DialogTitle>
-            <Button className="self-end mr-2" variant="ghost">Clear All</Button>
-          </div>
+    <Dialog open={open} onOpenChange={handleChange}>
+      
+      <DialogContent className="sm:max-w-[1000px]  bg-white">
+        <DialogHeader className="flex-row items-center justify-between">
+          <DialogDescription className="text-xl font-semibold text-black gap-2 flex"><PhoneCall></PhoneCall>Contact Information</DialogDescription>
+            <Button 
+            className="self-end mr-2" 
+            variant="ghost"
+            onClick={handleClearAllContact}
+            >Clear All</Button>
+          
         </DialogHeader>
 
         <DialogHeader>
@@ -248,23 +310,23 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
         <div className="grid gap-2 grid-cols-6">
           <div className="space-y-0.5 flex flex-col">
             <Label htmlFor="Salutation">Salutation</Label>
-            <SelectBar1 id="Salutation" onChange={handlerInputContactChange} />
+            <SelectBar1 value={formDataContact.Salutation} id="Salutation" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.5 flex flex-col"> 
             <Label htmlFor="PreferredLanguage" >Preferred Language</Label>
-            <SelectBar2 id="PreferredLanguage" onChange={handlerInputContactChange} />
+            <SelectBar2 value={formDataContact.PreferredLanguage} id="PreferredLanguage" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.5">
             <Label htmlFor="FirstName">First Name</Label>
-            <Input id="FirstName" type="text" className="border-b-black p-1 " onChange={handlerInputContactChange} />
+            <Input value={formDataContact.FirstName} id="FirstName" type="text" className="border-b-black p-1 " onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.5 ">
             <Label htmlFor="LastName">Last Name</Label>
-            <Input id="LastName" type="text" className="border-b-black p-1 " onChange={handlerInputContactChange} />
+            <Input value={formDataContact.LastName} id="LastName" type="text" className="border-b-black p-1 " onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.5 col-span-2">
             <Label htmlFor="Email">Email</Label>
-            <Input id="Email" type="email" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.Email} id="Email" type="email" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           {/* <div className="space-y-0.4 ml-5">
             <Label htmlFor="new">EXTN</Label>
@@ -279,31 +341,34 @@ export function BtnModalContact({ selectedCompany, selectedContact, setSelectedC
         <div className="grid grid-cols-6 gap-2">
           <div className="space-y-0.4 col-span-2">
             <Label htmlFor="Phone">Phone</Label>
-            <Input id="Phone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input
+             value={formDataContact.Phone} id="Phone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 col-span-2">
             <Label htmlFor="Mobile">Mobile</Label>
-            <Input id="Mobile" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input
+             value={formDataContact.Mobile} id="Mobile" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div> 
           <div className="space-y-0.4">
             <Label htmlFor="WorkPhone">Work</Label>
-            <Input id="WorkPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input
+             value={formDataContact.WorkPhone} id="WorkPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4">
             <Label htmlFor="WorkExtension">Work EXTN</Label>
-            <Input id="WorkExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.WorkExtension} id="WorkExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4">
             <Label htmlFor="OtherPhone">Other</Label>
-            <Input id="OtherPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.OtherPhone} id="OtherPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div> 
           <div className="space-y-0.4 ">
             <Label htmlFor="OtherExtension"> Other EXTN</Label>
-            <Input id="OtherExtension" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.OtherExtension} id="OtherExtension" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 col-span-2">
             <Label htmlFor="Fax">FAX</Label>
-            <Input id="Fax" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.Fax} id="Fax" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
         </div>
 
@@ -376,6 +441,8 @@ BtnModalAsset({
   selectedCompany,
   setSelectedAsset,
   selectedAsset,
+  open : externalOpen,
+  onOpenChange : externalOnChange,
 }) {
   //set asset
   console.log("BtnModalAsset ContactID : ",contactID)
@@ -419,6 +486,15 @@ BtnModalAsset({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
+  const open = externalOpen || isOpen;
+
+  const handleChange = (value) => {
+    if (externalOpen !== undefined) {
+      externalOnChange?.(false);
+    } else {
+      setIsOpen(value);
+    }
+  };
   
   useEffect(() => {
     if (!contactID) return;
@@ -526,18 +602,8 @@ BtnModalAsset({
   const [isCheckedForCreateProduct, setIsCheckedForCreateProduct] = useState(false);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
-          // className="bg-white mt-0.5"
-          className={`mt-0.5 ${(!selectedContactForCase && typeSearch !== 'individual') ? "bg-white cursor-not-allowed" : "bg-blue-500"}`} 
-          onClick={() => setIsOpen(true)}
-          disabled={!selectedContactForCase && typeSearch !== 'individual'} // 🔥 Button disabled if no contact selected
-        >
-          New Asset
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleChange}>
+      
       <DialogContent className="sm:max-w-[800px] bg-white">
         <DialogHeader>
           <DialogTitle className="text-xl">Asset Information</DialogTitle>
@@ -589,7 +655,7 @@ BtnModalAsset({
 
         {/* <h3 className="text-lg font-semibold mt-4">Unowned Assets</h3> */}
         
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           <Input
             className="border-2 border-black rounded-2xl w-55 text-md h-10 my-2"
             type="Search"
@@ -603,7 +669,7 @@ BtnModalAsset({
           >
             Search
           </Button>
-          <div className="mt-2">
+          <div className="mt-2 flex items-center">
           <Checkbox id="terms" className="w-5 h-5 border-2 border-black" checked={isCheckedForCreateProduct} onCheckedChange={setIsCheckedForCreateProduct} />
             <label
               htmlFor="terms"
@@ -672,6 +738,12 @@ BtnModalAsset({
     </Dialog>
   )
 };
+
+
+
+
+
+//? MODAL FOR MASTER SITE
 
 export function AssetEdit ({ assetId, onUpdate }) {
   const [asset, setAsset] = useState(null);
@@ -1078,18 +1150,22 @@ export function ContactEdit({ contactID, onUpdate }) {
 };
 
 export function ContactDelete ({ contactID }) {
+  const [delecteContact, setDelecteContact] = useState(false)
+
   const handleDelete = async () => {
     try {
       await ApiCustomer.delete(`/api/contact-information/${contactID}`);
+      setDelecteContact(!delecteContact);
+      window.location.reload();
     } catch (error) {
       console.error("Error deleting contact:", error);
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={delecteContact}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="text-red-500 hover:text-red-700">
+        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setDelecteContact(true)}>
           <Trash />
         </Button>
       </DialogTrigger>
@@ -1300,5 +1376,821 @@ return (
 );
 };
 
+export function ProductTypeAdd () {
+  // Form ProductType
+   const [formDataProductType, setFormDataProductType] = useState({
+     ProductGroup: '',
+     ProductTower: '',
+     ProductType: '',
+    })
+    
+    // Make Handler ProductType
+    const handlerInputProductType = (e) => {
+      const { id, value } = e.target
+      setFormDataProductType(prevState => ({
+        ...prevState,
+        [id]:value
+      }));
+    };
+
+    // Handler Submit
+    const handlerProductType = async () => {
+      if (!formDataProductType.ProductTower || !formDataProductType.ProductGroup || !formDataProductType.ProductType) {
+        alert("Please fill in all fields");
+        return;
+      }
+      try {
+        const response = await ApiCustomer.post("/api/product-type", formDataProductType);
+        console.log("Success:", response.data);
+        alert("ProductType Saved successfully");
+      } catch (err) {
+        console.error("Error saving product: ", err);
+        alert("Failed to save productype");
+      }
+    };
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2"> ProductType Add</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add ProductType Information</DialogTitle>
+          <DialogDescription>
+            Add the productType Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+   
+          <Label>Product Tower</Label>
+          <Select  value={formDataProductType.ProductTower} onValueChange={(value) =>
+    setFormDataProductType((prev) => ({ ...prev, ProductTower: value }))
+  }>
+                      <SelectTrigger className="col-span-3 w-full">
+                        <SelectValue placeholder="Product Tower"/>
+                      </SelectTrigger>
+                      <SelectContent >
+                        <SelectGroup>
+                          <SelectLabel>Product tower</SelectLabel>
+                          {/* <SelectItem value="">.</SelectItem> */}
+                          <SelectItem value="PSG">PSG</SelectItem>
+                          <SelectItem value="IPG">IPG</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+            </Select>
+
+          <Label>Product Group</Label>
+          <Select   value={formDataProductType.ProductGroup}
+  onValueChange={(value) =>
+    setFormDataProductType((prev) => ({ ...prev, ProductGroup: value }))
+  }>
+                      <SelectTrigger className="col-span-3 w-full">
+                        <SelectValue placeholder="Product Group"/>
+                      </SelectTrigger>
+                      <SelectContent >
+                        <SelectGroup>
+                          <SelectLabel>Product group</SelectLabel>
+                          {/* <SelectItem value="">.</SelectItem> */}
+                          <SelectItem value="Commercial">Commercial</SelectItem>
+                          <SelectItem value="Consumer">Consumer</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+            </Select>
+
+          <Label>Product Type</Label>
+          <Input type="text" id="ProductType" value={formDataProductType.ProductType} onChange={handlerInputProductType} />
+        </div>
+        <DialogFooter>
+          <Button onClick={handlerProductType}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
+  const [producttypes, setProductTypes] = useState(null);
+  const [productTower, setProductTower] = useState("");
+  const [productGroup, setProductGroup] = useState("");
+  const [productType, setProductType] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchProductTypes = async () => {
+    if (!ProductTypeID) return;
+    try {
+      const response = await ApiCustomer.get(`/api/product-type/${ProductTypeID}`);
+      const data = response.data.data;
+      setProductTypes(data);
+      setProductTower(data?.ProductTower || "");
+      setProductGroup(data?.ProductGroup || "");
+      setProductType(data?.ProductType || "");
+    } catch (error) {
+      console.error("Error fetching productType information:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (ProductTypeID && isOpen) {
+      fetchProductTypes();
+    }
+  }, [ProductTypeID, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setProductTower("");
+      setProductGroup("");
+      setProductType("");
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!productTower || !productGroup || !productType) {
+      alert("Fields marked with * are required!");
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/product-type/${ProductTypeID}`, {
+        ProductTower: productTower,
+        ProductGroup: productGroup,
+        ProductType: productType,
+      });
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating productType:", error);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchProductTypes(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit ProductType Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the productType Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+   
+        <Label>Product Tower</Label>
+        <Select
+  value={productTower}
+  onValueChange={(value) => setProductTower(value)}
+>
+  <SelectTrigger className="col-span-3 w-full">
+    <SelectValue placeholder="Product Tower" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectGroup>
+      <SelectLabel>Product Tower</SelectLabel>
+      <SelectItem value="PSG">PSG</SelectItem>
+      <SelectItem value="IPG">IPG</SelectItem>
+    </SelectGroup>
+  </SelectContent>
+</Select>
+
+        <Label>Product Group</Label>
+        <Select
+  value={productGroup}
+  onValueChange={(value) => setProductGroup(value)}
+>
+  <SelectTrigger className="col-span-3 w-full">
+    <SelectValue placeholder="Product Tower" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectGroup>
+      <SelectLabel>Product Group</SelectLabel>
+      <SelectItem value="Commercial">Commercial</SelectItem>
+      <SelectItem value="Consumer">Consumer</SelectItem>
+    </SelectGroup>
+  </SelectContent>
+</Select>
+
+
+        <Label>Product Type</Label>
+        <Input type="text" id="ProductType" value={productType} onChange={(e) => setProductType(e.target.value)} />
+      </div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export function ProductTypeDelete ({ ProductTypeID, isModalOpen, setIsModalOpen, onUpdate }) {
+  //set modal
+const handleDelete = async () => {
+  try {
+    const response = await ApiCustomer.delete(`/api/product-type/${ProductTypeID}`);
+    
+    console.log("Server Response:", response.data);
+    if (response.status === 409 || response.data.success === false) {
+      // 🚨 Restriction triggered - Show alert message
+      alert(response.data.message || "Cannot delete this product due to restrictions.");
+      return;
+    }
+    
+    alert("ProductType deleted successfully! ✅");
+    // ✅ Close the modal if it's open
+    setIsModalOpen(false);
+    // ✅ Refresh the table by calling `onUpdate()`
+    if (onUpdate) {
+      onUpdate();
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 409) {
+      // 🚨 Handle 409 Conflict error from backend
+      alert(error.response.data.message || "Cannot delete! This product has related Product Type.");
+    } else {
+      alert("Failed to delete productType. Please try again.");
+    }
+  }
+};
+
+return (
+  <Dialog>
+    <DialogTrigger asChild>
+      <Button variant="outline" className="text-red-500 hover:text-red-700">
+        <Trash />
+      </Button>
+    </DialogTrigger>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Delete ProductType</DialogTitle>
+        <DialogDescription>
+          Delete ProductType confirm. 
+        </DialogDescription>
+      </DialogHeader>
+      <h1>Anda yakin ingin menghapus data ini?</h1>
+      <DialogFooter>
+        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
+};
+
+
+
+//? Service Case Tab List
+
+
+// export function BtnModalsWorkOrder(){
+//   const [workOpen, setWorkOpen] = useState(false);
+
+//   const SC = [
+//     {
+//       ServiceOfferID : "DEPOT2",
+//       SeriviceDescription : "DEPOT REPAIR - 2DAY",
+//       CostumerTAT:"002",
+//       Price:"0.00",
+//       Tax:"0.00",
+//       Total:"00.00"
+//     },
+//     {
+//       ServiceOfferID : "DEPOT1",
+//       SeriviceDescription : "DEPOT REPAIR",
+//       CostumerTAT:"001",
+//       Price:"0.00",
+//       Tax:"0.00",
+//       Total:"00.00"
+//     },
+//     {
+//       ServiceOfferID : "APBPRP",
+//       SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
+//       CostumerTAT:"001",
+//       Price:"0.00",
+//       Tax:"0.00",
+//       Total:"00.00"
+//     },
+//     {
+//       ServiceOfferID : "APBPRP",
+//       SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
+//       CostumerTAT:"003",
+//       Price:"0.00",
+//       Tax:"0.00",
+//       Total:"00.00"
+//     },
+//   ]
+
+//   return (
+//     <>
+//     <Dialog open={workOpen}>
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogDescription>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
+//         </DialogHeader>
+//         <DialogTitle>Service Catalog</DialogTitle>
+//         <div className="flex">
+//           <DialogTitle>Select From List of Service Options</DialogTitle>
+//           <div className="">
+//             <p>Product Number</p>
+//             <p>Product Name</p>
+//             <p>Serial Number</p>
+//             <p>Warranty Status</p>
+//             <p>Currency</p>
+//           </div>
+//         </div>
+//         <Table>
+//           <TableCaption>Warrenty Services</TableCaption>
+//           <TableHeader>
+//             <TableRow>
+//               <TableHead>Select</TableHead>
+//               <TableHead>Service OfferID</TableHead>
+//               <TableHead>Service Description</TableHead>
+//               <TableHead>Costumer TAT/ Response TIme</TableHead>
+//               <TableHead>Price</TableHead>
+//               <TableHead>Tax</TableHead>
+//               <TableHead>Total</TableHead>
+//             </TableRow>
+//           </TableHeader>
+//           <TableBody>
+//               {SC.map((service) => {
+//             <TableRow>
+//               <TableCell><Checkbox></Checkbox></TableCell>
+//               <TableCell>{service.ServiceOfferID}</TableCell>
+//               <TableCell>{service.SeriviceDescription}</TableCell>
+//               <TableCell>{service.CostumerTAT}</TableCell>
+//               <TableCell>{service.Price}</TableCell>
+//               <TableCell>{service.Tax}</TableCell>
+//               <TableCell>{service.Total}</TableCell>
+//             </TableRow>
+//               })}
+//           </TableBody>
+//         </Table>
+//         <DialogFooter>
+//               <button>Cancel</button>
+//               <button>Next</button>
+//         </DialogFooter>
+//       </DialogContent>
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogDescription>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
+//         </DialogHeader>
+//         <DialogTitle>Service Catalog</DialogTitle>
+//         <div className="flex">
+//           <DialogTitle>Select From List of Service Options</DialogTitle>
+//           <div className="">
+//             <p>Product Number</p>
+//             <p>Product Name</p>
+//             <p>Serial Number</p>
+//             <p>Warranty Status</p>
+//             <p>Currency</p>
+//           </div>
+//         </div>
+//         <Table>
+//           <TableCaption>Warrenty Services</TableCaption>
+//           <TableHeader>
+//             <TableRow>
+//               <TableHead>Select</TableHead>
+//               <TableHead>Service OfferID</TableHead>
+//               <TableHead>Service Description</TableHead>
+//               <TableHead>Costumer TAT/ Response TIme</TableHead>
+//               <TableHead>Price</TableHead>
+//               <TableHead>Tax</TableHead>
+//               <TableHead>Total</TableHead>
+//             </TableRow>
+//           </TableHeader>
+//           <TableBody>
+//               {SC.map((service) => {
+//             <TableRow>
+//               <TableCell><Checkbox></Checkbox></TableCell>
+//               <TableCell>{service.ServiceOfferID}</TableCell>
+//               <TableCell>{service.SeriviceDescription}</TableCell>
+//               <TableCell>{service.CostumerTAT}</TableCell>
+//               <TableCell>{service.Price}</TableCell>
+//               <TableCell>{service.Tax}</TableCell>
+//               <TableCell>{service.Total}</TableCell>
+//             </TableRow>
+//               })}
+//           </TableBody>
+//         </Table>
+//         <DialogFooter>
+//           <button>Cancel</button>
+//           <button>Next</button>
+//         </DialogFooter>
+//       </DialogContent>
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogDescription>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
+//         </DialogHeader>
+//         <DialogTitle>Service Catalog</DialogTitle>
+//         <div className="flex">
+//           <DialogTitle>Select From List of Service Options</DialogTitle>
+//           <div className="">
+//             <p>Product Number</p>
+//             <p>Product Name</p>
+//             <p>Serial Number</p>
+//             <p>Warranty Status</p>
+//             <p>Currency</p>
+//           </div>
+//         </div>
+//         <Table>
+//           <TableCaption>Warrenty Services</TableCaption>
+//           <TableHeader>
+//             <TableRow>
+//               <TableHead>Select</TableHead>
+//               <TableHead>Service OfferID</TableHead>
+//               <TableHead>Service Description</TableHead>
+//               <TableHead>Costumer TAT/ Response TIme</TableHead>
+//               <TableHead>Price</TableHead>
+//               <TableHead>Tax</TableHead>
+//               <TableHead>Total</TableHead>
+//             </TableRow>
+//           </TableHeader>
+//           <TableBody>
+//               {SC.map((service) => {
+//             <TableRow>
+//               <TableCell><Checkbox></Checkbox></TableCell>
+//               <TableCell>{service.ServiceOfferID}</TableCell>
+//               <TableCell>{service.SeriviceDescription}</TableCell>
+//               <TableCell>{service.CostumerTAT}</TableCell>
+//               <TableCell>{service.Price}</TableCell>
+//               <TableCell>{service.Tax}</TableCell>
+//               <TableCell>{service.Total}</TableCell>
+//             </TableRow>
+//               })}
+//           </TableBody>
+//         </Table>
+//         <DialogFooter>
+//           <button>Cancel</button>
+//           <button>Cancel</button>
+//           <button>AddPart</button> // open another dialogs modals
+//           <button>Create Order</button> //submit
+//         </DialogFooter>
+//       </DialogContent>
+      
+//   </Dialog>
+//     </>
+//   )
+// }
+
+export function BtnModalsWorkOrder({ open, setOpen}) {
+  const [step, setStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(1);
+  const SC = [
+    {
+      ServiceOfferID: "DEPOT2",
+      SeriviceDescription: "DEPOT REPAIR - 2DAY",
+      CostumerTAT: "002",
+      Price: "0.00",
+      Tax: "0.00",
+      Total: "00.00",
+    },
+    {
+      ServiceOfferID: "DEPOT1",
+      SeriviceDescription: "DEPOT REPAIR",
+      CostumerTAT: "001",
+      Price: "0.00",
+      Tax: "0.00",
+      Total: "00.00",
+    },
+    {
+      ServiceOfferID : "APBPRP",
+      SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
+      CostumerTAT:"001",
+      Price:"0.00",
+      Tax:"0.00",
+      Total:"00.00"
+    },
+    {
+      ServiceOfferID : "APBPRP",
+      SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
+      CostumerTAT:"003",
+      Price:"0.00",
+      Tax:"0.00",
+      Total:"00.00"
+    },
+  ];
+
+  const Parts = [
+    {
+      Part: "N42547-001",
+      Keyword: "INTER CONNECT CABLE",
+      PartDescription: "SPS-CABLE LCD FHD 40P",
+      Orderability: "Yes",
+      ResistrictionReason: "",
+      Csr: "N",
+      Rohs: "",
+      Returnable:"true",
+      Hardrolls:"",
+      Dangerousgoods: "false",
+      Lithiumbattry: "false",
+      Oversize: "false",
+      Heavy: "false",
+      Price: "00.00",
+      Freightprice: "00.00",
+      Tax:  "00.00",
+      Total: "00.00",
+    },
+    {
+      Part: "M91238-005",
+      Keyword: "WLAN WIRELESS ACCESS NETWORK E",
+      PartDescription: "SKO-WLAN 6 RTK ax 2x2+BT RTL88...",
+      Orderability: "Yes",
+      ResistrictionReason: "",
+      Csr: "N",
+      Rohs: "",
+      Returnable:"true",
+      Hardrolls:"",
+      Dangerousgoods: "false",
+      Lithiumbattry: "false",
+      Oversize: "false",
+      Heavy: "false",
+      Price: "00.00",
+      Freightprice: "00.00",
+      Tax:  "00.00",
+      Total: "00.00",
+    },
+    {
+      Part: "M51850-001",
+      Keyword: "POWER CORD ",
+      PartDescription: "SKO-CORD C13 1.83M STKR CONV...",
+      Orderability: "Yes",
+      ResistrictionReason: "",
+      Csr: "N",
+      Rohs: "",
+      Returnable:"true",
+      Hardrolls:"",
+      Dangerousgoods: "false",
+      Lithiumbattry: "false",
+      Oversize: "false",
+      Heavy: "false",
+      Price: "00.00",
+      Freightprice: "00.00",
+      Tax:  "00.00",
+      Total: "00.00",
+    },
+    {
+      Part: "M41711-005",
+      Keyword: "LITHIUM BATTERIES",
+      PartDescription: "SKO-BATT 6C83Wh 3.59Ah LI WK060...",
+      Orderability: "Yes",
+      ResistrictionReason: "",
+      Csr: "N",
+      Rohs: "",
+      Returnable:"true",
+      Hardrolls:"",
+      Dangerousgoods: "false",
+      Lithiumbattry: "false",
+      Oversize: "false",
+      Heavy: "false",
+      Price: "00.00",
+      Freightprice: "00.00",
+      Tax:  "00.00",
+      Total: "00.00",
+    },
+    {
+      Part: "N42541-001",
+      Keyword: "PLASTIC INJECTION MOLDINGS",
+      PartDescription: "SPS-BEZEL LCD FHD",
+      Orderability: "Yes",
+      ResistrictionReason: "",
+      Csr: "N",
+      Rohs: "",
+      Returnable:"true",
+      Hardrolls:"",
+      Dangerousgoods: "false",
+      Lithiumbattry: "false",
+      Oversize: "false",
+      Heavy: "false",
+      Price: "00.00",
+      Freightprice: "00.00",
+      Tax:  "00.00",
+      Total: "00.00",
+    },
+  ]
+
+
+  function renderStepContent() {
+    switch (currentStep) {
+      case 1:
+        return (
+          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit] flex flex-col justify-center gap-0 p-0 bg-white [&>button]:hidden" >
+            <DialogHeader>
+              <div className="flex items-end justify-end ">
+                <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
+                <DialogClose asChild>
+                <Button type="button" variant="secondary" className={'hover:bg-gray-200 active:bg-gray-700'}>
+                  <XIcon/>
+                </Button>
+                </DialogClose>
+              </div>
+              <DialogDescription className={'bg-red-200 p-3 font-bold '}>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
+              <DialogTitle className={'text-blue-600 text-3xl'}>Service Catalog</DialogTitle>
+            </DialogHeader>
+            <div className="flex gap-4 my-2 justify-between p-2">
+              <DialogTitle>Step 1: Select From List of Service Options</DialogTitle>
+              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+                <p>Product Number</p><p>: </p>
+                <p>Product Name</p><p>: </p>
+                <p>Serial Number</p><p>: </p>
+                <p>Warranty Status</p><p>: </p>
+                <p>Currency</p><p>: </p>
+              </div>
+            </div>
+  
+            {/* Table */}
+            <Table>
+              <TableCaption className={'caption-top bg-blue-500 p-2 text-2xl text-left text-black'}>Warranty Services</TableCaption>
+              <TableHeader>
+                <TableRow className={'bg-gray-300'}>
+                  <TableHead className={'font-black text-black'}>Select</TableHead>
+                  <TableHead className={'font-black text-black'}>Service OfferID</TableHead>
+                  <TableHead className={'font-black text-black'}>Service Description</TableHead>
+                  <TableHead className={'font-black text-black'}>Customer TAT</TableHead>
+                  <TableHead className={'font-black text-black'}>Price</TableHead>
+                  <TableHead className={'font-black text-black'}>Tax</TableHead>
+                  <TableHead className={'font-black text-black'}>Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {SC.map((service, index) => (
+                  <TableRow key={index}>
+                    <TableCell><Checkbox /></TableCell>
+                    <TableCell>{service.ServiceOfferID}</TableCell>
+                    <TableCell>{service.SeriviceDescription}</TableCell>
+                    <TableCell>{service.CostumerTAT}</TableCell>
+                    <TableCell>{service.Price}</TableCell>
+                    <TableCell>{service.Tax}</TableCell>
+                    <TableCell>{service.Total}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+  
+            <DialogFooter className={'p-4'}>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => setOpen(false)}>Cancel</button>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => setCurrentStep(2)}>Next</button>
+            </DialogFooter>
+          </DialogContent>
+        );
+  
+      case 2:
+        return (
+          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit] flex flex-col  gap-0 p-0 bg-white [&>button]:hidden">
+            <DialogHeader className={'gap-0'}>
+              <div className="flex items-end justify-end">
+                <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary" className={'hover:bg-gray-200 active:bg-gray-700'}>
+                  <XIcon/>
+                  </Button>
+                </DialogClose>
+              </div>
+              <DialogTitle className={'text-blue-600 text-3xl'}>Service Catalog</DialogTitle>
+              <DialogDescription>Select parts required for the repair.</DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-between items-start p-2">
+              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+                <p>Service OfferID</p><p>: </p>
+                <p>Service Description</p><p>: </p>
+              </div>
+              <div className="flex items-center space-x-2 scale-200 gap-2">
+                <Label htmlFor="orderability">Orderability</Label>
+                <Switch id="orderability" />
+              </div>
+              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+                <p>Product Number</p><p>: </p>
+                <p>Product Name</p><p>: </p>
+                <p>Serial Number</p><p>: </p>
+                <p>Warranty Status</p><p>: </p>
+                <p>Currency</p><p>: </p>
+              </div>
+            </div>
+            {/* Your Custom Layout and Table for Step 2 */}
+
+            <Tabs
+            defaultValue="parts"
+            >
+              <TabsList className={'py-5 px-0 bg-white'}>
+                <TabsTrigger variant={'fullsize'} value="parts" className={'cursor-pointer '}>Parts</TabsTrigger>
+                <TabsTrigger variant={'fullsize'} value="snr" className={'cursor-pointer  text-blue-500'}>SNR</TabsTrigger>
+              </TabsList>
+              <TabsContent value="parts">
+              <Table>
+              <TableHeader>
+                <TableRow className={'bg-gray-300'}>
+                  <TableHead className={'font-black text-black'}>Select</TableHead>
+                  <TableHead className={'font-black text-black p-2'}>
+                    Parts #
+                    <span className="flex items-center"><Input className={'bg-white'}/><XIcon/></span>
+                    </TableHead>
+                  <TableHead className={'font-black text-black'}>
+                    Keyword
+                    <span className="flex items-center"><Input className={'bg-white'}/><XIcon/></span>
+                    </TableHead>
+                  <TableHead className={'font-black text-black'}>
+                    Part Description
+                    <span className="flex items-center"><Input className={'bg-white'}/><XIcon/></span>
+                  </TableHead>
+                  <TableHead className={'font-black text-black'}>Orderability</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Restriction Reason</TableHead>
+                  <TableHead className={'font-black text-black'}>CRS</TableHead>
+                  <TableHead className={'font-black text-black'}>ROHS</TableHead>
+                  <TableHead className={'font-black text-black'}>Retrunable</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Hard roll</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Dangerous Goods</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Lithium Battery</TableHead>
+                  <TableHead className={'font-black text-black'}>Oversize</TableHead>
+                  <TableHead className={'font-black text-black'}>Heavy</TableHead>
+                  <TableHead className={'font-black text-black'}>Price</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Friegh Price</TableHead>
+                  <TableHead className={'font-black text-black'}>Tax</TableHead>
+                  <TableHead className={'font-black text-black'}>Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Parts.map((part, index) => (
+                  <TableRow key={index}>
+                    <TableCell><Checkbox /></TableCell>
+                    <TableCell>{part.Part}</TableCell>
+                    <TableCell>{part.Keyword}</TableCell>
+                    <TableCell>{part.PartDescription}</TableCell>
+                    <TableCell>{part.Orderability}</TableCell>
+                    <TableCell>{part.ResistrictionReason}</TableCell>
+                    <TableCell>{part.Csr}</TableCell>
+                    <TableCell>{part.Rohs}</TableCell>
+                    <TableCell>{part.Returnable}</TableCell>
+                    <TableCell>{part.Hardrolls}</TableCell>
+                    <TableCell>{part.Dangerousgoods}</TableCell>
+                    <TableCell>{part.Lithiumbattry}</TableCell>
+                    <TableCell>{part.Oversize}</TableCell>
+                    <TableCell>{part.Heavy}</TableCell>
+                    <TableCell>{part.Price}</TableCell>
+                    <TableCell>{part.Freightprice}</TableCell>
+                    <TableCell>{part.Tax}</TableCell>
+                    <TableCell>{part.Total}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+              </TabsContent>
+              <TabsContent value="snr">
+                <p>tes</p>
+              </TabsContent>
+            </Tabs>
+  
+            <DialogFooter className={'p-4'}>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer"  onClick={() => setCurrentStep(1)}>Previous</button>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer"  onClick={() => setCurrentStep(3)}>Next</button>
+            </DialogFooter>
+          </DialogContent>
+        );
+  
+      case 3:
+        return (
+          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit]  bg-white [&>button]:hidden ">
+            <DialogHeader>
+              <div className="flex items-end justify-end">
+                <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary" className={'hover:bg-gray-200 active:bg-gray-700'}>
+                  <XIcon/>
+                  </Button>
+                </DialogClose>
+              </div>
+              <DialogTitle className={'text-blue-600 text-3xl'}>Service Catalog</DialogTitle>
+              <DialogDescription>Select parts required for the repair.</DialogDescription>
+            </DialogHeader>
+            <div className="flex gap-4 my-2 justify-end p-2">
+              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+                <p>Product Number</p><p>: </p>
+                <p>Product Name</p><p>: </p>
+                <p>Serial Number</p><p>: </p>
+                <p>Warranty Status</p><p>: </p>
+                <p>Currency</p><p>: </p>
+              </div>
+            </div>
 
   
+            <DialogFooter className={' sm:justify-start'}>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => setCurrentStep(2)}>Previous</button>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => setOpen(false)}>Cancel</button>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => alert('Adding part...')}>Add Part</button>
+              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => alert('Creating order...')}>Create Order</button>
+            </DialogFooter>
+          </DialogContent>
+        );
+  
+      default:
+        return null;
+    }
+  }
+  
+  return (
+    <>
+    <Dialog open={open} onOpenChange={setOpen} >
+      {renderStepContent()}
+    </Dialog>
+    {/* <Button onClick={() => setWorkOpen(true)}>Open Work Order</Button> */}
+  </>
+  );
+}

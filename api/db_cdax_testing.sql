@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 27, 2025 at 05:15 PM
+-- Generation Time: Apr 07, 2025 at 02:46 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,24 +33,14 @@ CREATE TABLE `asset_information` (
   `ProductNumber` varchar(11) NOT NULL,
   `SiteAccountID` int(11) DEFAULT NULL,
   `ContactID` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `asset_information`
 --
 
 INSERT INTO `asset_information` (`AssetID`, `SerialNumber`, `ProductNumber`, `SiteAccountID`, `ContactID`) VALUES
-(1, '5CD2355XDD', '6G1L7PA', 1, 3),
-(2, '5CG1329SV6', '483R7PA', 1, 2),
-(3, '5CG1329SV7', '483R7PA', NULL, 1),
-(4, '5CG2172BXY', '61G62PA', 4, 7),
-(5, '5CG2202BXY', '483R7PA', 6, 11),
-(6, '5CD2375XDD', '6G1L7PA', 3, 5),
-(11, '5CG9087V5T', '6G1L7PA', NULL, 8),
-(13, 'jojo', '67', 8, 13),
-(14, '5CG1987SV6', '6G1L7PQ', 3, 5),
-(15, '5CG2037CSB', '6G1L7PA', NULL, NULL),
-(16, '5CG1329GST', '6G1LGL8', NULL, 15);
+(2, 'CN3CR2C2QR', '2LB19A', 6, 8);
 
 -- --------------------------------------------------------
 
@@ -78,37 +68,14 @@ CREATE TABLE `caseinformation` (
   `CreatedBy` int(11) DEFAULT NULL,
   `Owner` int(11) DEFAULT NULL,
   `WorkGround` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `caseinformation`
 --
 
 INSERT INTO `caseinformation` (`CaseID`, `SiteAccountID`, `ContactID`, `AssetID`, `CaseSubject`, `CaseType`, `KCI_Flag`, `IncomingChannel`, `CaseStatus`, `CasePriority`, `CustomerSeverity`, `CreatedOn`, `CaseClosedDate`, `CaseNote`, `SymptomCode`, `CaseResolution`, `CreatedBy`, `Owner`, `WorkGround`) VALUES
-(1, 1, 3, 1, 'Ngawur', 'aaa', 0, NULL, NULL, NULL, NULL, '2025-03-22 13:10:17', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(1801, 1, 2, 2, 'asdasd', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-27 08:52:40', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(5492, 8, 13, 13, 'juju', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-26 06:05:10', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(8644, 1, 2, 2, 'Kerusakan LCD', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-24 07:52:15', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(9811, NULL, 1, 3, 'a', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-22 09:56:09', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(10716, NULL, 1, 3, 'asd', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-27 11:58:04', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(28827, 1, 3, 1, 'asdasdasd', 'Item2', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-23 18:05:23', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(38197, 1, 3, 1, 'aasdasd', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-24 02:52:55', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(38541, NULL, 15, 16, 'asasa', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-27 15:47:17', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(42741, 1, 2, 1, '9820192891', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-24 07:39:54', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(54186, 6, 11, 5, 'asdasd', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-25 22:13:41', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(57599, 1, 2, 2, 'sadsd', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-27 09:18:22', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(64562, 1, 2, 2, 'asdas', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-25 22:04:13', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(71341, 1, 2, 1, '9820192891', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-24 07:39:54', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(74486, 4, 7, 4, 'sadas', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-25 22:21:47', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(81919, 1, 3, 1, 'asad', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-25 22:03:51', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(82129, 1, 2, 2, 'a', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-22 09:51:12', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(83521, NULL, 8, 11, 'asdasd', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-27 15:40:31', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(85893, 4, 7, 4, 'aset', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-25 20:53:28', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(87388, 3, 5, 14, 'sadas', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-27 05:58:33', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(91574, 1, 3, 1, 'as', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-25 21:07:28', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(92136, NULL, 13, 13, 'asdsad', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-27 09:56:18', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(97609, 1, 3, 1, 'asdasdasd', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-22 10:34:16', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL),
-(99098, 4, 7, 4, 'sdasa', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-03-25 22:04:34', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL);
+(47981, 6, 8, 2, 'Tinta Bocor', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-04-07 07:21:57', NULL, 'This is a sample case note.', 'General Issue', '', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -126,6 +93,22 @@ CREATE TABLE `casenotes` (
   `MinutesSpent` int(11) DEFAULT NULL,
   `Note` text DEFAULT NULL,
   `CreatedOn` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `confirm_service`
+--
+
+CREATE TABLE `confirm_service` (
+  `id_confirmService` int(5) NOT NULL,
+  `AssetID` int(11) NOT NULL,
+  `Service_offerID` varchar(8) NOT NULL,
+  `PartID` int(11) NOT NULL,
+  `sub_total` float NOT NULL,
+  `total` float NOT NULL,
+  `Incident_Type` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -155,26 +138,31 @@ CREATE TABLE `contact_information` (
   `StateProvince` varchar(100) DEFAULT NULL,
   `Country` varchar(100) DEFAULT NULL,
   `ZipPostalCode` varchar(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `contact_information`
 --
 
 INSERT INTO `contact_information` (`ContactID`, `SiteAccountID`, `Salutation`, `FirstName`, `LastName`, `Email`, `PreferredLanguage`, `Phone`, `Mobile`, `WorkPhone`, `WorkExtension`, `OtherPhone`, `OtherExtension`, `Fax`, `AddressLine1`, `AddressLine2`, `City`, `StateProvince`, `Country`, `ZipPostalCode`) VALUES
-(1, NULL, 'Mr. ', 'RAFA', 'ELFARIZI', 'rafaelfarizi1@gmail.com', 'Bahasa Indonesia', '083834685279', '', '', '', '', '', '', 'Dukuh Cenang Desa Cenggini RT 03 RW 04', '', 'Kabupaten tegal', 'Jawa Tengah', 'Indonesia', '40511'),
-(2, 1, 'Mrs. ', 'Mey', 'Almasya', 'mey-miku21@gmail.com', 'English', '085755162771', '085755162771', '', '', '', '', '', 'Surakarta', '', 'Solo', 'Jawa Tengah', 'Indonesia', '40511'),
-(3, 1, 'Mr. ', 'Miku21', 'Margareth', 'mikucomunity21@gmail.com', 'English', '087731137512', '085755162771', '', '', '', '', '', 'Tegal', '', 'Kabupaten tegal', 'Jawa Tengah', 'Indonesia', '40511'),
-(4, 2, 'Mrs. ', 'Meisa', 'Putra', 'meisaputra@gmail.co.id', 'Spanish', '089677544227', '087731137512', '', '', '', '', '', 'Dukuh Cenang Desa Cenggini RT 03 RW 04', '', 'Kabupaten tegal', 'Jawa Tengah', '', '40511'),
-(5, 3, 'Mrs. ', 'Miku21', 'Margareth', 'mikucomunity21@gmail.com', 'Spanish', '087731137512', '', '', '', '', '', '', 'Dukuh Cenang Desa Cenggini RT 03 RW 04', '', 'Kabupaten tegal', 'Jawa Tengah', '', '40511'),
-(6, NULL, 'Mrs. ', 'Meisa', 'Putra', 'Meisaputra@gmail.com', 'Spanish', '087731137512', '', '', '', '', '', '', 'Dukuh Cenang Desa Cenggini RT 03 RW 04', '', '', '', 'Indonesia', ''),
-(7, 4, 'Mr. ', 'Aprilia', 'Margaret', 'afmmargareth@gmail.com', 'Bahasa Indonesia', '6287712341234', '', '', '', '', '', '', 'Jakarta Selatan', '', 'Jakarta', 'DKI Jakarta', 'Indonesia', '40511'),
-(8, NULL, 'Mrs. ', 'Joko', 'Wi', 'jokowi@gmail.com', 'English', '89271123', '8928123', '', '', '', '', '', 'Jakarta Utara', '', 'Jakarta', 'bandung', 'Indonesia', '88201'),
-(9, 4, 'Mrs. ', 'Fidelis', 'Margareth', 'mikucomunity21@gmail.com', 'English', '087731137512', '', '', '', '', '', '', 'Dukuh Cenang Desa Cenggini RT 03 RW 04', '', 'Kabupaten tegal', 'Jawa Tengah', '', '40511'),
-(11, 6, 'Mrs. ', 'Aprilia', 'Margareth', 'mikucomunity21@gmail.com', 'English', '087731137512', '', '', '', '', '', '', 'Dukuh Cenang Desa Cenggini RT 03 RW 04', '', 'Kabupaten tegal', 'Jawa Tengah', '', '40511'),
-(12, 7, 'Mr. ', 'RAFA', 'ELFARIZI', 'rafaelfarizi1@gmail.com', 'English', '083834685279', '', '', '', '', '', '', 'Dukuh Cenang Desa Cenggini RT 03 RW 04', '', 'Kabupaten tegal', 'Jawa Tengah', '', '40511'),
-(13, 8, 'Mrs. ', 'Hida', 'Bee', 'Hildabee@gmail.com', 'Bahasa Indonesia', '878787', '9999', 'Cenggini', '', '', '', '', 'Yogyakarta', '', 'jau', 'nuuu', 'Singapura', '2222'),
-(15, NULL, 'Mr. ', 'Ajax', 'Query', 'ajax@gmail.com', 'English', '082121212121', '082121212121', '', '', '', '', '', 'Java', '', 'Jawa', 'Jawa Tengah', 'Indonesia', '40511');
+(8, 6, 'Mr. ', 'Joshua', 'Harmes', 'joshuaharmes@gmai.com', 'Spanish', '1872923', '', '', '', '', '', '', 'Jln Kerupuk', '', 'Jambi', 'Jambi', 'Indonesia', '88928');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `global_trade_check`
+--
+
+CREATE TABLE `global_trade_check` (
+  `id_gtc` int(25) NOT NULL,
+  `global_trade_status` varchar(30) NOT NULL,
+  `embargoed_country` varchar(30) NOT NULL,
+  `gt_override_reason` varchar(30) NOT NULL,
+  `gt_details` varchar(50) NOT NULL,
+  `screening_id` varchar(25) NOT NULL,
+  `gt_active_listening` varchar(30) NOT NULL,
+  `gt_al_comments` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -193,7 +181,7 @@ CREATE TABLE `materialorder` (
   `RMANumber` varchar(100) DEFAULT NULL,
   `ReadyForClosureDate` datetime DEFAULT NULL,
   `Owner` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -210,7 +198,7 @@ CREATE TABLE `materialorderlineitems` (
   `ATPStatus` varchar(50) DEFAULT NULL,
   `Price` decimal(10,2) DEFAULT NULL,
   `Quantity` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -226,19 +214,14 @@ CREATE TABLE `product_information` (
   `end_of_sales_date` date DEFAULT NULL,
   `end_of_support_date` date DEFAULT NULL,
   `vendor` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `product_information`
 --
 
 INSERT INTO `product_information` (`ProductNumber`, `ProductLine`, `ProductName`, `ProductTypeID`, `end_of_sales_date`, `end_of_support_date`, `vendor`) VALUES
-('483R7PA', 'KV', 'HP 14s-cf2500TX', 5, NULL, NULL, 'HP'),
-('61G62PA', '6U', 'HP 245 G8', 5, NULL, NULL, 'HP'),
-('67', 'jk', 'juju', 7, NULL, NULL, NULL),
-('6G1L7PA', 'M7', 'Victus by HP 15.6 inch Gaming Laptop 15-fb0000 (598V1AV)', 5, NULL, NULL, 'HP'),
-('6G1L7PQ', 'M7', 'Yui', 7, NULL, NULL, NULL),
-('6G1LGL8', 'M7', 'Calculator X7', 7, NULL, NULL, NULL);
+('2LB19A', 'GC', 'HP Ink Tank 115', 2, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -251,20 +234,15 @@ CREATE TABLE `product_type` (
   `ProductType` varchar(50) NOT NULL,
   `ProductTower` enum('PSG','IPG','') DEFAULT NULL,
   `ProductGroup` enum('Commercial','Consumer','') DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `product_type`
 --
 
 INSERT INTO `product_type` (`ProductTypeID`, `ProductType`, `ProductTower`, `ProductGroup`) VALUES
-(1, 'Accessories', 'PSG', 'Commercial'),
-(2, 'Desktop', 'PSG', 'Consumer'),
-(3, 'Tablet', 'PSG', 'Consumer'),
-(4, 'Monitor', 'PSG', 'Consumer'),
-(5, 'Notebook/Laptop', 'PSG', 'Consumer'),
-(6, 'Desktop - C ', 'PSG', 'Consumer'),
-(7, 'Calculator', 'PSG', 'Consumer');
+(1, 'Notebook/Laptop', 'PSG', 'Consumer'),
+(2, 'Deskjet', 'IPG', 'Consumer');
 
 -- --------------------------------------------------------
 
@@ -282,7 +260,7 @@ CREATE TABLE `servicecatalog` (
   `Price` decimal(10,2) DEFAULT NULL,
   `Tax` decimal(10,2) DEFAULT NULL,
   `Total` decimal(10,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -308,9 +286,11 @@ CREATE TABLE `servicecatalog_parts` (
   `Heavy_Flag` tinyint(1) DEFAULT 0,
   `Price` decimal(10,2) DEFAULT NULL,
   `FreightPrice` decimal(10,2) DEFAULT NULL,
+  `Shipping_Fee` float NOT NULL,
+  `qty_parts` int(3) NOT NULL,
   `Tax` decimal(10,2) DEFAULT NULL,
   `Total` decimal(10,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -329,20 +309,31 @@ CREATE TABLE `site_account` (
   `StateProvince` varchar(100) DEFAULT NULL,
   `Country` varchar(100) NOT NULL,
   `ZipPostalCode` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `site_account`
 --
 
 INSERT INTO `site_account` (`SiteAccountID`, `Company`, `Email`, `PrimaryPhone`, `AddressLine1`, `AddressLine2`, `City`, `StateProvince`, `Country`, `ZipPostalCode`) VALUES
-(1, 'Miku21 Store', 'mikucomunity21@gmail.com', '087731137512', 'Virtual', '', 'Virtual World', 'Virtual World', '', '40511'),
-(2, 'PT Kapal Api', 'kapalapi@gmail.com', '087731137512', 'Jakarta Utara', '', 'Jakarta', 'DKI Jakarta', '', '40511'),
-(3, 'Miku21Bot', 'rafaelfarizi1@gmail.com', '083834685279', 'Dukuh Cenang Desa Cenggini RT 03 RW 04', 'Tegal', 'Kabupaten tegal', 'Jawa Tengah', '', '40511'),
-(4, 'AFM Company', 'afmcompany@gmail.com', '6289112341234', 'Jakarta Selatan', '', 'Jakarta', 'DKI Jakarta', '', '40511'),
-(6, 'AFMC', 'mikucomunity21@gmail.com', '087731137512', '', '', 'Kabupaten tegal', 'Jawa Tengah', '', '40511'),
-(7, 'UGM', 'ugm@gmail.com', '083834685279', '', '', 'Kabupaten tegal', 'Jawa Tengah', '', '40511'),
-(8, 'Janu', 'Ari@gmail.com', '08777777', 'Surabaya', '', 'Kediri', 'Jawir', '', '23233');
+(6, 'PT Bango', 'bangsejahtera@gmail.com', '88729', 'Jln Kemangi', '', 'Surakarta', 'Jawa ', '', '87291');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `warranty_services`
+--
+
+CREATE TABLE `warranty_services` (
+  `Service_offerID` varchar(8) NOT NULL,
+  `Service_description` varchar(255) NOT NULL,
+  `CTat_RTime` varchar(5) NOT NULL,
+  `Price` float NOT NULL,
+  `Shipping_Fee` float NOT NULL,
+  `qty_ws` int(3) NOT NULL,
+  `Tax` float NOT NULL,
+  `Total` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -365,7 +356,7 @@ CREATE TABLE `workorder` (
   `ShipmentState` varchar(50) DEFAULT NULL,
   `CreatedOn` datetime DEFAULT current_timestamp(),
   `Owner` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Indexes for dumped tables
@@ -385,9 +376,9 @@ ALTER TABLE `asset_information`
 --
 ALTER TABLE `caseinformation`
   ADD PRIMARY KEY (`CaseID`),
-  ADD KEY `SiteAccountID` (`SiteAccountID`),
+  ADD KEY `AssetID` (`AssetID`),
   ADD KEY `ContactID` (`ContactID`),
-  ADD KEY `AssetID` (`AssetID`);
+  ADD KEY `SiteAccountID` (`SiteAccountID`);
 
 --
 -- Indexes for table `casenotes`
@@ -397,11 +388,26 @@ ALTER TABLE `casenotes`
   ADD KEY `CaseID` (`CaseID`);
 
 --
+-- Indexes for table `confirm_service`
+--
+ALTER TABLE `confirm_service`
+  ADD PRIMARY KEY (`id_confirmService`),
+  ADD KEY `asset_information` (`AssetID`),
+  ADD KEY `warranty_services` (`Service_offerID`),
+  ADD KEY `servicecatalog_parts` (`PartID`);
+
+--
 -- Indexes for table `contact_information`
 --
 ALTER TABLE `contact_information`
   ADD PRIMARY KEY (`ContactID`),
   ADD KEY `SiteAccountID` (`SiteAccountID`);
+
+--
+-- Indexes for table `global_trade_check`
+--
+ALTER TABLE `global_trade_check`
+  ADD PRIMARY KEY (`id_gtc`);
 
 --
 -- Indexes for table `materialorder`
@@ -450,6 +456,12 @@ ALTER TABLE `site_account`
   ADD PRIMARY KEY (`SiteAccountID`);
 
 --
+-- Indexes for table `warranty_services`
+--
+ALTER TABLE `warranty_services`
+  ADD PRIMARY KEY (`Service_offerID`);
+
+--
 -- Indexes for table `workorder`
 --
 ALTER TABLE `workorder`
@@ -464,7 +476,7 @@ ALTER TABLE `workorder`
 -- AUTO_INCREMENT for table `asset_information`
 --
 ALTER TABLE `asset_information`
-  MODIFY `AssetID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `AssetID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `casenotes`
@@ -476,7 +488,13 @@ ALTER TABLE `casenotes`
 -- AUTO_INCREMENT for table `contact_information`
 --
 ALTER TABLE `contact_information`
-  MODIFY `ContactID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `ContactID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `global_trade_check`
+--
+ALTER TABLE `global_trade_check`
+  MODIFY `id_gtc` int(25) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `materialorder`
@@ -512,7 +530,7 @@ ALTER TABLE `servicecatalog_parts`
 -- AUTO_INCREMENT for table `site_account`
 --
 ALTER TABLE `site_account`
-  MODIFY `SiteAccountID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `SiteAccountID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `workorder`
@@ -545,6 +563,14 @@ ALTER TABLE `caseinformation`
 --
 ALTER TABLE `casenotes`
   ADD CONSTRAINT `casenotes_ibfk_1` FOREIGN KEY (`CaseID`) REFERENCES `caseinformation` (`CaseID`);
+
+--
+-- Constraints for table `confirm_service`
+--
+ALTER TABLE `confirm_service`
+  ADD CONSTRAINT `asset_information` FOREIGN KEY (`AssetID`) REFERENCES `asset_information` (`AssetID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `servicecatalog_parts` FOREIGN KEY (`PartID`) REFERENCES `servicecatalog_parts` (`PartID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `warranty_services` FOREIGN KEY (`Service_offerID`) REFERENCES `warranty_services` (`Service_offerID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `contact_information`

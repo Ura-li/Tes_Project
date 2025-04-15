@@ -66,7 +66,7 @@ const data = {
       title: "Master",
       url: "#",
       icon: Bot,
-      // isActive: true,
+      isActive: true,
       items: [
         {
           title: "Company",
@@ -90,7 +90,7 @@ const data = {
         },
         {
           title: "Product Type",
-          url: "/master/Product_type",
+          url: "/master/ProductType_table ",
         },        
       ],
     },

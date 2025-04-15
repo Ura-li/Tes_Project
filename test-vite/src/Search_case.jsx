@@ -64,92 +64,27 @@ const data = {
   navModals: [
     {
       title: "Account Info",
-      url: "#",
+      key: "account",
       icon: User2,
-      // isActive: true,
-      items: [
-        {
-          title: "Company",
-          url: "/master/Company_table",
-        },
-        {
-          title: "Assets",
-          url: "/master/Assets_table",
-        },
-        {
-          title: "Contact",
-          url: "/master/Contact_table",
-        },
-        {
-          title: "Case",
-          url: "/master/Case_table",
-        },
-      ],
+      
     },
     {
       title: "Contact Info",
-      url: "#",
+      key: "contact",
       icon: PhoneCall,
-      items: [
-        {
-          title: "Case",
-          url: "/Case",
-        },
-        {
-          title: "Work Order",
-          url: "#",
-        },
-        {
-          title: "Material Order",
-          url: "#",
-        },
-      ],
+      
     },
     {
       title: "Asset Info",
-      url: "#",
+      key: "asset",
       icon: LucideLaptop,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
+      
     },
     {
       title: "Repair History",
-      url: "#",
+      key: "repair",
       icon: Clock,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
+      
     },
   ],
   navMain: [
@@ -225,6 +160,9 @@ const data = {
   ],
 };
 
+import ModalProvider from "./components/modal-provider";
+
+
 const Search_case = () => {
   //create search state
   const [search, setSearch] = useState("");
@@ -242,6 +180,8 @@ const Search_case = () => {
 
   //show state condiition where search by email / phone for special condition
   const [searchByEmailPhoneForGlobalSearch, setSearchByEmailPhoneForGlobalSearch] = useState(false);
+
+  const [activeModal, setActiveModal] = useState(null)
 
   const handleSearchClick = () => {
     let queryParams = [];
@@ -285,20 +225,7 @@ const Search_case = () => {
     console.log("Contacts Searched trhough Phone:", contacts);
   }, [contacts]); // This runs every time activeTab changes
 
-  const handleInputChange = (e) => {
-    // if (search.trim() !== "") {
-    const { id, value } = e.target; // Get input field ID and value
-    setSearch((prev) => ({
-      ...prev,
-      [id]: value, // Update the corresponding field
-    }));
-    console.log(`Updated searchData:`, search);
-    // }
-    // console.log(search)
 
-    // }
-    console.log(search);
-  };
 
 
   //define method
@@ -408,6 +335,20 @@ const Search_case = () => {
     }));
   };
 
+  const handleClearAllAcconunt = () => {
+    setFormDataSiteAccount({
+    Company: "",
+    Email: "",
+    PrimaryPhone: "",
+    AddressLine1: "",
+    AddressLine2: "",
+    City: "",
+    StateProvince: "",
+    Country: "",
+    ZipPostalCode: "",
+    })
+  }
+
   //handler submit
   // console.log(formData)
   const handlerSiteAccountSubmit = async () => {
@@ -453,6 +394,29 @@ const Search_case = () => {
       [id]: value,
     }));
   };
+
+  const handleClearAllContact = () => {
+    setFormDataContact({
+    Salutation: "",
+    FirstName: "",
+    LastName: "",
+    Email: "",
+    PreferredLanguage: "",
+    Phone: "",
+    Mobile: "",
+    WorkPhone: "",
+    WorkExtension: "",
+    OtherPhone: "",
+    OtherExtension: "",
+    Fax: "",
+    AddressLine1: "",
+    AddressLine2: "",
+    City: "",
+    StateProvince: "",
+    Country: "",
+    ZipPostalCode: "",
+    });
+  }
 
   const handlerContactSubmit = async () => {
     console.log(formDataContact);
@@ -570,6 +534,67 @@ const Search_case = () => {
     }
   };
 
+  const updateFormFieldsInSearch = (fields) => {
+    setSearch((prev) => ({
+      ...prev,
+      ...fields,
+    }));
+  };
+
+  const handleInputChange = (e) => {
+    // if (search.trim() !== "") {
+    const { id, value } = e.target; // Get input field ID and value
+    // setSearch((prev) => ({
+    //   ...prev,
+    //   [id]: value, // Update the corresponding field
+    // }));
+    updateFormFieldsInSearch({ [id]: value });
+    console.log(`Updated searchData:`, search);
+    // }
+    // console.log(search)
+
+    // }
+    console.log(search);
+  };
+
+  // const initialSearchState = {
+  //   Email: "",
+  //   SerialNumber: "",
+  //   Country: "",
+  //   Company: "",
+  //   ZipPostalCode: "",
+  //   City: "",
+  //   Phone: "",
+  //   AssetTag: "",
+  //   ContractID: "",
+  //   TransactionType: "",
+  //   TransactiontID: "",
+  //   Opsi: "",
+  // };
+  
+  // const [initial, setInitialsearch] = useState(initialSearchState);
+  
+
+  const handleClearAll = () => {
+    updateFormFieldsInSearch({
+      Email: "",
+      SerialNumber: "",
+      Country: "",
+      Company: "",
+      ZipPostalCode: "",
+      City: "",
+      Phone: "",
+      AssetTag: "",
+      ContractID: "",
+      TransactionType: "",
+      TransactiontID: "",
+      Opsi: "",
+      LicenseKey: "",
+      PIN: "",
+    });
+  };
+  
+
   return (
     <div className="flex flex-1 p-2 pt-0">
       <SidebarProvider className=" overflow-auto min-h-[full]">
@@ -607,8 +632,9 @@ const Search_case = () => {
                   setCaseType={setCaseType}
                 ></BtnModal>
                 <SidebarTrigger
-                  className="-ml-1 bg-amber-50 scale-125 mr-1"
+                  className="-ml-1 scale-125 mr-1"
                   icon={PanelRight}
+                  color={"#ffffff"}
                 />
               </div>
             </TabsList>
@@ -616,11 +642,17 @@ const Search_case = () => {
             {/* search tab */}
             <TabsContent value="search">
               <Card className="drop-shadow-md">
+                <Button className="self-end mr-2" variant="ghost"
+                onClick={handleClearAll}
+                >
+                  Clear All
+                </Button>
                 <CardContent className="grid gap-5 grid-cols-3">
                   <div className="space-y-0.5">
                     <Label htmlFor="Email">Email</Label>
                     <Input
                       id="Email"
+                      value={search.Email || ""}
                       onChange={handleInputChange}
                       className="border-b-black p-1 "
                     />
@@ -629,6 +661,7 @@ const Search_case = () => {
                     <Label htmlFor="SerialNumber">Serial Number</Label>
                     <Input
                       id="SerialNumber"
+                      value={search.SerialNumber || ""}
                       onChange={handleInputChange}
                       className="border-b-black p-1"
                     />
@@ -637,6 +670,7 @@ const Search_case = () => {
                     <Label htmlFor="Country">Country</Label>
                     <SelectBar
                       id="Country"
+                      value={search.Country || ""}
                       onChange={handleInputChange}
                     ></SelectBar>
                   </div>
@@ -644,48 +678,82 @@ const Search_case = () => {
                     <Label htmlFor="Company">Company</Label>
                     <Input
                       id="Company"
+                      value={search.Company || ""}
                       className="border-b-black p-1"
                       onChange={handleInputChange}
                     />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="ZipPostalCode">Zip/Postal</Label>
-                    <Input id="ZipPostalCode" className="border-b-black p-1" />
+                    <Input 
+                      id="ZipPostalCode" 
+                      value={search.ZipPostalCode || ""}
+                      className="border-b-black p-1" 
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="City">City</Label>
-                    <Input id="City" className="border-b-black p-1" />
+                    <Input 
+                      id="City" 
+                      value={search.City || ""}
+                      className="border-b-black p-1"
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="Phone">Phone</Label>
                     <Input
                       id="Phone"
+                      value={search.Phone || ""}
                       onChange={handleInputChange}
                       className="border-b-black p-1"
                     />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="AssetTag">Asset Tag</Label>
-                    <Input id="AssetTag" className="border-b-black p-1" />
+                    <Input 
+                      id="AssetTag" 
+                      value={search.AssetTag || ""}
+                      className="border-b-black p-1"
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="ContractID">Contrack Id</Label>
-                    <Input id="ContractID" className="border-b-black p-1" />
+                    <Input 
+                      id="ContractID" 
+                      value={search.ContractID || ""}
+                      className="border-b-black p-1"
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="TransactionType">Transaction Type</Label>
                     <Input
                       id="TransactionType"
+                      value={search.TransactionType || ""}
                       className="border-b-black p-1"
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="TransactiontID">Transaction Id</Label>
-                    <Input id="TransactiontID" className="border-b-black p-1" />
+                    <Input 
+                    id="TransactiontID" 
+                    value={search.TransactiontID || ""}
+                    className="border-b-black p-1"
+                    onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="Opsi">Opsi</Label>
-                    <Input id="Opsi" className="border-b-black p-1" />
+                    <Input 
+                    id="Opsi" 
+                    value={search.Opsi || ""}
+                    className="border-b-black p-1"
+                    onChange={handleInputChange}
+                    />
                   </div>
                   {/* <div className="space-y-0.5">
                   <Label htmlFor="LicenseKey">Lisense key</Label>
@@ -783,7 +851,7 @@ const Search_case = () => {
                     <span className="flex items-center">
                       <User2></User2>Basic Information
                     </span>
-                    <Button className="self-end mr-2" variant="ghost">
+                    <Button className="self-end mr-2" variant="ghost" onClick={handleClearAllAcconunt}>
                       Clear All
                     </Button>
                     <Button className="bg-white text-gray-400  self-end ">
@@ -871,6 +939,7 @@ const Search_case = () => {
                     <Label htmlFor="current">Country</Label>
                     <SelectBar
                       id="Country"
+                      value={formDataSiteAccount.Country}
                       onChange={handlerInputSiteAccountChange}
                     />
                   </div>
@@ -914,7 +983,11 @@ const Search_case = () => {
                   </CardTitle>
                   <div>
                     <Button className="bg-white text-gray-400  self-end "><Copy></Copy>Same in Account Adress </Button>
-                    <Button className="self-end mr-2" variant="ghost">Clear All</Button>
+                    <Button 
+                    className="self-end mr-2" 
+                    variant="ghost"
+                    onClick={handleClearAllContact}
+                    >Clear All</Button>
                   </div>
                 </CardHeader>
                 <CardContent className="grid gap-5 grid-cols-5">
@@ -925,10 +998,12 @@ const Search_case = () => {
                     </Label>
                     <SelectBar1
                       id="Salutation"
+                      value={formDataContact.Salutation}
                       onChange={handlerInputContactChange}
                     />
                     <SelectBar2
                       id="PreferredLanguage"
+                      value={formDataContact.PreferredLanguage}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -938,6 +1013,7 @@ const Search_case = () => {
                       id="FirstName"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.FirstName}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -947,6 +1023,7 @@ const Search_case = () => {
                       id="LastName"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.LastName}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -956,6 +1033,7 @@ const Search_case = () => {
                       id="Email"
                       type="email"
                       className="border-b-black p-1"
+                      value={formDataContact.Email}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -970,6 +1048,7 @@ const Search_case = () => {
                       id="Phone"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.Phone}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -979,6 +1058,7 @@ const Search_case = () => {
                       id="Mobile"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.Mobile}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -988,6 +1068,7 @@ const Search_case = () => {
                       id="WorkPhone"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.WorkPhone}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -997,6 +1078,7 @@ const Search_case = () => {
                       id="WorkExtension"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.WorkExtension}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1006,6 +1088,7 @@ const Search_case = () => {
                       id="OtherPhone"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.OtherPhone}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1015,6 +1098,7 @@ const Search_case = () => {
                       id="OtherExtension"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.OtherExtension}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1024,6 +1108,7 @@ const Search_case = () => {
                       id="Fax"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.Fax}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1038,6 +1123,7 @@ const Search_case = () => {
                       id="AddressLine1"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.AddressLine1}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1047,6 +1133,7 @@ const Search_case = () => {
                       id="AddressLine2"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.AddressLine2}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1056,6 +1143,7 @@ const Search_case = () => {
                       id="City"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.City}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1065,6 +1153,7 @@ const Search_case = () => {
                       id="StateProvince"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.StateProvince}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1072,6 +1161,7 @@ const Search_case = () => {
                     <Label htmlFor="current">Country</Label>
                     <SelectBar
                       id="Country"
+                      value={formDataContact.Country}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1081,6 +1171,7 @@ const Search_case = () => {
                       id="ZipPostalCode"
                       type="text"
                       className="border-b-black p-1"
+                      value={formDataContact.ZipPostalCode}
                       onChange={handlerInputContactChange}
                     />
                   </div>
@@ -1107,9 +1198,14 @@ const Search_case = () => {
         </div>
         <Sidebar side="right" className="relative h-full" collapsible="icon">
           <SidebarContent>
-            <InfoCase items={data.navModals} items2={data.navMain} />
+            <InfoCase items={data.navModals} items2={data.navMain} onModalClick={setActiveModal} />
           </SidebarContent>
         </Sidebar>
+      <ModalProvider 
+        selectedAssetForCase={selectedAssetForCase}
+        selectedContactForCase={selectedContactForCase} 
+        activeModal={activeModal} 
+        setActiveModal={setActiveModal} />
       </SidebarProvider>
     </div>
   );

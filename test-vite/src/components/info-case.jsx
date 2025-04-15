@@ -22,7 +22,8 @@ import {
 
 export function InfoCase({
   items,
-  items2
+  items2,
+  onModalClick,
 }) {
   return (
     <SidebarGroup > 
@@ -32,13 +33,13 @@ export function InfoCase({
             <SidebarMenuItem
             key={item.title}
             className="group/collapsible">
-                <SidebarMenuButton tooltip={item.title}>
-                    {}
+                <SidebarMenuButton tooltip={item.title} onClick={() => onModalClick(item.key)}>
+                    
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
                   <Maximize2
                     className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    {}
+                    
                 </SidebarMenuButton>
             </SidebarMenuItem>
         ))}
@@ -58,17 +59,7 @@ export function InfoCase({
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub>
-                  {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild>
-                        <a href={subItem.url}>
-                          <span>{subItem.title}</span>
-                        </a>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
+                
               </CollapsibleContent>
             </SidebarMenuItem>
           </Collapsible>
