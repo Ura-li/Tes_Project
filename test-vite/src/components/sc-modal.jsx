@@ -154,10 +154,13 @@ export function BtnModalContact({
   setSelectedContact, 
   open : externalOpen, 
   onOpenChange : externalOnChange,
+  companyData
   }) {
     console.log("CHECK DATA FORM BTN MOdAL",selectedContact)
 
   //set modal state 
+
+  console.log("Company Data in Modal Contact : ",companyData)
   const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);
   
   const open = externalOpen || isModalContactSearchInput;
@@ -189,7 +192,9 @@ export function BtnModalContact({
       StateProvince: '',
       Country: '',
       ZipPostalCode: '',
-      SiteAccountID: selectedCompany?.SiteAccountID || null
+      SiteAccountID: typeof selectedCompany === "object" 
+      ? selectedCompany.SiteAccountID ?? "" 
+      : selectedCompany
     });
     
     
@@ -245,6 +250,7 @@ export function BtnModalContact({
         alert("Contact updated successfully!");
       } else {
         // ✅ Add new contact
+        console.log("Selected Company in ModalContactSubmit : ", selectedCompany)
         await ApiCustomer.post("/api/contact-information", formDataContact);
         setIsModalContactSearchInput(false)
         alert("Contact added successfully!");
@@ -253,9 +259,9 @@ export function BtnModalContact({
       // fetchContacts(); // ✅ Refresh contacts table
 
        // ✅ Ensure selectedCompany is not null before fetching contacts
-    if (selectedCompany?.SiteAccountID) {
+    if (selectedCompany.SiteAccountID || selectedCompany.length !== 0) {
       console.log("Selected Company :",selectedCompany);
-      const updatedContacts = await fetchContacts(selectedCompany.SiteAccountID);
+      const updatedContacts = await fetchContacts(selectedCompany.SiteAccountID ? selectedCompany.SiteAccountID : selectedCompany );
       setSelectedContact(updatedContacts); // ✅ Update state so table refreshes
       console.log("Updated Selected Contacts:", updatedContacts);
     }
@@ -265,6 +271,24 @@ export function BtnModalContact({
     }
   };
 
+  // make the 'same in account information' button :
+  const handleCopyFromAccount = () => {
+    if (companyData == null) return;
+  
+    const fieldsToCopy = [
+      "AddressLine1",
+      "AddressLine2",
+      "City",
+      "StateProvince",
+      "Country",
+      "ZipPostalCode"
+    ];
+  
+    fieldsToCopy.forEach((field) => {
+      const value = companyData[field] || "";
+      handlerInputContactChange({ target: { id: field, value } });
+    });
+  };
   
 
   // Edit function 
@@ -364,35 +388,35 @@ export function BtnModalContact({
 
         <DialogHeader className="flex-row justify-between items-center">
           <DialogTitle className="text-md">Address</DialogTitle>
-          <Button className="bg-white text-gray-400   "><Copy></Copy>Same in Account Adress </Button>
+          <Button className="bg-white text-gray-400   " onClick={handleCopyFromAccount}><Copy></Copy>Same in Account Adress </Button>
         </DialogHeader>
 
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-0.4">
             <Label htmlFor="AddressLine1">Address Line 1</Label>
-            <Input value={formDataContact.AddressLine1} id="AddressLine1" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input id="AddressLine1" type="text" value={formDataContact.AddressLine1 || ""} className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 flex flex-col">
             <Label htmlFor="current">Country</Label>
-            <SelectBar value={formDataContact.Country} id="Country" onChange={handlerInputContactChange}/>
+            <SelectBar id="Country" value={formDataContact.Country || ""} onChange={handlerInputContactChange}/>
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="AddressLine2">Address Line 2</Label>
-            <Input value={formDataContact.AddressLine2} id="AddressLine2" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input id="AddressLine2" value={formDataContact.AddressLine2 || ""} type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
-            <Input value={formDataContact.ZipPostalCode} id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input id="ZipPostalCode" value={formDataContact.ZipPostalCode || ""} type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="City">City</Label>
-            <Input value={formDataContact.City} id="City" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <Input id="City" type="text" value={formDataContact.City || ""} className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
 
             
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="StateProvince">State/Province</Label>
-            <Input value={formDataContact.StateProvince} id="StateProvince" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <Input id="StateProvince" value={formDataContact.StateProvince || ""} type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
 
             
                   {/* Hidden Input for SiteAccountID */}
@@ -422,7 +446,8 @@ export function BtnModalContact({
  * TODO 
  * MAKE ROUTE FOR PRODUCT
  */
-export function BtnModalAsset({
+export function 
+BtnModalAsset({
   typeSearch,
   contactID, 
   siteAccountID, 
@@ -1832,144 +1857,103 @@ return (
 //   )
 // }
 
-export function BtnModalsWorkOrder({ open, setOpen}) {
+export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
   const [step, setStep] = useState(0);
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
   const [currentStep, setCurrentStep] = useState(1);
+  const [assetForWorkOrderCreation, setAssetForWorkOrderCreation] = useState([]);
   const [modalPart, setModalPart] = useState(false);
-  const SC = [
-    {
-      ServiceOfferID: "DEPOT2",
-      SeriviceDescription: "DEPOT REPAIR - 2DAY",
-      CostumerTAT: "002",
-      Price: "0.00",
-      Tax: "0.00",
-      Total: "00.00",
-    },
-    {
-      ServiceOfferID: "DEPOT1",
-      SeriviceDescription: "DEPOT REPAIR",
-      CostumerTAT: "001",
-      Price: "0.00",
-      Tax: "0.00",
-      Total: "00.00",
-    },
-    {
-      ServiceOfferID : "APBPRP",
-      SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
-      CostumerTAT:"001",
-      Price:"0.00",
-      Tax:"0.00",
-      Total:"00.00"
-    },
-    {
-      ServiceOfferID : "APBPRP",
-      SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
-      CostumerTAT:"003",
-      Price:"0.00",
-      Tax:"0.00",
-      Total:"00.00"
-    },
-  ];
+  //product information
+  const fetchDataAssets = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
+      // console.log("Response fetch Asset Modal Work Order :",response)
+      return response.data.data
+    }catch(e){
+      console.error("error fetching Asset: ", e)
+    }
+  }
+  //waranty
+  //warranty state
+  const [warrantyOffer, setWarrantyOffer] = useState([])
+  //fetching data function
+  const fetchDataServiceOffer = async () => {
+    setLoading(true);
+    setError(null);
+    try{
+      const response = await ApiCustomer.get(`/api/service-log/warranty-services `)
+      return response.data.data;
+    }catch(e){
+      setError("Failed to load Warranty Service")
+      console.error("error fetching Service Offer: ", e)
+    }finally{
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+    fetchDataServiceOffer().then((data) => {
+      if (data) setWarrantyOffer(data);
+    });
+    fetchDataAssets().then((data) => {
+      if (data) setAssetForWorkOrderCreation(data);
+    });
+    fetchDataPartCatalog();
+  }, [])
+  // fetchDataServiceOffer().then((data) => {
+  //   if (data) setWarrantyOffer(data);
+  // });
 
-  const Parts = [
-    {
-      Part: "N42547-001",
-      Keyword: "INTER CONNECT CABLE",
-      PartDescription: "SPS-CABLE LCD FHD 40P",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-    {
-      Part: "M91238-005",
-      Keyword: "WLAN WIRELESS ACCESS NETWORK E",
-      PartDescription: "SKO-WLAN 6 RTK ax 2x2+BT RTL88...",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-    {
-      Part: "M51850-001",
-      Keyword: "POWER CORD ",
-      PartDescription: "SKO-CORD C13 1.83M STKR CONV...",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-    {
-      Part: "M41711-005",
-      Keyword: "LITHIUM BATTERIES",
-      PartDescription: "SKO-BATT 6C83Wh 3.59Ah LI WK060...",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-    {
-      Part: "N42541-001",
-      Keyword: "PLASTIC INJECTION MOLDINGS",
-      PartDescription: "SPS-BEZEL LCD FHD",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-  ]
+  const [selected, setSelected] = useState("DepotRepair"); 
 
-const [selected, setSelected] = useState("DepotRepair"); 
+  //handles Warranty Service
+  const [selectedWarrantyServices, setSelectedWarrantyServices] = useState([]);
+  const handlerWarrantyServices = (service, checked) => {
+    if (checked) {
+      setSelectedWarrantyServices((prev) => [...prev, service])
+    }else{
+      setSelectedWarrantyServices((prev) => 
+        prev.filter((item) => item.Service_offerID !==service.Service_offerID)
+      )
+    }
+  }
+
+  useEffect(() => {
+    console.log("Selected Services:", selectedWarrantyServices);
+  }, [selectedWarrantyServices]);
+  
+
+
+  //part
+  //part state
+  const [partCatalog, setPartCatalog] = useState([])
+  //fetch data part catalog
+  const fetchDataPartCatalog = async () => {
+    try{
+      const response = await ApiCustomer.get(`/api/service-log/parts-catalog`)
+      setPartCatalog(response.data.data)
+      return response.data.data
+    }catch(e){
+
+    }
+  }
+
+  //handler part
+  const [selectedPartCatalog, setSelectedPartCatalog] = useState([])
+  const handlerPartCatalog = (part, checked) => {
+    if(checked){
+      setSelectedPartCatalog((prev) => [...prev, part])
+    }else{
+      setSelectedPartCatalog((prev) => 
+        prev.filter((item) => item.PartNumber !== part.PartNumber)
+      )
+    }
+  }
+  useEffect(() => {
+    console.log("Selected Parts:", selectedPartCatalog);
+    console.log("Selected Warranty:", selectedWarrantyServices);
+  }, [selectedPartCatalog]);
+  
 
   function renderStepContent() {
     switch (currentStep) {
@@ -1991,9 +1975,10 @@ const [selected, setSelected] = useState("DepotRepair");
             <div className="flex gap-4 my-2 justify-between p-2">
               <DialogTitle>Step 1: Select From List of Service Options</DialogTitle>
               <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
-                <p>Product Number</p><p>: </p>
-                <p>Product Name</p><p>: </p>
-                <p>Serial Number</p><p>: </p>
+                
+                <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
+                <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
+                <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
                 <p>Warranty Status</p><p>: </p>
                 <p>Currency</p><p>: </p>
               </div>
@@ -2014,17 +1999,25 @@ const [selected, setSelected] = useState("DepotRepair");
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {SC.map((service, index) => (
-                  <TableRow key={index}>
-                    <TableCell><Checkbox /></TableCell>
-                    <TableCell>{service.ServiceOfferID}</TableCell>
-                    <TableCell>{service.SeriviceDescription}</TableCell>
-                    <TableCell>{service.CostumerTAT}</TableCell>
-                    <TableCell>{service.Price}</TableCell>
-                    <TableCell>{service.Tax}</TableCell>
-                    <TableCell>{service.Total}</TableCell>
-                  </TableRow>
-                ))}
+                {warrantyOffer.map((service, index) => {
+                  const isChecked = selectedWarrantyServices.some((item) => item.Service_offerID === service.Service_offerID)
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Checkbox 
+                          checked={isChecked}
+                          onCheckedChange={(checked) => handlerWarrantyServices(service, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>{service.Service_offerID}</TableCell>
+                      <TableCell>{service.Service_description}</TableCell>
+                      <TableCell>{service.CTat_RTime}</TableCell>
+                      <TableCell>{service.Price}</TableCell>
+                      <TableCell>{service.Tax}</TableCell>
+                      <TableCell>{service.Total}</TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
   
@@ -2052,17 +2045,17 @@ const [selected, setSelected] = useState("DepotRepair");
             </DialogHeader>
             <div className="flex justify-between items-start p-2">
               <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
-                <p>Service OfferID</p><p>: </p>
-                <p>Service Description</p><p>: </p>
+                <p>Service OfferID</p><p>: {selectedWarrantyServices[0].Service_offerID}</p>
+                <p>Service Description</p><p>: {selectedWarrantyServices[0].Service_description}</p>
               </div>
               <div className="flex items-center space-x-2 scale-200 gap-2">
                 <Label htmlFor="orderability">Orderability</Label>
                 <Switch id="orderability" />
               </div>
               <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
-                <p>Product Number</p><p>: </p>
-                <p>Product Name</p><p>: </p>
-                <p>Serial Number</p><p>: </p>
+                <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
+                <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
+                <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
                 <p>Warranty Status</p><p>: </p>
                 <p>Currency</p><p>: </p>
               </div>
@@ -2110,29 +2103,37 @@ const [selected, setSelected] = useState("DepotRepair");
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {Parts.map((part, index) => (
-                  <TableRow key={index}>
-                    <TableCell><Checkbox /></TableCell>
-                    <TableCell>{part.Part}</TableCell>
-                    <TableCell>{part.Keyword}</TableCell>
-                    <TableCell>{part.PartDescription}</TableCell>
-                    <TableCell>{part.Orderability}</TableCell>
-                    <TableCell>{part.ResistrictionReason}</TableCell>
-                    <TableCell>{part.Csr}</TableCell>
-                    <TableCell>{part.Rohs}</TableCell>
-                    <TableCell>{part.Returnable}</TableCell>
-                    <TableCell>{part.Hardrolls}</TableCell>
-                    <TableCell>{part.Dangerousgoods}</TableCell>
-                    <TableCell>{part.Lithiumbattry}</TableCell>
-                    <TableCell>{part.Oversize}</TableCell>
-                    <TableCell>{part.Heavy}</TableCell>
-                    <TableCell>{part.Price}</TableCell>
-                    <TableCell>{part.Freightprice}</TableCell>
-                    <TableCell>{part.Tax}</TableCell>
-                    <TableCell>{part.Total}</TableCell>
-                  </TableRow>
-                ))}
-                  <TableRow>
+                {partCatalog.map((part, index) => {
+                  const isChecked = selectedPartCatalog.some((item) => item.PartNumber === part.PartNumber)
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Checkbox 
+                          checked={isChecked}
+                          onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>{part.PartNumber}</TableCell>
+                      <TableCell>{part.Keyword}</TableCell>
+                      <TableCell>{part.PartDescription}</TableCell>
+                      <TableCell>{part.Orderability ? 'Yes' : 'No'}</TableCell>
+                      <TableCell>{part.ResistrictionReason}</TableCell>
+                      <TableCell>{part.Csr ? 'Y' : 'N'}</TableCell>
+                      <TableCell>{part.Rohs}</TableCell>
+                      <TableCell>{part.Returnable ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Hardrolls}</TableCell>
+                      <TableCell>{part.Dangerousgoods ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Lithiumbattry ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Oversize ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Heavy ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Price}</TableCell>
+                      <TableCell>{part.Freightprice}</TableCell>
+                      <TableCell>{part.Tax}</TableCell>
+                      <TableCell>{part.Total}</TableCell>
+                    </TableRow>
+                  )
+                })}
+                <TableRow>
                     <TableCell colSpan={'100%'}>
                       <Pagination className={'flex justify-start'}>
                         <PaginationContent>

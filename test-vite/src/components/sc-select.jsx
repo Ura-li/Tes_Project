@@ -18,6 +18,7 @@ import {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
+            {/* <SelectItem value="">Select a Country</SelectItem> */}
             <SelectItem value="Indonesia">Indonesia</SelectItem>
             <SelectItem value="Malaysia">Malaysia</SelectItem>
             <SelectItem value="Singapura">Singapura</SelectItem>
