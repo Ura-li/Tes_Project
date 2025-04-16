@@ -73,7 +73,7 @@ import { useModal } from "@/components/modal-context";
   (!selectedCompany || Object.keys(selectedCompany).length === 0);
 
 
-  if (ifEmptyQuerySearch && searchByEmailPhoneForGlobalSearch !== true) return <p>No Record Found</p>;
+  if (ifEmptyQuerySearch && searchByEmailPhoneForGlobalSearch !== true) return <p className="text-center mt-10">No Record Found</p>;
 
 
   // console.log("Received asset in TableCompany:", selectedAsset);

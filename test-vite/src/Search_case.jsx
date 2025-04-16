@@ -57,7 +57,7 @@ import {
   BtnModalAsset,
 } from "./components/sc-modal";
 import { Checkbox } from "./components/ui/checkbox";
-
+import Swal from 'sweetalert2';
 import { InfoCase } from "@/components/info-case";
 
 const data = {
@@ -351,18 +351,48 @@ const Search_case = () => {
 
   //handler submit
   // console.log(formData)
+
   const handlerSiteAccountSubmit = async () => {
-    // console.log(formDataSiteAccount)
+
+    if (
+      !formDataSiteAccount.Company ||
+      !formDataSiteAccount.Email ||
+      !formDataSiteAccount.PrimaryPhone
+    ) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Perhatian!',
+        text: 'Harap isi semua field yang diperlukan (Nama Perusahaan, Email, dan Primary Phone).',
+      });
+      return; // 🚫 Jangan lanjut kirim data
+    }
+  
+
     try {
       const response = await ApiCustomer.post(
         "/api/site_account",
         formDataSiteAccount
       );
       console.log("Success:", response.data);
-      alert("Customer Saved successfully");
+  
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Customer berhasil disimpan.',
+        confirmButtonText: 'OK',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.reload();  // ✅ Arahkan ke halaman search
+        }
+      });
+  
     } catch (err) {
       console.error("Error saving customer: ", err);
-      alert("Failed to save customer");
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: 'Gagal menyimpan customer.',
+      });
     }
   };
 
@@ -419,20 +449,49 @@ const Search_case = () => {
   }
 
   const handlerContactSubmit = async () => {
-    console.log(formDataContact);
-    console.log("formDataContact");
-    try {
-      const response = await ApiCustomer.post(
-        "/api/contact-information",
-        formDataContact
-      );
-      console.log("Success:", response.data);
-      alert("Contact Information Saved Successfully");
-    } catch (err) {
-      console.error("Error saving contact information: ", err);
-      alert("Failed to save contact information");
-    }
-  };
+  console.log(formDataContact);
+
+  // ✅ Validasi sederhana
+  if (
+    !formDataContact.FirstName ||
+    !formDataContact.LastName ||
+    !formDataContact.Email
+  ) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Perhatian!',
+      text: 'Harap isi semua field yang diperlukan (Nama Depan, Nama Belakang, dan Email).',
+    });
+    return; // 🚫 Jangan lanjut kirim data
+  }
+
+  try {
+    const response = await ApiCustomer.post(
+      "/api/contact-information",
+      formDataContact
+    );
+    console.log("Success:", response.data);
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: 'Contact berhasil disimpan.',
+      confirmButtonText: 'OK',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.reload(); // Arahkan ke halaman lain
+      }
+    });
+
+  } catch (err) {
+    console.error("Error saving contact information: ", err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal!',
+      text: 'Gagal menyimpan contact.',
+    });
+  }
+};
 
   //handler table selected
   const [selectedAsset, setSelectedAsset] = useState([]); // Store selected asset data
@@ -473,26 +532,46 @@ const Search_case = () => {
   const navigate = useNavigate(); // ✅ Get the navigate function
 
   const handleCreateCase = async () => {
+    // Cek apakah asset & contact sudah dipilih (dari data lama pun boleh)
     if (!selectedAssetForCase || !selectedContactForCase) {
-      alert("Please select an asset/contact before creating a case!"); // 🔥 Prevent case creation
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please select both an Asset and a Contact before creating a case.",
+        icon: "warning",
+        confirmButtonText: "OK"
+      });
       return;
     }
-
-    // ✅ Extract SiteAccountID only if it exists
+  
     const siteAccountID = selectedSiteAccounts
       ? selectedSiteAccounts.SiteAccountID
       : null;
-
+  
+    // Ambil data form yang diisi
+    const caseSubject = document.getElementById("CaseSubject").value;
+    const kciFlag = document.getElementById("KCI_Flag").checked;
+  
+    // Validasi isi form jika perlu (contoh: CaseSubject wajib diisi)
+    if (!caseSubject.trim()) {
+      Swal.fire({
+        title: "Missing Case Subject",
+        text: "Please enter a case subject before proceeding.",
+        icon: "warning",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
+  
     try {
       const newCase = {
-        CaseID: Math.floor(Math.random() * 100000), // Example random ID
+        CaseID: Math.floor(Math.random() * 100000),
         AssetID: selectedAssetForCase.AssetID,
         ContactID: selectedContactForCase.ContactID,
-        SiteAccountID: siteAccountID, // If company exists
-        CaseSubject: document.getElementById("CaseSubject").value,
+        SiteAccountID: siteAccountID,
+        CaseSubject: caseSubject,
         CaseType: caseType,
-        KCI_Flag: document.getElementById("KCI_Flag").checked,
-
+        KCI_Flag: kciFlag,
+  
         IncomingChannel: "Email",
         CaseStatus: "Open",
         CasePriority: "Medium",
@@ -502,12 +581,28 @@ const Search_case = () => {
         SymptomCode: "General Issue",
         CaseResolution: "",
       };
-
+  
       await ApiCustomer.post("/api/case-information", newCase);
-      alert("Case Created Successfully!");
-      navigate(`/case/${newCase.CaseID}`); // ✅ Redirect to case details page
+  
+      // SweetAlert sukses + redirect
+      Swal.fire({
+        title: 'Success!',
+        text: 'Case created successfully!',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        navigate(`/case/${newCase.CaseID}`);
+      });
+  
     } catch (error) {
       console.error("Error creating case:", error);
+  
+      Swal.fire({
+        title: 'Error!',
+        text: 'There was an error creating the case.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
     }
   };
 
