@@ -92,6 +92,9 @@ import { BtnModalsWorkOrder } from './sc-modal'
 export const TabsService = ({ caseDetails }) => {
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
 
+  const [selectedSymptom, setSelectedSymptom] = useState(null);
+
+
   const { open } = useSidebar();
 
   //casenote
@@ -99,7 +102,7 @@ export const TabsService = ({ caseDetails }) => {
     LogType: '',
     ActionType: '',
     Template: '',
-    VisibleExternally: '',
+    VisibleExternally: null,
     MinutesSpent: 0,
     Note: ''
   });
@@ -126,6 +129,16 @@ export const TabsService = ({ caseDetails }) => {
       })
       console.log("Case Notes Infor after save : ",caseNotes)
       console.log("Case Notes Display Infor after save : ",response)
+
+      let dataUpdated = {
+        CaseNote: response.data.data.NoteID
+      };
+      //symptom code
+      if(selectedSymptom) {
+        dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
+      }
+      await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated)
+
     } catch (error) {
       console.error("Save failed:", error);
       alert("Failed to save note.");
@@ -184,6 +197,19 @@ export const TabsService = ({ caseDetails }) => {
       return null;
     }
   }
+  const fetchSymptomCodes = async () => {
+    try{
+      const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`)
+      const caseData = res.data.data
+      const symptomCode = caseData.SymptomCode
+
+      const resSymptomCode = await ApiCustomer.get(`/api/case-information/symptom-codes/${symptomCode}`)
+      return resSymptomCode.data.data
+    }catch (err) {
+      console.error("Error in fetchSymptomCodes:", err);
+      return null;
+    }
+  }
   useEffect(() => {
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
@@ -192,11 +218,21 @@ export const TabsService = ({ caseDetails }) => {
           NotesDisplay: noteDetail.Note
         })
       } 
+      const symptomCodeDetail = await fetchSymptomCodes();
+      if(symptomCodeDetail){
+        setSelectedSymptom({
+          TopCategory: symptomCodeDetail.TopCategory,
+          SubCategory: symptomCodeDetail.SubCategory,
+          SymptomCode: symptomCodeDetail.SymptomCode,
+        })
+      }
     }
     loadNote()
   }, [])
 
   const [caseNotes, setCaseNotes] = useState([])
+
+  
   
 
   const buttons = [
@@ -255,6 +291,8 @@ export const TabsService = ({ caseDetails }) => {
       onChange={handleCaseNoteChange}
       caseNotes={caseNotes}
       setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
       />
     </div>
   </>
@@ -267,9 +305,16 @@ export const ServiceCase = ({
   formData, 
   onChange,
   caseNotes,
-  setCaseNotes
+  setCaseNotes,
+  selectedSymptom,
+  setSelectedSymptom
 }) => {
   const { open } = useSidebar();
+
+  
+const [symptomSearchTerm, setSymptomSearchTerm] = useState("");
+const [symptomSuggestions, setSymptomSuggestions] = useState([]);
+
   
 
   const tabs = [
@@ -356,6 +401,24 @@ useEffect(() => {
   loadNote()
 }, [])
 
+const fetchSymptomCodes = async (term) => {
+  try {
+    const response = await ApiCustomer.get("/api/case-information/symptom-codes");
+    const allCodes = response.data.data;
+
+    const filtered = allCodes.filter((sym) =>
+      sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+    );
+
+    setSymptomSuggestions(filtered);
+  } catch (err) {
+    console.error("Error fetching symptom codes", err);
+  }
+};
+// console.log("Selected Symptopm ",selectedSymptom)
+
+// useEffect(() => {
+// }, selectedSymptom)
 
 
   return (
@@ -956,22 +1019,49 @@ useEffect(() => {
 
             <div className='font-bold flex'>
               <span>Keyword Search</span>
-              <Input type="search" className="w-100 ml-27 border-2 border-black"></Input>
+              <Input 
+                type="search" 
+                className="w-100 ml-27 border-2 border-black"
+                value={symptomSearchTerm}
+                onChange={(e) => {
+                  const value = e.target.value
+                  setSymptomSearchTerm(value)
+                  if (value.length >= 2) fetchSymptomCodes(value)
+                    else setSymptomSuggestions([])
+                }}
+              />
             </div>
+            {symptomSuggestions.length > 0 && (
+              <ul className="bg-white border mt-1 max-h-40 overflow-y-auto absolute z-10">
+                {symptomSuggestions.map((sym) => (
+                  <li
+                    key={sym.SymptomCodeID}
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      setSelectedSymptom(sym);
+                      setSymptomSearchTerm(sym.SymptomCode);
+                      setSymptomSuggestions([]);
+                    }}
+                  >
+                    {sym.SymptomCode}
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <div className='font-bold flex'>
               <span>Top Category</span>
-              <span className='ml-32'>...</span>
+              <span className='ml-32'>{selectedSymptom?.TopCategory}</span>
             </div>
 
             <div className='font-bold flex'>
               <span>Sub Category</span>
-              <span className='ml-32'>...</span>
+              <span className='ml-32'>{selectedSymptom?.SubCategory}</span>
             </div>
 
             <div className='font-bold flex'>
               <span>Spesific Symptom</span>
-              <span className='ml-24'>...</span>
+              <span className='ml-24'>{selectedSymptom?.SymptomCode}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -992,7 +1082,15 @@ useEffect(() => {
             
             <div className='font-bold flex'>
               <span className='ml-7'>Auto Close</span>
-              <span className='ml-52'>...</span>
+              <Select className='ml-52' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="---"/>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Yes</SelectItem>
+                    <SelectItem value="0">No</SelectItem>
+                  </SelectContent>
+                </Select>
             </div>
 
             <div className='font-bold flex'>
