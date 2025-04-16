@@ -372,6 +372,7 @@ import { useModal } from "@/components/modal-context";
               <div className="flex items-center gap-2">
                 <User></User>
                 Contact
+                {/* {selectedCompany} */}
                 <span className="relative flex items-center">
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
@@ -390,9 +391,10 @@ import { useModal } from "@/components/modal-context";
 </Button> */}
               <BtnModalContact 
                 className="" 
-                selectedCompany={selectedCompany} 
+                selectedCompany={selectedCompany.length !== 0 ? selectedCompany : company.key} 
                 selectedContact={selectedContact}
                 setSelectedContact={setSelectedContact}
+                companyData = {companyData ? companyData : null}
               />
               </div>
           <Table className={`${company.type == 'individual' ? 'hidden' : ''}`}> 

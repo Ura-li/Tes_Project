@@ -140,6 +140,30 @@ export async function POST(request) {
         ZipPostalCode
     } = await request.json();
 
+    let orConditions = [];
+
+    if (Email) orConditions.push({ Email: { contains: Email } });
+    if (Phone) orConditions.push({ Phone: { contains: Phone } });
+    if (Mobile) orConditions.push({ Mobile: { contains: Mobile } });
+
+    if (orConditions.length === 0) {
+        return NextResponse.json({
+            success: false,
+            message: "At least one of Email, Phone, or Mobile must be provided."
+        }, { status: 400 });
+    }
+
+    const availableContactEmailPhoneDuplicate = await prisma.contact_information.count({
+        where: { OR: orConditions }
+    });
+    
+    if (availableContactEmailPhoneDuplicate !== 0) {
+        return NextResponse.json({
+            success: false,
+            message: "A company with this email or phone already exists."
+        }, { status: 409 });
+    }
+
     //create data 
     const contact_information = await prisma.contact_information.create({
         data:{

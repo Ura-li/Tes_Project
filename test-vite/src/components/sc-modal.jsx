@@ -62,6 +62,16 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 
 // const assets = [
 //   {
@@ -146,10 +156,13 @@ export function BtnModalContact({
   setSelectedContact, 
   open : externalOpen, 
   onOpenChange : externalOnChange,
+  companyData
   }) {
     console.log("CHECK DATA FORM BTN MOdAL",selectedContact)
 
   //set modal state 
+
+  console.log("Company Data in Modal Contact : ",companyData)
   const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);
   
   const open = externalOpen || isModalContactSearchInput;
@@ -181,7 +194,9 @@ export function BtnModalContact({
       StateProvince: '',
       Country: '',
       ZipPostalCode: '',
-      SiteAccountID: selectedCompany?.SiteAccountID || null
+      SiteAccountID: typeof selectedCompany === "object" 
+      ? selectedCompany.SiteAccountID ?? "" 
+      : selectedCompany
     });
     
     
@@ -238,6 +253,7 @@ export function BtnModalContact({
         responseMessage = 'Kontak berhasil diperbarui!';
       } else {
         // ✅ Add new contact
+        console.log("Selected Company in ModalContactSubmit : ", selectedCompany)
         await ApiCustomer.post("/api/contact-information", formDataContact);
         responseMessage = 'Kontak berhasil ditambahkan!';
       }
@@ -272,6 +288,24 @@ export function BtnModalContact({
     }
   };
 
+  // make the 'same in account information' button :
+  const handleCopyFromAccount = () => {
+    if (companyData == null) return;
+  
+    const fieldsToCopy = [
+      "AddressLine1",
+      "AddressLine2",
+      "City",
+      "StateProvince",
+      "Country",
+      "ZipPostalCode"
+    ];
+  
+    fieldsToCopy.forEach((field) => {
+      const value = companyData[field] || "";
+      handlerInputContactChange({ target: { id: field, value } });
+    });
+  };
   
 
   // Edit function 
@@ -371,35 +405,35 @@ export function BtnModalContact({
 
         <DialogHeader className="flex-row justify-between items-center">
           <DialogTitle className="text-md">Address</DialogTitle>
-          <Button className="bg-white text-gray-400   "><Copy></Copy>Same in Account Adress </Button>
+          <Button className="bg-white text-gray-400   " onClick={handleCopyFromAccount}><Copy></Copy>Same in Account Adress </Button>
         </DialogHeader>
 
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-0.4">
             <Label htmlFor="AddressLine1">Address Line 1</Label>
-            <Input value={formDataContact.AddressLine1} id="AddressLine1" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input id="AddressLine1" type="text" value={formDataContact.AddressLine1 || ""} className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 flex flex-col">
             <Label htmlFor="current">Country</Label>
-            <SelectBar value={formDataContact.Country} id="Country" onChange={handlerInputContactChange}/>
+            <SelectBar id="Country" value={formDataContact.Country || ""} onChange={handlerInputContactChange}/>
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="AddressLine2">Address Line 2</Label>
-            <Input value={formDataContact.AddressLine2} id="AddressLine2" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input id="AddressLine2" value={formDataContact.AddressLine2 || ""} type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
-            <Input value={formDataContact.ZipPostalCode} id="ZipPostalCode" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input id="ZipPostalCode" value={formDataContact.ZipPostalCode || ""} type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="City">City</Label>
-            <Input value={formDataContact.City} id="City" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <Input id="City" type="text" value={formDataContact.City || ""} className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
 
             
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="StateProvince">State/Province</Label>
-            <Input value={formDataContact.StateProvince} id="StateProvince" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <Input id="StateProvince" value={formDataContact.StateProvince || ""} type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
 
             
                   {/* Hidden Input for SiteAccountID */}
@@ -429,7 +463,8 @@ export function BtnModalContact({
  * TODO 
  * MAKE ROUTE FOR PRODUCT
  */
-export function BtnModalAsset({
+export function 
+BtnModalAsset({
   typeSearch,
   contactID, 
   siteAccountID, 
@@ -670,8 +705,8 @@ export function BtnModalAsset({
             onChange={(e) => setSearchUnowned(e.target.value)}
           />
           <Button
-            variant="outline"
-            className="bg-blue-700 text-white"
+            variant="search"
+            className=""
             onClick={fetchUnownedAssets}
           >
             Search
@@ -733,8 +768,8 @@ export function BtnModalAsset({
 
         <div className="flex justify-end gap-2 mt-2">
           <Button
-            variant="outline"
-            className="bg-blue-700 text-white"
+            variant="search"
+            className=""
             onClick={handleUpdateAsset}
             disabled={isUpdating || !selectedAssetForCreatingAsset}
           >
@@ -2257,142 +2292,103 @@ return (
 //   )
 // }
 
-export function BtnModalsWorkOrder({ open, setOpen}) {
+export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
   const [step, setStep] = useState(0);
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
   const [currentStep, setCurrentStep] = useState(1);
-  const SC = [
-    {
-      ServiceOfferID: "DEPOT2",
-      SeriviceDescription: "DEPOT REPAIR - 2DAY",
-      CostumerTAT: "002",
-      Price: "0.00",
-      Tax: "0.00",
-      Total: "00.00",
-    },
-    {
-      ServiceOfferID: "DEPOT1",
-      SeriviceDescription: "DEPOT REPAIR",
-      CostumerTAT: "001",
-      Price: "0.00",
-      Tax: "0.00",
-      Total: "00.00",
-    },
-    {
-      ServiceOfferID : "APBPRP",
-      SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
-      CostumerTAT:"001",
-      Price:"0.00",
-      Tax:"0.00",
-      Total:"00.00"
-    },
-    {
-      ServiceOfferID : "APBPRP",
-      SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
-      CostumerTAT:"003",
-      Price:"0.00",
-      Tax:"0.00",
-      Total:"00.00"
-    },
-  ];
+  const [assetForWorkOrderCreation, setAssetForWorkOrderCreation] = useState([]);
+  const [modalPart, setModalPart] = useState(false);
+  //product information
+  const fetchDataAssets = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
+      // console.log("Response fetch Asset Modal Work Order :",response)
+      return response.data.data
+    }catch(e){
+      console.error("error fetching Asset: ", e)
+    }
+  }
+  //waranty
+  //warranty state
+  const [warrantyOffer, setWarrantyOffer] = useState([])
+  //fetching data function
+  const fetchDataServiceOffer = async () => {
+    setLoading(true);
+    setError(null);
+    try{
+      const response = await ApiCustomer.get(`/api/service-log/warranty-services `)
+      return response.data.data;
+    }catch(e){
+      setError("Failed to load Warranty Service")
+      console.error("error fetching Service Offer: ", e)
+    }finally{
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+    fetchDataServiceOffer().then((data) => {
+      if (data) setWarrantyOffer(data);
+    });
+    fetchDataAssets().then((data) => {
+      if (data) setAssetForWorkOrderCreation(data);
+    });
+    fetchDataPartCatalog();
+  }, [])
+  // fetchDataServiceOffer().then((data) => {
+  //   if (data) setWarrantyOffer(data);
+  // });
 
-  const Parts = [
-    {
-      Part: "N42547-001",
-      Keyword: "INTER CONNECT CABLE",
-      PartDescription: "SPS-CABLE LCD FHD 40P",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-    {
-      Part: "M91238-005",
-      Keyword: "WLAN WIRELESS ACCESS NETWORK E",
-      PartDescription: "SKO-WLAN 6 RTK ax 2x2+BT RTL88...",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-    {
-      Part: "M51850-001",
-      Keyword: "POWER CORD ",
-      PartDescription: "SKO-CORD C13 1.83M STKR CONV...",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-    {
-      Part: "M41711-005",
-      Keyword: "LITHIUM BATTERIES",
-      PartDescription: "SKO-BATT 6C83Wh 3.59Ah LI WK060...",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-    {
-      Part: "N42541-001",
-      Keyword: "PLASTIC INJECTION MOLDINGS",
-      PartDescription: "SPS-BEZEL LCD FHD",
-      Orderability: "Yes",
-      ResistrictionReason: "",
-      Csr: "N",
-      Rohs: "",
-      Returnable:"true",
-      Hardrolls:"",
-      Dangerousgoods: "false",
-      Lithiumbattry: "false",
-      Oversize: "false",
-      Heavy: "false",
-      Price: "00.00",
-      Freightprice: "00.00",
-      Tax:  "00.00",
-      Total: "00.00",
-    },
-  ]
+  const [selected, setSelected] = useState("DepotRepair"); 
 
+  //handles Warranty Service
+  const [selectedWarrantyServices, setSelectedWarrantyServices] = useState([]);
+  const handlerWarrantyServices = (service, checked) => {
+    if (checked) {
+      setSelectedWarrantyServices((prev) => [...prev, service])
+    }else{
+      setSelectedWarrantyServices((prev) => 
+        prev.filter((item) => item.Service_offerID !==service.Service_offerID)
+      )
+    }
+  }
+
+  useEffect(() => {
+    console.log("Selected Services:", selectedWarrantyServices);
+  }, [selectedWarrantyServices]);
+  
+
+
+  //part
+  //part state
+  const [partCatalog, setPartCatalog] = useState([])
+  //fetch data part catalog
+  const fetchDataPartCatalog = async () => {
+    try{
+      const response = await ApiCustomer.get(`/api/service-log/parts-catalog`)
+      setPartCatalog(response.data.data)
+      return response.data.data
+    }catch(e){
+
+    }
+  }
+
+  //handler part
+  const [selectedPartCatalog, setSelectedPartCatalog] = useState([])
+  const handlerPartCatalog = (part, checked) => {
+    if(checked){
+      setSelectedPartCatalog((prev) => [...prev, part])
+    }else{
+      setSelectedPartCatalog((prev) => 
+        prev.filter((item) => item.PartNumber !== part.PartNumber)
+      )
+    }
+  }
+  useEffect(() => {
+    console.log("Selected Parts:", selectedPartCatalog);
+    console.log("Selected Warranty:", selectedWarrantyServices);
+  }, [selectedPartCatalog]);
+  
 
   function renderStepContent() {
     switch (currentStep) {
@@ -2409,14 +2405,15 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
                 </DialogClose>
               </div>
               <DialogDescription className={'bg-red-200 p-3 font-bold '}>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
-              <DialogTitle className={'text-blue-600 text-3xl'}>Service Catalog</DialogTitle>
+              <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
             </DialogHeader>
             <div className="flex gap-4 my-2 justify-between p-2">
               <DialogTitle>Step 1: Select From List of Service Options</DialogTitle>
               <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
-                <p>Product Number</p><p>: </p>
-                <p>Product Name</p><p>: </p>
-                <p>Serial Number</p><p>: </p>
+                
+                <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
+                <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
+                <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
                 <p>Warranty Status</p><p>: </p>
                 <p>Currency</p><p>: </p>
               </div>
@@ -2437,30 +2434,38 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {SC.map((service, index) => (
-                  <TableRow key={index}>
-                    <TableCell><Checkbox /></TableCell>
-                    <TableCell>{service.ServiceOfferID}</TableCell>
-                    <TableCell>{service.SeriviceDescription}</TableCell>
-                    <TableCell>{service.CostumerTAT}</TableCell>
-                    <TableCell>{service.Price}</TableCell>
-                    <TableCell>{service.Tax}</TableCell>
-                    <TableCell>{service.Total}</TableCell>
-                  </TableRow>
-                ))}
+                {warrantyOffer.map((service, index) => {
+                  const isChecked = selectedWarrantyServices.some((item) => item.Service_offerID === service.Service_offerID)
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Checkbox 
+                          checked={isChecked}
+                          onCheckedChange={(checked) => handlerWarrantyServices(service, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>{service.Service_offerID}</TableCell>
+                      <TableCell>{service.Service_description}</TableCell>
+                      <TableCell>{service.CTat_RTime}</TableCell>
+                      <TableCell>{service.Price}</TableCell>
+                      <TableCell>{service.Tax}</TableCell>
+                      <TableCell>{service.Total}</TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
   
             <DialogFooter className={'p-4'}>
-              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => setOpen(false)}>Cancel</button>
-              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => setCurrentStep(2)}>Next</button>
+              <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button variant={'search'} className="" onClick={() => setCurrentStep(2)}>Next</Button>
             </DialogFooter>
           </DialogContent>
         );
   
       case 2:
         return (
-          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit] flex flex-col  gap-0 p-0 bg-white [&>button]:hidden">
+          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit] flex flex-col  gap-0 p-0 bg-white [&>button]:hidden scale-95">
             <DialogHeader className={'gap-0'}>
               <div className="flex items-end justify-end">
                 <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
@@ -2470,22 +2475,22 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
                   </Button>
                 </DialogClose>
               </div>
-              <DialogTitle className={'text-blue-600 text-3xl'}>Service Catalog</DialogTitle>
+              <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
               <DialogDescription>Select parts required for the repair.</DialogDescription>
             </DialogHeader>
             <div className="flex justify-between items-start p-2">
               <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
-                <p>Service OfferID</p><p>: </p>
-                <p>Service Description</p><p>: </p>
+                <p>Service OfferID</p><p>: {selectedWarrantyServices[0].Service_offerID}</p>
+                <p>Service Description</p><p>: {selectedWarrantyServices[0].Service_description}</p>
               </div>
               <div className="flex items-center space-x-2 scale-200 gap-2">
                 <Label htmlFor="orderability">Orderability</Label>
                 <Switch id="orderability" />
               </div>
               <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
-                <p>Product Number</p><p>: </p>
-                <p>Product Name</p><p>: </p>
-                <p>Serial Number</p><p>: </p>
+                <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
+                <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
+                <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
                 <p>Warranty Status</p><p>: </p>
                 <p>Currency</p><p>: </p>
               </div>
@@ -2533,28 +2538,64 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {Parts.map((part, index) => (
-                  <TableRow key={index}>
-                    <TableCell><Checkbox /></TableCell>
-                    <TableCell>{part.Part}</TableCell>
-                    <TableCell>{part.Keyword}</TableCell>
-                    <TableCell>{part.PartDescription}</TableCell>
-                    <TableCell>{part.Orderability}</TableCell>
-                    <TableCell>{part.ResistrictionReason}</TableCell>
-                    <TableCell>{part.Csr}</TableCell>
-                    <TableCell>{part.Rohs}</TableCell>
-                    <TableCell>{part.Returnable}</TableCell>
-                    <TableCell>{part.Hardrolls}</TableCell>
-                    <TableCell>{part.Dangerousgoods}</TableCell>
-                    <TableCell>{part.Lithiumbattry}</TableCell>
-                    <TableCell>{part.Oversize}</TableCell>
-                    <TableCell>{part.Heavy}</TableCell>
-                    <TableCell>{part.Price}</TableCell>
-                    <TableCell>{part.Freightprice}</TableCell>
-                    <TableCell>{part.Tax}</TableCell>
-                    <TableCell>{part.Total}</TableCell>
+                {partCatalog.map((part, index) => {
+                  const isChecked = selectedPartCatalog.some((item) => item.PartNumber === part.PartNumber)
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Checkbox 
+                          checked={isChecked}
+                          onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>{part.PartNumber}</TableCell>
+                      <TableCell>{part.Keyword}</TableCell>
+                      <TableCell>{part.PartDescription}</TableCell>
+                      <TableCell>{part.Orderability ? 'Yes' : 'No'}</TableCell>
+                      <TableCell>{part.ResistrictionReason}</TableCell>
+                      <TableCell>{part.Csr ? 'Y' : 'N'}</TableCell>
+                      <TableCell>{part.Rohs}</TableCell>
+                      <TableCell>{part.Returnable ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Hardrolls}</TableCell>
+                      <TableCell>{part.Dangerousgoods ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Lithiumbattry ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Oversize ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Heavy ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Price}</TableCell>
+                      <TableCell>{part.Freightprice}</TableCell>
+                      <TableCell>{part.Tax}</TableCell>
+                      <TableCell>{part.Total}</TableCell>
+                    </TableRow>
+                  )
+                })}
+                <TableRow>
+                    <TableCell colSpan={'100%'}>
+                      <Pagination className={'flex justify-start'}>
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious href="#" />
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">1</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#" isActive>
+                              2
+                            </PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">3</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationNext href="#" />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    </TableCell>
                   </TableRow>
-                ))}
               </TableBody>
             </Table>
               </TabsContent>
@@ -2564,15 +2605,15 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
             </Tabs>
   
             <DialogFooter className={'p-4'}>
-              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer"  onClick={() => setCurrentStep(1)}>Previous</button>
-              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer"  onClick={() => setCurrentStep(3)}>Next</button>
+              <Button variant={'search'} className=""  onClick={() => setCurrentStep(1)}>Previous</Button>
+              <Button variant={'search'} className=""  onClick={() => setCurrentStep(3)}>Next</Button>
             </DialogFooter>
           </DialogContent>
         );
   
       case 3:
         return (
-          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit]  bg-white [&>button]:hidden ">
+          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit] p-0 bg-white [&>button]:hidden ">
             <DialogHeader>
               <div className="flex items-end justify-end">
                 <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
@@ -2582,8 +2623,8 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
                   </Button>
                 </DialogClose>
               </div>
-              <DialogTitle className={'text-blue-600 text-3xl'}>Service Catalog</DialogTitle>
-              <DialogDescription>Select parts required for the repair.</DialogDescription>
+              <DialogTitle className={'text-blue-600 text-2xl indent-5'}>Service Catalog</DialogTitle>
+              <DialogDescription>SELECT PARTS REQUIRED FOR THE REPAIR.</DialogDescription>
             </DialogHeader>
             <div className="flex gap-4 my-2 justify-end p-2">
               <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
@@ -2594,13 +2635,85 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
                 <p>Currency</p><p>: </p>
               </div>
             </div>
-
+            <Table>
+              <TableHeader>
+                <TableRow className={'bg-blue-400'}>
+                  <TableHead className={'font-bold text-black'}>Service OfferID</TableHead>
+                  <TableHead className={'font-bold text-black'}>Description</TableHead>
+                  <TableHead className={'font-bold text-black'}>Unit Price</TableHead>
+                  <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
+                  <TableHead className={'font-bold text-black'}>Qty</TableHead>
+                  <TableHead className={'font-bold text-black'}>Tax</TableHead>
+                  <TableHead className={'font-bold text-black'}>Price</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                </TableRow>
+              </TableBody>
+              <TableHeader>
+                <TableRow className={'bg-blue-400'}>
+                  <TableHead className={'font-bold text-black'}>Part #</TableHead>
+                  <TableHead className={'font-bold text-black'}>Description</TableHead>
+                  <TableHead className={'font-bold text-black'}>Unit Price</TableHead>
+                  <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
+                  <TableHead className={'font-bold text-black'}>Qty</TableHead>
+                  <TableHead className={'font-bold text-black'}>Tax</TableHead>
+                  <TableHead className={'font-bold text-black'}>Price</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell colSpan={4}></TableCell>
+                  <TableCell colSpan={2}>Sub Total</TableCell>
+                  <TableCell>--</TableCell>
+                </TableRow>
+                <TableRow className={'bg-blue-400'}>
+                  <TableCell colSpan={4}></TableCell>
+                  <TableCell>Total</TableCell>
+                  <TableCell>--</TableCell>
+                  <TableCell>--</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+            
   
-            <DialogFooter className={' sm:justify-start'}>
-              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => setCurrentStep(2)}>Previous</button>
-              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => setOpen(false)}>Cancel</button>
-              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => alert('Adding part...')}>Add Part</button>
-              <button className="bg-blue-500 p-3 rounded-2xl cursor-pointer" onClick={() => alert('Creating order...')}>Create Order</button>
+            <DialogFooter className={' sm:justify-start p-2 items-center gap-10'}>
+              <Button variant={'search'} className="" onClick={() => setCurrentStep(2)}>Previous</Button>
+              <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button variant={'search'} className="" onClick={() => setModalPart(true)}>Add Part</Button>
+              <Button variant={'search'} className="" onClick={() => alert('Creating order...')}>Create Order</Button>
+              <Label htmlFor="incident" className={'font-bold '}>Incident Type</Label>
+              <Select onChange={setSelected} defaultValue="DepotRepair">
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="DepotRepair">DepotRepair</SelectItem>
+                    <SelectItem value="banana">Banana</SelectItem>
+                    <SelectItem value="blueberry">Blueberry</SelectItem>
+                    <SelectItem value="grapes">Grapes</SelectItem>
+                    <SelectItem value="pineapple">Pineapple</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </DialogFooter>
           </DialogContent>
         );
@@ -2614,8 +2727,106 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
     <>
     <Dialog open={open} onOpenChange={setOpen} >
       {renderStepContent()}
+    <BtnModalsPartAdd open2={modalPart} setOpen2={setModalPart}/>
     </Dialog>
     {/* <Button onClick={() => setWorkOpen(true)}>Open Work Order</Button> */}
   </>
   );
+}
+
+export function BtnModalsPartAdd({open2, setOpen2}){
+  return(
+    <>
+    <Dialog open={open2} onOpenChange={setOpen2}>
+      <DialogContent className={' sm:min-w-[58vw] sm:min-h-[fit-content] flex flex-col justify-center'}>
+        <DialogHeader className={''}>
+          <DialogTitle className={'text-blue-600 text-2xl '}>Add Part</DialogTitle>
+        </DialogHeader>
+          <div className="flex items-center justify-between sm:max-w-full">
+            <span className="flex gap-2 items-center">
+              <DialogDescription className={'whitespace-nowrap'}>Part Number</DialogDescription>
+              <Input className={'ring-1 min-w-[10em] ring-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500'}></Input>
+              <Button variant={'search'}>Search</Button>
+            </span>
+            <div className="bg-gray-300 flex gap-x-10 p-2 flex-1 max-w-[10em]">
+                <p>Currency</p><p className="whitespace-nowrap">: </p>
+            </div>
+          </div>
+          <div className="overflow-x-auto max-w-full">
+            <Table className={' sm:min-w-[1000px]'}>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className={'text-black font-bold'}>Select</TableHead>
+                  <TableHead className={'text-black font-bold'}>Part #</TableHead>
+                  <TableHead className={'text-black font-bold'}>Keyword</TableHead>
+                  <TableHead className={'text-black font-bold'}>Part Description</TableHead>
+                  <TableHead className={'font-black text-black'}>Orderability</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Restriction Reason</TableHead>
+                  <TableHead className={'font-black text-black'}>CRS</TableHead>
+                  <TableHead className={'font-black text-black'}>ROHS</TableHead>
+                  <TableHead className={'font-black text-black'}>Retrunable</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Hard roll</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Dangerous Goods</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Lithium Battery</TableHead>
+                  <TableHead className={'font-black text-black'}>Oversize</TableHead>
+                  <TableHead className={'font-black text-black'}>Heavy</TableHead>
+                  <TableHead className={'font-black text-black'}>Price</TableHead>
+                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Friegh Price</TableHead>
+                  <TableHead className={'font-black text-black'}>Tax</TableHead>
+                  <TableHead className={'font-black text-black'}>Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                    <TableCell className={'flex'}><Checkbox></Checkbox></TableCell>
+                    <TableCell>---</TableCell>
+                    <TableCell>---</TableCell>
+                    <TableCell>---</TableCell>
+                    <TableCell>---</TableCell>
+                    <TableCell>---</TableCell>
+                    <TableCell>---</TableCell>
+                    <TableCell>---</TableCell>
+                    <TableCell>---</TableCell>
+                    <TableCell>---</TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell colSpan={'100%'}>
+                      <Pagination className={'flex justify-start'}>
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious href="#" />
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">1</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#" isActive>
+                              2
+                            </PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink href="#">3</PaginationLink>
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                          <PaginationItem>
+                            <PaginationNext href="#" />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    </TableCell>
+                  </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+          <DialogFooter className={'sm:justify-start'}>
+            <Button variant={'search'}>Add Part</Button>
+            <Button variant={'search'}>Clear</Button>
+            <Button variant={'search'}>Cancel</Button>
+          </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
+  )
 }
