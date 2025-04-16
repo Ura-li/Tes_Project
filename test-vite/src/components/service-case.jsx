@@ -53,6 +53,9 @@ import {
  import { useState, useEffect } from "react";
  import { useSidebar } from '@/components/ui/sidebar'
  import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
+import ApiCustomer from '@/api'
+
 const workorder = [
   {
     workordernumber: "WO-027816939",
@@ -91,12 +94,115 @@ export const TabsService = ({ caseDetails }) => {
 
   const { open } = useSidebar();
 
+  //casenote
+  const [caseNoteFormData, setCaseNoteFormData] = useState({
+    LogType: '',
+    ActionType: '',
+    Template: '',
+    VisibleExternally: '',
+    MinutesSpent: 0,
+    Note: ''
+  });
+
+  const handleCaseNoteChange = (key, value) => {
+    setCaseNoteFormData(prev => { 
+      const updated = { ...prev, [key]: value };
+      console.log("🔄 Updated Form:", updated); // ✅ Log on every change
+      return updated;
+     });
+  };
+  const saveCaseNote = async () => {
+    
+  console.log("📝 Form Data to Submit:", caseNoteFormData); // ✅ Log the form data
+    try {
+      const response = await ApiCustomer.post("/api/case-information/case-notes", {
+        ...caseNoteFormData,
+        CaseID: caseDetails.CaseID
+      });
+      console.log("Saved successfully:", response.data);
+      alert("Case Note Saved!");
+      setCaseNotes({
+        NotesDisplay: response.data.data.Note
+      })
+      console.log("Case Notes Infor after save : ",caseNotes)
+      console.log("Case Notes Display Infor after save : ",response)
+    } catch (error) {
+      console.error("Save failed:", error);
+      alert("Failed to save note.");
+    }
+  };
+  
+  const checkOrCreateNote = async () => {
+    const existing = await ApiCustomer.get(`/api/case-information/case-notes?caseId=${caseDetails.CaseID}`);
+    
+    if (existing.data.data.length > 0) {
+      const noteID = existing.data.data[0].NoteID;
+      await ApiCustomer.patch(`/api/case-information/case-notes/${noteID}`, {
+        ...caseNoteFormData,
+        Note: existing.data.data[0].Note + "\n" + caseNoteFormData.Note
+      });
+    } else {
+      await ApiCustomer.post("/api/case-information/case-notes", {
+        ...caseNoteFormData,
+        CaseID: caseDetails.CaseID
+      });
+    }
+  };
+  
+  const fetchCaseNotes = async () => {
+    try{
+      const res = await ApiCustomer.get(`/api/case-information/case-notes`)
+      const notes = res.data.data
+  
+      const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
+  
+      let noteID = null
+  
+      if(existingNote){
+        noteID = existingNote.NoteID
+      }else{
+        const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
+          LogType: "NotesLog",
+          ActionType: "Initial",
+          Template: "",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: "",
+          CaseID: caseID,
+        })
+        
+        noteID = createResponse.data.data.NoteID;
+      }
+  
+      const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
+      const noteDetail = detailRes.data.data;
+  
+      console.log("✅ Case Note Detail:", noteDetail);
+      return noteDetail;
+    }catch(err){
+      console.error("Error in fetchCaseNotes:", err);
+      return null;
+    }
+  }
+  useEffect(() => {
+    const loadNote = async () => {
+      const noteDetail = await fetchCaseNotes();
+      if(noteDetail ){
+        setCaseNotes({
+          NotesDisplay: noteDetail.Note
+        })
+      } 
+    }
+    loadNote()
+  }, [])
+
+  const [caseNotes, setCaseNotes] = useState([])
   
 
   const buttons = [
     { icon: ArrowLeftFromLine, label: "", onClick: () => alert("not now") },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-    { icon: Save, label: "Save", onClick: () => alert("not now") },
+    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
     { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now") },
     { icon: RotateCw, label: "Refresh", onClick: () => alert("not now") },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
@@ -113,6 +219,7 @@ export const TabsService = ({ caseDetails }) => {
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
   return (
+    <>
     <div className='border-1 flex items-center '>
        {visibleButtons.map((btn, index) => (
           <Button
@@ -120,7 +227,7 @@ export const TabsService = ({ caseDetails }) => {
             onClick={btn.onClick}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-          >
+            >
             <btn.icon className="h-4 w-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
@@ -141,12 +248,29 @@ export const TabsService = ({ caseDetails }) => {
         )}
     <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/>
     </div>
+    <div>
+    <ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      />
+    </div>
+  </>
   )
 }
 
 
-export const ServiceCase = ({ caseDetails }) => {
+export const ServiceCase = ({ 
+  caseDetails, 
+  formData, 
+  onChange,
+  caseNotes,
+  setCaseNotes
+}) => {
   const { open } = useSidebar();
+  
 
   const tabs = [
     { value: "case_info", label: "Case Information" },
@@ -182,6 +306,57 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
     <CardTitle className={`col-span-${span}`}>{value}</CardTitle>
   </>
 );
+
+
+//notes handler
+const fetchCaseNotes = async () => {
+  try{
+    const res = await ApiCustomer.get(`/api/case-information/case-notes`)
+    const notes = res.data.data
+
+    const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
+
+    let noteID = null
+
+    if(existingNote){
+      noteID = existingNote.NoteID
+    }else{
+      const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
+        LogType: "NotesLog",
+        ActionType: "Initial",
+        Template: "",
+        VisibleExternally: false,
+        MinutesSpent: 0,
+        Note: "",
+        CaseID: caseID,
+      })
+      
+      noteID = createResponse.data.data.NoteID;
+    }
+
+    const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
+    const noteDetail = detailRes.data.data;
+
+    console.log("✅ Case Note Detail:", noteDetail);
+    return noteDetail;
+  }catch(err){
+    console.error("Error in fetchCaseNotes:", err);
+    return null;
+  }
+}
+useEffect(() => {
+  const loadNote = async () => {
+    const noteDetail = await fetchCaseNotes();
+    if(noteDetail ){
+      setCaseNotes({
+        NotesDisplay: noteDetail.Note
+      })
+    }
+  }
+  loadNote()
+}, [])
+
+
 
   return (
     <>
@@ -719,7 +894,17 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
 
             <div className='font-bold flex jus'>
               <span>Log Type</span>
-              <span className='ml-72'>...</span>
+              <span className='ml-72'>
+                <Select onValueChange={(val) => onChange("LogType", val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Log Type"/>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NotesLog">Notes Log</SelectItem>
+                    <SelectItem value="PhoneLog">Phone Log</SelectItem>
+                  </SelectContent>
+                </Select>
+              </span>
             </div>
 
             <div className='font-bold flex'>
@@ -734,7 +919,17 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
 
             <div className='font-bold flex'>
               <span>Visible Externally</span>
-              <span className='ml-57'>...</span>
+              <span className='ml-57'>
+              <Select onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="---"/>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Yes</SelectItem>
+                    <SelectItem value="0">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </span>
             </div>
 
             <div className='font-bold flex '>
@@ -744,12 +939,12 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
 
             <div className='flex'>
               <span className='font-bold'>Notes</span>
-              <textarea className='ml-79 w-80 h-40 resize-none p-2 border-2 border-black '></textarea>
+              <textarea className='ml-79 w-80 h-40 resize-none p-2 border-2 border-black ' value={formData?.Note || ''} onChange={(e) => onChange("Note", e.target.value)}></textarea>
             </div>
 
             <div className='absolute ml-180'>
-            <textarea className='w-120 h-100 resize-none p-2 border-2 border-black'></textarea>
-
+            <textarea className='w-120 h-100 resize-none p-2 border-2 border-black' readOnly value={caseNotes?.NotesDisplay}> </textarea>
+                
             </div>
 
             </CardContent>

@@ -31,9 +31,9 @@ export const Case = () => {
       <TabsService
         caseDetails={caseDetails}
       ></TabsService>
-      <ServiceCase
+      {/* <ServiceCase
         caseDetails={caseDetails}
-      ></ServiceCase>
+      ></ServiceCase> */}
     </div>
   )
 }
