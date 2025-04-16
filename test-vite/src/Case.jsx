@@ -28,10 +28,12 @@ export const Case = () => {
 
   return (
     <div className="">
-      <TabsService></TabsService>
-      <ServiceCase
+      <TabsService
         caseDetails={caseDetails}
-      ></ServiceCase>
+      ></TabsService>
+      {/* <ServiceCase
+        caseDetails={caseDetails}
+      ></ServiceCase> */}
     </div>
   )
 }
