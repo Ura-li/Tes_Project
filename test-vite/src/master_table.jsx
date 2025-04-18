@@ -6,6 +6,7 @@ import { ProductAdd, ProductEdit, ProductDelete } from "@/components/sc-modal";
 import { BtnModalAsset, AssetEdit, AssetDelete } from "@/components/sc-modal"
 import { ProductTypeAdd, ProductTypeEdit, ProductTypeDelete } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
+import { WarrantyServiceAdd, WarrantyServiceEdit, WarrantyServiceDelete } from "@/components/sc-modal";
 
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
@@ -778,9 +779,9 @@ export const ProductType_table = () => {
           <thead>
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
               <th className="border p-2">ProductType ID</th>
-              <th className="border p-2">Product Type</th>
               <th className="border p-2">Product Tower</th>
               <th className="border p-2">Product Group</th>
+              <th className="border p-2">Product Type</th>
               <th className="border p-2">Actions</th>
             </tr>
           </thead>
@@ -788,9 +789,9 @@ export const ProductType_table = () => {
             {currentData.map((ProductTypeItem) => (
               <tr key={ProductTypeItem.ProductTypeID} className="hover:bg-gray-100 text-center">
                 <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/case/${ProductTypeItem.ProductTypeID}`)} >{ProductTypeItem.ProductTypeID}</td>
-                <td className="border p-2">{ProductTypeItem.ProductType}</td>
                 <td className="border p-2">{ProductTypeItem.ProductTower}</td>
                 <td className="border p-2">{ProductTypeItem.ProductGroup}</td>
+                <td className="border p-2">{ProductTypeItem.ProductType}</td>
                 <td className="border p-2 flex space-x-2">
                   <ProductTypeEdit ProductTypeID={ProductTypeItem.ProductTypeID} onUpdate={fetchProductTypeDataTable}/>
                   <ProductTypeDelete
@@ -805,6 +806,143 @@ export const ProductType_table = () => {
           </tbody>
         </table>
         {filteredProductTypeTable.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const WarrantyService_table = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Jumlah data per halaman
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [WarrantyServiceData, setWarrantyServiceData] = useState([]);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchWarrantyServiceDataTable=async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/warranty-services");
+      if (response.data.success) {
+        setWarrantyServiceData(response.data.data);
+      } else {
+        setError("Failed to fetch Warranty Service data");
+      }
+    } catch (err) {
+      console.error("Error fetching Warranty Service data:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // 🔹 Load data when component mounts
+  useEffect(() => {
+    fetchWarrantyServiceDataTable();
+  }, []);
+
+  // Filter data berdasarkan pencarian
+  const filteredWarrantyServiceTable = WarrantyServiceData.filter((item) =>
+    Object.values(item).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Hitung total halaman
+  const totalPages = Math.ceil(filteredWarrantyServiceTable.length / itemsPerPage);
+
+  // Ambil data sesuai halaman saat ini
+  const currentData = filteredWarrantyServiceTable.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+
+  //navigate
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Warranty Service Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+    <WarrantyServiceAdd></WarrantyServiceAdd>
+      
+      {/* 🔹 Loading & Error Messages */}
+      {loading && <p>Loading cases...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+              <th className="border p-2">Service offerID</th>
+              <th className="border p-2">Service description</th>
+              <th className="border p-2">Csutomer Tat</th>
+              <th className="border p-2">Price</th>
+              <th className="border p-2">Shipping Fee</th>
+              <th className="border p-2">Quantity</th>
+              <th className="border p-2">Tax</th>
+              <th className="border p-2">Total</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((WarrantyServiceItem) => (
+              <tr key={WarrantyServiceItem.Service_offerID} className="hover:bg-gray-100 text-center">
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/case/${WarrantyServiceItem.Service_offerID}`)} >{WarrantyServiceItem.Service_offerID}</td>
+                <td className="border p-2">{WarrantyServiceItem.Service_description}</td>
+                <td className="border p-2">{WarrantyServiceItem.CTat_RTime}</td>
+                <td className="border p-2">{WarrantyServiceItem.Price}</td>
+                <td className="border p-2">{WarrantyServiceItem.Shipping_Fee}</td>
+                <td className="border p-2">{WarrantyServiceItem.qty_ws}</td>
+                <td className="border p-2">{WarrantyServiceItem.Tax}</td>
+                <td className="border p-2">{WarrantyServiceItem.Total}</td>
+                <td className="border p-2 flex space-x-2">
+                  <WarrantyServiceEdit Service_offerID={WarrantyServiceItem.Service_offerID} onUpdate={fetchWarrantyServiceDataTable}></WarrantyServiceEdit>
+                  <WarrantyServiceDelete
+                      Service_offerID={WarrantyServiceItem.Service_offerID}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchWarrantyServiceDataTable}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredWarrantyServiceTable.length === 0 && (
           <p className="text-center mt-4 text-gray-500">No cases found.</p>
         )}
       </div>

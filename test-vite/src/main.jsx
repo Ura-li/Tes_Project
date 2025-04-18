@@ -17,7 +17,7 @@ import { Case_table } from './master_table';
 import { Product_table } from './master_table';
 import { Bookings } from './bookings';
 import { ProductType_table } from './master_table';
-
+import { WarrantyService_table } from './master_table';
 // import { ModalContextProvider } from './components/modal-context';
 
 createRoot(document.getElementById('root')).render(
@@ -39,6 +39,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/Case_table' element={<Case_table />} />
             <Route path='/master/Product_table' element={<Product_table/>}/>
             <Route path='/master/ProductType_table' element={<ProductType_table/>}/>
+            <Route path='/master/WarrantyService_table' element={<WarrantyService_table/>}/>
           </Route>
           <Route path="/lorem" element={<Lorem />}/>
         </Routes>
