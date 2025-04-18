@@ -53,6 +53,7 @@ import { Pencil, Trash } from "lucide-react";
 import ApiCustomer from "@/api";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { Textarea } from "./ui/textarea";
 
 
 import {
@@ -244,31 +245,46 @@ export function BtnModalContact({
   const handlerContactSubmit = async () => {
     console.log("formDataContact", formDataContact);
     try {
+      let responseMessage = '';
+  
       if (formDataContact.ContactID) {
         // ✅ Update existing contact
         await ApiCustomer.patch(`/api/contact-information/${formDataContact.ContactID}`, formDataContact);
-        setIsModalContactSearchInput(false)
-        alert("Contact updated successfully!");
+        responseMessage = 'Kontak berhasil diperbarui!';
       } else {
         // ✅ Add new contact
         console.log("Selected Company in ModalContactSubmit : ", selectedCompany)
         await ApiCustomer.post("/api/contact-information", formDataContact);
-        setIsModalContactSearchInput(false)
-        alert("Contact added successfully!");
+        responseMessage = 'Kontak berhasil ditambahkan!';
       }
-
-      // fetchContacts(); // ✅ Refresh contacts table
-
-       // ✅ Ensure selectedCompany is not null before fetching contacts
-    if (selectedCompany.SiteAccountID || selectedCompany.length !== 0) {
-      console.log("Selected Company :",selectedCompany);
-      const updatedContacts = await fetchContacts(selectedCompany.SiteAccountID ? selectedCompany.SiteAccountID : selectedCompany );
-      setSelectedContact(updatedContacts); // ✅ Update state so table refreshes
-      console.log("Updated Selected Contacts:", updatedContacts);
-    }
-
+  
+      // ✅ Tutup modal form input dulu
+      setIsModalContactSearchInput(false);
+  
+      // ✅ Tunggu sebentar biar modal benar-benar hilang (hindari konflik z-index)
+      setTimeout(async () => {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: responseMessage,
+          confirmButtonText: 'OK'
+        });
+  
+        // ✅ Refresh data kontak setelah SweetAlert ditutup
+        if (selectedCompany?.SiteAccountID) {
+          const updatedContacts = await fetchContacts(selectedCompany.SiteAccountID);
+          setSelectedContact(updatedContacts);
+          console.log("Updated Selected Contacts:", updatedContacts);
+        }
+      }, 300); // delay kecil untuk pastikan modal tertutup
+  
     } catch (error) {
       console.error("Error adding contact:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: 'Terjadi kesalahan saat menyimpan kontak.',
+      });
     }
   };
 
@@ -812,7 +828,14 @@ export function AssetEdit ({ assetId, onUpdate }) {
 
   const handleUpdate = async () => {
     if (!serialNumber || !productName || !productNumber) {
-      alert("Serial Number, Product Name dan Product Number wajib diisi!");
+      Swal.fire({
+        icon: 'Incomplete Data',
+        title: 'Warning!',
+        text: 'Please fill in all fields before submitting.',
+        time: 1100,
+        timerProgressBar: false,
+        showConfirmButton: false,
+      })
       return;
     }
 
@@ -945,7 +968,14 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
 
   const handleUpdate = async () => {
     if (!companyName || !email || !primaryPhone || !addressLine1 || !city || !country || !zipPostalCode) {
-      alert("Fields marked with * are required!");
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all fields before submitting.",
+        icon: "warning",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }); 
       return;
     }
 
@@ -1014,7 +1044,14 @@ export function CompanyDelete ({ siteAccountId, isModalOpen, setIsModalOpen, onU
         return;
       }
       
-      alert("Site Account deleted successfully! ✅");
+      Swal.fire({
+        icon: 'Success',
+        title: 'Berhasil!',
+        text: 'Company berhasil dihapus.',
+        timer: 1100,  
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
       // ✅ Close the modal if it's open
       setIsModalOpen(false);
       // ✅ Refresh the table by calling `onUpdate()`
@@ -1107,7 +1144,14 @@ export function ContactEdit({ contactID, onUpdate }) {
 
   const handleUpdate = async () => {
     if (!firstName || !lastName || !email || !phone || !city || !country) {
-      alert("Fields marked with * are required!");
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all fields before submitting.",
+        icon: "warning",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });  
       return;
     }
 
@@ -1231,16 +1275,39 @@ export function ProductAdd () {
     // Handler Submit
     const handlerProduct = async () => {
       if (!formDataProduct.ProductNumber || !formDataProduct.ProductLine || !formDataProduct.ProductName) {
-        alert("Please fill in all fields");
+          Swal.fire({
+          title: "Incomplete Data",
+          text: "Please fill in all fields before submitting.",
+          icon: "warning",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
         return;
       }
       try {
         const response = await ApiCustomer.post("/api/product-information", formDataProduct);
         console.log("Success:", response.data);
-        alert("Product Saved successfully");
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Product berhasil disimpan.',
+          timer: 1200,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.reload();
+        });
       } catch (err) {
         console.error("Error saving product: ", err);
-        alert("Failed to save product");
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to save Product. Please try again.",
+          icon: "error",
+          timer: 1200,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
       }
     };
   return (
@@ -1307,7 +1374,14 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
 
   const handleUpdate = async () => {
     if (!productLine || !productName) {
-      alert("Fields marked with * are required!");
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all fields before submitting.",
+        icon: "warning",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });  
       return;
     }
 
@@ -1362,7 +1436,14 @@ const handleDelete = async () => {
       return;
     }
     
-    alert("Product deleted successfully! ✅");
+    Swal.fire({
+      icon: 'Success',
+      title: 'Berhasil!',
+      text: 'ProductType berhasil dihapus.',
+      timer: 1100,  
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
     // ✅ Close the modal if it's open
     setIsModalOpen(false);
     // ✅ Refresh the table by calling `onUpdate()`
@@ -1421,17 +1502,46 @@ export function ProductTypeAdd () {
 
     // Handler Submit
     const handlerProductType = async () => {
-      if (!formDataProductType.ProductTower || !formDataProductType.ProductGroup || !formDataProductType.ProductType) {
-        alert("Please fill in all fields");
+      const { ProductTower, ProductGroup, ProductType } = formDataProductType;
+    
+      if (!ProductTower || !ProductGroup || !ProductType) {
+        Swal.fire({
+          title: "Incomplete Data",
+          text: "Please fill in all fields before submitting.",
+          icon: "warning",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
         return;
       }
+    
       try {
         const response = await ApiCustomer.post("/api/product-type", formDataProductType);
         console.log("Success:", response.data);
-        alert("ProductType Saved successfully");
+    
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Product Type berhasil disimpan.',
+          timer: 1200,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.reload();
+        });
+
       } catch (err) {
-        console.error("Error saving product: ", err);
-        alert("Failed to save productype");
+        console.error("Error saving product type: ", err);
+    
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to save ProductType. Please try again.",
+          icon: "error",
+          timer: 1200,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
       }
     };
   return (
@@ -1484,7 +1594,7 @@ export function ProductTypeAdd () {
             </Select>
 
           <Label>Product Type</Label>
-          <Input type="text" id="ProductType" value={formDataProductType.ProductType} onChange={handlerInputProductType} />
+          <Input type="text" id="ProductType" className="p-2" value={formDataProductType.ProductType} onChange={handlerInputProductType} />
         </div>
         <DialogFooter>
           <Button onClick={handlerProductType}>Add</Button>
@@ -1531,7 +1641,14 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
 
   const handleUpdate = async () => {
     if (!productTower || !productGroup || !productType) {
-      alert("Fields marked with * are required!");
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all fields before submitting.",
+        icon: "warning",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });  
       return;
     }
 
@@ -1622,8 +1739,14 @@ const handleDelete = async () => {
       alert(response.data.message || "Cannot delete this product due to restrictions.");
       return;
     }
-    
-    alert("ProductType deleted successfully! ✅");
+    Swal.fire({
+      icon: 'Success',
+      title: 'Berhasil!',
+      text: 'ProductType berhasil dihapus.',
+      timer: 1100,  
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
     // ✅ Close the modal if it's open
     setIsModalOpen(false);
     // ✅ Refresh the table by calling `onUpdate()`
@@ -1652,6 +1775,317 @@ return (
         <DialogTitle>Delete ProductType</DialogTitle>
         <DialogDescription>
           Delete ProductType confirm. 
+        </DialogDescription>
+      </DialogHeader>
+      <h1>Anda yakin ingin menghapus data ini?</h1>
+      <DialogFooter>
+        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
+};
+
+export function WarrantyServiceAdd () {
+  // Form ProductType
+   const [formDataWarratyService, setFormDataWarrantyService] = useState({
+    Service_offerID: '',
+    Service_description: '',	
+    CTat_RTime: '',
+    Price: '',
+    Shipping_Fee: '',
+    qty_ws: '',
+    Tax: '',
+    Total: '',
+    })
+    
+    // Make Handler ProductType
+    const handlerInputWarrantyService = (e) => {
+      const { id, value } = e.target
+      setFormDataWarrantyService(prevState => ({
+        ...prevState,
+        [id]:value
+      }));
+    };
+
+    // Handler Submit
+    const handlerWarrantyService = async () => {
+      const { 
+        Service_offerID, Service_description, CTat_RTime, Price,
+        Shipping_Fee, qty_ws, Tax, Total
+      } = formDataWarratyService;
+    
+      if (!Service_offerID || !Service_description || !CTat_RTime || !Price || !Shipping_Fee || !qty_ws || !Tax || !Total) {
+        Swal.fire({
+          title: "Incomplete Data",
+          text: "Please fill in all fields before submitting.",
+          icon: "warning",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+        return;
+      }
+    
+      try {
+        const response = await ApiCustomer.post("/api/warranty-services", formDataWarratyService);
+        console.log("Success:", response.data);
+    
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Warranty Service berhasil disimpan.',
+          timer: 1200,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.reload();
+        });
+
+      } catch (err) {
+        console.error("Error saving warranty service: ", err);
+    
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to save warranty service. Please try again.",
+          icon: "error",
+          timer: 1200,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+      }
+    };
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2"> Warranty Service Add</Button>
+      </DialogTrigger>
+      <DialogContent className="h-[500px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Add Warranty Service Information</DialogTitle>
+          <DialogDescription>
+            Add the warranty service Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+
+        <Label>Service Offer ID</Label>
+        <Input type="text" id="Service_offerID" className="p-2" value={formDataWarratyService.Service_offerID} onChange={handlerInputWarrantyService} />
+   
+        <Label htmlFor="Service_description">Service Description</Label>
+        <Textarea
+          id="Service_description"
+          placeholder="Masukkan deskripsi servis"
+          className="mt-1"
+          value={formDataWarratyService.Service_description}
+          onChange={handlerInputWarrantyService}
+        />
+
+        <Label>Customer TAT / Response Time</Label>
+        <Input type="text" id="CTat_RTime" className="p-2" value={formDataWarratyService.CTat_RTime} onChange={handlerInputWarrantyService} />
+
+        <Label>Price</Label>
+        <Input type="text" id="Price" className="p-2" value={formDataWarratyService.Price} onChange={handlerInputWarrantyService} />
+        
+        <Label>Shipping Fee</Label>
+        <Input type="text" id="Shipping_Fee" className="p-2" value={formDataWarratyService.Shipping_Fee} onChange={handlerInputWarrantyService} />
+
+        <Label>Quantity</Label>
+        <Input type="number" id="qty_ws" className="p-2" value={formDataWarratyService.qty_ws} onChange={handlerInputWarrantyService} />
+         
+        <Label>Tax</Label>
+        <Input type="text" id="Tax" className="p-2" value={formDataWarratyService.Tax} onChange={handlerInputWarrantyService} />
+
+        <Label>Total</Label>
+        <Input type="text" id="Total" className="p-2" value={formDataWarratyService.Total} onChange={handlerInputWarrantyService} />
+        </div>
+        <DialogFooter>
+          <Button onClick={handlerWarrantyService}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+};
+
+export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
+  const [WarrantyService, setWarrantyService] = useState(null);
+  const [Service_offerIDState, setService_offerIDState] = useState("");
+  const [Service_description, setService_description] = useState("");
+  const [CTat_RTime, setCTat_RTime] = useState("");
+  const [Price, setPrice] = useState("");
+  const [Shipping_Fee, setShipping_Fee] = useState("");
+  const [qty_ws, setQty_ws] = useState("");
+  const [Tax, setTax] = useState("");
+  const [Total, setTotal] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchWarrantyService = async () => {
+    if (!Service_offerID) return;
+    try {
+      const response = await ApiCustomer.get(`/api/warranty-services/${Service_offerID}`);
+      const data = response.data.data;
+      setWarrantyService(data);
+      setService_offerIDState(data?.Service_offerID || "");
+      setService_description(data?.Service_description || "");
+      setCTat_RTime(data?.CTat_RTime || "");
+      setPrice(data?.Price || "");
+      setShipping_Fee(data?.Shipping_Fee || "");
+      setQty_ws(data?.qty_ws || "");
+      setTax(data?.Tax || "");
+      setTotal(data?.Total || "");
+
+    } catch (error) {
+      console.error("Error fetching Warranty Service information:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (Service_offerID && isOpen) {
+      fetchWarrantyService();
+    }
+  }, [Service_offerID, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setWarrantyService("");
+      setService_description("");
+      setCTat_RTime("");
+      setPrice("");
+      setShipping_Fee("");
+      setQty_ws("");
+      setTax("");
+      setTotal("");
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!Service_offerIDState || !Service_description || !CTat_RTime || !Price || !Shipping_Fee || !qty_ws || !Tax || !Total) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all fields before submitting.",
+        icon: "warning",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });  
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/warranty-services/${Service_offerID}`, {
+        Service_description : Service_description,	
+        CTat_RTime : CTat_RTime,
+        Price : parseFloat(Price),
+        Shipping_Fee : parseFloat(Shipping_Fee),
+        qty_ws : parseInt(qty_ws),
+        Tax : parseFloat(Tax),
+        Total : parseFloat(Total)
+      });
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating Warranty Service:", error);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchWarrantyService(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="h-[500px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Warranty Service Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the Warranty Service Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+
+<Label htmlFor="Service_description">Service Description</Label>
+<Textarea
+  id="Service_description"
+  placeholder="Masukkan deskripsi servis"
+  className="mt-1"
+  value={Service_description} onChange={(e) => setService_description(e.target.value)}
+/>
+
+<Label>Customer TAT / Response Time</Label>
+<Input type="text" id="CTat_RTime" className="p-2"  value={CTat_RTime} onChange={(e) => setCTat_RTime(e.target.value)} />
+
+<Label>Price</Label>
+<Input type="text" id="Price" className="p-2"  value={Price} onChange={(e) => setPrice(e.target.value)} />
+
+<Label>Shipping Fee</Label>
+<Input type="text" id="Shipping_Fee" className="p-2"  value={Shipping_Fee} onChange={(e) => setShipping_Fee(e.target.value)} />
+
+<Label>Quantity</Label>
+<Input type="number" id="qty_ws" className="p-2"  value={qty_ws} onChange={(e) => setQty_ws(e.target.value)} />
+ 
+<Label>Tax</Label>
+<Input type="text" id="Tax" className="p-2"  value={Tax} onChange={(e) => setTax(e.target.value)} />
+
+<Label>Total</Label>
+<Input type="text" id="Total" className="p-2"  value={Total} onChange={(e) => setTotal(e.target.value)}/>
+</div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export function WarrantyServiceDelete ({ Service_offerID, isModalOpen, setIsModalOpen, onUpdate }) {
+  //set modal
+const handleDelete = async () => {
+  try {
+    const response = await ApiCustomer.delete(`/api/warranty-services/${Service_offerID}`);
+    
+    console.log("Server Response:", response.data);
+    if (response.status === 409 || response.data.success === false) {
+      // 🚨 Restriction triggered - Show alert message
+      alert(response.data.message || "Cannot delete this Warranty Service due to restrictions.");
+      return;
+    }
+    Swal.fire({
+      icon: 'Success',
+      title: 'Berhasil!',
+      text: 'Warranty Service dihapus.',
+      timer: 1000,  
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
+    // ✅ Close the modal if it's open
+    setIsModalOpen(false);
+    // ✅ Refresh the table by calling `onUpdate()`
+    if (onUpdate) {
+      onUpdate();
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 409) {
+      // 🚨 Handle 409 Conflict error from backend
+      alert(error.response.data.message || "Cannot delete! This Warranty has related Warranty Service.");
+    } else {
+      alert("Failed to delete Warranty Service. Please try again.");
+    }
+  }
+};
+
+return (
+  <Dialog>
+    <DialogTrigger asChild>
+      <Button variant="outline" className="text-red-500 hover:text-red-700">
+        <Trash />
+      </Button>
+    </DialogTrigger>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Delete Warranty Service</DialogTitle>
+        <DialogDescription>
+          Delete Warranty Service confirm. 
         </DialogDescription>
       </DialogHeader>
       <h1>Anda yakin ingin menghapus data ini?</h1>
@@ -1883,7 +2317,8 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
     setLoading(true);
     setError(null);
     try{
-      const response = await ApiCustomer.get(`/api/service-log/warranty-services `)
+      const response = await ApiCustomer.get(`/api/service-log/warranty-services`)
+      console.log("Warranty Service Response:", response.data);
       return response.data.data;
     }catch(e){
       setError("Failed to load Warranty Service")
@@ -1894,6 +2329,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
   }
   useEffect(() => {
     fetchDataServiceOffer().then((data) => {
+      console.log("Data received for warrantyOffer:", data);
       if (data) setWarrantyOffer(data);
     });
     fetchDataAssets().then((data) => {
@@ -1932,6 +2368,8 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
   const fetchDataPartCatalog = async () => {
     try{
       const response = await ApiCustomer.get(`/api/service-log/parts-catalog`)
+      console.log("output of respone part-catelog: ",response.data)
+      console.log("response.data.data: ", response.data.data); 
       setPartCatalog(response.data.data)
       return response.data.data
     }catch(e){
@@ -2467,7 +2905,7 @@ export function BtnModalsPartAdd({
             </div>
           </div>
           <div className="overflow-x-auto max-w-full">
-            <Table className={' sm:min-w-[1000px]'}>
+            <Table className={''}>
               <TableHeader>
                 <TableRow>
                   <TableHead className={'text-black font-bold'}>Select</TableHead>
@@ -2581,7 +3019,7 @@ export function BtnModalsPartAdd({
             <Button variant={'search'} onClick={() => { setTempSelectedParts([]); 
     setPartNumberInput("");
     setPartNumberSearch(""); }}>Clear</Button>
-            <Button variant={'search'}>Cancel</Button>
+            <Button variant={'search'} onClick={() => open}>Cancel</Button>
           </DialogFooter>
       </DialogContent>
     </Dialog>

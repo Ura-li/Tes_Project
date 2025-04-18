@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
  } from '@/components/ui/select'
+ import Swal from 'sweetalert2';
 
 import ApiCustomer from '@/api'
 
@@ -105,40 +106,73 @@ export const SnInput = ({
   }
   //submit data
   const handleSubmit = async () => {
-    console.log("Form Data Submit SN Input : ",formData)
-    try{
+    console.log("Form Data Submit SN Input : ", formData);
+    
+    if (!formData.SerialNumber || !formData.ProductNumber) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Peringatan!',
+        text: 'Serial Number dan Product Number harus diisi.',
+        timer: 2000, 
+        timerProgressBar: true,
+        showConfirmButton: false,
+        customClass: {
+          popup: 'z-[9999]',
+        },
+      });
+      return;
+    };
 
-      // await ApiCustomer.post("/api/product-information/product-type", {
-      //   ProductType: formData.ProductType,
-      //   ProductTower: formData.ProductTower,
-      //   ProductGroup: formData.ProductGroup,
-      //   ProductTypeID: formData.ProductTypeID
-      // })
-
+    try {
       await ApiCustomer.post("/api/product-information", {
         ProductNumber: formData.ProductNumber,
         ProductName: formData.ProductName,
         ProductLine: formData.ProductLine,
         ProductTypeID: formData.ProductTypeID,
       });
-      
-      //set upsert, so wh
+  
       await ApiCustomer.post("/api/asset-information", {
         SerialNumber: formData.SerialNumber,
-        ProductNumber: formData.ProductNumber, // Reference from product_information
+        ProductNumber: formData.ProductNumber,
         SiteAccountID: formData.SiteAccountID || null,
-        ContactID: formData.ContactID || null
+        ContactID: formData.ContactID || null,
       });
-
-
-      alert("Asset successfully added!");
+  
+      // ✅ TUTUP FORM DULU
       setIsOpenModal(false);
+  
+      // ✅ TAMPILKAN SWEET ALERT DENGAN TIMER OTOMATIS
+      await Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Asset berhasil ditambahkan.',
+        timer: 2000, 
+        timerProgressBar: true,
+        showConfirmButton: false,
+        customClass: {
+          popup: 'z-[9999]',
+        },
+      });
+  
+      // ✅ Setelah alert tertutup otomatis, lakukan refresh
       fetchUnownedAssets();
-    }catch(err){
+  
+    } catch (err) {
       console.error("Error adding asset:", err);
-      alert("Failed to add asset. Please try again.");
+  
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: 'Gagal menambahkan asset. Silakan coba lagi.',
+        timer: 2000, 
+        timerProgressBar: true,
+        showConfirmButton: false,
+        customClass: {
+          popup: 'z-[9999]',
+        },
+      });
     }
-  }
+  };
 
   //handle create type :
   const [productDetails, setProductDetails] = useState({
@@ -155,11 +189,11 @@ export const SnInput = ({
   return (
     <Dialog open={isOpenModal} onOpenChange={setIsOpenModal}>
     <DialogTrigger asChild>
-      <Button variant="link" className="ml-30">Serial Number</Button>
+      <Button variant="link" className="ml-30">Add New Product</Button>
     </DialogTrigger>
     <DialogContent className="sm:max-w-[900px] ">
       <DialogHeader className="flex flex-row justify-between">
-        <DialogTitle className='mt-1 font-bold'>Serial Number</DialogTitle>
+        <DialogTitle className='mt-1 font-bold'>Add New Product</DialogTitle>
         <Button variant="link">Clear All</Button>
       </DialogHeader>
       <div className="grid gap-4 py-4 grid-flow-col grid-rows-4 ">

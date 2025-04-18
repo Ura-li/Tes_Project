@@ -91,7 +91,11 @@ const data = {
         {
           title: "Product Type",
           url: "/master/ProductType_table ",
-        },        
+        },     
+        {
+          title: "Warranty Service",
+          url: "/master/WarrantyService_table",
+        },      
       ],
     },
     {

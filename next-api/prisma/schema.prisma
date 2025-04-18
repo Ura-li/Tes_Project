@@ -237,13 +237,15 @@ model global_trade_check {
 }
 
 model confirm_service {
-  id_confirmService Int    @id
+  id_confirmService Int               @id
   AssetID           Int
-  Service_offerID   String @db.VarChar(8)
+  Service_offerID   String            @db.VarChar(8)
   PartID            Int
-  sub_total         Float  @db.Float
-  total             Float  @db.Float
-  Incident_Type     String @db.VarChar(50)
+  sub_total         Float             @db.Float
+  total             Float             @db.Float
+  Incident_Type     String            @db.VarChar(50)
+  asset_information asset_information @relation(fields: [AssetID], references: [AssetID], onDelete: Cascade, map: "asset_information")
+  warranty_services warranty_services @relation(fields: [Service_offerID], references: [Service_offerID], onDelete: Cascade, map: "warranty_services")
 
   @@index([AssetID], map: "asset_information")
   @@index([PartID], map: "servicecatalog_parts")
