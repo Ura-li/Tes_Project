@@ -1882,7 +1882,8 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
     setLoading(true);
     setError(null);
     try{
-      const response = await ApiCustomer.get(`/api/service-log/warranty-services `)
+      const response = await ApiCustomer.get(`/api/service-log/warranty-services`)
+      console.log("Warranty Service Response:", response.data);
       return response.data.data;
     }catch(e){
       setError("Failed to load Warranty Service")
@@ -1893,6 +1894,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
   }
   useEffect(() => {
     fetchDataServiceOffer().then((data) => {
+      console.log("Data received for warrantyOffer:", data);
       if (data) setWarrantyOffer(data);
     });
     fetchDataAssets().then((data) => {
@@ -1931,6 +1933,8 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
   const fetchDataPartCatalog = async () => {
     try{
       const response = await ApiCustomer.get(`/api/service-log/parts-catalog`)
+      console.log("output of respone part-catelog: ",response.data)
+      console.log("response.data.data: ", response.data.data); 
       setPartCatalog(response.data.data)
       return response.data.data
     }catch(e){
@@ -2318,7 +2322,7 @@ export function BtnModalsPartAdd({open2, setOpen2}){
             </div>
           </div>
           <div className="overflow-x-auto max-w-full">
-            <Table className={' sm:min-w-[1000px]'}>
+            <Table className={''}>
               <TableHeader>
                 <TableRow>
                   <TableHead className={'text-black font-bold'}>Select</TableHead>
@@ -2388,7 +2392,7 @@ export function BtnModalsPartAdd({open2, setOpen2}){
           <DialogFooter className={'sm:justify-start'}>
             <Button variant={'search'}>Add Part</Button>
             <Button variant={'search'}>Clear</Button>
-            <Button variant={'search'}>Cancel</Button>
+            <Button variant={'search'} onClick={() => open}>Cancel</Button>
           </DialogFooter>
       </DialogContent>
     </Dialog>
