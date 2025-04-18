@@ -232,6 +232,7 @@ export const TabsService = ({ caseDetails }) => {
 
   const [caseNotes, setCaseNotes] = useState([])
 
+
   
   
 
@@ -353,6 +354,58 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
 );
 
 
+  //customer, asset, entitlement
+  //customer
+  const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
+    MainAccount: null,
+    SiteAccount: null,
+    Type: null,
+  });
+  const fetchCustomerData = async () => {
+    try{
+      // console.log("Case Detail : ", caseDetails);
+      const resMainAccount = await ApiCustomer.get(`/api/contact-information/${caseDetails.ContactID}`)
+      setDataFetchCustomerData({
+        MainAccount: resMainAccount.data.data
+      })
+      if(caseDetails.SiteAccountID !== null) {
+        const resSiteAccount = await ApiCustomer.get(`/api/site_account/${caseDetails.SiteAccountID}`)
+        setDataFetchCustomerData((prev) => ({
+          ...prev,
+          SiteAccount: resSiteAccount.data.data,
+          Type: "SiteAccount"
+        }));
+        
+      }else{
+        setDataFetchCustomerData((prev) => ({
+          ...prev,
+          type: "Individual", // fallback if no site account
+        }));
+      }
+
+      console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
+      // const res = await ApiCustomer.get(`/api/`)
+    }catch(err){
+      console.error("Error returning Customer Data : ",err)
+      return null
+    }
+  }
+  //asset
+  const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
+  const fetchAssetInformation = async () => {
+    try{
+      const resAsset = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
+      setDataFetchAssetInformation({
+        AssetInformation: resAsset.data.data
+      })
+    }catch(err){
+      console.error("Error returning Asset Data : ",err)
+      return null
+    }
+  }
+
+
+
 //notes handler
 const fetchCaseNotes = async () => {
   try{
@@ -390,6 +443,8 @@ const fetchCaseNotes = async () => {
   }
 }
 useEffect(() => {
+  fetchCustomerData();
+  fetchAssetInformation();
   const loadNote = async () => {
     const noteDetail = await fetchCaseNotes();
     if(noteDetail ){
@@ -400,6 +455,9 @@ useEffect(() => {
   }
   loadNote()
 }, [])
+useEffect(() =>{
+  console.log("Data Asset Info : ",dataFetchAssetInformation)
+}, dataFetchAssetInformation)
 
 const fetchSymptomCodes = async (term) => {
   try {
@@ -625,7 +683,7 @@ const fetchSymptomCodes = async (term) => {
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Customer Account</span>
-              <span className='ml-30'>...</span>
+              <span className='ml-30'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Company : dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -653,19 +711,19 @@ const fetchSymptomCodes = async (term) => {
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Primary Contact</span>
-              <span className='ml-35'>...</span>
+              <span className='ml-35'>{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</span>
             </div>
 
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Primary Email</span>
-              <span className='ml-35'>...</span>
+              <span className='ml-35'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Email : dataFetchCustomerData?.MainAccount?.Email}</span>
             </div>
 
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Phone</span>
-              <span className='ml-49.5'>...</span>
+              <span className='ml-49.5'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone: dataFetchCustomerData?.MainAccount?.Phone}</span>
             </div>
   
             <div className='font-bold flex'>
@@ -676,7 +734,7 @@ const fetchSymptomCodes = async (term) => {
             <div className='font-bold flex'>
             <Lock className='size-5 mr-2'></Lock>
               <span>Country</span>
-              <span className='ml-46'>...</span>
+              <span className='ml-46'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Country : dataFetchCustomerData?.MainAccount?.Country}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -720,19 +778,19 @@ const fetchSymptomCodes = async (term) => {
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Asset</span>
-              <span className='ml-56'>...</span>
+              <span className='ml-56'>{dataFetchAssetInformation?.AssetInformation?.SerialNumber}</span>
             </div>
 
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Serial Number</span>
-              <span className='ml-39'>...</span>
+              <span className='ml-39'>{dataFetchAssetInformation?.AssetInformation?.SerialNumber}</span>
             </div>
 
             <div className='font-bold flex'>
             <Lock className='size-5 mr-2'></Lock>
               <span>Product Name</span>
-              <span className='ml-39'>...</span>
+              <span className='ml-39'>{dataFetchAssetInformation?.AssetInformation?.product_information?.ProductName}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -744,7 +802,7 @@ const fetchSymptomCodes = async (term) => {
             <div className='font-bold flex'>
             <Lock className=' size-5 mr-2'></Lock>
               <span>Product Number</span>
-              <span className='ml-30'>...</span>
+              <span className='ml-30'>{dataFetchAssetInformation?.AssetInformation?.ProductNumber}</span>
             </div>
 
             <div className='font-bold flex'>
