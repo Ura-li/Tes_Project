@@ -9,7 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+<<<<<<< Updated upstream
     "@prisma/client": "^6.4.1",
+=======
+    "@prisma/client": "^6.6.0",
+>>>>>>> Stashed changes
     "next": "15.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
