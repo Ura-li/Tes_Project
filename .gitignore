@@ -1,1 +1,13 @@
 test-vite/package-lock.json
+next-api/prisma/node_modules/@prisma/client/wasm.js
+next-api/prisma/node_modules/@prisma/client/wasm.d.ts
+next-api/prisma/node_modules/@prisma/client/schema.prisma
+next-api/prisma/node_modules/@prisma/client/runtime/wasm.js
+next-api/prisma/node_modules/@prisma/client/runtime/react-native.js
+next-api/prisma/node_modules/@prisma/client/runtime/library.js
+next-api/prisma/node_modules/@prisma/client/runtime/library.d.ts
+next-api/prisma/node_modules/@prisma/client/runtime/index-browser.js
+next-api/prisma/node_modules/@prisma/client/runtime/index-browser.d.ts
+next-api/prisma/node_modules/@prisma/client/runtime/edge.js
+next-api/prisma/node_modules/@prisma/client/runtime/edge-esm.js
+next-api/prisma/node_modules/@prisma/client/query_engine-windows.dll.node
