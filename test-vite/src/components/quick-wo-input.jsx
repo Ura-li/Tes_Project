@@ -79,7 +79,7 @@ export function QuickWOInput ({ WOID }) {
   useEffect(() => {
     if (!WOID) return;
     (async () => {
-      const res = await ApiCustomer.get(`/api/workorder/${WOID}`);
+      const res = await ApiCustomer.get(`/api/work-order/${WOID}`);
       const wo = res.data.data; 
       setIncomingChannel(wo.IncomingChannel || "..."); 
       setWorkOrderNumber(wo.WorkOrderNumber || "...");
@@ -166,7 +166,7 @@ export function QuickWOInput ({ WOID }) {
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
                   <span>Work Order Number</span>
-                  <Input className="ml-40" value={workOrderNumber} readOnly/>
+                  <Input className="ml-40" value={WOID} readOnly/>
                 </div>
 
                 <div className="font-bold flex">

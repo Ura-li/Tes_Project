@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 
 export async function GET(request, {params}) {
-    const woid = await params.WOID
+    const woid = params.WOID
 
     if (!woid) {
         return NextResponse.json({

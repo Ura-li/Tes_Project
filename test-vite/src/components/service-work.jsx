@@ -38,6 +38,8 @@ import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
 
+import { QuickWOInput } from "./quick-wo-input";
+
 export const ServiceWork = () => {
   const { woid } = useParams();
 
@@ -756,7 +758,7 @@ export const ServiceWork = () => {
             </Card> 
           </TabsContent>
 
-          <QuickWOInput WOID={1} />
+          <QuickWOInput WOID={woid} />
         </Tabs>
       </CardContent>
     </Card>
