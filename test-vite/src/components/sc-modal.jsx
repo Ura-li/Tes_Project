@@ -1629,6 +1629,7 @@ return (
 
 
 
+
 //? Service Case Tab List
 
 
@@ -2182,5 +2183,248 @@ export function BtnModalsWorkOrder({ open, setOpen}) {
     </Dialog>
     {/* <Button onClick={() => setWorkOpen(true)}>Open Work Order</Button> */}
   </>
+  );
+}
+
+export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen  }) {
+  const [formData, setFormData] = useState({
+    PartNumber: "",
+    Keyword: "",
+    PartDescription: "",
+    Orderability: "",
+    RestrictionReason: "",
+    Price: "",
+    FreightPrice: "",
+    Shipping_Fee: "",
+    qty_parts: "",
+    Tax: "",
+    Total: "",
+    CSR_Flag: false,
+    ROHS_Flag: false,
+    Returnable_Flag: false,
+    HardRoll_Flag: false,
+    DangerousGoods_Flag: false,
+    LithiumBattery_Flag: false,
+    Oversize_Flag: false,
+    Heavy_Flag: false,
+  });
+
+  const handleChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    const requiredFields = [
+      "PartNumber", "Keyword", "PartDescription", "Orderability",
+      "Price", "qty_parts", "Tax", "Total"
+    ];
+
+    const missingFields = requiredFields.filter((field) => !formData[field]);
+    if (missingFields.length > 0) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post("/api/servicecatalog-parts", formData);
+      alert("Service Catalog Part added successfully!");
+      onAddSuccess && onAddSuccess();
+      onClose && onClose();
+    } catch (error) {
+      console.error("Failed to add part:", error);
+      alert("Failed to save service catalog part.");
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2">Add Part</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Service Catalog Part</DialogTitle>
+          <DialogDescription>
+            Fill in the fields to add a new part. * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
+          <Label>Part Number*</Label>
+          <Input id="PartNumber" value={formData.PartNumber} onChange={handleChange} />
+
+          <Label>Keyword*</Label>
+          <Input id="Keyword" value={formData.Keyword} onChange={handleChange} />
+
+          <Label>Part Description*</Label>
+          <Input id="PartDescription" value={formData.PartDescription} onChange={handleChange} />
+
+          <Label>Orderability*</Label>
+          <Input id="Orderability" value={formData.Orderability} onChange={handleChange} />
+
+          <Label>Restriction Reason</Label>
+          <Input id="RestrictionReason" value={formData.RestrictionReason} onChange={handleChange} />
+
+          <Label>Price*</Label>
+          <Input type="number" id="Price" value={formData.Price} onChange={handleChange} />
+
+          <Label>Freight Price</Label>
+          <Input type="number" id="FreightPrice" value={formData.FreightPrice} onChange={handleChange} />
+
+          <Label>Shipping Fee</Label>
+          <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} />
+
+          <Label>Quantity*</Label>
+          <Input type="number" id="qty_parts" value={formData.qty_parts} onChange={handleChange} />
+
+          <Label>Tax*</Label>
+          <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} />
+
+          <Label>Total*</Label>
+          <Input type="number" id="Total" value={formData.Total} onChange={handleChange} />
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-4">
+            <div><input type="checkbox" id="CSR_Flag" checked={formData.CSR_Flag} onChange={handleChange} /> <label htmlFor="CSR_Flag">CSR</label></div>
+            <div><input type="checkbox" id="ROHS_Flag" checked={formData.ROHS_Flag} onChange={handleChange} /> <label htmlFor="ROHS_Flag">ROHS</label></div>
+            <div><input type="checkbox" id="Returnable_Flag" checked={formData.Returnable_Flag} onChange={handleChange} /> <label htmlFor="Returnable_Flag">Returnable</label></div>
+            <div><input type="checkbox" id="HardRoll_Flag" checked={formData.HardRoll_Flag} onChange={handleChange} /> <label htmlFor="HardRoll_Flag">Hard Roll</label></div>
+            <div><input type="checkbox" id="DangerousGoods_Flag" checked={formData.DangerousGoods_Flag} onChange={handleChange} /> <label htmlFor="DangerousGoods_Flag">Dangerous Goods</label></div>
+            <div><input type="checkbox" id="LithiumBattery_Flag" checked={formData.LithiumBattery_Flag} onChange={handleChange} /> <label htmlFor="LithiumBattery_Flag">Lithium Battery</label></div>
+            <div><input type="checkbox" id="Oversize_Flag" checked={formData.Oversize_Flag} onChange={handleChange} /> <label htmlFor="Oversize_Flag">Oversize</label></div>
+            <div><input type="checkbox" id="Heavy_Flag" checked={formData.Heavy_Flag} onChange={handleChange} /> <label htmlFor="Heavy_Flag">Heavy</label></div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ServiceCatalogPartEdit({ PartID, onUpdate }) {
+  // console.log(PartID);
+  const [isOpen, setIsOpen] = useState(false);
+  const [partData, setPartData] = useState({
+    PartNumber: "",
+    Keyword: "",
+    PartDescription: "",
+    Orderability: "",
+    RestrictionReason: "",
+    Price: "",
+    FreightPrice: "",
+    Shipping_Fee: "",
+    qty_parts: "",
+    Tax: "",
+    Total: "",
+    CSR_Flag: false,
+    ROHS_Flag: false,
+    Returnable_Flag: false,
+    HardRoll_Flag: false,
+    DangerousGoods_Flag: false,
+    LithiumBattery_Flag: false,
+    Oversize_Flag: false,
+    Heavy_Flag: false,
+  });
+
+  const fetchPart = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/servicecatalog-parts/${PartID}`);
+      const data = response.data.data;
+      console.log("Data Dari API", data);
+
+      setPartData((prev) => ({
+        ...prev,
+        ...data,
+      }));
+    } catch (error) {
+      console.error("Error fetching part data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (PartID && isOpen) {
+      fetchPart();
+      console.log("Sialan");
+    }
+  }, [PartID, isOpen]);
+
+  const handleChange = (key, value) => {
+    setPartData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await ApiCustomer.patch(`/api/servicecatalog-parts/${PartID}`, partData);
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating part:", error);
+    }
+  };
+
+  const flagFields = [
+    "CSR_Flag",
+    "ROHS_Flag",
+    "Returnable_Flag",
+    "HardRoll_Flag",
+    "DangerousGoods_Flag",
+    "LithiumBattery_Flag",
+    "Oversize_Flag",
+    "Heavy_Flag",
+  ];
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchPart();}}>
+          <Pencil size={16} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Service Catalog Part</DialogTitle>
+          <DialogDescription>
+            Update the part details and flags.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-2">
+          {/* Input fields */}
+          {Object.entries(partData).map(([key, value]) => {
+            if (flagFields.includes(key)) return null; // Skip flags here
+            return (
+              <Input
+                key={key}
+                value={value}
+                placeholder={key}
+                onChange={(e) => handleChange(key, e.target.value)}
+              />
+            );
+          })}
+
+          {/* Checkbox flags */}
+          <div className="grid grid-cols-2 gap-2 pt-4">
+            {flagFields.map((flag) => (
+              <div key={flag} className="flex items-center space-x-2">
+                <Checkbox
+                  id={flag}
+                  checked={!!partData[flag]}
+                  onCheckedChange={(checked) => handleChange(flag, checked)}
+                />
+                <Label htmlFor={flag}>{flag.replace(/_/g, " ")}</Label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

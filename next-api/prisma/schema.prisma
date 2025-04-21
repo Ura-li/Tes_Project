@@ -130,44 +130,37 @@ model materialorderlineitems {
 }
 
 model servicecatalog {
-  ServiceCatalogID     Int                    @id @default(autoincrement())
-  ProductNumber        String?                @db.VarChar(100)
-  ProductName          String?                @db.VarChar(255)
-  SerialNumber         String?                @db.VarChar(100)
-  WarrantyStatus       String?                @db.VarChar(50)
-  Currency             String?                @db.VarChar(10)
-  Price                Decimal?               @db.Decimal(10, 2)
-  Tax                  Decimal?               @db.Decimal(10, 2)
-  Total                Decimal?               @db.Decimal(10, 2)
-  servicecatalog_parts servicecatalog_parts[]
+  ServiceCatalogID Int      @id @default(autoincrement())
+  ProductNumber    String?  @db.VarChar(100)
+  ProductName      String?  @db.VarChar(255)
+  SerialNumber     String?  @db.VarChar(100)
+  WarrantyStatus   String?  @db.VarChar(50)
+  Currency         String?  @db.VarChar(10)
+  Price            Decimal? @db.Decimal(10, 2)
+  Tax              Decimal? @db.Decimal(10, 2)
+  Total            Decimal? @db.Decimal(10, 2)
 }
 
 model servicecatalog_parts {
-  PartID              Int               @id @default(autoincrement())
-  ServiceCatalogID    Int?
-  PartNumber          String?           @db.VarChar(100)
-  Keyword             String?           @db.VarChar(100)
-  PartDescription     String?           @db.Text
-  Orderability        String?           @db.VarChar(50)
-  RestrictionReason   String?           @db.Text
-  CSR_Flag            Boolean?          @default(false)
-  ROHS_Flag           Boolean?          @default(false)
-  Returnable_Flag     Boolean?          @default(false)
-  HardRoll_Flag       Boolean?          @default(false)
-  DangerousGoods_Flag Boolean?          @default(false)
-  LithiumBattery_Flag Boolean?          @default(false)
-  Oversize_Flag       Boolean?          @default(false)
-  Heavy_Flag          Boolean?          @default(false)
-  Price               Decimal?          @db.Decimal(10, 2)
-  FreightPrice        Decimal?          @db.Decimal(10, 2)
-  Shipping_Fee        Float             @db.Float
+  PartNumber          String   @id @db.VarChar(100)
+  Keyword             String?  @db.VarChar(100)
+  PartDescription     String?  @db.Text
+  Orderability        String?  @db.VarChar(50)
+  RestrictionReason   String?  @db.Text
+  CSR_Flag            Boolean? @default(false)
+  ROHS_Flag           Boolean? @default(false)
+  Returnable_Flag     Boolean? @default(false)
+  HardRoll_Flag       Boolean? @default(false)
+  DangerousGoods_Flag Boolean? @default(false)
+  LithiumBattery_Flag Boolean? @default(false)
+  Oversize_Flag       Boolean? @default(false)
+  Heavy_Flag          Boolean? @default(false)
+  Price               Decimal? @db.Decimal(10, 2)
+  FreightPrice        Decimal? @db.Decimal(10, 2)
+  Shipping_Fee        Float    @db.Float
   qty_parts           Int
-  Tax                 Decimal?          @db.Decimal(10, 2)
-  Total               Decimal?          @db.Decimal(10, 2)
-  confirm_service     confirm_service[]
-  servicecatalog      servicecatalog?   @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID], onDelete: Restrict, onUpdate: Restrict, map: "servicecatalog_parts_ibfk_1")
-
-  @@index([ServiceCatalogID], map: "ServiceCatalogID")
+  Tax                 Decimal? @db.Decimal(10, 2)
+  Total               Decimal? @db.Decimal(10, 2)
 }
 
 model site_account {
@@ -241,16 +234,15 @@ model global_trade_check {
 }
 
 model confirm_service {
-  id_confirmService    Int                  @id
-  AssetID              Int
-  Service_offerID      String               @db.VarChar(8)
-  PartID               Int
-  sub_total            Float                @db.Float
-  total                Float                @db.Float
-  Incident_Type        String               @db.VarChar(50)
-  asset_information    asset_information    @relation(fields: [AssetID], references: [AssetID], onDelete: Cascade, map: "asset_information")
-  servicecatalog_parts servicecatalog_parts @relation(fields: [PartID], references: [PartID], onDelete: Cascade, map: "servicecatalog_parts")
-  warranty_services    warranty_services    @relation(fields: [Service_offerID], references: [Service_offerID], onDelete: Cascade, map: "warranty_services")
+  id_confirmService Int               @id
+  AssetID           Int
+  Service_offerID   String            @db.VarChar(8)
+  PartID            Int
+  sub_total         Float             @db.Float
+  total             Float             @db.Float
+  Incident_Type     String            @db.VarChar(50)
+  asset_information asset_information @relation(fields: [AssetID], references: [AssetID], onDelete: Cascade, map: "asset_information")
+  warranty_services warranty_services @relation(fields: [Service_offerID], references: [Service_offerID], onDelete: Cascade, map: "warranty_services")
 
   @@index([AssetID], map: "asset_information")
   @@index([PartID], map: "servicecatalog_parts")

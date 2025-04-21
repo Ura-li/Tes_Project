@@ -91,7 +91,11 @@ const data = {
         {
           title: "Product Type",
           url: "/master/ProductType_table ",
-        },        
+        },
+        {
+          title: "Service Catalog Type",
+          url: "/master/ServiceCatalogPartsTable ",
+        },         
       ],
     },
     {
