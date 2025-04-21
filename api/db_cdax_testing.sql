@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 16, 2025 at 01:07 PM
+-- Generation Time: Apr 21, 2025 at 08:03 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,7 +33,7 @@ CREATE TABLE `asset_information` (
   `ProductNumber` varchar(11) NOT NULL,
   `SiteAccountID` int(11) DEFAULT NULL,
   `ContactID` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `asset_information`
@@ -44,7 +44,8 @@ INSERT INTO `asset_information` (`AssetID`, `SerialNumber`, `ProductNumber`, `Si
 (3, '5B213', '8712', NULL, 3),
 (4, '5GC', '882', 3, 4),
 (5, 'GT544', '7676', NULL, 5),
-(9, '5CG1329SV7', '6G1L7PA', 4, 17);
+(9, '5CG1329SV7', '6G1L7PA', 4, 17),
+(10, '23', '12', 9, 18);
 
 -- --------------------------------------------------------
 
@@ -72,14 +73,15 @@ CREATE TABLE `caseinformation` (
   `CreatedBy` int(11) DEFAULT NULL,
   `Owner` int(11) DEFAULT NULL,
   `WorkGround` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `caseinformation`
 --
 
 INSERT INTO `caseinformation` (`CaseID`, `SiteAccountID`, `ContactID`, `AssetID`, `CaseSubject`, `CaseType`, `KCI_Flag`, `IncomingChannel`, `CaseStatus`, `CasePriority`, `CustomerSeverity`, `CreatedOn`, `CaseClosedDate`, `CaseNote`, `SymptomCode`, `CaseResolution`, `CreatedBy`, `Owner`, `WorkGround`) VALUES
-(15715, 4, 17, 9, 'wesad', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-04-15 13:54:31', NULL, 5, 1, '', NULL, NULL, NULL);
+(15715, 4, 17, 9, 'wesad', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-04-15 13:54:31', NULL, 5, 2, '', NULL, NULL, NULL),
+(19081, 4, 17, 9, 'Victus Cleaning', 'Depot Repair', 0, 'Email', 'Open', 'Medium', 'Normal', '2025-04-21 03:03:07', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -97,30 +99,14 @@ CREATE TABLE `casenotes` (
   `MinutesSpent` int(11) DEFAULT NULL,
   `Note` text DEFAULT NULL,
   `CreatedOn` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `casenotes`
 --
 
 INSERT INTO `casenotes` (`NoteID`, `CaseID`, `LogType`, `ActionType`, `Template`, `VisibleExternally`, `MinutesSpent`, `Note`, `CreatedOn`) VALUES
-(5, 15715, '', '', '', NULL, 0, ' Product \nSerial no.	:	5CD2355XDD\nProduct tower	:	PSG\nProduct group	:	Consumer\nProduct type	:	Notebook/Laptop\nProduct line	:	M7\nProduct no.	:	6G1L2PA\nProduct name	:	Victus by HP 15.6 inch Gaming Laptop 15-fa0000 (599K1AV)\nEnd of sales date	:	31 Aug 2023\nEnd of support date	:	31 Aug 2026\n\n***********************\nProblem desc.	:	Laptop mati\nCase note	:	\n \nCase type	:	Bench\n\n\n', '2025-04-16 08:28:47');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `confirm_service`
---
-
-CREATE TABLE `confirm_service` (
-  `id_confirmService` int(5) NOT NULL,
-  `AssetID` int(11) NOT NULL,
-  `Service_offerID` varchar(8) NOT NULL,
-  `PartID` int(11) NOT NULL,
-  `sub_total` float NOT NULL,
-  `total` float NOT NULL,
-  `Incident_Type` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+(5, 15715, 'NotesLog', '', '', 1, 0, ' Product \nSerial no.	:	5CD2355XDD\nProduct tower	:	PSG\nProduct group	:	Consumer\nProduct type	:	Notebook/Laptop\nProduct line	:	M7\nProduct no.	:	6G1L2PA\nProduct name	:	Victus by HP 15.6 inch Gaming Laptop 15-fa0000 (599K1AV)\nEnd of sales date	:	31 Aug 2023\nEnd of support date	:	31 Aug 2026\n\n***********************\nProblem desc.	:	Laptop mati\nCase note	:	\n \nCase type	:	Bench\n\n\n\n**************\nasdasda', '2025-04-16 08:28:47');
 
 -- --------------------------------------------------------
 
@@ -149,7 +135,7 @@ CREATE TABLE `contact_information` (
   `StateProvince` varchar(100) DEFAULT NULL,
   `Country` varchar(100) DEFAULT NULL,
   `ZipPostalCode` varchar(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `contact_information`
@@ -162,7 +148,8 @@ INSERT INTO `contact_information` (`ContactID`, `SiteAccountID`, `Salutation`, `
 (5, NULL, 'Mr. ', 'Friska', 'Latuconsina', 'Friska@gmail.com', 'Bahasa Indonesia', '0896', '', '', '', '', '', '', 'Jl Sutomo', '', 'Kediri', 'Jawa Timur', 'Indonesia', '6565'),
 (8, 6, 'Mr. ', 'Joshua', 'Harmes', 'joshuaharmes@gmai.com', 'Spanish', '1872923', '', '', '', '', '', '', 'Jln Kerupuk', '', 'Jambi', 'Jambi', 'Indonesia', '88928'),
 (16, 4, 'Mrs. ', 'Mey', 'Almasya', 'mey-miku21@gmail.com', 'English', '085755162771', '085755162771', '', '', '', '', '', 'Solo', '', 'Surakarta', 'Jawa Tengah', 'Indonesia', '40611'),
-(17, 4, 'Mr. ', 'Miku21', 'Margareth', 'mikucomunity21@gmail.com', 'Spanish', '087731137512', '087731137512', '', '', '', '', '', 'Virtual Reality', '', 'Virtual World', 'Virtual', 'Indonesia', '12312');
+(17, 4, 'Mr. ', 'Miku21', 'Margareth', 'mikucomunity21@gmail.com', 'Spanish', '087731137512', '087731137512', '', '', '', '', '', 'Virtual Reality', '', 'Virtual World', 'Virtual', 'Indonesia', '12312'),
+(18, 9, 'Mr. ', 'RAFA', 'ELFARIZI', 'poo@gmail.com', 'Spanish', '222', '', '', '', '', '', '', 'Dukuh Cenang Desa Cenggini RT 03 RW 04', '', 'Kabupaten tegal', 'Jawa Tengah', '', '40511');
 
 -- --------------------------------------------------------
 
@@ -171,7 +158,7 @@ INSERT INTO `contact_information` (`ContactID`, `SiteAccountID`, `Salutation`, `
 --
 
 CREATE TABLE `global_trade_check` (
-  `id_gtc` int(25) NOT NULL,
+  `id_gtc` int(11) NOT NULL,
   `global_trade_status` varchar(30) NOT NULL,
   `embargoed_country` varchar(30) NOT NULL,
   `gt_override_reason` varchar(30) NOT NULL,
@@ -179,7 +166,7 @@ CREATE TABLE `global_trade_check` (
   `screening_id` varchar(25) NOT NULL,
   `gt_active_listening` varchar(30) NOT NULL,
   `gt_al_comments` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -188,8 +175,8 @@ CREATE TABLE `global_trade_check` (
 --
 
 CREATE TABLE `materialorder` (
-  `MOID` int(11) NOT NULL,
-  `WOID` int(11) DEFAULT NULL,
+  `MOID` varchar(13) NOT NULL,
+  `WOID` varchar(13) DEFAULT NULL,
   `OrderNumber` varchar(100) DEFAULT NULL,
   `OrderStatus` varchar(50) DEFAULT NULL,
   `OrderType` varchar(50) DEFAULT NULL,
@@ -198,7 +185,15 @@ CREATE TABLE `materialorder` (
   `RMANumber` varchar(100) DEFAULT NULL,
   `ReadyForClosureDate` datetime DEFAULT NULL,
   `Owner` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `materialorder`
+--
+
+INSERT INTO `materialorder` (`MOID`, `WOID`, `OrderNumber`, `OrderStatus`, `OrderType`, `CreatedOn`, `SalesOrderNumber`, `RMANumber`, `ReadyForClosureDate`, `Owner`) VALUES
+('MO-0001', 'WO-0001', NULL, 'Created', 'Repair', '2025-04-20 21:01:42', NULL, NULL, NULL, 'Miku21'),
+('MO-0002', 'WO-0002', NULL, 'Created', 'Repair', '2025-04-21 03:03:25', NULL, NULL, NULL, 'Miku21');
 
 -- --------------------------------------------------------
 
@@ -208,14 +203,23 @@ CREATE TABLE `materialorder` (
 
 CREATE TABLE `materialorderlineitems` (
   `LineItemID` int(11) NOT NULL,
-  `MOID` int(11) DEFAULT NULL,
+  `MOID` varchar(13) DEFAULT NULL,
   `LineNumber` int(11) DEFAULT NULL,
   `PartNumber` varchar(100) DEFAULT NULL,
   `Description` text DEFAULT NULL,
   `ATPStatus` varchar(50) DEFAULT NULL,
   `Price` decimal(10,2) DEFAULT NULL,
   `Quantity` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `materialorderlineitems`
+--
+
+INSERT INTO `materialorderlineitems` (`LineItemID`, `MOID`, `LineNumber`, `PartNumber`, `Description`, `ATPStatus`, `Price`, `Quantity`) VALUES
+(3, 'MO-0001', 1, 'M91238-005', 'SKO-WLAN 6 RTK ax 2x2+BT RTL88', NULL, 500000.00, 1),
+(4, 'MO-0001', 2, 'N42547-001', 'SPS-CABLE LCD FHD 40P', NULL, 120000.00, 1),
+(7, 'MO-0002', 1, 'M91238-005', 'SKO-WLAN 6 RTK ax 2x2+BT RTL88', NULL, 500000.00, 1);
 
 -- --------------------------------------------------------
 
@@ -231,13 +235,14 @@ CREATE TABLE `product_information` (
   `end_of_sales_date` date DEFAULT NULL,
   `end_of_support_date` date DEFAULT NULL,
   `vendor` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `product_information`
 --
 
 INSERT INTO `product_information` (`ProductNumber`, `ProductLine`, `ProductName`, `ProductTypeID`, `end_of_sales_date`, `end_of_support_date`, `vendor`) VALUES
+('12', '12', '44', 7, NULL, NULL, NULL),
 ('2LB19A', 'GC', 'HP Ink Tank 115', 2, NULL, NULL, NULL),
 ('483R7PA', 'KV', 'HP 14s-cf2500TX', 5, NULL, NULL, 'HP'),
 ('572GH1', 'LP', 'HP Elite Book G3 ', 2, NULL, NULL, NULL),
@@ -259,7 +264,7 @@ CREATE TABLE `product_type` (
   `ProductType` varchar(50) NOT NULL,
   `ProductTower` enum('PSG','IPG','') DEFAULT NULL,
   `ProductGroup` enum('Commercial','Consumer','') DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `product_type`
@@ -282,15 +287,23 @@ INSERT INTO `product_type` (`ProductTypeID`, `ProductType`, `ProductTower`, `Pro
 
 CREATE TABLE `servicecatalog` (
   `ServiceCatalogID` int(11) NOT NULL,
-  `ProductNumber` varchar(100) DEFAULT NULL,
-  `ProductName` varchar(255) DEFAULT NULL,
-  `SerialNumber` varchar(100) DEFAULT NULL,
+  `AssetID` int(11) NOT NULL,
+  `Service_offerID` varchar(8) NOT NULL,
+  `PartNumber` varchar(100) DEFAULT NULL,
   `WarrantyStatus` varchar(50) DEFAULT NULL,
   `Currency` varchar(10) DEFAULT NULL,
   `Price` decimal(10,2) DEFAULT NULL,
   `Tax` decimal(10,2) DEFAULT NULL,
   `Total` decimal(10,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `servicecatalog`
+--
+
+INSERT INTO `servicecatalog` (`ServiceCatalogID`, `AssetID`, `Service_offerID`, `PartNumber`, `WarrantyStatus`, `Currency`, `Price`, `Tax`, `Total`) VALUES
+(6, 9, 'DEPOT1', NULL, NULL, NULL, 1200.00, 0.00, 0.00),
+(9, 9, 'DEPOT1', NULL, NULL, NULL, 1200.00, 0.00, 0.00);
 
 -- --------------------------------------------------------
 
@@ -315,16 +328,17 @@ CREATE TABLE `servicecatalog_parts` (
   `Price` decimal(10,2) NOT NULL DEFAULT 0.00,
   `FreightPrice` decimal(10,2) NOT NULL DEFAULT 0.00,
   `Tax` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `Total` decimal(10,2) NOT NULL DEFAULT 0.00
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `Total` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `Shipping_Fee` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `servicecatalog_parts`
 --
 
-INSERT INTO `servicecatalog_parts` (`PartNumber`, `Keyword`, `PartDescription`, `Orderability`, `RestrictionReason`, `CSR_Flag`, `ROHS_Flag`, `Returnable_Flag`, `HardRoll_Flag`, `DangerousGoods_Flag`, `LithiumBattery_Flag`, `Oversize_Flag`, `Heavy_Flag`, `Price`, `FreightPrice`, `Tax`, `Total`) VALUES
-('M91238-005', 'WLAN WIRELESS ACCESS NETWORK', 'SKO-WLAN 6 RTK ax 2x2+BT RTL88', 1, NULL, 0, 0, 1, 0, 0, 0, 0, 0, 0.00, 0.00, 0.00, 0.00),
-('N42547-001', 'INTER CONNECT CABLE', 'SPS-CABLE LCD FHD 40P', 1, NULL, 0, 0, 1, 0, 0, 0, 0, 0, 0.00, 0.00, 0.00, 0.00);
+INSERT INTO `servicecatalog_parts` (`PartNumber`, `Keyword`, `PartDescription`, `Orderability`, `RestrictionReason`, `CSR_Flag`, `ROHS_Flag`, `Returnable_Flag`, `HardRoll_Flag`, `DangerousGoods_Flag`, `LithiumBattery_Flag`, `Oversize_Flag`, `Heavy_Flag`, `Price`, `FreightPrice`, `Tax`, `Total`, `Shipping_Fee`) VALUES
+('M91238-005', 'WLAN WIRELESS ACCESS NETWORK', 'SKO-WLAN 6 RTK ax 2x2+BT RTL88', 1, NULL, 0, 0, 1, 0, 0, 0, 0, 0, 500000.00, 0.00, 0.00, 0.00, 0.00),
+('N42547-001', 'INTER CONNECT CABLE', 'SPS-CABLE LCD FHD 40P', 1, NULL, 0, 0, 1, 0, 0, 0, 0, 0, 120000.00, 0.00, 0.00, 0.00, 0.00);
 
 -- --------------------------------------------------------
 
@@ -343,7 +357,7 @@ CREATE TABLE `site_account` (
   `StateProvince` varchar(100) DEFAULT NULL,
   `Country` varchar(100) NOT NULL,
   `ZipPostalCode` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `site_account`
@@ -354,7 +368,8 @@ INSERT INTO `site_account` (`SiteAccountID`, `Company`, `Email`, `PrimaryPhone`,
 (3, 'PT Teh hijau', 'tehhijau@gmail.com', '0865424162', 'Jl Sutomo', '', 'Gresik', 'Jawa Tengah', 'Indonesia', '454545'),
 (4, 'Miku21 Store', 'mikucomunity21@gmail.com', '087731137512', 'Virtual Reality', '', 'Virtual World', 'Virtual', 'Indonesia', '12312'),
 (6, 'PT Bango', 'bangsejahtera@gmail.com', '88729', 'Jln Kemangi', '', 'Surakarta', 'Jawa ', '', '87291'),
-(8, 'AFM Company', 'afmcompany@gmail.com', '083834685279', 'Jakarta Selatan', '', 'Jakarta', 'DKI Jakarta', 'Inggris', '12343');
+(8, 'AFM Company', 'afmcompany@gmail.com', '083834685279', 'Jakarta Selatan', '', 'Jakarta', 'DKI Jakarta', 'Inggris', '12343'),
+(9, 'PT Kapal Api', 'Loasd', 'asdas', '', '', '', '', '', '');
 
 -- --------------------------------------------------------
 
@@ -368,16 +383,46 @@ CREATE TABLE `symptom_codes` (
   `TopCategory` varchar(50) NOT NULL,
   `SubCategory` varchar(50) NOT NULL,
   `QualityCodes` varchar(50) DEFAULT NULL,
-  `CreatedOn` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `CreatedOn` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `symptom_codes`
 --
 
 INSERT INTO `symptom_codes` (`SymptomCodeID`, `SymptomCode`, `TopCategory`, `SubCategory`, `QualityCodes`, `CreatedOn`) VALUES
-(1, 'No Boot', 'HyperX Memory', 'Memory Defective Product', '', '2025-04-16 02:44:25'),
-(2, 'Module Fails Memtest', 'HyperX Memory', 'Memory Defective Product', '', '2025-04-16 02:44:25');
+(1, 'No Boot', 'HyperX Memory', 'Memory Defective Product', '', '2025-04-15 19:44:25'),
+(2, 'Module Fails Memtest', 'HyperX Memory', 'Memory Defective Product', '', '2025-04-15 19:44:25');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `test-table-without-migration`
+--
+
+CREATE TABLE `test-table-without-migration` (
+  `id` int(11) NOT NULL,
+  `name` varchar(12) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `test_table`
+--
+
+CREATE TABLE `test_table` (
+  `MOID` int(11) NOT NULL,
+  `WOID` int(11) DEFAULT NULL,
+  `OrderNumber` varchar(100) DEFAULT NULL,
+  `OrderStatus` varchar(50) DEFAULT NULL,
+  `OrderType` varchar(50) DEFAULT NULL,
+  `CreatedOn` datetime DEFAULT current_timestamp(),
+  `SalesOrderNumber` varchar(100) DEFAULT NULL,
+  `RMANumber` varchar(100) DEFAULT NULL,
+  `ReadyForClosureDate` datetime DEFAULT NULL,
+  `Owner` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -391,10 +436,10 @@ CREATE TABLE `warranty_services` (
   `CTat_RTime` varchar(5) DEFAULT NULL,
   `Price` float NOT NULL DEFAULT 0,
   `Shipping_Fee` float NOT NULL DEFAULT 0,
-  `qty_ws` int(3) NOT NULL DEFAULT 0,
+  `qty_ws` int(11) NOT NULL DEFAULT 0,
   `Tax` float NOT NULL DEFAULT 0,
   `Total` float NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `warranty_services`
@@ -402,7 +447,7 @@ CREATE TABLE `warranty_services` (
 
 INSERT INTO `warranty_services` (`Service_offerID`, `Service_description`, `CTat_RTime`, `Price`, `Shipping_Fee`, `qty_ws`, `Tax`, `Total`) VALUES
 ('APBPRP', 'SRS/CREW 1WDW DEF RETURN', '003', 0, 0, 0, 0, 0),
-('DEPOT1', 'DEPOT REPAIR', '001', 0, 0, 0, 0, 0),
+('DEPOT1', 'DEPOT REPAIR', '001', 1200, 0, 0, 0, 0),
 ('DEPOT2', 'DEPOT REPAIR - 2DAY', '002', 0, 0, 0, 0, 0);
 
 -- --------------------------------------------------------
@@ -412,9 +457,8 @@ INSERT INTO `warranty_services` (`Service_offerID`, `Service_description`, `CTat
 --
 
 CREATE TABLE `workorder` (
-  `WOID` int(11) NOT NULL,
+  `WOID` varchar(13) NOT NULL,
   `CaseID` int(11) DEFAULT NULL,
-  `ServiceCatalogID` int(11) DEFAULT NULL,
   `WorkOrderNumber` varchar(100) DEFAULT NULL,
   `WorkOrderType` varchar(50) DEFAULT NULL,
   `Priority` varchar(50) DEFAULT NULL,
@@ -426,7 +470,42 @@ CREATE TABLE `workorder` (
   `ShipmentState` varchar(50) DEFAULT NULL,
   `CreatedOn` datetime DEFAULT current_timestamp(),
   `Owner` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `workorder`
+--
+
+INSERT INTO `workorder` (`WOID`, `CaseID`, `WorkOrderNumber`, `WorkOrderType`, `Priority`, `SystemStatus`, `SubStatus`, `PreferredDay`, `PreferredTime`, `ShipmentCountry`, `ShipmentState`, `CreatedOn`, `Owner`) VALUES
+('WO-0001', 15715, 'WO-0001', 'DepotRepair', NULL, 'Open', NULL, NULL, NULL, NULL, NULL, '2025-04-20 21:01:42', 'Miku21'),
+('WO-0002', 19081, 'WO-0002', 'DepotRepair', NULL, 'Open', NULL, NULL, NULL, NULL, NULL, '2025-04-21 03:03:25', 'Miku21');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `_prisma_migrations`
+--
+
+CREATE TABLE `_prisma_migrations` (
+  `id` varchar(36) NOT NULL,
+  `checksum` varchar(64) NOT NULL,
+  `finished_at` datetime(3) DEFAULT NULL,
+  `migration_name` varchar(255) NOT NULL,
+  `logs` text DEFAULT NULL,
+  `rolled_back_at` datetime(3) DEFAULT NULL,
+  `started_at` datetime(3) NOT NULL DEFAULT current_timestamp(3),
+  `applied_steps_count` int(10) UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `_prisma_migrations`
+--
+
+INSERT INTO `_prisma_migrations` (`id`, `checksum`, `finished_at`, `migration_name`, `logs`, `rolled_back_at`, `started_at`, `applied_steps_count`) VALUES
+('6894c1ec-8231-47ad-8af3-38fa7e684900', 'd1ed88b4fa1681ee2da26d68858fbab7ba5d8aba7321410cee789acc839f4afe', '2025-04-18 15:19:31.276', '20250418151931_adding_test_without_schema', NULL, NULL, '2025-04-18 15:19:31.265', 1),
+('93d80a0c-2535-4df1-a666-ae4e460264a6', '2942465357dc57e57a8ed5fbe306ecc078839a4e3f00d2996235394b23472016', '2025-04-18 14:42:32.762', '20250418144232_adding_test_table', NULL, NULL, '2025-04-18 14:42:32.743', 1),
+('a1cd3d92-9c84-4bc9-ad38-d2f47b544ccc', 'bebaf6e104b14963411ec4c7600ab6febfa8d86ba3cceea93d6891ff7255dc61', '2025-04-17 03:56:12.205', '20250417035612_changing_shipping_fee', NULL, NULL, '2025-04-17 03:56:12.192', 1),
+('f7e5376b-15f3-4548-b308-5f102afa8d0b', 'a9161b38b3a2072a5439ff3f2d7b1feaf85c7c236302ba465e4d7b0f928854e6', '2025-04-17 03:56:09.334', '20250417033130_init', NULL, NULL, '2025-04-17 03:56:08.047', 1);
 
 --
 -- Indexes for dumped tables
@@ -446,9 +525,9 @@ ALTER TABLE `asset_information`
 --
 ALTER TABLE `caseinformation`
   ADD PRIMARY KEY (`CaseID`),
-  ADD KEY `SiteAccountID` (`SiteAccountID`),
-  ADD KEY `ContactID` (`ContactID`),
   ADD KEY `AssetID` (`AssetID`),
+  ADD KEY `ContactID` (`ContactID`),
+  ADD KEY `SiteAccountID` (`SiteAccountID`),
   ADD KEY `CaseNote` (`CaseNote`),
   ADD KEY `SymptomCode` (`SymptomCode`);
 
@@ -458,15 +537,6 @@ ALTER TABLE `caseinformation`
 ALTER TABLE `casenotes`
   ADD PRIMARY KEY (`NoteID`),
   ADD KEY `CaseID` (`CaseID`);
-
---
--- Indexes for table `confirm_service`
---
-ALTER TABLE `confirm_service`
-  ADD PRIMARY KEY (`id_confirmService`),
-  ADD KEY `asset_information` (`AssetID`),
-  ADD KEY `warranty_services` (`Service_offerID`),
-  ADD KEY `servicecatalog_parts` (`PartID`);
 
 --
 -- Indexes for table `contact_information`
@@ -493,7 +563,8 @@ ALTER TABLE `materialorder`
 --
 ALTER TABLE `materialorderlineitems`
   ADD PRIMARY KEY (`LineItemID`),
-  ADD KEY `MOID` (`MOID`);
+  ADD KEY `MOID` (`MOID`),
+  ADD KEY `PartNumber` (`PartNumber`);
 
 --
 -- Indexes for table `product_information`
@@ -512,7 +583,10 @@ ALTER TABLE `product_type`
 -- Indexes for table `servicecatalog`
 --
 ALTER TABLE `servicecatalog`
-  ADD PRIMARY KEY (`ServiceCatalogID`);
+  ADD PRIMARY KEY (`ServiceCatalogID`),
+  ADD KEY `AssetID` (`AssetID`),
+  ADD KEY `PartNumber` (`PartNumber`),
+  ADD KEY `Service_offerID` (`Service_offerID`);
 
 --
 -- Indexes for table `servicecatalog_parts`
@@ -533,6 +607,19 @@ ALTER TABLE `symptom_codes`
   ADD PRIMARY KEY (`SymptomCodeID`);
 
 --
+-- Indexes for table `test-table-without-migration`
+--
+ALTER TABLE `test-table-without-migration`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `test_table`
+--
+ALTER TABLE `test_table`
+  ADD PRIMARY KEY (`MOID`),
+  ADD KEY `WOID` (`WOID`);
+
+--
 -- Indexes for table `warranty_services`
 --
 ALTER TABLE `warranty_services`
@@ -546,6 +633,12 @@ ALTER TABLE `workorder`
   ADD KEY `CaseID` (`CaseID`);
 
 --
+-- Indexes for table `_prisma_migrations`
+--
+ALTER TABLE `_prisma_migrations`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -553,7 +646,7 @@ ALTER TABLE `workorder`
 -- AUTO_INCREMENT for table `asset_information`
 --
 ALTER TABLE `asset_information`
-  MODIFY `AssetID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `AssetID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `casenotes`
@@ -565,25 +658,19 @@ ALTER TABLE `casenotes`
 -- AUTO_INCREMENT for table `contact_information`
 --
 ALTER TABLE `contact_information`
-  MODIFY `ContactID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `ContactID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `global_trade_check`
 --
 ALTER TABLE `global_trade_check`
-  MODIFY `id_gtc` int(25) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `materialorder`
---
-ALTER TABLE `materialorder`
-  MODIFY `MOID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_gtc` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `materialorderlineitems`
 --
 ALTER TABLE `materialorderlineitems`
-  MODIFY `LineItemID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `LineItemID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `product_type`
@@ -595,13 +682,13 @@ ALTER TABLE `product_type`
 -- AUTO_INCREMENT for table `servicecatalog`
 --
 ALTER TABLE `servicecatalog`
-  MODIFY `ServiceCatalogID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ServiceCatalogID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `site_account`
 --
 ALTER TABLE `site_account`
-  MODIFY `SiteAccountID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `SiteAccountID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `symptom_codes`
@@ -610,10 +697,16 @@ ALTER TABLE `symptom_codes`
   MODIFY `SymptomCodeID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `workorder`
+-- AUTO_INCREMENT for table `test-table-without-migration`
 --
-ALTER TABLE `workorder`
-  MODIFY `WOID` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `test-table-without-migration`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `test_table`
+--
+ALTER TABLE `test_table`
+  MODIFY `MOID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -653,13 +746,14 @@ ALTER TABLE `contact_information`
 -- Constraints for table `materialorder`
 --
 ALTER TABLE `materialorder`
-  ADD CONSTRAINT `materialorder_ibfk_1` FOREIGN KEY (`WOID`) REFERENCES `workorder` (`WOID`);
+  ADD CONSTRAINT `materialorder_ibfk_1` FOREIGN KEY (`WOID`) REFERENCES `workorder` (`WOID`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `materialorderlineitems`
 --
 ALTER TABLE `materialorderlineitems`
-  ADD CONSTRAINT `materialorderlineitems_ibfk_1` FOREIGN KEY (`MOID`) REFERENCES `materialorder` (`MOID`);
+  ADD CONSTRAINT `materialorderlineitems_ibfk_1` FOREIGN KEY (`MOID`) REFERENCES `materialorder` (`MOID`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `materialorderlineitems_ibfk_2` FOREIGN KEY (`PartNumber`) REFERENCES `servicecatalog_parts` (`PartNumber`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `product_information`
@@ -668,10 +762,18 @@ ALTER TABLE `product_information`
   ADD CONSTRAINT `product_information_ibfk_1` FOREIGN KEY (`ProductTypeID`) REFERENCES `product_type` (`ProductTypeID`);
 
 --
+-- Constraints for table `servicecatalog`
+--
+ALTER TABLE `servicecatalog`
+  ADD CONSTRAINT `servicecatalog_ibfk_1` FOREIGN KEY (`AssetID`) REFERENCES `asset_information` (`AssetID`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `servicecatalog_ibfk_2` FOREIGN KEY (`PartNumber`) REFERENCES `servicecatalog_parts` (`PartNumber`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `servicecatalog_ibfk_3` FOREIGN KEY (`Service_offerID`) REFERENCES `warranty_services` (`Service_offerID`) ON UPDATE CASCADE;
+
+--
 -- Constraints for table `workorder`
 --
 ALTER TABLE `workorder`
-  ADD CONSTRAINT `workorder_ibfk_1` FOREIGN KEY (`CaseID`) REFERENCES `caseinformation` (`CaseID`);
+  ADD CONSTRAINT `workorder_ibfk_1` FOREIGN KEY (`CaseID`) REFERENCES `caseinformation` (`CaseID`) ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

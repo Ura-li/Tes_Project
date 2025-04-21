@@ -56,22 +56,22 @@ import {
 
 import ApiCustomer from '@/api'
 
-const workorder = [
-  {
-    workordernumber: "WO-027816939",
-    caseid: "54165182991",
-    serviceaccount: "Icon Plus",
-    substatus: "Waiting",
-    systemstatus: "Open",
-    priority: "WO Priority",
-    workorder: "In-Country",
-    primaryincident: "Depot Repair",
-    duedate: "21/03/2025 00.53",
-    orion: "-",
-    owner : "Jokowi",
-    created: "Widodo",
-  },
-]
+// const workorder = [
+//   {
+//     workordernumber: "WO-027816939",
+//     caseid: "54165182991",
+//     serviceaccount: "Icon Plus",
+//     substatus: "Waiting",
+//     systemstatus: "Open",
+//     priority: "WO Priority",
+//     workorder: "In-Country",
+//     primaryincident: "Depot Repair",
+//     duedate: "21/03/2025 00.53",
+//     orion: "-",
+//     owner : "Jokowi",
+//     created: "Widodo",
+//   },
+// ]
 
 const partsorder = [
   {
@@ -445,6 +445,8 @@ const fetchCaseNotes = async () => {
 useEffect(() => {
   fetchCustomerData();
   fetchAssetInformation();
+  
+  fetchWorkOrders();
   const loadNote = async () => {
     const noteDetail = await fetchCaseNotes();
     if(noteDetail ){
@@ -477,6 +479,41 @@ const fetchSymptomCodes = async (term) => {
 
 // useEffect(() => {
 // }, selectedSymptom)
+
+
+//order section
+//workorder
+const [workOrders, setWorkOrders] = useState([]);
+const fetchWorkOrders = async () => {
+  try {
+    const res = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
+    setWorkOrders(res.data.data); // adjust based on API response shape
+    // console.log("Fetch Work Order: ",res)
+  } catch (err) {
+    console.error("Failed to fetch work orders:", err);
+  }
+};
+
+const [materialOrders, setMaterialOrders] = useState([]);
+const fetchMaterialOrders = async () => {
+  try {
+    if (!workOrders.length) return;
+
+    const woidList = workOrders.map((wo) => wo.WOID).join(',');
+    const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
+    setMaterialOrders(res.data.data);
+  } catch (err) {
+    console.error("Failed to fetch Material orders:", err);
+  }
+}
+
+
+useEffect(() => {
+  console.log("Work Orders Fetching L ",workOrders)
+  if (workOrders.length > 0) {
+    fetchMaterialOrders();
+  }
+}, [workOrders]);
 
 
   return (
@@ -1276,15 +1313,15 @@ const fetchSymptomCodes = async (term) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {workorder.map((work) => (
-                  <TableRow key={work.workordernumber}>
+                {workOrders.map((work) => (
+                  <TableRow key={work.WOID}>
                     <TableCell className="font-medium">
-                      <Link to="/Work">
-                      {work.workordernumber}
+                      <Link to={`/work/${work.WOID}`}>
+                      {work.WOID}
                       </Link>
                       </TableCell>
-                    <TableCell>{work.caseid}</TableCell>
-                    <TableCell>{work.serviceaccount}</TableCell>
+                    <TableCell>{work.CaseID}</TableCell>
+                    {/* <TableCell>{work.serviceaccount}</TableCell>
                     <TableCell>{work.substatus}</TableCell>
                     <TableCell>{work.systemstatus}</TableCell>
                     <TableCell>{work.priority}</TableCell>
@@ -1293,7 +1330,7 @@ const fetchSymptomCodes = async (term) => {
                     <TableCell>{work.duedate}</TableCell>
                     <TableCell>{work.orion}</TableCell>
                     <TableCell>{work.owner}</TableCell>
-                    <TableCell>{work.created}</TableCell>
+                    <TableCell>{work.created}</TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>
@@ -1385,13 +1422,33 @@ const fetchSymptomCodes = async (term) => {
               </TableHeader>
 
               <TableBody>
-                  <TableRow>
+                {materialOrders.map((material) => (
+                    <TableRow key={material.MOID}>
+                      <TableCell className="font-medium">
+                        <Link to={`/material-order/${material.MOID}`}>
+                        {material.MOID} on {material.WOID} 
+                        </Link>
+                        </TableCell>
+                      <TableCell>{material.CaseID}</TableCell>
+                      {/* <TableCell>{work.serviceaccount}</TableCell>
+                      <TableCell>{work.substatus}</TableCell>
+                      <TableCell>{work.systemstatus}</TableCell>
+                      <TableCell>{work.priority}</TableCell>
+                      <TableCell>{work.workorder}</TableCell>
+                      <TableCell>{work.primaryincident}</TableCell>
+                      <TableCell>{work.duedate}</TableCell>
+                      <TableCell>{work.orion}</TableCell>
+                      <TableCell>{work.owner}</TableCell>
+                      <TableCell>{work.created}</TableCell> */}
+                    </TableRow>
+                  ))}
+                  {/* <TableRow>
                     <TableCell className="font-medium">
                       <Link to="/material_order">
-                       MO-8292819129 for WO-027816939
+                      
                       </Link>
                     </TableCell>
-                  </TableRow>
+                  </TableRow> */}
               </TableBody>
             </Table>
             </CardContent>

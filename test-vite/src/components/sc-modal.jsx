@@ -284,6 +284,8 @@ export function BtnModalContact({
         icon: 'error',
         title: 'Gagal!',
         text: 'Terjadi kesalahan saat menyimpan kontak.',
+        timer: 1500,
+        showConfirmButton: false,
       });
     }
   };
@@ -2448,6 +2450,41 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
 
   }
 
+  //createorder
+  const createOrder = async () => {
+    try {
+      const res = await ApiCustomer.post("/api/service-log/create-order", {
+        AssetID: assetForWorkOrderCreation.AssetID,
+        CaseID: caseDetails.CaseID,
+        selectedWarrantyServices,
+        selectedPartCatalog,
+        IncidentType: selected
+      });
+  
+      await Swal.fire({
+        title: "Success!",
+        text: "Order added successfully!",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(()=>{
+        setOpen(false);
+        const WOID = res.data.WOID
+        window.open(`/work/${WOID}`, '_blank');
+      });
+    } catch (err) {
+      console.error("❌ Order Creation Failed:", err);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to create order",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+  
+
 
   
 
@@ -2810,7 +2847,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
               <Button variant={'search'} className="" onClick={() => setCurrentStep(2)}>Previous</Button>
               <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
               <Button variant={'search'} className="" onClick={() => setModalPart(true)}>Add Part</Button>
-              <Button variant={'search'} className="" onClick={() => alert('Creating order...')}>Create Order</Button>
+              <Button variant={'search'} className="" onClick={createOrder}>Create Order</Button>
               <Label htmlFor="incident" className={'font-bold '}>Incident Type</Label>
               <Select onChange={setSelected} defaultValue="DepotRepair">
                 <SelectTrigger className="w-[180px]">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
 import {
@@ -34,12 +34,45 @@ import {
 } from "@/components/ui/table";
 import { KeyRound } from "lucide-react";
 
+import { useParams } from "react-router";
+
+import ApiCustomer from "@/api";
 
 export const ServiceWork = () => {
+  const { woid } = useParams();
+
+  const [workOrders, setWorkOrders] = useState([]);
+  const fetchWorkOrders = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/work-order/${woid}`);
+      setWorkOrders(res.data.data); // adjust based on API response shape
+      // console.log("Fetch Work Order: ",res)
+    } catch (err) {
+      console.error("Failed to fetch work orders:", err);
+    }
+  };
+
+  const [materialOrders, setMaterialOrders] = useState([])
+  const fetchMaterialOrders = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
+      console.log("Material Order in WO Detail : ", res)
+      setMaterialOrders(res.data.data);
+    } catch (err) {
+      console.error("Failed to fetch Material orders:", err);
+    }
+  }
+
+  useEffect(() => {
+    fetchWorkOrders();
+    fetchMaterialOrders();
+  }, [])
+  // useEffect(() => {
+  // }, [workOrders])
   return (
     <Card className="mt-2 rounded-none h-[160px]">
       <CardHeader>
-        <CardTitle className="text-xl ">WO-027816939</CardTitle>
+        <CardTitle className="text-xl ">{woid}</CardTitle>
         <CardTitle className="text-sm">Work Order . Work Order</CardTitle>
       </CardHeader>
 
@@ -332,11 +365,33 @@ export const ServiceWork = () => {
                   </TableHeader>
 
                   <TableBody>
+                    { materialOrders.length > 0 ? (materialOrders.map((material) => (
+                      <TableRow key={material.MOID}>
+                        <TableCell className="font-medium">
+                          <Link to={`/material-order/${material.MOID}`}>
+                          {material.MOID} on {material.WOID} 
+                          </Link>
+                          </TableCell>
+                        <TableCell>{material.CaseID}</TableCell>
+                        {/* <TableCell>{work.serviceaccount}</TableCell>
+                        <TableCell>{work.substatus}</TableCell>
+                        <TableCell>{work.systemstatus}</TableCell>
+                        <TableCell>{work.priority}</TableCell>
+                        <TableCell>{work.workorder}</TableCell>
+                        <TableCell>{work.primaryincident}</TableCell>
+                        <TableCell>{work.duedate}</TableCell>
+                        <TableCell>{work.orion}</TableCell>
+                        <TableCell>{work.owner}</TableCell>
+                        <TableCell>{work.created}</TableCell> */}
+                      </TableRow>
+                    ))
+                  ): (
                     <TableRow>
                       <TableCell className="font-medium">
                         No data available
                       </TableCell>
                     </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
