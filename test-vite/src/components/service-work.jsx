@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
 import {
@@ -34,12 +34,47 @@ import {
 } from "@/components/ui/table";
 import { KeyRound } from "lucide-react";
 
+import { useParams } from "react-router";
+
+import ApiCustomer from "@/api";
+
+import { QuickWOInput } from "./quick-wo-input";
 
 export const ServiceWork = () => {
+  const { woid } = useParams();
+
+  const [workOrders, setWorkOrders] = useState([]);
+  const fetchWorkOrders = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/work-order/${woid}`);
+      setWorkOrders(res.data.data); // adjust based on API response shape
+      // console.log("Fetch Work Order: ",res)
+    } catch (err) {
+      console.error("Failed to fetch work orders:", err);
+    }
+  };
+
+  const [materialOrders, setMaterialOrders] = useState([])
+  const fetchMaterialOrders = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
+      console.log("Material Order in WO Detail : ", res)
+      setMaterialOrders(res.data.data);
+    } catch (err) {
+      console.error("Failed to fetch Material orders:", err);
+    }
+  }
+
+  useEffect(() => {
+    fetchWorkOrders();
+    fetchMaterialOrders();
+  }, [])
+  // useEffect(() => {
+  // }, [workOrders])
   return (
     <Card className="mt-2 rounded-none h-[160px]">
       <CardHeader>
-        <CardTitle className="text-xl ">WO-027816939</CardTitle>
+        <CardTitle className="text-xl ">{woid}</CardTitle>
         <CardTitle className="text-sm">Work Order . Work Order</CardTitle>
       </CardHeader>
 
@@ -332,11 +367,33 @@ export const ServiceWork = () => {
                   </TableHeader>
 
                   <TableBody>
+                    { materialOrders.length > 0 ? (materialOrders.map((material) => (
+                      <TableRow key={material.MOID}>
+                        <TableCell className="font-medium">
+                          <Link to={`/material-order/${material.MOID}`}>
+                          {material.MOID} on {material.WOID} 
+                          </Link>
+                          </TableCell>
+                        <TableCell>{material.CaseID}</TableCell>
+                        {/* <TableCell>{work.serviceaccount}</TableCell>
+                        <TableCell>{work.substatus}</TableCell>
+                        <TableCell>{work.systemstatus}</TableCell>
+                        <TableCell>{work.priority}</TableCell>
+                        <TableCell>{work.workorder}</TableCell>
+                        <TableCell>{work.primaryincident}</TableCell>
+                        <TableCell>{work.duedate}</TableCell>
+                        <TableCell>{work.orion}</TableCell>
+                        <TableCell>{work.owner}</TableCell>
+                        <TableCell>{work.created}</TableCell> */}
+                      </TableRow>
+                    ))
+                  ): (
                     <TableRow>
                       <TableCell className="font-medium">
                         No data available
                       </TableCell>
                     </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -701,247 +758,7 @@ export const ServiceWork = () => {
             </Card> 
           </TabsContent>
 
-          <TabsContent value="Quick_WO_Input">
-          <Card className="flex-col mt-7">
-              <span className="ml-5 font-bold text-xl">General</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-4">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Incoming Channel</span>
-                  <span className="ml-40">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Work Order Number</span>
-                  <span className="ml-35.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Work Order Type</span>
-                  <span className="ml-42">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>System Status</span>
-                  <span className="ml-48.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Sub Status</span>
-                  <span className="ml-55">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Partner Status</span>
-                  <span className="ml-48.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Work Order Description</span>
-                  <span className="ml-30.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Work Order Instruction</span>
-                  <span className="ml-32">...</span>
-                </div>
-              </CardContent>
-            </Card>
-
-          <Card className="flex-col mt-7">
-              <span className="ml-5 font-bold text-xl">Service Delivery Address</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-9">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Choose Address</span>
-                  <span className="ml-45">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Company Name</span>
-                  <span className="ml-45">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Contact First Name</span>
-                  <span className="ml-39">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Contact Last Name</span>
-                  <span className="ml-40">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Phone Number</span>
-                  <span className="ml-47">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Email Address</span>
-                  <span className="ml-49">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Address Line1</span>
-                  <span className="ml-49">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Address Line2</span>
-                  <span className="ml-49">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Address Line3</span>
-                  <span className="ml-49">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>City</span>
-                  <span className="ml-70">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>State Or Province</span>
-                  <span className="ml-44.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Country/Region</span>
-                  <span className="ml-47">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Postal Code</span>
-                  <span className="ml-55">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Timezone</span>
-                  <span className="ml-59">...</span>
-                </div>
-      
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Service Territory</span>
-                  <span className="ml-46.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Bussiness Segment</span>
-                  <span className="ml-42">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Longitude</span>
-                  <span className="ml-58.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Latitude</span>
-                  <span className="ml-62">...</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="flex-col mt-7 ">
-              <span className="ml-5 font-bold text-xl">SLA in Customer Time Zone</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-7">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>SLA Jeopardy</span>
-                  <span className="ml-66">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Due Date (Customer)</span>
-                  <span className="ml-52">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Coverage Window</span>
-                  <span className="ml-57">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Response</span>
-                  <span className="ml-74">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">OTC Code</span>
-                  <span className="ml-73.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Requested Date Time (Customer)</span>
-                  <span className="ml-30">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Guaranteed Fix Time (Customer)</span>
-                  <span className="ml-31">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Early Start Date Time (Customer)</span>
-                  <span className="ml-32">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Latest Start Date Time (Customer)</span>
-                  <span className="ml-30">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>SLA Reschedule</span>
-                  <span className="ml-64.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Active Schedule Date</span>
-                  <span className="ml-54.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>SLA Error Description</span>
-                  <span className="ml-54">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Case Priority Index</span>
-                  <span className="ml-59">...</span>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <QuickWOInput WOID={woid} />
         </Tabs>
       </CardContent>
     </Card>

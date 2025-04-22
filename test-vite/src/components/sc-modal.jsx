@@ -284,6 +284,8 @@ export function BtnModalContact({
         icon: 'error',
         title: 'Gagal!',
         text: 'Terjadi kesalahan saat menyimpan kontak.',
+        timer: 1500,
+        showConfirmButton: false,
       });
     }
   };
@@ -2377,6 +2379,14 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
     }
   }
 
+  //search part handler
+  const [partNumberSearch, setPartNumberSearch] = useState("");
+  const [keywordSearch, setKeywordSearch] = useState("");
+  const [descriptionSearch, setDescriptionSearch] = useState("");
+
+
+
+
   //handler part
   const [selectedPartCatalog, setSelectedPartCatalog] = useState([])
   const handlerPartCatalog = (part, checked) => {
@@ -2388,10 +2398,94 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
       )
     }
   }
+  
   useEffect(() => {
     console.log("Selected Parts:", selectedPartCatalog);
     console.log("Selected Warranty:", selectedWarrantyServices);
+    
+    handlerPriceConfirmServices();
   }, [selectedPartCatalog]);
+  
+
+  
+  //hanlder confirm
+  //handler qty price parts
+  const handleQtyChangePartsCatalog = (partNumber, qty) => {
+    setSelectedPartCatalog((prev) =>
+      prev.map((item) => {
+        if (item.PartNumber === partNumber) {
+          const parsedQty = parseInt(qty) || 0;
+          const price = parseFloat(item.Price) || 0;
+          return {
+            ...item,
+            qty: parsedQty,
+            Total: (parsedQty * price).toFixed(2)
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  //handle add part in confirm services
+  const [tempSelectedParts, setTempSelectedParts] = useState([]);
+  
+
+  //handler Total Subtotal Confirm Services
+  const [subTotalConfirmServices, setSubTotalConfirmServices] = useState(0)
+  const [TotalTaxConfirmServices, setTotalTaxConfirmServices] = useState(0)
+  const [totalConfirmServices, setTotalConfirmServices] = useState(0)
+  const handlerPriceConfirmServices = () =>{
+    let serviceTotal = selectedWarrantyServices.reduce((acc, service) => {
+      return acc + (parseFloat(service.Price) || 0);
+    }, 0);
+  
+    let partsTotal = selectedPartCatalog.reduce((acc, part) => {
+      return acc + (parseFloat(part.Total) || 0);
+    }, 0);
+  
+    const subTotal = serviceTotal + partsTotal;
+    console.log("SubTotal Confirm Services : ",subTotal)
+    setSubTotalConfirmServices(subTotal.toFixed(2));
+
+  }
+
+  //createorder
+  const createOrder = async () => {
+    try {
+      const res = await ApiCustomer.post("/api/service-log/create-order", {
+        AssetID: assetForWorkOrderCreation.AssetID,
+        CaseID: caseDetails.CaseID,
+        selectedWarrantyServices,
+        selectedPartCatalog,
+        IncidentType: selected
+      });
+  
+      await Swal.fire({
+        title: "Success!",
+        text: "Order added successfully!",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(()=>{
+        setOpen(false);
+        const WOID = res.data.WOID
+        window.open(`/work/${WOID}`, '_blank');
+      });
+    } catch (err) {
+      console.error("❌ Order Creation Failed:", err);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to create order",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+  
+
+
   
 
   function renderStepContent() {
@@ -2462,12 +2556,19 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
   
             <DialogFooter className={'p-4'}>
               <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button variant={'search'} className="" onClick={() => setCurrentStep(2)}>Next</Button>
+              <Button variant={'search'} onClick={() => setCurrentStep(2)} disabled={selectedWarrantyServices.length === 0} className={selectedWarrantyServices.length === 0 ? "opacity-50 cursor-not-allowed" : ""}>Next</Button>
             </DialogFooter>
           </DialogContent>
         );
   
       case 2:
+        const filteredPartCatalog = partCatalog.filter(part => {
+          return (
+            part.PartNumber?.toLowerCase().includes(partNumberSearch.toLowerCase()) &&
+            part.Keyword?.toLowerCase().includes(keywordSearch.toLowerCase()) &&
+            part.PartDescription?.toLowerCase().includes(descriptionSearch.toLowerCase())
+          );
+        });
         return (
           <DialogContent className="sm:max-w-[fit] sm:min-h-[fit] flex flex-col  gap-0 p-0 bg-white [&>button]:hidden scale-95">
             <DialogHeader className={'gap-0'}>
@@ -2515,15 +2616,36 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
                   <TableHead className={'font-black text-black'}>Select</TableHead>
                   <TableHead className={'font-black text-black p-2'}>
                     Parts #
-                    <span className="flex items-center"><Input className={'bg-white'}/><XIcon/></span>
+                    <span className="flex items-center">
+                      <Input 
+                        className={'bg-white'}
+                        value={partNumberSearch}
+                        onChange={(e) => setPartNumberSearch(e.target.value)}
+                      />
+                      <XIcon className="cursor-pointer" onClick={() => setPartNumberSearch("")}/>
+                    </span>
                     </TableHead>
                   <TableHead className={'font-black text-black'}>
                     Keyword
-                    <span className="flex items-center"><Input className={'bg-white'}/><XIcon/></span>
+                    <span className="flex items-center">
+                      <Input 
+                        className={'bg-white'}
+                        value={keywordSearch}
+                        onChange={(e) => setKeywordSearch(e.target.value)}
+                      />
+                      <XIcon className="cursor-pointer" onClick={() => setKeywordSearch("")}/>
+                    </span>
                     </TableHead>
                   <TableHead className={'font-black text-black'}>
                     Part Description
-                    <span className="flex items-center"><Input className={'bg-white'}/><XIcon/></span>
+                    <span className="flex items-center">
+                      <Input 
+                        className={'bg-white'}
+                        value={descriptionSearch}
+                        onChange={(e) => setDescriptionSearch(e.target.value)}
+                      />
+                      <XIcon className="cursor-pointer" onClick={() => setDescriptionSearch("")}/>
+                    </span>
                   </TableHead>
                   <TableHead className={'font-black text-black'}>Orderability</TableHead>
                   <TableHead className={'font-black text-black whitespace-break-spaces'}>Restriction Reason</TableHead>
@@ -2542,7 +2664,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {partCatalog.map((part, index) => {
+                {filteredPartCatalog.map((part, index) => {
                   const isChecked = selectedPartCatalog.some((item) => item.PartNumber === part.PartNumber)
                   return (
                     <TableRow key={index}>
@@ -2559,7 +2681,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
                       <TableCell>{part.ResistrictionReason}</TableCell>
                       <TableCell>{part.Csr ? 'Y' : 'N'}</TableCell>
                       <TableCell>{part.Rohs}</TableCell>
-                      <TableCell>{part.Returnable ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Returnable_Flag ? 'true' : 'false'}</TableCell>
                       <TableCell>{part.Hardrolls}</TableCell>
                       <TableCell>{part.Dangerousgoods ? 'true' : 'false'}</TableCell>
                       <TableCell>{part.Lithiumbattry ? 'true' : 'false'}</TableCell>
@@ -2632,9 +2754,9 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
             </DialogHeader>
             <div className="flex gap-4 my-2 justify-end p-2">
               <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
-                <p>Product Number</p><p>: </p>
-                <p>Product Name</p><p>: </p>
-                <p>Serial Number</p><p>: </p>
+                <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
+                <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
+                <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
                 <p>Warranty Status</p><p>: </p>
                 <p>Currency</p><p>: </p>
               </div>
@@ -2652,15 +2774,20 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                </TableRow>
+                {selectedWarrantyServices.map((service, index) => {
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>{service.Service_offerID}</TableCell>
+                      <TableCell>{service.Service_description}</TableCell>
+                      <TableCell>{service.CTat_RTime}</TableCell>
+                      <TableCell>{service.Shipping_Fee}</TableCell>
+                      {/* <TableCell>{service.Price}</TableCell> */}
+                      <TableCell>1</TableCell>
+                      <TableCell>{service.Tax}</TableCell>
+                      <TableCell>{service.Price}</TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
               <TableHeader>
                 <TableRow className={'bg-blue-400'}>
@@ -2674,19 +2801,37 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                </TableRow>
+                {selectedPartCatalog.map((part, index) => {
+                  const isChecked = selectedPartCatalog.some((item) => item.PartNumber === part.PartNumber)
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Checkbox 
+                          checked={isChecked}
+                          onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>{part.PartNumber}</TableCell>
+                      <TableCell>{part.PartDescription}</TableCell>
+                      <TableCell>{part.Shipping_Fee}</TableCell>
+                      <TableCell>
+                      <Input
+                        placeholder="QTY"
+                        type="number"
+                        value={part.qty || ''}
+                        onChange={(e) => handleQtyChangePartsCatalog(part.PartNumber, e.target.value)}
+                        className="w-16"
+                      />
+                      </TableCell>
+                      <TableCell>{part.Tax}</TableCell>
+                      <TableCell>{part.Total}</TableCell>
+                    </TableRow>
+                  )
+                })}
                 <TableRow>
                   <TableCell colSpan={4}></TableCell>
                   <TableCell colSpan={2}>Sub Total</TableCell>
-                  <TableCell>--</TableCell>
+                  <TableCell>{subTotalConfirmServices}</TableCell>
                 </TableRow>
                 <TableRow className={'bg-blue-400'}>
                   <TableCell colSpan={4}></TableCell>
@@ -2702,7 +2847,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
               <Button variant={'search'} className="" onClick={() => setCurrentStep(2)}>Previous</Button>
               <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
               <Button variant={'search'} className="" onClick={() => setModalPart(true)}>Add Part</Button>
-              <Button variant={'search'} className="" onClick={() => alert('Creating order...')}>Create Order</Button>
+              <Button variant={'search'} className="" onClick={createOrder}>Create Order</Button>
               <Label htmlFor="incident" className={'font-bold '}>Incident Type</Label>
               <Select onChange={setSelected} defaultValue="DepotRepair">
                 <SelectTrigger className="w-[180px]">
@@ -2731,14 +2876,47 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
     <>
     <Dialog open={open} onOpenChange={setOpen} >
       {renderStepContent()}
-    <BtnModalsPartAdd open2={modalPart} setOpen2={setModalPart}/>
+    <BtnModalsPartAdd 
+      open2={modalPart} 
+      setOpen2={setModalPart}
+      partCatalog={partCatalog}
+      selectedPartCatalog={selectedPartCatalog}
+      setSelectedPartCatalog={setSelectedPartCatalog}
+    />
     </Dialog>
     {/* <Button onClick={() => setWorkOpen(true)}>Open Work Order</Button> */}
   </>
   );
 }
 
-export function BtnModalsPartAdd({open2, setOpen2}){
+export function BtnModalsPartAdd({
+  open2, 
+  setOpen2,
+  partCatalog,
+  selectedPartCatalog,
+  setSelectedPartCatalog
+}){
+  const [tempSelectedParts, setTempSelectedParts] = useState([]);
+  const handlerPartCatalog = (part, checked) => {
+    if (checked) {
+      setTempSelectedParts((prev) => [...prev, part]);
+    } else {
+      setTempSelectedParts((prev) =>
+        prev.filter((item) => item.PartNumber !== part.PartNumber)
+      );
+    }
+  };
+
+  //search
+  const [partNumberInput, setPartNumberInput] = useState("");
+  const [partNumberSearch, setPartNumberSearch] = useState("");
+
+  const filteredPartCatalog = partCatalog.filter(part => {
+    return (
+      part.PartNumber?.toLowerCase().includes(partNumberSearch.toLowerCase())
+    );
+  });
+  
   return(
     <>
     <Dialog open={open2} onOpenChange={setOpen2}>
@@ -2749,8 +2927,15 @@ export function BtnModalsPartAdd({open2, setOpen2}){
           <div className="flex items-center justify-between sm:max-w-full">
             <span className="flex gap-2 items-center">
               <DialogDescription className={'whitespace-nowrap'}>Part Number</DialogDescription>
-              <Input className={'ring-1 min-w-[10em] ring-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500'}></Input>
-              <Button variant={'search'}>Search</Button>
+              <Input 
+                className={'ring-1 min-w-[10em] ring-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500'}
+                value={partNumberInput}
+                onChange={(e) => setPartNumberInput(e.target.value)}
+              />
+              <Button 
+                variant={'search'}
+                onClick={(e) => setPartNumberSearch(partNumberInput)}
+              >Search</Button>
             </span>
             <div className="bg-gray-300 flex gap-x-10 p-2 flex-1 max-w-[10em]">
                 <p>Currency</p><p className="whitespace-nowrap">: </p>
@@ -2781,18 +2966,39 @@ export function BtnModalsPartAdd({open2, setOpen2}){
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                    <TableCell className={'flex'}><Checkbox></Checkbox></TableCell>
-                    <TableCell>---</TableCell>
-                    <TableCell>---</TableCell>
-                    <TableCell>---</TableCell>
-                    <TableCell>---</TableCell>
-                    <TableCell>---</TableCell>
-                    <TableCell>---</TableCell>
-                    <TableCell>---</TableCell>
-                    <TableCell>---</TableCell>
-                    <TableCell>---</TableCell>
-                </TableRow>
+              {
+              filteredPartCatalog
+              .filter(part => !selectedPartCatalog.some(selected => selected.PartNumber === part.PartNumber))
+              .map((part, index) => {
+                  const isChecked = tempSelectedParts.some((item) => item.PartNumber === part.PartNumber)
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Checkbox 
+                          checked={isChecked}
+                          onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>{part.PartNumber}</TableCell>
+                      <TableCell>{part.Keyword}</TableCell>
+                      <TableCell>{part.PartDescription}</TableCell>
+                      <TableCell>{part.Orderability ? 'Yes' : 'No'}</TableCell>
+                      <TableCell>{part.ResistrictionReason}</TableCell>
+                      <TableCell>{part.Csr ? 'Y' : 'N'}</TableCell>
+                      <TableCell>{part.Rohs}</TableCell>
+                      <TableCell>{part.Returnable_Flag ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Hardrolls}</TableCell>
+                      <TableCell>{part.Dangerousgoods ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Lithiumbattry ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Oversize ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Heavy ? 'true' : 'false'}</TableCell>
+                      <TableCell>{part.Price}</TableCell>
+                      <TableCell>{part.Freightprice}</TableCell>
+                      <TableCell>{part.Tax}</TableCell>
+                      <TableCell>{part.Total}</TableCell>
+                    </TableRow>
+                  )
+                })}
                 <TableRow>
                     <TableCell colSpan={'100%'}>
                       <Pagination className={'flex justify-start'}>
@@ -2825,8 +3031,31 @@ export function BtnModalsPartAdd({open2, setOpen2}){
             </Table>
           </div>
           <DialogFooter className={'sm:justify-start'}>
-            <Button variant={'search'}>Add Part</Button>
-            <Button variant={'search'}>Clear</Button>
+            <Button 
+              variant={'search'}
+              onClick={() => {
+                setSelectedPartCatalog((prev) => [
+                  ...prev,
+                  ...tempSelectedParts.filter(
+                    (part) => !prev.some((p) => p.PartNumber === part.PartNumber)
+                  ),
+                ]);
+                setTempSelectedParts([]); // ✅ clear after adding
+                Swal.fire({
+                  title: "Success!",
+                  text: "Part(s) added successfully!",
+                  icon: "success",
+                  timer: 1500,
+                  showConfirmButton: false,
+                }).then(()=>{
+                  setOpen2(false);
+                });
+
+              }}
+            >Add Part</Button>
+            <Button variant={'search'} onClick={() => { setTempSelectedParts([]); 
+    setPartNumberInput("");
+    setPartNumberSearch(""); }}>Clear</Button>
             <Button variant={'search'} onClick={() => open}>Cancel</Button>
           </DialogFooter>
       </DialogContent>

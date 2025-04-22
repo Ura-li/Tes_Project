@@ -4,7 +4,6 @@ import {
   TabsService
  } from './components/service-case'
 import { useParams } from 'react-router'
-
 import ApiCustomer from './api'
 
 export const Case = () => {
