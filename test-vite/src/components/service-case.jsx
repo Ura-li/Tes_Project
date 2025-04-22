@@ -56,22 +56,22 @@ import {
 
 import ApiCustomer from '@/api'
 
-const workorder = [
-  {
-    workordernumber: "WO-027816939",
-    caseid: "54165182991",
-    serviceaccount: "Icon Plus",
-    substatus: "Waiting",
-    systemstatus: "Open",
-    priority: "WO Priority",
-    workorder: "In-Country",
-    primaryincident: "Depot Repair",
-    duedate: "21/03/2025 00.53",
-    orion: "-",
-    owner : "Jokowi",
-    created: "Widodo",
-  },
-]
+// const workorder = [
+//   {
+//     workordernumber: "WO-027816939",
+//     caseid: "54165182991",
+//     serviceaccount: "Icon Plus",
+//     substatus: "Waiting",
+//     systemstatus: "Open",
+//     priority: "WO Priority",
+//     workorder: "In-Country",
+//     primaryincident: "Depot Repair",
+//     duedate: "21/03/2025 00.53",
+//     orion: "-",
+//     owner : "Jokowi",
+//     created: "Widodo",
+//   },
+// ]
 
 const partsorder = [
   {
@@ -92,6 +92,9 @@ import { BtnModalsWorkOrder } from './sc-modal'
 export const TabsService = ({ caseDetails }) => {
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
 
+  const [selectedSymptom, setSelectedSymptom] = useState(null);
+
+
   const { open } = useSidebar();
 
   //casenote
@@ -99,7 +102,7 @@ export const TabsService = ({ caseDetails }) => {
     LogType: '',
     ActionType: '',
     Template: '',
-    VisibleExternally: '',
+    VisibleExternally: null,
     MinutesSpent: 0,
     Note: ''
   });
@@ -126,6 +129,16 @@ export const TabsService = ({ caseDetails }) => {
       })
       console.log("Case Notes Infor after save : ",caseNotes)
       console.log("Case Notes Display Infor after save : ",response)
+
+      let dataUpdated = {
+        CaseNote: response.data.data.NoteID
+      };
+      //symptom code
+      if(selectedSymptom) {
+        dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
+      }
+      await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated)
+
     } catch (error) {
       console.error("Save failed:", error);
       alert("Failed to save note.");
@@ -184,6 +197,19 @@ export const TabsService = ({ caseDetails }) => {
       return null;
     }
   }
+  const fetchSymptomCodes = async () => {
+    try{
+      const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`)
+      const caseData = res.data.data
+      const symptomCode = caseData.SymptomCode
+
+      const resSymptomCode = await ApiCustomer.get(`/api/case-information/symptom-codes/${symptomCode}`)
+      return resSymptomCode.data.data
+    }catch (err) {
+      console.error("Error in fetchSymptomCodes:", err);
+      return null;
+    }
+  }
   useEffect(() => {
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
@@ -192,11 +218,22 @@ export const TabsService = ({ caseDetails }) => {
           NotesDisplay: noteDetail.Note
         })
       } 
+      const symptomCodeDetail = await fetchSymptomCodes();
+      if(symptomCodeDetail){
+        setSelectedSymptom({
+          TopCategory: symptomCodeDetail.TopCategory,
+          SubCategory: symptomCodeDetail.SubCategory,
+          SymptomCode: symptomCodeDetail.SymptomCode,
+        })
+      }
     }
     loadNote()
   }, [])
 
   const [caseNotes, setCaseNotes] = useState([])
+
+
+  
   
 
   const buttons = [
@@ -255,6 +292,8 @@ export const TabsService = ({ caseDetails }) => {
       onChange={handleCaseNoteChange}
       caseNotes={caseNotes}
       setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
       />
     </div>
   </>
@@ -267,9 +306,16 @@ export const ServiceCase = ({
   formData, 
   onChange,
   caseNotes,
-  setCaseNotes
+  setCaseNotes,
+  selectedSymptom,
+  setSelectedSymptom
 }) => {
   const { open } = useSidebar();
+
+  
+const [symptomSearchTerm, setSymptomSearchTerm] = useState("");
+const [symptomSuggestions, setSymptomSuggestions] = useState([]);
+
   
 
   const tabs = [
@@ -306,6 +352,58 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
     <CardTitle className={`col-span-${span}`}>{value}</CardTitle>
   </>
 );
+
+
+  //customer, asset, entitlement
+  //customer
+  const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
+    MainAccount: null,
+    SiteAccount: null,
+    Type: null,
+  });
+  const fetchCustomerData = async () => {
+    try{
+      // console.log("Case Detail : ", caseDetails);
+      const resMainAccount = await ApiCustomer.get(`/api/contact-information/${caseDetails.ContactID}`)
+      setDataFetchCustomerData({
+        MainAccount: resMainAccount.data.data
+      })
+      if(caseDetails.SiteAccountID !== null) {
+        const resSiteAccount = await ApiCustomer.get(`/api/site_account/${caseDetails.SiteAccountID}`)
+        setDataFetchCustomerData((prev) => ({
+          ...prev,
+          SiteAccount: resSiteAccount.data.data,
+          Type: "SiteAccount"
+        }));
+        
+      }else{
+        setDataFetchCustomerData((prev) => ({
+          ...prev,
+          type: "Individual", // fallback if no site account
+        }));
+      }
+
+      console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
+      // const res = await ApiCustomer.get(`/api/`)
+    }catch(err){
+      console.error("Error returning Customer Data : ",err)
+      return null
+    }
+  }
+  //asset
+  const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
+  const fetchAssetInformation = async () => {
+    try{
+      const resAsset = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
+      setDataFetchAssetInformation({
+        AssetInformation: resAsset.data.data
+      })
+    }catch(err){
+      console.error("Error returning Asset Data : ",err)
+      return null
+    }
+  }
+
 
 
 //notes handler
@@ -345,6 +443,10 @@ const fetchCaseNotes = async () => {
   }
 }
 useEffect(() => {
+  fetchCustomerData();
+  fetchAssetInformation();
+  
+  fetchWorkOrders();
   const loadNote = async () => {
     const noteDetail = await fetchCaseNotes();
     if(noteDetail ){
@@ -355,7 +457,63 @@ useEffect(() => {
   }
   loadNote()
 }, [])
+useEffect(() =>{
+  console.log("Data Asset Info : ",dataFetchAssetInformation)
+}, dataFetchAssetInformation)
 
+const fetchSymptomCodes = async (term) => {
+  try {
+    const response = await ApiCustomer.get("/api/case-information/symptom-codes");
+    const allCodes = response.data.data;
+
+    const filtered = allCodes.filter((sym) =>
+      sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+    );
+
+    setSymptomSuggestions(filtered);
+  } catch (err) {
+    console.error("Error fetching symptom codes", err);
+  }
+};
+// console.log("Selected Symptopm ",selectedSymptom)
+
+// useEffect(() => {
+// }, selectedSymptom)
+
+
+//order section
+//workorder
+const [workOrders, setWorkOrders] = useState([]);
+const fetchWorkOrders = async () => {
+  try {
+    const res = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
+    setWorkOrders(res.data.data); // adjust based on API response shape
+    // console.log("Fetch Work Order: ",res)
+  } catch (err) {
+    console.error("Failed to fetch work orders:", err);
+  }
+};
+
+const [materialOrders, setMaterialOrders] = useState([]);
+const fetchMaterialOrders = async () => {
+  try {
+    if (!workOrders.length) return;
+
+    const woidList = workOrders.map((wo) => wo.WOID).join(',');
+    const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
+    setMaterialOrders(res.data.data);
+  } catch (err) {
+    console.error("Failed to fetch Material orders:", err);
+  }
+}
+
+
+useEffect(() => {
+  console.log("Work Orders Fetching L ",workOrders)
+  if (workOrders.length > 0) {
+    fetchMaterialOrders();
+  }
+}, [workOrders]);
 
 
   return (
@@ -562,7 +720,7 @@ useEffect(() => {
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Customer Account</span>
-              <span className='ml-30'>...</span>
+              <span className='ml-30'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Company : dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -590,19 +748,19 @@ useEffect(() => {
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Primary Contact</span>
-              <span className='ml-35'>...</span>
+              <span className='ml-35'>{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</span>
             </div>
 
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Primary Email</span>
-              <span className='ml-35'>...</span>
+              <span className='ml-35'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Email : dataFetchCustomerData?.MainAccount?.Email}</span>
             </div>
 
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Phone</span>
-              <span className='ml-49.5'>...</span>
+              <span className='ml-49.5'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone: dataFetchCustomerData?.MainAccount?.Phone}</span>
             </div>
   
             <div className='font-bold flex'>
@@ -613,7 +771,7 @@ useEffect(() => {
             <div className='font-bold flex'>
             <Lock className='size-5 mr-2'></Lock>
               <span>Country</span>
-              <span className='ml-46'>...</span>
+              <span className='ml-46'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Country : dataFetchCustomerData?.MainAccount?.Country}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -657,19 +815,19 @@ useEffect(() => {
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Asset</span>
-              <span className='ml-56'>...</span>
+              <span className='ml-56'>{dataFetchAssetInformation?.AssetInformation?.SerialNumber}</span>
             </div>
 
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Serial Number</span>
-              <span className='ml-39'>...</span>
+              <span className='ml-39'>{dataFetchAssetInformation?.AssetInformation?.SerialNumber}</span>
             </div>
 
             <div className='font-bold flex'>
             <Lock className='size-5 mr-2'></Lock>
               <span>Product Name</span>
-              <span className='ml-39'>...</span>
+              <span className='ml-39'>{dataFetchAssetInformation?.AssetInformation?.product_information?.ProductName}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -681,7 +839,7 @@ useEffect(() => {
             <div className='font-bold flex'>
             <Lock className=' size-5 mr-2'></Lock>
               <span>Product Number</span>
-              <span className='ml-30'>...</span>
+              <span className='ml-30'>{dataFetchAssetInformation?.AssetInformation?.ProductNumber}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -956,22 +1114,49 @@ useEffect(() => {
 
             <div className='font-bold flex'>
               <span>Keyword Search</span>
-              <Input type="search" className="w-100 ml-27 border-2 border-black"></Input>
+              <Input 
+                type="search" 
+                className="w-100 ml-27 border-2 border-black"
+                value={symptomSearchTerm}
+                onChange={(e) => {
+                  const value = e.target.value
+                  setSymptomSearchTerm(value)
+                  if (value.length >= 2) fetchSymptomCodes(value)
+                    else setSymptomSuggestions([])
+                }}
+              />
             </div>
+            {symptomSuggestions.length > 0 && (
+              <ul className="bg-white border mt-1 max-h-40 overflow-y-auto absolute z-10">
+                {symptomSuggestions.map((sym) => (
+                  <li
+                    key={sym.SymptomCodeID}
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      setSelectedSymptom(sym);
+                      setSymptomSearchTerm(sym.SymptomCode);
+                      setSymptomSuggestions([]);
+                    }}
+                  >
+                    {sym.SymptomCode}
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <div className='font-bold flex'>
               <span>Top Category</span>
-              <span className='ml-32'>...</span>
+              <span className='ml-32'>{selectedSymptom?.TopCategory}</span>
             </div>
 
             <div className='font-bold flex'>
               <span>Sub Category</span>
-              <span className='ml-32'>...</span>
+              <span className='ml-32'>{selectedSymptom?.SubCategory}</span>
             </div>
 
             <div className='font-bold flex'>
               <span>Spesific Symptom</span>
-              <span className='ml-24'>...</span>
+              <span className='ml-24'>{selectedSymptom?.SymptomCode}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -992,7 +1177,15 @@ useEffect(() => {
             
             <div className='font-bold flex'>
               <span className='ml-7'>Auto Close</span>
-              <span className='ml-52'>...</span>
+              <Select className='ml-52' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="---"/>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Yes</SelectItem>
+                    <SelectItem value="0">No</SelectItem>
+                  </SelectContent>
+                </Select>
             </div>
 
             <div className='font-bold flex'>
@@ -1120,15 +1313,15 @@ useEffect(() => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {workorder.map((work) => (
-                  <TableRow key={work.workordernumber}>
+                {workOrders.map((work) => (
+                  <TableRow key={work.WOID}>
                     <TableCell className="font-medium">
-                      <Link to="/Work">
-                      {work.workordernumber}
+                      <Link to={`/work/${work.WOID}`}>
+                      {work.WOID}
                       </Link>
                       </TableCell>
-                    <TableCell>{work.caseid}</TableCell>
-                    <TableCell>{work.serviceaccount}</TableCell>
+                    <TableCell>{work.CaseID}</TableCell>
+                    {/* <TableCell>{work.serviceaccount}</TableCell>
                     <TableCell>{work.substatus}</TableCell>
                     <TableCell>{work.systemstatus}</TableCell>
                     <TableCell>{work.priority}</TableCell>
@@ -1137,7 +1330,7 @@ useEffect(() => {
                     <TableCell>{work.duedate}</TableCell>
                     <TableCell>{work.orion}</TableCell>
                     <TableCell>{work.owner}</TableCell>
-                    <TableCell>{work.created}</TableCell>
+                    <TableCell>{work.created}</TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>
@@ -1229,13 +1422,33 @@ useEffect(() => {
               </TableHeader>
 
               <TableBody>
-                  <TableRow>
+                {materialOrders.map((material) => (
+                    <TableRow key={material.MOID}>
+                      <TableCell className="font-medium">
+                        <Link to={`/material-order/${material.MOID}`}>
+                        {material.MOID} on {material.WOID} 
+                        </Link>
+                        </TableCell>
+                      <TableCell>{material.CaseID}</TableCell>
+                      {/* <TableCell>{work.serviceaccount}</TableCell>
+                      <TableCell>{work.substatus}</TableCell>
+                      <TableCell>{work.systemstatus}</TableCell>
+                      <TableCell>{work.priority}</TableCell>
+                      <TableCell>{work.workorder}</TableCell>
+                      <TableCell>{work.primaryincident}</TableCell>
+                      <TableCell>{work.duedate}</TableCell>
+                      <TableCell>{work.orion}</TableCell>
+                      <TableCell>{work.owner}</TableCell>
+                      <TableCell>{work.created}</TableCell> */}
+                    </TableRow>
+                  ))}
+                  {/* <TableRow>
                     <TableCell className="font-medium">
                       <Link to="/material_order">
-                       MO-8292819129 for WO-027816939
+                      
                       </Link>
                     </TableCell>
-                  </TableRow>
+                  </TableRow> */}
               </TableBody>
             </Table>
             </CardContent>

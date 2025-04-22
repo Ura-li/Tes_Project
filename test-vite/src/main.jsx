@@ -30,9 +30,9 @@ createRoot(document.getElementById('root')).render(
             <Route index element={<Landing />} />
             <Route path='/search_case' element={<Search_case />} />
             <Route path='/case/:caseId' element={<Case />} />
-            <Route path='/work' element={<Work />}/>
-            <Route path='/material_order' element={<MaterialOrder />}/>
-            <Route path='/mo_detail' element={<MoDetail />}/>
+            <Route path='/work/:woid' element={<Work />}/>
+            <Route path='/material-order/:moid' element={<MaterialOrder />}/>
+            <Route path='/mo_detail/:molineid' element={<MoDetail />}/>
             <Route path='/bookings' element={<Bookings/>}/>
             <Route path='/master/Company_table' element={<Company_table />} />
             <Route path='/master/Assets_table' element={<Assets_table />} />

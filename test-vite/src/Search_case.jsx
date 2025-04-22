@@ -577,9 +577,9 @@ const Search_case = () => {
         CasePriority: "Medium",
         CustomerSeverity: "Normal",
         CaseClosedDate: null,
-        CaseNote: "This is a sample case note.",
-        SymptomCode: "General Issue",
-        CaseResolution: "",
+        CaseNote: null,
+        SymptomCode: null,
+        CaseResolution: null,
       };
   
       await ApiCustomer.post("/api/case-information", newCase);

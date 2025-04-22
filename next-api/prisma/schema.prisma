@@ -19,9 +19,9 @@ model asset_information {
   caseinformation     caseinformation[]
   servicecatalog      servicecatalog[]
 
-  @@index([SiteAccountID], map: "SiteAccountID")
   @@index([ContactID], map: "ContactID")
   @@index([ProductNumber], map: "ProductNumber")
+  @@index([SiteAccountID], map: "SiteAccountID")
 }
 
 model caseinformation {
@@ -49,13 +49,13 @@ model caseinformation {
   asset_information                             asset_information?   @relation(fields: [AssetID], references: [AssetID], onDelete: Restrict, onUpdate: Restrict, map: "caseinformation_ibfk_3")
   casenotes_caseinformation_CaseNoteTocasenotes casenotes?           @relation("caseinformation_CaseNoteTocasenotes", fields: [CaseNote], references: [NoteID], onDelete: Restrict, onUpdate: Restrict, map: "caseinformation_ibfk_4")
   symptom_codes                                 symptom_codes?       @relation(fields: [SymptomCode], references: [SymptomCodeID], onDelete: Restrict, onUpdate: Restrict, map: "caseinformation_ibfk_5")
-  casenotes                                     casenotes[]
+  casenotes_casenotes_CaseIDTocaseinformation   casenotes[]          @relation("casenotes_CaseIDTocaseinformation")
   workorder                                     workorder[]
 
   @@index([AssetID], map: "AssetID")
+  @@index([CaseNote], map: "CaseNote")
   @@index([ContactID], map: "ContactID")
   @@index([SiteAccountID], map: "SiteAccountID")
-  @@index([CaseNote], map: "CaseNote")
   @@index([SymptomCode], map: "SymptomCode")
 }
 
@@ -70,7 +70,7 @@ model casenotes {
   Note                                                String?           @db.Text
   CreatedOn                                           DateTime?         @default(now()) @db.DateTime(0)
   caseinformation_caseinformation_CaseNoteTocasenotes caseinformation[] @relation("caseinformation_CaseNoteTocasenotes")
-  caseinformation                                     caseinformation?  @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict, onUpdate: Restrict, map: "casenotes_ibfk_1")
+  caseinformation_casenotes_CaseIDTocaseinformation   caseinformation?  @relation("casenotes_CaseIDTocaseinformation", fields: [CaseID], references: [CaseID], onDelete: Restrict, onUpdate: Restrict, map: "casenotes_ibfk_1")
 
   @@index([CaseID], map: "CaseID")
 }
@@ -101,6 +101,17 @@ model contact_information {
   site_account      site_account?       @relation(fields: [SiteAccountID], references: [SiteAccountID], onDelete: Restrict, onUpdate: Restrict, map: "contact_information_ibfk_1")
 
   @@index([SiteAccountID], map: "SiteAccountID")
+}
+
+model global_trade_check {
+  id_gtc              Int    @id @default(autoincrement())
+  global_trade_status String @db.VarChar(30)
+  embargoed_country   String @db.VarChar(30)
+  gt_override_reason  String @db.VarChar(30)
+  gt_details          String @db.VarChar(50)
+  screening_id        String @db.VarChar(25)
+  gt_active_listening String @db.VarChar(30)
+  gt_al_comments      String @db.VarChar(50)
 }
 
 model materialorder {
@@ -134,6 +145,28 @@ model materialorderlineitems {
 
   @@index([MOID], map: "MOID")
   @@index([PartNumber], map: "PartNumber")
+}
+
+model product_information {
+  ProductNumber       String              @id @db.VarChar(11)
+  ProductLine         String              @db.VarChar(3)
+  ProductName         String              @db.VarChar(255)
+  ProductTypeID       Int
+  end_of_sales_date   DateTime?           @db.Date
+  end_of_support_date DateTime?           @db.Date
+  vendor              String?             @db.VarChar(50)
+  asset_information   asset_information[]
+  product_type        product_type        @relation(fields: [ProductTypeID], references: [ProductTypeID], onUpdate: Restrict, map: "product_information_ibfk_1")
+
+  @@index([ProductTypeID], map: "ProductTypeID")
+}
+
+model product_type {
+  ProductTypeID       Int                        @id @default(autoincrement())
+  ProductType         String                     @db.VarChar(50)
+  ProductTower        product_type_ProductTower?
+  ProductGroup        product_type_ProductGroup?
+  product_information product_information[]
 }
 
 model servicecatalog {
@@ -194,6 +227,50 @@ model site_account {
   contact_information contact_information[]
 }
 
+model symptom_codes {
+  SymptomCodeID   Int               @id @default(autoincrement())
+  SymptomCode     String            @db.VarChar(50)
+  TopCategory     String            @db.VarChar(50)
+  SubCategory     String            @db.VarChar(50)
+  QualityCodes    String?           @db.VarChar(50)
+  CreatedOn       DateTime          @default(now()) @db.Timestamp(0)
+  caseinformation caseinformation[]
+}
+
+model test_table_without_migration {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(12)
+
+  @@map("test-table-without-migration")
+}
+
+model test_table {
+  MOID                Int       @id @default(autoincrement())
+  WOID                Int?
+  OrderNumber         String?   @db.VarChar(100)
+  OrderStatus         String?   @db.VarChar(50)
+  OrderType           String?   @db.VarChar(50)
+  CreatedOn           DateTime? @default(now()) @db.DateTime(0)
+  SalesOrderNumber    String?   @db.VarChar(100)
+  RMANumber           String?   @db.VarChar(100)
+  ReadyForClosureDate DateTime? @db.DateTime(0)
+  Owner               String?   @db.VarChar(100)
+
+  @@index([WOID], map: "WOID")
+}
+
+model warranty_services {
+  Service_offerID     String           @id @db.VarChar(8)
+  Service_description String           @db.VarChar(255)
+  CTat_RTime          String?          @db.VarChar(5)
+  Price               Float            @default(0) @db.Float
+  Shipping_Fee        Float            @default(0) @db.Float
+  qty_ws              Int              @default(0)
+  Tax                 Float            @default(0) @db.Float
+  Total               Float            @default(0) @db.Float
+  servicecatalog      servicecatalog[]
+}
+
 model workorder {
   WOID                        String           @id @db.VarChar(13)
   CaseID                      Int?
@@ -229,83 +306,6 @@ model workorder {
   caseinformation             caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict, map: "workorder_ibfk_1")
 
   @@index([CaseID], map: "CaseID")
-}
-
-model product_information {
-  ProductNumber       String              @id @db.VarChar(11)
-  ProductLine         String              @db.VarChar(3)
-  ProductName         String              @db.VarChar(255)
-  ProductTypeID       Int
-  end_of_sales_date   DateTime?           @db.Date
-  end_of_support_date DateTime?           @db.Date
-  vendor              String?             @db.VarChar(50)
-  asset_information   asset_information[]
-  product_type        product_type        @relation(fields: [ProductTypeID], references: [ProductTypeID], onUpdate: Restrict, map: "product_information_ibfk_1")
-
-  @@index([ProductTypeID], map: "ProductTypeID")
-}
-
-model product_type {
-  ProductTypeID       Int                        @id @default(autoincrement())
-  ProductType         String                     @db.VarChar(50)
-  ProductTower        product_type_ProductTower?
-  ProductGroup        product_type_ProductGroup?
-  product_information product_information[]
-}
-
-model global_trade_check {
-  id_gtc              Int    @id @default(autoincrement())
-  global_trade_status String @db.VarChar(30)
-  embargoed_country   String @db.VarChar(30)
-  gt_override_reason  String @db.VarChar(30)
-  gt_details          String @db.VarChar(50)
-  screening_id        String @db.VarChar(25)
-  gt_active_listening String @db.VarChar(30)
-  gt_al_comments      String @db.VarChar(50)
-}
-
-model warranty_services {
-  Service_offerID     String           @id @db.VarChar(8)
-  Service_description String           @db.VarChar(255)
-  CTat_RTime          String?          @db.VarChar(5)
-  Price               Float            @default(0) @db.Float
-  Shipping_Fee        Float            @default(0) @db.Float
-  qty_ws              Int              @default(0)
-  Tax                 Float            @default(0) @db.Float
-  Total               Float            @default(0) @db.Float
-  servicecatalog      servicecatalog[]
-}
-
-model symptom_codes {
-  SymptomCodeID   Int               @id @default(autoincrement())
-  SymptomCode     String            @db.VarChar(50)
-  TopCategory     String            @db.VarChar(50)
-  SubCategory     String            @db.VarChar(50)
-  QualityCodes    String?           @db.VarChar(50)
-  CreatedOn       DateTime          @default(now()) @db.Timestamp(0)
-  caseinformation caseinformation[]
-}
-
-model test_table_without_migration {
-  id   Int    @id @default(autoincrement())
-  name String @db.VarChar(12)
-
-  @@map("test-table-without-migration")
-}
-
-model test_table {
-  MOID                Int       @id @default(autoincrement())
-  WOID                Int?
-  OrderNumber         String?   @db.VarChar(100)
-  OrderStatus         String?   @db.VarChar(50)
-  OrderType           String?   @db.VarChar(50)
-  CreatedOn           DateTime? @default(now()) @db.DateTime(0)
-  SalesOrderNumber    String?   @db.VarChar(100)
-  RMANumber           String?   @db.VarChar(100)
-  ReadyForClosureDate DateTime? @db.DateTime(0)
-  Owner               String?   @db.VarChar(100)
-
-  @@index([WOID], map: "WOID")
 }
 
 model workorder_service_delivery {
