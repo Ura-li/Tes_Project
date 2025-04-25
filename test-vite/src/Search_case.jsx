@@ -892,6 +892,8 @@ const Search_case = () => {
                   search={search}
                   setSearch={setSearch}
                   onSelectCompany={handleSelectedSiteAccount}
+                  setActiveTab={setActiveTab}
+                  setFormDataSiteAccount={setFormDataSiteAccount}
                 />
                 <DialogContactBtn />
               </TabsList>

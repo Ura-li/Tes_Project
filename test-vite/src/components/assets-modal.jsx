@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@radix-ui/react-checkbox";
 import { Search } from "lucide-react";
+import Swal from "sweetalert2";
 
 import {
   Table,
@@ -245,7 +246,9 @@ export function DialogCompanyBtn({
     setIsModalCompanyOpen,
     search,
     setSearch,
-    onSelectCompany
+    onSelectCompany,
+    setActiveTab,
+    setFormDataSiteAccount
   }) {
     //set State Company
     const [siteAccounts, setSiteAccounts] = useState([]);
@@ -286,6 +289,23 @@ export function DialogCompanyBtn({
             setFilteredSiteAccount(filteredResults); // ✅ Set results if matches found
           } else {
             setFilteredSiteAccount([]); // ✅ Explicitly reset when no matches
+            setIsModalCompanyOpen(false)
+            Swal.fire({
+              icon: "error",
+              title: "Data not found",
+              showConfirmButton: false,
+              timer: 1500
+            }).then(()=>{
+              setTimeout(() => {
+                setFormDataSiteAccount((prev) => ({
+                  ...prev,
+                  Company: search.Company || "",
+                  Company: search.Company || "",
+                  Company: search.Company || "",
+                }));
+                setActiveTab("Account"); // Wait until modal is fully closed
+              }, 300); // Slight delay to ensure smooth transition            
+            })
           }
 
           console.log("Lower Search: ", lowerSearch);
