@@ -465,8 +465,7 @@ export function BtnModalContact({
  * TODO 
  * MAKE ROUTE FOR PRODUCT
  */
-export function 
-BtnModalAsset({
+export function BtnModalAsset({
   typeSearch,
   contactID, 
   siteAccountID, 

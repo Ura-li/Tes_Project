@@ -18,7 +18,7 @@ export async function GET(request) {
         //     whereCondition.OR = [...(whereCondition.OR || []), { CaseID: { contains: caseID } }];
         // }
         if (caseID) {
-            whereCondition.CaseID = caseID;
+            whereCondition.CaseID = parseInt(caseID);
         }
 
 

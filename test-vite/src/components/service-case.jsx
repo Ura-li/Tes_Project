@@ -457,9 +457,9 @@ useEffect(() => {
   }
   loadNote()
 }, [])
-useEffect(() =>{
-  console.log("Data Asset Info : ",dataFetchAssetInformation)
-}, dataFetchAssetInformation)
+// useEffect(() =>{
+//   console.log("Data Asset Info : ",dataFetchAssetInformation)
+// }, dataFetchAssetInformation)
 
 const fetchSymptomCodes = async (term) => {
   try {

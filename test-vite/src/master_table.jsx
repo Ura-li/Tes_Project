@@ -1061,8 +1061,8 @@ export const Mo_table = () => {
           <tbody>
             {currentData.map((MaterialOrderItem) => (
               <tr key={MaterialOrderItem.MOID} className="hover:bg-gray-100 text-center">
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/case/${MaterialOrderItem.MOID}`)} >{MaterialOrderItem.MOID}</td>
-                <td className="border p-2">{MaterialOrderItem.WOID}</td>
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/material-order/${MaterialOrderItem.MOID}`)} >{MaterialOrderItem.MOID}</td>
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline"onClick={() => navigate(`/work/${MaterialOrderItem.WOID}`)} >{MaterialOrderItem.WOID}</td>
                 <td className="border p-2">{MaterialOrderItem.OrderNumber}</td>
                 <td className="border p-2">{MaterialOrderItem.OrderStatus}</td>
                 <td className="border p-2">{MaterialOrderItem.OrderType}</td>
