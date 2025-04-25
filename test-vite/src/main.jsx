@@ -19,6 +19,7 @@ import { Bookings } from './bookings';
 import { ProductType_table } from './master_table';
 import { ServiceCatalogPartsTable } from './master_table';
 
+import { WarrantyService_table } from './master_table';
 // import { ModalContextProvider } from './components/modal-context';
 
 createRoot(document.getElementById('root')).render(
@@ -30,9 +31,9 @@ createRoot(document.getElementById('root')).render(
             <Route index element={<Landing />} />
             <Route path='/search_case' element={<Search_case />} />
             <Route path='/case/:caseId' element={<Case />} />
-            <Route path='/work' element={<Work />}/>
-            <Route path='/material_order' element={<MaterialOrder />}/>
-            <Route path='/mo_detail' element={<MoDetail />}/>
+            <Route path='/work/:woid' element={<Work />}/>
+            <Route path='/material-order/:moid' element={<MaterialOrder />}/>
+            <Route path='/mo_detail/:molineid' element={<MoDetail />}/>
             <Route path='/bookings' element={<Bookings/>}/>
             <Route path='/master/Company_table' element={<Company_table />} />
             <Route path='/master/Assets_table' element={<Assets_table />} />
@@ -42,6 +43,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/ProductType_table' element={<ProductType_table/>}/>
             <Route path='/master/ServiceCatalogPartsTable' element={<ServiceCatalogPartsTable/>}/>
             {/* <Route path='/master/GlobalTradeCheckTable' element={<GlobalTradeCheckTable/>}/> */}
+            <Route path='/master/WarrantyService_table' element={<WarrantyService_table/>}/>
           </Route>
           <Route path="/lorem" element={<Lorem />}/>
         </Routes>

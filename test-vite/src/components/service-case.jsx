@@ -53,22 +53,25 @@ import {
  import { useState, useEffect } from "react";
  import { useSidebar } from '@/components/ui/sidebar'
  import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-const workorder = [
-  {
-    workordernumber: "WO-027816939",
-    caseid: "54165182991",
-    serviceaccount: "Icon Plus",
-    substatus: "Waiting",
-    systemstatus: "Open",
-    priority: "WO Priority",
-    workorder: "In-Country",
-    primaryincident: "Depot Repair",
-    duedate: "21/03/2025 00.53",
-    orion: "-",
-    owner : "Jokowi",
-    created: "Widodo",
-  },
-]
+
+import ApiCustomer from '@/api'
+
+// const workorder = [
+//   {
+//     workordernumber: "WO-027816939",
+//     caseid: "54165182991",
+//     serviceaccount: "Icon Plus",
+//     substatus: "Waiting",
+//     systemstatus: "Open",
+//     priority: "WO Priority",
+//     workorder: "In-Country",
+//     primaryincident: "Depot Repair",
+//     duedate: "21/03/2025 00.53",
+//     orion: "-",
+//     owner : "Jokowi",
+//     created: "Widodo",
+//   },
+// ]
 
 const partsorder = [
   {
@@ -86,17 +89,157 @@ const partsorder = [
 import { BtnModalsWorkOrder } from './sc-modal'
 
 
-export const TabsService = () => {
+export const TabsService = ({ caseDetails }) => {
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
+
+  const [selectedSymptom, setSelectedSymptom] = useState(null);
+
 
   const { open } = useSidebar();
 
+  //casenote
+  const [caseNoteFormData, setCaseNoteFormData] = useState({
+    LogType: '',
+    ActionType: '',
+    Template: '',
+    VisibleExternally: null,
+    MinutesSpent: 0,
+    Note: ''
+  });
+
+  const handleCaseNoteChange = (key, value) => {
+    setCaseNoteFormData(prev => { 
+      const updated = { ...prev, [key]: value };
+      console.log("🔄 Updated Form:", updated); // ✅ Log on every change
+      return updated;
+     });
+  };
+  const saveCaseNote = async () => {
+    
+  console.log("📝 Form Data to Submit:", caseNoteFormData); // ✅ Log the form data
+    try {
+      const response = await ApiCustomer.post("/api/case-information/case-notes", {
+        ...caseNoteFormData,
+        CaseID: caseDetails.CaseID
+      });
+      console.log("Saved successfully:", response.data);
+      alert("Case Note Saved!");
+      setCaseNotes({
+        NotesDisplay: response.data.data.Note
+      })
+      console.log("Case Notes Infor after save : ",caseNotes)
+      console.log("Case Notes Display Infor after save : ",response)
+
+      let dataUpdated = {
+        CaseNote: response.data.data.NoteID
+      };
+      //symptom code
+      if(selectedSymptom) {
+        dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
+      }
+      await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated)
+
+    } catch (error) {
+      console.error("Save failed:", error);
+      alert("Failed to save note.");
+    }
+  };
+  
+  const checkOrCreateNote = async () => {
+    const existing = await ApiCustomer.get(`/api/case-information/case-notes?caseId=${caseDetails.CaseID}`);
+    
+    if (existing.data.data.length > 0) {
+      const noteID = existing.data.data[0].NoteID;
+      await ApiCustomer.patch(`/api/case-information/case-notes/${noteID}`, {
+        ...caseNoteFormData,
+        Note: existing.data.data[0].Note + "\n" + caseNoteFormData.Note
+      });
+    } else {
+      await ApiCustomer.post("/api/case-information/case-notes", {
+        ...caseNoteFormData,
+        CaseID: caseDetails.CaseID
+      });
+    }
+  };
+  
+  const fetchCaseNotes = async () => {
+    try{
+      const res = await ApiCustomer.get(`/api/case-information/case-notes`)
+      const notes = res.data.data
+  
+      const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
+  
+      let noteID = null
+  
+      if(existingNote){
+        noteID = existingNote.NoteID
+      }else{
+        const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
+          LogType: "NotesLog",
+          ActionType: "Initial",
+          Template: "",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: "",
+          CaseID: caseID,
+        })
+        
+        noteID = createResponse.data.data.NoteID;
+      }
+  
+      const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
+      const noteDetail = detailRes.data.data;
+  
+      console.log("✅ Case Note Detail:", noteDetail);
+      return noteDetail;
+    }catch(err){
+      console.error("Error in fetchCaseNotes:", err);
+      return null;
+    }
+  }
+  const fetchSymptomCodes = async () => {
+    try{
+      const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`)
+      const caseData = res.data.data
+      const symptomCode = caseData.SymptomCode
+
+      const resSymptomCode = await ApiCustomer.get(`/api/case-information/symptom-codes/${symptomCode}`)
+      return resSymptomCode.data.data
+    }catch (err) {
+      console.error("Error in fetchSymptomCodes:", err);
+      return null;
+    }
+  }
+  useEffect(() => {
+    const loadNote = async () => {
+      const noteDetail = await fetchCaseNotes();
+      if(noteDetail ){
+        setCaseNotes({
+          NotesDisplay: noteDetail.Note
+        })
+      } 
+      const symptomCodeDetail = await fetchSymptomCodes();
+      if(symptomCodeDetail){
+        setSelectedSymptom({
+          TopCategory: symptomCodeDetail.TopCategory,
+          SubCategory: symptomCodeDetail.SubCategory,
+          SymptomCode: symptomCodeDetail.SymptomCode,
+        })
+      }
+    }
+    loadNote()
+  }, [])
+
+  const [caseNotes, setCaseNotes] = useState([])
+
+
+  
   
 
   const buttons = [
     { icon: ArrowLeftFromLine, label: "", onClick: () => alert("not now") },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-    { icon: Save, label: "Save", onClick: () => alert("not now") },
+    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
     { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now") },
     { icon: RotateCw, label: "Refresh", onClick: () => alert("not now") },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
@@ -113,6 +256,7 @@ export const TabsService = () => {
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
   return (
+    <>
     <div className='border-1 flex items-center '>
        {visibleButtons.map((btn, index) => (
           <Button
@@ -120,7 +264,7 @@ export const TabsService = () => {
             onClick={btn.onClick}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-          >
+            >
             <btn.icon className="h-4 w-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
@@ -139,14 +283,40 @@ export const TabsService = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} />
+    <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/>
     </div>
+    <div>
+    <ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
+      />
+    </div>
+  </>
   )
 }
 
 
-export const ServiceCase = ({ caseDetails }) => {
+export const ServiceCase = ({ 
+  caseDetails, 
+  formData, 
+  onChange,
+  caseNotes,
+  setCaseNotes,
+  selectedSymptom,
+  setSelectedSymptom
+}) => {
   const { open } = useSidebar();
+
+  
+const [symptomSearchTerm, setSymptomSearchTerm] = useState("");
+const [symptomSuggestions, setSymptomSuggestions] = useState([]);
+
+  
 
   const tabs = [
     { value: "case_info", label: "Case Information" },
@@ -182,6 +352,169 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
     <CardTitle className={`col-span-${span}`}>{value}</CardTitle>
   </>
 );
+
+
+  //customer, asset, entitlement
+  //customer
+  const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
+    MainAccount: null,
+    SiteAccount: null,
+    Type: null,
+  });
+  const fetchCustomerData = async () => {
+    try{
+      // console.log("Case Detail : ", caseDetails);
+      const resMainAccount = await ApiCustomer.get(`/api/contact-information/${caseDetails.ContactID}`)
+      setDataFetchCustomerData({
+        MainAccount: resMainAccount.data.data
+      })
+      if(caseDetails.SiteAccountID !== null) {
+        const resSiteAccount = await ApiCustomer.get(`/api/site_account/${caseDetails.SiteAccountID}`)
+        setDataFetchCustomerData((prev) => ({
+          ...prev,
+          SiteAccount: resSiteAccount.data.data,
+          Type: "SiteAccount"
+        }));
+        
+      }else{
+        setDataFetchCustomerData((prev) => ({
+          ...prev,
+          type: "Individual", // fallback if no site account
+        }));
+      }
+
+      console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
+      // const res = await ApiCustomer.get(`/api/`)
+    }catch(err){
+      console.error("Error returning Customer Data : ",err)
+      return null
+    }
+  }
+  //asset
+  const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
+  const fetchAssetInformation = async () => {
+    try{
+      const resAsset = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
+      setDataFetchAssetInformation({
+        AssetInformation: resAsset.data.data
+      })
+    }catch(err){
+      console.error("Error returning Asset Data : ",err)
+      return null
+    }
+  }
+
+
+
+//notes handler
+const fetchCaseNotes = async () => {
+  try{
+    const res = await ApiCustomer.get(`/api/case-information/case-notes`)
+    const notes = res.data.data
+
+    const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
+
+    let noteID = null
+
+    if(existingNote){
+      noteID = existingNote.NoteID
+    }else{
+      const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
+        LogType: "NotesLog",
+        ActionType: "Initial",
+        Template: "",
+        VisibleExternally: false,
+        MinutesSpent: 0,
+        Note: "",
+        CaseID: caseID,
+      })
+      
+      noteID = createResponse.data.data.NoteID;
+    }
+
+    const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
+    const noteDetail = detailRes.data.data;
+
+    console.log("✅ Case Note Detail:", noteDetail);
+    return noteDetail;
+  }catch(err){
+    console.error("Error in fetchCaseNotes:", err);
+    return null;
+  }
+}
+useEffect(() => {
+  fetchCustomerData();
+  fetchAssetInformation();
+  
+  fetchWorkOrders();
+  const loadNote = async () => {
+    const noteDetail = await fetchCaseNotes();
+    if(noteDetail ){
+      setCaseNotes({
+        NotesDisplay: noteDetail.Note
+      })
+    }
+  }
+  loadNote()
+}, [])
+useEffect(() =>{
+  console.log("Data Asset Info : ",dataFetchAssetInformation)
+}, dataFetchAssetInformation)
+
+const fetchSymptomCodes = async (term) => {
+  try {
+    const response = await ApiCustomer.get("/api/case-information/symptom-codes");
+    const allCodes = response.data.data;
+
+    const filtered = allCodes.filter((sym) =>
+      sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+    );
+
+    setSymptomSuggestions(filtered);
+  } catch (err) {
+    console.error("Error fetching symptom codes", err);
+  }
+};
+// console.log("Selected Symptopm ",selectedSymptom)
+
+// useEffect(() => {
+// }, selectedSymptom)
+
+
+//order section
+//workorder
+const [workOrders, setWorkOrders] = useState([]);
+const fetchWorkOrders = async () => {
+  try {
+    const res = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
+    setWorkOrders(res.data.data); // adjust based on API response shape
+    // console.log("Fetch Work Order: ",res)
+  } catch (err) {
+    console.error("Failed to fetch work orders:", err);
+  }
+};
+
+const [materialOrders, setMaterialOrders] = useState([]);
+const fetchMaterialOrders = async () => {
+  try {
+    if (!workOrders.length) return;
+
+    const woidList = workOrders.map((wo) => wo.WOID).join(',');
+    const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
+    setMaterialOrders(res.data.data);
+  } catch (err) {
+    console.error("Failed to fetch Material orders:", err);
+  }
+}
+
+
+useEffect(() => {
+  console.log("Work Orders Fetching L ",workOrders)
+  if (workOrders.length > 0) {
+    fetchMaterialOrders();
+  }
+}, [workOrders]);
+
 
   return (
     <>
@@ -387,7 +720,7 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Customer Account</span>
-              <span className='ml-30'>...</span>
+              <span className='ml-30'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Company : dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -415,19 +748,19 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Primary Contact</span>
-              <span className='ml-35'>...</span>
+              <span className='ml-35'>{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</span>
             </div>
 
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Primary Email</span>
-              <span className='ml-35'>...</span>
+              <span className='ml-35'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Email : dataFetchCustomerData?.MainAccount?.Email}</span>
             </div>
 
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Phone</span>
-              <span className='ml-49.5'>...</span>
+              <span className='ml-49.5'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone: dataFetchCustomerData?.MainAccount?.Phone}</span>
             </div>
   
             <div className='font-bold flex'>
@@ -438,7 +771,7 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
             <div className='font-bold flex'>
             <Lock className='size-5 mr-2'></Lock>
               <span>Country</span>
-              <span className='ml-46'>...</span>
+              <span className='ml-46'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Country : dataFetchCustomerData?.MainAccount?.Country}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -482,19 +815,19 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Asset</span>
-              <span className='ml-56'>...</span>
+              <span className='ml-56'>{dataFetchAssetInformation?.AssetInformation?.SerialNumber}</span>
             </div>
 
             <div className='font-bold flex'>
               <Lock className='size-5 mr-2'></Lock>
               <span>Serial Number</span>
-              <span className='ml-39'>...</span>
+              <span className='ml-39'>{dataFetchAssetInformation?.AssetInformation?.SerialNumber}</span>
             </div>
 
             <div className='font-bold flex'>
             <Lock className='size-5 mr-2'></Lock>
               <span>Product Name</span>
-              <span className='ml-39'>...</span>
+              <span className='ml-39'>{dataFetchAssetInformation?.AssetInformation?.product_information?.ProductName}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -506,7 +839,7 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
             <div className='font-bold flex'>
             <Lock className=' size-5 mr-2'></Lock>
               <span>Product Number</span>
-              <span className='ml-30'>...</span>
+              <span className='ml-30'>{dataFetchAssetInformation?.AssetInformation?.ProductNumber}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -719,7 +1052,17 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
 
             <div className='font-bold flex jus'>
               <span>Log Type</span>
-              <span className='ml-72'>...</span>
+              <span className='ml-72'>
+                <Select onValueChange={(val) => onChange("LogType", val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Log Type"/>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NotesLog">Notes Log</SelectItem>
+                    <SelectItem value="PhoneLog">Phone Log</SelectItem>
+                  </SelectContent>
+                </Select>
+              </span>
             </div>
 
             <div className='font-bold flex'>
@@ -734,7 +1077,17 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
 
             <div className='font-bold flex'>
               <span>Visible Externally</span>
-              <span className='ml-57'>...</span>
+              <span className='ml-57'>
+              <Select onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="---"/>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Yes</SelectItem>
+                    <SelectItem value="0">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </span>
             </div>
 
             <div className='font-bold flex '>
@@ -744,12 +1097,12 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
 
             <div className='flex'>
               <span className='font-bold'>Notes</span>
-              <textarea className='ml-79 w-80 h-40 resize-none p-2 border-2 border-black '></textarea>
+              <textarea className='ml-79 w-80 h-40 resize-none p-2 border-2 border-black ' value={formData?.Note || ''} onChange={(e) => onChange("Note", e.target.value)}></textarea>
             </div>
 
             <div className='absolute ml-180'>
-            <textarea className='w-120 h-100 resize-none p-2 border-2 border-black'></textarea>
-
+            <textarea className='w-120 h-100 resize-none p-2 border-2 border-black' readOnly value={caseNotes?.NotesDisplay}> </textarea>
+                
             </div>
 
             </CardContent>
@@ -761,22 +1114,49 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
 
             <div className='font-bold flex'>
               <span>Keyword Search</span>
-              <Input type="search" className="w-100 ml-27 border-2 border-black"></Input>
+              <Input 
+                type="search" 
+                className="w-100 ml-27 border-2 border-black"
+                value={symptomSearchTerm}
+                onChange={(e) => {
+                  const value = e.target.value
+                  setSymptomSearchTerm(value)
+                  if (value.length >= 2) fetchSymptomCodes(value)
+                    else setSymptomSuggestions([])
+                }}
+              />
             </div>
+            {symptomSuggestions.length > 0 && (
+              <ul className="bg-white border mt-1 max-h-40 overflow-y-auto absolute z-10">
+                {symptomSuggestions.map((sym) => (
+                  <li
+                    key={sym.SymptomCodeID}
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      setSelectedSymptom(sym);
+                      setSymptomSearchTerm(sym.SymptomCode);
+                      setSymptomSuggestions([]);
+                    }}
+                  >
+                    {sym.SymptomCode}
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <div className='font-bold flex'>
               <span>Top Category</span>
-              <span className='ml-32'>...</span>
+              <span className='ml-32'>{selectedSymptom?.TopCategory}</span>
             </div>
 
             <div className='font-bold flex'>
               <span>Sub Category</span>
-              <span className='ml-32'>...</span>
+              <span className='ml-32'>{selectedSymptom?.SubCategory}</span>
             </div>
 
             <div className='font-bold flex'>
               <span>Spesific Symptom</span>
-              <span className='ml-24'>...</span>
+              <span className='ml-24'>{selectedSymptom?.SymptomCode}</span>
             </div>
 
             <div className='font-bold flex'>
@@ -797,7 +1177,15 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
             
             <div className='font-bold flex'>
               <span className='ml-7'>Auto Close</span>
-              <span className='ml-52'>...</span>
+              <Select className='ml-52' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="---"/>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Yes</SelectItem>
+                    <SelectItem value="0">No</SelectItem>
+                  </SelectContent>
+                </Select>
             </div>
 
             <div className='font-bold flex'>
@@ -925,15 +1313,15 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {workorder.map((work) => (
-                  <TableRow key={work.workordernumber}>
+                {workOrders.map((work) => (
+                  <TableRow key={work.WOID}>
                     <TableCell className="font-medium">
-                      <Link to="/Work">
-                      {work.workordernumber}
+                      <Link to={`/work/${work.WOID}`}>
+                      {work.WOID}
                       </Link>
                       </TableCell>
-                    <TableCell>{work.caseid}</TableCell>
-                    <TableCell>{work.serviceaccount}</TableCell>
+                    <TableCell>{work.CaseID}</TableCell>
+                    {/* <TableCell>{work.serviceaccount}</TableCell>
                     <TableCell>{work.substatus}</TableCell>
                     <TableCell>{work.systemstatus}</TableCell>
                     <TableCell>{work.priority}</TableCell>
@@ -942,7 +1330,7 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
                     <TableCell>{work.duedate}</TableCell>
                     <TableCell>{work.orion}</TableCell>
                     <TableCell>{work.owner}</TableCell>
-                    <TableCell>{work.created}</TableCell>
+                    <TableCell>{work.created}</TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>
@@ -1034,13 +1422,33 @@ const CaseField = ({ label, value, icon, span = 1 }) => (
               </TableHeader>
 
               <TableBody>
-                  <TableRow>
+                {materialOrders.map((material) => (
+                    <TableRow key={material.MOID}>
+                      <TableCell className="font-medium">
+                        <Link to={`/material-order/${material.MOID}`}>
+                        {material.MOID} on {material.WOID} 
+                        </Link>
+                        </TableCell>
+                      <TableCell>{material.CaseID}</TableCell>
+                      {/* <TableCell>{work.serviceaccount}</TableCell>
+                      <TableCell>{work.substatus}</TableCell>
+                      <TableCell>{work.systemstatus}</TableCell>
+                      <TableCell>{work.priority}</TableCell>
+                      <TableCell>{work.workorder}</TableCell>
+                      <TableCell>{work.primaryincident}</TableCell>
+                      <TableCell>{work.duedate}</TableCell>
+                      <TableCell>{work.orion}</TableCell>
+                      <TableCell>{work.owner}</TableCell>
+                      <TableCell>{work.created}</TableCell> */}
+                    </TableRow>
+                  ))}
+                  {/* <TableRow>
                     <TableCell className="font-medium">
                       <Link to="/material_order">
-                       MO-8292819129 for WO-027816939
+                      
                       </Link>
                     </TableCell>
-                  </TableRow>
+                  </TableRow> */}
               </TableBody>
             </Table>
             </CardContent>

@@ -4,7 +4,6 @@ import {
   TabsService
  } from './components/service-case'
 import { useParams } from 'react-router'
-
 import ApiCustomer from './api'
 
 export const Case = () => {
@@ -28,10 +27,12 @@ export const Case = () => {
 
   return (
     <div className="">
-      <TabsService></TabsService>
-      <ServiceCase
+      <TabsService
         caseDetails={caseDetails}
-      ></ServiceCase>
+      ></TabsService>
+      {/* <ServiceCase
+        caseDetails={caseDetails}
+      ></ServiceCase> */}
     </div>
   )
 }

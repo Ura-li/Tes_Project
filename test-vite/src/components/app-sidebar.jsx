@@ -99,7 +99,11 @@ const data = {
         {
           title: "Global Trade Check",
           url: "/master/MaterialOrder ",
-        },         
+        },              
+        {
+          title: "Warranty Service",
+          url: "/master/WarrantyService_table",
+        },   
       ],
     },
     {
@@ -119,6 +123,10 @@ const data = {
           title: "Material Order",
           url: "/Material_order",
         },
+        // {
+        //   title: "Catalog Service",
+        //   url: "/CatalogService",
+        // },
       ],
     },
     {

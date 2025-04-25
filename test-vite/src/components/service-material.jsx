@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,13 +33,43 @@ import {
 } from "@/components/ui/table"; 
 import { Link } from "react-router";
 
+import { useParams } from "react-router";
+
+import ApiCustomer from "@/api";
+
 
 
 export const ServiceMaterial = () => {
+  const { moid } = useParams();
+
+  const [materialOrders, setMaterialOrders] = useState([]);
+  const [materialLineOrders, setMaterialLineOrders] = useState([]);
+
+  const fetchMaterialOrder = async () => {
+    try{
+      const res = await ApiCustomer.get(`/api/material-order/${moid}`)
+      setMaterialOrders(res.data.data)
+    }catch(err){
+      console.error("Failed to fetch material orders:", err);
+    }
+  }
+  const fetchMaterialLineOrdersInMODetail = async () => {
+    try{
+      const res = await ApiCustomer.get(`/api/material-order/material-order-line-items?MOID=${moid}`)
+      setMaterialLineOrders(res.data.data)
+    }catch(err){
+      console.error("Failed to fetch material line orders:", err);
+    }
+  }
+
+  useEffect(() => {
+    fetchMaterialOrder();
+    fetchMaterialLineOrdersInMODetail();
+  }, [])
   return (
     <Card className="mt-2 rounded-none h-[160px]">
       <CardHeader>
-        <CardTitle className="text-xl ">MO-8292819129 for WO-027816939</CardTitle>
+        <CardTitle className="text-xl ">{materialOrders.MOID} for {materialOrders.WOID}</CardTitle>
         <CardTitle className="text-sm">Material Order . Information</CardTitle>
       </CardHeader>
 
@@ -228,7 +258,18 @@ export const ServiceMaterial = () => {
                   </TableHeader>
 
                   <TableBody>
-                    <TableRow>
+                    {materialLineOrders.map((lineitem) => (
+                      <TableRow key={lineitem.LineItemID}>
+                        <TableCell className="font-medium">
+                          <Link to={`/mo_detail/${lineitem.LineItemID}`}>
+                          {lineitem.MOID} - {lineitem.LineItemID}
+                          </Link>
+                          </TableCell>
+                        {/* <TableCell>{lineitem.CaseID}</TableCell> */}
+
+                      </TableRow>
+                    ))}
+                    {/* <TableRow>
                       <TableCell className="font-medium">
                        <Link to="/mo_detail">MO-8292819129-1</Link>
                       </TableCell>
@@ -238,7 +279,7 @@ export const ServiceMaterial = () => {
                       <TableCell className="font-medium">
                         available
                       </TableCell>
-                    </TableRow>
+                    </TableRow> */}
                   </TableBody>
                 </Table>
               </CardContent>

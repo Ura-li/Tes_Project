@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,11 +33,27 @@ import {
 } from "@/components/ui/table"; 
 import { Link } from "react-router";
 
+import { useParams } from "react-router";
+import ApiCustomer from "@/api";
+
 export const ServiceMoDetail = () => {
+  const { molineid } = useParams();
+  const [moLineItems, setMoLineItems] = useState([])
+  const fetchMoLineItems = async () => {
+    try{
+      const res = await ApiCustomer.get(`/api/material-order/material-order-line-items/${molineid}`)
+      setMoLineItems(res.data.data)
+    }catch(err){
+      console.error("Failed to fetch Material Line Items orders:", err);
+    }
+  }
+  useEffect(() => {
+    fetchMoLineItems()
+  }, [])
   return (
     <Card className="mt-2 rounded-none h-[160px]">
       <CardHeader>
-        <CardTitle className="text-xl ">MO-8292819129 - 1</CardTitle>
+        <CardTitle className="text-xl ">{moLineItems.MOID} - {moLineItems.LineItemID}</CardTitle>
         <CardTitle className="text-sm">Material Order Line Item . Information</CardTitle>
       </CardHeader>
 

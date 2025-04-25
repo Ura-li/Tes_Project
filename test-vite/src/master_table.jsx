@@ -4,10 +4,9 @@ import { ContactEdit, ContactDelete } from "@/components/sc-modal"
 import { CompanyEdit, CompanyDelete } from "@/components/sc-modal"
 import { ProductAdd, ProductEdit, ProductDelete } from "@/components/sc-modal";
 import { BtnModalAsset, AssetEdit, AssetDelete } from "@/components/sc-modal"
-import { ProductTypeAdd, ProductTypeEdit, ProductTypeDelete, ServiceCatalogPartEdit, ServiceCatalogPartDelete } from "@/components/sc-modal";
-import { ServiceCatalogPartAdd } from "@/components/sc-modal";
+import { ProductTypeAdd, ProductTypeEdit, ProductTypeDelete } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
-// import { MaterialOrderAdd, MaterialOrderEdit, MaterialOrderDelete} from "@components/sc-modal"
+import { WarrantyServiceAdd, WarrantyServiceEdit, WarrantyServiceDelete } from "@/components/sc-modal";
 
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
@@ -780,9 +779,9 @@ export const ProductType_table = () => {
           <thead>
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
               <th className="border p-2">ProductType ID</th>
-              <th className="border p-2">Product Type</th>
               <th className="border p-2">Product Tower</th>
               <th className="border p-2">Product Group</th>
+              <th className="border p-2">Product Type</th>
               <th className="border p-2">Actions</th>
             </tr>
           </thead>
@@ -790,9 +789,9 @@ export const ProductType_table = () => {
             {currentData.map((ProductTypeItem) => (
               <tr key={ProductTypeItem.ProductTypeID} className="hover:bg-gray-100 text-center">
                 <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/case/${ProductTypeItem.ProductTypeID}`)} >{ProductTypeItem.ProductTypeID}</td>
-                <td className="border p-2">{ProductTypeItem.ProductType}</td>
                 <td className="border p-2">{ProductTypeItem.ProductTower}</td>
                 <td className="border p-2">{ProductTypeItem.ProductGroup}</td>
+                <td className="border p-2">{ProductTypeItem.ProductType}</td>
                 <td className="border p-2 flex space-x-2">
                   <ProductTypeEdit ProductTypeID={ProductTypeItem.ProductTypeID} onUpdate={fetchProductTypeDataTable}/>
                   <ProductTypeDelete
@@ -833,54 +832,62 @@ export const ProductType_table = () => {
   );
 };
 
-export const ServiceCatalogPartsTable = () => {
+export const WarrantyService_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 5; // Jumlah data per halaman
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [partsData, setPartsData] = useState([]);
+  const [WarrantyServiceData, setWarrantyServiceData] = useState([]);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchPartsData = async () => {
+  const fetchWarrantyServiceDataTable=async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await ApiCustomer.get("/api/servicecatalog-parts");
+      const response = await ApiCustomer.get("/api/warranty-services");
       if (response.data.success) {
-        setPartsData(response.data.data);
+        setWarrantyServiceData(response.data.data);
       } else {
-        setError("Failed to fetch parts data");
+        setError("Failed to fetch Warranty Service data");
       }
     } catch (err) {
-      console.error("Error fetching parts data:", err);
+      console.error("Error fetching Warranty Service data:", err);
       setError("Error fetching data");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
+  // 🔹 Load data when component mounts
   useEffect(() => {
-    fetchPartsData();
+    fetchWarrantyServiceDataTable();
   }, []);
 
-  const filteredParts = partsData.filter((item) =>
+  // Filter data berdasarkan pencarian
+  const filteredWarrantyServiceTable = WarrantyServiceData.filter((item) =>
     Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  const totalPages = Math.ceil(filteredParts.length / itemsPerPage);
-  const currentData = filteredParts.slice(
+  // Hitung total halaman
+  const totalPages = Math.ceil(filteredWarrantyServiceTable.length / itemsPerPage);
+
+  // Ambil data sesuai halaman saat ini
+  const currentData = filteredWarrantyServiceTable.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+
+  //navigate
   const navigate = useNavigate();
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Service Catalog Parts Table</h2>
+      <h2 className="text-xl font-bold mb-4">Warranty Service Table</h2>
       <input
         type="text"
         placeholder="Search..."
@@ -889,80 +896,58 @@ export const ServiceCatalogPartsTable = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {<ServiceCatalogPartAdd 
-        onAddSuccess={fetchPartsData} 
-        onClose={() => setIsModalOpen(false)}
-        isOpen={isModalOpen}
-        setIsOpen={setIsModalOpen}/> }
-
-      {loading && <p>Loading parts...</p>}
+    <WarrantyServiceAdd></WarrantyServiceAdd>
+      
+      {/* 🔹 Loading & Error Messages */}
+      {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
+      {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">Part Number</th>
-              <th className="border p-2">Keyword</th>
-              <th className="border p-2">Part Description</th>
-              <th className="border p-2">Orderability</th>
-              <th className="border p-2">Restriction Reason</th>
-              <th className="border p-2">Flags</th>
+              <th className="border p-2">Service offerID</th>
+              <th className="border p-2">Service description</th>
+              <th className="border p-2">Csutomer Tat</th>
               <th className="border p-2">Price</th>
-              <th className="border p-2">Freight Price</th>
               <th className="border p-2">Shipping Fee</th>
-              <th className="border p-2">QTY Parts</th>
+              <th className="border p-2">Quantity</th>
               <th className="border p-2">Tax</th>
-              <th className="border p-2">Total</th>            
-              <th className="border p-2">ID</th>            
+              <th className="border p-2">Total</th>
               <th className="border p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item) => (
-              <tr key={item.PartNumber} className="hover:bg-gray-100 text-center">
-                <td className="border p-2">{item.PartNumber}</td>
-                <td className="border p-2">{item.Keyword}</td>
-                <td className="border p-2">{item.PartDescription}</td>
-                <td className="border p-2">{item.Orderability}</td>
-                <td className="border p-2">{item.RestrictionReason}</td>
-                <td className="border p-2 text-xs">
-                <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-left">
-                <span>CSR: {item.CSR_Flag ? "✔" : "✘"}</span>
-                <span>ROHS: {item.ROHS_Flag ? "✔" : "✘"}</span>
-                <span>Returnable: {item.Returnable_Flag ? "✔" : "✘"}</span>
-                <span>HR: {item.HardRoll_Flag ? "✔" : "✘"}</span>
-                <span>DG: {item.DangerousGoods_Flag ? "✔" : "✘"}</span>
-                <span>LB: {item.LithiumBattery_Flag ? "✔" : "✘"}</span>
-                <span>Oversize: {item.Oversize_Flag ? "✔" : "✘"}</span>
-                <span>Heavy: {item.Heavy_Flag ? "✔" : "✘"}</span>
-                </div>
-                </td>
-                <td className="border p-2">{item.Price}</td>
-                <td className="border p-2">{item.FreightPrice}</td>
-                <td className="border p-2">{item.Shipping_Fee}</td>
-                <td className="border p-2">{item.qty_parts}</td>
-                <td className="border p-2">{item.Tax}</td>
-                <td className="border p-2">{item.Total}</td>
-                <td className="border p-2">{item.PartID}</td>
-                <td className="border p-2 flex space-x-2 justify-center">
-                <ServiceCatalogPartEdit PartID={item.PartNumber} onUpdate={fetchPartsData} />
-                    <ServiceCatalogPartDelete
-                    PartID={item.PartNumber}
-                    // isModalOpen={isModalOpen}
-                    // setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchPartsData}
-                  /> 
+            {currentData.map((WarrantyServiceItem) => (
+              <tr key={WarrantyServiceItem.Service_offerID} className="hover:bg-gray-100 text-center">
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/case/${WarrantyServiceItem.Service_offerID}`)} >{WarrantyServiceItem.Service_offerID}</td>
+                <td className="border p-2">{WarrantyServiceItem.Service_description}</td>
+                <td className="border p-2">{WarrantyServiceItem.CTat_RTime}</td>
+                <td className="border p-2">{WarrantyServiceItem.Price}</td>
+                <td className="border p-2">{WarrantyServiceItem.Shipping_Fee}</td>
+                <td className="border p-2">{WarrantyServiceItem.qty_ws}</td>
+                <td className="border p-2">{WarrantyServiceItem.Tax}</td>
+                <td className="border p-2">{WarrantyServiceItem.Total}</td>
+                <td className="border p-2 flex space-x-2">
+                  <WarrantyServiceEdit Service_offerID={WarrantyServiceItem.Service_offerID} onUpdate={fetchWarrantyServiceDataTable}></WarrantyServiceEdit>
+                  <WarrantyServiceDelete
+                      Service_offerID={WarrantyServiceItem.Service_offerID}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchWarrantyServiceDataTable}
+                  />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {filteredParts.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No parts found.</p>
+        {filteredWarrantyServiceTable.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No cases found.</p>
         )}
       </div>
 
+      {/* Pagination */}
       <div className="flex justify-center items-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
@@ -984,263 +969,3 @@ export const ServiceCatalogPartsTable = () => {
   );
 };
 
-// export const GlobalTradeCheckTable = () => {
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const itemsPerPage = 5;
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState(null);
-//   const [gtcData, setGtcData] = useState([]);
-//   const [isModalOpen, setIsModalOpen] = useState(false);
-
-//   const fetchGtcData = async () => {
-//     setLoading(true);
-//     setError(null);
-//     try {
-//       const response = await ApiCustomer.get("/api/global-trade-check");
-//       if (response.data.success) {
-//         setGtcData(response.data.data);
-//       } else {
-//         setError("Failed to fetch global trade check data");
-//       }
-//     } catch (err) {
-//       console.error("Error fetching GTC data:", err);
-//       setError("Error fetching data");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchGtcData();
-//   }, []);
-
-//   const filteredData = gtcData.filter((item) =>
-//     Object.values(item).some((value) =>
-//       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-//     )
-//   );
-
-//   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-//   const currentData = filteredData.slice(
-//     (currentPage - 1) * itemsPerPage,
-//     currentPage * itemsPerPage
-//   );
-
-//   return (
-//     <div className="p-4">
-//       <h2 className="text-xl font-bold mb-4">Global Trade Check Table</h2>
-//       <input
-//         type="text"
-//         placeholder="Search..."
-//         className="mb-4 p-2 border rounded w-1/3"
-//         value={searchTerm}
-//         onChange={(e) => setSearchTerm(e.target.value)}
-//       />
-
-//       <GlobalTradeCheckAdd 
-//         onAddSuccess={fetchGtcData} 
-//         onClose={() => setIsModalOpen(false)}
-//         isOpen={isModalOpen}
-//         setIsOpen={setIsModalOpen}
-//       />
-
-//       {loading && <p>Loading data...</p>}
-//       {error && <p className="text-red-500">{error}</p>}
-
-//       <div className="overflow-x-auto">
-//         <table className="min-w-full border border-gray-300 shadow-lg">
-//           <thead>
-//             <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-//               <th className="border p-2">ID</th>
-//               <th className="border p-2">Global Trade Status</th>
-//               <th className="border p-2">Embargoed Country</th>
-//               <th className="border p-2">Override Reason</th>
-//               <th className="border p-2">Details</th>
-//               <th className="border p-2">Screening ID</th>
-//               <th className="border p-2">Active Listening</th>
-//               <th className="border p-2">AL Comments</th>
-//               <th className="border p-2">Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {currentData.map((item) => (
-//               <tr key={item.id_gtc} className="hover:bg-gray-100 text-center">
-//                 <td className="border p-2">{item.id_gtc}</td>
-//                 <td className="border p-2">{item.global_trade_status}</td>
-//                 <td className="border p-2">{item.embargoed_country}</td>
-//                 <td className="border p-2">{item.gt_override_reason}</td>
-//                 <td className="border p-2">{item.gt_details}</td>
-//                 <td className="border p-2">{item.screening_id}</td>
-//                 <td className="border p-2">{item.gt_active_listening}</td>
-//                 <td className="border p-2">{item.gt_al_comments}</td>
-//                 <td className="border p-2 flex space-x-2 justify-center">
-//                   <GlobalTradeCheckEdit id_gtc={item.id_gtc} onUpdate={fetchGtcData} />
-//                   <GlobalTradeCheckDelete id_gtc={item.id_gtc} onUpdate={fetchGtcData} />
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//         {filteredData.length === 0 && (
-//           <p className="text-center mt-4 text-gray-500">No records found.</p>
-//         )}
-//       </div>
-
-//       <div className="flex justify-center items-center mt-4 space-x-2">
-//         <button
-//           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-//           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-//           disabled={currentPage === 1}
-//         >
-//           Previous
-//         </button>
-//         <span>Page {currentPage} of {totalPages}</span>
-//         <button
-//           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-//           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-//           disabled={currentPage === totalPages}
-//         >
-//           Next
-//         </button>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export const MaterialOrderTable = () => {
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const itemsPerPage = 5;
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState(null);
-//   const [materialOrderData, setMaterialOrderData] = useState([]);
-//   const [isModalOpen, setIsModalOpen] = useState(false);
-
-//   const fetchMaterialOrderData = async () => {
-//     setLoading(true);
-//     setError(null);
-//     try {
-//       const response = await ApiCustomer.get("/api/material-order");
-//       if (response.data.success) {
-//         setMaterialOrderData(response.data.data);
-//       } else {
-//         setError("Failed to fetch Material Order data");
-//       }
-//     } catch (err) {
-//       console.error("Error fetching material order data:", err);
-//       setError("Error fetching data");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchMaterialOrderData();
-//   }, []);
-
-//   const filteredData = materialOrderData.filter((item) =>
-//     Object.values(item).some((value) =>
-//       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-//     )
-//   );
-
-//   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-//   const currentData = filteredData.slice(
-//     (currentPage - 1) * itemsPerPage,
-//     currentPage * itemsPerPage
-//   );
-
-//   const navigate = useNavigate();
-
-//   return (
-//     <div className="p-4">
-//       <h2 className="text-xl font-bold mb-4">Material Order Table</h2>
-//       <input
-//         type="text"
-//         placeholder="Search..."
-//         className="mb-4 p-2 border rounded w-1/3"
-//         value={searchTerm}
-//         onChange={(e) => setSearchTerm(e.target.value)}
-//       />
-
-//       <MaterialOrderAdd />
-
-//       {loading && <p>Loading orders...</p>}
-//       {error && <p className="text-red-500">{error}</p>}
-
-//       <div className="overflow-x-auto">
-//         <table className="min-w-full border border-gray-300 shadow-lg">
-//           <thead>
-//             <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-//               <th className="border p-2">MOID</th>
-//               <th className="border p-2">WOID</th>
-//               <th className="border p-2">Order Number</th>
-//               <th className="border p-2">Order Status</th>
-//               <th className="border p-2">Order Type</th>
-//               <th className="border p-2">Created On</th>
-//               <th className="border p-2">Sales Order</th>
-//               <th className="border p-2">RMA Number</th>
-//               <th className="border p-2">Closure Date</th>
-//               <th className="border p-2">Owner</th>
-//               <th className="border p-2">Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {currentData.map((item) => (
-//               <tr key={item.MOID} className="hover:bg-gray-100 text-center">
-//                 <td
-//                   className="border p-2 text-blue-500 cursor-pointer hover:underline"
-//                   onClick={() => navigate(`/material-order/${item.MOID}`)}
-//                 >
-//                   {item.MOID}
-//                 </td>
-//                 <td className="border p-2">{item.WOID}</td>
-//                 <td className="border p-2">{item.OrderNumber}</td>
-//                 <td className="border p-2">{item.OrderStatus}</td>
-//                 <td className="border p-2">{item.OrderType}</td>
-//                 <td className="border p-2">{item.CreatedOn}</td>
-//                 <td className="border p-2">{item.SalesOrderNumber}</td>
-//                 <td className="border p-2">{item.RMANumber}</td>
-//                 <td className="border p-2">{item.ReadyForClosureDate}</td>
-//                 <td className="border p-2">{item.Owner}</td>
-//                 <td className="border p-2 flex space-x-2">
-//                   {/* <MaterialOrderEdit MOID={item.MOID} onUpdate={fetchMaterialOrderData} />
-//                   <MaterialOrderDelete
-//                     MOID={item.MOID}
-//                     isModalOpen={isModalOpen}
-//                     setIsModalOpen={setIsModalOpen}
-//                     onUpdate={fetchMaterialOrderData}
-//                   /> */}
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//         {filteredData.length === 0 && (
-//           <p className="text-center mt-4 text-gray-500">No material orders found.</p>
-//         )}
-//       </div>
-
-//       {/* Pagination */}
-//       <div className="flex justify-center items-center mt-4 space-x-2">
-//         <button
-//           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-//           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-//           disabled={currentPage === 1}
-//         >
-//           Previous
-//         </button>
-//         <span>Page {currentPage} of {totalPages}</span>
-//         <button
-//           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-//           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-//           disabled={currentPage === totalPages}
-//         >
-//           Next
-//         </button>
-//       </div>
-//     </div>
-//   );
-// };
