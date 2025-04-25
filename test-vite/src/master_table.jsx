@@ -4,9 +4,10 @@ import { ContactEdit, ContactDelete } from "@/components/sc-modal"
 import { CompanyEdit, CompanyDelete } from "@/components/sc-modal"
 import { ProductAdd, ProductEdit, ProductDelete } from "@/components/sc-modal";
 import { BtnModalAsset, AssetEdit, AssetDelete } from "@/components/sc-modal"
-import { ProductTypeAdd, ProductTypeEdit, ProductTypeDelete, ServiceCatalogPartEdit } from "@/components/sc-modal";
+import { ProductTypeAdd, ProductTypeEdit, ProductTypeDelete, ServiceCatalogPartEdit, ServiceCatalogPartDelete } from "@/components/sc-modal";
 import { ServiceCatalogPartAdd } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
+// import { MaterialOrderAdd, MaterialOrderEdit, MaterialOrderDelete} from "@components/sc-modal"
 
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
@@ -945,13 +946,13 @@ export const ServiceCatalogPartsTable = () => {
                 <td className="border p-2">{item.Total}</td>
                 <td className="border p-2">{item.PartID}</td>
                 <td className="border p-2 flex space-x-2 justify-center">
-                  { <ServiceCatalogPartEdit PartID={item.PartNumber} onUpdate={fetchPartsData} />
-                  /*<ServiceCatalogPartDelete
-                    PartID={item.PartID}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
+                <ServiceCatalogPartEdit PartID={item.PartNumber} onUpdate={fetchPartsData} />
+                    <ServiceCatalogPartDelete
+                    PartID={item.PartNumber}
+                    // isModalOpen={isModalOpen}
+                    // setIsModalOpen={setIsModalOpen}
                     onUpdate={fetchPartsData}
-                  /> */}
+                  /> 
                 </td>
               </tr>
             ))}
@@ -982,3 +983,264 @@ export const ServiceCatalogPartsTable = () => {
     </div>
   );
 };
+
+// export const GlobalTradeCheckTable = () => {
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const itemsPerPage = 5;
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState(null);
+//   const [gtcData, setGtcData] = useState([]);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+
+//   const fetchGtcData = async () => {
+//     setLoading(true);
+//     setError(null);
+//     try {
+//       const response = await ApiCustomer.get("/api/global-trade-check");
+//       if (response.data.success) {
+//         setGtcData(response.data.data);
+//       } else {
+//         setError("Failed to fetch global trade check data");
+//       }
+//     } catch (err) {
+//       console.error("Error fetching GTC data:", err);
+//       setError("Error fetching data");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchGtcData();
+//   }, []);
+
+//   const filteredData = gtcData.filter((item) =>
+//     Object.values(item).some((value) =>
+//       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+//     )
+//   );
+
+//   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+//   const currentData = filteredData.slice(
+//     (currentPage - 1) * itemsPerPage,
+//     currentPage * itemsPerPage
+//   );
+
+//   return (
+//     <div className="p-4">
+//       <h2 className="text-xl font-bold mb-4">Global Trade Check Table</h2>
+//       <input
+//         type="text"
+//         placeholder="Search..."
+//         className="mb-4 p-2 border rounded w-1/3"
+//         value={searchTerm}
+//         onChange={(e) => setSearchTerm(e.target.value)}
+//       />
+
+//       <GlobalTradeCheckAdd 
+//         onAddSuccess={fetchGtcData} 
+//         onClose={() => setIsModalOpen(false)}
+//         isOpen={isModalOpen}
+//         setIsOpen={setIsModalOpen}
+//       />
+
+//       {loading && <p>Loading data...</p>}
+//       {error && <p className="text-red-500">{error}</p>}
+
+//       <div className="overflow-x-auto">
+//         <table className="min-w-full border border-gray-300 shadow-lg">
+//           <thead>
+//             <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+//               <th className="border p-2">ID</th>
+//               <th className="border p-2">Global Trade Status</th>
+//               <th className="border p-2">Embargoed Country</th>
+//               <th className="border p-2">Override Reason</th>
+//               <th className="border p-2">Details</th>
+//               <th className="border p-2">Screening ID</th>
+//               <th className="border p-2">Active Listening</th>
+//               <th className="border p-2">AL Comments</th>
+//               <th className="border p-2">Actions</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {currentData.map((item) => (
+//               <tr key={item.id_gtc} className="hover:bg-gray-100 text-center">
+//                 <td className="border p-2">{item.id_gtc}</td>
+//                 <td className="border p-2">{item.global_trade_status}</td>
+//                 <td className="border p-2">{item.embargoed_country}</td>
+//                 <td className="border p-2">{item.gt_override_reason}</td>
+//                 <td className="border p-2">{item.gt_details}</td>
+//                 <td className="border p-2">{item.screening_id}</td>
+//                 <td className="border p-2">{item.gt_active_listening}</td>
+//                 <td className="border p-2">{item.gt_al_comments}</td>
+//                 <td className="border p-2 flex space-x-2 justify-center">
+//                   <GlobalTradeCheckEdit id_gtc={item.id_gtc} onUpdate={fetchGtcData} />
+//                   <GlobalTradeCheckDelete id_gtc={item.id_gtc} onUpdate={fetchGtcData} />
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//         {filteredData.length === 0 && (
+//           <p className="text-center mt-4 text-gray-500">No records found.</p>
+//         )}
+//       </div>
+
+//       <div className="flex justify-center items-center mt-4 space-x-2">
+//         <button
+//           className="p-2 bg-gray-300 rounded disabled:opacity-50"
+//           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+//           disabled={currentPage === 1}
+//         >
+//           Previous
+//         </button>
+//         <span>Page {currentPage} of {totalPages}</span>
+//         <button
+//           className="p-2 bg-gray-300 rounded disabled:opacity-50"
+//           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+//           disabled={currentPage === totalPages}
+//         >
+//           Next
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export const MaterialOrderTable = () => {
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const itemsPerPage = 5;
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState(null);
+//   const [materialOrderData, setMaterialOrderData] = useState([]);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+
+//   const fetchMaterialOrderData = async () => {
+//     setLoading(true);
+//     setError(null);
+//     try {
+//       const response = await ApiCustomer.get("/api/material-order");
+//       if (response.data.success) {
+//         setMaterialOrderData(response.data.data);
+//       } else {
+//         setError("Failed to fetch Material Order data");
+//       }
+//     } catch (err) {
+//       console.error("Error fetching material order data:", err);
+//       setError("Error fetching data");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchMaterialOrderData();
+//   }, []);
+
+//   const filteredData = materialOrderData.filter((item) =>
+//     Object.values(item).some((value) =>
+//       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+//     )
+//   );
+
+//   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+//   const currentData = filteredData.slice(
+//     (currentPage - 1) * itemsPerPage,
+//     currentPage * itemsPerPage
+//   );
+
+//   const navigate = useNavigate();
+
+//   return (
+//     <div className="p-4">
+//       <h2 className="text-xl font-bold mb-4">Material Order Table</h2>
+//       <input
+//         type="text"
+//         placeholder="Search..."
+//         className="mb-4 p-2 border rounded w-1/3"
+//         value={searchTerm}
+//         onChange={(e) => setSearchTerm(e.target.value)}
+//       />
+
+//       <MaterialOrderAdd />
+
+//       {loading && <p>Loading orders...</p>}
+//       {error && <p className="text-red-500">{error}</p>}
+
+//       <div className="overflow-x-auto">
+//         <table className="min-w-full border border-gray-300 shadow-lg">
+//           <thead>
+//             <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+//               <th className="border p-2">MOID</th>
+//               <th className="border p-2">WOID</th>
+//               <th className="border p-2">Order Number</th>
+//               <th className="border p-2">Order Status</th>
+//               <th className="border p-2">Order Type</th>
+//               <th className="border p-2">Created On</th>
+//               <th className="border p-2">Sales Order</th>
+//               <th className="border p-2">RMA Number</th>
+//               <th className="border p-2">Closure Date</th>
+//               <th className="border p-2">Owner</th>
+//               <th className="border p-2">Actions</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {currentData.map((item) => (
+//               <tr key={item.MOID} className="hover:bg-gray-100 text-center">
+//                 <td
+//                   className="border p-2 text-blue-500 cursor-pointer hover:underline"
+//                   onClick={() => navigate(`/material-order/${item.MOID}`)}
+//                 >
+//                   {item.MOID}
+//                 </td>
+//                 <td className="border p-2">{item.WOID}</td>
+//                 <td className="border p-2">{item.OrderNumber}</td>
+//                 <td className="border p-2">{item.OrderStatus}</td>
+//                 <td className="border p-2">{item.OrderType}</td>
+//                 <td className="border p-2">{item.CreatedOn}</td>
+//                 <td className="border p-2">{item.SalesOrderNumber}</td>
+//                 <td className="border p-2">{item.RMANumber}</td>
+//                 <td className="border p-2">{item.ReadyForClosureDate}</td>
+//                 <td className="border p-2">{item.Owner}</td>
+//                 <td className="border p-2 flex space-x-2">
+//                   {/* <MaterialOrderEdit MOID={item.MOID} onUpdate={fetchMaterialOrderData} />
+//                   <MaterialOrderDelete
+//                     MOID={item.MOID}
+//                     isModalOpen={isModalOpen}
+//                     setIsModalOpen={setIsModalOpen}
+//                     onUpdate={fetchMaterialOrderData}
+//                   /> */}
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//         {filteredData.length === 0 && (
+//           <p className="text-center mt-4 text-gray-500">No material orders found.</p>
+//         )}
+//       </div>
+
+//       {/* Pagination */}
+//       <div className="flex justify-center items-center mt-4 space-x-2">
+//         <button
+//           className="p-2 bg-gray-300 rounded disabled:opacity-50"
+//           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+//           disabled={currentPage === 1}
+//         >
+//           Previous
+//         </button>
+//         <span>Page {currentPage} of {totalPages}</span>
+//         <button
+//           className="p-2 bg-gray-300 rounded disabled:opacity-50"
+//           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+//           disabled={currentPage === totalPages}
+//         >
+//           Next
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };

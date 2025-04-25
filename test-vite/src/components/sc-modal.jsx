@@ -2428,3 +2428,38 @@ export function ServiceCatalogPartEdit({ PartID, onUpdate }) {
     </Dialog>
   );
 }
+
+export function ServiceCatalogPartDelete({ PartID, onUpdate }) {
+  const handleDelete = async () => {
+    try {
+      await ApiCustomer.delete(`/api/servicecatalog-parts/${PartID}`);
+      if (onUpdate) {
+        onUpdate(); // untuk refresh data setelah delete
+      }
+    } catch (error) {
+      console.error("Error deleting part:", error);
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700">
+          <Trash size={16} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Part</DialogTitle>
+          <DialogDescription>
+            Konfirmasi penghapusan part dari katalog.
+          </DialogDescription>
+        </DialogHeader>
+        <h1>Anda yakin ingin menghapus part ini?</h1>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

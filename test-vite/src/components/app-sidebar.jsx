@@ -95,6 +95,10 @@ const data = {
         {
           title: "Service Catalog Type",
           url: "/master/ServiceCatalogPartsTable ",
+        },
+        {
+          title: "Global Trade Check",
+          url: "/master/MaterialOrder ",
         },         
       ],
     },

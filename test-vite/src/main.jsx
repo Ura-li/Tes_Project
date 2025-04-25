@@ -10,7 +10,7 @@ import { Case } from './Case';
 import { Work } from './work';
 import { MaterialOrder } from './material_order';
 import { MoDetail } from './material_order';
-import { Company_table } from './master_table';
+import { Company_table} from './master_table';
 import { Assets_table } from './master_table';
 import { Contact_table } from './master_table';
 import { Case_table } from './master_table';
@@ -41,6 +41,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/Product_table' element={<Product_table/>}/>
             <Route path='/master/ProductType_table' element={<ProductType_table/>}/>
             <Route path='/master/ServiceCatalogPartsTable' element={<ServiceCatalogPartsTable/>}/>
+            {/* <Route path='/master/GlobalTradeCheckTable' element={<GlobalTradeCheckTable/>}/> */}
           </Route>
           <Route path="/lorem" element={<Lorem />}/>
         </Routes>
