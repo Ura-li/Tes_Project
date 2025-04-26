@@ -300,8 +300,8 @@ export function DialogCompanyBtn({
                 setFormDataSiteAccount((prev) => ({
                   ...prev,
                   Company: search.Company || "",
-                  Company: search.Company || "",
-                  Company: search.Company || "",
+                  ZipPostalCode: search.ZipPostalCode || "",
+                  City: search.City || "",
                 }));
                 setActiveTab("Account"); // Wait until modal is fully closed
               }, 300); // Slight delay to ensure smooth transition            

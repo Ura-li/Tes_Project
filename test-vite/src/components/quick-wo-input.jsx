@@ -28,8 +28,9 @@ import { KeyRound } from "lucide-react";
 import ApiCustomer from "@/api";
 
 
-export function QuickWOInput ({ WOID }) {
+export function QuickWOInput ({ WOID, caseInformation }) {
   // State untuk 8 field General
+  // console.log('case_informtion in quick wo input : ', caseInformation)
   const [tab, setTab] = useState("Quick_WO_Input");
   const [incomingChannel, setIncomingChannel] = useState("");
   const [workOrderNumber, setWorkOrderNumber] = useState("");
@@ -74,6 +75,22 @@ export function QuickWOInput ({ WOID }) {
   const [activeScheduleDate, setActiveScheduleDate] = useState("");
   const [slaErrorDescription, setSlaErrorDescription] = useState("");
   const [casePriorityIndex, setCasePriorityIndex] = useState("");
+
+  //fetch data site_account
+  const [siteAccountInformation, setSiteAccountInformation] = useState([])
+  
+  useEffect(() => {
+    const fetchDataSiteAccounts = async () => {
+      try {
+        const res = await ApiCustomer.get(`/api/site_account/${caseInformation?.SiteAccountID}`)
+        console.log('res in quick wo input : ',res)
+        setSiteAccountInformation(res.data.data)
+      } catch (error) {
+        
+      }
+    }
+    fetchDataSiteAccounts();
+  }, [caseInformation?.SiteAccountID])
 
   // Fetch data awal
   useEffect(() => {
@@ -204,19 +221,23 @@ export function QuickWOInput ({ WOID }) {
               </CardContent>
             </Card>
 
+            {/* 
+            TODO :
+            Make this available in Contact Individual
+            */}
             <Card className="flex-col mt-7">  
               <span className="ml-5 font-bold text-xl">Service Delivery Address</span>
               <CardContent className="grid gap-5 grid-flow-col grid-rows-9">
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2" />
                   <span>Choose Address</span>
-                  <span className="ml-45">{addressID}</span>
+                  <span className="ml-45">Site Account address</span>
                 </div>
 
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2" />
                   <span>Company Name</span>
-                  <span className="ml-45">{companyName}</span>
+                  <span className="ml-45">{siteAccountInformation.Company}</span>
                 </div>
 
                 <div className="font-bold flex">
@@ -232,24 +253,24 @@ export function QuickWOInput ({ WOID }) {
 
                 <div className="font-bold flex">
                   <span className="ml-7">Phone Number</span>
-                  <Input className="ml-47" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)}/>
+                  <Input className="ml-47" value={siteAccountInformation.PrimaryPhone || siteAccountInformation.WhatsappNo} onChange={e => setPhoneNumber(e.target.value)}/>
                 </div>
 
                 <div className="font-bold flex">
                   <span className="ml-7">Email Address</span>
-                  <Input className="ml-49" value={email} onChange={e => setEmail(e.target.value)}/>
+                  <Input className="ml-49" value={siteAccountInformation.Email} onChange={e => setEmail(e.target.value)}/>
                 </div>
 
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2" />
                   <span>Address Line1</span>
-                  <span className="ml-49">{addressLine1}</span>
+                  <span className="ml-49">{siteAccountInformation.AddressLine1}</span>
                 </div>
 
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2" />
                   <span>Address Line2</span>
-                  <span className="ml-49">{addressLine2}</span>
+                  <span className="ml-49">{siteAccountInformation.AddressLine2}</span>
                 </div>
 
                 <div className="font-bold flex">
@@ -261,25 +282,25 @@ export function QuickWOInput ({ WOID }) {
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2" />
                   <span>City</span>
-                  <span className="ml-70">{city}</span>
+                  <span className="ml-70">{siteAccountInformation.City}</span>
                 </div>
 
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2" />
                   <span>State Or Province</span>
-                  <span className="ml-44.5">{stateOrProvince}</span>
+                  <span className="ml-44.5">{siteAccountInformation.StateProvince}</span>
                 </div>
 
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2" />
                   <span>Country/Region</span>
-                  <span className="ml-47">{countryOrRegion}</span>
+                  <span className="ml-47">{siteAccountInformation.Country}</span>
                 </div>
 
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2" />
                   <span>Postal Code</span>
-                  <span className="ml-55">{postalCode}</span>
+                  <span className="ml-55">{siteAccountInformation.ZipPostalCode}</span>
                 </div>
 
                 <div className="font-bold flex">

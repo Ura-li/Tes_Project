@@ -920,6 +920,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
   const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
   const [primaryPhone, setPrimaryPhone] = useState("");
+  const [whatsappNo, setWhatsappNo] = useState("");
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
   const [city, setCity] = useState("");
@@ -937,6 +938,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
       setCompanyName(data?.Company || "");
       setEmail(data?.Email || "");
       setPrimaryPhone(data?.PrimaryPhone || "");
+      setWhatsappNo(data?.WhatsappNo || "");
       setAddressLine1(data?.AddressLine1 || "");
       setAddressLine2(data?.AddressLine2 || "");
       setCity(data?.City || "");
@@ -959,6 +961,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
       setCompanyName("");
       setEmail("");
       setPrimaryPhone("");
+      setWhatsappNo("");
       setAddressLine1("");
       setAddressLine2("");
       setCity("");
@@ -986,6 +989,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         Company: companyName,
         Email: email,
         PrimaryPhone: primaryPhone,
+        WhatsappNo: whatsappNo,
         AddressLine1: addressLine1,
         AddressLine2: addressLine2,
         City: city,
@@ -1018,6 +1022,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
           <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Company Name *" />
           <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email *" />
           <Input value={primaryPhone} onChange={(e) => setPrimaryPhone(e.target.value)} placeholder="Primary Phone *" />
+          <Input value={whatsappNo} onChange={(e) => setWhatsappNo(e.target.value)} placeholder="Whatsapp No *" />
           <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} placeholder="Address Line 1 *" />
           <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Address Line 2" />
           <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City *" />

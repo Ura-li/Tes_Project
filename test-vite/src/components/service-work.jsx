@@ -32,6 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Swal from "sweetalert2";
 import { KeyRound } from "lucide-react";
 
 import { useParams } from "react-router";
@@ -48,7 +49,7 @@ export const ServiceWork = () => {
     try {
       const res = await ApiCustomer.get(`/api/work-order/${woid}`);
       setWorkOrders(res.data.data); // adjust based on API response shape
-      // console.log("Fetch Work Order: ",res)
+      console.log("Fetch Work Order: ",res)
     } catch (err) {
       console.error("Failed to fetch work orders:", err);
     }
@@ -65,10 +66,49 @@ export const ServiceWork = () => {
     }
   }
 
+  const [caseInformation, setCaseInformation] = useState([])
+  
+
   useEffect(() => {
-    fetchWorkOrders();
-    fetchMaterialOrders();
-  }, [])
+    const fetchAllData = async () => {
+      Swal.fire({
+        title: 'Please wait...',
+        text: 'Loading Work Order Details...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+  
+      try {
+        
+        const resWO = await ApiCustomer.get(`/api/work-order/${woid}`);
+        const workOrderData = resWO.data.data;
+        setWorkOrders(workOrderData);
+  
+        
+        const resMO = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
+        setMaterialOrders(resMO.data.data);
+  
+        
+        if (workOrderData?.CaseID) {
+          const resCI = await ApiCustomer.get(`/api/case-information/${workOrderData.CaseID}`);
+          setCaseInformation(resCI.data.data);
+        }
+  
+        Swal.close(); 
+  
+      } catch (err) {
+        console.error("Fetch error:", err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Something went wrong while loading data!',
+        });
+      }
+    };
+  
+    if (woid) fetchAllData();
+  }, [woid]);
+  
   // useEffect(() => {
   // }, [workOrders])
   return (
@@ -758,7 +798,9 @@ export const ServiceWork = () => {
             </Card> 
           </TabsContent>
 
-          <QuickWOInput WOID={woid} />
+          <TabsContent value="Quick_WO_Input">
+            <QuickWOInput WOID={woid} caseInformation={caseInformation} />
+          </TabsContent>
         </Tabs>
       </CardContent>
     </Card>

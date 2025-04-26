@@ -25,7 +25,10 @@ export async function GET(request) {
  
          // Search by Phone
          if (phone) {
-             whereCondition.OR = [...(whereCondition.OR || []), { PrimaryPhone: { contains: phone } }];
+             whereCondition.OR = [...(whereCondition.OR || []), { 
+                PrimaryPhone: { contains: phone }, 
+                WhatsappNo: { contains: phone }, 
+            }];
          }
          
          if (search) {
@@ -87,7 +90,7 @@ export async function POST(request) {
         const data = await request.json();
         
         // Validasi sederhana
-        if (!data.Company || !data.Email || !data.PrimaryPhone) {
+        if (!data.Company || !data.Email || (data.PrimaryPhone == "" && data.WhatsappNo == "")) {
             return NextResponse.json({
                 success: false,
                 message: "Company, Email, and PrimaryPhone are required"
@@ -95,21 +98,36 @@ export async function POST(request) {
         }
 
         
-        let whereCondition = {
-            OR: [
-                { Email: { contains: data.Email } },
-                { PrimaryPhone: { contains: data.PrimaryPhone } }
-            ]
+        let orConditions = [];
+
+        if (data.Email) {
+        orConditions.push({ Email: { contains: data.Email } });
         }
+        if (data.PrimaryPhone) {
+        orConditions.push({ PrimaryPhone: { contains: data.PrimaryPhone } });
+        }
+        if (data.WhatsappNo) {
+        orConditions.push({ WhatsappNo: { contains: data.WhatsappNo } });
+        }
+
+        if (orConditions.length === 0) {
+        return NextResponse.json({
+            success: false,
+            message: "At least one of Email, PrimaryPhone, or WhatsappNo is required for duplicate check",
+        }, { status: 400 });
+        }
+
         const availableCompanyEmailPhoneDuplicate = await prisma.site_account.count({
-            where: whereCondition
-        })
+        where: {
+            OR: orConditions
+        }
+        });
         
         if(availableCompanyEmailPhoneDuplicate !== 0){
             return NextResponse.json({
                 success: false,
                 message: "A company wit dis email or phone is alredy eksis",
-                error: error.message
+                error: "A company wit dis email or phone is alredy eksis"
             }, { status: 409 });
         }
         // Simpan ke database
@@ -118,6 +136,7 @@ export async function POST(request) {
                 Company: data.Company,
                 Email: data.Email,
                 PrimaryPhone: data.PrimaryPhone,
+                WhatsappNo: data.WhatsappNo,
                 AddressLine1: data.AddressLine1 || "",
                 AddressLine2: data.AddressLine2 || "",
                 City: data.City || "",
