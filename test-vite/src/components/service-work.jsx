@@ -119,27 +119,27 @@ export const ServiceWork = () => {
       </CardHeader>
 
       <CardContent>
-        <Tabs>
+        <Tabs defaultValue="Quick_WO_Input" className="w-[760px]">
           <TabsList className="bg-white w-[760px]">
-            <TabsTrigger value="wo_summary" className="cursor-pointer">
+            <TabsTrigger variant="underline" value="wo_summary" className="cursor-pointer">
               WO Summary
             </TabsTrigger>
-            <TabsTrigger
+            <TabsTrigger variant="underline"
               value="wo_details"
               className="cursor-pointer white"
             >
               WO Details
             </TabsTrigger>
-            <TabsTrigger value="wo_bookings" className="cursor-pointer">
+            <TabsTrigger variant="underline" value="wo_bookings" className="cursor-pointer">
               WO Bookings
             </TabsTrigger>
-            <TabsTrigger value="wo_Notes_Timeline" className="cursor-pointer">
+            <TabsTrigger variant="underline" value="wo_Notes_Timeline" className="cursor-pointer">
               WO Notes/Timeline
             </TabsTrigger>
-            <TabsTrigger value="wo_Closure_Details" className="cursor-pointer">
+            <TabsTrigger variant="underline" value="wo_Closure_Details" className="cursor-pointer">
               WO Closure Details
             </TabsTrigger>
-            <TabsTrigger value="Quick_WO_Input" className="cursor-pointer">
+            <TabsTrigger variant="underline" value="Quick_WO_Input" className="cursor-pointer">
               Quick WO Input
             </TabsTrigger>
             <SelectBarRelated></SelectBarRelated>

@@ -2589,15 +2589,15 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
               <DialogDescription>Select parts required for the repair.</DialogDescription>
             </DialogHeader>
             <div className="flex justify-between items-start p-2">
-              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+              <div className="bg-gray-300 grid grid-cols-2 gap-x-2 p-2 flex-1">
                 <p>Service OfferID</p><p>: {selectedWarrantyServices[0].Service_offerID}</p>
                 <p>Service Description</p><p>: {selectedWarrantyServices[0].Service_description}</p>
               </div>
-              <div className="flex items-center space-x-2 scale-200 gap-2">
+              <div className="flex items-center space-x-2 gap-2 flex-1 self-center justify-center ">
                 <Label htmlFor="orderability">Orderability</Label>
                 <Switch id="orderability" />
               </div>
-              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+              <div className="bg-gray-300 grid grid-cols-2 gap-x-2 p-2 flex-1">
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
@@ -2978,7 +2978,7 @@ export function BtnModalsPartAdd({
                   const isChecked = tempSelectedParts.some((item) => item.PartNumber === part.PartNumber)
                   return (
                     <TableRow key={index}>
-                      <TableCell>
+                      <TableCell className="flex">
                         <Checkbox 
                           checked={isChecked}
                           onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
@@ -3061,7 +3061,7 @@ export function BtnModalsPartAdd({
             <Button variant={'search'} onClick={() => { setTempSelectedParts([]); 
     setPartNumberInput("");
     setPartNumberSearch(""); }}>Clear</Button>
-            <Button variant={'search'} onClick={() => open}>Cancel</Button>
+            <Button variant={'search'} onClick={() => setOpen2(false)}>Cancel</Button>
           </DialogFooter>
       </DialogContent>
     </Dialog>
