@@ -216,6 +216,7 @@ model site_account {
   Company             String                @db.VarChar(255)
   Email               String?               @db.VarChar(255)
   PrimaryPhone        String?               @db.VarChar(50)
+  WhatsappNo          String?               @db.VarChar(50)
   AddressLine1        String                @db.VarChar(255)
   AddressLine2        String?               @db.VarChar(255)
   City                String                @db.VarChar(100)

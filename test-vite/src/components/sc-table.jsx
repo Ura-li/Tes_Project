@@ -175,7 +175,7 @@ import { useModal } from "@/components/modal-context";
       key: companyData.SiteAccountID,
       company: companyData.Company,
       type: 'siteAccount',
-      text: `${companyData.AddressLine1} ${companyData.City} ${companyData.StateProvince} ${companyData.Country}-${companyData.ZipPostalCode} | Email: ${companyData.Email} | Phone: ${companyData.PrimaryPhone}`,
+      text: `${companyData.AddressLine1} ${companyData.City} ${companyData.StateProvince} ${companyData.Country}-${companyData.ZipPostalCode} | Email: ${companyData.Email} | Phone: ${companyData.PrimaryPhone || companyData.WhatsappNo}`,
     });
   }
   

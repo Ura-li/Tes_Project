@@ -222,6 +222,7 @@ export const Company_table = () => {
               <th className="border p-2">Company</th>
               <th className="border p-2">Email</th>
               <th className="border p-2">Primary Phone</th>
+              <th className="border p-2">Whatsapp Number</th>
               <th className="border p-2">City</th>
               <th className="border p-2">Country</th>
               <th className="border p-2">Actions</th>
@@ -237,6 +238,7 @@ export const Company_table = () => {
                   <td className="border p-2">{company.Company}</td>
                   <td className="border p-2">{company.Email}</td>
                   <td className="border p-2">{company.PrimaryPhone}</td>
+                  <td className="border p-2">{company.WhatsappNo}</td>
                   <td className="border p-2">{company.City}</td>
                   <td className="border p-2">{company.Country}</td>
                   <td className="border p-2 flex space-x-2">

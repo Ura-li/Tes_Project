@@ -76,21 +76,21 @@ export const ServiceMaterial = () => {
       <CardContent>
         <Tabs>
           <TabsList className="bg-white w-[760px]">
-            <TabsTrigger value="mo_information" className="cursor-pointer">
+            <TabsTrigger variant={'underline'} value="mo_information" className="cursor-pointer">
               MO Information
             </TabsTrigger>
-            <TabsTrigger
+            <TabsTrigger variant={'underline'}
               value="mo_items"
               className="cursor-pointer white">
             MO Items & Message
             </TabsTrigger>
-            <TabsTrigger value="entitlement_sla" className="cursor-pointer">
+            <TabsTrigger variant={'underline'} value="entitlement_sla" className="cursor-pointer">
             Entitlement & SLA
             </TabsTrigger>
-            <TabsTrigger value="billing_quotation" className="cursor-pointer">
+            <TabsTrigger variant={'underline'} value="billing_quotation" className="cursor-pointer">
             Billing & Quotation
             </TabsTrigger>
-            <TabsTrigger value="notes_attaechment" className="cursor-pointer">
+            <TabsTrigger variant={'underline'} value="notes_attaechment" className="cursor-pointer">
             Notes & Attachment
             </TabsTrigger>
             <SelectBarRelated></SelectBarRelated>

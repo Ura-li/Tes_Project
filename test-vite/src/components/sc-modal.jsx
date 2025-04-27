@@ -936,6 +936,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
   const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
   const [primaryPhone, setPrimaryPhone] = useState("");
+  const [whatsappNo, setWhatsappNo] = useState("");
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
   const [city, setCity] = useState("");
@@ -953,6 +954,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
       setCompanyName(data?.Company || "");
       setEmail(data?.Email || "");
       setPrimaryPhone(data?.PrimaryPhone || "");
+      setWhatsappNo(data?.WhatsappNo || "");
       setAddressLine1(data?.AddressLine1 || "");
       setAddressLine2(data?.AddressLine2 || "");
       setCity(data?.City || "");
@@ -975,6 +977,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
       setCompanyName("");
       setEmail("");
       setPrimaryPhone("");
+      setWhatsappNo("");
       setAddressLine1("");
       setAddressLine2("");
       setCity("");
@@ -1002,6 +1005,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         Company: companyName,
         Email: email,
         PrimaryPhone: primaryPhone,
+        WhatsappNo: whatsappNo,
         AddressLine1: addressLine1,
         AddressLine2: addressLine2,
         City: city,
@@ -1034,6 +1038,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
           <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Company Name *" />
           <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email *" />
           <Input value={primaryPhone} onChange={(e) => setPrimaryPhone(e.target.value)} placeholder="Primary Phone *" />
+          <Input value={whatsappNo} onChange={(e) => setWhatsappNo(e.target.value)} placeholder="Whatsapp No *" />
           <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} placeholder="Address Line 1 *" />
           <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Address Line 2" />
           <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City *" />
@@ -3213,15 +3218,15 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
               <DialogDescription>Select parts required for the repair.</DialogDescription>
             </DialogHeader>
             <div className="flex justify-between items-start p-2">
-              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+              <div className="bg-gray-300 grid grid-cols-2 gap-x-2 p-2 flex-1">
                 <p>Service OfferID</p><p>: {selectedWarrantyServices[0].Service_offerID}</p>
                 <p>Service Description</p><p>: {selectedWarrantyServices[0].Service_description}</p>
               </div>
-              <div className="flex items-center space-x-2 scale-200 gap-2">
+              <div className="flex items-center space-x-2 gap-2 flex-1 self-center justify-center ">
                 <Label htmlFor="orderability">Orderability</Label>
                 <Switch id="orderability" />
               </div>
-              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+              <div className="bg-gray-300 grid grid-cols-2 gap-x-2 p-2 flex-1">
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
@@ -3602,7 +3607,7 @@ export function BtnModalsPartAdd({
                   const isChecked = tempSelectedParts.some((item) => item.PartNumber === part.PartNumber)
                   return (
                     <TableRow key={index}>
-                      <TableCell>
+                      <TableCell className="flex">
                         <Checkbox 
                           checked={isChecked}
                           onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
@@ -3685,7 +3690,7 @@ export function BtnModalsPartAdd({
             <Button variant={'search'} onClick={() => { setTempSelectedParts([]); 
     setPartNumberInput("");
     setPartNumberSearch(""); }}>Clear</Button>
-            <Button variant={'search'} onClick={() => open}>Cancel</Button>
+            <Button variant={'search'} onClick={() => setOpen2(false)}>Cancel</Button>
           </DialogFooter>
       </DialogContent>
     </Dialog>
