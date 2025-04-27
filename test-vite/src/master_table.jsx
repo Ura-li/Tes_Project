@@ -7,6 +7,7 @@ import { BtnModalAsset, AssetEdit, AssetDelete } from "@/components/sc-modal"
 import { ProductTypeAdd, ProductTypeEdit, ProductTypeDelete } from "@/components/sc-modal";
 import { WarrantyServiceAdd, WarrantyServiceEdit, WarrantyServiceDelete } from "@/components/sc-modal";
 import { MaterialOrderEdit, MaterialOrderDelete,  } from "@/components/sc-modal";
+import { WorkOrderDelete, WorkOrderEdit } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
 
 export const Contact_table = () => {
@@ -625,7 +626,7 @@ export const Product_table = () => {
         {/* Tampilkan error jika terjadi kesalahan */}
         {error && <p className="text-red-500">{error}</p>}
         
-        {/* <ProductAdd></ProductAdd> */}
+        <ProductAdd></ProductAdd>
         {/* Tabel Data */}
         <div className="overflow-x-auto">
           <table className="min-w-full border border-gray-300">
@@ -1034,8 +1035,6 @@ export const Mo_table = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-    
-      
       {/* 🔹 Loading & Error Messages */}
       {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -1089,6 +1088,188 @@ export const Mo_table = () => {
           </tbody>
         </table>
         {filteredMaterialOrderTable.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const Wo_table = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Jumlah data per halaman
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [WorkOrderData, setWorkOrderData] = useState([]);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchWorkOrderDataTable=async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/work-order");
+      if (response.data.success) {
+        setWorkOrderData(response.data.data);
+      } else {
+        setError("Failed to fetch Work Order data");
+      }
+    } catch (err) {
+      console.error("Error fetching Work Order data:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // 🔹 Load data when component mounts
+  useEffect(() => {
+    fetchWorkOrderDataTable();
+  }, []);
+
+  // Filter data berdasarkan pencarian
+  const filteredWorkOrderTable = WorkOrderData.filter((item) =>
+    Object.values(item).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Hitung total halaman
+  const totalPages = Math.ceil(filteredWorkOrderTable.length / itemsPerPage);
+
+  // Ambil data sesuai halaman saat ini
+  const currentData = filteredWorkOrderTable.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+
+  //navigate
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Work Order Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      {/* 🔹 Loading & Error Messages */}
+      {loading && <p>Loading cases...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">         
+              <th className="border p-2">WOID</th>
+              <th className="border p-2">Case ID</th>
+              <th className="border p-2">Work Order Type</th>
+              <th className="border p-2">Priority</th>
+              <th className="border p-2">System Status</th>
+              <th className="border p-2">Sub Status</th>
+              <th className="border p-2">Preferred Day</th>
+              <th className="border p-2">Preferred Time</th>      
+              <th className="border p-2">Shipment Country</th>
+              <th className="border p-2">Shipment State</th>
+              <th className="border p-2">Created On</th>
+              <th className="border p-2">Owner</th>
+              <th className="border p-2">SLAJeopardy</th>
+              <th className="border p-2">DueDate Customer</th>
+              <th className="border p-2">Coverage Window</th>
+              <th className="border p-2">Response</th>
+              <th className="border p-2">OTCCode</th>
+              <th className="border p-2">Requested DateTime Customer</th>
+              <th className="border p-2">Guaranteed FixTime Customer</th>
+              <th className="border p-2">Early Start DateTime Customer</th>
+              <th className="border p-2">Latest Start DateTime Customer</th>
+              <th className="border p-2">SLAReschedule</th>
+              <th className="border p-2">Active Schedule Date</th>
+              <th className="border p-2">SLA Error Description</th>
+              <th className="border p-2">Case Priority Index</th>
+              <th className="border p-2">Partner Status</th>
+              <th className="border p-2">WorkOrder Description</th>
+              <th className="border p-2">PartnerNotes</th>
+              <th className="border p-2">Incoming Channel</th>
+              <th className="border p-2">material order</th>
+              <th className="border p-2">Case Information</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((WorkOrderItem) => (
+              <tr key={WorkOrderItem.WOID} className="hover:bg-gray-100 text-center">
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/work/${WorkOrderItem.WOID}`)} >{WorkOrderItem.WOID}</td>
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/case/${WorkOrderItem.CaseID}`)} >{WorkOrderItem.CaseID}</td>
+                <td className="border p-2">{WorkOrderItem.WorkOrderType}</td>
+                <td className="border p-2">{WorkOrderItem.Priority}</td>
+                <td className="border p-2">{WorkOrderItem.SystemStatus}</td>
+                <td className="border p-2">{WorkOrderItem.SubStatus}</td>
+                <td className="border p-2">{WorkOrderItem.PreferredDay}</td>
+                <td className="border p-2">{WorkOrderItem.PreferredTime}</td>
+                <td className="border p-2">{WorkOrderItem.ShipmentCountry}</td>
+                <td className="border p-2">{WorkOrderItem.ShipmentState}</td>
+                <td className="border p-2">{WorkOrderItem.CreatedOn}</td>
+                <td className="border p-2">{WorkOrderItem.Owner}</td>
+                <td className="border p-2">{WorkOrderItem.SLAJeopardy}</td>
+                <td className="border p-2">{WorkOrderItem.DueDateCustomer}</td>
+                <td className="border p-2">{WorkOrderItem.CoverageWindow}</td>
+                <td className="border p-2">{WorkOrderItem.Response}</td>
+                <td className="border p-2">{WorkOrderItem.OTCCode}</td>
+                <td className="border p-2">{WorkOrderItem.RequestedDateTimeCustomer}</td>
+                <td className="border p-2">{WorkOrderItem.GuaranteedFixTimeCustomer}</td>
+                <td className="border p-2">{WorkOrderItem.EarlyStartDateTimeCustomer}</td>
+                <td className="border p-2">{WorkOrderItem.LatestStartDateTimeCustomer}</td>
+                <td className="border p-2">{WorkOrderItem.SLAReschedule}</td>
+                <td className="border p-2">{WorkOrderItem.ActiveScheduleDate}</td>
+                <td className="border p-2">{WorkOrderItem.SLAErrorDescription}</td>
+                <td className="border p-2">{WorkOrderItem.CasePriorityIndex}</td>
+                <td className="border p-2">{WorkOrderItem.PartnerStatus}</td>
+                <td className="border p-2">{WorkOrderItem.WorkOrderDescription}</td>
+                <td className="border p-2">{WorkOrderItem.PartnerNotes}</td>
+                <td className="border p-2">{WorkOrderItem.IncomingChannel}</td>
+                <td className="border p-2">{WorkOrderItem.MaterialOrder}</td>
+                <td className="border p-2">{WorkOrderItem.CaseInformation}</td>
+                <td className="border p-2 flex space-x-2">
+
+                  <WorkOrderEdit WOID={WorkOrderItem.WOID} onUpdate={fetchWorkOrderDataTable}/>
+                  <WorkOrderDelete 
+                      MOID={WorkOrderItem.MOID}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchWorkOrderDataTable}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredWorkOrderTable.length === 0 && (
           <p className="text-center mt-4 text-gray-500">No cases found.</p>
         )}
       </div>

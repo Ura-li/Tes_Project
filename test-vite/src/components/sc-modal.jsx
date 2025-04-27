@@ -593,33 +593,50 @@ export function BtnModalAsset({
 
   const handleUpdateAsset = async () => {
     if (!selectedAssetForCreatingAsset) return;
-    setIsUpdating(true);
-    console.log(siteAccountID);
-    
+  
+    // Tampilkan loading menggunakan SweetAlert2
+    Swal.fire({
+      title: 'Memperbarui asset...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
     try {
       const response = await ApiCustomer.patch(`/api/asset-information/kepemilikan/${selectedAssetForCreatingAsset.AssetID}`, {
         contactID,
         siteAccountID
       });
-      
+  
       if (response.status === 200) {
         const updatedAssets = await fetchAssetTable(siteAccountID, contactID);
         setSelectedAsset(updatedAssets);
-        console.log("Selected Asset after Creating New One : ", updatedAssets);
-        alert("Asset berhasil diperbarui!");
-
         setIsOpen(false);
-        // fetchDataAssets();
-
-        if(selectedAssetForCreatingAsset?.AssetID){
-        }
+  
+        // Tutup loading dan tampilkan alert sukses
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Asset berhasil diperbarui!',
+          timer: 2000,
+          showConfirmButton: false
+        });
       }
     } catch (error) {
-      alert("Terjadi kesalahan saat memperbarui asset. ", error);
-      console.error("Terjadi kesalahan : ", error)
+      // Tutup loading dan tampilkan alert error
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: 'Terjadi kesalahan saat memperbarui asset.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      console.error("Terjadi kesalahan : ", error);
     }
-    setIsUpdating(false);
   };
+  
   
   
   const handleSearch = async () => {
@@ -2300,6 +2317,419 @@ return (
 );
 };
 
+export function WorkOrderEdit({ WOID, onUpdate }) {
+  const [WorkOrder, setWorkOrder] = useState(null);
+  const [CaseID,  setCaseID] = useState("");
+  const [WorkOrderType, setWorkOrderType] = useState("");
+  const [Priority,  setPriority ] = useState("");
+  const [SystemStatus, setSystemStatus] = useState("");
+  const [SubStatus, setSubStatus] = useState("");
+  const [PreferredDay, setPreferredDay] = useState("");
+  const [PreferredTime, setPreferredTime] = useState("");
+  const [ShipmentCountry,  setShipmentCountry] = useState("");
+  const [CreatedOn,  setCreatedOn] = useState("");
+  const [Owner,  setOwner] = useState("");
+  const [SLAJeopardy,  setSLAJeopardy] = useState("");
+  const [DueDateCustomer,  setDueDateCustomer] = useState("");
+  const [CoverageWindow,  setCoverageWindow] = useState("");
+  const [Response,  setResponse] = useState("");
+  const [OTCCode,  setOTCCode] = useState("");
+  const [RequestedDateTimeCustomer,  setRequestedDateTimeCustomer] = useState("");
+  const [GuaranteedFixTimeCustomer,  setGuaranteedFixTimeCustomer] = useState("");
+  const [EarlyStartDateTimeCustomer,  setEarlyStartDateTimeCustomer] = useState("");
+  const [LatestStartDateTimeCustomer,  setLatestStartDateTimeCustomer] = useState("");
+  const [SLAReschedule,  setSLAReschedule] = useState("");
+  const [ActiveScheduleDate,  setActiveScheduleDate] = useState("");
+  const [SLAErrorDescription,  setSLAErrorDescription] = useState("");
+  const [CasePriorityIndex,  setCasePriorityIndex] = useState("");
+  const [PartnerStatus,  setPartnerStatus] = useState("");
+  const [WorkOrderDescription,  setWorkOrderDescription] = useState("");
+  const [PartnerNotes,  setPartnerNotes] = useState("");
+  const [IncomingChannel,  setIncomingChannel] = useState("");
+
+  
+  
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchWorkOrder = async () => {
+    if (!WOID) return;
+    try {
+      const response = await ApiCustomer.get(`/api/work-order/${WOID}`);
+      const data = response.data.data;
+  
+      // Fungsi bantu untuk konversi ke yyyy-MM-dd
+      const formatDate = (dateString) => {
+        return dateString ? new Date(dateString).toISOString().split("T")[0] : "";
+      };
+  
+      setWorkOrder(data);
+      setCaseID(data?.CaseID || "");
+      setWorkOrderType(data?.WorkOrderType || "");
+      setPriority(data?.Priority || "");
+      setSystemStatus(data?.SystemStatus || "");
+      setSubStatus(data?.SubStatus || "");
+      setPreferredDay(data?.PreferredDay || "");
+      setPreferredTime(data?.PreferredTime || "");
+      setShipmentCountry(data?.ShipmentCountry || "");
+      setCreatedOn(formatDate(data?.CreatedOn));
+      setOwner(data?.Owner || "");
+      setSLAJeopardy(data?.SLAJeopardy || "");
+      setDueDateCustomer(data?.DueDateCustomer || "");
+      setCoverageWindow(data?.CoverageWindow || "");
+      setResponse(data?.Response || "");
+      setOTCCode(data?.OTCCode|| "");
+      setRequestedDateTimeCustomer(data?.RequestedDateTimeCustomer || "");
+      setGuaranteedFixTimeCustomer(data?.GuaranteedFixTimeCustomer || "");
+      setEarlyStartDateTimeCustomer(data?.EarlyStartDateTimeCustomer|| "");
+      setLatestStartDateTimeCustomer(data?.LatestStartDateTimeCustomer|| "");
+      setSLAReschedule(data?.SLAReschedule || "");
+      setActiveScheduleDate(data?.ActiveScheduleDate || "");
+      setSLAErrorDescription(data?.SLAErrorDescription || "");
+      setCasePriorityIndex(data?.CasePriorityIndex || "");
+      setPartnerStatus(data?.PartnerStatus || "");
+      setWorkOrderDescription(data?.WorkOrderDescription || "");
+      setPartnerNotes(data?.PartnerNotes || "");
+      setIncomingChannel(data?.IncomingChannel || "");
+  
+    } catch (error) {
+      console.error("Error fetching Work Order information:", error);
+    }
+  };
+  
+
+  useEffect(() => {
+    if (WOID && isOpen) {
+      fetchWorkOrder();
+    }
+  }, [WOID, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setWorkOrder("");
+      setCaseID("");
+      setWorkOrderType("");
+      setPriority("");
+      setSystemStatus("");
+      setSubStatus("");
+      setPreferredDay("");
+      setPreferredTime("");
+      setShipmentCountry("");
+      setCreatedOn("");
+      setOwner("");
+      setSLAJeopardy("");
+      setDueDateCustomer("");
+      setCoverageWindow("");
+      setResponse("");
+      setOTCCode("");
+      setRequestedDateTimeCustomer("");
+      setGuaranteedFixTimeCustomer("");
+      setEarlyStartDateTimeCustomer("");
+      setLatestStartDateTimeCustomer("");
+      setSLAReschedule("");
+      setActiveScheduleDate("");
+      setSLAErrorDescription("");
+      setCasePriorityIndex("");
+      setPartnerStatus("");
+      setWorkOrderDescription("");
+      setPartnerNotes("");
+      setIncomingChannel("");
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!WorkOrderType || !Priority || !SystemStatus || !SubStatus || !PreferredDay || !PreferredTime || !ShipmentCountry || !CreatedOn || !Owner || !SLAJeopardy || !DueDateCustomer || !CoverageWindow || !Response || !OTCCode || !RequestedDateTimeCustomer || !GuaranteedFixTimeCustomer || !EarlyStartDateTimeCustomer || !LatestStartDateTimeCustomer || !SLAReschedule || !ActiveScheduleDate || !SLAErrorDescription || !CasePriorityIndex || !PartnerStatus || !WorkOrderDescription || !PartnerNotes) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text:  "Please fill in all fields before submitting.",
+        icon:  "warning",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });  
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/work-order/${WOID}`, {
+        CaseID : CaseID,
+        WorkOrderType : WorkOrderType, 
+        Priority : Priority,
+        SystemStatus   : SystemStatus,
+        SubStatus   : SubStatus,
+        PreferredDay   : PreferredDay,
+        PreferredTime : PreferredTime,
+        ShipmentCountry : ShipmentCountry,
+        CreatedOn   : CreatedOn,
+        Owner : Owner,
+        SLAJeopardy : SLAJeopardy,
+        DueDateCustomer : DueDateCustomer,
+        CoverageWindow : CoverageWindow,
+        Response : Response,
+        OTCCode : OTCCode,
+        RequestedDateTimeCustomer : RequestedDateTimeCustomer,
+        GuaranteedFixTimeCustomer : GuaranteedFixTimeCustomer,
+        EarlyStartDateTimeCustomer : EarlyStartDateTimeCustomer,
+        LatestStartDateTimeCustomer : LatestStartDateTimeCustomer,
+        SLAReschedule : SLAReschedule,
+        ActiveScheduleDate : ActiveScheduleDate,
+        SLAErrorDescription : SLAErrorDescription,
+        CasePriorityIndex: CasePriorityIndex,
+        PartnerStatus: PartnerStatus,
+        WorkOrderDescription: WorkOrderDescription,
+        PartnerNotes: PartnerNotes,
+        IncomingChannel: IncomingChannel,
+      });
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating Work Order:", error);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchWorkOrder(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="h-[500px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Material Order Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the Material Order Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+        <Label>Work Order Type</Label>
+        <Input type="text" id="Work Order Type" className="p-2"  value={WorkOrderType} onChange={(e) => setWorkOrderType(e.target.value)} />
+
+        <Label>Priority</Label>
+        <Select onValueChange={setPriority} defaultValue={Priority}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="High">High</SelectItem>
+            <SelectItem value="Medium">Medium</SelectItem>
+            <SelectItem value="Low">Low</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Label>System Status</Label>
+        <Select onValueChange={setSystemStatus} defaultValue={SystemStatus}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select System Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Open">Open</SelectItem>
+            <SelectItem value="In Progress">In Progress</SelectItem>
+            <SelectItem value="Closed">Closed</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Label>Sub Status</Label>
+        <Select onValueChange={setSubStatus} defaultValue={SubStatus}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Sub Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Pending">Pending</SelectItem>
+            <SelectItem value="Resolved">Resolved</SelectItem>
+            <SelectItem value="Escalated">Escalated</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Label>Preferred Day</Label>
+        <Input type="date" id="Preferred Day" className="p-2"  value={PreferredDay} onChange={(e) => setPreferredDay(e.target.value)} />
+
+        <Label>Preferred Time</Label>
+        <Input type="date" id="Preferred Time" className="p-2"  value={PreferredTime} onChange={(e) => setPreferredTime(e.target.value)} />     
+
+        <Label>Shipment Country</Label>
+        <Select>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Shipment Country" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="USA">USA</SelectItem>
+            <SelectItem value="Canada">Canada</SelectItem>
+            <SelectItem value="Indonesia">Indonesia</SelectItem>
+            <SelectItem value="UK">UK</SelectItem>
+            <SelectItem value="Germany">Germany</SelectItem>
+            <SelectItem value="France">France</SelectItem>
+            <SelectItem value="Japan">Japan</SelectItem>
+            <SelectItem value="China">China</SelectItem>
+            <SelectItem value="India">India</SelectItem>
+            <SelectItem value="Australia">Australia</SelectItem>
+            <SelectItem value="Brazil">Brazil</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Label>Shipment State</Label>
+        <Select>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Shipment State" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="California">California</SelectItem>
+            <SelectItem value="Texas">Texas</SelectItem>
+            <SelectItem value="New York">New York</SelectItem>
+            <SelectItem value="Florida">Florida</SelectItem>
+          </SelectContent>
+        </Select>  
+
+        <Label>Created On</Label>
+        <Input type="date" id="Created On" className="p-2"  value={CreatedOn} onChange={(e) => setCreatedOn(e.target.value)} />
+
+        <Label>Owner</Label>
+        <Input type="text" id="Owner" className="p-2"  value={Owner} onChange={(e) => setOwner(e.target.value)} />
+
+        <Label>SLA Jeopardy</Label>
+        <Select onValueChange={setSLAJeopardy} defaultValue={SLAJeopardy}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select SLA Jeopardy" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Yes">Yes</SelectItem>
+            <SelectItem value="No">No</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Label>Due Date Customer</Label>
+        <Input type="date" id="Due Date Customer" className="p-2"  value={DueDateCustomer} onChange={(e) => setDueDateCustomer(e.target.value)} />
+
+        <Label>Coverage Window</Label>
+        <Input type="text" id="Coverage Window" className="p-2"  value={CoverageWindow} onChange={(e) => setCoverageWindow(e.target.value)} />
+
+        <Label>Response</Label>
+        <Input type="text" id="Response" className="p-2"  value={Response} onChange={(e) => setResponse(e.target.value)} />
+
+        <Label>OTC Code</Label>
+        <Input type="text" id="OTC Code" className="p-2"  value={OTCCode} onChange={(e) => setOTCCode(e.target.value)} />
+
+        <Label>Requested Date Time Customer</Label>
+        <Input type="date" id="Requested Date Time Customer" className="p-2"  value={RequestedDateTimeCustomer} onChange={(e) => setRequestedDateTimeCustomer(e.target.value)} />
+
+        <Label>Guaranteed Fix Time Customer</Label>
+        <Input type="date" id="Guaranteed Fix Time Customer" className="p-2"  value={GuaranteedFixTimeCustomer} onChange={(e) => setGuaranteedFixTimeCustomer(e.target.value)} />
+
+        <Label>Early Start Date Time Customer</Label>
+        <Input type="date" id="Early Start Date Time Customer" className="p-2"  value={EarlyStartDateTimeCustomer} onChange={(e) => setEarlyStartDateTimeCustomer(e.target.value)} />
+
+        <Label>Latest Start Date Time Customer</Label>
+        <Input type="date" id="Latest Start Date Time Customer" className="p-2"  value={LatestStartDateTimeCustomer} onChange={(e) => setLatestStartDateTimeCustomer(e.target.value)} />
+
+        <Label>SLA Reschedule</Label>
+        <Input type="text" id="SLA Reschedule" className="p-2"  value={SLAReschedule} onChange={(e) => setSLAReschedule(e.target.value)} />
+
+        <Label>Active Schedule Date</Label>
+        <Input type="date" id="Active Schedule Date" className="p-2"  value={ActiveScheduleDate} onChange={(e) => setActiveScheduleDate(e.target.value)} />
+
+        <Label>SLA Error Description</Label>
+        <Input type="text" id="SLA Error Description" className="p-2"  value={SLAErrorDescription} onChange={(e) => setSLAErrorDescription(e.target.value)} />
+
+        <Label>Case Priority Index</Label>
+        <Input type="text" id="Case Priority Index" className="p-2"  value={CasePriorityIndex} onChange={(e) => setCasePriorityIndex(e.target.value)} />
+
+        <Label>Partner Status</Label>
+        <Input type="text" id="Partner Status" className="p-2"  value={PartnerStatus} onChange={(e) => setPartnerStatus(e.target.value)} />
+
+        <Label>Work Order Description</Label>
+        <Textarea
+          id="Work Order Description"
+          placeholder="Masukkan deskripsi servis"
+          className="mt-1"
+          value={WorkOrderDescription} onChange={(e) => setWorkOrderDescription(e.target.value)}
+        />
+
+        <Label>Partner Notes</Label>
+        <Textarea
+          id="Partner Notes"
+          placeholder="Masukkan deskripsi servis"
+          className="mt-1"
+          value={PartnerNotes} onChange={(e) => setPartnerNotes(e.target.value)}
+        />
+
+        <Label>Incoming Channel</Label>
+        <Select onValueChange={setIncomingChannel} defaultValue={IncomingChannel}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Incoming Channel" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Email">Email</SelectItem>
+            <SelectItem value="Phone">Phone</SelectItem>
+            <SelectItem value="Chat">Chat</SelectItem>
+          </SelectContent>
+        </Select>
+
+        </div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export function WorkOrderDelete ({ WOID, isModalOpen, setIsModalOpen, onUpdate }) {
+  //set modal
+const handleDelete = async () => {
+  try {
+    const response = await ApiCustomer.delete(`/api/work-order/${WOID}`);
+    
+    console.log("Server Response:", response.data);
+    if (response.status === 409 || response.data.success === false) {
+      // 🚨 Restriction triggered - Show alert message
+      alert(response.data.message || "Cannot delete this Work Order due to restrictions.");
+      return;
+    }
+    Swal.fire({
+      icon: 'Success',
+      title: 'Berhasil!',
+      text: 'Work Order dihapus.',
+      timer: 1000,  
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
+    // ✅ Close the modal if it's open
+    setIsModalOpen(false);
+    // ✅ Refresh the table by calling `onUpdate()`
+    if (onUpdate) {
+      onUpdate();
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 409) {
+      // 🚨 Handle 409 Conflict error from backend
+      alert(error.response.data.message || "Cannot delete! This Waork has related Work Order.");
+    } else {
+      alert("Failed to delete Work Order. Please try again.");
+    }
+  }
+};
+
+return (
+  <Dialog>
+    <DialogTrigger asChild>
+      <Button variant="outline" className="text-red-500 hover:text-red-700">
+        <Trash />
+      </Button>
+    </DialogTrigger>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Delete Work Order</DialogTitle>
+        <DialogDescription>
+          Delete Work Order confirm. 
+        </DialogDescription>
+      </DialogHeader>
+      <h1>Anda yakin ingin menghapus data ini?</h1>
+      <DialogFooter>
+        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
+};
 //? Service Case Tab List
 
 

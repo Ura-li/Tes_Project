@@ -100,6 +100,10 @@ const data = {
           title: "Material Order",
           url: "/master/Mo_table",
         },  
+        {
+          title: "Work Order",
+          url: "/master/Wo_table",
+        },  
       ],
     },
     {
