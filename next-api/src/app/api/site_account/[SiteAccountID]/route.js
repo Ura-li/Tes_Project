@@ -3,7 +3,8 @@ import prisma from "../../../../../prisma/client";
 
 export async function GET(request, { params }) {
     try {
-        const siteAccountID = parseInt(params.SiteAccountID);
+        const { SiteAccountID } = await params
+        const siteAccountID = parseInt(SiteAccountID);
 
         console.log("Site Account ID Defined : ", siteAccountID)
         if (isNaN(siteAccountID)) {
@@ -52,6 +53,7 @@ export async function PATCH(request, { params }) {
             Company,
             Email,
             PrimaryPhone,
+            WhatsappNo,
             AddressLine1,
             AddressLine2,
             City,
@@ -74,6 +76,7 @@ export async function PATCH(request, { params }) {
                 Company,
                 Email,
                 PrimaryPhone,
+                WhatsappNo,
                 AddressLine1,
                 AddressLine2,
                 City,

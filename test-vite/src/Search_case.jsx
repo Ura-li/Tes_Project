@@ -318,6 +318,7 @@ const Search_case = () => {
     Company: "",
     Email: "",
     PrimaryPhone: "",
+    WhatsappNo: "",
     AddressLine1: "",
     AddressLine2: "",
     City: "",
@@ -340,6 +341,7 @@ const Search_case = () => {
     Company: "",
     Email: "",
     PrimaryPhone: "",
+    WhatsappNo: "",
     AddressLine1: "",
     AddressLine2: "",
     City: "",
@@ -357,7 +359,7 @@ const Search_case = () => {
     if (
       !formDataSiteAccount.Company ||
       !formDataSiteAccount.Email ||
-      !formDataSiteAccount.PrimaryPhone
+      (!formDataSiteAccount.PrimaryPhone && !formDataSiteAccount.WhatsappNo)
     ) {
       Swal.fire({
         icon: 'warning',
@@ -892,6 +894,8 @@ const Search_case = () => {
                   search={search}
                   setSearch={setSearch}
                   onSelectCompany={handleSelectedSiteAccount}
+                  setActiveTab={setActiveTab}
+                  setFormDataSiteAccount={setFormDataSiteAccount}
                 />
                 <DialogContactBtn />
               </TabsList>
@@ -955,7 +959,7 @@ const Search_case = () => {
                   </CardTitle>
                 </CardHeader>
 
-                <CardContent className="grid gap-5 grid-cols-3">
+                <CardContent className="grid gap-5 grid-cols-4">
                   <div className="space-y-0.5">
                     <Label htmlFor="Company">Company</Label>
                     <Input
@@ -983,6 +987,16 @@ const Search_case = () => {
                       className="border-b-black p-1"
                       onChange={handlerInputSiteAccountChange}
                       value={formDataSiteAccount.PrimaryPhone}
+                    />
+                  </div>
+                  <div className="space-y-0.5">
+                    <Label htmlFor="WhatsappNo">Whatsapp No</Label>
+                    <Input
+                      id="WhatsappNo"
+                      type="text"
+                      className="border-b-black p-1"
+                      onChange={handlerInputSiteAccountChange}
+                      value={formDataSiteAccount.WhatsappNo}
                     />
                   </div>
                 </CardContent>
