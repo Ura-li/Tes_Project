@@ -116,7 +116,7 @@ export async function PATCH(request, { params }) {
 
 //delete data
 export async function DELETE(request, { params }) {
-    const MOID = params.MOID    ;
+    const MOID = params.MOID ;
 
     try {
         const deletedMaterial = await prisma.materialorder.delete({

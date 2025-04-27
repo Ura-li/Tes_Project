@@ -33,6 +33,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Swal from "sweetalert2";
+import { TabsServiceWO } from "./service-case";
 import { KeyRound } from "lucide-react";
 
 import { useParams } from "react-router";
@@ -112,6 +113,8 @@ export const ServiceWork = () => {
   // useEffect(() => {
   // }, [workOrders])
   return (
+    <div>
+    <TabsServiceWO/>
     <Card className="mt-2 rounded-none h-[160px]">
       <CardHeader>
         <CardTitle className="text-xl ">{woid}</CardTitle>
@@ -804,5 +807,6 @@ export const ServiceWork = () => {
         </Tabs>
       </CardContent>
     </Card>
+    </div>
   );
 };
