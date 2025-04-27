@@ -7,7 +7,7 @@ import { BtnModalAsset, AssetEdit, AssetDelete } from "@/components/sc-modal"
 import { ProductTypeAdd, ProductTypeEdit, ProductTypeDelete } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
 import { WarrantyServiceAdd, WarrantyServiceEdit, WarrantyServiceDelete } from "@/components/sc-modal";
-
+import { ServiceCatalogPartAdd, ServiceCatalogPartDelete, ServiceCatalogPartEdit } from "@/components/sc-modal";
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -1047,7 +1047,6 @@ export const ServiceCatalogPartsTable = () => {
               <th className="border p-2">Price</th>
               <th className="border p-2">Freight Price</th>
               <th className="border p-2">Shipping Fee</th>
-              <th className="border p-2">QTY Parts</th>
               <th className="border p-2">Tax</th>
               <th className="border p-2">Total</th>            
               <th className="border p-2">ID</th>            
@@ -1077,14 +1076,13 @@ export const ServiceCatalogPartsTable = () => {
                 <td className="border p-2">{item.Price}</td>
                 <td className="border p-2">{item.FreightPrice}</td>
                 <td className="border p-2">{item.Shipping_Fee}</td>
-                <td className="border p-2">{item.qty_parts}</td>
                 <td className="border p-2">{item.Tax}</td>
                 <td className="border p-2">{item.Total}</td>
                 <td className="border p-2">{item.PartID}</td>
                 <td className="border p-2 flex space-x-2 justify-center">
-                <ServiceCatalogPartEdit PartID={item.PartNumber} onUpdate={fetchPartsData} />
+                <ServiceCatalogPartEdit PartNumber={item.PartNumber} onUpdate={fetchPartsData} />
                     <ServiceCatalogPartDelete
-                    PartID={item.PartNumber}
+                    PartNumber={item.PartNumber}
                     // isModalOpen={isModalOpen}
                     // setIsModalOpen={setIsModalOpen}
                     onUpdate={fetchPartsData}

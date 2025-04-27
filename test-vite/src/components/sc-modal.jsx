@@ -2981,9 +2981,6 @@ export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen
           <Label>Shipping Fee</Label>
           <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} />
 
-          <Label>Quantity*</Label>
-          <Input type="number" id="qty_parts" value={formData.qty_parts} onChange={handleChange} />
-
           <Label>Tax*</Label>
           <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} />
 
@@ -3009,8 +3006,8 @@ export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen
   );
 }
 
-export function ServiceCatalogPartEdit({ PartID, onUpdate }) {
-  // console.log(PartID);
+export function ServiceCatalogPartEdit({ PartNumber, onUpdate }) {
+  // console.log(PartNumber);
   const [isOpen, setIsOpen] = useState(false);
   const [partData, setPartData] = useState({
     PartNumber: "",
@@ -3021,7 +3018,6 @@ export function ServiceCatalogPartEdit({ PartID, onUpdate }) {
     Price: "",
     FreightPrice: "",
     Shipping_Fee: "",
-    qty_parts: "",
     Tax: "",
     Total: "",
     CSR_Flag: false,
@@ -3036,7 +3032,7 @@ export function ServiceCatalogPartEdit({ PartID, onUpdate }) {
 
   const fetchPart = async () => {
     try {
-      const response = await ApiCustomer.get(`/api/servicecatalog-parts/${PartID}`);
+      const response = await ApiCustomer.get(`/api/servicecatalog-parts/${PartNumber}`);
       const data = response.data.data;
       console.log("Data Dari API", data);
 
@@ -3050,11 +3046,11 @@ export function ServiceCatalogPartEdit({ PartID, onUpdate }) {
   };
 
   useEffect(() => {
-    if (PartID && isOpen) {
+    if (PartNumber && isOpen) {
       fetchPart();
       console.log("Sialan");
     }
-  }, [PartID, isOpen]);
+  }, [PartNumber, isOpen]);
 
   const handleChange = (key, value) => {
     setPartData((prev) => ({ ...prev, [key]: value }));
@@ -3062,7 +3058,7 @@ export function ServiceCatalogPartEdit({ PartID, onUpdate }) {
 
   const handleUpdate = async () => {
     try {
-      await ApiCustomer.patch(`/api/servicecatalog-parts/${PartID}`, partData);
+      await ApiCustomer.patch(`/api/servicecatalog-parts/${PartNumber}`, partData);
       onUpdate();
       setIsOpen(false);
     } catch (error) {
@@ -3103,7 +3099,7 @@ export function ServiceCatalogPartEdit({ PartID, onUpdate }) {
             return (
               <Input
                 key={key}
-                value={value}
+                value={value || ""}
                 placeholder={key}
                 onChange={(e) => handleChange(key, e.target.value)}
               />
@@ -3133,10 +3129,10 @@ export function ServiceCatalogPartEdit({ PartID, onUpdate }) {
   );
 }
 
-export function ServiceCatalogPartDelete({ PartID, onUpdate }) {
+export function ServiceCatalogPartDelete({ PartNumber, onUpdate }) {
   const handleDelete = async () => {
     try {
-      await ApiCustomer.delete(`/api/servicecatalog-parts/${PartID}`);
+      await ApiCustomer.delete(`/api/servicecatalog-parts/${PartNumber}`);
       if (onUpdate) {
         onUpdate(); // untuk refresh data setelah delete
       }

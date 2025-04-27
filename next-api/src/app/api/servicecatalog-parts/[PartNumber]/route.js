@@ -49,7 +49,7 @@ export async function PATCH(request, { params }) {
         Price,
         FreightPrice,
         Shipping_Fee,
-        qty_parts,
+        // qty_parts,
         Tax,
         Total,
     } = await request.json();
@@ -73,7 +73,7 @@ export async function PATCH(request, { params }) {
                 Price: Price ? Number(Price) : null,
                 FreightPrice: FreightPrice ? Number(FreightPrice) : null,
                 Shipping_Fee: Shipping_Fee ? parseFloat(Shipping_Fee) : 0,
-                qty_parts: parseInt(qty_parts),
+                // qty_parts: parseInt(qty_parts),
                 Tax: Tax ? Number(Tax) : null,
                 Total: Total ? Number(Total) : null,
             },
