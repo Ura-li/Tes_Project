@@ -307,17 +307,36 @@ export const TabsService = ({ caseDetails }) => {
   )
 }
 
+const spanMap = {
+  1: "col-span-1",
+  2: "col-span-2",
+  3: "col-span-3",
+  4: "col-span-4",
+  5: "col-span-5",
+  6: "col-span-6",
+};
+
 export const CaseField = ({ label, children, icon, span = 1, className }) => (
   <>
-    <CardTitle className={twMerge(`font-medium grid justify-start grid-flow-col  items-center ${icon ? "gap-1" : ""}`,className)}>
-      {icon && <Lock className="size-4" />}
+    <CardTitle
+      className={twMerge(
+        `relative font-medium flex items-center`,
+        icon ? "pl-6" : "",
+        className
+      )}
+    >
+      {icon && (
+        <Lock className="absolute left-0 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+      )}
       {label}
     </CardTitle>
-    <CardTitle className={`col-span-${span}`}>
+
+    <CardTitle className={spanMap[span]}>
       {children}
     </CardTitle>
   </>
 );
+
 
 export const TabsServiceWO = () => {
 
@@ -1263,7 +1282,7 @@ useEffect(() => {
 
           <Card className="mt-5 flex-col">
           <CardHeader>
-              <CardTitle className=' text-lg'>Syomtem Description /CardTitle</CardTitle>
+              <CardTitle className=' text-lg'>Symtome Description / CardTitle</CardTitle>
               <hr />
             </CardHeader>
               <CardContent className="flex gap-6">
@@ -1318,9 +1337,9 @@ useEffect(() => {
                     </ul>
                   )}
 
-                  <CaseField label="Top Category" className={'col-span-2'}  span={3} >---{selectedSymptom?.TopCategory}</CaseField>
-                  <CaseField label="Sub Category" className={'col-span-2'}  span={3} >---{selectedSymptom?.SubCategory}</CaseField>
-                  <CaseField label="Spesific Symptom" className={'col-span-2'}  span={3} >---{selectedSymptom?.SymptomCode}</CaseField>
+                  <CaseField label="Top Category" className={'col-span-2'}  span={3} >{selectedSymptom?.TopCategory}</CaseField>
+                  <CaseField label="Sub Category" className={'col-span-2'}  span={3} >{selectedSymptom?.SubCategory}</CaseField>
+                  <CaseField label="Spesific Symptom" className={'col-span-2'}  span={3} >{selectedSymptom?.SymptomCode}</CaseField>
                   
                   {/* <div className='font-bold flex'>
                     <span>Top Category</span>
