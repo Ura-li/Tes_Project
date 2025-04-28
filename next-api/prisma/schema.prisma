@@ -25,7 +25,7 @@ model asset_information {
 }
 
 model caseinformation {
-  CaseID                                        Int                  @id
+  CaseID                                        String               @id
   SiteAccountID                                 Int?
   ContactID                                     Int?
   AssetID                                       Int?
@@ -51,17 +51,19 @@ model caseinformation {
   symptom_codes                                 symptom_codes?       @relation(fields: [SymptomCode], references: [SymptomCodeID], onDelete: Restrict, onUpdate: Restrict, map: "caseinformation_ibfk_5")
   casenotes_casenotes_CaseIDTocaseinformation   casenotes[]          @relation("casenotes_CaseIDTocaseinformation")
   workorder                                     workorder[]
+  createdByUser                                 User?                @relation("UserCreatedCases", fields: [CreatedBy], references: [IDUser], onDelete: Restrict, onUpdate: Cascade)
 
   @@index([AssetID], map: "AssetID")
   @@index([CaseNote], map: "CaseNote")
   @@index([ContactID], map: "ContactID")
   @@index([SiteAccountID], map: "SiteAccountID")
   @@index([SymptomCode], map: "SymptomCode")
+  @@index([CreatedBy])
 }
 
 model casenotes {
   NoteID                                              Int               @id @default(autoincrement())
-  CaseID                                              Int?
+  CaseID                                              String?
   LogType                                             String?           @db.VarChar(50)
   ActionType                                          String?           @db.VarChar(50)
   Template                                            String?           @db.VarChar(100)
@@ -261,17 +263,18 @@ model test_table {
 }
 
 model User {
-  IDUser        Int      @id @default(autoincrement())
-  Email         String   @unique @db.VarChar(255)
-  Username      String   @unique @db.VarChar(100)
-  Password      String   @db.VarChar(255)
-  Name          String   @db.VarChar(255)
-  Role          String   @default("user") @db.VarChar(50)
-  ProfilePhoto  String?  @db.VarChar(500) // nullable, user might not upload a photo yet
-  CreatedAt     DateTime @default(now())
-  UpdatedAt     DateTime @updatedAt
-}
+  IDUser       Int      @id @default(autoincrement())
+  Email        String   @unique @db.VarChar(255)
+  Username     String   @unique @db.VarChar(100)
+  Password     String   @db.VarChar(255)
+  Name         String   @db.VarChar(255)
+  Role         String   @default("user") @db.VarChar(50)
+  ProfilePhoto String?  @db.VarChar(500) // nullable, user might not upload a photo yet
+  CreatedAt    DateTime @default(now())
+  UpdatedAt    DateTime @updatedAt
 
+  caseinformations_created caseinformation[] @relation("UserCreatedCases")
+}
 
 model warranty_services {
   Service_offerID     String           @id @db.VarChar(8)
@@ -287,7 +290,7 @@ model warranty_services {
 
 model workorder {
   WOID                        String           @id @db.VarChar(13)
-  CaseID                      Int?
+  CaseID                      String?
   WorkOrderNumber             String?          @db.VarChar(100)
   WorkOrderType               String?          @db.VarChar(50)
   Priority                    String?          @db.VarChar(50)

@@ -7,7 +7,7 @@ export async function GET(request) {
         // Ambil parameter pencarian & pagination
         const { searchParams } = new URL(request.url);
 
-        const caseID = parseInt(searchParams.get("caseID"));
+        const caseID = searchParams.get("caseID");
 
         console.log("Query Params:", { caseID });
 

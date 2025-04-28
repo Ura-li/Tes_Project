@@ -390,7 +390,6 @@ const CaseField = ({ label, value, icon, span = 1, className }) => (
         }));
       }
 
-      console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
       // const res = await ApiCustomer.get(`/api/`)
     }catch(err){
       console.error("Error returning Customer Data : ",err)
@@ -416,6 +415,7 @@ const CaseField = ({ label, value, icon, span = 1, className }) => (
 //notes handler
 const fetchCaseNotes = async () => {
   try{
+    // console.log("Case Details : ", caseDetails)
     const res = await ApiCustomer.get(`/api/case-information/case-notes`)
     const notes = res.data.data
 
@@ -452,6 +452,7 @@ const fetchCaseNotes = async () => {
 useEffect(() => {
   fetchCustomerData();
   fetchAssetInformation();
+  fetchOwnerUserData();
   
   fetchWorkOrders();
   const loadNote = async () => {
@@ -464,9 +465,27 @@ useEffect(() => {
   }
   loadNote()
 }, [])
+
+//data for upper style
+const [ownerUserData, setOwnerUserData ] = useState([])
+// const []
+const fetchOwnerUserData = async () => {
+  try {
+    const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
+    setOwnerUserData(response.data.data)
+  } catch (error) {
+    
+  }
+}
+
+
 useEffect(() =>{
   console.log("Data Asset Info : ",dataFetchAssetInformation)
-}, dataFetchAssetInformation)
+  
+  console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
+  console.log("Fetch Data User ", ownerUserData)
+}, [ownerUserData])
+
 
 const fetchSymptomCodes = async (term) => {
   try {
@@ -523,6 +542,7 @@ useEffect(() => {
 }, [workOrders]);
 
 
+
   return (
     <>
     <Card className="mt-2 rounded-none p-0 border-0">
@@ -552,7 +572,7 @@ useEffect(() => {
               </CardTitle>
               <CardTitle className="flex">
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>Kamisyah Indriani</h1>
+                  <h1 className='text-blue-500'>{ownerUserData.Name}</h1>
                   <p className="text-sm font-light ">Owner</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
@@ -560,7 +580,7 @@ useEffect(() => {
                   <p className="text-sm font-light ">Queue</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>{caseDetails.CaseID}</h1>
+                  <h1 className='text-blue-500'>{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</h1>
                   <p className="text-sm font-light ">Contact</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
@@ -570,7 +590,7 @@ useEffect(() => {
                   </SelectTrigger>
                   <SelectContent className="p-0">
                     <SelectGroup className="p-0">
-                    <SelectItem value="first" className="p-0">PT BANK SBI INDONESIA</SelectItem>
+                    <SelectItem value="first" className="p-0">{dataFetchCustomerData.SiteAccount?.Company}</SelectItem>
                     <SelectItem value="??">??</SelectItem>
                       <SelectItem value="!!">!!</SelectItem>
                       <SelectItem value="**">**</SelectItem>

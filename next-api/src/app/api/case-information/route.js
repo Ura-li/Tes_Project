@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 import prisma  from "../../../../prisma/client";
 
+import { generateID } from "@/utils/generateID";
+
 export async function GET(request) {
     //get search parameter
     const { searchParams } = new URL(request.url);
@@ -74,7 +76,6 @@ export async function GET(request) {
 export async function POST(request) {
     //get all request
     const { 
-        CaseID,
         SiteAccountID,
         ContactID,
         AssetID,
@@ -88,9 +89,12 @@ export async function POST(request) {
         CaseClosedDate,
         CaseNote,
         SymptomCode,
-        CaseResolution
+        CaseResolution,
+        CreatedBy,
     } = await request.json();
 
+    const CaseID = await generateID("C-", "caseinformation", "CaseID")
+    console.log("Generated ID:", CaseID, typeof CaseID);
     //validation
     if (!AssetID && !ContactID ) {
         return NextResponse.json(
@@ -119,7 +123,8 @@ export async function POST(request) {
             CaseClosedDate: CaseClosedDate,
             CaseNote: CaseNote,
             SymptomCode: SymptomCode,
-            CaseResolution: CaseResolution
+            CaseResolution: CaseResolution,
+            CreatedBy: parseInt(CreatedBy),
         },
     });
 
