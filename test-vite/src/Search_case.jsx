@@ -60,6 +60,8 @@ import { Checkbox } from "./components/ui/checkbox";
 import Swal from 'sweetalert2';
 import { InfoCase } from "@/components/info-case";
 
+import { getUserFromToken } from "@/lib/utils/auth"
+
 const data = {
   navModals: [
     {
@@ -600,8 +602,11 @@ const Search_case = () => {
     }
   
     try {
+      const data = {
+        user: getUserFromToken()
+      }
+      console.log("Data From New Create Case : ", data)
       const newCase = {
-        CaseID: Math.floor(Math.random() * 100000),
         AssetID: selectedAssetForCase.AssetID,
         ContactID: selectedContactForCase.ContactID,
         SiteAccountID: siteAccountID,
@@ -617,9 +622,10 @@ const Search_case = () => {
         CaseNote: null,
         SymptomCode: null,
         CaseResolution: null,
+        CreatedBy: data.user.id,
       };
   
-      await ApiCustomer.post("/api/case-information", newCase);
+      const res = await ApiCustomer.post("/api/case-information", newCase);
   
       // SweetAlert sukses + redirect
       Swal.fire({
@@ -629,7 +635,7 @@ const Search_case = () => {
         showConfirmButton: false,
         timer: 2000,
       }).then(() => {
-        navigate(`/case/${newCase.CaseID}`);
+        navigate(`/case/${res.data.data.CaseID}`);
       });
   
     } catch (error) {

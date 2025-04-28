@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 
 export async function GET(request, { params }) {
-    const assetID = parseInt(params.AssetID);
+    const { AssetID } = await params
+    const assetID = parseInt(AssetID);
 
     if (isNaN(assetID)) {
         return NextResponse.json({
@@ -45,7 +46,7 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
     const assetID = parseInt(params.AssetID);
 
-    try {
+    try { 
         const body = await request.json();
         const { SerialNumber, ProductName, ProductNumber, ProductLine, SiteAccountID, ContactID } = body;
 

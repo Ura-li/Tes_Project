@@ -8,12 +8,12 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { cn } from "@/lib/utils"; // adjust path
 import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, LucideCalendarDays } from "lucide-react";
 
-export default function DatePicker() {
+export default function DatePicker({ value, onChange }) {
   const [selected, setSelected] = useState(null);
   const [viewDate, setViewDate] = useState(new Date());
 
   const handleSelect = (date) => {
-    setSelected(date);
+    onChange(date);
   };
 
   const handleMonthSelect = (monthIndex) => {
@@ -38,7 +38,7 @@ export default function DatePicker() {
         <div className="flex flex-col items-center">
       <DayPicker
         mode="single"
-        selected={selected}
+        selected={value}
         onSelect={handleSelect}
         month={viewDate}
         onMonthChange={setViewDate}

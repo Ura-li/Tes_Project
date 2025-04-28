@@ -3,16 +3,47 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useState } from "react"
+
+import ApiCustomer from "@/api"
+import Swal from "sweetalert2"
 
 export function LoginForm({
   className,
   ...props
 }) {
+
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await ApiCustomer.post('/api/auth/login',{
+        identifier,
+        password
+      })
+      console.log('Login success:', res.data);
+      const { token } = res.data;
+      localStorage.setItem('token', token);
+
+      Swal.fire('Success', 'Login Success', 'success').then((result) => {
+        window.location.href = '/';
+      });
+    } catch (error) {
+      console.error('Login failed:', error);
+      Swal.fire('Error', 'Login Failed', 'error');
+    }
+  }
+
+  /**
+   * TODO :
+   */
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <form className="p-6 md:p-8" onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
@@ -22,7 +53,7 @@ export function LoginForm({
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required />
+                <Input id="email" type="email" placeholder="m@example.com" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required />
               </div>
               <div className="grid gap-3">
                 <div className="flex items-center">
@@ -31,7 +62,7 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <Button type="submit" className="w-full">
                 Login
