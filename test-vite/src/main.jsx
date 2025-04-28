@@ -20,12 +20,15 @@ import { ProductType_table } from './master_table';
 import { WarrantyService_table } from './master_table';
 // import { ModalContextProvider } from './components/modal-context';
 
+import { GateKeepingRouting } from './components/GateKeepingRouting';
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       {/* <ModalContextProvider> */}
         <Routes>
-          <Route path='/' element={<App />}>
+          {/* <Route path='/' element={<App />}> */}
+          <Route path='/' element={<GateKeepingRouting />}>
             <Route index element={<Landing />} />
             <Route path='/search_case' element={<Search_case />} />
             <Route path='/case/:caseId' element={<Case />} />
@@ -33,6 +36,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/material-order/:moid' element={<MaterialOrder />}/>
             <Route path='/mo_detail/:molineid' element={<MoDetail />}/>
             <Route path='/bookings' element={<Bookings/>}/>
+            {/* <Route path='/master' element> */}
             <Route path='/master/Company_table' element={<Company_table />} />
             <Route path='/master/Assets_table' element={<Assets_table />} />
             <Route path='/master/Contact_table' element={<Contact_table />} />
@@ -40,6 +44,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/Product_table' element={<Product_table/>}/>
             <Route path='/master/ProductType_table' element={<ProductType_table/>}/>
             <Route path='/master/WarrantyService_table' element={<WarrantyService_table/>}/>
+            {/* </Route> */}
           </Route>
           <Route path="/lorem" element={<Lorem />}/>
         </Routes>

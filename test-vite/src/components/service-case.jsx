@@ -58,6 +58,7 @@ import ApiCustomer from '@/api'
 
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
+import { format } from 'date-fns'
 import { twMerge } from "tailwind-merge"
 // const workorder = [
 //   {
@@ -319,6 +320,8 @@ export const ServiceCase = ({
   
 const [symptomSearchTerm, setSymptomSearchTerm] = useState("");
 const [symptomSuggestions, setSymptomSuggestions] = useState([]);
+
+const [caseClosedDate, setCaseClosedDate] = useState(null);
 
   
 
@@ -652,8 +655,8 @@ useEffect(() => {
                   label="Case Closed Date"
                   value={
                     <span className="flex gap-[5em]">
-                      ... 
-                      <DatePicker></DatePicker>
+                      {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "..."}
+                      <DatePicker value={caseClosedDate} onChange={setCaseClosedDate}></DatePicker>
                       ...
                     </span>
                   }
