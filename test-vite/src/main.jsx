@@ -48,8 +48,8 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/WarrantyService_table' element={<WarrantyService_table/>}/>
             <Route path='/master/Mo_table' element={<Mo_table/>}/>
             <Route path='/master/Wo_table' element={<Wo_table/>}/>
-            {/* </Route> */}
           </Route>
+            {/* </Route> */}
           <Route path="/lorem" element={<Lorem />}/>
         </Routes>
       {/* </ModalContextProvider> */}
