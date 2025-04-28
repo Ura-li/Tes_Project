@@ -5,9 +5,9 @@ import prisma from "../../../../../prisma/client";
 export async function GET(request, { params }) {
     //get params id
     const url = new URL(request.url);
-    const caseID = parseInt(url.pathname.split("/").pop()); 
+    const caseID = url.pathname.split("/").pop(); 
 
-    if (isNaN(caseID)) {
+    if (!caseID) {
         return NextResponse.json(
             { success: false, message: "Invalid Case ID" },
             { status: 400 }
@@ -53,10 +53,9 @@ export async function GET(request, { params }) {
 
 // update data
 export async function PATCH(request, { params }) {
-    const caseID = parseInt(params.CaseID);
-
+    const { CaseID } = params;
+    const caseID = CaseID;
     const { 
-        CaseID,
         SiteAccountID,
         ContactID,
         AssetID,
@@ -111,7 +110,8 @@ export async function PATCH(request, { params }) {
 
 //delete data
 export async function DELETE(request, { params }) {
-    const caseID = parseInt(params.CaseID);
+    const { CaseID } = await params;
+    const caseID = CaseID;
     
     await prisma.caseinformation.delete(
         {

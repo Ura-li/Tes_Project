@@ -60,6 +60,7 @@ import ApiCustomer from '@/api'
 
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
+import { format } from 'date-fns'
 import { twMerge } from "tailwind-merge"
 // const workorder = [
 //   {
@@ -334,6 +335,8 @@ export const ServiceCase = ({
 const [symptomSearchTerm, setSymptomSearchTerm] = useState("");
 const [symptomSuggestions, setSymptomSuggestions] = useState([]);
 
+const [caseClosedDate, setCaseClosedDate] = useState(null);
+
   
 
   const tabs = [
@@ -392,7 +395,6 @@ const [symptomSuggestions, setSymptomSuggestions] = useState([]);
         }));
       }
 
-      console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
       // const res = await ApiCustomer.get(`/api/`)
     }catch(err){
       console.error("Error returning Customer Data : ",err)
@@ -418,6 +420,7 @@ const [symptomSuggestions, setSymptomSuggestions] = useState([]);
 //notes handler
 const fetchCaseNotes = async () => {
   try{
+    // console.log("Case Details : ", caseDetails)
     const res = await ApiCustomer.get(`/api/case-information/case-notes`)
     const notes = res.data.data
 
@@ -454,6 +457,7 @@ const fetchCaseNotes = async () => {
 useEffect(() => {
   fetchCustomerData();
   fetchAssetInformation();
+  fetchOwnerUserData();
   
   fetchWorkOrders();
   const loadNote = async () => {
@@ -466,9 +470,27 @@ useEffect(() => {
   }
   loadNote()
 }, [])
+
+//data for upper style
+const [ownerUserData, setOwnerUserData ] = useState([])
+// const []
+const fetchOwnerUserData = async () => {
+  try {
+    const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
+    setOwnerUserData(response.data.data)
+  } catch (error) {
+    
+  }
+}
+
+
 useEffect(() =>{
   console.log("Data Asset Info : ",dataFetchAssetInformation)
-}, dataFetchAssetInformation)
+  
+  console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
+  console.log("Fetch Data User ", ownerUserData)
+}, [ownerUserData])
+
 
 const fetchSymptomCodes = async (term) => {
   try {
@@ -525,6 +547,7 @@ useEffect(() => {
 }, [workOrders]);
 
 
+
   return (
     <>
     <Card className="mt-2 rounded-none p-0 border-0">
@@ -554,7 +577,7 @@ useEffect(() => {
               </CardTitle>
               <CardTitle className="flex">
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>Kamisyah Indriani</h1>
+                  <h1 className='text-blue-500'>{ownerUserData.Name}</h1>
                   <p className="text-sm font-light ">Owner</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
@@ -562,7 +585,7 @@ useEffect(() => {
                   <p className="text-sm font-light ">Queue</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>{caseDetails.CaseID}</h1>
+                  <h1 className='text-blue-500'>{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</h1>
                   <p className="text-sm font-light ">Contact</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
@@ -572,7 +595,7 @@ useEffect(() => {
                   </SelectTrigger>
                   <SelectContent className="p-0">
                     <SelectGroup className="p-0">
-                    <SelectItem value="first" className="p-0">PT BANK SBI INDONESIA</SelectItem>
+                    <SelectItem value="first" className="p-0">{dataFetchCustomerData.SiteAccount?.Company}</SelectItem>
                     <SelectItem value="??">??</SelectItem>
                       <SelectItem value="!!">!!</SelectItem>
                       <SelectItem value="**">**</SelectItem>
@@ -653,10 +676,11 @@ useEffect(() => {
                   icon
                   span={3}
                 > 
-                <span className="flex gap-[5em]">
-                      --- 
-                      <DatePicker></DatePicker>
+                  <span className="flex gap-[5em]">
+                      {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "..."}
+                      <DatePicker value={caseClosedDate} onChange={setCaseClosedDate}></DatePicker>
                       ---
+
                     </span>
                 </CaseField>
                 <CaseField label="Irrelevant"  icon >
