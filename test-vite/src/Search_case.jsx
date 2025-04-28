@@ -191,12 +191,47 @@ const Search_case = () => {
 
     // this for switching tab
     if (search.SerialNumber !== "") {
-      setIsModalAssetOpen(true); // Open modal
-      setActiveTab("ci"); // Switch tab to target
+      setIsModalAssetOpen(true);     
+      setActiveTab("ci");
+    
+   
+      setTimeout(() => {
+        Swal.fire({
+          title: 'Memuat data asset...',
+          text: 'Mohon tunggu sebentar',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading(); // Tampilkan loading
+          }
+        });
+    
+        setTimeout(() => {
+          Swal.close();  
+        }, 500);  
+      }, 300);
     } else if (search.Company !== "") {
       setIsModalCompanyOpen(true);
-      setActiveTab("ci"); // Switch tab to target
+      setActiveTab("ci");
+    
+     
+      setTimeout(() => {
+        Swal.fire({
+          title: 'Memuat data company...',
+          text: 'Mohon tunggu sebentar',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading(); // Tampilkan loading
+          }
+        });
+    
+   
+        setTimeout(() => {
+          Swal.close(); 
+        }, 500); 
+      }, 300); 
     }
+    
+    
 
     /**
      * if the query include email / phone, queryparam runned
@@ -597,7 +632,8 @@ const Search_case = () => {
         title: 'Success!',
         text: 'Case created successfully!',
         icon: 'success',
-        confirmButtonText: 'OK'
+        showConfirmButton: false,
+        timer: 2000,
       }).then(() => {
         navigate(`/case/${res.data.data.CaseID}`);
       });
@@ -609,7 +645,8 @@ const Search_case = () => {
         title: 'Error!',
         text: 'There was an error creating the case.',
         icon: 'error',
-        confirmButtonText: 'OK'
+        showConfirmButton: false,
+        timer: 1000,
       });
     }
   };

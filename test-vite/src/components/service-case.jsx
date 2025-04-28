@@ -319,6 +319,135 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
   </>
 );
 
+export const TabsServiceWO = () => {
+
+  const buttons = [
+    { icon: ArrowLeftFromLine, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now") },
+    { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Refresh", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Process", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
+    { icon: UserPen, label:  "Create Material Order", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now") },
+  ];
+  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  const hiddenButtons = open ? buttons.slice(-3) : [];
+  return (
+    <>
+    <div className='border-1 flex items-center '>
+       {visibleButtons.map((btn, index) => (
+          <Button
+            key={index}
+            onClick={btn.onClick}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+            >
+            <btn.icon className="h-4 w-4" />
+            {btn.label && <span className="text-md">{btn.label}</span>}
+          </Button>
+        ))}
+
+{open && hiddenButtons.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">...</DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                <DropdownMenuItem key={index}>
+                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  {btn.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    </div>
+    <div>
+    {/* <ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
+      /> */}
+    </div>
+  </>
+  )
+}
+
+export const TabsServiceMO = () => {
+
+  const buttons = [
+    { icon: ArrowLeftFromLine, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now") },
+    { icon: RotateCw, label: "ATP", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Cancel Order", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Add Parts", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Place Order", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Tax", onClick: () => alert("not now") },
+    { icon: StepBack, label: "CustID Search", onClick: () => alert("not now") },
+    { icon: UserPen, label:  "PUDO Search", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+  ];
+  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  const hiddenButtons = open ? buttons.slice(-3) : [];
+  return (
+    <>
+    <div className='border-1 flex items-center '>
+       {visibleButtons.map((btn, index) => (
+          <Button
+            key={index}
+            onClick={btn.onClick}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+            >
+            <btn.icon className="h-4 w-4" />
+            {btn.label && <span className="text-md">{btn.label}</span>}
+          </Button>
+        ))}
+
+{open && hiddenButtons.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">...</DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                <DropdownMenuItem key={index}>
+                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  {btn.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    </div>
+    <div>
+    {/* <ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
+      /> */}
+    </div>
+  </>
+  )
+}
 
 export const ServiceCase = ({ 
   caseDetails, 
@@ -491,6 +620,9 @@ useEffect(() =>{
   console.log("Fetch Data User ", ownerUserData)
 }, [ownerUserData])
 
+// useEffect(() =>{
+//   console.log("Data Asset Info : ",dataFetchAssetInformation)
+// }, dataFetchAssetInformation)
 
 const fetchSymptomCodes = async (term) => {
   try {

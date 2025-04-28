@@ -32,6 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table"; 
 import { Link } from "react-router";
+import { TabsServiceMO } from "./service-case";
 
 import { useParams } from "react-router";
 
@@ -67,6 +68,8 @@ export const ServiceMaterial = () => {
     fetchMaterialLineOrdersInMODetail();
   }, [])
   return (
+    <div>
+      <TabsServiceMO/>
     <Card className="mt-2 rounded-none h-[160px]">
       <CardHeader>
         <CardTitle className="text-xl ">{materialOrders.MOID} for {materialOrders.WOID}</CardTitle>
@@ -448,5 +451,6 @@ export const ServiceMaterial = () => {
         </Tabs>
       </CardContent>
     </Card>
+    </div>
   );
 };
