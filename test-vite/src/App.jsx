@@ -72,7 +72,7 @@ const App = () => {
         </div> */}
         <Outlet/>
       </SidebarInset>
-    </SidebarProvider>
+    </SidebarProvider>  
     </div>
   )
 }

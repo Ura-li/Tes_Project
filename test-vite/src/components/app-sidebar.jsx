@@ -98,7 +98,15 @@ const data = {
         {
           title: "Warranty Service",
           url: "/master/WarrantyService_table",
-        },      
+        },    
+        {
+          title: "Material Order",
+          url: "/master/Mo_table",
+        },  
+        {
+          title: "Work Order",
+          url: "/master/Wo_table",
+        },  
       ],
     },
     {
