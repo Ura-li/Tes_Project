@@ -46,7 +46,9 @@ import {
   StepBack,
   CalendarDays,
   Lock,
-  UserPen
+  UserPen,
+  ArrowUp,
+  ChevronDown
  } from 'lucide-react'
 
  import { useLocation } from "react-router-dom";
@@ -305,6 +307,18 @@ export const TabsService = ({ caseDetails }) => {
   )
 }
 
+export const CaseField = ({ label, children, icon, span = 1, className }) => (
+  <>
+    <CardTitle className={twMerge(`font-medium grid justify-start grid-flow-col  items-center ${icon ? "gap-1" : ""}`,className)}>
+      {icon && <Lock className="size-4" />}
+      {label}
+    </CardTitle>
+    <CardTitle className={`col-span-${span}`}>
+      {children}
+    </CardTitle>
+  </>
+);
+
 
 export const ServiceCase = ({ 
   caseDetails, 
@@ -350,15 +364,6 @@ const [caseClosedDate, setCaseClosedDate] = useState(null);
     const [selected, setSelected] = useState("apple"); // Default to 'apple'
 
     
-const CaseField = ({ label, value, icon, span = 1, className }) => (
-  <>
-    <CardTitle className={twMerge(`font-medium grid justify-start grid-flow-col  items-center ${icon ? "gap-1" : ""}`,className)}>
-      {icon && <Lock className="size-4" />}
-      {label}
-    </CardTitle>
-    <CardTitle className={`col-span-${span}`}>{value}</CardTitle>
-  </>
-);
 
 
   //customer, asset, entitlement
@@ -549,7 +554,7 @@ useEffect(() => {
       <CardHeader className="p-0">
         <Tabs defaultValue="case_info"> 
           
-          <CardContent className="flex flex-col gap-3 border-2 w-full p-2">
+          <CardContent className="flex flex-col gap-3 border-2 w-full p-2 sticky">
             <div className="flex justify-between">
               <CardTitle className="text-xl ">
                 {caseDetails.CaseID}
@@ -644,58 +649,50 @@ useEffect(() => {
       
           <TabsContent value="case_info" className={'p-2'}>
             <Card className="flex-row">
-              <CardContent className="grid gap-10  grid-cols-6 p-3 ">  
-                <CaseField label="Case ID" value={caseDetails.CaseID} icon />
-                <CaseField label="Case Subject" value={caseDetails.CaseSubject} span={3} />
-                <CaseField label="Incoming Channel" value={caseDetails.IncomingChannel} icon />
-                <CaseField label="Business Segment" value="..." />
-                <CaseField label="Email Status" value="..." />
-                <CaseField label="Case Status" value={caseDetails.CaseStatus} />
-                <CaseField label="Case Type" value={caseDetails.CaseType} />
-                <CaseField label="KCI For Case?" value={caseDetails.KCI_Flag ? "Yes" : "No"} />
-                <CaseField label="Case Priority" value={caseDetails.CasePriority} />
-                <CaseField label="HPI Segment" value="..." />
-                <CaseField label="Customer Tracking Number" value="..." icon />
-                <CaseField label="Customer Severity" value={caseDetails.CustomerSeverity} />
-                <CaseField label="Update Customer Tracking Number" value="..." span={3} />
-                <CaseField
-                  label="Created ON"
-                  value={
-                    <span className="flex gap-[5em]">
-                      {new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')}
-                          <DatePicker></DatePicker>
-                      {new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  }
-                  icon
-                  span={3}
-                />
-                <CaseField label="Alternate Customer Tracking Number" value="..." />
+              <CardContent className="grid gap-10 items-center grid-cols-6 p-3 ">  
+                <CaseField label="Case ID" icon >{caseDetails.CaseID}</CaseField>
+                <CaseField label="Case Subject"  span={3} >{caseDetails.CaseSubject}</CaseField>
+                <CaseField label="Incoming Channel"  icon >{caseDetails.IncomingChannel}</CaseField>
+                <CaseField label="Business Segment"  >---</CaseField>
+                <CaseField label="Email Status" >---</CaseField>
+                <CaseField label="Case Status"  >{caseDetails.CaseStatus}</CaseField>
+                <CaseField label="Case Type"  >{caseDetails.CaseType}</CaseField>
+                <CaseField label="KCI For Case?"  >{caseDetails.KCI_Flag ? "Yes" : "No"}</CaseField>
+                <CaseField label="Case Priority"  >{caseDetails.CasePriority}</CaseField>
+                <CaseField label="HPI Segment"  >---</CaseField>
+                <CaseField label="Customer Tracking Number"  icon >---</CaseField>
+                <CaseField label="Customer Severity"  >{caseDetails.CustomerSeverity}</CaseField>
+                <CaseField label="Update Customer Tracking Number"  span={3} >---</CaseField>
+                <CaseField label="Created ON" icon span={3}>
+                  <span className="flex gap-[5em]">
+                    {new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')}
+                        <DatePicker></DatePicker>
+                    {new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </CaseField>
+                <CaseField label="Alternate Customer Tracking Number"> ---  </CaseField>
                 <CaseField
                   label="Case Closed Date"
-                  value={
-                    <span className="flex gap-[5em]">
+                  icon
+                  span={3}
+                > 
+                  <span className="flex gap-[5em]">
                       {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "..."}
                       <DatePicker value={caseClosedDate} onChange={setCaseClosedDate}></DatePicker>
-                      ...
+                      ---
+
                     </span>
-                  }
-                  icon
-                  span={3}
-                />
-                <CaseField label="Irrelevant" value="..." icon />
-                <CaseField
-                  label="Submitted To Base"
-                  value={
+                </CaseField>
+                <CaseField label="Irrelevant"  icon >
+                  --- 
+                </CaseField> 
+                <CaseField label="Submitted To Base" icon span={3}>
                     <span className="flex gap-[5em]">
-                      ... 
+                      --- 
                       <DatePicker></DatePicker>
-                      ...
+                      ---
                     </span>
-                  }
-                  icon
-                  span={3}
-                />
+                </CaseField>
 
               </CardContent>
             </Card>
@@ -703,56 +700,15 @@ useEffect(() => {
             <Card className="mt-5 flex-col">
             <span className='ml-5 font-bold text-xl'>Global Trade Check</span>
               <CardContent className="grid gap-10  grid-cols-6 p-3">
-                {/* <CardTitle className='font-bold flex'>
-                  <Lock className='size-5 mr-2'></Lock>
-                  <span>Global Trade Status</span>
-                  <span className='ml-18'>...</span>
-                </CardTitle>
-
-                <CardTitle className='font-bold flex'>
-                  <Lock className='size-5 mr-2'></Lock>
-                  <span>Embargoed Country</span>
-                  <span className='ml-16.5'>...</span>
-                </CardTitle>
-
-                <CardTitle className='font-bold flex'>
-                  <span className='ml-7'>GT Override Reason</span>
-                  <span className='ml-17.5'>...</span>
-                </CardTitle>
-
-                <CardTitle className='ml-12 font-bold flex'>
-                  <span>GT Details</span>
-                  <span className='ml-36'>...</span>
-                </CardTitle>
-
-                <CardTitle className='ml-12 font-bold flex'>
-                  <span>Screening ID</span>
-                  <span className='ml-31'>...</span>
-                </CardTitle>
-
-                <CardTitle className='ml-5 font-bold flex'>
-                  <Lock className='size-5 mr-2'></Lock>
-                  <span>GT Active Listening</span>
-                  <span className='ml-19'>...</span>
-                </CardTitle>
-
-                <CardTitle className='mr-15 font-bold flex'>
-                  <Lock className='size-5 mr-2'></Lock>
-                  <span>GT AL Comments</span>
-                  <span className='ml-25'>...</span>
-                </CardTitle> */}
-
-                <CaseField label="Global Trade Status" value="..."/>
-                <CaseField label="GT Override Reason" value="..." />
-                <CaseField label="GT Active Listening" value="..." />
-                <CaseField label="Embargoed Country" value="..." icon/>
-                <CaseField label="GT Details" value="..." />
-                <CaseField label="GT All Comments" value="..." />
-                <CaseField />
-                <CaseField label="Screening ID" value="..." />
-                <CaseField/>
-                
-
+                <CaseField label="Global Trade Status" > --- </CaseField>
+                <CaseField label="GT Override Reason" >--- </CaseField>
+                <CaseField label="GT Active Listening" > ---</CaseField>
+                <CaseField label="Embargoed Country" icon>--- </CaseField>
+                <CaseField label="GT Details" >--- </CaseField>
+                <CaseField label="GT All Comments" > ---</CaseField>
+                <CaseField >--- </CaseField>
+                <CaseField label="Screening ID" > ---</CaseField>
+                <CaseField>--- </CaseField>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1028,188 +984,241 @@ useEffect(() => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="ci_notes" className={'p-2'} >
+          <TabsContent value="ci_notes" className={'p-2 flex flex-col gap-4'} >
           <Card className="flex-col p-2  ">
             <CardHeader>
-            <CardTitle className=' text-lg'>Customer Issue Description & System Information</CardTitle>
-            <hr />
+              <CardTitle className=' text-lg'>Customer Issue Description & System Information</CardTitle>
+              <hr />
             </CardHeader>
-              <CardContent className="grid grid-cols-6 grid-rows-6">
-              
-              <div className='col-span-4 row-span-3'>
-                <textarea className='border-2 border-black w-[100%] h-[100%] resize-none'></textarea>
-              </div>
+              <CardContent className="flex gap-x-5 p-4">
+                <div className="flex-1 grid grid-row-7 grid-cols-6 items-center gap-y-7">
+                  <div className='row-span-4 col-span-full'>
+                    <textarea className='border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none'></textarea>
+                  </div>
+                  <CaseField label="Related Device" className={'col-span-3'}  span={3}>--- </CaseField>
+                  <CaseField label="Device Manufacturer" className={'col-span-3'}  span={3} icon>--- </CaseField>
+                  <CaseField label="Device Model" className={'col-span-3'}  span={3}>--- </CaseField>
+                </div>
 
-              <div className='ml-7 font-bold flex'>
-                <span>Related Device</span>
-                <span className='ml-47.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>Device Manufacturer</span>
-                <span className='ml-36'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span className='ml-7'>Device Model</span>
-                <span className='ml-50'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span>Program/Category</span>
-                <span className='ml-38.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span>Operating System</span>
-                <span className='ml-40.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span>Version</span>
-                <span className='ml-60'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span>Remote Diag Code</span>
-                <span className='ml-39.5'>...</span>
-              </div>
-    
-              <div className='font-bold flex'>
-                <span>Application Information</span>
-                <span className='ml-35'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span>Provider / Platform</span>
-                <span className='ml-44'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span>Software Version</span>
-                <span className='ml-49'>...</span>
-              </div>
+                <div className="flex-1 grid-flow-row gap-y-7 grid grid-cols-6">
+                  <CaseField label="Program/Category" className={'col-span-3'}  span={2}>---</CaseField>
+                  <CaseField label="Operating System" className={'col-span-3'}  span={3}>---</CaseField>
+                  <CaseField label="Version" className={'col-span-3'}  span={3} >---</CaseField>
+                  <CaseField label="Remote Diag Code" className={'col-span-3'}  span={3} >---</CaseField>
+                  <CaseField label="Applicsation Information" className={'col-span-3'}  span={3}>---</CaseField>
+                  <CaseField label="Provider / Platform" className={'col-span-3'}  span={3}>---</CaseField>
+                  <CaseField label="Software Version" className={'col-span-3'}  span={3}>---</CaseField>
+                </div>
               </CardContent>
           </Card>
 
-          <Card className="mt-5 flex-col">
-            <span className='ml-5 font-bold text-xl'>Case Notes</span>
-              <CardContent className="grid grid-col grid-rows-5 gap-6">
+          <Card className="flex-col p-2  ">
+            <CardHeader>
+              <CardTitle className=' text-lg'>Case Notes</CardTitle>
+              <hr />
+            </CardHeader>
+              <CardContent className="flex gap-4">
+                <div className="grid grid-cols-6 gap-y-7 flex-1">
 
-              <div className='font-bold flex jus'>
-                <span>Log Type</span>
-                <span className='ml-72'>
-                  <Select onValueChange={(val) => onChange("LogType", val)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Log Type"/>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="NotesLog">Notes Log</SelectItem>
-                      <SelectItem value="PhoneLog">Phone Log</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </span>
-              </div>
+                  <CaseField label="Log Type" className={'col-span-2'} span={4}>
+                    <Select onValueChange={(val) => onChange("LogType", val)}>
+                        <SelectTrigger className={'w-[100%] hover:shadow-lg border-b-0'}>
+                          <SelectValue placeholder="Log Type"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="NotesLog">Notes Log</SelectItem>
+                          <SelectItem value="PhoneLog">Phone Log</SelectItem>
+                        </SelectContent>
+                    </Select>
+                  </CaseField>
 
-              <div className='font-bold flex'>
-                <span>Action Type</span>
-                <span className='ml-67'>...</span>
-              </div>
+                  <CaseField label="Action Type" className={'col-span-2'}  span={4}>---</CaseField>
 
-              <div className='font-bold flex'>
-                <span>Template </span>
-                <span className='ml-72'>...</span>
-              </div>
+                  <CaseField label="Template" className={'col-span-2'} span={4}>---</CaseField>
 
-              <div className='font-bold flex'>
-                <span>Visible Externally</span>
-                <span className='ml-57'>
-                <Select onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="---"/>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">Yes</SelectItem>
-                      <SelectItem value="0">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </span>
-              </div>
-
-              <div className='font-bold flex '>
-                <span>Number of Minutes Spent</span>
-                <span className='ml-40.5'>...</span>
-              </div>
-
-              <div className='flex'>
-                <span className='font-bold'>Notes</span>
-                <textarea className='ml-79 w-80 h-40 resize-none p-2 border-2 border-black ' value={formData?.Note || ''} onChange={(e) => onChange("Note", e.target.value)}></textarea>
-              </div>
-
-              <div className='absolute ml-180'>
-              <textarea className='w-120 h-100 resize-none p-2 border-2 border-black' readOnly value={caseNotes?.NotesDisplay}> </textarea>
-                  
-              </div>
-
-              </CardContent>
-          </Card>
-
-          <Card className="mt-5 flex-col">
-            <span className='ml-5 font-bold text-xl'>Symptom Codes</span>
-              <CardContent className="grid gap-4.5 grid-flow-col grid-rows-4">
-
-              <div className='font-bold flex'>
-                <span>Keyword Search</span>
-                <Input 
-                  type="search" 
-                  className="w-100 ml-27 border-2 border-black"
-                  value={symptomSearchTerm}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    setSymptomSearchTerm(value)
-                    if (value.length >= 2) fetchSymptomCodes(value)
-                      else setSymptomSuggestions([])
-                  }}
-                />
-              </div>
-              {symptomSuggestions.length > 0 && (
-                <ul className="bg-white border mt-1 max-h-40 overflow-y-auto absolute z-10">
-                  {symptomSuggestions.map((sym) => (
-                    <li
-                      key={sym.SymptomCodeID}
-                      className="p-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => {
-                        setSelectedSymptom(sym);
-                        setSymptomSearchTerm(sym.SymptomCode);
-                        setSymptomSuggestions([]);
-                      }}
+                  <CaseField label="Visible Externally" className={'col-span-2'} span={4}>
+                    <Select
+                      value={
+                        formData?.VisibleExternally === undefined || formData?.VisibleExternally === null
+                          ? ""
+                          : formData?.VisibleExternally
+                            ? "1"
+                            : "0"
+                      }
+                      onValueChange={(val) => onChange("VisibleExternally", val === "1")}
                     >
-                      {sym.SymptomCode}
-                    </li>
-                  ))}
-                </ul>
-              )}
+                      <SelectTrigger className={'w-[100%] hover:shadow-lg border-b-0'}>
+                        <SelectValue placeholder="---" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Yes</SelectItem>
+                        <SelectItem value="0">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </CaseField>
 
-              <div className='font-bold flex'>
-                <span>Top Category</span>
-                <span className='ml-32'>{selectedSymptom?.TopCategory}</span>
-              </div>
+                  <CaseField label="Number of Minutes Spent" className={'col-span-2'}  icon span={3} >---</CaseField>
 
-              <div className='font-bold flex'>
-                <span>Sub Category</span>
-                <span className='ml-32'>{selectedSymptom?.SubCategory}</span>
-              </div>
+                  <CaseField label="Notes" className={'col-span-2 self-start'} span={4}>
+                    <textarea
+                      className='h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500'
+                      value={formData?.Note || ''}
+                      onChange={(e) => onChange("Note", e.target.value)}
+                    />
+                  </CaseField>
+                  {/* <textarea
+                      className='h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500'
+                      value={formData?.Note || ''}
+                      onChange={(e) => onChange("Note", e.target.value)}
+                    /> */}
+                    
+                  
+                  {/* <div className='font-bold flex'>
+                    <span>Log Type</span>
+                      <Select onValueChange={(val) => onChange("LogType", val)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Log Type"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="NotesLog">Notes Log</SelectItem>
+                          <SelectItem value="PhoneLog">Phone Log</SelectItem>
+                        </SelectContent>
+                      </Select>
+                  </div>
 
-              <div className='font-bold flex'>
-                <span>Spesific Symptom</span>
-                <span className='ml-24'>{selectedSymptom?.SymptomCode}</span>
-              </div>
+                  <div className='font-bold flex'>
+                    <span>Action Type</span>
+                    <span className=''>...</span>
+                  </div>
 
-              <div className='font-bold flex'>
-                <span className='mr-60'>Quality Codes</span>
-                <span className=''>Add Existing QA Code</span>
-              </div>
+                  <div className='font-bold flex'>
+                    <span>Template </span>
+                    <span className=''>...</span>
+                  </div>
+
+                  <div className='font-bold flex'>
+                    <span>Visible Externally</span>
+                    <span className=''>
+                    <Select onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="---"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">Yes</SelectItem>
+                          <SelectItem value="0">No</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </span>
+                  </div>
+
+                  <div className='font-bold flex '>
+                    <span>Number of Minutes Spent</span>
+                    <span className=''>...</span>
+                  </div>
+
+                  <div className='flex'>
+                    <span className='font-bold'>Notes</span>
+                    <textarea className=' w-80 h-40 resize-none p-2 border-2 border-black ' value={formData?.Note || ''} onChange={(e) => onChange("Note", e.target.value)}></textarea>
+                  </div> */}
+
+                </div>
+
+                <div className='flex flex-1'>
+                  <textarea className='w-[100%] h-[100%] resize-none p-2 ring-1 ring-gray-500' readOnly value={caseNotes?.NotesDisplay}> </textarea>
+                </div>
+              </CardContent>
+          </Card>
+
+          <Card className="mt-5 flex-col">
+          <CardHeader>
+              <CardTitle className=' text-lg'>Syomtem Description /CardTitle</CardTitle>
+              <hr />
+            </CardHeader>
+              <CardContent className="flex gap-6">
+
+                <div className="grid grid-cols-5 gap-y-7 gap-x-2 flex-1">
+                  <CaseField label="Keyword Search" className={'col-span-2'} span={3}>
+                    <Input
+                        placeholder="..."
+                        type="search"
+                        className=""
+                        value={symptomSearchTerm}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          setSymptomSearchTerm(value)
+                          if (value.length >= 2) fetchSymptomCodes(value)
+                            else setSymptomSuggestions([])
+                        }}
+                    />
+                  </CaseField>
+
+                  {/* <div className='font-bold flex'>
+                    <span>Keyword Search</span>
+                    <Input
+                    placeholder="..."
+                      type="search"
+                      className=""
+                      value={symptomSearchTerm}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        setSymptomSearchTerm(value)
+                        if (value.length >= 2) fetchSymptomCodes(value)
+                          else setSymptomSuggestions([])
+                      }}
+                    />
+                  </div> */}
+
+                  {symptomSuggestions.length > 0 && (
+                    <ul className="bg-white border mt-1 max-h-40 overflow-y-auto absolute z-10">
+                      {symptomSuggestions.map((sym) => (
+                        <li
+                          key={sym.SymptomCodeID}
+                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            setSelectedSymptom(sym);
+                            setSymptomSearchTerm(sym.SymptomCode);
+                            setSymptomSuggestions([]);
+                          }}
+                        >
+                          {sym.SymptomCode}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <CaseField label="Top Category" className={'col-span-2'}  span={3} >---{selectedSymptom?.TopCategory}</CaseField>
+                  <CaseField label="Sub Category" className={'col-span-2'}  span={3} >---{selectedSymptom?.SubCategory}</CaseField>
+                  <CaseField label="Spesific Symptom" className={'col-span-2'}  span={3} >---{selectedSymptom?.SymptomCode}</CaseField>
+                  
+                  {/* <div className='font-bold flex'>
+                    <span>Top Category</span>
+                    <span className=''>...{selectedSymptom?.TopCategory}</span>
+                  </div>
+                  <div className='font-bold flex'>
+                    <span>Sub Category</span>
+                    <span className=''>...{selectedSymptom?.SubCategory}</span>
+                  </div>
+                  <div className='font-bold flex'>
+                    <span>Spesific Symptom</span>
+                    <span className=''>...{selectedSymptom?.SymptomCode}</span>
+                  </div> */}
+                </div>
+
+                <div className='font-bold flex flex-1'>
+                  <Table className=""  >
+                    <TableCaption className={"caption-top justify-between flex items-end "}>
+                    <span className=''>Quality Codes</span>
+                    <span className=''>Add Existing QA Code</span>  
+                    </TableCaption>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>QA Level 1 <ArrowUp/> <ChevronDown/> </TableHead>
+                        <TableHead>QA Level 2 <ArrowUp/> <ChevronDown/> </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                  </Table>
+                  
+                </div>
               </CardContent>
           </Card>
 
