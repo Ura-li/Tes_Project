@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || ''
 
 export function middleware() {
     // retrieve the current response

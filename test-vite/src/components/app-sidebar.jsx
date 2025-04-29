@@ -37,13 +37,16 @@ import {
  
 import { ScrollArea } from "@/components/ui/scroll-area"
 
+import { getUserFromToken } from "@/lib/utils/auth"
+
 // This is sample data.
 const data = {
-  user: {
-    name: "ME",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
+  // user: {
+  //   name: "ME",
+  //   email: "m@example.com",
+  //   avatar: "/avatars/shadcn.jpg",
+  // },
+  user: getUserFromToken(),
   teams: [
     {
       name: "HP Company",
@@ -103,7 +106,15 @@ const data = {
         {
           title: "Warranty Service",
           url: "/master/WarrantyService_table",
-        },   
+        },    
+        {
+          title: "Material Order",
+          url: "/master/Mo_table",
+        },  
+        {
+          title: "Work Order",
+          url: "/master/Wo_table",
+        },  
       ],
     },
     {

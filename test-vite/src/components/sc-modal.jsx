@@ -467,8 +467,7 @@ export function BtnModalContact({
  * TODO 
  * MAKE ROUTE FOR PRODUCT
  */
-export function 
-BtnModalAsset({
+export function BtnModalAsset({
   typeSearch,
   contactID, 
   siteAccountID, 
@@ -596,33 +595,50 @@ BtnModalAsset({
 
   const handleUpdateAsset = async () => {
     if (!selectedAssetForCreatingAsset) return;
-    setIsUpdating(true);
-    console.log(siteAccountID);
-    
+  
+    // Tampilkan loading menggunakan SweetAlert2
+    Swal.fire({
+      title: 'Memperbarui asset...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
     try {
       const response = await ApiCustomer.patch(`/api/asset-information/kepemilikan/${selectedAssetForCreatingAsset.AssetID}`, {
         contactID,
         siteAccountID
       });
-      
+  
       if (response.status === 200) {
         const updatedAssets = await fetchAssetTable(siteAccountID, contactID);
         setSelectedAsset(updatedAssets);
-        console.log("Selected Asset after Creating New One : ", updatedAssets);
-        alert("Asset berhasil diperbarui!");
-
         setIsOpen(false);
-        // fetchDataAssets();
-
-        if(selectedAssetForCreatingAsset?.AssetID){
-        }
+  
+        // Tutup loading dan tampilkan alert sukses
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Asset berhasil diperbarui!',
+          timer: 2000,
+          showConfirmButton: false
+        });
       }
     } catch (error) {
-      alert("Terjadi kesalahan saat memperbarui asset. ", error);
-      console.error("Terjadi kesalahan : ", error)
+      // Tutup loading dan tampilkan alert error
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: 'Terjadi kesalahan saat memperbarui asset.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      console.error("Terjadi kesalahan : ", error);
     }
-    setIsUpdating(false);
   };
+  
   
   
   const handleSearch = async () => {
@@ -2106,9 +2122,482 @@ return (
 );
 };
 
+export function MaterialOrderEdit({ MOID, onUpdate }) {
+  const [MaterialOrder, setMaterialOrder] = useState(null);
+  const [WOID,  setWOID] = useState("");
+  const [OrderNumber,  setOrderNumber ] = useState("");
+  const [OrderStatus, setOrderStatus] = useState("");
+  const [OrderType, setOrderType] = useState("");
+  const [CreatedOn, setCreatedOn] = useState("");
+  const [SalesOrderNumber, setSalesOrderNumber] = useState("");
+  const [RMANumber, setRMANumber] = useState("");
+  const [ReadyForClosureDate,  setReadyForClosureDate] = useState("");
+  const [Owner,  setOwner] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchMaterialOrder = async () => {
+    if (!MOID) return;
+    try {
+      const response = await ApiCustomer.get(`/api/mo-detaill/${MOID}`);
+      const data = response.data.data;
+  
+      // Fungsi bantu untuk konversi ke yyyy-MM-dd
+      const formatDate = (dateString) => {
+        return dateString ? new Date(dateString).toISOString().split("T")[0] : "";
+      };
+  
+      setMaterialOrder(data);
+      setWOID(data?.WOID || "");
+      setOrderNumber(data?.OrderNumber || "");
+      setOrderStatus(data?.OrderStatus || "");
+      setOrderType(data?.OrderType || "");
+      setCreatedOn(formatDate(data?.CreatedOn));
+      setSalesOrderNumber(data?.SalesOrderNumber || "");
+      setRMANumber(data?.RMANumber || "");
+      setReadyForClosureDate(formatDate(data?.ReadyForClosureDate));
+      setOwner(data?.Owner || "");
+  
+    } catch (error) {
+      console.error("Error fetching Material Order information:", error);
+    }
+  };
+  
+
+  useEffect(() => {
+    if (MOID && isOpen) {
+      fetchMaterialOrder();
+    }
+  }, [MOID, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setMaterialOrder("");
+      setWOID("");
+      setOrderNumber("");
+      setOrderStatus("");
+      setOrderType("");
+      setCreatedOn("");
+      setSalesOrderNumber("");
+      setRMANumber("");
+      setReadyForClosureDate("");
+      setOwner("");
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!WOID || !OrderNumber || !OrderStatus || !OrderType || !CreatedOn || !SalesOrderNumber || !RMANumber || !ReadyForClosureDate || !Owner) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text:  "Please fill in all fields before submitting.",
+        icon:  "warning",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });  
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/mo-detaill/${MOID}`, {
+        WOID : WOID,
+        OrderNumber : OrderNumber, 
+        OrderStatus : OrderStatus,
+        OrderType   : OrderType,
+        CreatedOn   : CreatedOn,
+        SalesOrderNumber : SalesOrderNumber,
+        RMANumber : RMANumber,
+        ReadyForClosureDate : ReadyForClosureDate,
+        Owner : Owner,
+      });
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating Material Order:", error);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchMaterialOrder(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="h-[500px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Material Order Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the Material Order Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
 
 
+<Label>Order Number</Label>
+<Input type="text" id="Order Number" className="p-2"  value={OrderNumber} onChange={(e) => setOrderNumber(e.target.value)} />
 
+<Label>Order Status</Label>
+<Input type="text" id="Order Status" className="p-2"  value={OrderStatus} onChange={(e) => setOrderStatus(e.target.value)} />
+
+<Label>Order Type</Label>
+<Input type="text" id="Order Type" className="p-2"  value={OrderType} onChange={(e) => setOrderType(e.target.value)} />
+ 
+<Label>Created On</Label>
+<Input type="date" id="Created On" className="p-2"  value={CreatedOn} onChange={(e) => setCreatedOn(e.target.value)} />
+
+<Label>Sales Order Number</Label>
+<Input type="text" id="Sales Order Number" className="p-2"  value={SalesOrderNumber} onChange={(e) => setSalesOrderNumber(e.target.value)}/>
+
+<Label>RMANumber</Label>
+<Input type="text" id="RMANumber" className="p-2"  value={RMANumber} onChange={(e) => setRMANumber(e.target.value)}/>
+
+<Label>Ready For Closure Date</Label>
+<Input type="date" id="Ready For Closure Date" className="p-2"  value={ReadyForClosureDate} onChange={(e) => setReadyForClosureDate(e.target.value)}/>
+
+<Label>Owner</Label>
+<Input type="text" id="Owner" className="p-2"  value={Owner} onChange={(e) => setOwner(e.target.value)}/>
+</div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export function MaterialOrderDelete ({ MOID, isModalOpen, setIsModalOpen, onUpdate }) {
+  //set modal
+const handleDelete = async () => {
+  try {
+    const response = await ApiCustomer.delete(`/api/mo-detaill/${MOID}`);
+    
+    console.log("Server Response:", response.data);
+    if (response.status === 409 || response.data.success === false) {
+      // 🚨 Restriction triggered - Show alert message
+      alert(response.data.message || "Cannot delete this Material Order due to restrictions.");
+      return;
+    }
+    Swal.fire({
+      icon: 'Success',
+      title: 'Berhasil!',
+      text: 'Material Order dihapus.',
+      timer: 1000,  
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
+    // ✅ Close the modal if it's open
+    setIsModalOpen(false);
+    // ✅ Refresh the table by calling `onUpdate()`
+    if (onUpdate) {
+      onUpdate();
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 409) {
+      // 🚨 Handle 409 Conflict error from backend
+      alert(error.response.data.message || "Cannot delete! This Warranty has related Warranty Service.");
+    } else {
+      alert("Failed to delete Material Order. Please try again.");
+    }
+  }
+};
+
+return (
+  <Dialog>
+    <DialogTrigger asChild>
+      <Button variant="outline" className="text-red-500 hover:text-red-700">
+        <Trash />
+      </Button>
+    </DialogTrigger>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Delete Material Order</DialogTitle>
+        <DialogDescription>
+          Delete Material Order confirm. 
+        </DialogDescription>
+      </DialogHeader>
+      <h1>Anda yakin ingin menghapus data ini?</h1>
+      <DialogFooter>
+        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
+};
+
+export function WorkOrderEdit({ WOID, onUpdate }) {
+  const [formData, setFormData] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
+
+  const defaultFormData = {
+    WorkOrderType: "",
+    Priority: "",
+    SystemStatus: "",
+    SubStatus: "",
+    PreferredDay: "",
+    PreferredTime: "",
+    ShipmentCountry: "",
+    ShipmentState: "",
+    CreatedOn: "",
+    Owner: "",
+    SLAJeopardy: "",
+    DueDateCustomer: "",
+    CoverageWindow: "",
+    Response: "",
+    OTCCode: "",
+    RequestedDateTimeCustomer: "",
+    GuaranteedFixTimeCustomer: "",
+    EarlyStartDateTimeCustomer: "",
+    LatestStartDateTimeCustomer: "",
+    SLAReschedule: "",
+    ActiveScheduleDate: "",
+    SLAErrorDescription: "",
+    CasePriorityIndex: "",
+    PartnerStatus: "",
+    WorkOrderDescription: "",
+    PartnerNotes: "",
+    IncomingChannel: "",
+  };
+
+  const formatDate = (dateString) => dateString ? new Date(dateString).toISOString().split("T")[0] : "";
+
+  const fetchWorkOrder = async () => {
+    if (!WOID) return;
+    try {
+      const response = await ApiCustomer.get(`/api/work-order/${WOID}`);
+      const data = response.data.data || {};
+
+      setFormData({
+        WorkOrderType: data.WorkOrderType || "",
+        Priority: data.Priority || "",
+        SystemStatus: data.SystemStatus || "",
+        SubStatus: data.SubStatus || "",
+        PreferredDay: formatDate(data.PreferredDay),
+        PreferredTime: formatDate(data.PreferredTime),
+        ShipmentCountry: data.ShipmentCountry || "",
+        ShipmentState: data.ShipmentState || "",
+        CreatedOn: formatDate(data.CreatedOn),
+        Owner: data.Owner || "",
+        SLAJeopardy: data.SLAJeopardy || "",
+        DueDateCustomer: formatDate(data.DueDateCustomer),
+        CoverageWindow: data.CoverageWindow || "",
+        Response: data.Response || "",
+        OTCCode: data.OTCCode || "",
+        RequestedDateTimeCustomer: formatDate(data.RequestedDateTimeCustomer),
+        GuaranteedFixTimeCustomer: formatDate(data.GuaranteedFixTimeCustomer),
+        EarlyStartDateTimeCustomer: formatDate(data.EarlyStartDateTimeCustomer),
+        LatestStartDateTimeCustomer: formatDate(data.LatestStartDateTimeCustomer),
+        SLAReschedule: data.SLAReschedule || "",
+        ActiveScheduleDate: formatDate(data.ActiveScheduleDate),
+        SLAErrorDescription: data.SLAErrorDescription || "",
+        CasePriorityIndex: data.CasePriorityIndex || "",
+        PartnerStatus: data.PartnerStatus || "",
+        WorkOrderDescription: data.WorkOrderDescription || "",
+        PartnerNotes: data.PartnerNotes || "",
+        IncomingChannel: data.IncomingChannel || "",
+      });
+    } catch (error) {
+      console.error("Error fetching Work Order information:", error);
+    }
+  };
+
+  const resetForm = () => setFormData(defaultFormData);
+
+  useEffect(() => {
+    if (WOID && isOpen) {
+      fetchWorkOrder();
+    }
+  }, [WOID, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      resetForm();
+    }
+  }, [isOpen]);
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: e.target ? e.target.value : e,
+    }));
+  };
+
+  const handleUpdate = async () => {
+    const { WorkOrderType, Priority, SystemStatus } = formData;
+  
+    if (!WorkOrderType || !Priority || !SystemStatus) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all required fields.",
+        icon: "warning",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+  
+    try {
+      await ApiCustomer.patch(`/api/work-order/${WOID}`, formData);
+  
+      Swal.fire({
+        title: "Success!",
+        text: "Data berhasil diperbarui.",
+        icon: "success",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+  
+      onUpdate();      // Refresh data
+      setIsOpen(false); // Tutup modal atau form
+    } catch (error) {
+      console.error("Error updating Work Order:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Gagal memperbarui data!",
+        icon: "error",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+  
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchWorkOrder(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="h-[500px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Work Order Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the Work Order. Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {[
+            { label: "Work Order Type", id: "WorkOrderType", type: "text" },
+            { label: "Priority", id: "Priority", type: "select", options: ["High", "Medium", "Low"] },
+            { label: "System Status", id: "SystemStatus", type: "select", options: ["Open", "In Progress", "Closed"] },
+            { label: "Sub Status", id: "SubStatus", type: "select", options: ["Pending", "Resolved", "Escalated"] },
+            { label: "Preferred Day", id: "PreferredDay", type: "date" },
+            { label: "Preferred Time", id: "PreferredTime", type: "datetime-local" },
+            { label: "Shipment Country", id: "ShipmentCountry", type: "select", options: ["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"] },
+            { label: "Shipment State", id: "ShipmentState", type: "select", options: ["California", "Texas", "New York", "Florida"] },
+            { label: "Created On", id: "CreatedOn", type: "date" },
+            { label: "Owner", id: "Owner", type: "text" },
+            { label: "SLA Jeopardy", id: "SLAJeopardy", type: "select", options: ["Yes", "No"] },
+            { label: "Due Date Customer", id: "DueDateCustomer", type: "date" },
+            { label: "Coverage Window", id: "CoverageWindow", type: "text" },
+            { label: "Response", id: "Response", type: "text" },
+            { label: "OTC Code", id: "OTCCode", type: "text" },
+            { label: "Requested Date Time Customer", id: "RequestedDateTimeCustomer", type: "date" },
+            { label: "Guaranteed Fix Time Customer", id: "GuaranteedFixTimeCustomer", type: "date" },
+            { label: "Early Start Date Time Customer", id: "EarlyStartDateTimeCustomer", type: "date" },
+            { label: "Latest Start Date Time Customer", id: "LatestStartDateTimeCustomer", type: "date" },
+            { label: "SLA Reschedule", id: "SLAReschedule", type: "text" },
+            { label: "Active Schedule Date", id: "ActiveScheduleDate", type: "date" },
+            { label: "SLA Error Description", id: "SLAErrorDescription", type: "text" },
+            { label: "Case Priority Index", id: "CasePriorityIndex", type: "text" },
+            { label: "Partner Status", id: "PartnerStatus", type: "text" },
+            { label: "Work Order Description", id: "WorkOrderDescription", type: "textarea" },
+            { label: "Partner Notes", id: "PartnerNotes", type: "textarea" },
+            { label: "Incoming Channel", id: "IncomingChannel", type: "select", options: ["Email", "Phone", "Chat"] },
+          ].map(({ label, id, type, options }) => (
+            <div key={id}>
+              <Label>{label}</Label>
+              {type === "select" ? (
+                <Select onValueChange={handleChange(id)} value={formData[id]}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder={`Select ${label}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {options.map(option => (
+                      <SelectItem key={option} value={option}>{option}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : type === "textarea" ? (
+                <Textarea id={id} className="p-2" value={formData[id]} onChange={handleChange(id)} />
+              ) : (
+                <Input type={type} id={id} className="p-2" value={formData[id]} onChange={handleChange(id)} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function WorkOrderDelete ({ WOID, isModalOpen, setIsModalOpen, onUpdate }) {
+  //set modal
+const handleDelete = async () => {
+  try {
+    const response = await ApiCustomer.delete(`/api/work-order/${WOID}`);
+    
+    console.log("Server Response:", response.data);
+    if (response.status === 409 || response.data.success === false) {
+      // 🚨 Restriction triggered - Show alert message
+      alert(response.data.message || "Cannot delete this Work Order due to restrictions.");
+      return;
+    }
+    Swal.fire({
+      icon: 'Success',
+      title: 'Berhasil!',
+      text: 'Work Order dihapus.',
+      timer: 1000,  
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
+    // ✅ Close the modal if it's open
+    setIsModalOpen(false);
+    // ✅ Refresh the table by calling `onUpdate()`
+    if (onUpdate) {
+      onUpdate();
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 409) {
+      // 🚨 Handle 409 Conflict error from backend
+      alert(error.response.data.message || "Cannot delete! This Waork has related Work Order.");
+    } else {
+      alert("Failed to delete Work Order. Please try again.");
+    }
+  }
+};
+
+return (
+  <Dialog>
+    <DialogTrigger asChild>
+      <Button variant="outline" className="text-red-500 hover:text-red-700">
+        <Trash />
+      </Button>
+    </DialogTrigger>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Delete Work Order</DialogTitle>
+        <DialogDescription>
+          Delete Work Order confirm. 
+        </DialogDescription>
+      </DialogHeader>
+      <h1>Anda yakin ingin menghapus data ini?</h1>
+      <DialogFooter>
+        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
+};
 //? Service Case Tab List
 
 
