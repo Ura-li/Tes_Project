@@ -30,10 +30,24 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+import Swal from "sweetalert2"
+
 export function NavUser({
   user
 }) {
   const { isMobile } = useSidebar()
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    Swal.fire({
+      title: "Success",
+      text: "User has been log out",
+      icon: "Success"
+    }).then((result) => {
+      window.location.href = '/lorem'; // back to login page
+    })
+  };
+  
 
   return (
     <SidebarMenu>
@@ -95,8 +109,11 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <LogOut />
-              Log out
+            <span onClick={logout} className="flex items-center cursor-pointer gap-2">
+              <LogOut className="w-5 h-5" />
+              <span>Log out</span>
+            </span>
+
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
