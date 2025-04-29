@@ -191,8 +191,6 @@ const Search_case = () => {
     if (search.SerialNumber !== "") {
       setIsModalAssetOpen(true);     
       setActiveTab("ci");
-    
-   
       setTimeout(() => {
         Swal.fire({
           title: 'Memuat data asset...',
@@ -202,7 +200,6 @@ const Search_case = () => {
             Swal.showLoading(); // Tampilkan loading
           }
         });
-    
         setTimeout(() => {
           Swal.close();  
         }, 500);  
@@ -210,8 +207,6 @@ const Search_case = () => {
     } else if (search.Company !== "") {
       setIsModalCompanyOpen(true);
       setActiveTab("ci");
-    
-     
       setTimeout(() => {
         Swal.fire({
           title: 'Memuat data company...',
@@ -221,8 +216,6 @@ const Search_case = () => {
             Swal.showLoading(); // Tampilkan loading
           }
         });
-    
-   
         setTimeout(() => {
           Swal.close(); 
         }, 500); 

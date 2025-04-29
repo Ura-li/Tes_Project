@@ -9,6 +9,8 @@ import { WarrantyServiceAdd, WarrantyServiceEdit, WarrantyServiceDelete } from "
 import { MaterialOrderEdit, MaterialOrderDelete,  } from "@/components/sc-modal";
 import { WorkOrderDelete, WorkOrderEdit } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
+import Swal from "sweetalert2";
+
 
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
@@ -20,20 +22,32 @@ export const Contact_table = () => {
   const itemsPerPage = 10;
 
   // Fungsi untuk mengambil data dari API
-    const fetchContacts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await ApiCustomer.get(`/api/contact-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
-        setContacts(response.data.data); 
-        setTotalPages(response.data.totalPages);
-      } catch (err) {
-        console.error("Error fetching contact data:", err);
-        setError("Failed to fetch data");
-      } finally {
-        setLoading(false);
+  const fetchContacts = async () => {
+    // Menampilkan indikator loading menggunakan SweetAlert2
+    Swal.fire({
+      title: 'Memuat Data Kontak...',
+      text: 'Mohon tunggu sebentar...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading(); // Menampilkan indikator loading
       }
-    };
+    });
+  
+    setLoading(true);
+    setError(null);
+  
+    try {
+      const response = await ApiCustomer.get(`/api/contact-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
+      setContacts(response.data.data); // Menyimpan data kontak ke state
+      setTotalPages(response.data.totalPages);
+    } catch (err) {
+      console.error("Error fetching contact data:", err);
+      setError("Failed to fetch data");
+    } finally {
+      setLoading(false);
+      Swal.close(); 
+    }
+  };
   
     useEffect(() => {
       fetchContacts();
@@ -55,8 +69,6 @@ export const Contact_table = () => {
         }}
       />
 
-      {/* Tampilkan loading jika sedang mengambil data */}
-      {loading && <p>Loading data...</p>}
 
       {/* Tampilkan error jika terjadi kesalahan */}
       {error && <p className="text-red-500">{error}</p>}
@@ -173,20 +185,37 @@ export const Company_table = () => {
 
   // Fungsi untuk mengambil data dari API
   const fetchCompanies = async () => {
-    setLoading(true);
+    Swal.fire({
+      title: 'Memuat Data Company...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
     setError(null);
+  
     try {
       const response = await ApiCustomer.get(`/api/site_account?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
-      setCompanies(response.data.data); 
+      setCompanies(response.data.data);
       setTotalPages(response.data.totalPages);
+  
+      Swal.close();
     } catch (err) {
       console.error("Error fetching company data:", err);
       setError("Failed to fetch data");
-    } finally {
-      setLoading(false);
+  
+      Swal.close(); // Tetap tutup loading walaupun error
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data perusahaan.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
   };
-
+  
   useEffect(() => {
     fetchCompanies();
   }, [currentPage, searchTerm]);
@@ -206,9 +235,6 @@ export const Company_table = () => {
           setCurrentPage(1); // Reset ke halaman pertama saat mencari
         }}
       />
-
-      {/* Tampilkan loading jika sedang mengambil data */}
-      {loading && <p>Loading data...</p>}
 
       {/* Tampilkan error jika terjadi kesalahan */}
       {error && <p className="text-red-500">{error}</p>}
@@ -327,23 +353,44 @@ export const Case_table = () => {
   //   },
   // ]);
 
-  const fetchCaseDataTable=async () => {
-    setLoading(true);
+  const fetchCaseDataTable = async () => {
+    Swal.fire({
+      title: 'Memuat Data Case....',
+      text: 'Mohon Tunggu Sebentar',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
     setError(null);
+  
     try {
       const response = await ApiCustomer.get("/api/case-information");
+  
       if (response.data.success) {
         setCaseData(response.data.data);
       } else {
         setError("Failed to fetch case data");
       }
+  
+      Swal.close(); // <-- Tambahkan Swal.close() setelah berhasil
+  
     } catch (err) {
       console.error("Error fetching case data:", err);
       setError("Error fetching data");
-    } finally {
-      setLoading(false);
+  
+      Swal.close(); // Tetap tutup loading jika error
+  
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data perusahaan.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     }
-  }
+  };
+  
 
   // 🔹 Load data when component mounts
   useEffect(() => {
@@ -467,17 +514,39 @@ export const Assets_table = () => {
   const fetchAssets = async () => {
     setLoading(true);
     setError(null);
+  
+    Swal.fire({
+      title: 'Memuat Data Asset...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
     try {
       const response = await ApiCustomer.get(`/api/asset-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
-      setAssets(response.data.data); 
+      setAssets(response.data.data);
       setTotalPages(response.data.totalPages);
+  
+      Swal.close(); // Tutup loading kalau berhasil
     } catch (err) {
       console.error("Error fetching asset data:", err);
       setError("Failed to fetch data");
+  
+      Swal.close(); // Tetap tutup loading walau error
+  
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data asset.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="p-4">
@@ -496,8 +565,6 @@ export const Assets_table = () => {
         }}
       />
       </div>      
-      {/* Tampilkan loading jika sedang mengambil data */}
-      {loading && <p>Loading data...</p>}
 
       {/* Tampilkan error jika terjadi kesalahan */}
       {error && <p className="text-red-500">{error}</p>}
@@ -590,18 +657,39 @@ export const Product_table = () => {
     const fetchProducts = async () => {
       setLoading(true);
       setError(null);
+    
+      Swal.fire({
+        title: 'Memuat Data Produk...',
+        text: 'Mohon tunggu sebentar',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+    
       try {
         const response = await ApiCustomer.get(`/api/product-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
-        setProducts(response.data.data); 
+        setProducts(response.data.data);
         setTotalPages(response.data.totalPages);
+    
+        Swal.close(); // Tutup loading Swal setelah sukses
       } catch (err) {
-        console.error("Error fetching company data:", err);
+        console.error("Error fetching product data:", err);
         setError("Failed to fetch data");
+    
+        Swal.close(); // Tutup Swal kalau error juga
+    
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data produk.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       } finally {
         setLoading(false);
       }
     };
-  
+    
     useEffect(() => {
       fetchProducts();
     }, [currentPage, searchTerm]);
@@ -621,9 +709,6 @@ export const Product_table = () => {
             setCurrentPage(1); // Reset ke halaman pertama saat mencari
           }}
         />
-  
-        {/* Tampilkan loading jika sedang mengambil data */}
-        {loading && <p>Loading data...</p>}
   
         {/* Tampilkan error jika terjadi kesalahan */}
         {error && <p className="text-red-500">{error}</p>}
@@ -717,23 +802,50 @@ export const ProductType_table = () => {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchProductTypeDataTable=async () => {
+  const fetchProductTypeDataTable = async () => {
     setLoading(true);
     setError(null);
+  
+    Swal.fire({
+      title: 'Memuat Data Tipe Produk...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
     try {
       const response = await ApiCustomer.get("/api/product-type");
       if (response.data.success) {
         setProductTypeData(response.data.data);
+        Swal.close(); // Tutup Swal saat sukses
       } else {
-        setError("Failed to fetch ProducType data");
+        setError("Failed to fetch ProductType data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data tipe produk.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     } catch (err) {
       console.error("Error fetching ProductType data:", err);
       setError("Error fetching data");
+  
+      Swal.close(); // Tutup Swal saat error
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data tipe produk.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     } finally {
       setLoading(false);
     }
-  }
+  };
+  
 
   // 🔹 Load data when component mounts
   useEffect(() => {
@@ -772,9 +884,7 @@ export const ProductType_table = () => {
       />
 
       <ProductTypeAdd> </ProductTypeAdd>
-      
-      {/* 🔹 Loading & Error Messages */}
-      {loading && <p>Loading cases...</p>}
+    
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
@@ -846,23 +956,50 @@ export const WarrantyService_table = () => {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchWarrantyServiceDataTable=async () => {
+  const fetchWarrantyServiceDataTable = async () => {
     setLoading(true);
     setError(null);
+  
+    Swal.fire({
+      title: 'Memuat Data Warranty Service...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
     try {
       const response = await ApiCustomer.get("/api/warranty-services");
       if (response.data.success) {
         setWarrantyServiceData(response.data.data);
+        Swal.close(); // Tutup Swal kalau sukses
       } else {
         setError("Failed to fetch Warranty Service data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data Warranty Service.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     } catch (err) {
       console.error("Error fetching Warranty Service data:", err);
       setError("Error fetching data");
+  
+      Swal.close(); // Tutup Swal kalau error
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data Warranty Service.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     } finally {
       setLoading(false);
     }
-  }
+  };
+  
 
   // 🔹 Load data when component mounts
   useEffect(() => {
@@ -903,7 +1040,6 @@ export const WarrantyService_table = () => {
     <WarrantyServiceAdd></WarrantyServiceAdd>
       
       {/* 🔹 Loading & Error Messages */}
-      {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
@@ -983,23 +1119,50 @@ export const Mo_table = () => {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchMaterialOrderDataTable=async () => {
+  const fetchMaterialOrderDataTable = async () => {
     setLoading(true);
     setError(null);
+  
+    Swal.fire({
+      title: 'Memuat Data Material Order...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
     try {
       const response = await ApiCustomer.get("/api/mo-detaill");
       if (response.data.success) {
         setMaterialOrderData(response.data.data);
+        Swal.close(); // Tutup loading kalau sukses
       } else {
         setError("Failed to fetch Material Order data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data Material Order.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     } catch (err) {
       console.error("Error fetching Material Order data:", err);
       setError("Error fetching data");
+  
+      Swal.close();
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data Material Order.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     } finally {
       setLoading(false);
     }
-  }
+  };
+  
 
   // 🔹 Load data when component mounts
   useEffect(() => {
@@ -1037,8 +1200,6 @@ export const Mo_table = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {/* 🔹 Loading & Error Messages */}
-      {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
@@ -1129,20 +1290,46 @@ export const Wo_table = () => {
   const fetchWorkOrderDataTable=async () => {
     setLoading(true);
     setError(null);
+
+    Swal.fire({
+      title: 'Memuat Data Work Order...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       const response = await ApiCustomer.get("/api/work-order");
       if (response.data.success) {
         setWorkOrderData(response.data.data);
+        Swal.close();
       } else {
         setError("Failed to fetch Work Order data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data Work Order.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
       }
     } catch (err) {
       console.error("Error fetching Work Order data:", err);
       setError("Error fetching data");
+      Swal.close();
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data Work Order.",
+        icon: "error",
+        confirmButtonText: "OK"
+      });
     } finally {
       setLoading(false);
     }
   }
+  
 
   // 🔹 Load data when component mounts
   useEffect(() => {
@@ -1180,8 +1367,7 @@ export const Wo_table = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {/* 🔹 Loading & Error Messages */}
-      {loading && <p>Loading cases...</p>}
+  
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
