@@ -191,9 +191,41 @@ const Search_case = () => {
     if (search.SerialNumber !== "") {
       setIsModalAssetOpen(true); // Open modal
       setActiveTab("ci"); // Switch tab to target
+
+      setTimeout(() => {
+        Swal.fire({
+          title: 'Memuat data asset...',
+          text: 'Mohon tunggu sebentar',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading(); // Tampilkan loading
+          }
+        });
+    
+        setTimeout(() => {
+          Swal.close();  
+        }, 500);  
+      }, 300);
+
     } else if (search.Company !== "") {
       setIsModalCompanyOpen(true);
       setActiveTab("ci"); // Switch tab to target
+      setTimeout(() => {
+        Swal.fire({
+          title: 'Memuat data company...',
+          text: 'Mohon tunggu sebentar',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading(); // Tampilkan loading
+          }
+        });
+    
+   
+        setTimeout(() => {
+          Swal.close(); 
+        }, 500); 
+      }, 300); 
+
     }
 
     /**
