@@ -10,19 +10,20 @@ import { Case } from './Case';
 import { Work } from './work';
 import { MaterialOrder } from './material_order';
 import { MoDetail } from './material_order';
-import { Company_table} from './master_table';
+import { Company_table, ResourceTable, SubkTechnician_table} from './master_table';
 import { Assets_table } from './master_table';
 import { Contact_table } from './master_table';
 import { Case_table } from './master_table';
 import { Product_table } from './master_table';
 import { Bookings } from './bookings';
 import { ProductType_table } from './master_table';
-import { ServiceCatalogPartsTable } from './master_table';
+// import { ServiceCatalogPartsTable } from './master_table';
 
 import { WarrantyService_table } from './master_table';
 import { Mo_table } from './master_table';
 import { Wo_table } from './master_table';
 // import { ModalContextProvider } from './components/modal-context';
+import { ResourceAccountTable } from './master_table';
 
 import { GateKeepingRouting } from './components/GateKeepingRouting';
 
@@ -47,11 +48,14 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/Case_table' element={<Case_table />} />
             <Route path='/master/Product_table' element={<Product_table/>}/>
             <Route path='/master/ProductType_table' element={<ProductType_table/>}/>
-            <Route path='/master/ServiceCatalogPartsTable' element={<ServiceCatalogPartsTable/>}/>
+            {/* <Route path='/master/ServiceCatalogPartsTable' element={<ServiceCatalogPartsTable/>}/> */}
             {/* <Route path='/master/GlobalTradeCheckTable' element={<GlobalTradeCheckTable/>}/> */}
             <Route path='/master/WarrantyService_table' element={<WarrantyService_table/>}/>
             <Route path='/master/Mo_table' element={<Mo_table/>}/>
             <Route path='/master/Wo_table' element={<Wo_table/>}/>
+            <Route path='master/Resource' element={<ResourceTable/>}/>
+            <Route path='master/ResourceAccount' element={<ResourceAccountTable/>}/>
+            <Route path='master/SubkTechnician' element={<SubkTechnician_table/>}/>
             {/* </Route> */}
           </Route>
           <Route path="/lorem" element={<Lorem />}/>

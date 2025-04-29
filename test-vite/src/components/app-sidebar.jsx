@@ -95,14 +95,14 @@ const data = {
           title: "Product Type",
           url: "/master/ProductType_table ",
         },
-        {
-          title: "Service Catalog Type",
-          url: "/master/ServiceCatalogPartsTable ",
-        },
-        {
-          title: "Global Trade Check",
-          url: "/master/MaterialOrder ",
-        },              
+        // {
+        //   title: "Service Catalog Type",
+        //   url: "/master/ServiceCatalogPartsTable ",
+        // },
+        // {
+        //   title: "Global Trade Check",
+        //   url: "/master/MaterialOrder ",
+        // },              
         {
           title: "Warranty Service",
           url: "/master/WarrantyService_table",
@@ -114,7 +114,19 @@ const data = {
         {
           title: "Work Order",
           url: "/master/Wo_table",
-        },  
+        },
+        {
+          title: "Resource",
+          url: "/master/Resource",
+        },
+        {
+          title: "Resource Account",
+          url: "/master/ResourceAccount",
+        },
+        {
+          title: "Subk Technician",
+          url: "/master/SubkTechnician",
+        },     
       ],
     },
     {

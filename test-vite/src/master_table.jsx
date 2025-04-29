@@ -8,6 +8,9 @@ import { ProductTypeAdd, ProductTypeEdit, ProductTypeDelete } from "@/components
 import { WarrantyServiceAdd, WarrantyServiceEdit, WarrantyServiceDelete } from "@/components/sc-modal";
 import { MaterialOrderEdit, MaterialOrderDelete,  } from "@/components/sc-modal";
 import { WorkOrderDelete, WorkOrderEdit } from "@/components/sc-modal";
+// import { ResourceAdd, ResourceEdit, ResourceDelete } from "@/components/sc-modal";
+// import { ResourceAccountAdd, ResourceAccountEdit, ResourceAccountDelete } from "@/components/sc-modal";
+// import { SubkTechinicianAdd, SubkTechnicianEdit, SubTechnicianDelete } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
 
 export const Contact_table = () => {
@@ -1282,6 +1285,379 @@ export const Wo_table = () => {
         </table>
         {filteredWorkOrderTable.length === 0 && (
           <p className="text-center mt-4 text-gray-500">No cases found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const ResourceTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [resourceData, setResourceData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchResourceData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/resources");
+      if (response.data.success) {
+        setResourceData(response.data.data);
+      } else {
+        setError("Failed to fetch Resource data");
+      }
+    } catch (err) {
+      console.error("Error fetching Resource data:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchResourceData();
+  }, []);
+
+  const filteredResources = resourceData.filter((item) =>
+    Object.values(item).some((value) =>
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const totalPages = Math.ceil(filteredResources.length / itemsPerPage);
+  const currentData = filteredResources.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Resource Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      {/* <ResourceAdd /> */}
+
+      {loading && <p>Loading resources...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+              <th className="border p-2">Resource ID</th>
+              <th className="border p-2">Name</th>
+              <th className="border p-2">Resource Accounts</th>
+              <th className="border p-2">Booking Details</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((resource) => (
+              <tr key={resource.ResourceId} className="hover:bg-gray-100 text-center">
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() => navigate(`/resource/${resource.ResourceId}`)}
+                >
+                  {resource.ResourceId}
+                </td>
+                <td className="border p-2">{resource.Name}</td>
+                <td className="border p-2 flex space-x-2 justify-center">
+                  <ResourceEdit
+                    ResourceId={resource.ResourceId}
+                    onUpdate={fetchResourceData}
+                  />
+                  <ResourceDelete
+                    ResourceId={resource.ResourceId}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchResourceData}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredResources.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No resources found.</p>
+        )}
+      </div>
+
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const ResourceAccountTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [resourceAccounts, setResourceAccounts] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchResourceAccounts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/resource-accounts");
+      if (response.data.success) {
+        setResourceAccounts(response.data.data);
+      } else {
+        setError("Failed to fetch resource accounts");
+      }
+    } catch (err) {
+      console.error("Error fetching resource accounts:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchResourceAccounts();
+  }, []);
+
+  const filteredAccounts = resourceAccounts.filter((item) =>
+    Object.values(item).some((value) =>
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const totalPages = Math.ceil(filteredAccounts.length / itemsPerPage);
+  const currentData = filteredAccounts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Resource Accounts</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      {/* <ResourceAccountAdd onAdd={fetchResourceAccounts} /> */}
+
+      {loading && <p>Loading accounts...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+              <th className="border p-2">Resource Account ID</th>
+              <th className="border p-2">Name</th>
+              <th className="border p-2">Resource ID</th>
+              <th className="border p-2">Resource</th>
+              <th className="border p-2">SUbk Technicians</th>
+              <th className="border p-2">Booking Details</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((account) => (
+              <tr key={account.ResourceAccountId} className="hover:bg-gray-100 text-center">
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() => navigate(`/resource-account/${account.ResourceAccountId}`)}
+                >
+                  {account.ResourceAccountId}
+                </td>
+                <td className="border p-2">{account.Name}</td>
+                <td className="border p-2">{account.ResourceId || "-"}</td>
+                <td className="border p-2 flex space-x-2 justify-center">
+                  <ResourceAccountEdit
+                    ResourceAccountId={account.ResourceAccountId}
+                    onUpdate={fetchResourceAccounts}
+                  />
+                  <ResourceAccountDelete
+                    ResourceAccountId={account.ResourceAccountId}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchResourceAccounts}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredAccounts.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No accounts found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const SubkTechnician_table = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [subkTechnicianData, setSubkTechnicianData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchSubkTechnicianData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/subk-technicians");
+      if (response.data.success) {
+        setSubkTechnicianData(response.data.data);
+      } else {
+        setError("Failed to fetch SubkTechnician data");
+      }
+    } catch (err) {
+      console.error("Error fetching SubkTechnician data:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubkTechnicianData();
+  }, []);
+
+  const filteredData = subkTechnicianData.filter((item) =>
+    Object.values(item).some((value) =>
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const currentData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Subk Technician Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      {/* <SubkTechnicianAdd onUpdate={fetchSubkTechnicianData} /> */}
+
+      {loading && <p>Loading data...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+              <th className="border p-2">Subk Technician ID</th>
+              <th className="border p-2">Name</th>
+              <th className="border p-2">Resource Account ID</th>
+              <th className="border p-2">Resource Account</th>
+              <th className="border p-2">Booking Details</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((item) => (
+              <tr key={item.SubkTechnicianId} className="hover:bg-gray-100 text-center">
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/subk-technician/${item.SubkTechnicianId}`)}>
+                  {item.SubkTechnicianId}
+                </td>
+                <td className="border p-2">{item.Name}</td>
+                <td className="border p-2">{item.resourceAccount?.Name || "N/A"}</td>
+                <td className="border p-2 flex space-x-2 justify-center">
+                  <SubkTechnicianEdit SubkTechnicianId={item.SubkTechnicianId} onUpdate={fetchSubkTechnicianData} />
+                  <SubkTechnicianDelete
+                    SubkTechnicianId={item.SubkTechnicianId}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchSubkTechnicianData}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredData.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No entries found.</p>
         )}
       </div>
 
