@@ -1,0 +1,2 @@
+-- AddForeignKey
+ALTER TABLE `Bookings` ADD CONSTRAINT `Bookings_CreatedBy_fkey` FOREIGN KEY (`CreatedBy`) REFERENCES `User`(`IDUser`) ON DELETE RESTRICT ON UPDATE CASCADE;
