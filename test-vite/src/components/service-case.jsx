@@ -51,7 +51,7 @@ import {
   ChevronDown
  } from 'lucide-react'
 
- import { useLocation } from "react-router-dom";
+ import { useLocation, useNavigate } from "react-router-dom";
  import { useState, useEffect } from "react";
  import { useSidebar } from '@/components/ui/sidebar'
  import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -697,15 +697,26 @@ useEffect(() => {
   }
 }, [workOrders]);
 
+const navigate = useNavigate();
+
+const handleClick = async () => {
+  // await fetchOwnerUserData();
+  // await fetchCustomerData(); 
+  {workOrders.map((work) => {
+  navigate(`/work/${work.WOID}`, {
+    state: { ownerUserData, dataFetchCustomerData }
+  });
+  })}
+};
 
 
   return (
     <>
     <Card className="mt-2 rounded-none p-0 border-0">
-      <CardHeader className="p-0">
+      
         <Tabs defaultValue="case_info"> 
           
-          <CardContent className="flex flex-col gap-3 border-2 w-full p-2 sticky">
+          <CardHeader className="flex flex-col gap-3 border-2 w-full p-2 sticky">
             <div className="flex justify-between">
               <CardTitle className="text-xl ">
                 {caseDetails.CaseID}
@@ -796,7 +807,7 @@ useEffect(() => {
           </DropdownMenu>
         )}
             </TabsList>
-          </CardContent>
+          </CardHeader>
       
           <TabsContent value="case_info" className={'p-2'}>
             <Card className="flex-row">
@@ -817,21 +828,16 @@ useEffect(() => {
                 <CaseField label="Created ON" icon span={3}>
                   <span className="flex gap-[5em]">
                     {new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')}
-                        <DatePicker></DatePicker>
+                        <DatePicker variant='icon'></DatePicker>
                     {new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </CaseField>
                 <CaseField label="Alternate Customer Tracking Number"> ---  </CaseField>
-                <CaseField
-                  label="Case Closed Date"
-                  icon
-                  span={3}
-                > 
+                <CaseField label="Case Closed Date" icon span={3} > 
                   <span className="flex gap-[5em]">
-                      {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "..."}
-                      <DatePicker value={caseClosedDate} onChange={setCaseClosedDate}></DatePicker>
+                      {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
+                      <DatePicker variant='icon' value={caseClosedDate} onChange={setCaseClosedDate}></DatePicker>
                       ---
-
                     </span>
                 </CaseField>
                 <CaseField label="Irrelevant"  icon >
@@ -839,8 +845,8 @@ useEffect(() => {
                 </CaseField> 
                 <CaseField label="Submitted To Base" icon span={3}>
                     <span className="flex gap-[5em]">
-                      --- 
-                      <DatePicker></DatePicker>
+                     
+                      <DatePicker variant='icon'></DatePicker>
                       ---
                     </span>
                 </CaseField>
@@ -1520,11 +1526,11 @@ useEffect(() => {
                 </TableHeader>
                 <TableBody>
                   {workOrders.map((work) => (
-                    <TableRow key={work.WOID}>
-                      <TableCell className="font-medium">
-                        <Link to={`/work/${work.WOID}`}>
+                    <TableRow key={work.WOID} className="hover:bg-gray-500 cursor-pointer">
+                      <TableCell className="font-medium " onClick={handleClick}>
+                        {/* <Link to={`/work/${work.WOID}`}> */}
                         {work.WOID}
-                        </Link>
+                        {/* </Link> */}
                         </TableCell>
                       <TableCell>{work.CaseID}</TableCell>
                       {/* <TableCell>{work.serviceaccount}</TableCell>
@@ -1680,7 +1686,7 @@ useEffect(() => {
             </Card>
           </TabsContent>
         </Tabs>
-      </CardHeader>
+      
     </Card>
     </>            
   )

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import {
   Card,
   CardContent,
@@ -17,6 +17,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SelectBarRelated } from "./sc-select";
@@ -112,32 +113,80 @@ export const ServiceWork = () => {
   
   // useEffect(() => {
   // }, [workOrders])
-  return (
-    <div>
-    <TabsServiceWO/>
-    <Card className="mt-2 rounded-none h-[160px]">
-      <CardHeader>
-        <CardTitle className="text-xl ">{woid}</CardTitle>
-        <CardTitle className="text-sm">Work Order . Work Order</CardTitle>
-      </CardHeader>
 
-      <CardContent>
-        <Tabs defaultValue="Quick_WO_Input" className="w-[760px]">
-          <TabsList className="bg-white w-[760px]">
+    const [selected, setSelected] = useState("work_order"); 
+
+    const location = useLocation();
+    const { ownerUserData, dataFetchCustomerData } = location.state || {}; 
+  return (
+    <>
+    <TabsServiceWO/>
+    <Card className="mt-2 rounded-none p-0 border-0">
+        <Tabs defaultValue="Quick_WO_Input" className="">
+          <CardHeader className={'flex flex-col gap-3 border-2 w-full p-2 sticky'}>
+            <div className="flex justify-between">
+              <CardTitle className="text-xl ">{woid}
+                <span className="text-sm flex items-center">Work Order .
+                      <Select onValueChange={setSelected} defaultValue="work_order" className="shadow-xl">
+                      <SelectTrigger className="shadow-none border-none">
+                        <SelectValue  />
+                      </SelectTrigger>
+                      <SelectContent >
+                        <SelectGroup>
+                          <SelectItem value="work_order">work order</SelectItem>
+                          <SelectItem value="??">??</SelectItem>
+                          <SelectItem value="!!">!!</SelectItem>
+                          <SelectItem value="**">**</SelectItem>
+                          <SelectItem value="&&">&&</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                      </Select>
+                </span>
+              </CardTitle>
+              <CardTitle className="flex">
+                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                  <h1 className='text-blue-500'>{ownerUserData.Name}</h1>
+                  <p className="text-sm font-light ">Owner</p>
+                </div>
+                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                  <h1 className='text-blue-500'>---</h1>
+                  <p className="text-sm font-light ">Queue</p>
+                </div>
+                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                  <h1 className='text-blue-500'>{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</h1>
+                  <p className="text-sm font-light ">Contact</p>
+                </div>
+                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                <Select onValueChange={setSelected} defaultValue="first" >
+                  <SelectTrigger className="shadow-none border-none text-blue-500 p-0">
+                    <SelectValue  />
+                  </SelectTrigger>
+                  <SelectContent className="p-0">
+                    <SelectGroup className="p-0">
+                    <SelectItem value="first" className="p-0">{dataFetchCustomerData.SiteAccount?.Company}</SelectItem>
+                    <SelectItem value="??">??</SelectItem>
+                      <SelectItem value="!!">!!</SelectItem>
+                      <SelectItem value="**">**</SelectItem>
+                      <SelectItem value="&&">&&</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                  </Select>
+                  <p className="text-sm font-light ">Site Account</p>
+                </div>
+              </CardTitle>
+            </div>
+          <TabsList className="bg-white ">
             <TabsTrigger variant="underline" value="wo_summary" className="cursor-pointer">
               WO Summary
             </TabsTrigger>
-            <TabsTrigger variant="underline"
-              value="wo_details"
-              className="cursor-pointer white"
-            >
+            <TabsTrigger variant="underline" value="wo_details" className="cursor-pointer white">
               WO Details
             </TabsTrigger>
             <TabsTrigger variant="underline" value="wo_bookings" className="cursor-pointer">
               WO Bookings
             </TabsTrigger>
             <TabsTrigger variant="underline" value="wo_Notes_Timeline" className="cursor-pointer">
-              WO Notes/Timeline
+              WO Notes/Timeline 
             </TabsTrigger>
             <TabsTrigger variant="underline" value="wo_Closure_Details" className="cursor-pointer">
               WO Closure Details
@@ -147,6 +196,7 @@ export const ServiceWork = () => {
             </TabsTrigger>
             <SelectBarRelated></SelectBarRelated>
           </TabsList>
+          </CardHeader>
 
           <TabsContent value="wo_summary">
            <div className="flex gap-4">
@@ -585,7 +635,7 @@ export const ServiceWork = () => {
           </TabsContent>
 
           <TabsContent value="wo_Closure_Details">
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Resolution Notes
               </span>
@@ -598,7 +648,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Labor Types
               </span>
@@ -626,7 +676,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Miscellaneous Charges 
               </span>
@@ -663,7 +713,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               DOA Letter (If DOA Case)
               </span>
@@ -676,7 +726,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card> 
   
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Page Count Information
               </span>
@@ -701,7 +751,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card> 
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Follow-Up
               </span>
@@ -732,7 +782,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card> 
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Closure Data
               </span>
@@ -775,7 +825,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card> 
     
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Closure Codes
               </span>
@@ -805,8 +855,8 @@ export const ServiceWork = () => {
             <QuickWOInput WOID={woid} caseInformation={caseInformation} />
           </TabsContent>
         </Tabs>
-      </CardContent>
+      
     </Card>
-    </div>
+    </>
   );
 };

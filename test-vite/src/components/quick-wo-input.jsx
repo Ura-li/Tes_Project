@@ -26,6 +26,39 @@ import { KeyRound } from "lucide-react";
 
 //import API
 import ApiCustomer from "@/api";
+import { twMerge } from "tailwind-merge";
+import DatePicker from "./date-picker";
+// import { CaseField } from "./service-case";
+const spanMap = {
+  1: "col-span-1",
+  2: "col-span-2",
+  3: "col-span-3",
+  4: "col-span-4",
+  5: "col-span-5",
+  6: "col-span-6",
+};
+export const CaseField = ({ label, children, icon = false, span = 1, className, childClass }) => {
+  // Determine which icon to use
+  const IconComponent = icon === true ? Lock : icon || null;
+
+  return (
+    <>
+      <CardTitle className={twMerge(
+        `font-medium grid grid-cols-[1.25rem_auto] items-center gap-2 ${className}`
+      )}>
+        {IconComponent ? (
+          <IconComponent className="size-4" />
+        ) : (
+          <div className="w-5" />
+        )}
+        {label}
+      </CardTitle>
+      <CardTitle className={twMerge(spanMap[span],childClass)}>
+        {children}
+      </CardTitle>
+    </>
+  );
+};
 
 
 export function QuickWOInput ({ WOID, caseInformation }) {
@@ -126,24 +159,24 @@ export function QuickWOInput ({ WOID, caseInformation }) {
       const res2 = await ApiCustomer.get(`/api/workorder/${WOID}/service-address`);
       const address = res2.data.data;
 
-      setAddressID(address.AddressID || "");
-      setCompanyName(address.CompanyName || "");
-      setContactFirstName(address.ContactFirstName || "");
-      setContactLastName(address.ContactLastName || "");
-      setPhoneNumber(address.PhoneNumber || "");
-      setEmail(address.Email || "");
-      setAddressLine1(address.AddressLine1 || "");
-      setAddressLine2(address.AddressLine2 || "");
-      setAddressLine3(address.AddressLine3 || "");
-      setCity(address.City || "");
-      setStateOrProvince(address.StateOrProvince || "");
-      setCountryOrRegion(address.CountryOrRegion || "");
-      setPostalCode(address.PostalCode || "");
-      setTimezone(address.TimeZone || "");
-      setServiceTerritory(address.ServiceTerritory || "");
-      setBusinessSegment(address.BusinessSegment || "");
-      setLongitude(address.Longitude || "");
-      setLatitude(address.Latitude || "");
+      setAddressID(address.AddressID || "---");
+      setCompanyName(address.CompanyName || "---");
+      setContactFirstName(address.ContactFirstName || "---");
+      setContactLastName(address.ContactLastName || "---");
+      setPhoneNumber(address.PhoneNumber || "---");
+      setEmail(address.Email || "---");
+      setAddressLine1(address.AddressLine1 || "---");
+      setAddressLine2(address.AddressLine2 || "---");
+      setAddressLine3(address.AddressLine3 || "---");
+      setCity(address.City || "---");
+      setStateOrProvince(address.StateOrProvince || "---");
+      setCountryOrRegion(address.CountryOrRegion || "---");
+      setPostalCode(address.PostalCode || "---");
+      setTimezone(address.TimeZone || "---");
+      setServiceTerritory(address.ServiceTerritory || "---");
+      setBusinessSegment(address.BusinessSegment || "---");
+      setLongitude(address.Longitude || "---");
+      setLatitude(address.Latitude || "---");
     })();
   }, [WOID]);
 
@@ -171,52 +204,55 @@ export function QuickWOInput ({ WOID, caseInformation }) {
       <CardContent>
         <Tabs value={tab} onValueChange={setTab}>
           <TabsContent value="Quick_WO_Input">
-            <Card className="flex-col mt-7">
-              <span className="ml-5 font-bold text-xl">General</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-4">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Incoming Channel</span>
-                  <Input className="ml-40" value={incomingChannel} readOnly/>
+            <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className=' text-lg'>General</CardTitle>
+                <hr />
+              </CardHeader>
+
+              <CardContent className="flex gap-5">
+                <div className="grid grid-cols-6 gap-5 flex-1">
+                  <div className="border-1 col-span-6 grid grid-cols-6 p-4">
+                    <CaseField label="Incoming Channel" className={'col-span-2'} icon span={4}> <Input variant={'invisible'} className="" value={incomingChannel} readOnly/> </CaseField>
+                  </div>
+                  <CaseField label="Work Order Number" className={'col-span-2 '} icon span={4}> <Input variant={'invisible'} className="" value={WOID} readOnly/></CaseField>
+                  <CaseField label="Work Order Type" className={'col-span-2'}  span={4}> <Input variant={'invisible'} className="" value={workOrderType} onChange={e => setWorkOrderType(e.target.value)} /> </CaseField>
+                  <CaseField label="System Status" className={'col-span-2'}  span={4}> <Input variant={'invisible'} className="" value={systemStatus} readOnly/> </CaseField>
+                  <CaseField label="Sub Status" className={'col-span-2'} icon={KeyRound} span={4}> <Input variant={'invisible'} className="" value={subStatus} onChange={e => setSubStatus(e.target.value)} /> </CaseField>
+                  <CaseField label="Partner Status" className={'col-span-2'} icon span={4}> <Input variant={'invisible'} className="" value={partnerStatus} onChange={e => setPartnerStatus(e.target.value)} /> </CaseField>
+                  {/* <div className="font-bold flex">
+                    <Lock className="size-5 mr-2"></Lock>
+                    <span>Incoming Channel</span>
+                    <Input className="ml-40" value={incomingChannel} readOnly/>
+                  </div>
+                  <div className="font-bold flex">
+                    <Lock className="size-5 mr-2"></Lock>
+                    <span>Work Order Number</span>
+                    <Input className="ml-40" value={WOID} readOnly/>
+                  </div>
+                  <div className="font-bold flex">
+                    <span className="ml-7">Work Order Type</span>
+                    <Input className="ml-40" value={workOrderType} onChange={e => setWorkOrderType(e.target.value)} />
+                  </div>
+                  <div className="font-bold flex">
+                    <Lock className="size-5 mr-2"></Lock>
+                    <span>System Status</span>
+                    <Input className="ml-40" value={systemStatus} readOnly/>
+                  </div>
+                  <div className="font-bold flex">
+                    <span className="ml-7">Sub Status</span>
+                    <Input className="ml-40" value={subStatus} onChange={e => setSubStatus(e.target.value)} />
+                  </div>
+                  <div className="font-bold flex">
+                    <span className="ml-7">Partner Status</span>
+                    <Input className="ml-40" value={partnerStatus} onChange={e => setPartnerStatus(e.target.value)} />
+                  </div> */}
                 </div>
 
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Work Order Number</span>
-                  <Input className="ml-40" value={WOID} readOnly/>
-                </div>
+                <div className="grid grid-cols-6 items-start justify-start flex-1 content-start gap-5">
+                  <CaseField label="Work Order Description" className={'col-span-2'} icon span={4}> <Input variant={'invisible'} className="" value={workOrderDescription} readOnly/> </CaseField>
+                  <CaseField label="Work Order Instruction" className={'col-span-2'} icon span={4}> <Input variant={'invisible'} className="" value={workOrderInstruction} readOnly/> </CaseField>
 
-                <div className="font-bold flex">
-                  <span className="ml-7">Work Order Type</span>
-                  <Input className="ml-40" value={workOrderType} onChange={e => setWorkOrderType(e.target.value)} />
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>System Status</span>
-                  <Input className="ml-40" value={systemStatus} readOnly/>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Sub Status</span>
-                  <Input className="ml-40" value={subStatus} onChange={e => setSubStatus(e.target.value)} />
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Partner Status</span>
-                  <Input className="ml-40" value={partnerStatus} onChange={e => setPartnerStatus(e.target.value)} />
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Work Order Description</span>
-                  <Input className="ml-40" value={workOrderDescription} readOnly/>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Work Order Instruction</span>
-                  <Input className="ml-40" value={workOrderInstruction} readOnly/>
                 </div>
               </CardContent>
             </Card>
@@ -226,9 +262,31 @@ export function QuickWOInput ({ WOID, caseInformation }) {
             Make this available in Contact Individual
             */}
             <Card className="flex-col mt-7">  
-              <span className="ml-5 font-bold text-xl">Service Delivery Address</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-9">
-                <div className="font-bold flex">
+              <CardHeader>
+                <CardTitle className=' text-lg'>Service Delivery Address</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid gap-5 grid-cols-6">
+                <CaseField label="Choose Address" className={''}  >Site Account address</CaseField>
+                <CaseField label="Address Line1" className={''}  > <Input variant={'invisible'} className=" " value={addressLine1} readOnly/> </CaseField>
+                <CaseField label="Postal Code" className={''}  > <Input variant={'invisible'}  className="" value={postalCode} readOnly/> </CaseField>
+                <CaseField label="Company Name" className={''}  > <Input variant={'invisible'} className="" value={siteAccountInformation.Company} readOnly/> </CaseField>
+                <CaseField label="Address Line2" className={''}  > <Input variant={'invisible'} className="" value={addressLine2} readOnly/> </CaseField>
+                <CaseField label="Timezone" className={''} icon > <Input variant={'invisible'} className="" value={timezone} readOnly/> </CaseField>
+                <CaseField label="Contact First Name" className={''}  > <Input variant={'invisible'} className="" value={contactFirstName} onChange={e => setContactFirstName(e.target.value)} /> </CaseField>
+                <CaseField label="Address Line3" className={''}  > <Input variant={'invisible'} className="" value={addressLine3} onChange={e => setAddressLine3(e.target.value)} /> </CaseField>
+                <CaseField label="Service Territory" className={''}  > <Input variant={'invisible'} className="" value={serviceTerritory} readOnly/> </CaseField>
+                <CaseField label="Contact Last Name" className={''}  > <Input variant={'invisible'} className="" value={contactLastName} readOnly/> </CaseField>
+                <CaseField label="City" className={''}  > <Input variant={'invisible'} className="" value={city} readOnly/> </CaseField>
+                <CaseField label="Business Segment" className={''}  > <Input variant={'invisible'} className="" value={businessSegment} readOnly/> </CaseField>
+                <CaseField label="Phone Number" className={''}  > <Input variant={'invisible'} className="" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} /> </CaseField>
+                <CaseField label="State Or Province" className={''}  > <Input variant={'invisible'} className="" value={stateOrProvince} readOnly/> </CaseField>
+                <CaseField label="Longitude" className={''}  > <Input variant={'invisible'} className="" value={longitude} readOnly/> </CaseField>
+                <CaseField label="Email Address" className={''}  > <Input variant={'invisible'} className="" value={email} onChange={e => setEmail(e.target.value)} /> </CaseField>
+                <CaseField label="Country/Region" className={''}  > <Input variant={'invisible'} className="" value={countryOrRegion} readOnly/> </CaseField>
+                <CaseField label="Latitude" className={''}  > <Input variant={'invisible'} className="" value={latitude} readOnly/> </CaseField>
+
+                {/* <div className="font-bold flex">
                   <Lock className="size-5 mr-2" />
                   <span>Choose Address</span>
                   <span className="ml-45">Site Account address</span>
@@ -331,14 +389,42 @@ export function QuickWOInput ({ WOID, caseInformation }) {
                   <Lock className="size-5 mr-2" />
                   <span>Latitude</span>
                   <span className="ml-62">{latitude}</span>
-                </div>
+                </div> */}
               </CardContent>
             </Card>
 
             <Card className="flex-col mt-7 ">
-              <span className="ml-5 font-bold text-xl">SLA in Customer Time Zone</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-7">
-                <div className="font-bold flex">
+              <CardHeader>
+                <CardTitle className=' text-lg'>SLA in Customer Time Zone</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid gap-5 auto-rows-auto grid-cols-6 place-content-between">
+                <CaseField label="SLA Jeopardy" className={''} icon > <Input className="" value={slaJeopardy} readOnly/> </CaseField>
+                <CaseField label="Requested Date Time (Customer)" className={''}  >
+                  <DatePicker></DatePicker>
+                </CaseField>
+                <CaseField label="SLA Reschedule" className={''} icon > <Input className="" value={slaReschedule} readOnly/> </CaseField>
+                <CaseField label="Due Date (Customer)" className={''} icon >
+                  <DatePicker></DatePicker>
+                </CaseField>
+                <CaseField label="Guaranteed Fix Time (Customer)" className={''} icon >
+                  <DatePicker></DatePicker>
+                </CaseField>
+                <CaseField label="Active Schedule Date" className={''} icon > <Input className="" value={activeScheduleDate} readOnly/> </CaseField>
+                <CaseField label="Coverage Window" className={''}  > <Input className="" value={coverageWindow} onChange={e => setCoverageWindow(e.target.value)} /> </CaseField>
+                <CaseField label="Early Start Date Time (Customer)" className={''}  >
+                  <DatePicker></DatePicker>
+                </CaseField>
+                <CaseField label="SLA Error Description" className={'row-span-2 items-start'} childClass={'row-span-2'} icon >
+                   <textarea value={slaErrorDescription} className='border-0 ring-0 ring-gray-400 w-[100%] h-[100%] resize-none'></textarea>
+                </CaseField>
+                <CaseField label="Response" className={''}  > <Input className="" value={response} readOnly/> </CaseField>
+                <CaseField label="Latest Start Date Time (Customer)" className={''}  > 
+                  <DatePicker></DatePicker>
+                </CaseField>
+                <CaseField label="OTC Code" className={''}  > <Input className="" value={otcCode} onChange={e => setOtcCode(e.target.value)} /> </CaseField>
+                <CaseField label="Case Priority Index" className={'col-start-5'} icon > <Input className="" value={casePriorityIndex} readOnly/> </CaseField>
+                {/* <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
                   <span>SLA Jeopardy</span>
                   <span className="ml-66">{slaJeopardy}</span>
@@ -420,13 +506,13 @@ export function QuickWOInput ({ WOID, caseInformation }) {
                   <Lock className="size-5 mr-2"></Lock>
                   <span>Case Priority Index</span>
                   <span className="ml-59">{casePriorityIndex}</span>
-                </div>
+                </div> */}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
         <CardFooter className="flex justify-end">
-          <Button onClick={handleSave}>Save</Button>
+          {/* <Button onClick={handleSave}>Save</Button> */}
         </CardFooter>
       </CardContent>
   );
