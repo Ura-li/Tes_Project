@@ -289,6 +289,99 @@ model warranty_services {
   servicecatalog      servicecatalog[]
 }
 
+model Resource {
+  ResourceId String @id @db.VarChar(255)
+  Name       String @db.VarChar(255)
+
+  // Relations
+  resourceAccounts ResourceAccount[] // <-- 1 Resource has many ResourceAccounts
+  bookingDetails   BookingDetails[]
+}
+
+model ResourceAccount {
+  ResourceAccountId String @id @db.VarChar(255)
+  Name              String @db.VarChar(255)
+
+  // Foreign key to Resource
+  ResourceId String?   @db.VarChar(255)
+  resource   Resource? @relation(fields: [ResourceId], references: [ResourceId])
+
+  // Relations
+  subkTechnicians SubkTechnician[] // <-- 1 ResourceAccount has many SubkTechnicians
+  bookingDetails  BookingDetails[]
+}
+
+model SubkTechnician {
+  SubkTechnicianId String @id @db.VarChar(255)
+  Name             String @db.VarChar(255)
+
+  // Foreign key to ResourceAccount
+  ResourceAccountId String?          @db.VarChar(255)
+  resourceAccount   ResourceAccount? @relation(fields: [ResourceAccountId], references: [ResourceAccountId])
+
+  bookingDetails BookingDetails[]
+}
+
+model Bookings {
+  BookingId     Int     @id @default(autoincrement())
+  BookingStatus String? @db.VarChar(100)
+  WOID          String
+
+  // SLA  
+  ScheduleJeopardy     Boolean?
+  ScheduleJeopardyTime DateTime?
+
+  DoNotDisturb     Boolean?
+  CeScheduleChange Boolean?
+  CreatedAt        DateTime @default(now()) @db.DateTime(0)
+  CreatedBy        Int
+
+  // TotalDuration
+  TotalBillableDurationInMinutes   Int?
+  TotalInProgressDurationInMinutes Int?
+  TotalBreakDurationInMinutes      Int?
+
+  workorder workorder? @relation("WorkOrderBookingsCase", fields: [WOID], references: [WOID], onDelete: Restrict)
+
+  // Relations
+  createdByUser User @relation("UserCreatedBookings", fields: [CreatedBy], references: [IDUser], onDelete: Restrict)
+
+  bookingDetails BookingDetails[]
+
+  @@index([WOID], map: "fk_address_workorder")
+}
+
+model BookingDetails {
+  BookingDetailId   Int     @id @default(autoincrement())
+  BookingId         Int
+  ResourceId        String?
+  ResourceAccountId String?
+  SubkTechnicianId  String?
+  Name              String  @db.VarChar(255)
+  Status            String  @db.VarChar(50)
+
+  // Customer Time
+  StartTimeCustomerTime            DateTime?
+  EndTimeCustomerTime              DateTime?
+  EstimatedArrivalTimeCustomerTime DateTime?
+  ActualArrivalTimeCustomerTime    DateTime?
+
+  // User Time
+  StartTimeUserTime            DateTime?
+  EndTimeUserTime              DateTime?
+  DurationInMinutesUserTime    Int?
+  EstimatedArrivalTimeUserTime DateTime?
+  ActualArrivalTimeUserTime    DateTime?
+
+  ChangedAt DateTime @default(now()) @db.DateTime(0)
+  ChangedBy Int
+
+  resource        Resource?        @relation(fields: [ResourceId], references: [ResourceId], onDelete: Restrict, onUpdate: Cascade)
+  resourceaccount ResourceAccount? @relation(fields: [ResourceAccountId], references: [ResourceAccountId], onDelete: Restrict, onUpdate: Cascade)
+  subkTechnician  SubkTechnician?  @relation(fields: [SubkTechnicianId], references: [SubkTechnicianId], onDelete: Restrict, onUpdate: Cascade)
+  booking         Bookings         @relation(fields: [BookingId], references: [BookingId], onDelete: Cascade)
+}
+
 model workorder {
   WOID                        String           @id @db.VarChar(13)
   CaseID                      String?
