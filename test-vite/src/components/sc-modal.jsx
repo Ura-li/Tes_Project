@@ -2596,6 +2596,454 @@ return (
   </Dialog>
 );
 };
+
+export function UserEdit({ IDUser, onUpdate }) {
+  const [formData, setFormData] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
+
+  const defaultFormData = {
+    Email: "",
+    Username: "",
+    Password: "",
+    Name: "",
+    Role: "",
+    ProfilPhoto: "",
+    CreatedAt: "",
+    UpdateAt: "",
+
+  };
+
+  const formatDate = (dateString) => dateString ? new Date(dateString).toISOString().split("T")[0] : "";
+
+  const fetchUser = async () => {
+    if (!IDUser) return;
+    try {
+      const response = await ApiCustomer.get(`/api/user/${IDUser}`);
+      const data = response.data.data || {};
+
+      setFormData({
+        Email: data.Email || "",
+        Username: data.Username || "",
+        Password: data.Password || "",
+        Name: data.Name || "",
+        Role: data.Role || "",
+        ProfilPhoto: data.ProfilPhoto || "",
+        CreatedAt: formatDate(data.CreatedAt),
+        UpdateAt: formatDate(data.UpdateAt),
+      });
+    } catch (error) {
+      console.error("Error fetching User information:", error);
+    }
+  };
+
+  const resetForm = () => setFormData(defaultFormData);
+
+  useEffect(() => {
+    if (IDUser && isOpen) {
+      fetchUser();
+    }
+  }, [IDUser, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      resetForm();
+    }
+  }, [isOpen]);
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: e.target ? e.target.value : e,
+    }));
+  };
+
+  const handleUpdate = async () => {
+    const { 
+      Email,
+      Username,
+      Password,
+      Name,
+      Role,
+      ProfilPhoto,
+      CreatedAt,
+      UpdateAt,
+    } = formData;
+  
+    if (!Email || !Username || !Password) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all required fields.",
+        icon: "warning",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+  
+    try {
+      await ApiCustomer.patch(`/api/user/${IDUser}`, formData);
+  
+      Swal.fire({
+        title: "Success!",
+        text: "Data berhasil diperbarui.",
+        icon: "success",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+  
+      onUpdate();      // Refresh data
+      setIsOpen(false); // Tutup modal atau form
+    } catch (error) {
+      console.error("Error updating User:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Gagal memperbarui data!",
+        icon: "error",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+  
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchUser(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="h-[500px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit User Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the User. Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {[
+            { label: "Email", id: "Email", type: "gmail" },
+            { label: "Username", id: "Username", type: "text" },
+            { label: "Password", id: "Password", type: "password" },
+            { label: "Name", id: "Names", type: "text"},
+            { label: "Role", id: "Role", type: "text" },
+            { label: "ProfilPhoto", id: "ProfilPhoto", type: "text" },
+            { label: "CreatedAt", id: "CreatedAt", type: "date"},
+            { label: "UpdateAt", id: "UpdateAt", type: "date"},
+          ].map(({ label, id, type, options }) => (
+            <div key={id}>
+              <Label>{label}</Label>
+              {type === "select" ? (
+                <Select onValueChange={handleChange(id)} value={formData[id]}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder={`Select ${label}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {options.map(option => (
+                      <SelectItem key={option} value={option}>{option}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : type === "textarea" ? (
+                <Textarea id={id} className="p-2" value={formData[id]} onChange={handleChange(id)} />
+              ) : (
+                <Input type={type} id={id} className="p-2" value={formData[id]} onChange={handleChange(id)} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export function UserDelete ({ IDUser, isModalOpen, setIsModalOpen, onUpdate }) {
+  //set modal
+const handleDelete = async () => {
+  try {
+    const response = await ApiCustomer.delete(`/api/user/${IDUser}`);
+    
+    console.log("Server Response:", response.data);
+    if (response.status === 409 || response.data.success === false) {
+      // 🚨 Restriction triggered - Show alert message
+      alert(response.data.message || "Cannot delete this User due to restrictions.");
+      return;
+    }
+    Swal.fire({
+      icon: 'Success',
+      title: 'Berhasil!',
+      text: 'User dihapus.',
+      timer: 1000,  
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
+    // ✅ Close the modal if it's open
+    setIsModalOpen(false);
+    // ✅ Refresh the table by calling `onUpdate()`
+    if (onUpdate) {
+      onUpdate();
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 409) {
+      // 🚨 Handle 409 Conflict error from backend
+      alert(error.response.data.message || "Cannot delete! This User has related User.");
+    } else {
+      alert("Failed to delete User. Please try again.");
+    }
+  }
+};
+
+return (
+  <Dialog>
+    <DialogTrigger asChild>
+      <Button variant="outline" className="text-red-500 hover:text-red-700">
+        <Trash />
+      </Button>
+    </DialogTrigger>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Delete User</DialogTitle>
+        <DialogDescription>
+          Delete User confirm. 
+        </DialogDescription>
+      </DialogHeader>
+      <h1>Anda yakin ingin menghapus data ini?</h1>
+      <DialogFooter>
+        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
+};
+
+export function PartEdit({ PartNumber, onUpdate }) {
+  const [formData, setFormData] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
+
+  const defaultFormData = {
+    PartNumber: "",
+    Keyword: "",
+    PartDescription: "",
+    Orderability: "",
+    RestrictionReason: "",
+    CSR_Flag: "",
+    ROHS_Flag: "",
+    Returnable_Flag: "",
+    HardRoll_Flag: "",
+    DangerousGoods_Flag: "",
+    LithiumBattery_Flag: "",
+    Oversize_Flag: "",
+    Heavy_Flag: "",
+    Price: "",
+    Total: "",
+    Shipping_Fee: "",
+  };
+
+  const formatDate = (dateString) => dateString ? new Date(dateString).toISOString().split("T")[0] : "";
+
+  const fetchPart = async () => {
+    if (!PartNumber) return;
+    try {
+      const response = await ApiCustomer.get(`/api/service-log/parts-catalog/${PartNumber}`);
+      const data = response.data.data || {};
+
+      setFormData({
+        PartNumber: data.PartNumber || "",
+        Keyword: data.Keyword || "",
+        PartDescription: data.PartDescription || "",
+        Orderability: data.Orderability || "",
+        RestrictionReason: data.RestrictionReason || "",
+        CSR_Flag: data.CSR_Flag || "",
+        ROHS_Flag: data.ROHS_Flag || "",
+        Returnable_Flag: data.Returnable_Flag || "",
+        HardRoll_Flag: data.HardRoll_Flag || "",
+        DangerousGoods_Flag: data.DangerousGoods_Flag || "",
+        LithiumBattery_Flag: data.LithiumBattery_Flag || "",
+        Oversize_Flag: data.Oversize_Flag || "",
+        Heavy_Flag: data.Heavy_Flag || "",
+        Price: data.Price || "",
+        FreightPrice: data.FreightPrice || "",
+        Tax: data.Tax || "",
+        Total: data.Total || "",
+        Shipping_Fee: data.Shipping_Fee || "",
+      });
+    } catch (error) {
+      console.error("Error fetching Parts information:", error);
+    }
+  };
+
+  const resetForm = () => setFormData(defaultFormData);
+
+  useEffect(() => {
+    if (PartNumber && isOpen) {
+      fetchPart();
+    }
+  }, [PartNumber, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      resetForm();
+    }
+  }, [isOpen]);
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: e.target ? e.target.value : e,
+    }));
+  };
+
+  const handleUpdate = async () => {
+    const { 
+      PartNumber,
+      Keyword,
+      PartDescription,
+      Orderability,
+      RestrictionReason,
+      CSR_Flag,
+      ROHS_Flag,
+      Returnable_Flag,
+      HardRoll_Flag,
+      DangerousGoods_Flag,
+      LithiumBattery_Flag,
+      Oversize_Flag,
+      Heavy_Flag,
+      Price,
+      Total,
+      Shipping_Fee,
+    } = formData;
+  
+    if (!PartNumber || !Keyword || !PartDescription) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all required fields.",
+        icon: "warning",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+  
+    try {
+      await ApiCustomer.patch(`/api/service-log/parts-catalog/${PartNumber}`, formData);
+  
+      Swal.fire({
+        title: "Success!",
+        text: "Data berhasil diperbarui.",
+        icon: "success",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+  
+      onUpdate();      // Refresh data
+      setIsOpen(false); // Tutup modal atau form
+    } catch (error) {
+      console.error("Error updating Parts:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Gagal memperbarui data!",
+        icon: "error",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+  
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchPart(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="h-[500px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit User Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the User. Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+  {[
+    { label: "Part Number", id: "PartNumber", type: "text", required: true },
+    { label: "Keyword", id: "Keyword", type: "text" },
+    { label: "Part Description", id: "PartDescription", type: "textarea" },
+    { label: "Orderability", id: "Orderability", type: "checkbox" },
+    { label: "Restriction Reason", id: "RestrictionReason", type: "textarea" },
+    { label: "CSR Flag", id: "CSR_Flag", type: "checkbox" },
+    { label: "ROHS Flag", id: "ROHS_Flag", type: "checkbox" },
+    { label: "Returnable Flag", id: "Returnable_Flag", type: "checkbox" },
+    { label: "Hard Roll Flag", id: "HardRoll_Flag", type: "checkbox" },
+    { label: "Dangerous Goods Flag", id: "DangerousGoods_Flag", type: "checkbox" },
+    { label: "Lithium Battery Flag", id: "LithiumBattery_Flag", type: "checkbox" },
+    { label: "Oversize Flag", id: "Oversize_Flag", type: "checkbox" },
+    { label: "Heavy Flag", id: "Heavy_Flag", type: "checkbox" },
+    { label: "Price", id: "Price", type: "number" },
+    { label: "Freight Price", id: "FreightPrice", type: "number" },
+    { label: "Tax", id: "Tax", type: "number" },
+    { label: "Total", id: "Total", type: "number" },
+    { label: "Shipping Fee", id: "Shipping_Fee", type: "number" },
+  ].map(({ label, id, type, required }) => (
+    <div key={id}>
+      <Label htmlFor={id}>
+        {label} {required ? <span className="text-red-500">*</span> : ""}
+      </Label>
+      {type === "textarea" ? (
+        <Textarea
+          id={id}
+          className="p-2"
+          value={formData[id] || ""}
+          onChange={handleChange(id)}
+        />
+      ) : type === "checkbox" ? (
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id={id}
+            checked={!!formData[id]}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, [id]: e.target.checked }))
+            }
+          />
+          <label htmlFor={id}>{label}</label>
+        </div>
+      ) : (
+        <Input
+          type={type}
+          id={id}
+          className="p-2"
+          value={formData[id] || ""}
+          onChange={handleChange(id)}
+        />
+      )}
+    </div>
+  ))}
+</div>
+
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 //? Service Case Tab List
 
 

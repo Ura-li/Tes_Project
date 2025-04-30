@@ -107,6 +107,14 @@ const data = {
           title: "Work Order",
           url: "/master/Wo_table",
         },  
+        {
+          title: "User",
+          url: "/master/User_table",
+        },  
+        {
+          title: "Parts",
+          url: "/master/Part_table",
+        },  
       ],
     },
     {
