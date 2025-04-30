@@ -620,6 +620,9 @@ useEffect(() =>{
   console.log("Fetch Data User ", ownerUserData)
 }, [ownerUserData])
 
+// useEffect(() =>{
+//   console.log("Data Asset Info : ",dataFetchAssetInformation)
+// }, dataFetchAssetInformation)
 
 const fetchSymptomCodes = async (term) => {
   try {
