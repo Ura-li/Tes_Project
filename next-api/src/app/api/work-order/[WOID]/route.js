@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 
 export async function GET(request, {params}) {
-    const { WOID } = params
+    const { WOID } = await params
     const woid = WOID
 
     if (!woid) {
@@ -41,7 +41,7 @@ export async function GET(request, {params}) {
 }
 
 export async function PATCH(request, { params }) {
-    const { WOID } = params
+    const { WOID } = await params
     const woid = WOID
 
     try {
@@ -76,14 +76,14 @@ export async function PATCH(request, { params }) {
         IncomingChannel
         } = body;
 
-        if (
-            !WorkOrderType || !Priority || !SystemStatus
-        ) {
-            return NextResponse.json({
-                success: false,
-                message: "All fields are required!"
-            }, { status: 400 });
-        }
+        // if (
+        //     !WorkOrderType || !Priority || !SystemStatus
+        // ) {
+        //     return NextResponse.json({
+        //         success: false,
+        //         message: "All fields are required!"
+        //     }, { status: 400 });
+        // }
 
         // Cek apakah Material Order ada
         const existingWorkOrder = await prisma.workorder.findUnique({

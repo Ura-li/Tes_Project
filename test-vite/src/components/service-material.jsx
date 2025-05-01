@@ -69,7 +69,12 @@ export const ServiceMaterial = () => {
   }, [])
   return (
     <div>
-      <TabsServiceMO/>
+      {materialOrders.OrderStatus === 'Closed' && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-2">
+          This material order is <strong>read-only</strong> because it is <strong>Closed</strong>.
+        </div>
+      )}
+      <TabsServiceMO materialOrders={materialOrders}/>
     <Card className="mt-2 rounded-none h-[160px]">
       <CardHeader>
         <CardTitle className="text-xl ">{materialOrders.MOID} for {materialOrders.WOID}</CardTitle>

@@ -146,7 +146,12 @@ export const ServiceWork = () => {
   const navigate = useNavigate();
   return (
     <div>
-    <TabsServiceWO/>
+      {workOrders.SystemStatus === 'CLOSED_POSTED' && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-2">
+          This work order is <strong>read-only</strong> because it is <strong>Closed</strong>.
+        </div>
+      )}
+    <TabsServiceWO workOrders={workOrders}/>
     <Card className="mt-2 rounded-none h-[160px]">
       <CardHeader>
         <CardTitle className="text-xl ">{woid}</CardTitle>
@@ -194,7 +199,7 @@ export const ServiceWork = () => {
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
                   <span>Work Order Number</span>
-                  <span className="ml-35.5">...</span>
+                  <span className="ml-35.5">{workOrders.WOID}</span>
                 </div>
 
                 <div className="font-bold flex">
@@ -210,7 +215,7 @@ export const ServiceWork = () => {
 
                 <div className="font-bold flex">
                   <span className="ml-7">System Status</span>
-                  <span className="ml-48">...</span>
+                  <span className="ml-48">{workOrders.SystemStatus}</span>
                 </div>
 
                 <div className="font-bold flex">
