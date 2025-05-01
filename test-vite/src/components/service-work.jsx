@@ -41,7 +41,7 @@ import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
 
-import { QuickWOInput } from "./quick-wo-input";
+import { CaseField, QuickWOInput } from "./quick-wo-input";
 
 export const ServiceWork = () => {
   const { woid } = useParams();
@@ -200,174 +200,55 @@ export const ServiceWork = () => {
 
           <TabsContent value="wo_summary">
            <div className="flex gap-4">
-            <Card className="w-[850px] mt-7 rounded-md">
-              <span className="ml-5 font-bold text-xl">General</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-9 h-115">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Incoming Channel</span>
-                  <span className="ml-40">...</span>
+            <Card className="flex-1/3  rounded-md">
+              <CardHeader>
+                <CardTitle className=' text-lg'>General</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid gap-5 grid-cols-4 items-center ">
+                <div className="p-4 ring-1 col-span-2 grid grid-cols-2 items-center">
+                  <CaseField label="Incoming Channel"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
                 </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Work Order Number</span>
-                  <span className="ml-35.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Work Order Type</span>
-                  <span className="ml-42">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Priority</span>
-                  <span className="ml-60">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">System Status</span>
-                  <span className="ml-48">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <KeyRound className="size-5 mr-2"></KeyRound>
-                  <span>Sub-Status</span>
-                  <span className="ml-54">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Bookable Resource Booking</span>
-                  <span className="ml-22">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Service Offer ID</span>
-                  <span className="ml-45">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Service Description</span>
-                  <span className="ml-39">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Patner Case Id</span>
-                  <span className="ml-50">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Patner Status</span>
-                  <span className="ml-52">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Preferred Day</span>
-                  <span className="ml-51">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Preferred Time</span>
-                  <span className="ml-49">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Black Badged/Special Access</span>
-                  <span className="ml-23">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Recommended Resource</span>
-                  <span className="ml-31">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Shipment Country</span>
-                  <span className="ml-42.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Shipment State</span>
-                  <span className="ml-48">...</span>
-                </div>
+                <CaseField label="Patner Case Id"  ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Work Order Number"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Patner Status"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Work Order Type"  ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <div className="p-3 ring-1 col-span-2"></div>
+                <CaseField label="Priority" icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Recommended Resource"  ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="System Status"  ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Shipment Country"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Sub-Status"  icon={KeyRound}><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Shipment State" icon ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Bookable Resource Booking"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Service Offer ID" className={'col-start-1'} icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Service Description" className={'col-start-1'} icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+  
               </CardContent>
             </Card>
 
-            <div>
-              <Card className="mt-7.5 rounded-sm h-19 w-96">
-                <CardContent className="grid">
-                  <div className="font-bold flex">
-                    <span>Currently Worked By</span>
-                    <span className="ml-18">...</span>
-                  </div>
+            <div className="flex-1 flex flex-col gap-4">
+              <Card className="rounded-sm ">
+                <CardContent className="grid grid-cols-4 items-center">
+                    <CaseField label="Currently Worked By"  className={'col-span-3'}> <Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
                 </CardContent>
               </Card>
 
-              <Card className="mt-3 rounded-md w-96">
-                <span className="ml-5 font-bold text-xl">
-                Entitlement and Modifier
-                </span>
-                <CardContent className="grid gap-5 grid-rows-3">
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Entitlement</span>
-                    <span className="ml-40">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Offer</span>
-                    <span className="ml-52">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>OTC Code</span>
-                    <span className="ml-43.5">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Authorizing Employee</span>
-                    <span className="ml-20">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Coverage Window Used</span>
-                    <span className="ml-17">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Coverage Window Value</span>
-                    <span className="ml-16">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Response Time Value</span>
-                    <span className="ml-22.5">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Repair Time Value</span>
-                    <span className="ml-28.5">...</span>
-                  </div>
-                  
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Case Priority Index</span>
-                    <span className="ml-27">...</span>
-                  </div>
+              <Card className="rounded-md ">
+                <CardHeader>
+                  <CardTitle className=' text-lg'>Entitlement and Modifier</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent className="grid gap-5 grid-cols-2 items-center">
+                  <CaseField label="Entitlement"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Offer"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="OTC Code"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Authorizing Employee"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Coverage Window Used"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Coverage Window Value"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Response Time Value"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Repair Time Value"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Case Priority Index"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
                 </CardContent>
               </Card>
             </div>
@@ -375,9 +256,10 @@ export const ServiceWork = () => {
             </div>
 
             <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">
-                Service Delivery Address
-              </span>
+              <CardHeader>
+                <CardTitle className=' text-lg'>Service Delivery Address</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="grid ">
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
@@ -388,9 +270,10 @@ export const ServiceWork = () => {
             </Card>
 
             <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">
-                SLA in Customer Time Zone
-              </span>
+              <CardHeader>
+                <CardTitle className=' text-lg'>SLA in Customer Time Zone</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="grid">
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
@@ -401,9 +284,10 @@ export const ServiceWork = () => {
             </Card>
 
             <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">
-                Part Order Information
-              </span>
+              <CardHeader>
+                <CardTitle className=' text-lg'> Part Order Information</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="grid gap-5">
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
@@ -443,9 +327,10 @@ export const ServiceWork = () => {
             </Card>
 
             <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">
-              Material Order Information
-              </span>
+              <CardHeader>
+                <CardTitle className=' text-lg'> Material Order Information</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="grid">
               <Table>
                   <TableHeader>
@@ -493,9 +378,11 @@ export const ServiceWork = () => {
             </Card>
 
             <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">
-              Primary Incident
-              </span>
+              <CardHeader>
+                <CardTitle className=' text-lg'> Primary Incident</CardTitle>
+                <hr />
+              </CardHeader>
+
               <CardContent className="grid">
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
