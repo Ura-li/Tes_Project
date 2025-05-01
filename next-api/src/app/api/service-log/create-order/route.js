@@ -6,7 +6,7 @@ import { generateID } from "@/utils/generateID";
 export async function POST(request) {
     try{
         const body = await request.json()
-        const { AssetID, CaseID, selectedWarrantyServices, selectedPartCatalog, IncidentType } = body;
+        const { AssetID, CaseID, selectedWarrantyServices, selectedPartCatalog, IncidentType, OwnerID } = body;
 
          // 1. Create Work Order
         const WOID = await generateID("WO-", "workorder", "WOID"); 
@@ -17,8 +17,8 @@ export async function POST(request) {
                 CaseID,
                 WorkOrderType: IncidentType,
                 WorkOrderNumber: WOID,
-                SystemStatus: "Open",
-                Owner: "Miku21"
+                SystemStatus: "OPEN_UNSCHEDULED",
+                OwnerID: OwnerID 
             }
         });
 
@@ -41,9 +41,9 @@ export async function POST(request) {
             data: {
             MOID,
             WOID,
-            OrderStatus: "Created",
+            OrderStatus: "New",
             OrderType: "Repair",
-            Owner: "Miku21"
+            OwnerID: OwnerID
             }
         });
 
@@ -63,7 +63,8 @@ export async function POST(request) {
                     connect: { 
                         PartNumber: part.PartNumber,
                     }
-                }
+                },
+                Status: "New"
             }
             });
         }

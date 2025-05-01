@@ -73,6 +73,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 
+import { getUserFromToken } from "@/lib/utils/auth";
+
 // const assets = [
 //   {
 //     productname: "HP Victus 16 inch Gaming Laptop 16-r0555TX",
@@ -2948,12 +2950,16 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
   //createorder
   const createOrder = async () => {
     try {
+      const data = {
+        user: getUserFromToken()
+      }
       const res = await ApiCustomer.post("/api/service-log/create-order", {
         AssetID: assetForWorkOrderCreation.AssetID,
         CaseID: caseDetails.CaseID,
         selectedWarrantyServices,
         selectedPartCatalog,
-        IncidentType: selected
+        IncidentType: selected,
+        OwnerID: data.user.id,
       });
   
       await Swal.fire({

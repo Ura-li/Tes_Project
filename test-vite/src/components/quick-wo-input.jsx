@@ -123,6 +123,7 @@ export function QuickWOInput ({ WOID, caseInformation }) {
       }
     }
     fetchDataSiteAccounts();
+    console.log("Site Account Information : ",siteAccountInformation)
   }, [caseInformation?.SiteAccountID])
 
   // Fetch data awal

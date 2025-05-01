@@ -53,6 +53,7 @@ import {
 
  import { useLocation, useNavigate } from "react-router-dom";
  import { useState, useEffect } from "react";
+ import { useNavigate } from 'react-router'
  import { useSidebar } from '@/components/ui/sidebar'
  import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -62,6 +63,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { format } from 'date-fns'
 import { twMerge } from "tailwind-merge"
+import Swal from 'sweetalert2'
 // const workorder = [
 //   {
 //     workordernumber: "WO-027816939",
@@ -96,7 +98,9 @@ import { BtnModalsWorkOrder } from './sc-modal'
 import DatePicker from './date-picker'
 
 
+
 export const TabsService = ({ caseDetails }) => {
+  const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
 
   const [selectedSymptom, setSelectedSymptom] = useState(null);
@@ -104,6 +108,7 @@ export const TabsService = ({ caseDetails }) => {
 
   const { open } = useSidebar();
 
+  
   //casenote
   const [caseNoteFormData, setCaseNoteFormData] = useState({
     LogType: '',
@@ -244,10 +249,10 @@ export const TabsService = ({ caseDetails }) => {
   
 
   const buttons = [
-    { icon: ArrowLeftFromLine, label: "", onClick: () => alert("not now") },
+    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/master/Case_table`) },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
-    { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now") },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseCase() },
     { icon: RotateCw, label: "Refresh", onClick: () => alert("not now") },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
     { icon: StepBack, label: "CSR", onClick: () => alert("not now") },
@@ -262,6 +267,59 @@ export const TabsService = ({ caseDetails }) => {
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
+  const saveAndCloseCase = async () => {
+    const confirmResult = await Swal.fire({
+      title: 'Confirm Save',
+      text: 'This will give the Case status as CLOSED. Are you sure you want to save changes?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, Save it'
+    });
+
+    if (!confirmResult.isConfirmed) {
+      return; // User canceled
+    }
+    try {
+      Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we update the Case.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      const res = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`,{
+        CaseStatus: 'Close'
+      })
+      if (res.data.success) {
+        // Success alert
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          navigate(`/master/Case_table`)
+        })
+      } else {
+        // Error from API
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: res.data.message
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to update!',
+        text: error.message || 'Something went wrong.'
+      });
+    }
+  }
   return (
     <>
     <div className='border-1 flex items-center '>
@@ -337,14 +395,14 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
   </>
 );
 
+export const TabsServiceWO = ({workOrders}) => {
 
-export const TabsServiceWO = () => {
-
+  const navigate = useNavigate();   
   const buttons = [
-    { icon: ArrowLeftFromLine, label: "", onClick: () => alert("not now") },
+    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/case/${workOrders.CaseID}`) },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
-    { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now") },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseWorkOrder() },
     { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
     { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
@@ -358,6 +416,59 @@ export const TabsServiceWO = () => {
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
+  const saveAndCloseWorkOrder = async () => {
+    const confirmResult = await Swal.fire({
+      title: 'Confirm Save',
+      text: 'This will give the order status as CLOSED. Are you sure you want to save changes?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, Save it'
+    });
+
+    if (!confirmResult.isConfirmed) {
+      return; // User canceled
+    }
+    try {
+      Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we update the Work Order.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      const res = await ApiCustomer.patch(`/api/work-order/${workOrders.WOID}`,{
+        SystemStatus: 'CLOSED_POSTED'
+      })
+      if (res.data.success) {
+        // Success alert
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          navigate(`/case/${workOrders.CaseID}`)
+        })
+      } else {
+        // Error from API
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: res.data.message
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to update!',
+        text: error.message || 'Something went wrong.'
+      });
+    }
+  }
   return (
     <>
     <div className='border-1 flex items-center '>
@@ -403,13 +514,14 @@ export const TabsServiceWO = () => {
   )
 }
 
-export const TabsServiceMO = () => {
+export const TabsServiceMO = ({materialOrders}) => {
 
+  const navigate = useNavigate();   
   const buttons = [
-    { icon: ArrowLeftFromLine, label: "", onClick: () => alert("not now") },
+    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/work/${materialOrders.WOID}`) },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
-    { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now") },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseMaterialOrder() },
     { icon: RotateCw, label: "ATP", onClick: () => alert("not now") },
     { icon: StepBack, label: "Cancel Order", onClick: () => alert("not now") },
     { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
@@ -423,6 +535,46 @@ export const TabsServiceMO = () => {
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
+  const saveAndCloseMaterialOrder = async () => {
+    try {
+      Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we update the Material Order.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      const res = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`,{
+        OrderStatus: 'Closed'
+      })
+      if (res.data.success) {
+        // Success alert
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          navigate(`/work/${materialOrders.WOID}`)
+        })
+      } else {
+        // Error from API
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: res.data.message
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to update!',
+        text: error.message || 'Something went wrong.'
+      });
+    }
+  }
   return (
     <>
     <div className='border-1 flex items-center '>
@@ -468,6 +620,111 @@ export const TabsServiceMO = () => {
   )
 }
 
+export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
+ const navigate = useNavigate();
+  const buttons = [
+    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/material-order/${MOLineDetails.MOID}`) },
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseMaterialLineItemsOrder() },
+    { icon: StepBack, label: "Cancl", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+    { icon: RotateCw, label: "Assign", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Word Templates", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Run Report", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Process", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
+      // { icon: UserPen, label:  "Add To Queue", onClick: () => alert("not now") },
+      // { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+  ];
+  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  const hiddenButtons = open ? buttons.slice(-3) : [];
+
+  const saveAndCloseMaterialLineItemsOrder = async () => {
+    try {
+      Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we update the line item.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${MOLineDetails.LineItemID}`,{
+        Status: 'Closed'
+      })
+      if (res.data.success) {
+        // Success alert
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          navigate(`/material-order/${MOLineDetails.MOID}`)
+        })
+      } else {
+        // Error from API
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: res.data.message
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to update!',
+        text: error.message || 'Something went wrong.'
+      });
+    }
+  }
+  return (
+    <>
+    <div className='border-1 flex items-center '>
+       {visibleButtons.map((btn, index) => (
+          <Button
+            key={index}
+            onClick={btn.onClick}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+            >
+            <btn.icon className="h-4 w-4" />
+            {btn.label && <span className="text-md">{btn.label}</span>}
+          </Button>
+        ))}
+
+{open && hiddenButtons.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">...</DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                <DropdownMenuItem key={index}>
+                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  {btn.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    </div>
+    <div>
+    {/* <ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
+      /> */}
+    </div>
+  </>
+  )
+}
 export const ServiceCase = ({ 
   caseDetails, 
   formData, 
@@ -712,6 +969,11 @@ const handleClick = async () => {
 
   return (
     <>
+    {caseDetails.CaseStatus === 'Close' && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-2">
+          This Case is <strong>read-only</strong> because it is <strong>Closed</strong>.
+        </div>
+      )}
     <Card className="mt-2 rounded-none p-0 border-0">
       
         <Tabs defaultValue="case_info"> 

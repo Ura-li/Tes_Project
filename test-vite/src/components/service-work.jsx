@@ -42,8 +42,14 @@ import { useParams } from "react-router";
 import ApiCustomer from "@/api";
 
 import { CaseField, QuickWOInput } from "./quick-wo-input";
+import { NewBookableResourceBooking } from "./service-booking";
+import { getUserFromToken } from "@/lib/utils/auth";
+
+import { useNavigate } from "react-router";
 
 export const ServiceWork = () => {
+
+  const user = getUserFromToken();
   const { woid } = useParams();
 
   const [workOrders, setWorkOrders] = useState([]);
@@ -69,6 +75,7 @@ export const ServiceWork = () => {
   }
 
   const [caseInformation, setCaseInformation] = useState([])
+  const [bookings, setBookings] = useState([])
   
 
   useEffect(() => {
@@ -94,6 +101,9 @@ export const ServiceWork = () => {
         if (workOrderData?.CaseID) {
           const resCI = await ApiCustomer.get(`/api/case-information/${workOrderData.CaseID}`);
           setCaseInformation(resCI.data.data);
+
+          const resBooking = await ApiCustomer.get(`/api/bookings?WOID=${woid}`);
+          setBookings(resBooking.data.data)
         }
   
         Swal.close(); 
@@ -110,6 +120,26 @@ export const ServiceWork = () => {
   
     if (woid) fetchAllData();
   }, [woid]);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString();
+  };
+  
+
+  // const fetchBookings = async () => {
+  //   try {
+  //     const response = await ApiCustomer.get('/api/bookings')
+  //     setBookings(response.data.data)
+  //   } catch (error) {
+  //     console.error("Fetch error:", err);
+  //       Swal.fire({
+  //         icon: 'error',
+  //         title: 'Oops...',
+  //         text: 'Something went wrong while loading data!',
+  //       });
+  //   }
+  // }
   
   // useEffect(() => {
   // }, [workOrders])
@@ -118,8 +148,15 @@ export const ServiceWork = () => {
 
     const location = useLocation();
     const { ownerUserData, dataFetchCustomerData } = location.state || {}; 
+
+    const navigate = useNavigate();
   return (
     <>
+    {workOrders.SystemStatus === 'CLOSED_POSTED' && (
+      <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-2">
+        This work order is <strong>read-only</strong> because it is <strong>Closed</strong>.
+      </div>
+    )}
     <TabsServiceWO/>
     <Card className="mt-2 rounded-none p-0 border-0">
         <Tabs defaultValue="Quick_WO_Input" className="">
@@ -408,7 +445,7 @@ export const ServiceWork = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="wo_bookings">
+          <TabsContent value="wo_bookings" className="w-390">
             <Card className="mt-5 flex-col">
               <span className="ml-5 font-bold text-xl">WO Bookings</span>
               <CardContent className="grid gap-5">
@@ -433,31 +470,63 @@ export const ServiceWork = () => {
             </Card>
 
             <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">Booking</span>
+              <span className="ml-5 font-bold text-xl">Booking </span>   
               <CardContent className="grid">
-                <Button variant="link" className="w-50 ml-250 ">
-                  <Link to="/bookings">
+                {/* <Button variant="link" className="w-50 ml-250 "> */}
+                {/* <Link 
+                  to="/bookings"
+                  state={{ WOID: workOrders.WOID }}
+                >
                     + New Bookable Resource
-                  </Link>
-                </Button>
+                  </Link> */}
+                  <NewBookableResourceBooking WOID={ workOrders.WOID } CreatedBy={user.id} />
+                {/* </Button> */}
               <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">Order Number</TableHead>
-                      <TableHead>Case ID</TableHead>
+                      <TableHead className="w-[100px]">Resource</TableHead>
+                      <TableHead>Account</TableHead>
+                      <TableHead>Booking</TableHead>
+                      <TableHead>Reschedule</TableHead>
+                      <TableHead>Reschedule Reason</TableHead>
+                      <TableHead>Start Time</TableHead>
+                      <TableHead>Estimated Arrival Time (ETA)</TableHead>
+                      <TableHead>Actual Arrival Time</TableHead>
+                      <TableHead>End Time</TableHead>
                       <TableHead>Created On</TableHead>
-                      <TableHead>Order Status</TableHead>
-                      <TableHead>Order Type</TableHead>
-                      <TableHead>Ready For Closure</TableHead>
+                      <TableHead>Created By</TableHead>
                     </TableRow>
                   </TableHeader>
 
                   <TableBody>
+                  {bookings.length > 0 ? (
+                    bookings.map((booking, index) => (
+                      <TableRow key={booking.BookingId || index} onClick={() => navigate(`/bookings`,{ state: { BookingId: booking.BookingId }})} >
+                        <TableCell>{booking.workorder?.Owner || '-'}</TableCell>
+                        <TableCell>{booking.workorder?.WorkOrderNumber || '-'}</TableCell>
+                        <TableCell>{booking.BookingStatus || '-'}</TableCell>
+                        <TableCell>{booking.CeScheduleChange ? 'Yes' : 'No'}</TableCell>
+                        <TableCell>{booking.ScheduleJeopardy ? 'Jeopardy' : '-'}</TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell>{formatDate(booking.CreatedAt)}</TableCell>
+                        {/* <TableCell>{formatDate(booking.StartTimeCustomerTime)}</TableCell>
+                        <TableCell>{formatDate(booking.EstimatedArrivalTimeCustomerTime)}</TableCell>
+                        <TableCell>{formatDate(booking.ActualArrivalTimeCustomerTime)}</TableCell>
+                        <TableCell>{formatDate(booking.EndTimeCustomerTime)}</TableCell>
+                        <TableCell>{formatDate(booking.CreatedAt)}</TableCell> */}
+                        <TableCell>{booking.createdByUser?.Name || '-'}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
                     <TableRow>
-                      <TableCell className="font-medium">
+                      <TableCell colSpan={11} className="text-center">
                         No data available
                       </TableCell>
                     </TableRow>
+                  )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -738,7 +807,7 @@ export const ServiceWork = () => {
             </Card> 
           </TabsContent>
 
-          <TabsContent value="Quick_WO_Input">
+          <TabsContent value="Quick_WO_Input" className="w-400">
             <QuickWOInput WOID={woid} caseInformation={caseInformation} />
           </TabsContent>
         </Tabs>

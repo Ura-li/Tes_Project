@@ -38,7 +38,9 @@ createRoot(document.getElementById('root')).render(
             <Route path='/work/:woid' element={<Work />}/>
             <Route path='/material-order/:moid' element={<MaterialOrder />}/>
             <Route path='/mo_detail/:molineid' element={<MoDetail />}/>
-            <Route path='/bookings' element={<Bookings/>}/>
+            <Route path='/bookings' element={<Bookings />} />]
+
+
             {/* <Route path='/master' element> */}
             <Route path='/master/Company_table' element={<Company_table />} />
             <Route path='/master/Assets_table' element={<Assets_table />} />
@@ -51,6 +53,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/Wo_table' element={<Wo_table/>}/>
             {/* </Route> */}
           </Route>
+            {/* </Route> */}
           <Route path="/lorem" element={<Lorem />}/>
         </Routes>
       {/* </ModalContextProvider> */}

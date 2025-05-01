@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 
 export async function GET(request, {params}) {
-    const moid = await params.MOID
+    // const moid = await params.MOID
+    const { MOID } = await params;
+    const moid = MOID
 
     if (!moid) {
         return NextResponse.json({
@@ -35,6 +37,62 @@ export async function GET(request, {params}) {
             success: false,
             message: "Failed to fetch data",
             error: err.message
+        }, { status: 500 });
+    }
+}
+
+export async function PATCH(request, {params}) {
+    const { MOID } = await params;
+    const moid = MOID
+
+    if (!moid) {
+        return NextResponse.json({
+            success: false,
+            message: "Invalid Material Order ID"
+        }, { status: 400 });
+    }
+    try {
+        const body = await request.json();
+        // Cek apakah AssetID ada
+        const existingMaterialOrder = await prisma.materialorder.findUnique({
+            where: { MOID: moid }
+        });
+        
+        
+        if (!existingMaterialOrder) {
+            return NextResponse.json({
+                success: false,
+                message: "Material Order not found!"
+            }, { status: 404 });
+        }
+        
+        const { OrderNumber, OrderStatus, OrderType, CreatedOn, SalesOrderNumber, RMANumber, ReadyForClosureDate, Owner } = body;
+        // Update data
+        const updatedMaterialOrder = await prisma.materialorder.update({
+            where: { MOID: moid },
+            data: {
+                OrderNumber, 
+                OrderStatus, 
+                OrderType, 
+                CreatedOn, 
+                SalesOrderNumber, 
+                RMANumber, 
+                ReadyForClosureDate, 
+                Owner
+            }
+        });
+
+        return NextResponse.json({
+            success: true,
+            message: "Data Material Order Information Updated!",
+            data: updatedMaterialOrder
+        }, { status: 200 });
+
+    } catch (error) {
+        return NextResponse.json({
+            success: false,
+            message: "Failed to update Material Order",
+            error: error.message
         }, { status: 500 });
     }
 }
