@@ -8,18 +8,19 @@ import Lorem from './Lorem';
 import Search_case from './search_case';
 import { Case } from './Case';
 import { Work } from './work';
-import { MaterialOrder } from './material_order';
-import { MoDetail } from './material_order';
-import { Company_table } from './master_table';
-import { Assets_table } from './master_table';
-import { Contact_table } from './master_table';
-import { Case_table } from './master_table';
-import { Product_table } from './master_table';
+import { MaterialOrder, MoDetail } from './material_order';
+import 
+{ Company_table,
+  Assets_table,
+  Contact_table,
+  Case_table,
+  Product_table,
+  ProductType_table,
+  WarrantyService_table,
+  Mo_table,
+  Wo_table
+ } from './master_table';
 import { Bookings } from './bookings';
-import { ProductType_table } from './master_table';
-import { WarrantyService_table } from './master_table';
-import { Mo_table } from './master_table';
-import { Wo_table } from './master_table';
 // import { ModalContextProvider } from './components/modal-context';
 
 import { GateKeepingRouting } from './components/GateKeepingRouting';
