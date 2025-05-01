@@ -51,9 +51,8 @@ import {
   ChevronDown
  } from 'lucide-react'
 
- import { useLocation, useNavigate } from "react-router-dom";
+ import { useLocation, useNavigate } from "react-router";
  import { useState, useEffect } from "react";
- import { useNavigate } from 'react-router'
  import { useSidebar } from '@/components/ui/sidebar'
  import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
