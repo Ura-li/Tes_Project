@@ -49,9 +49,9 @@ export const Case = () => {
   if (!caseDetails) return null;
 
   return (
-    <div className="">
+    <>
       <TabsService caseDetails={caseDetails} />
       {/* <ServiceCase caseDetails={caseDetails} /> */}
-    </div>
+    </>
   );
 };
