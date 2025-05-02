@@ -17,7 +17,7 @@ import {
 import { MaterialOrderEdit, MaterialOrderDelete } from "@/components/sc-modal";
 import { WorkOrderDelete, WorkOrderEdit } from "@/components/sc-modal";
 import { UserEdit, UserDelete } from "@/components/sc-modal";
-import { PartEdit } from "@/components/sc-modal";
+import { PartEdit, PartDelete } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 
@@ -586,7 +586,7 @@ export const Assets_table = () => {
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Asset Information Table</h2>
       <div className="space-x-2">
-        <BtnModalAsset />
+        {/* <BtnModalAsset /> */}
         {/* Input Pencarian */}
         <input
           type="text"
@@ -1945,13 +1945,12 @@ export const Part_table = () => {
                 <td className="border p-2">{PartItem.Shipping_Fee}</td>
                 <td className="border p-2 flex space-x-2">
                 <PartEdit PartNumber={PartItem.PartNumber} onUpdate={fetchPartDataTable}></PartEdit>
-                  
-                  {/* <UserDelete
-                    IDUser={UserItem.IDUser}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchUserDataTable}
-                  /> */}
+                <PartDelete
+                  PartNumber={PartItem.PartNumber}
+                  isModalOpen={isModalOpen}
+                  setIsModalOpen={setIsModalOpen}
+                  onUpdate={fetchPartDataTable}
+                />
                 </td>
               </tr>
             ))}

@@ -1,89 +1,116 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
+import bcrypt from "bcryptjs";
 
+// GET - Ambil detail user berdasarkan ID
 export async function GET(request, { params }) {
-    const { IDUser } = await params
-    const idUser = parseInt(IDUser)
+  const { IDUser } = params;
+  const idUser = parseInt(IDUser);
 
-    if (isNaN(idUser)) {
-        return NextResponse.json({
-            success: false,
-            message: "Invalid ID User"
-        }, { status: 400 });
-    }
-
-    const user = await prisma.user.findUnique({
-        where: { IDUser: idUser}
-    })
-    if(!user) {
-        return NextResponse.json({
-            success: false,
-            message: "Detail Data User Not Found!",
-            data: null
-        }, { status: 404 });
-    }
-
+  if (isNaN(idUser)) {
     return NextResponse.json({
-        success: true,
-        message: "Detail Data User Information",
-        data: user
-    }, { status: 200 });
+      success: false,
+      message: "Invalid ID User"
+    }, { status: 400 });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { IDUser: idUser }
+  });
+
+  if (!user) {
+    return NextResponse.json({
+      success: false,
+      message: "Detail Data User Not Found!",
+      data: null
+    }, { status: 404 });
+  }
+
+  return NextResponse.json({
+    success: true,
+    message: "Detail Data User Information",
+    data: user
+  }, { status: 200 });
 }
 
+// PATCH - Update user berdasarkan ID
 export async function PATCH(request, { params }) {
-    const { IDUser } = await params
-    const idUser = parseInt(IDUser)
+  const { IDUser } = params;
+  const idUser = parseInt(IDUser);
+
+  if (isNaN(idUser)) {
+    return NextResponse.json({
+      success: false,
+      message: "Invalid ID User"
+    }, { status: 400 });
+  }
 
   try {
     const body = await request.json();
-    const { ProductTower, ProductGroup, ProductType } = body;
+    const { Email, Username, Password, Name, Role, ProfilePhoto } = body;
 
-    if (!ProductTower || !ProductGroup || !ProductType) {
+    if (!Email && !Username && !Password && !Name && !Role && !ProfilePhoto) {
       return NextResponse.json({
         success: false,
-        message: "All fields are required!"
+        message: "Minimal satu field harus dikirim untuk diupdate."
       }, { status: 400 });
     }
-    
-    const updatedProductTypeInformation = await prisma.product_type.update({
-      where: { ProductTypeID },
-      data: { ProductTower, ProductGroup, ProductType }
+
+    const dataToUpdate = {};
+    if (Email) dataToUpdate.Email = Email;
+    if (Username) dataToUpdate.Username = Username;
+    if (Password) dataToUpdate.Password = await bcrypt.hash(Password, 10);
+    if (Name) dataToUpdate.Name = Name;
+    if (Role) dataToUpdate.Role = Role;
+    if (ProfilePhoto) dataToUpdate.ProfilePhoto = ProfilePhoto;
+
+    const updatedUser = await prisma.user.update({
+      where: { IDUser: idUser },
+      data: dataToUpdate,
     });
 
     return NextResponse.json({
       success: true,
-      message: "Data Product Type Information Updated!",
-      data: updatedProductTypeInformation
+      message: "Data user berhasil diperbarui",
+      data: updatedUser
     }, { status: 200 });
 
   } catch (error) {
     return NextResponse.json({
       success: false,
-      message: "Failed to update Product Type",
+      message: "Gagal memperbarui data user",
       error: error.message
     }, { status: 500 });
   }
 }
 
-// DELETE 
+// DELETE - Hapus user berdasarkan ID
 export async function DELETE(request, { params }) {
-  const ProductTypeID = parseInt(params.ProductTypeID);
+  const { IDUser } = params;
+  const idUser = parseInt(IDUser);
+
+  if (isNaN(idUser)) {
+    return NextResponse.json({
+      success: false,
+      message: "Invalid ID User"
+    }, { status: 400 });
+  }
 
   try {
-    const deletedProductType = await prisma.product_type.delete({
-      where: { ProductTypeID },
+    const deletedUser = await prisma.user.delete({
+      where: { IDUser: idUser },
     });
 
     return NextResponse.json({
       success: true,
-      message: "Product Type deleted successfully",
-      data: deletedProductType
+      message: "User berhasil dihapus",
+      data: deletedUser
     }, { status: 200 });
 
   } catch (error) {
     return NextResponse.json({
       success: false,
-      message: "Product Type not found or already deleted",
+      message: "User tidak ditemukan atau sudah dihapus",
       error: error.message
     }, { status: 404 });
   }

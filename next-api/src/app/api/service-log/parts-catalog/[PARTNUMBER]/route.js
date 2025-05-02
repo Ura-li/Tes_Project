@@ -1,125 +1,150 @@
 import { NextResponse } from "next/server";
-import prisma from "../../../../../prisma/client";
+import prisma from "../../../../../../prisma/client";
 
-export async function GET(request, {params}) {
-    const { PARTNUMBER } = params
-    const PartNumber = PARTNUMBER
+// Helper function to parse boolean values
+const parseBool = (value) => {
+    return value === 'true' || value === true;
+};
 
-    if (!PartNumber) {
-        return NextResponse.json({
-            success: false,
-            message: "Invalid Part Number ID"
-        }, { status: 400 });
+// GET Part by PartNumber
+export async function GET(request, { params }) {
+    const { PartNumber } = await params;  // Awaiting params before using
+    const partNumber = decodeURIComponent(PartNumber);
+
+    if (!partNumber) {
+        return NextResponse.json(
+            { success: false, message: "Invalid Part Number" },
+            { status: 400 }
+        );
     }
-    try{
-        const Part = await prisma.servicecatalog_parts.findUnique({
-            where: { PARTNUMBER: PartNumber },
-        });
-    
-        if (!Part) {
-            return NextResponse.json({
-                success: false,
-                message: "Detail Data Part Not Found!",
-                data: null
-            }, { status: 404 });
-        }
-    
-        return NextResponse.json({
-            success: true,
-            message: "Detail Data Part",
-            data: Part
-        }, { status: 200 });
-    }catch(err){
-        console.error("🔥 ERROR in GET API:", err);
 
-        return NextResponse.json({
-            success: false,
-            message: "Failed to fetch data",
-            error: err.message
-        }, { status: 500 });
+    const part = await prisma.servicecatalog_parts.findUnique({
+        where: { PartNumber: partNumber },
+    });
+
+    if (!part) {
+        return NextResponse.json(
+            { success: true, message: "Part not found", data: null },
+            { status: 404 }
+        );
+    }
+
+    return NextResponse.json(
+        { success: true, message: "Part detail fetched", data: part },
+        { status: 200 }
+    );
+}
+
+// UPDATE Part by PartNumber
+export async function PATCH(request, { params }) {
+    const { PartNumber } = await params;  // Awaiting params before using
+    const partNumber = decodeURIComponent(PartNumber);
+
+    const {
+        Keyword,
+        PartDescription,
+        Orderability,
+        RestrictionReason,
+        CSR_Flag,
+        ROHS_Flag,
+        Returnable_Flag,
+        HardRoll_Flag,
+        DangerousGoods_Flag,
+        LithiumBattery_Flag,
+        Oversize_Flag,
+        Heavy_Flag,
+        Price,
+        FreightPrice,
+        Shipping_Fee,
+        Tax,
+        Total,
+    } = await request.json();
+
+    // Check if the part exists
+    const existingPart = await prisma.servicecatalog_parts.findUnique({
+        
+        where: { PartNumber: partNumber },
+    });
+
+    if (!existingPart) {
+        console.log("Part not found in database:", partNumber); 
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Part not found for update",
+            },
+            { status: 404 }
+        );
+    }
+
+    try {
+        const updatedPart = await prisma.servicecatalog_parts.update({
+            where: { PartNumber: partNumber },
+            data: {
+                Keyword,
+                PartDescription,
+                Orderability,
+                RestrictionReason,
+                CSR_Flag: parseBool(CSR_Flag),
+                ROHS_Flag: parseBool(ROHS_Flag),
+                Returnable_Flag: parseBool(Returnable_Flag),
+                HardRoll_Flag: parseBool(HardRoll_Flag),
+                DangerousGoods_Flag: parseBool(DangerousGoods_Flag),
+                LithiumBattery_Flag: parseBool(LithiumBattery_Flag),
+                Oversize_Flag: parseBool(Oversize_Flag),
+                Heavy_Flag: parseBool(Heavy_Flag),
+                Price: isNaN(Number(Price)) ? null : Number(Price),
+                FreightPrice: isNaN(Number(FreightPrice)) ? null : Number(FreightPrice),
+                Shipping_Fee: Shipping_Fee ? parseFloat(Shipping_Fee) : 0,
+                Tax: isNaN(Number(Tax)) ? null : Number(Tax),
+                Total: isNaN(Number(Total)) ? null : Number(Total),
+            },
+        });
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Part updated successfully!",
+                data: updatedPart,
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("Error updating part:", error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to update part",
+                error: error.message,
+            },
+            { status: 500 }
+        );
     }
 }
 
-export async function PATCH(request, { params }) {
-    const { PARTNUMBER } = params
-    const PartNumber = PARTNUMBER
+
+// DELETE Part by PartNumber
+export async function DELETE(request, { params }) {
+    const partNumber = decodeURIComponent(params.PartNumber);
 
     try {
-        const body = await request.json();
-        const {
-            PartNumber,
-            Keyword,
-            PartDescription,
-            Orderability,
-            RestrictionReason,
-            CSR_Flag,
-            ROHS_Flag,
-            Returnable_Flag,
-            HardRoll_Flag,
-            DangerousGoods_Flag,
-            LithiumBattery_Flag,
-            Oversize_Flag,
-            Heavy_Flag,
-            Price,
-            Total,
-            Shipping_Fee,
-        } = body;
-
-        if (
-            !PartNumber || !Keyword || !PartDescription
-        ) {
-            return NextResponse.json({
-                success: false,
-                message: "All fields are required!"
-            }, { status: 400 });
-        }
-
-        const existingPart = await prisma.servicecatalog_parts.findUnique({
-            where: { PARTNUMBER:PARTNUMBER }
+        await prisma.servicecatalog_parts.delete({
+            where: { PartNumber: partNumber },
         });
 
-        if (!existingPart) {
-            return NextResponse.json({
+        return NextResponse.json(
+            { success: true, message: "Part deleted successfully!" },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("Error deleting part:", error);
+        return NextResponse.json(
+            {
                 success: false,
-                message: "Part not found!"
-            }, { status: 404 });
-        }
-
-        // Update data
-        const updatedPartInformation = await prisma.servicecatalog_parts.update({
-          where: { PARTNUMBER },
-          data: {
-            PartNumber,
-            Keyword,
-            PartDescription,
-            Orderability,
-            RestrictionReason,
-            CSR_Flag,
-            ROHS_Flag,
-            Returnable_Flag,
-            HardRoll_Flag,
-            DangerousGoods_Flag,
-            LithiumBattery_Flag,
-            Oversize_Flag,
-            Heavy_Flag,
-            Price,
-            Total,
-            Shipping_Fee,
-          }
-        });
-    
-        return NextResponse.json({
-          success: true,
-          message: "Data Part Information Updated!",
-          data: updatedPartInformation
-        }, { status: 200 });
-    
-      } catch (error) {
-        console.error(error);
-        return NextResponse.json({
-          success: false,
-          message: "Failed to update Part",
-          error: error.message
-        }, { status: 500 });
-      }
+                message: "Failed to delete part",
+                error: error.message,
+            },
+            { status: 500 }
+        );
     }
+}
