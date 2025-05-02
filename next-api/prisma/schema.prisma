@@ -33,7 +33,7 @@ model caseinformation {
   CaseType                                      String?              @db.VarChar(100)
   KCI_Flag                                      Boolean?             @default(false)
   IncomingChannel                               String?              @db.VarChar(100)
-  CaseStatus                                    String?              @db.VarChar(50)
+  CaseStatus                                    CaseStatus           @default(Open)
   CasePriority                                  String?              @db.VarChar(50)
   CustomerSeverity                              String?              @db.VarChar(50)
   CreatedOn                                     DateTime?            @default(now()) @db.DateTime(0)
@@ -117,33 +117,37 @@ model global_trade_check {
 }
 
 model materialorder {
-  MOID                   String                   @id @db.VarChar(13)
-  WOID                   String?                  @db.VarChar(13)
-  OrderNumber            String?                  @db.VarChar(100)
-  OrderStatus            String?                  @db.VarChar(50)
-  OrderType              String?                  @db.VarChar(50)
-  CreatedOn              DateTime?                @default(now()) @db.DateTime(0)
-  SalesOrderNumber       String?                  @db.VarChar(100)
-  RMANumber              String?                  @db.VarChar(100)
-  ReadyForClosureDate    DateTime?                @db.DateTime(0)
-  Owner                  String?                  @db.VarChar(100)
+  MOID                String              @id @db.VarChar(13)
+  WOID                String?             @db.VarChar(13)
+  OrderNumber         String?             @db.VarChar(100)
+  OrderStatus         MaterialOrderStatus @default(New)
+  OrderType           String?             @db.VarChar(50)
+  CreatedOn           DateTime?           @default(now()) @db.DateTime(0)
+  SalesOrderNumber    String?             @db.VarChar(100)
+  RMANumber           String?             @db.VarChar(100)
+  ReadyForClosureDate DateTime?           @db.DateTime(0)
+  OwnerID             Int?
+  owner               User?               @relation("UserMaterialOrders", fields: [OwnerID], references: [IDUser], onDelete: Restrict)
+
   workorder              workorder?               @relation(fields: [WOID], references: [WOID], onDelete: Restrict, map: "materialorder_ibfk_1")
   materialorderlineitems materialorderlineitems[]
 
   @@index([WOID], map: "WOID")
+  @@index([OwnerID])
 }
 
 model materialorderlineitems {
-  LineItemID           Int                   @id @default(autoincrement())
-  MOID                 String?               @db.VarChar(13)
+  LineItemID           Int                         @id @default(autoincrement())
+  MOID                 String?                     @db.VarChar(13)
   LineNumber           Int?
-  PartNumber           String?               @db.VarChar(100)
-  Description          String?               @db.Text
-  ATPStatus            String?               @db.VarChar(50)
-  Price                Decimal?              @db.Decimal(10, 2)
+  PartNumber           String?                     @db.VarChar(100)
+  Description          String?                     @db.Text
+  ATPStatus            String?                     @db.VarChar(50)
+  Price                Decimal?                    @db.Decimal(10, 2)
   Quantity             Int?
-  materialorder        materialorder?        @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
-  servicecatalog_parts servicecatalog_parts? @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
+  Status               MaterialOrderLineItemStatus @default(New)
+  materialorder        materialorder?              @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
+  servicecatalog_parts servicecatalog_parts?       @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
 
   @@index([MOID], map: "MOID")
   @@index([PartNumber], map: "PartNumber")
@@ -269,12 +273,15 @@ model User {
   Password     String   @db.VarChar(255)
   Name         String   @db.VarChar(255)
   Role         String   @default("user") @db.VarChar(50)
-  ProfilePhoto String?  @db.VarChar(500) // nullable, user might not upload a photo yet
+  ProfilePhoto String?  @db.VarChar(500)
   CreatedAt    DateTime @default(now())
   UpdatedAt    DateTime @updatedAt
 
   caseinformations_created caseinformation[] @relation("UserCreatedCases")
-  createdBookings          Bookings[]        @relation("UserCreatedBookings")
+  bookings_created         Bookings[]        @relation("UserCreatedBookings")
+
+  workorders_owned     workorder[]     @relation("UserWorkOrders")
+  materialorders_owned materialorder[] @relation("UserMaterialOrders")
 }
 
 model warranty_services {
@@ -383,19 +390,21 @@ model BookingDetails {
 }
 
 model workorder {
-  WOID                        String           @id @db.VarChar(13)
-  CaseID                      String?
-  WorkOrderNumber             String?          @db.VarChar(100)
-  WorkOrderType               String?          @db.VarChar(50)
-  Priority                    String?          @db.VarChar(50)
-  SystemStatus                String?          @db.VarChar(50)
-  SubStatus                   String?          @db.VarChar(50)
-  PreferredDay                DateTime?        @db.Date
-  PreferredTime               DateTime?        @db.Time(0)
-  ShipmentCountry             String?          @db.VarChar(50)
-  ShipmentState               String?          @db.VarChar(50)
-  CreatedOn                   DateTime?        @default(now()) @db.DateTime(0)
-  Owner                       String?          @db.VarChar(100)
+  WOID            String          @id @db.VarChar(13)
+  CaseID          String?
+  WorkOrderNumber String?         @db.VarChar(100)
+  WorkOrderType   String?         @db.VarChar(50)
+  Priority        String?         @db.VarChar(50)
+  SystemStatus    WorkOrderStatus @default(OPEN_UNSCHEDULED)
+  SubStatus       String?         @db.VarChar(50)
+  PreferredDay    DateTime?       @db.Date
+  PreferredTime   DateTime?       @db.Time(0)
+  ShipmentCountry String?         @db.VarChar(50)
+  ShipmentState   String?         @db.VarChar(50)
+  CreatedOn       DateTime?       @default(now()) @db.DateTime(0)
+  OwnerID         Int?
+  owner           User?           @relation("UserWorkOrders", fields: [OwnerID], references: [IDUser], onDelete: Restrict)
+
   SLAJeopardy                 String?          @db.VarChar(50)
   DueDateCustomer             DateTime?        @db.DateTime(0)
   CoverageWindow              String?          @db.VarChar(100)
@@ -418,6 +427,7 @@ model workorder {
   bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
 
   @@index([CaseID], map: "CaseID")
+  @@index([OwnerID])
 }
 
 model Resource {
@@ -566,4 +576,32 @@ enum product_type_ProductGroup {
   Commercial
   Consumer
   EMPTY_ENUM_VALUE @map("")
+}
+
+enum MaterialOrderLineItemStatus {
+  New
+  Submitted
+  Ordered
+  Shipped
+  Closed
+  EMPTY_ENUM_VALUE @map("")
+}
+
+enum MaterialOrderStatus {
+  New
+  Submitted
+  Ordered
+  Shipped
+  Closed
+}
+
+enum WorkOrderStatus {
+  OPEN_UNSCHEDULED
+  OPEN_COMPLETED
+  CLOSED_POSTED
+}
+
+enum CaseStatus {
+  Open
+  Close
 }
