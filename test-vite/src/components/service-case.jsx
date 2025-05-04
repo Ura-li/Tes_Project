@@ -960,7 +960,7 @@ const handleClick = async () => {
   // await fetchCustomerData(); 
   {workOrders.map((work) => {
   navigate(`/work/${work.WOID}`, {
-    state: { ownerUserData, dataFetchCustomerData }
+    // state: { ownerUserData, dataFetchCustomerData }
   });
   })}
 };
