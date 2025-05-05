@@ -3,8 +3,7 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  const hashedPassword = await bcry
-  pt.hash('admin123', 10); // hash the password
+  const hashedPassword = await bcrypt.hash('admin123', 10); // hash the password
 
   await prisma.user.upsert({
     where: { Email: 'admin@admin.com' },
