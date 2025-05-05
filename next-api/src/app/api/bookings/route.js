@@ -37,8 +37,15 @@ export async function GET(request) {
     const bookings = await prisma.bookings.findMany({
       where: whereCondition,
       include: {
-        workorder: true, 
+        workorder: true,
         createdByUser: true,
+        bookingDetails: {
+          include: {
+            resource: true,
+            resourceaccount: true,
+            subkTechnician: true,
+          },
+        },
       },
       skip,
       take: limit,
@@ -68,41 +75,68 @@ export async function GET(request) {
     );
   }
 }
+// /api/bookings
 export async function POST(request) {
   try {
-    const { WOID, CreatedBy } = await request.json()
+    const { WOID, CreatedBy } = await request.json();
 
-    const woid = WOID
-    const createdBy = parseInt(CreatedBy)
+    const woid = WOID;
+    const createdBy = parseInt(CreatedBy);
 
-    // console.log(CreatedBy)
-    // Validasi input dasar
     if (!woid || !createdBy) {
       return NextResponse.json(
         { error: 'WOID dan CreatedBy wajib diisi.' },
         { status: 400 }
-      )
+      );
     }
 
-    // Buat entri di tabel bookings saja
-    const bookings = await prisma.bookings.create({
-      data: {
-        WOID: woid,
-        BookingStatus: 'Schedule',
-        CreatedBy: createdBy,
-      }
-    })
+    // Buat booking dan bookingDetails dalam transaksi
+    const result = await prisma.$transaction(async (tx) => {
+      const booking = await tx.bookings.create({
+        data: {
+          WOID: woid,
+          BookingStatus: 'Schedule',
+          CreatedBy: createdBy,
+        }
+      });
+
+      const bookingDetail = await tx.bookingDetails.create({
+        data: {
+          BookingId: booking.BookingId,
+          ChangedBy: createdBy,
+          Name: "",
+          Status: "Schedule",
+
+          // Waktu dan relasi diisi default/null (bisa dipatch nanti)
+          StartTimeCustomerTime: null,
+          EndTimeCustomerTime: null,
+          EstimatedArrivalTimeCustomerTime: null,
+          ActualArrivalTimeCustomerTime: null,
+          StartTimeUserTime: null,
+          EndTimeUserTime: null,
+          DurationInMinutesUserTime: 0,
+          EstimatedArrivalTimeUserTime: null,
+          ActualArrivalTimeUserTime: null,
+
+          ResourceId: null,
+          ResourceAccountId: null,
+          SubkTechnicianId: null,
+        }
+      });
+
+      return { BookingId: booking.BookingId };
+    });
 
     return NextResponse.json(
-      { message: 'Booking berhasil dibuat', BookingId: bookings.BookingId },
+      { message: 'Booking dan BookingDetails berhasil dibuat', ...result },
       { status: 201 }
-    )
+    );
 
   } catch (error) {
-    console.error('[BOOKING_CREATE_ERROR]', error)
+    console.error('[BOOKING_CREATE_ERROR]', error);
     return NextResponse.json(
       { error: 'Terjadi kesalahan saat membuat booking.' },
       { status: 500 }
-    )
+    );
   }
 }

@@ -41,6 +41,7 @@ import {
 'use client'
 
 import { useNavigate } from 'react-router';
+import { useParams } from 'react-router';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import ApiCustomer from "@/api";
 import debounce from 'lodash.debounce';
@@ -89,6 +90,8 @@ function formatDateForInput(dateString) {
 
 
 export function ServiceBooking ({BookingId , woid}) {  
+  
+  const { bookingid } = useParams();
   const [tab, setTab] = useState("book_info");
   const [bookingData, setBookingData] = useState(null);
   const [resourceName, setResourceName] = useState("");
@@ -144,38 +147,42 @@ export function ServiceBooking ({BookingId , woid}) {
 
   useEffect(() => {
     async function fetchBooking() {
-      if (BookingId !== ""){
-        try {
-          const addData = await ApiCustomer.post(`/api/bookings`)
-          console.log("ADDING BOOKING")
-        } catch (error) {
+      if (bookingid == ""){
+        // try {
+        //   const addData = await ApiCustomer.post(`/api/bookings`)
+        //   console.log("ADDING BOOKING")
+        // } catch (error) {
           
-        }
+        // }
+        return console.log('error')
       };
       try {
-        const response = await ApiCustomer.get(`/api/bookings/${BookingId}`);
-        setBookingData(response.data);
+        const response = await ApiCustomer.get(`/api/bookings/${bookingid}`);
         const data = response.data; // <- Harusnya langsung .data, BUKAN .data.booking
-
+        console.log("data fetch booking : ",data)
+        setBookingData(response.data);
+        
         // Set field-field yang kamu butuhkan
         setResourceName(data?.bookingDetails?.[0]?.resource?.Name || "");
+        setResourceId(data?.bookingDetails?.[0]?.resource?.ResourceId || "");
         setAccountName(data?.bookingDetails?.[0]?.resourceaccount?.Name || "");
+        setAccountId(data?.bookingDetails?.[0]?.resourceaccount?.ResourceAccountId || "");
         setSubkTechnicianName(data?.bookingDetails?.[0]?.subkTechnician?.Name || "");
-        setSubkTechnicianLearnerName(data?.bookingDetails?.[0]?.subkTechnicianLearner?.Name || "");
-
+        setSubkTechnicianId(data?.bookingDetails?.[0]?.subkTechnician?.SubkTechnicianId || "");
+        
         setBookingStatus(data?.BookingStatus || "");
         setWorkOrderNumber(data?.workorder?.WorkOrderNumber || "");
         setRequestedDateTimeCustomer(formatDateForInput(data?.workorder?.RequestedDateTimeCustomer || ""));
         setGuaranteedFixTimeCustomer(formatDateForInput(data?.workorder?.GuaranteedFixTimeCustomer || ""));
-
+        
         setDoNotDisturb(data?.DoNotDisturb || false);
         setCeScheduleChange(data?.CeScheduleChange || false);
-
+        
         setStartTimeCustomerTime(formatDateForInput(data?.bookingDetails?.[0]?.StartTimeCustomerTime || ""));
         setEndTimeCustomerTime(formatDateForInput(data?.bookingDetails?.[0]?.EndTimeCustomerTime || ""));
         setEstimatedArrivalTimeCustomerTime(formatDateForInput(data?.bookingDetails?.[0]?.EstimatedArrivalTimeCustomerTime || ""));
         setActualArrivalTimeCustomerTime(formatDateForInput(data?.bookingDetails?.[0]?.ActualArrivalTimeCustomerTime || ""));
-
+        
         setStartTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.StartTimeUserTime || ""));
         setEndTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.EndTimeUserTime || ""));
         setDurationInMinutesUserTime(data?.bookingDetails?.[0]?.DurationInMinutesUserTime || 0);
@@ -184,31 +191,49 @@ export function ServiceBooking ({BookingId , woid}) {
 
         setScheduleJeopardy(data?.ScheduleJeopardy || false);
         setScheduleJeopardyTime(formatDateForInput(data?.ScheduleJeopardyTime || ""));
-
+        
         setTotalBillableDurationInMinutes(data?.TotalBillableDurationInMinutes || 0);
         setTotalInProgressDurationInMinutes(data?.TotalInProgressDurationInMinutes || 0);
         setTotalBreakDurationInMinutes(data?.TotalBreakDurationInMinutes || 0);
-
+        
+        // const updatedBookingData = {
+        //   ...bookingData, // keep all original fields
+        //   ResourceId: resourceId,
+        //   ResourceAccountId: accountId,
+        //   SubkTechnicianId: subkTechnicianId,
+        //   StartTimeCustomerTime: startTimeCustomerTime || null,
+        //   EndTimeCustomerTime: endTimeCustomerTime || null,
+        //   EstimatedArrivalTimeCustomerTime: estimatedArrivalTimeCustomerTime || null,
+        //   ActualArrivalTimeCustomerTime: actualArrivalTimeCustomerTime || null,
+        //   StartTimeUserTime: startTimeUserTime || null,
+        //   EndTimeUserTime: endTimeUserTime || null,
+        //   DurationInMinutesUserTime: durationInMinutesUserTime || null,
+        //   EstimatedArrivalTimeUserTime: estimatedArrivalTimeUserTime || null,
+        //   ActualArrivalTimeUserTime: actualArrivalTimeUserTime || null,
+        // };
+        
+        // setBookingData(updatedBookingData);
       } catch (error) {
         console.error("Failed to fetch booking data:", error);
       }
     }
-
-    if (BookingId) {
+    
+    if (bookingid) {
       fetchBooking();
     }
-  }, [BookingId]);
+  }, []);
 
   if (!bookingData) {
-    return <div>Loading...</div>;
+    return <div>Loadinsg...</div>;
   }
 
   const handleUpdate = async () => {
-    setBookingData({
+    console.log("Booking Data : ",bookingData)
+    const updatedBookingData = {
+      ...bookingData, // keep all original fields
       ResourceId: resourceId,
-      AccountId: accountId,
-      subkTechnicianId: subkTechnicianId,
-      SubkTechnicianLearnerId: subkTechnicianLearnerId,
+      ResourceAccountId: accountId,
+      SubkTechnicianId: subkTechnicianId,
       StartTimeCustomerTime: startTimeCustomerTime || null,
       EndTimeCustomerTime: endTimeCustomerTime || null,
       EstimatedArrivalTimeCustomerTime: estimatedArrivalTimeCustomerTime || null,
@@ -218,9 +243,11 @@ export function ServiceBooking ({BookingId , woid}) {
       DurationInMinutesUserTime: durationInMinutesUserTime || null,
       EstimatedArrivalTimeUserTime: estimatedArrivalTimeUserTime || null,
       ActualArrivalTimeUserTime: actualArrivalTimeUserTime || null,
-    });
+    };
+    
+    await setBookingData(updatedBookingData);
     try {
-      await ApiCustomer.patch(`/api/bookings/${BookingId}`, {
+      await ApiCustomer.patch(`/api/bookings/${bookingid}`, {
         ChangedBy: changedBy,
         BookingStatus: bookingStatus,
         DoNotDisturb: doNotDisturb,
@@ -239,7 +266,7 @@ export function ServiceBooking ({BookingId , woid}) {
         icon: "Success",
         text: "Booking telas berhasil di simpan",
       }).then(() => {
-        window.location.href = `/work/${woid}`
+        window.location.href = `/work/${bookingData.WOID}`
       })
     } catch (error) {
       console.error("Error updating booking:", error);
@@ -314,7 +341,8 @@ export function ServiceBooking ({BookingId , woid}) {
       const response = await ApiCustomer.get(`/api/subktechnicians`, {
         params: { keyword }
       });
-      setSearchResultsSubkTechnician(response.data);
+      console.log("SubukTech : ",response.data);
+      setSearchResultsSubkTechnician(response.data.data);
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
     }
@@ -366,7 +394,7 @@ export function ServiceBooking ({BookingId , woid}) {
                 <div className='font-bold flex'>
                   <Lock className='size-5 mr-2'></Lock>
                   <span>Name </span>
-                  {resourceId !== "" || bookingData.bookingDetails[0].resource.resourceId !== '' ? (
+                  {resourceId !== "" || bookingData?.bookingDetails?.[0]?.resource?.resourceId !== '' ? (
                     <span className='ml-50'>{resourceName}</span>
                   ) : (
                     <span className='ml-50'>...</span>
@@ -473,17 +501,17 @@ export function ServiceBooking ({BookingId , woid}) {
                   <ul className="absolute bg-white border mt-1 w-full z-10">
                     {searchResultsSubkTechnician.map((tech) => (
                       <li
-                        key={tech.id}
+                        key={tech.SubkTechnicianId}
                         className="p-2 hover:bg-gray-200 cursor-pointer"
                         onClick={() => {
-                          setSubkTechnicianName(tech.name);
-                          setSubkTechnicianId(tech.id);
+                          setSubkTechnicianName(tech.Name);
+                          setSubkTechnicianId(tech.SubkTechnicianId);
                           setSearchResultsSubkTechnician([]); // Clear suggestions
 
 
                         }}
                       >
-                        {tech.name}
+                        {tech.Name}
                       </li>
                     ))}
                   </ul>
@@ -492,21 +520,21 @@ export function ServiceBooking ({BookingId , woid}) {
 
               <div className='font-bold flex'>
                 <span className='ml-7'>Subk Technician Learner ID</span>
-                {/* <input 
+                <input 
                   type="text" 
                   className='ml-22.5' 
-                  value={subkTechnicianLearnerName} 
-                  onChange={(e) => setSubkTechnicianLearnerName(e.target.value)} 
-                /> */}
-                <input
+                  value={subkTechnicianId} 
+                  onChange={(e) => setSubkTechnicianId(e.target.value)} 
+                />
+                {/* <input
                   type="text"
                   className="ml-22.5"
-                  value={subkTechnicianLearnerName}
+                  value={subkTechnicianId}
                   onChange={(e) => {
-                    setSubkTechnicianLearnerName(e.target.value);
+                    setSubkTechnicianId(e.target.value);
                     handleSearchSubkTechnicianLearner(e.target.value);
                   }}
-                />
+                /> */}
 
                 {/* Suggestion dropdown */}
                 {searchResultsSubkTechnicianLearner.length > 0 && (
@@ -874,7 +902,7 @@ export function NewBookableResourceBooking({ WOID, CreatedBy}) {
       if (response.status === 201) {
         const { BookingId } = response.data;
         // Lanjut ke navigasi sambil bawa BookingId
-        navigate('/bookings', { state: { BookingId } });
+        navigate(`/bookings/${BookingId}`);
       }
     } catch (error) {
       console.error('Gagal membuat booking:', error);

@@ -38,6 +38,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/material-order/:moid' element={<MaterialOrder />}/>
             <Route path='/mo_detail/:molineid' element={<MoDetail />}/>
             <Route path='/bookings' element={<Bookings />} />]
+            <Route path='/bookings/:bookingid' element={<Bookings />} />]
 
 
             {/* <Route path='/master' element> */}

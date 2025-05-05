@@ -40,7 +40,7 @@ import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
 
-import { QuickWOInput } from "./quick-wo-input";
+import { CaseField, QuickWOInput } from "./quick-wo-input";
 import { NewBookableResourceBooking } from "./service-booking";
 import { getUserFromToken } from "@/lib/utils/auth";
 
@@ -102,6 +102,7 @@ export const ServiceWork = () => {
           setCaseInformation(resCI.data.data);
 
           const resBooking = await ApiCustomer.get(`/api/bookings?WOID=${woid}`);
+          console.log("Res Booking : ",resBooking.data.data)
           setBookings(resBooking.data.data)
         }
   
@@ -152,15 +153,15 @@ export const ServiceWork = () => {
         </div>
       )}
     <TabsServiceWO workOrders={workOrders}/>
-    <Card className="mt-2 rounded-none h-[160px]">
+    <Card className=" rounded-none ">
       <CardHeader>
         <CardTitle className="text-xl ">{woid}</CardTitle>
         <CardTitle className="text-sm">Work Order . Work Order</CardTitle>
       </CardHeader>
 
       <CardContent>
-        <Tabs defaultValue="Quick_WO_Input" className="w-[760px]">
-          <TabsList className="bg-white w-[760px]">
+        <Tabs defaultValue="Quick_WO_Input" >
+          <TabsList className="bg-white ">
             <TabsTrigger variant="underline" value="wo_summary" className="cursor-pointer">
               WO Summary
             </TabsTrigger>
@@ -242,7 +243,7 @@ export const ServiceWork = () => {
 
             </div>
 
-            <Card className="mt-5 flex-col">
+            <Card className=" flex-col">
               <CardHeader>
                 <CardTitle className=' text-lg'>Service Delivery Address</CardTitle>
                 <hr />
@@ -451,9 +452,9 @@ export const ServiceWork = () => {
                   <TableBody>
                   {bookings.length > 0 ? (
                     bookings.map((booking, index) => (
-                      <TableRow key={booking.BookingId || index} onClick={() => navigate(`/bookings`,{ state: { BookingId: booking.BookingId }})} >
-                        <TableCell>{booking.workorder?.Owner || '-'}</TableCell>
-                        <TableCell>{booking.workorder?.WorkOrderNumber || '-'}</TableCell>
+                      <TableRow key={booking.BookingId || index} onClick={() => navigate(`/bookings/${booking.BookingId}`)} >
+                        <TableCell>{booking.bookingDetails?.[0].resource?.Name || '-'}</TableCell>
+                        <TableCell>{booking.bookingDetails?.[0].resourceaccount?.Name || '-'}</TableCell>
                         <TableCell>{booking.BookingStatus || '-'}</TableCell>
                         <TableCell>{booking.CeScheduleChange ? 'Yes' : 'No'}</TableCell>
                         <TableCell>{booking.ScheduleJeopardy ? 'Jeopardy' : '-'}</TableCell>

@@ -23,10 +23,40 @@ import { SelectBarRelated } from "./sc-select";
 import { Car, Lock, Plus } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import { KeyRound } from "lucide-react";
+import { twMerge } from "tailwind-merge";
 
 //import API
 import ApiCustomer from "@/api";
+const spanMap = {
+  1: "col-span-1",
+  2: "col-span-2",
+  3: "col-span-3",
+  4: "col-span-4",
+  5: "col-span-5",
+  6: "col-span-6",
+};
+export const CaseField = ({ label, children, icon = false, span = 1, className, childClass }) => {
+  // Determine which icon to use
+  const IconComponent = icon === true ? Lock : icon || null;
 
+  return (
+    <>
+      <CardTitle className={twMerge(
+        `font-medium grid grid-cols-[1.25rem_auto] items-center gap-2 ${className}`
+      )}>
+        {IconComponent ? (
+          <IconComponent className="size-4" />
+        ) : (
+          <div className="w-5" />
+        )}
+        {label}
+      </CardTitle>
+      <CardTitle className={twMerge(spanMap[span],childClass)}>
+        {children}
+      </CardTitle>
+    </>
+  );
+};
 
 export function QuickWOInput ({ WOID, caseInformation }) {
   // State untuk 8 field General
