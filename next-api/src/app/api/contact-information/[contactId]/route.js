@@ -4,10 +4,10 @@ import prisma from "../../../../../prisma/client";
 // GET - Fetch Contact Information by ID
 export async function GET(request, { params }) {
     try {
-        const contactId = parseInt(params.contactId); // Perbaiki format parameter
-        // const { ContactId } = await params; // Perbaiki format parameter
+        // const contactId = parseInt(params.contactId); // Perbaiki format parameter
+        const { contactId } = await params; // Perbaiki format parameter
         // const contactId = parseInt(ContactId);
-        if (isNaN(contactId)) {
+        if (!contactId) {
             return NextResponse.json(
                 { success: false, message: "Invalid Contact ID", data: null },
                 { status: 400 }
@@ -15,7 +15,7 @@ export async function GET(request, { params }) {
         }
 
         const contact_information = await prisma.contact_information.findUnique({
-            where: { ContactID: contactId },
+            where: { ContactID: parseInt(contactId) },
         });
 
         if (!contact_information) {

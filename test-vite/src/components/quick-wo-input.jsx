@@ -23,10 +23,10 @@ import { SelectBarRelated } from "./sc-select";
 import { Car, Lock, Plus } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import { KeyRound } from "lucide-react";
+import { twMerge } from "tailwind-merge";
 
 //import API
 import ApiCustomer from "@/api";
-import { twMerge } from "tailwind-merge";
 import DatePicker from "./date-picker";
 // import { CaseField } from "./service-case";
 const spanMap = {

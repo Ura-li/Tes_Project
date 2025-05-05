@@ -104,6 +104,7 @@ export const ServiceWork = () => {
           setCaseInformation(resCI.data.data);
 
           const resBooking = await ApiCustomer.get(`/api/bookings?WOID=${woid}`);
+          console.log("Res Booking : ",resBooking.data.data)
           setBookings(resBooking.data.data)
         }
   
@@ -158,7 +159,7 @@ export const ServiceWork = () => {
         This work order is <strong>read-only</strong> because it is <strong>Closed</strong>.
       </div>
     )}
-    <TabsServiceWO/>
+    <TabsServiceWO  workOrders={workOrders} />
     <Card className="mt-2 rounded-none p-0 border-0">
         <Tabs defaultValue="Quick_WO_Input" className="">
           <CardHeader className={'flex flex-col gap-3 border-2 w-full p-2 sticky'}>
@@ -510,9 +511,9 @@ export const ServiceWork = () => {
                   <TableBody>
                   {bookings.length > 0 ? (
                     bookings.map((booking, index) => (
-                      <TableRow key={booking.BookingId || index} onClick={() => navigate(`/bookings`,{ state: { BookingId: booking.BookingId }})} >
-                        <TableCell>{booking.workorder?.Owner || '-'}</TableCell>
-                        <TableCell>{booking.workorder?.WorkOrderNumber || '-'}</TableCell>
+                      <TableRow key={booking.BookingId || index} onClick={() => navigate(`/bookings/${booking.BookingId}`)} >
+                        <TableCell>{booking.bookingDetails?.[0].resource?.Name || '-'}</TableCell>
+                        <TableCell>{booking.bookingDetails?.[0].resourceaccount?.Name || '-'}</TableCell>
                         <TableCell>{booking.BookingStatus || '-'}</TableCell>
                         <TableCell>{booking.CeScheduleChange ? 'Yes' : 'No'}</TableCell>
                         <TableCell>{booking.ScheduleJeopardy ? 'Jeopardy' : '-'}</TableCell>
