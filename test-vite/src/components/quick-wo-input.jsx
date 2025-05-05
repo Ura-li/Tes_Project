@@ -27,7 +27,6 @@ import { twMerge } from "tailwind-merge";
 
 //import API
 import ApiCustomer from "@/api";
-import { twMerge } from "tailwind-merge";
 import DatePicker from "./date-picker";
 // import { CaseField } from "./service-case";
 const spanMap = {
@@ -61,24 +60,6 @@ export const CaseField = ({ label, children, icon = false, span = 1, className, 
   );
 };
 
-  return (
-    <>
-      <CardTitle className={twMerge(
-        `font-medium grid grid-cols-[1.25rem_auto] items-center gap-2 ${className}`
-      )}>
-        {IconComponent ? (
-          <IconComponent className="size-4" />
-        ) : (
-          <div className="w-5" />
-        )}
-        {label}
-      </CardTitle>
-      <CardTitle className={twMerge(spanMap[span],childClass)}>
-        {children}
-      </CardTitle>
-    </>
-  );
-};
 
 export function QuickWOInput ({ WOID, caseInformation }) {
   // State untuk 8 field General
