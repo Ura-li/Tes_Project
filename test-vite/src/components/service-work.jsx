@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import {
   Card,
   CardContent,
@@ -17,6 +17,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SelectBarRelated } from "./sc-select";
@@ -45,6 +46,7 @@ import { NewBookableResourceBooking } from "./service-booking";
 import { getUserFromToken } from "@/lib/utils/auth";
 
 import { useNavigate } from "react-router";
+import DatePicker from "./date-picker";
 
 export const ServiceWork = () => {
 
@@ -144,38 +146,93 @@ export const ServiceWork = () => {
   // useEffect(() => {
   // }, [workOrders])
 
-  const navigate = useNavigate();
-  return (
-    <div>
-      {workOrders.SystemStatus === 'CLOSED_POSTED' && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-2">
-          This work order is <strong>read-only</strong> because it is <strong>Closed</strong>.
-        </div>
-      )}
-    <TabsServiceWO workOrders={workOrders}/>
-    <Card className=" rounded-none ">
-      <CardHeader>
-        <CardTitle className="text-xl ">{woid}</CardTitle>
-        <CardTitle className="text-sm">Work Order . Work Order</CardTitle>
-      </CardHeader>
+    const [selected, setSelected] = useState("work_order"); 
 
-      <CardContent>
-        <Tabs defaultValue="Quick_WO_Input" >
+    // const location = useLocation();
+    // const { ownerUserData, dataFetchCustomerData } = location.state || {}; 
+
+    const navigate = useNavigate();
+  return (
+    <>
+    {workOrders.SystemStatus === 'CLOSED_POSTED' && (
+      <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-2">
+        This work order is <strong>read-only</strong> because it is <strong>Closed</strong>.
+      </div>
+    )}
+    <TabsServiceWO  workOrders={workOrders} />
+    <Card className="mt-2 rounded-none p-0 border-0">
+        <Tabs defaultValue="Quick_WO_Input" className="">
+          <CardHeader className={'flex flex-col gap-3 border-2 w-full p-2 sticky'}>
+            <div className="flex justify-between">
+              <CardTitle className="text-xl ">{woid}
+                <span className="text-sm flex items-center">Work Order .
+                      <Select onValueChange={setSelected} defaultValue="work_order" className="shadow-xl">
+                      <SelectTrigger className="shadow-none border-none">
+                        <SelectValue  />
+                      </SelectTrigger>
+                      <SelectContent >
+                        <SelectGroup>
+                          <SelectItem value="work_order">work order</SelectItem>
+                          <SelectItem value="??">??</SelectItem>
+                          <SelectItem value="!!">!!</SelectItem>
+                          <SelectItem value="**">**</SelectItem>
+                          <SelectItem value="&&">&&</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                      </Select>
+                </span>
+              </CardTitle>
+              <CardTitle className="flex">
+                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                  <h1 className='text-blue-500'>
+                    {/* {ownerUserData.Name} */}
+                    </h1>
+                  <p className="text-sm font-light ">Owner</p>
+                </div>
+                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                  <h1 className='text-blue-500'>---</h1>
+                  <p className="text-sm font-light ">Queue</p>
+                </div>
+                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                  <h1 className='text-blue-500'>
+                    {/* {dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName} */}
+                    </h1>
+                  <p className="text-sm font-light ">Contact</p>
+                </div>
+                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                <Select onValueChange={setSelected} defaultValue="first" >
+                  <SelectTrigger className="shadow-none border-none text-blue-500 p-0">
+                    <SelectValue  />
+                  </SelectTrigger>
+                  <SelectContent className="p-0">
+                    <SelectGroup className="p-0">
+                    <SelectItem value="first" className="p-0">
+                      {/* {dataFetchCustomerData.SiteAccount?.Company} */}
+
+                    </SelectItem>
+                    <SelectItem value="??">??</SelectItem>
+                      <SelectItem value="!!">!!</SelectItem>
+                      <SelectItem value="**">**</SelectItem>
+                      <SelectItem value="&&">&&</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                  </Select>
+                  <p className="text-sm font-light ">Site Account</p>
+                </div>
+              </CardTitle>
+            </div>
           <TabsList className="bg-white ">
             <TabsTrigger variant="underline" value="wo_summary" className="cursor-pointer">
               WO Summary
             </TabsTrigger>
-            <TabsTrigger variant="underline"
-              value="wo_details"
-              className="cursor-pointer white"
-            >
+            <TabsTrigger variant="underline" value="wo_details" className="cursor-pointer white">
               WO Details
             </TabsTrigger>
             <TabsTrigger variant="underline" value="wo_bookings" className="cursor-pointer">
               WO Bookings
             </TabsTrigger>
             <TabsTrigger variant="underline" value="wo_Notes_Timeline" className="cursor-pointer">
-              WO Notes/Timeline
+              WO Notes/Timeline 
             </TabsTrigger>
             <TabsTrigger variant="underline" value="wo_Closure_Details" className="cursor-pointer">
               WO Closure Details
@@ -185,6 +242,7 @@ export const ServiceWork = () => {
             </TabsTrigger>
             <SelectBarRelated></SelectBarRelated>
           </TabsList>
+          </CardHeader>
 
           <TabsContent value="wo_summary">
            <div className="flex gap-4">
@@ -243,7 +301,7 @@ export const ServiceWork = () => {
 
             </div>
 
-            <Card className=" flex-col">
+            <Card className="mt-5 flex-col">
               <CardHeader>
                 <CardTitle className=' text-lg'>Service Delivery Address</CardTitle>
                 <hr />
@@ -396,26 +454,27 @@ export const ServiceWork = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="wo_bookings" className="w-390">
+          <TabsContent value="wo_bookings" >
             <Card className="mt-5 flex-col">
               <span className="ml-5 font-bold text-xl">WO Bookings</span>
               <CardContent className="grid gap-5">
                 <div className="font-bold flex">
                   <span>Requested Date Time (Customer)</span>
                   <span className="ml-50 mr-10">...</span>
-                  <CalendarDays></CalendarDays>
+                  <DatePicker></DatePicker>
                 </div>
 
                 <div className="font-bold flex">
                   <span>Guaranteed Fix Time (Customer)</span>
                   <span className="ml-51 mr-10">...</span>
-                  <CalendarDays></CalendarDays>
+                  {/* <DatePicker></DatePicker> */}
+                  <DatePicker></DatePicker>
                 </div>
 
                 <div className="font-bold flex">
                   <span>Due Date (Customer) </span>
                   <span className="ml-72.5 mr-10">...</span>
-                  <CalendarDays></CalendarDays>
+                  <DatePicker></DatePicker>
                 </div>
               </CardContent>
             </Card>
@@ -542,7 +601,7 @@ export const ServiceWork = () => {
           </TabsContent>
 
           <TabsContent value="wo_Closure_Details">
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Resolution Notes
               </span>
@@ -555,7 +614,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Labor Types
               </span>
@@ -583,7 +642,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Miscellaneous Charges 
               </span>
@@ -620,7 +679,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               DOA Letter (If DOA Case)
               </span>
@@ -633,7 +692,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card> 
   
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Page Count Information
               </span>
@@ -658,7 +717,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card> 
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Follow-Up
               </span>
@@ -689,7 +748,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card> 
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Closure Data
               </span>
@@ -732,7 +791,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card> 
     
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Closure Codes
               </span>
@@ -758,12 +817,12 @@ export const ServiceWork = () => {
             </Card> 
           </TabsContent>
 
-          <TabsContent value="Quick_WO_Input" className="w-400">
+          <TabsContent value="Quick_WO_Input" >
             <QuickWOInput WOID={woid} caseInformation={caseInformation} />
           </TabsContent>
         </Tabs>
-      </CardContent>
+      
     </Card>
-    </div>
+    </>
   );
 };

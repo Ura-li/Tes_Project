@@ -51,9 +51,8 @@ import {
   ChevronDown
  } from 'lucide-react'
 
- import { useLocation } from "react-router-dom";
+ import { useLocation, useNavigate } from "react-router";
  import { useState, useEffect } from "react";
- import { useNavigate } from 'react-router'
  import { useSidebar } from '@/components/ui/sidebar'
  import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -365,13 +364,31 @@ export const TabsService = ({ caseDetails }) => {
   )
 }
 
+const spanMap = {
+  1: "col-span-1",
+  2: "col-span-2",
+  3: "col-span-3",
+  4: "col-span-4",
+  5: "col-span-5",
+  6: "col-span-6",
+};
+
 export const CaseField = ({ label, children, icon, span = 1, className }) => (
   <>
-    <CardTitle className={twMerge(`font-medium grid justify-start grid-flow-col  items-center ${icon ? "gap-1" : ""}`,className)}>
-      {icon && <Lock className="size-4" />}
+    <CardTitle
+      className={twMerge(
+        `relative font-medium flex items-center`,
+        icon ? "pl-6" : "",
+        className
+      )}
+    >
+      {icon && (
+        <Lock className="absolute left-0 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+      )}
       {label}
     </CardTitle>
-    <CardTitle className={`col-span-${span}`}>
+
+    <CardTitle className={spanMap[span]}>
       {children}
     </CardTitle>
   </>
@@ -936,6 +953,17 @@ useEffect(() => {
   }
 }, [workOrders]);
 
+const navigate = useNavigate();
+
+const handleClick = async () => {
+  // await fetchOwnerUserData();
+  // await fetchCustomerData(); 
+  {workOrders.map((work) => {
+  navigate(`/work/${work.WOID}`, {
+    // state: { ownerUserData, dataFetchCustomerData }
+  });
+  })}
+};
 
 
   return (
@@ -946,10 +974,10 @@ useEffect(() => {
         </div>
       )}
     <Card className="mt-2 rounded-none p-0 border-0">
-      <CardHeader className="p-0">
+      
         <Tabs defaultValue="case_info"> 
           
-          <CardContent className="flex flex-col gap-3 border-2 w-full p-2 sticky">
+          <CardHeader className="flex flex-col gap-3 border-2 w-full p-2 sticky">
             <div className="flex justify-between">
               <CardTitle className="text-xl ">
                 {caseDetails.CaseID}
@@ -1040,7 +1068,7 @@ useEffect(() => {
           </DropdownMenu>
         )}
             </TabsList>
-          </CardContent>
+          </CardHeader>
       
           <TabsContent value="case_info" className={'p-2'}>
             <Card className="flex-row">
@@ -1061,21 +1089,16 @@ useEffect(() => {
                 <CaseField label="Created ON" icon span={3}>
                   <span className="flex gap-[5em]">
                     {new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')}
-                        <DatePicker></DatePicker>
+                        <DatePicker variant='icon'></DatePicker>
                     {new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </CaseField>
                 <CaseField label="Alternate Customer Tracking Number"> ---  </CaseField>
-                <CaseField
-                  label="Case Closed Date"
-                  icon
-                  span={3}
-                > 
+                <CaseField label="Case Closed Date" icon span={3} > 
                   <span className="flex gap-[5em]">
-                      {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "..."}
-                      <DatePicker value={caseClosedDate} onChange={setCaseClosedDate}></DatePicker>
+                      {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
+                      <DatePicker variant='icon' value={caseClosedDate} onChange={setCaseClosedDate}></DatePicker>
                       ---
-
                     </span>
                 </CaseField>
                 <CaseField label="Irrelevant"  icon >
@@ -1083,8 +1106,8 @@ useEffect(() => {
                 </CaseField> 
                 <CaseField label="Submitted To Base" icon span={3}>
                     <span className="flex gap-[5em]">
-                      --- 
-                      <DatePicker></DatePicker>
+                     
+                      <DatePicker variant='icon'></DatePicker>
                       ---
                     </span>
                 </CaseField>
@@ -1093,288 +1116,101 @@ useEffect(() => {
             </Card>
 
             <Card className="mt-5 flex-col">
-            <span className='ml-5 font-bold text-xl'>Global Trade Check</span>
-              <CardContent className="grid gap-10  grid-cols-6 p-3">
+            <CardHeader>
+            <CardTitle className=' text-lg'>Global Trade Check</CardTitle>
+              <hr />
+            </CardHeader>
+              <CardContent className="grid gap-10  grid-cols-6 p-3 ">
                 <CaseField label="Global Trade Status" > --- </CaseField>
                 <CaseField label="GT Override Reason" >--- </CaseField>
                 <CaseField label="GT Active Listening" > ---</CaseField>
                 <CaseField label="Embargoed Country" icon>--- </CaseField>
                 <CaseField label="GT Details" >--- </CaseField>
                 <CaseField label="GT All Comments" > ---</CaseField>
-                <CaseField >--- </CaseField>
-                <CaseField label="Screening ID" > ---</CaseField>
-                <CaseField>--- </CaseField>
+                <CaseField className={'col-start-3'} label="Screening ID" > ---</CaseField>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent  value="customer,add,entitement">
-          <Card className="flex-col mt-7">
-            <span className='ml-5 font-bold text-xl'>Customer Information</span>
-              <CardContent className="grid gap-4.5 grid-flow-col grid-rows-6">
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>Customer Account</span>
-                <span className='ml-30'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Company : dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName}</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>Is Partner</span>
-                <span className='ml-47'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>HIPAA</span>
-                <span className='ml-53'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span className='ml-7'>PIN</span>
-                <span className='ml-58.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span className='ml-7'>Customer Time Zone</span>
-                <span className='ml-26.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>Primary Contact</span>
-                <span className='ml-35'>{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>Primary Email</span>
-                <span className='ml-35'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Email : dataFetchCustomerData?.MainAccount?.Email}</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>Phone</span>
-                <span className='ml-49.5'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone: dataFetchCustomerData?.MainAccount?.Phone}</span>
-              </div>
-    
-              <div className='font-bold flex'>
-                <span className='ml-7'>Secondary Contact</span>
-                <span className='ml-26'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>Country</span>
-                <span className='ml-46'>{dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Country : dataFetchCustomerData?.MainAccount?.Country}</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span className='ml-7'>Submitted By</span>
-                <span className='ml-36'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>Partner & Customer</span>
-                <span className='ml-24'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>Region</span>
-                <span className='ml-58'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span className='ml-7'>Parent Company</span>
-                <span className='ml-40'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span className='ml-7'>Parent Company Non-Latin</span>
-                <span className='ml-20'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>Account Tier</span>
-                <span className='ml-47.5'>...</span>
-              </div>
+          <TabsContent  value="customer,add,entitement" className={'p-1 flex flex-col gap-4'}>
+          <Card className="flex-col ">
+            <CardHeader>
+            <CardTitle className=' text-lg'>Customer Information</CardTitle>
+              <hr />
+            </CardHeader>
+              <CardContent className="grid gap-10 grid-cols-6">
+                <CaseField label="Customer Account" icon > {dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Company : dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName} </CaseField>
+                <CaseField label="Primary Contact" icon >{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</CaseField>
+                <CaseField label="Submitted By" > ---</CaseField>
+                <CaseField label="Is Partner" icon > ---</CaseField>
+                <CaseField label=" Primary Email" icon >{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</CaseField>
+                <CaseField label="Partner & Customer" icon > ---</CaseField>
+                <CaseField label="HIPAA" icon > ---</CaseField>
+                <CaseField label="Phone" icon > {dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone: dataFetchCustomerData?.MainAccount?.Phone}</CaseField>
+                <CaseField label="Region" icon > ---</CaseField>
+                <CaseField label="PIN" > ---</CaseField>
+                <CaseField label="Secondary Contact" > ---</CaseField>
+                <CaseField label="Parent Company" > ---</CaseField>
+                <CaseField label="Customer Time Zone" icon > ---</CaseField>
+                <CaseField label="Country" icon > {dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Country : dataFetchCustomerData?.MainAccount?.Country}</CaseField>
+                <CaseField label="Parent Company Non-Latin" > ---</CaseField>
+                <CaseField label="Account Tier" className={'col-start-5'} > ---</CaseField>
               </CardContent>
             </Card>
 
-            <Card className="flex-col mt-5">
-            <span className='ml-5 font-bold text-xl'>Asset Information</span>
-              <CardContent className="grid gap-4.5 grid-flow-col grid-rows-4">
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>Asset</span>
-                <span className='ml-56'>{dataFetchAssetInformation?.AssetInformation?.SerialNumber}</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>Serial Number</span>
-                <span className='ml-39'>{dataFetchAssetInformation?.AssetInformation?.SerialNumber}</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>Product Name</span>
-                <span className='ml-39'>{dataFetchAssetInformation?.AssetInformation?.product_information?.ProductName}</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>Device Properties</span>
-                <span className='ml-33'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className=' size-5 mr-2'></Lock>
-                <span>Product Number</span>
-                <span className='ml-30'>{dataFetchAssetInformation?.AssetInformation?.ProductNumber}</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className=' size-5 mr-2'></Lock>
-                <span>HW Profit Center</span>
-                <span className='ml-29'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className=' size-5 mr-2'></Lock>
-                <span>HWPC Code</span>
-                <span className='ml-38.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className=' size-5 mr-2'></Lock>
-                <span>Asset Location</span>
-                <span className='ml-34'>...</span>
-              </div>
-    
-              <div className='font-bold flex'>
-                <span className='ml-8'>SNIC - Count</span>
-                <span className='ml-44'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>MV Product Description </span>
-                <span className='ml-24'>...</span>
-              </div>
+            <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className=' text-lg'>Asset Information</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid gap-10 grid-cols-6 items-center">
+                <CaseField label="Assets" icon >{dataFetchAssetInformation?.AssetInformation?.SerialNumber} </CaseField>
+                <CaseField label="Product Number" icon> </CaseField>
+                <CaseField label="Asset Location" > ---</CaseField>
+                <CaseField label="Serial Number" icon >{dataFetchAssetInformation?.AssetInformation?.SerialNumber} </CaseField>
+                <CaseField label="HW Profit Center" icon> ---</CaseField>
+                <CaseField label="SNIC - Count" icon> ---</CaseField>
+                <CaseField label="Product Name" icon>{dataFetchAssetInformation?.AssetInformation?.product_information?.ProductName} </CaseField>
+                <CaseField label="HWPC Code" icon> ---</CaseField>
+                <CaseField label="MV Product Description" icon> ---</CaseField>
+                <div className="p-5 gap-2 ring-1 col-span-2 grid grid-cols-2 items-center">
+                  <CaseField label="Device Properties" icon> ---</CaseField>
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="flex-col mt-5">
-            <span className='ml-5 font-bold text-xl'>SLA Information</span>
-              <CardContent className="grid gap-4.5 grid-flow-col grid-rows-3">
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>Latest Start Date (Cust Time)</span>
-                <span className='ml-35'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>Guaranteed Fix Date(Cust Time)</span>
-                <span className='ml-29'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>Case Priority Index</span>
-                <span className='ml-53.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>Coverage Window Used</span>
-                <span className='ml-30'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className=' size-5 mr-2'></Lock>
-                <span>Coverage Window Value</span>
-                <span className='ml-29'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className=' size-5 mr-2'></Lock>
-                <span>Case Priority Rule</span>
-                <span className='ml-41.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className=' size-5 mr-2'></Lock>
-                <span>Response Time Value</span>
-                <span className='ml-35'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className=' size-5 mr-2'></Lock>
-                <span>Repair Time Value</span>
-                <span className='ml-41'>...</span>
-              </div>
+            <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className=' text-lg'>SLA Information</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid gap-10 grid-cols-6 items-center">
+                <CaseField label="Latest Start Date (Cust Time)" icon>--- </CaseField>
+                <CaseField label="Coverage Window Used" icon> ---</CaseField>
+                <CaseField label="Response Time Value" icon> ---</CaseField>
+                <CaseField label="Guaranteed Fix Date (Cust Time)" icon> ---</CaseField>
+                <CaseField label="Coverage Window Value" icon> ---</CaseField>
+                <CaseField label="Repair Time Value" icon> ---</CaseField>
+                <CaseField label="Case Priority Index" icon> ---</CaseField>
+                <CaseField label="Case Priority Rule" icon> ---</CaseField>
               </CardContent>
             </Card>
 
-            <Card className="flex-col mt-5">
-            <span className='ml-5 font-bold text-xl'>Entitlement Information</span>
-              <CardContent className="grid gap-4.5 grid-flow-col grid-rows-3">
-              <div className='ml-7 font-bold flex'>
-                <span>Case Entitlement</span>
-                <span className='ml-48'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>Entitlement Status</span>
-                <span className='ml-45'>...</span>
-              </div>
-
-              <div className='ml-7 font-bold flex'>
-                <span>Selected Entitlement Offer </span>
-                <span className='ml-30'>...</span>
-              </div>
-
-              <div className='ml-2 font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>Start Date</span>
-                <span className='ml-38'>...</span>
-                <CalendarDays className='w-5 ml-5'></CalendarDays>
-              </div>
-
-              <div className='ml-2 font-bold flex'>
-              <Lock className=' size-5 mr-2'></Lock>
-                <span>End Date</span>
-                <span className='ml-40'>...</span>
-                <CalendarDays className='w-5 ml-5' ></CalendarDays>
-              </div>
-
-              <div className='ml-2 font-bold flex'>
-                <Lock className=' size-5 mr-2'></Lock>
-                <span>Days Left</span>
-                <span className='ml-40'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>OTC Code</span>
-                <span className='ml-51'>...</span>
-              </div>
-
-              <div className='ml-7 font-bold flex'>
-                <span>Entitlement Override</span>
-                <span className='ml-30'>...</span>
-              </div>
-
-              <div className='ml-7 font-bold flex'>
-                <span>Authorizing Employee</span>
-                <span className='ml-28'>...</span>
-              </div>
+            <Card className="flex-col ">
+            <CardHeader>
+                <CardTitle className=' text-lg'>Entitlement Information</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid gap-10 grid-cols-6 items-center">
+                <CaseField label="Case Entitlement" icon> ---</CaseField>
+                <CaseField label="Start Date" icon> <DatePicker></DatePicker> </CaseField>
+                <CaseField label="OTC Code" icon> ---</CaseField>
+                <CaseField label="Entitlement Status" icon> ---</CaseField>
+                <CaseField label="End Date" icon> <DatePicker></DatePicker></CaseField>
+                <CaseField label="Entitlement Override" icon> ---</CaseField>
+                <CaseField label="Selected Entitlement Offer" icon> ---</CaseField>
+                <CaseField label="Days Left" icon> ---</CaseField>
+                <CaseField label="Authorizing Employee" icon> ---</CaseField>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1400,7 +1236,7 @@ useEffect(() => {
                   <CaseField label="Operating System" className={'col-span-3'}  span={3}>---</CaseField>
                   <CaseField label="Version" className={'col-span-3'}  span={3} >---</CaseField>
                   <CaseField label="Remote Diag Code" className={'col-span-3'}  span={3} >---</CaseField>
-                  <CaseField label="Applicsation Information" className={'col-span-3'}  span={3}>---</CaseField>
+                  <CaseField label="Application Information" className={'col-span-3'}  span={3}>---</CaseField>
                   <CaseField label="Provider / Platform" className={'col-span-3'}  span={3}>---</CaseField>
                   <CaseField label="Software Version" className={'col-span-3'}  span={3}>---</CaseField>
                 </div>
@@ -1524,9 +1360,9 @@ useEffect(() => {
               </CardContent>
           </Card>
 
-          <Card className="mt-5 flex-col">
-          <CardHeader>
-              <CardTitle className=' text-lg'>Syomtem Description /CardTitle</CardTitle>
+          <Card className=" flex-col">
+            <CardHeader>
+              <CardTitle className=' text-lg'>Symtome Description / CardTitle</CardTitle>
               <hr />
             </CardHeader>
               <CardContent className="flex gap-6">
@@ -1564,7 +1400,7 @@ useEffect(() => {
                   </div> */}
 
                   {symptomSuggestions.length > 0 && (
-                    <ul className="bg-white border mt-1 max-h-40 overflow-y-auto absolute z-10">
+                    <ul className="bg-white border  max-h-40 overflow-y-auto absolute z-10">
                       {symptomSuggestions.map((sym) => (
                         <li
                           key={sym.SymptomCodeID}
@@ -1581,9 +1417,9 @@ useEffect(() => {
                     </ul>
                   )}
 
-                  <CaseField label="Top Category" className={'col-span-2'}  span={3} >---{selectedSymptom?.TopCategory}</CaseField>
-                  <CaseField label="Sub Category" className={'col-span-2'}  span={3} >---{selectedSymptom?.SubCategory}</CaseField>
-                  <CaseField label="Spesific Symptom" className={'col-span-2'}  span={3} >---{selectedSymptom?.SymptomCode}</CaseField>
+                  <CaseField label="Top Category" className={'col-span-2'}  span={3} >{selectedSymptom?.TopCategory}</CaseField>
+                  <CaseField label="Sub Category" className={'col-span-2'}  span={3} >{selectedSymptom?.SubCategory}</CaseField>
+                  <CaseField label="Spesific Symptom" className={'col-span-2'}  span={3} >{selectedSymptom?.SymptomCode}</CaseField>
                   
                   {/* <div className='font-bold flex'>
                     <span>Top Category</span>
@@ -1600,35 +1436,53 @@ useEffect(() => {
                 </div>
 
                 <div className='font-bold flex flex-1'>
-                  <Table className=""  >
-                    <TableCaption className={"caption-top justify-between flex items-end "}>
-                    <span className=''>Quality Codes</span>
-                    <span className=''>Add Existing QA Code</span>  
-                    </TableCaption>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>QA Level 1 <ArrowUp/> <ChevronDown/> </TableHead>
-                        <TableHead>QA Level 2 <ArrowUp/> <ChevronDown/> </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                  </Table>
+                <Table className="pverflow-auto">
+                  <TableCaption className="caption-top">
+                    {/* Optional caption content here */}
+                  </TableCaption>
+
+                  <TableHeader>
+                    <TableRow className={''}>
+                      <TableHead>Quality Codes</TableHead>
+                      <TableHead className={'text-right'}>Add Existing QA Code</TableHead>
+                    </TableRow>
+                    <TableRow>
+                      <TableHead className="">
+                        <div className="flex items-center  gap-1">
+                          QA Level 1 <ArrowUp /> <ChevronDown />
+                        </div>
+                      </TableHead>
+                      <TableHead className="">
+                        <div className="flex items-center  gap-1">
+                          QA Level 2 <ArrowUp /> <ChevronDown />
+                        </div>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>Entry</TableCell>
+                      <TableCell>0A - see comments</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+
                   
                 </div>
               </CardContent>
           </Card>
 
           <Card className="mt-5 flex-col">
-            <span className='ml-5 font-bold text-xl'>Case Resolution</span>
-            <CardContent className="grid gap-5 grid-flow-col grid-rows-3">
-
-              <div className='font-bold flex'>
-                <span className='ml-7'>Case Resolution Code</span>
-                <span className='ml-32'>...</span>
-              </div>
-              
-              <div className='font-bold flex'>
-                <span className='ml-7'>Auto Close</span>
-                <Select className='ml-52' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
+            <CardHeader>
+              <CardTitle className=' text-lg'>Case Resolution</CardTitle>
+              <hr />
+            </CardHeader>
+            
+            <CardContent className="grid gap-5 grid-cols-6 p-3 ">
+                <CaseField label="Case Resolution Code" > --- </CaseField>
+                <CaseField label="Case Ready for Closure" icon >
+                  <Select className='' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
                     <SelectTrigger>
                       <SelectValue placeholder="---"/>
                     </SelectTrigger>
@@ -1636,35 +1490,24 @@ useEffect(() => {
                       <SelectItem value="1">Yes</SelectItem>
                       <SelectItem value="0">No</SelectItem>
                     </SelectContent>
-                  </Select>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>Case Ready for Closure</span>
-                <span className='ml-29.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span className='ml-7'>Ready for Close Days</span>
-                <span className='ml-32'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span className='ml-7'>Ready for Closure Date</span>
-                <span className='ml-28.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-              <Lock className='size-5 mr-2'></Lock>
-                <span>Pending Customer Action</span>
-                <span className='ml-24'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span>Customer Requested Close Date</span>
-                <span className='ml-30'>...</span>
-              </div>
+                  </Select> 
+                </CaseField>
+                <CaseField label="Pending Customer Action" icon ><DatePicker /></CaseField>
+                <CaseField label="Auto Close" >
+                <Select className='' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="---"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">Yes</SelectItem>
+                      <SelectItem value="0">No</SelectItem>
+                    </SelectContent>
+                  </Select> 
+                </CaseField>
+                <CaseField label="Ready for Close Days" icon>--- </CaseField>
+                <CaseField  label="Customer Requested Close Date" icon> <DatePicker /></CaseField>
+                <CaseField className={'col-start-3'} label="Ready for Closure Date"icon ><DatePicker /> </CaseField>
+              
               </CardContent>
             </Card>
           </TabsContent>
@@ -1688,62 +1531,34 @@ useEffect(() => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="ci_orders" >
-          <Card className="flex-col mt-7">
-            <span className='ml-5 font-bold text-xl'>Shipment Information</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-3">
-          
-              <div className='font-bold flex'>
-                <span className='ml-7'>Shipment Country</span>
-                <span className='ml-40'>...</span>
-              </div>
+          <TabsContent value="ci_orders" className={'p-2 flex flex-col gap-4'} >
+          <Card className="flex-col ">
+            <CardHeader>
+            <CardTitle className=' text-lg'>Shipment Information</CardTitle>
+              <hr />
+            </CardHeader>
+              <CardContent className="grid gap-10 grid-cols-4 items-center">
+                <CaseField label="Shipment Country">--- </CaseField>
+                <CaseField label="Exception Order"> ---</CaseField>
+                <CaseField label="Shipment State" icon> ---</CaseField>
+                <CaseField label="SBD Override"> ---</CaseField>
+                <CaseField label="Major Account Id"> ---</CaseField>
+                <CaseField label="Currency"> ---</CaseField>
+                <CaseField label="Promo Code" className={'col-start-3'}> ---</CaseField>
 
-              <div className='font-bold flex'>
-                <Lock className='size-5 mr-2'></Lock>
-                <span>Shipment State</span>
-                <span className='ml-45.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span className='ml-7'>Major Account Id</span>
-                <span className='ml-41.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span>Exception Order</span>
-                <span className='ml-40'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span >SBD Ovveride</span>
-                <span className='ml-44.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span>Currency</span>
-                <span className='ml-53.5'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span>Promo Code</span>
-                <span className='ml-40'>...</span>
-              </div>
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
-            <span className='ml-5 font-bold text-xl'>Work Order</span>
-              <CardContent className="grid gap-5">
-          
-              <div className='font-bold flex'>
-                <span>Incident Type</span>
-                <span className='ml-50'>...</span>
-              </div>
-
-              <div className='font-bold flex'>
-                <span>Work Order Description</span>
-                <span className='ml-30.5'>...</span>
-              </div>
+          <Card className="flex-col ">
+          <CardHeader>
+            <CardTitle className=' text-lg'>Work Order</CardTitle>
+              <hr />
+            </CardHeader>
+              <CardContent className=" flex flex-col gap-5 p-3">
+                    <div className="grid gap-5 grid-cols-4">
+                      <CaseField label="Incident Type" span={3}> --- </CaseField>
+                      <CaseField label="Work Order Description" span={3}>--- </CaseField>
+                    </div>
 
                 <Table>
                 <TableHeader>
@@ -1764,11 +1579,11 @@ useEffect(() => {
                 </TableHeader>
                 <TableBody>
                   {workOrders.map((work) => (
-                    <TableRow key={work.WOID}>
-                      <TableCell className="font-medium">
-                        <Link to={`/work/${work.WOID}`}>
+                    <TableRow key={work.WOID} className="hover:bg-gray-500 cursor-pointer">
+                      <TableCell className="font-medium " onClick={handleClick}>
+                        {/* <Link to={`/work/${work.WOID}`}> */}
                         {work.WOID}
-                        </Link>
+                        {/* </Link> */}
                         </TableCell>
                       <TableCell>{work.CaseID}</TableCell>
                       {/* <TableCell>{work.serviceaccount}</TableCell>
@@ -1788,8 +1603,11 @@ useEffect(() => {
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
-            <span className='ml-5 font-bold text-xl'>Parts Order </span>
+          <Card className="flex-col ">
+            <CardHeader>
+            <CardTitle className=' text-lg'>Parts Order</CardTitle>
+              <hr />
+            </CardHeader>
               <CardContent className="grid gap-5">
     
                 <Table>
@@ -1823,8 +1641,11 @@ useEffect(() => {
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
-            <span className='ml-5 font-bold text-xl'>Service Order </span>
+          <Card className="flex-col ">
+          <CardHeader>
+            <CardTitle className=' text-lg'>Service Order</CardTitle>
+              <hr />
+            </CardHeader>
               <CardContent className="grid gap-5">
     
                 <Table>
@@ -1853,8 +1674,11 @@ useEffect(() => {
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
-            <span className='ml-5 font-bold text-xl'>Material Order </span>
+          <Card className="flex-col ">
+          <CardHeader>
+            <CardTitle className=' text-lg'>Material Order</CardTitle>
+              <hr />
+            </CardHeader>
               <CardContent className="grid gap-5">
     
                 <Table>
@@ -1924,7 +1748,7 @@ useEffect(() => {
             </Card>
           </TabsContent>
         </Tabs>
-      </CardHeader>
+      
     </Card>
     </>            
   )
