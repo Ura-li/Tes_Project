@@ -1,43 +1,44 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
-// GET: Fetch single ResourceAccount by ID
+
+// GET: Fetch single SubkTechnician by ID
 export async function GET(request, { params }) {
-  const { ResourceAccountId } = params;
+  const { SubkTechnicianId } = params;
 
   try {
-    const resourceAccount = await prisma.resourceAccount.findUnique({
-      where: { ResourceAccountId },
+    const subkTechnician = await prisma.subkTechnician.findUnique({
+      where: { SubkTechnicianId },
     });
 
-    if (!resourceAccount) {
+    if (!subkTechnician) {
       return NextResponse.json({
         success: false,
-        message: "ResourceAccount not found",
+        message: "SubkTechnician not found",
         data: null,
       }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      message: "ResourceAccount details retrieved successfully",
-      data: resourceAccount,
+      message: "SubkTechnician details retrieved successfully",
+      data: subkTechnician,
     }, { status: 200 });
   } catch (error) {
     return NextResponse.json({
       success: false,
-      message: "Failed to fetch ResourceAccount",
+      message: "Failed to fetch SubkTechnician",
       error: error.message,
     }, { status: 500 });
   }
 }
 
-// PATCH: Update ResourceAccount
+// PATCH: Update SubkTechnician
 export async function PATCH(request, { params }) {
-  const { ResourceAccountId } = params;
+  const { SubkTechnicianId } = params;
 
   try {
     const body = await request.json();
-    const { Name, ResourceId } = body;
+    const { Name, ResourceAccountId } = body;
 
     if (!Name) {
       return NextResponse.json({
@@ -46,48 +47,48 @@ export async function PATCH(request, { params }) {
       }, { status: 400 });
     }
 
-    const updatedResourceAccount = await prisma.resourceAccount.update({
-      where: { ResourceAccountId },
+    const updatedSubkTechnician = await prisma.subkTechnician.update({
+      where: { SubkTechnicianId },
       data: {
         Name,
-        ResourceId: ResourceId || null, // optional
+        ResourceAccountId: ResourceAccountId || null, // optional
       },
     });
 
     return NextResponse.json({
       success: true,
-      message: "ResourceAccount updated successfully",
-      data: updatedResourceAccount,
+      message: "SubkTechnician updated successfully",
+      data: updatedSubkTechnician,
     }, { status: 200 });
 
   } catch (error) {
     return NextResponse.json({
       success: false,
-      message: "Failed to update ResourceAccount",
+      message: "Failed to update SubkTechnician",
       error: error.message,
     }, { status: 500 });
   }
 }
 
-// DELETE: Delete ResourceAccount
+// DELETE: Delete SubkTechnician
 export async function DELETE(request, { params }) {
-  const { ResourceAccountId } = params;
+  const { SubkTechnicianId } = params;
 
   try {
-    const deletedResourceAccount = await prisma.resourceAccount.delete({
-      where: { ResourceAccountId },
+    const deletedSubkTechnician = await prisma.subkTechnician.delete({
+      where: { SubkTechnicianId },
     });
 
     return NextResponse.json({
       success: true,
-      message: "ResourceAccount deleted successfully",
-      data: deletedResourceAccount,
+      message: "SubkTechnician deleted successfully",
+      data: deletedSubkTechnician,
     }, { status: 200 });
 
   } catch (error) {
     return NextResponse.json({
       success: false,
-      message: "Failed to delete ResourceAccount. It may not exist.",
+      message: "Failed to delete SubkTechnician. It may not exist.",
       error: error.message,
     }, { status: 404 });
   }

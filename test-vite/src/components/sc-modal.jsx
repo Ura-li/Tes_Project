@@ -4050,3 +4050,422 @@ export function ResourceAccountAdd() {
   );
 }
 
+export function ResourceAccountEdit({ ResourceAccountId, onUpdate }) {
+  const [resourceAccount, setResourceAccount] = useState(null);
+  const [name, setName] = useState("");
+  const [resourceId, setResourceId] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchResourceAccount = async () => {
+    if (!ResourceAccountId) return;
+    try {
+      const response = await ApiCustomer.get(`/api/resource-account/${ResourceAccountId}`);
+      const data = response.data.data;
+      setResourceAccount(data);
+      setName(data?.Name || "");
+      setResourceId(data?.ResourceId || "");
+    } catch (error) {
+      console.error("Error fetching ResourceAccount:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (ResourceAccountId && isOpen) {
+      fetchResourceAccount();
+    }
+  }, [ResourceAccountId, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setName("");
+      setResourceId("");
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!name) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Name is required.",
+        icon: "warning",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/resource-account/${ResourceAccountId}`, {
+        Name: name,
+        ResourceId: resourceId || null,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "ResourceAccount has been updated.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+
+      onUpdate(); // Refresh parent data
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating ResourceAccount:", error);
+      Swal.fire({
+        title: "Update Failed",
+        text: "Could not update ResourceAccount. Please try again.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchResourceAccount(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit ResourceAccount</DialogTitle>
+          <DialogDescription>
+            Update the details of the ResourceAccount. Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name*"
+          />
+          <Input
+            value={resourceId}
+            onChange={(e) => setResourceId(e.target.value)}
+            placeholder="ResourceId (optional)"
+          />
+        </div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ResourceAccountDelete({ ResourceAccountId, onUpdate }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      const response = await ApiCustomer.delete(`/api/resource-account/${ResourceAccountId}`);
+
+      if (response.status === 409 || response.data.success === false) {
+        alert(response.data.message || "Cannot delete this ResourceAccount due to restrictions.");
+        return;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "ResourceAccount berhasil dihapus.",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+
+      setIsModalOpen(false);
+
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      if (error.response?.status === 409) {
+        alert(error.response.data.message || "Cannot delete! ResourceAccount has related records.");
+      } else {
+        alert("Failed to delete ResourceAccount. Please try again.");
+      }
+    }
+  };
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete ResourceAccount</DialogTitle>
+          <DialogDescription>
+            Confirm deletion of this ResourceAccount.
+          </DialogDescription>
+        </DialogHeader>
+        <p>Apakah Anda yakin ingin menghapus data ini?</p>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SubkTechnicianAdd() {
+  const [formData, setFormData] = useState({
+    SubkTechnicianId: '',
+    Name: '',
+    ResourceAccountId: '',
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.SubkTechnicianId || !formData.Name) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "SubkTechnicianId and Name are required.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post("/api/subk-technician", {
+        SubkTechnicianId: formData.SubkTechnicianId,
+        Name: formData.Name,
+        ResourceAccountId: formData.ResourceAccountId || null,
+      });
+
+      console.log("Success:", response.data);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'SubkTechnician berhasil disimpan.',
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Error saving SubkTechnician:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menyimpan SubkTechnician. Silakan coba lagi.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2">Add Subk Technician</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add SubkTechnician</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>SubkTechnicianId *</Label>
+          <Input id="SubkTechnicianId" value={formData.SubkTechnicianId} onChange={handleInputChange} />
+
+          <Label>Name *</Label>
+          <Input id="Name" value={formData.Name} onChange={handleInputChange} />
+
+          {/* <Label>ResourceAccountId (optional)</Label>
+          <Input id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} /> */}
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SubkTechnicianEdit({ SubkTechnicianId, onUpdate }) {
+  const [subkTechnician, setSubkTechnician] = useState(null);
+  const [name, setName] = useState("");
+  const [resourceAccountId, setResourceAccountId] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchSubkTechnician = async () => {
+    if (!SubkTechnicianId) return;
+    try {
+      const response = await ApiCustomer.get(`/api/subk-technician/${SubkTechnicianId}`);
+      const data = response.data.data;
+      setSubkTechnician(data);
+      setName(data?.Name || "");
+      setResourceAccountId(data?.ResourceAccountId || "");
+    } catch (error) {
+      console.error("Error fetching SubkTechnician:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (SubkTechnicianId && isOpen) {
+      fetchSubkTechnician();
+    }
+  }, [SubkTechnicianId, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setName("");
+      setResourceAccountId("");
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!name) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Name is required.",
+        icon: "warning",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/subk-technician/${SubkTechnicianId}`, {
+        Name: name,
+        ResourceAccountId: resourceAccountId || null,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "SubkTechnician has been updated.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+
+      onUpdate(); // Refresh parent data
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating SubkTechnician:", error);
+      Swal.fire({
+        title: "Update Failed",
+        text: "Could not update SubkTechnician. Please try again.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchSubkTechnician(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit SubkTechnician</DialogTitle>
+          <DialogDescription>
+            Update the details of the SubkTechnician. Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name*"
+          />
+          <Input
+            value={resourceAccountId}
+            onChange={(e) => setResourceAccountId(e.target.value)}
+            placeholder="ResourceAccountId (optional)"
+          />
+        </div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SubkTechnicianDelete({ SubkTechnicianId, onUpdate }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      const response = await ApiCustomer.delete(`/api/subk-technician/${SubkTechnicianId}`);
+
+      if (response.status === 409 || response.data.success === false) {
+        alert(response.data.message || "Cannot delete this SubkTechnician due to restrictions.");
+        return;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "SubkTechnician berhasil dihapus.",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+
+      setIsModalOpen(false);
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      if (error.response?.status === 409) {
+        alert(error.response.data.message || "Cannot delete! SubkTechnician has related records.");
+      } else {
+        alert("Failed to delete SubkTechnician. Please try again.");
+      }
+    }
+  };
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete SubkTechnician</DialogTitle>
+          <DialogDescription>
+            Confirm deletion of this SubkTechnician.
+          </DialogDescription>
+        </DialogHeader>
+        <p>Apakah Anda yakin ingin menghapus data ini?</p>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

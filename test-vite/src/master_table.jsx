@@ -8,8 +8,8 @@ import { ProductTypeAdd, ProductTypeEdit, ProductTypeDelete } from "@/components
 import { WarrantyServiceAdd, WarrantyServiceEdit, WarrantyServiceDelete } from "@/components/sc-modal";
 import { MaterialOrderEdit, MaterialOrderDelete,  } from "@/components/sc-modal";
 import { WorkOrderDelete, WorkOrderEdit } from "@/components/sc-modal";
-// import { ResourceAccountAdd, ResourceAccountEdit, ResourceAccountDelete } from "@/components/sc-modal";
-// import { SubkTechinicianAdd, SubkTechnicianEdit, SubTechnicianDelete } from "@/components/sc-modal";
+import { ResourceAccountAdd, ResourceAccountEdit, ResourceAccountDelete } from "@/components/sc-modal";
+import { SubkTechnicianAdd, SubkTechnicianEdit, SubkTechnicianDelete} from "@/components/sc-modal";
 import { useNavigate } from "react-router";
 
 export const Contact_table = () => {
@@ -1310,7 +1310,6 @@ export const Wo_table = () => {
   );
 };
 
-import { ResourceAccountAdd } from "@/components/sc-modal";
 export const ResourceAccountTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -1396,7 +1395,7 @@ export const ResourceAccountTable = () => {
                 <td className="border p-2">{account.Name}</td>
                 <td className="border p-2">{account.ResourceId || "-"}</td>
                 <td className="border p-2 flex space-x-2 justify-center">
-                  {/* <ResourceAccountEdit
+                  <ResourceAccountEdit
                     ResourceAccountId={account.ResourceAccountId}
                     onUpdate={fetchResourceAccounts}
                   />
@@ -1405,7 +1404,7 @@ export const ResourceAccountTable = () => {
                     isModalOpen={isModalOpen}
                     setIsModalOpen={setIsModalOpen}
                     onUpdate={fetchResourceAccounts}
-                  /> */}
+                  />
                 </td>
               </tr>
             ))}
@@ -1494,7 +1493,7 @@ export const SubkTechnician_table = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {/* <SubkTechnicianAdd onUpdate={fetchSubkTechnicianData} /> */}
+      <SubkTechnicianAdd onUpdate={fetchSubkTechnicianData} />
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -1519,13 +1518,13 @@ export const SubkTechnician_table = () => {
                 <td className="border p-2">{item.Name}</td>
                 <td className="border p-2">{item.resourceAccount?.Name || "N/A"}</td>
                 <td className="border p-2 flex space-x-2 justify-center">
-                  {/* <SubkTechnicianEdit SubkTechnicianId={item.SubkTechnicianId} onUpdate={fetchSubkTechnicianData} />
+                  <SubkTechnicianEdit SubkTechnicianId={item.SubkTechnicianId} onUpdate={fetchSubkTechnicianData} />
                   <SubkTechnicianDelete
                     SubkTechnicianId={item.SubkTechnicianId}
                     isModalOpen={isModalOpen}
                     setIsModalOpen={setIsModalOpen}
                     onUpdate={fetchSubkTechnicianData}
-                  /> */}
+                  />
                 </td>
               </tr>
             ))}
