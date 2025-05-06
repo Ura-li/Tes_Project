@@ -3833,3 +3833,214 @@ export function BtnModalsPartAdd({
     </>
   )
 }
+
+export function BtnModalsResourceAccountAdd({
+  open,
+  setOpen,
+  resourceAccounts,
+  selectedResourceAccounts,
+  setSelectedResourceAccounts
+}) {
+  const [tempSelectedAccounts, setTempSelectedAccounts] = useState([]);
+  const [nameInput, setNameInput] = useState("");
+  const [nameSearch, setNameSearch] = useState("");
+
+  const handleSelectAccount = (account, checked) => {
+    if (checked) {
+      setTempSelectedAccounts((prev) => [...prev, account]);
+    } else {
+      setTempSelectedAccounts((prev) =>
+        prev.filter((item) => item.ResourceAccountId !== account.ResourceAccountId)
+      );
+    }
+  };
+
+  const filteredAccounts = resourceAccounts.filter(account =>
+    account.Name.toLowerCase().includes(nameSearch.toLowerCase())
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:min-w-[50vw] sm:min-h-[fit-content] flex flex-col justify-center">
+        <DialogHeader>
+          <DialogTitle className="text-blue-600 text-2xl">Add Resource Account</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex items-center justify-between">
+          <span className="flex gap-2 items-center">
+            <DialogDescription className="whitespace-nowrap">Name</DialogDescription>
+            <Input
+              className="ring-1 min-w-[10em] ring-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+            />
+            <Button variant="search" onClick={() => setNameSearch(nameInput)}>
+              Search
+            </Button>
+          </span>
+        </div>
+
+        <div className="overflow-x-auto max-w-full mt-4">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Select</TableHead>
+                <TableHead>Resource Account ID</TableHead>
+                <TableHead>Name</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredAccounts
+                .filter(account => !selectedResourceAccounts.some(sel => sel.ResourceAccountId === account.ResourceAccountId))
+                .map((account, index) => {
+                  const isChecked = tempSelectedAccounts.some(item => item.ResourceAccountId === account.ResourceAccountId);
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={(checked) => handleSelectAccount(account, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>{account.ResourceAccountId}</TableCell>
+                      <TableCell>{account.Name}</TableCell>
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+        </div>
+
+        <DialogFooter className="sm:justify-start mt-4">
+          <Button
+            variant="search"
+            onClick={() => {
+              setSelectedResourceAccounts((prev) => [
+                ...prev,
+                ...tempSelectedAccounts.filter(
+                  (acc) => !prev.some((a) => a.ResourceAccountId === acc.ResourceAccountId)
+                ),
+              ]);
+              setTempSelectedAccounts([]);
+              Swal.fire({
+                title: "Success!",
+                text: "Resource Account(s) added successfully!",
+                icon: "success",
+                timer: 1500,
+                showConfirmButton: false,
+              }).then(() => {
+                setOpen(false);
+              });
+            }}
+          >
+            Add Account
+          </Button>
+          <Button
+            variant="search"
+            onClick={() => {
+              setTempSelectedAccounts([]);
+              setNameInput("");
+              setNameSearch("");
+            }}
+          >
+            Clear
+          </Button>
+          <Button variant="search" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// import { useState } from "react";
+// import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+// import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import Swal from "sweetalert2";
+// import { ApiCustomer } from "@/lib/axios";
+
+export function ResourceAccountAdd() {
+  const [formData, setFormData] = useState({
+    ResourceAccountId: '',
+    Name: '',
+    ResourceId: null,
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.ResourceAccountId || !formData.Name) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "ResourceAccountId and Name are required.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post("/api/resource-account", formData);
+      console.log("Success:", response.data);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'ResourceAccount berhasil disimpan.',
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Error saving ResourceAccount:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menyimpan ResourceAccount. Silakan coba lagi.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2">Add Resource Account</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add ResourceAccount</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>ResourceAccountId *</Label>
+          <Input id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} />
+
+          <Label>Name *</Label>
+          <Input id="Name" value={formData.Name} onChange={handleInputChange} />
+
+          {/* <Label>ResourceId (optional)</Label>
+          <Input id="ResourceId" value={formData.ResourceId} onChange={handleInputChange} /> */}
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+

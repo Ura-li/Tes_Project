@@ -116,10 +116,6 @@ const data = {
           url: "/master/Wo_table",
         },
         {
-          title: "Resource",
-          url: "/master/Resource",
-        },
-        {
           title: "Resource Account",
           url: "/master/ResourceAccount",
         },
