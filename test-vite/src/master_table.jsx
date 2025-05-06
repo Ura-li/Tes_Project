@@ -10,6 +10,7 @@ import { MaterialOrderEdit, MaterialOrderDelete,  } from "@/components/sc-modal"
 import { WorkOrderDelete, WorkOrderEdit } from "@/components/sc-modal";
 import { ResourceAccountAdd, ResourceAccountEdit, ResourceAccountDelete } from "@/components/sc-modal";
 import { SubkTechnicianAdd, SubkTechnicianEdit, SubkTechnicianDelete} from "@/components/sc-modal";
+import { SymptomCodeAdd, SymptomCodeEdit , SymptomCodeDelete } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
 
 export const Contact_table = () => {
@@ -1524,6 +1525,137 @@ export const SubkTechnician_table = () => {
                     isModalOpen={isModalOpen}
                     setIsModalOpen={setIsModalOpen}
                     onUpdate={fetchSubkTechnicianData}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredData.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No entries found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const SymptomCodeTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [symptomCodeData, setSymptomCodeData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchSymptomCodeData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/symptom-codes");
+      if (response.data.success) {
+        setSymptomCodeData(response.data.data);
+      } else {
+        setError("Failed to fetch SymptomCode data");
+      }
+    } catch (err) {
+      console.error("Error fetching SymptomCode data:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSymptomCodeData();
+  }, []);
+
+  const filteredData = symptomCodeData.filter((item) =>
+    Object.values(item).some((value) =>
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const currentData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Symptom Code Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      <SymptomCodeAdd onUpdate={fetchSymptomCodeData} />
+
+      {loading && <p>Loading data...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+              <th className="border p-2">Symptom Code ID</th>
+              <th className="border p-2">Symptom Code</th>
+              <th className="border p-2">Top Category</th>
+              <th className="border p-2">Sub Category</th>
+              <th className="border p-2">Quality Codes</th>
+              <th className="border p-2">Created On</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((item) => (
+              <tr key={item.SymptomCodeID} className="hover:bg-gray-100 text-center">
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/symptom-code/${item.SymptomCodeID}`)}>
+                  {item.SymptomCodeID}
+                </td>
+                <td className="border p-2">{item.SymptomCode}</td>
+                <td className="border p-2">{item.TopCategory}</td>
+                <td className="border p-2">{item.SubCategory}</td>
+                <td className="border p-2">{item.QualityCodes || "N/A"}</td>
+                <td className="border p-2">
+                  {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </td>
+                <td className="border p-2 flex space-x-2 justify-center">
+                  <SymptomCodeEdit SymptomCodeID={item.SymptomCodeID} onUpdate={fetchSymptomCodeData} />
+                  <SymptomCodeDelete
+                    SymptomCodeID={item.SymptomCodeID}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchSymptomCodeData}
                   />
                 </td>
               </tr>

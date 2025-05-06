@@ -19,7 +19,8 @@ import
   WarrantyService_table,
   Mo_table,
   Wo_table,
-  SubkTechnician_table
+  SubkTechnician_table,
+  SymptomCodeTable
  } from './master_table';
 import { Bookings } from './bookings';
 // import { ModalContextProvider } from './components/modal-context';
@@ -59,6 +60,7 @@ createRoot(document.getElementById('root')).render(
             {/* <Route path='master/Resource' element={<ResourceTable/>}/> */}
             <Route path='master/ResourceAccount' element={<ResourceAccountTable/>}/>
             <Route path='master/SubkTechnician' element={<SubkTechnician_table/>}/>
+            <Route path='master/symptom_codes' element={<SymptomCodeTable/>}/>
             {/* </Route> */}
           </Route>
             {/* </Route> */}

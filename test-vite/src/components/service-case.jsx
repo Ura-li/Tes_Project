@@ -214,7 +214,7 @@ export const TabsService = ({ caseDetails }) => {
       const caseData = res.data.data
       const symptomCode = caseData.SymptomCode
 
-      const resSymptomCode = await ApiCustomer.get(`/api/case-information/symptom-codes/${symptomCode}`)
+      const resSymptomCode = await ApiCustomer.get(`/api/symptom-codes/${symptomCode}`)
       return resSymptomCode.data.data
     }catch (err) {
       console.error("Error in fetchSymptomCodes:", err);
@@ -901,7 +901,7 @@ useEffect(() =>{
 
 const fetchSymptomCodes = async (term) => {
   try {
-    const response = await ApiCustomer.get("/api/case-information/symptom-codes");
+    const response = await ApiCustomer.get("/api/symptom-codes");
     const allCodes = response.data.data;
 
     const filtered = allCodes.filter((sym) =>

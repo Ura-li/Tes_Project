@@ -122,6 +122,10 @@ const data = {
         {
           title: "Subk Technician",
           url: "/master/SubkTechnician",
+        },
+        {
+          title: "Symptom Codes",
+          url: "/master/symptom_codes",
         },     
       ],
     },

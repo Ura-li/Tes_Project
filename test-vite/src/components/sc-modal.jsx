@@ -4469,3 +4469,246 @@ export function SubkTechnicianDelete({ SubkTechnicianId, onUpdate }) {
     </Dialog>
   );
 }
+
+export function SymptomCodeAdd({ onUpdate }) {
+  const [formData, setFormData] = useState({
+    SymptomCode: '',
+    TopCategory: '',
+    SubCategory: '',
+    QualityCodes: '',
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.SymptomCode || !formData.TopCategory || !formData.SubCategory) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "SymptomCode, TopCategory, and SubCategory are required.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post("/api/symptom-codes", formData);
+
+      console.log("Success:", response.data);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Symptom Code berhasil disimpan.',
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        onUpdate?.();
+      });
+    } catch (error) {
+      console.error("Error saving Symptom Code:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menyimpan data. Silakan coba lagi.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm mb-4">Add Symptom Code</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Symptom Code</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>SymptomCode *</Label>
+          <Input id="SymptomCode" value={formData.SymptomCode} onChange={handleInputChange} />
+
+          <Label>TopCategory *</Label>
+          <Input id="TopCategory" value={formData.TopCategory} onChange={handleInputChange} />
+
+          <Label>SubCategory *</Label>
+          <Input id="SubCategory" value={formData.SubCategory} onChange={handleInputChange} />
+
+          <Label>QualityCodes</Label>
+          <Input id="QualityCodes" value={formData.QualityCodes} onChange={handleInputChange} />
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SymptomCodeEdit({ SymptomCodeID, onUpdate }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [symptomData, setSymptomData] = useState({
+    SymptomCode: "",
+    TopCategory: "",
+    SubCategory: "",
+    QualityCodes: "",
+  });
+
+  const fetchSymptomData = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/symptom-codes/${SymptomCodeID}`);
+      const data = response.data.data;
+      setSymptomData({
+        SymptomCode: data?.SymptomCode || "",
+        TopCategory: data?.TopCategory || "",
+        SubCategory: data?.SubCategory || "",
+        QualityCodes: data?.QualityCodes || "",
+      });
+    } catch (error) {
+      console.error("Error fetching Symptom Code:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) fetchSymptomData();
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    const { SymptomCode, TopCategory, SubCategory } = symptomData;
+    if (!SymptomCode || !TopCategory || !SubCategory) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "SymptomCode, TopCategory, and SubCategory are required.",
+        icon: "warning",
+        timer: 1200,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/symptom-codes/${SymptomCodeID}`, symptomData);
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: "Symptom Code has been updated.",
+        timer: 1200,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      setIsOpen(false);
+      onUpdate?.();
+    } catch (error) {
+      console.error("Error updating Symptom Code:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "Could not update Symptom Code.",
+        timer: 1200,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+    }
+  };
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setSymptomData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Symptom Code</DialogTitle>
+          <DialogDescription>Update the details of the symptom code. Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Input id="SymptomCode" value={symptomData.SymptomCode} onChange={handleChange} placeholder="SymptomCode *" />
+          <Input id="TopCategory" value={symptomData.TopCategory} onChange={handleChange} placeholder="TopCategory *" />
+          <Input id="SubCategory" value={symptomData.SubCategory} onChange={handleChange} placeholder="SubCategory *" />
+          <Input id="QualityCodes" value={symptomData.QualityCodes} onChange={handleChange} placeholder="QualityCodes" />
+        </div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SymptomCodeDelete({ SymptomCodeID, onUpdate }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      const response = await ApiCustomer.delete(`/api/symptom-codes/${SymptomCodeID}`);
+
+      if (response.status === 409 || response.data.success === false) {
+        alert(response.data.message || "Cannot delete this Symptom Code due to restrictions.");
+        return;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Deleted",
+        text: "Symptom Code has been deleted successfully.",
+        timer: 1100,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+
+      setIsModalOpen(false);
+      onUpdate?.();
+    } catch (error) {
+      if (error.response?.status === 409) {
+        alert(error.response.data.message || "Cannot delete! Symptom Code has related records.");
+      } else {
+        alert("Failed to delete Symptom Code. Please try again.");
+      }
+    }
+  };
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Symptom Code</DialogTitle>
+          <DialogDescription>Confirm deletion of this Symptom Code.</DialogDescription>
+        </DialogHeader>
+        <p>Apakah Anda yakin ingin menghapus data ini?</p>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
