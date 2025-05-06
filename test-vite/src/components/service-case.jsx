@@ -388,9 +388,9 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
       {label}
     </CardTitle>
 
-    <CardTitle className={spanMap[span]}>
+    <div className={`${spanMap[span]} truncate`}>
       {children}
-    </CardTitle>
+    </div>
   </>
 );
 
@@ -739,7 +739,19 @@ export const ServiceCase = ({
 const [symptomSearchTerm, setSymptomSearchTerm] = useState("");
 const [symptomSuggestions, setSymptomSuggestions] = useState([]);
 
+const [createdOn, setCreatedOn] = useState(null);
 const [caseClosedDate, setCaseClosedDate] = useState(null);
+const [submittedToBase, setsubmittedToBase] = useState(null);
+
+const [pendingCustomerAction, setPendingCustomerAction] = useState(null);
+const [customerRequestedCloseDate, setCustomerRequestedCloseDate] = useState(null);
+const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
+// const [cr]
+useEffect(() => {
+  if (caseDetails?.CreatedOn) {
+    setCreatedOn(new Date(caseDetails.CreatedOn)); // includes date + time
+  }
+}, [caseDetails]);
 
   
 
@@ -965,6 +977,9 @@ const handleClick = async () => {
   })}
 };
 
+const [startDate, setstartDate] = useState(null);
+const [endDate, setEndDate] = useState(null)
+
 
   return (
     <>
@@ -1088,27 +1103,25 @@ const handleClick = async () => {
                 <CaseField label="Update Customer Tracking Number"  span={3} >---</CaseField>
                 <CaseField label="Created ON" icon span={3}>
                   <span className="flex gap-[5em]">
-                    {new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')}
-                        <DatePicker variant='icon'></DatePicker>
-                    {new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })}
+                    {/* {new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')} */}
+                        <DatePicker variant='icon' value={createdOn} onChange={setCreatedOn} readOnly></DatePicker>
+                    {/* {new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })} */}
                   </span>
                 </CaseField>
                 <CaseField label="Alternate Customer Tracking Number"> ---  </CaseField>
                 <CaseField label="Case Closed Date" icon span={3} > 
                   <span className="flex gap-[5em]">
                       {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
-                      <DatePicker variant='icon' value={caseClosedDate} onChange={setCaseClosedDate}></DatePicker>
-                      ---
+                      <DatePicker variant='icon' value={caseClosedDate} onChange={setCaseClosedDate} readOnly></DatePicker>
+                      
                     </span>
                 </CaseField>
-                <CaseField label="Irrelevant"  icon >
-                  --- 
-                </CaseField> 
+                <CaseField label="Irrelevant"  icon >--- </CaseField> 
                 <CaseField label="Submitted To Base" icon span={3}>
                     <span className="flex gap-[5em]">
                      
-                      <DatePicker variant='icon'></DatePicker>
-                      ---
+                      <DatePicker variant='icon' value={submittedToBase} onChange={setsubmittedToBase} readOnly></DatePicker>
+                      
                     </span>
                 </CaseField>
 
@@ -1124,7 +1137,7 @@ const handleClick = async () => {
                 <CaseField label="Global Trade Status" > --- </CaseField>
                 <CaseField label="GT Override Reason" >--- </CaseField>
                 <CaseField label="GT Active Listening" > ---</CaseField>
-                <CaseField label="Embargoed Country" icon>--- </CaseField>
+                <CaseField label="Embargoed Country" >--- </CaseField>
                 <CaseField label="GT Details" >--- </CaseField>
                 <CaseField label="GT All Comments" > ---</CaseField>
                 <CaseField className={'col-start-3'} label="Screening ID" > ---</CaseField>
@@ -1201,15 +1214,15 @@ const handleClick = async () => {
                 <CardTitle className=' text-lg'>Entitlement Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6 items-center">
-                <CaseField label="Case Entitlement" icon> ---</CaseField>
-                <CaseField label="Start Date" icon> <DatePicker></DatePicker> </CaseField>
+              <CardContent className="grid gap-10 grid-cols-7 items-center">
+                <CaseField label="Case Entitlement" icon> Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quam beatae debitis veniam, natus voluptatum, quos officiis, necessitatibus maxime et neque enim deleniti delectus magni ipsum non harum explicabo praesentium sapiente.</CaseField>
+                <CaseField label="Start Date" icon span={2}> <DatePicker value={startDate} onChange={setstartDate} readOnly></DatePicker> </CaseField>
                 <CaseField label="OTC Code" icon> ---</CaseField>
                 <CaseField label="Entitlement Status" icon> ---</CaseField>
-                <CaseField label="End Date" icon> <DatePicker></DatePicker></CaseField>
+                <CaseField label="End Date" icon span={2}> <DatePicker value={endDate} onChange={setEndDate} readOnly></DatePicker></CaseField>
                 <CaseField label="Entitlement Override" icon> ---</CaseField>
                 <CaseField label="Selected Entitlement Offer" icon> ---</CaseField>
-                <CaseField label="Days Left" icon> ---</CaseField>
+                <CaseField label="Days Left" icon span={2}> ---</CaseField>
                 <CaseField label="Authorizing Employee" icon> ---</CaseField>
               </CardContent>
             </Card>
@@ -1479,11 +1492,11 @@ const handleClick = async () => {
               <hr />
             </CardHeader>
             
-            <CardContent className="grid gap-5 grid-cols-6 p-3 ">
+            <CardContent className="grid gap-5 grid-cols-7 p-3 ">
                 <CaseField label="Case Resolution Code" > --- </CaseField>
                 <CaseField label="Case Ready for Closure" icon >
                   <Select className='' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
-                    <SelectTrigger>
+                    <SelectTrigger className={'w-full'}>
                       <SelectValue placeholder="---"/>
                     </SelectTrigger>
                     <SelectContent>
@@ -1492,10 +1505,10 @@ const handleClick = async () => {
                     </SelectContent>
                   </Select> 
                 </CaseField>
-                <CaseField label="Pending Customer Action" icon ><DatePicker /></CaseField>
+                <CaseField label="Pending Customer Action" icon span={2}><DatePicker value={pendingCustomerAction} onChange={setPendingCustomerAction}/></CaseField>
                 <CaseField label="Auto Close" >
                 <Select className='' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
-                    <SelectTrigger>
+                    <SelectTrigger className={'w-full'}>
                       <SelectValue placeholder="---"/>
                     </SelectTrigger>
                     <SelectContent>
@@ -1505,8 +1518,8 @@ const handleClick = async () => {
                   </Select> 
                 </CaseField>
                 <CaseField label="Ready for Close Days" icon>--- </CaseField>
-                <CaseField  label="Customer Requested Close Date" icon> <DatePicker /></CaseField>
-                <CaseField className={'col-start-3'} label="Ready for Closure Date"icon ><DatePicker /> </CaseField>
+                <CaseField  label="Customer Requested Close Date" icon span={2}> <DatePicker value={customerRequestedCloseDate} onChange={setCustomerRequestedCloseDate} /></CaseField>
+                <CaseField className={'col-start-3'} label="Ready for Closure Date"icon span={2} ><DatePicker value={ReadyForClosureDate} onChange={setReadyForClosureDate}/> </CaseField>
               
               </CardContent>
             </Card>
@@ -1579,7 +1592,7 @@ const handleClick = async () => {
                 </TableHeader>
                 <TableBody>
                   {workOrders.map((work) => (
-                    <TableRow key={work.WOID} className="hover:bg-gray-500 cursor-pointer">
+                    <TableRow key={work.WOID} className="hover:bg-gray-300 cursor-pointer">
                       <TableCell className="font-medium " onClick={handleClick}>
                         {/* <Link to={`/work/${work.WOID}`}> */}
                         {work.WOID}
