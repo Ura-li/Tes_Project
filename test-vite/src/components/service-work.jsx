@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import {
   Card,
   CardContent,
@@ -17,6 +17,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SelectBarRelated } from "./sc-select";
@@ -40,9 +41,16 @@ import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
 
-import { QuickWOInput } from "./quick-wo-input";
+import { CaseField, QuickWOInput } from "./quick-wo-input";
+import { NewBookableResourceBooking } from "./service-booking";
+import { getUserFromToken } from "@/lib/utils/auth";
+
+import { useNavigate } from "react-router";
+import DatePicker from "./date-picker";
 
 export const ServiceWork = () => {
+
+  const user = getUserFromToken();
   const { woid } = useParams();
 
   const [workOrders, setWorkOrders] = useState([]);
@@ -68,6 +76,7 @@ export const ServiceWork = () => {
   }
 
   const [caseInformation, setCaseInformation] = useState([])
+  const [bookings, setBookings] = useState([])
   
 
   useEffect(() => {
@@ -93,6 +102,10 @@ export const ServiceWork = () => {
         if (workOrderData?.CaseID) {
           const resCI = await ApiCustomer.get(`/api/case-information/${workOrderData.CaseID}`);
           setCaseInformation(resCI.data.data);
+
+          const resBooking = await ApiCustomer.get(`/api/bookings?WOID=${woid}`);
+          console.log("Res Booking : ",resBooking.data.data)
+          setBookings(resBooking.data.data)
         }
   
         Swal.close(); 
@@ -109,35 +122,117 @@ export const ServiceWork = () => {
   
     if (woid) fetchAllData();
   }, [woid]);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString();
+  };
+  
+
+  // const fetchBookings = async () => {
+  //   try {
+  //     const response = await ApiCustomer.get('/api/bookings')
+  //     setBookings(response.data.data)
+  //   } catch (error) {
+  //     console.error("Fetch error:", err);
+  //       Swal.fire({
+  //         icon: 'error',
+  //         title: 'Oops...',
+  //         text: 'Something went wrong while loading data!',
+  //       });
+  //   }
+  // }
   
   // useEffect(() => {
   // }, [workOrders])
-  return (
-    <div>
-    <TabsServiceWO/>
-    <Card className="mt-2 rounded-none h-[160px]">
-      <CardHeader>
-        <CardTitle className="text-xl ">{woid}</CardTitle>
-        <CardTitle className="text-sm">Work Order . Work Order</CardTitle>
-      </CardHeader>
 
-      <CardContent>
-        <Tabs defaultValue="Quick_WO_Input" className="w-[760px]">
-          <TabsList className="bg-white w-[760px]">
+    const [selected, setSelected] = useState("work_order"); 
+
+    // const location = useLocation();
+    // const { ownerUserData, dataFetchCustomerData } = location.state || {}; 
+
+    const navigate = useNavigate();
+  return (
+    <>
+    {workOrders.SystemStatus === 'CLOSED_POSTED' && (
+      <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-2">
+        This work order is <strong>read-only</strong> because it is <strong>Closed</strong>.
+      </div>
+    )}
+    <TabsServiceWO  workOrders={workOrders} />
+    <Card className="mt-2 rounded-none p-0 border-0">
+        <Tabs defaultValue="Quick_WO_Input" className="">
+          <CardHeader className={'flex flex-col gap-3 border-2 w-full p-2 sticky'}>
+            <div className="flex justify-between">
+              <CardTitle className="text-xl ">{woid}
+                <span className="text-sm flex items-center">Work Order .
+                      <Select onValueChange={setSelected} defaultValue="work_order" className="shadow-xl">
+                      <SelectTrigger className="shadow-none border-none">
+                        <SelectValue  />
+                      </SelectTrigger>
+                      <SelectContent >
+                        <SelectGroup>
+                          <SelectItem value="work_order">work order</SelectItem>
+                          <SelectItem value="??">??</SelectItem>
+                          <SelectItem value="!!">!!</SelectItem>
+                          <SelectItem value="**">**</SelectItem>
+                          <SelectItem value="&&">&&</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                      </Select>
+                </span>
+              </CardTitle>
+              <CardTitle className="flex">
+                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                  <h1 className='text-blue-500'>
+                    {/* {ownerUserData.Name} */}
+                    </h1>
+                  <p className="text-sm font-light ">Owner</p>
+                </div>
+                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                  <h1 className='text-blue-500'>---</h1>
+                  <p className="text-sm font-light ">Queue</p>
+                </div>
+                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                  <h1 className='text-blue-500'>
+                    {/* {dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName} */}
+                    </h1>
+                  <p className="text-sm font-light ">Contact</p>
+                </div>
+                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                <Select onValueChange={setSelected} defaultValue="first" >
+                  <SelectTrigger className="shadow-none border-none text-blue-500 p-0">
+                    <SelectValue  />
+                  </SelectTrigger>
+                  <SelectContent className="p-0">
+                    <SelectGroup className="p-0">
+                    <SelectItem value="first" className="p-0">
+                      {/* {dataFetchCustomerData.SiteAccount?.Company} */}
+
+                    </SelectItem>
+                    <SelectItem value="??">??</SelectItem>
+                      <SelectItem value="!!">!!</SelectItem>
+                      <SelectItem value="**">**</SelectItem>
+                      <SelectItem value="&&">&&</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                  </Select>
+                  <p className="text-sm font-light ">Site Account</p>
+                </div>
+              </CardTitle>
+            </div>
+          <TabsList className="bg-white ">
             <TabsTrigger variant="underline" value="wo_summary" className="cursor-pointer">
               WO Summary
             </TabsTrigger>
-            <TabsTrigger variant="underline"
-              value="wo_details"
-              className="cursor-pointer white"
-            >
+            <TabsTrigger variant="underline" value="wo_details" className="cursor-pointer white">
               WO Details
             </TabsTrigger>
             <TabsTrigger variant="underline" value="wo_bookings" className="cursor-pointer">
               WO Bookings
             </TabsTrigger>
             <TabsTrigger variant="underline" value="wo_Notes_Timeline" className="cursor-pointer">
-              WO Notes/Timeline
+              WO Notes/Timeline 
             </TabsTrigger>
             <TabsTrigger variant="underline" value="wo_Closure_Details" className="cursor-pointer">
               WO Closure Details
@@ -147,177 +242,59 @@ export const ServiceWork = () => {
             </TabsTrigger>
             <SelectBarRelated></SelectBarRelated>
           </TabsList>
+          </CardHeader>
 
           <TabsContent value="wo_summary">
            <div className="flex gap-4">
-            <Card className="w-[850px] mt-7 rounded-md">
-              <span className="ml-5 font-bold text-xl">General</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-9 h-115">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Incoming Channel</span>
-                  <span className="ml-40">...</span>
+            <Card className="flex-1/3  rounded-md">
+              <CardHeader>
+                <CardTitle className=' text-lg'>General</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid gap-5 grid-cols-4 items-center ">
+                <div className="p-4 ring-1 col-span-2 grid grid-cols-2 items-center">
+                  <CaseField label="Incoming Channel"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
                 </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Work Order Number</span>
-                  <span className="ml-35.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Work Order Type</span>
-                  <span className="ml-42">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Priority</span>
-                  <span className="ml-60">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">System Status</span>
-                  <span className="ml-48">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <KeyRound className="size-5 mr-2"></KeyRound>
-                  <span>Sub-Status</span>
-                  <span className="ml-54">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Bookable Resource Booking</span>
-                  <span className="ml-22">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Service Offer ID</span>
-                  <span className="ml-45">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Service Description</span>
-                  <span className="ml-39">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Patner Case Id</span>
-                  <span className="ml-50">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Patner Status</span>
-                  <span className="ml-52">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Preferred Day</span>
-                  <span className="ml-51">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Preferred Time</span>
-                  <span className="ml-49">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Black Badged/Special Access</span>
-                  <span className="ml-23">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Recommended Resource</span>
-                  <span className="ml-31">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Shipment Country</span>
-                  <span className="ml-42.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Shipment State</span>
-                  <span className="ml-48">...</span>
-                </div>
+                <CaseField label="Patner Case Id"  ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Work Order Number"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Patner Status"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Work Order Type"  ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <div className="p-3 ring-1 col-span-2"></div>
+                <CaseField label="Priority" icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Recommended Resource"  ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="System Status"  ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Shipment Country"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Sub-Status"  icon={KeyRound}><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Shipment State" icon ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Bookable Resource Booking"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Service Offer ID" className={'col-start-1'} icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Service Description" className={'col-start-1'} icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+  
               </CardContent>
             </Card>
 
-            <div>
-              <Card className="mt-7.5 rounded-sm h-19 w-96">
-                <CardContent className="grid">
-                  <div className="font-bold flex">
-                    <span>Currently Worked By</span>
-                    <span className="ml-18">...</span>
-                  </div>
+            <div className="flex-1 flex flex-col gap-4">
+              <Card className="rounded-sm ">
+                <CardContent className="grid grid-cols-4 items-center">
+                    <CaseField label="Currently Worked By"  className={'col-span-3'}> <Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
                 </CardContent>
               </Card>
 
-              <Card className="mt-3 rounded-md w-96">
-                <span className="ml-5 font-bold text-xl">
-                Entitlement and Modifier
-                </span>
-                <CardContent className="grid gap-5 grid-rows-3">
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Entitlement</span>
-                    <span className="ml-40">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Offer</span>
-                    <span className="ml-52">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>OTC Code</span>
-                    <span className="ml-43.5">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Authorizing Employee</span>
-                    <span className="ml-20">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Coverage Window Used</span>
-                    <span className="ml-17">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Coverage Window Value</span>
-                    <span className="ml-16">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Response Time Value</span>
-                    <span className="ml-22.5">...</span>
-                  </div>
-
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Repair Time Value</span>
-                    <span className="ml-28.5">...</span>
-                  </div>
-                  
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>Case Priority Index</span>
-                    <span className="ml-27">...</span>
-                  </div>
+              <Card className="rounded-md ">
+                <CardHeader>
+                  <CardTitle className=' text-lg'>Entitlement and Modifier</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent className="grid gap-5 grid-cols-2 items-center">
+                  <CaseField label="Entitlement"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Offer"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="OTC Code"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Authorizing Employee"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Coverage Window Used"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Coverage Window Value"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Response Time Value"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Repair Time Value"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                  <CaseField label="Case Priority Index"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
                 </CardContent>
               </Card>
             </div>
@@ -325,9 +302,10 @@ export const ServiceWork = () => {
             </div>
 
             <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">
-                Service Delivery Address
-              </span>
+              <CardHeader>
+                <CardTitle className=' text-lg'>Service Delivery Address</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="grid ">
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
@@ -338,9 +316,10 @@ export const ServiceWork = () => {
             </Card>
 
             <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">
-                SLA in Customer Time Zone
-              </span>
+              <CardHeader>
+                <CardTitle className=' text-lg'>SLA in Customer Time Zone</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="grid">
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
@@ -351,9 +330,10 @@ export const ServiceWork = () => {
             </Card>
 
             <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">
-                Part Order Information
-              </span>
+              <CardHeader>
+                <CardTitle className=' text-lg'> Part Order Information</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="grid gap-5">
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
@@ -393,9 +373,10 @@ export const ServiceWork = () => {
             </Card>
 
             <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">
-              Material Order Information
-              </span>
+              <CardHeader>
+                <CardTitle className=' text-lg'> Material Order Information</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="grid">
               <Table>
                   <TableHeader>
@@ -443,9 +424,11 @@ export const ServiceWork = () => {
             </Card>
 
             <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">
-              Primary Incident
-              </span>
+              <CardHeader>
+                <CardTitle className=' text-lg'> Primary Incident</CardTitle>
+                <hr />
+              </CardHeader>
+
               <CardContent className="grid">
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
@@ -471,56 +454,89 @@ export const ServiceWork = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="wo_bookings">
+          <TabsContent value="wo_bookings" >
             <Card className="mt-5 flex-col">
               <span className="ml-5 font-bold text-xl">WO Bookings</span>
               <CardContent className="grid gap-5">
                 <div className="font-bold flex">
                   <span>Requested Date Time (Customer)</span>
                   <span className="ml-50 mr-10">...</span>
-                  <CalendarDays></CalendarDays>
+                  <DatePicker></DatePicker>
                 </div>
 
                 <div className="font-bold flex">
                   <span>Guaranteed Fix Time (Customer)</span>
                   <span className="ml-51 mr-10">...</span>
-                  <CalendarDays></CalendarDays>
+                  {/* <DatePicker></DatePicker> */}
+                  <DatePicker></DatePicker>
                 </div>
 
                 <div className="font-bold flex">
                   <span>Due Date (Customer) </span>
                   <span className="ml-72.5 mr-10">...</span>
-                  <CalendarDays></CalendarDays>
+                  <DatePicker></DatePicker>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">Booking</span>
+              <span className="ml-5 font-bold text-xl">Booking </span>   
               <CardContent className="grid">
-                <Button variant="link" className="w-50 ml-250 ">
-                  <Link to="/bookings">
+                {/* <Button variant="link" className="w-50 ml-250 "> */}
+                {/* <Link 
+                  to="/bookings"
+                  state={{ WOID: workOrders.WOID }}
+                >
                     + New Bookable Resource
-                  </Link>
-                </Button>
+                  </Link> */}
+                  <NewBookableResourceBooking WOID={ workOrders.WOID } CreatedBy={user.id} />
+                {/* </Button> */}
               <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">Order Number</TableHead>
-                      <TableHead>Case ID</TableHead>
+                      <TableHead className="w-[100px]">Resource</TableHead>
+                      <TableHead>Account</TableHead>
+                      <TableHead>Booking</TableHead>
+                      <TableHead>Reschedule</TableHead>
+                      <TableHead>Reschedule Reason</TableHead>
+                      <TableHead>Start Time</TableHead>
+                      <TableHead>Estimated Arrival Time (ETA)</TableHead>
+                      <TableHead>Actual Arrival Time</TableHead>
+                      <TableHead>End Time</TableHead>
                       <TableHead>Created On</TableHead>
-                      <TableHead>Order Status</TableHead>
-                      <TableHead>Order Type</TableHead>
-                      <TableHead>Ready For Closure</TableHead>
+                      <TableHead>Created By</TableHead>
                     </TableRow>
                   </TableHeader>
 
                   <TableBody>
+                  {bookings.length > 0 ? (
+                    bookings.map((booking, index) => (
+                      <TableRow key={booking.BookingId || index} onClick={() => navigate(`/bookings/${booking.BookingId}`)} >
+                        <TableCell>{booking.bookingDetails?.[0].resource?.Name || '-'}</TableCell>
+                        <TableCell>{booking.bookingDetails?.[0].resourceaccount?.Name || '-'}</TableCell>
+                        <TableCell>{booking.BookingStatus || '-'}</TableCell>
+                        <TableCell>{booking.CeScheduleChange ? 'Yes' : 'No'}</TableCell>
+                        <TableCell>{booking.ScheduleJeopardy ? 'Jeopardy' : '-'}</TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell>{formatDate(booking.CreatedAt)}</TableCell>
+                        {/* <TableCell>{formatDate(booking.StartTimeCustomerTime)}</TableCell>
+                        <TableCell>{formatDate(booking.EstimatedArrivalTimeCustomerTime)}</TableCell>
+                        <TableCell>{formatDate(booking.ActualArrivalTimeCustomerTime)}</TableCell>
+                        <TableCell>{formatDate(booking.EndTimeCustomerTime)}</TableCell>
+                        <TableCell>{formatDate(booking.CreatedAt)}</TableCell> */}
+                        <TableCell>{booking.createdByUser?.Name || '-'}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
                     <TableRow>
-                      <TableCell className="font-medium">
+                      <TableCell colSpan={11} className="text-center">
                         No data available
                       </TableCell>
                     </TableRow>
+                  )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -585,7 +601,7 @@ export const ServiceWork = () => {
           </TabsContent>
 
           <TabsContent value="wo_Closure_Details">
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Resolution Notes
               </span>
@@ -598,7 +614,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Labor Types
               </span>
@@ -626,7 +642,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Miscellaneous Charges 
               </span>
@@ -663,7 +679,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card>
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               DOA Letter (If DOA Case)
               </span>
@@ -676,7 +692,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card> 
   
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Page Count Information
               </span>
@@ -701,7 +717,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card> 
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Follow-Up
               </span>
@@ -732,7 +748,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card> 
 
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Closure Data
               </span>
@@ -775,7 +791,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card> 
     
-          <Card className="flex-col mt-7">
+            <Card className="flex-col mt-7">
               <span className="ml-5 font-bold text-xl">
               Closure Codes
               </span>
@@ -801,12 +817,12 @@ export const ServiceWork = () => {
             </Card> 
           </TabsContent>
 
-          <TabsContent value="Quick_WO_Input">
+          <TabsContent value="Quick_WO_Input" >
             <QuickWOInput WOID={woid} caseInformation={caseInformation} />
           </TabsContent>
         </Tabs>
-      </CardContent>
+      
     </Card>
-    </div>
+    </>
   );
 };

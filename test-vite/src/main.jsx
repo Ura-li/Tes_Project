@@ -8,20 +8,20 @@ import Lorem from './Lorem';
 import Search_case from './search_case';
 import { Case } from './Case';
 import { Work } from './work';
-import { MaterialOrder } from './material_order';
-import { MoDetail } from './material_order';
-import { Company_table, SubkTechnician_table} from './master_table';
-import { Assets_table } from './master_table';
-import { Contact_table } from './master_table';
-import { Case_table } from './master_table';
-import { Product_table } from './master_table';
+import { MaterialOrder, MoDetail } from './material_order';
+import 
+{ Company_table,
+  Assets_table,
+  Contact_table,
+  Case_table,
+  Product_table,
+  ProductType_table,
+  WarrantyService_table,
+  Mo_table,
+  Wo_table,
+  SubkTechnician_table
+ } from './master_table';
 import { Bookings } from './bookings';
-import { ProductType_table } from './master_table';
-// import { ServiceCatalogPartsTable } from './master_table';
-
-import { WarrantyService_table } from './master_table';
-import { Mo_table } from './master_table';
-import { Wo_table } from './master_table';
 // import { ModalContextProvider } from './components/modal-context';
 import { ResourceAccountTable } from './master_table';
 
@@ -40,7 +40,10 @@ createRoot(document.getElementById('root')).render(
             <Route path='/work/:woid' element={<Work />}/>
             <Route path='/material-order/:moid' element={<MaterialOrder />}/>
             <Route path='/mo_detail/:molineid' element={<MoDetail />}/>
-            <Route path='/bookings' element={<Bookings/>}/>
+            <Route path='/bookings' element={<Bookings />} />]
+            <Route path='/bookings/:bookingid' element={<Bookings />} />]
+
+
             {/* <Route path='/master' element> */}
             <Route path='/master/Company_table' element={<Company_table />} />
             <Route path='/master/Assets_table' element={<Assets_table />} />
@@ -58,6 +61,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='master/SubkTechnician' element={<SubkTechnician_table/>}/>
             {/* </Route> */}
           </Route>
+            {/* </Route> */}
           <Route path="/lorem" element={<Lorem />}/>
         </Routes>
       {/* </ModalContextProvider> */}

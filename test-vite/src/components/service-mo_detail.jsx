@@ -36,6 +36,8 @@ import { Link } from "react-router";
 import { useParams } from "react-router";
 import ApiCustomer from "@/api";
 
+import { TabsServiceMOLineItems } from "./service-case";
+
 export const ServiceMoDetail = () => {
   const { molineid } = useParams();
   const [moLineItems, setMoLineItems] = useState([])
@@ -51,6 +53,13 @@ export const ServiceMoDetail = () => {
     fetchMoLineItems()
   }, [])
   return (
+    <>
+    {moLineItems.Status === 'Closed' && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-2">
+          This material order line item is <strong>read-only</strong> because it is <strong>Closed</strong>.
+        </div>
+      )}
+      <TabsServiceMOLineItems MOLineDetails={moLineItems}/>
     <Card className="mt-2 rounded-none h-[160px]">
       <CardHeader>
         <CardTitle className="text-xl ">{moLineItems.MOID} - {moLineItems.LineItemID}</CardTitle>
@@ -372,5 +381,7 @@ export const ServiceMoDetail = () => {
         </Tabs>
       </CardContent>
     </Card>
+    
+    </>
   );
 };

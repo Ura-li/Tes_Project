@@ -41,11 +41,9 @@ import {
 'use client'
 
 import { useNavigate } from 'react-router';
-import { useParams } from 'react-router';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import ApiCustomer from "@/api";
 import debounce from 'lodash.debounce';
-import Swal from 'sweetalert2';
 
 const workorder = [
   {
@@ -89,9 +87,7 @@ function formatDateForInput(dateString) {
 }
 
 
-export function ServiceBooking ({BookingId , woid}) {  
-  
-  const { bookingid } = useParams();
+export function ServiceBooking ({BookingId}) {  
   const [tab, setTab] = useState("book_info");
   const [bookingData, setBookingData] = useState(null);
   const [resourceName, setResourceName] = useState("");
@@ -136,10 +132,7 @@ export function ServiceBooking ({BookingId , woid}) {
   const [searchResultsSubkTechnician, setSearchResultsSubkTechnician] = useState([]);
   const [searchResultsSubkTechnicianLearner, setSearchResultsSubkTechnicianLearner] = useState([]);
 
-  const [bookingDetailsData, setBookingDetailsData] = useState({
-    resourceId: "",
-    ResourceAccountId: "",
-  });
+  const [bookingDetailsData, setBookingDetailsData] = useState([]);
 
   const [changedBy, setChangedBy] = useState(1);
 
@@ -147,42 +140,31 @@ export function ServiceBooking ({BookingId , woid}) {
 
   useEffect(() => {
     async function fetchBooking() {
-      if (bookingid == ""){
-        // try {
-        //   const addData = await ApiCustomer.post(`/api/bookings`)
-        //   console.log("ADDING BOOKING")
-        // } catch (error) {
-          
-        // }
-        return console.log('error')
-      };
+      if (!BookingId) return;
       try {
-        const response = await ApiCustomer.get(`/api/bookings/${bookingid}`);
-        const data = response.data; // <- Harusnya langsung .data, BUKAN .data.booking
-        console.log("data fetch booking : ",data)
+        const response = await ApiCustomer.get(`/api/bookings/${BookingId}`);
         setBookingData(response.data);
-        
+        const data = response.data; // <- Harusnya langsung .data, BUKAN .data.booking
+
         // Set field-field yang kamu butuhkan
         setResourceName(data?.bookingDetails?.[0]?.resource?.Name || "");
-        setResourceId(data?.bookingDetails?.[0]?.resource?.ResourceId || "");
-        setAccountName(data?.bookingDetails?.[0]?.resourceaccount?.Name || "");
-        setAccountId(data?.bookingDetails?.[0]?.resourceaccount?.ResourceAccountId || "");
+        setAccountName(data?.bookingDetails?.[0]?.account?.Name || "");
         setSubkTechnicianName(data?.bookingDetails?.[0]?.subkTechnician?.Name || "");
-        setSubkTechnicianId(data?.bookingDetails?.[0]?.subkTechnician?.SubkTechnicianId || "");
-        
+        setSubkTechnicianLearnerName(data?.bookingDetails?.[0]?.subkTechnicianLearner?.Name || "");
+
         setBookingStatus(data?.BookingStatus || "");
         setWorkOrderNumber(data?.workorder?.WorkOrderNumber || "");
         setRequestedDateTimeCustomer(formatDateForInput(data?.workorder?.RequestedDateTimeCustomer || ""));
         setGuaranteedFixTimeCustomer(formatDateForInput(data?.workorder?.GuaranteedFixTimeCustomer || ""));
-        
+
         setDoNotDisturb(data?.DoNotDisturb || false);
         setCeScheduleChange(data?.CeScheduleChange || false);
-        
+
         setStartTimeCustomerTime(formatDateForInput(data?.bookingDetails?.[0]?.StartTimeCustomerTime || ""));
         setEndTimeCustomerTime(formatDateForInput(data?.bookingDetails?.[0]?.EndTimeCustomerTime || ""));
         setEstimatedArrivalTimeCustomerTime(formatDateForInput(data?.bookingDetails?.[0]?.EstimatedArrivalTimeCustomerTime || ""));
         setActualArrivalTimeCustomerTime(formatDateForInput(data?.bookingDetails?.[0]?.ActualArrivalTimeCustomerTime || ""));
-        
+
         setStartTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.StartTimeUserTime || ""));
         setEndTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.EndTimeUserTime || ""));
         setDurationInMinutesUserTime(data?.bookingDetails?.[0]?.DurationInMinutesUserTime || 0);
@@ -191,91 +173,60 @@ export function ServiceBooking ({BookingId , woid}) {
 
         setScheduleJeopardy(data?.ScheduleJeopardy || false);
         setScheduleJeopardyTime(formatDateForInput(data?.ScheduleJeopardyTime || ""));
-        
+
         setTotalBillableDurationInMinutes(data?.TotalBillableDurationInMinutes || 0);
         setTotalInProgressDurationInMinutes(data?.TotalInProgressDurationInMinutes || 0);
         setTotalBreakDurationInMinutes(data?.TotalBreakDurationInMinutes || 0);
-        
-        // const updatedBookingData = {
-        //   ...bookingData, // keep all original fields
-        //   ResourceId: resourceId,
-        //   ResourceAccountId: accountId,
-        //   SubkTechnicianId: subkTechnicianId,
-        //   StartTimeCustomerTime: startTimeCustomerTime || null,
-        //   EndTimeCustomerTime: endTimeCustomerTime || null,
-        //   EstimatedArrivalTimeCustomerTime: estimatedArrivalTimeCustomerTime || null,
-        //   ActualArrivalTimeCustomerTime: actualArrivalTimeCustomerTime || null,
-        //   StartTimeUserTime: startTimeUserTime || null,
-        //   EndTimeUserTime: endTimeUserTime || null,
-        //   DurationInMinutesUserTime: durationInMinutesUserTime || null,
-        //   EstimatedArrivalTimeUserTime: estimatedArrivalTimeUserTime || null,
-        //   ActualArrivalTimeUserTime: actualArrivalTimeUserTime || null,
-        // };
-        
-        // setBookingData(updatedBookingData);
+
       } catch (error) {
         console.error("Failed to fetch booking data:", error);
       }
     }
-    
-    if (bookingid) {
+
+    if (BookingId) {
       fetchBooking();
     }
-  }, []);
+  }, [BookingId]);
 
   if (!bookingData) {
-    return <div>Loadinsg...</div>;
+    return <div>Loading...</div>;
   }
 
   const handleUpdate = async () => {
-    console.log("Booking Data : ",bookingData)
-    const updatedBookingData = {
-      ...bookingData, // keep all original fields
+    setBookingData({
       ResourceId: resourceId,
-      ResourceAccountId: accountId,
-      SubkTechnicianId: subkTechnicianId,
-      StartTimeCustomerTime: startTimeCustomerTime || null,
-      EndTimeCustomerTime: endTimeCustomerTime || null,
-      EstimatedArrivalTimeCustomerTime: estimatedArrivalTimeCustomerTime || null,
-      ActualArrivalTimeCustomerTime: actualArrivalTimeCustomerTime || null,
-      StartTimeUserTime: startTimeUserTime || null,
-      EndTimeUserTime: endTimeUserTime || null,
-      DurationInMinutesUserTime: durationInMinutesUserTime || null,
-      EstimatedArrivalTimeUserTime: estimatedArrivalTimeUserTime || null,
-      ActualArrivalTimeUserTime: actualArrivalTimeUserTime || null,
-    };
-    
-    await setBookingData(updatedBookingData);
+      AccountId: accountId,
+      subkTechnicianId: subkTechnicianId,
+      SubkTechnicianLearnerId: subkTechnicianLearnerId,
+      StartTimeCustomerTime: startTimeCustomerTime,
+      EndTimeCustomerTime: endTimeCustomerTime,
+      EstimatedArrivalTimeCustomerTime: estimatedArrivalTimeCustomerTime,
+      ActualArrivalTimeCustomerTime: actualArrivalTimeCustomerTime,
+      StartTimeUserTime: startTimeUserTime,
+      EndTimeUserTime: endTimeUserTime,
+      DurationInMinutesUserTime: durationInMinutesUserTime,
+      EstimatedArrivalTimeUserTime: estimatedArrivalTimeUserTime,
+      ActualArrivalTimeUserTime: actualArrivalTimeUserTime,
+    });
     try {
-      await ApiCustomer.patch(`/api/bookings/${bookingid}`, {
+      await ApiCustomer.patch(`/api/bookings/${BookingId}`, {
         ChangedBy: changedBy,
         BookingStatus: bookingStatus,
         DoNotDisturb: doNotDisturb,
         CeScheduleChange: ceScheduleChange,
         ScheduleJeopardy: scheduleJeopardy,
-        ScheduleJeopardyTime: scheduleJeopardyTime ? new Date(scheduleJeopardyTime) : null,
+        ScheduleJeopardyTime: scheduleJeopardyTime,
         TotalBillableDurationInMinutes: totalBillableDurationInMinutes,
         TotalInProgressDurationInMinutes: totalInProgressDurationInMinutes,
         TotalBreakDurationInMinutes: totalBreakDurationInMinutes,
-        bookingDetailsData: bookingData,
-        bookingDetails2Data: bookingDetailsData
+        bookingDetailsData: bookingDetailsData,
       });
-
-      Swal.fire({
-        title: 'Success',
-        icon: "Success",
-        text: "Booking telas berhasil di simpan",
-      }).then(() => {
-        window.location.href = `/work/${bookingData.WOID}`
-      })
     } catch (error) {
       console.error("Error updating booking:", error);
     }
   };
 
   const handleSearchResource = debounce(async (keyword) => {
-    
-    console.log('Debounced keyword:', keyword); // <-- ADD THIS
     if (!keyword) {
       setSearchResultsResource([]);
       return;
@@ -285,32 +236,11 @@ export function ServiceBooking ({BookingId , woid}) {
       const response = await ApiCustomer.get(`/api/resources`, {
         params: { keyword }
       });
-      setSearchResultsResource(response.data.data);
-      console.log("Search Result Resource : ",response.data)
+      setSearchResultsResource(response.data);
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
     }
   }, 500); // 500ms delay
-
-  
-  const fetchResourceAccount = async (resourceId) => {
-    try {
-      const response = await ApiCustomer.get(`/api/resourceAccounts?resourceId=${resourceId}`);
-      const data = response.data.data
-      setAccountName(data.Name);
-      setAccountId(data.ResourceAccountId);
-
-      setBookingDetailsData((prev) =>({
-        ...prev,
-        ResourceAccountId: data.ResourceAccountId                            
-      }))
-      console.log("Accpunt : ",data)
-    } catch (error) {
-      console.error("Error fetching Subk Technician search:", error);
-    }
-  }
-  
-  
 
 
   const handleSearchAccount = debounce(async (keyword) => {
@@ -324,7 +254,6 @@ export function ServiceBooking ({BookingId , woid}) {
         params: { keyword }
       });
       setSearchResultsAccount(response.data);
-      console.log("a")
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
     }
@@ -341,8 +270,7 @@ export function ServiceBooking ({BookingId , woid}) {
       const response = await ApiCustomer.get(`/api/subktechnicians`, {
         params: { keyword }
       });
-      console.log("SubukTech : ",response.data);
-      setSearchResultsSubkTechnician(response.data.data);
+      setSearchResultsSubkTechnician(response.data);
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
     }
@@ -391,17 +319,13 @@ export function ServiceBooking ({BookingId , woid}) {
           <Card className="flex-col mt-7 w-[500px]">
             <CardContent className="grid gap-5.5">
         
-                <div className='font-bold flex'>
-                  <Lock className='size-5 mr-2'></Lock>
-                  <span>Name </span>
-                  {resourceId !== "" || bookingData?.bookingDetails?.[0]?.resource?.resourceId !== '' ? (
-                    <span className='ml-50'>{resourceName}</span>
-                  ) : (
-                    <span className='ml-50'>...</span>
-                  )}
-                </div>
+              <div className='font-bold flex'>
+                <Lock className='size-5 mr-2'></Lock>
+                <span>Name</span>
+                <span className='ml-50'>...</span>
+              </div>
 
-              <div className='font-bold flex flex-col relative ml-7 w-full'>
+              <div className='font-bold flex'>
                 <span className='ml-7'>Resource</span>
                 <input
                   type="text"
@@ -410,30 +334,23 @@ export function ServiceBooking ({BookingId , woid}) {
                   onChange={(e) => {
                     setResourceName(e.target.value);
                     handleSearchResource(e.target.value);
-
                   }}
                 />
 
                 {/* Suggestion dropdown */}
                 {searchResultsResource.length > 0 && (
-                  <ul className="absolute bg-white border mt-1 w-full max-h-60 overflow-y-auto shadow-lg rounded z-10 transition-all duration-200">
+                  <ul className="absolute bg-white border mt-1 w-full z-10">
                     {searchResultsResource.map((res) => (
                       <li
-                        key={res.ResourceId}
+                        key={res.id}
                         className="p-2 hover:bg-gray-200 cursor-pointer"
                         onClick={() => {
-                          setResourceName(res.Name);
-                          setResourceId(res.ResourceId);
+                          setResourceName(res.name);
+                          setResourceId(res.id);
                           setSearchResultsResource([]); // Clear suggestions
-                          setBookingDetailsData((prev) =>({
-                            ...prev,
-                            resourceId: res.ResourceId                            
-                          }))
-
-                          fetchResourceAccount(res.ResourceId)
                         }}
                       >
-                        {res.Name}
+                        {res.name}
                       </li>
                     ))}
                   </ul>
@@ -449,7 +366,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   value={accountName}
                   onChange={(e) => {
                     setAccountName(e.target.value);
-                    // handleSearchAccount(e.target.value);
+                    handleSearchAccount(e.target.value);
                   }}
                 />
 
@@ -461,13 +378,9 @@ export function ServiceBooking ({BookingId , woid}) {
                         key={acc.id}
                         className="p-2 hover:bg-gray-200 cursor-pointer"
                         onClick={() => {
-                          setAccountName(acc.Name);
-                          setAccountId(acc.ResourceAccountId);
+                          setAccountName(acc.name);
+                          setAccountId(acc.id);
                           setSearchResultsAccount([]); // Clear suggestions
-                          setBookingDetailsData((prev) =>({
-                            ...prev,
-                            ResourceAccountId: acc.ResourceAccountId                            
-                          }))
                         }}
                       >
                         {acc.name}
@@ -501,17 +414,15 @@ export function ServiceBooking ({BookingId , woid}) {
                   <ul className="absolute bg-white border mt-1 w-full z-10">
                     {searchResultsSubkTechnician.map((tech) => (
                       <li
-                        key={tech.SubkTechnicianId}
+                        key={tech.id}
                         className="p-2 hover:bg-gray-200 cursor-pointer"
                         onClick={() => {
-                          setSubkTechnicianName(tech.Name);
-                          setSubkTechnicianId(tech.SubkTechnicianId);
+                          setSubkTechnicianName(tech.name);
+                          setSubkTechnicianId(tech.id);
                           setSearchResultsSubkTechnician([]); // Clear suggestions
-
-
                         }}
                       >
-                        {tech.Name}
+                        {tech.name}
                       </li>
                     ))}
                   </ul>
@@ -520,21 +431,21 @@ export function ServiceBooking ({BookingId , woid}) {
 
               <div className='font-bold flex'>
                 <span className='ml-7'>Subk Technician Learner ID</span>
-                <input 
+                {/* <input 
                   type="text" 
                   className='ml-22.5' 
-                  value={subkTechnicianId} 
-                  onChange={(e) => setSubkTechnicianId(e.target.value)} 
-                />
-                {/* <input
+                  value={subkTechnicianLearnerName} 
+                  onChange={(e) => setSubkTechnicianLearnerName(e.target.value)} 
+                /> */}
+                <input
                   type="text"
                   className="ml-22.5"
-                  value={subkTechnicianId}
+                  value={subkTechnicianLearnerName}
                   onChange={(e) => {
-                    setSubkTechnicianId(e.target.value);
+                    setSubkTechnicianLearnerName(e.target.value);
                     handleSearchSubkTechnicianLearner(e.target.value);
                   }}
-                /> */}
+                />
 
                 {/* Suggestion dropdown */}
                 {searchResultsSubkTechnicianLearner.length > 0 && (
@@ -886,23 +797,19 @@ export function ServiceBooking ({BookingId , woid}) {
 }
 
 
-export function NewBookableResourceBooking({ WOID, CreatedBy}) {
+export function NewBookableResourceBooking({ WOID, CreatedBy }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false)
 
   const handleCreateBooking = async () => {
     try {
       setLoading(true);
-      const data = {
-        WOID: WOID,
-        CreatedBy: CreatedBy
-      }
-      const response = await ApiCustomer.post('/api/bookings', data);
+      const response = await ApiCustomer.post('/api/bookings', { WOID, CreatedBy });
 
       if (response.status === 201) {
         const { BookingId } = response.data;
         // Lanjut ke navigasi sambil bawa BookingId
-        navigate(`/bookings/${BookingId}`);
+        navigate('/bookings', { state: { BookingId } });
       }
     } catch (error) {
       console.error('Gagal membuat booking:', error);
