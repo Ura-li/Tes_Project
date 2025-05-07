@@ -38,6 +38,21 @@ import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
 
+// import { debounce } from "lodash";
+
+import debounce from 'lodash.debounce';
+
+function formatDateForInput(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 export const ServiceMaterial = () => {
   const { moid } = useParams();
 
@@ -59,9 +74,10 @@ export const ServiceMaterial = () => {
     defectiveMediaRetention: false,
     notificationNumber: '',
     salesOrderNumber: '',
-    resourceName: '', // Mungkin berasal dari relasi user/owner
-    workOrder: null, // Bisa objek berisi info workorder
-    parentMO: null, // Jika parent material order ada
+    resourceName: '', 
+    resourceId: null,
+    workOrder: '', // Bisa objek berisi info workorder
+    parentMO: '', // Jika parent material order ada
     isBCPOrder: false,
     materialOrderType: '',
     eotOrderNumber: '',
@@ -122,13 +138,13 @@ export const ServiceMaterial = () => {
         serviceDescription: data.ServiceDescription || '',
         orderType: data.OrderType || '',
         shippingPriority: data.ShippingPriority || '',
-        readyForClosureDate: data.ReadyForClosureDate || '',
+        readyForClosureDate: formatDateForInput(data.ReadyForClosureDate || ''),
         caseID: data.workorder?.CaseID || '',
         contact: data.workorder?.caseinformation?.contact_information
           ? `${data.workorder.caseinformation.contact_information.FirstName} ${data.workorder.caseinformation.contact_information.LastName}`
           : null,
-        deliveryRequestedDateCustomerTime: data.DeliveryRequestedDate || '',
-        collectionRequestedDate: data.CollectionRequestedDate || '',
+        deliveryRequestedDateCustomerTime: formatDateForInput(data.DeliveryRequestedDate || ''),
+        collectionRequestedDate: formatDateForInput(data.CollectionRequestedDate || ''),
         promoCode: data.PromoCode || '',
         customerInducedDamage: data.CustomerInducedDamage || false,
         accidentalDamageProtection: data.AccidentalDamageProtection || false,
@@ -136,6 +152,7 @@ export const ServiceMaterial = () => {
         notificationNumber: data.NotificationNumber || '',
         salesOrderNumber: data.SalesOrderNumber || '',
         resourceName: data.Resource?.Name || '',
+        resourceId: data.Resource?.ResourceId || '',
         workOrder: data.WOID || null,
         parentMO: data.parentMO?.MOID || null,
         isBCPOrder: data.IsBCPOrder || false,
@@ -168,13 +185,20 @@ export const ServiceMaterial = () => {
     try {
       const payload = {
         ShippingPriority: materialOrderInformation.shippingPriority,
-        DeliveryRequestedDate: materialOrderInformation.deliveryRequestedDateCustomerTime,
+        // DeliveryRequestedDate: materialOrderInformation.deliveryRequestedDateCustomerTime
+        // ? new Date(materialOrderInformation.deliveryRequestedDateCustomerTime).toISOString()
+        // : undefined,
         DefectiveMediaRetention: materialOrderInformation.defectiveMediaRetention,
         MaterialOrderType: materialOrderInformation.materialOrderType,
         EOTOrderNumber: materialOrderInformation.eotOrderNumber,
         ParentMOID: materialOrderInformation.parentMO,
-        // ResourceId: materialOrderInformation.resourceId,
+        ResourceId: materialOrderInformation.resourceId,
       };
+
+      // Tambahkan hanya jika valid
+      if (materialOrderInformation.deliveryRequestedDateCustomerTime) {
+        payload.DeliveryRequestedDate = new Date(materialOrderInformation.deliveryRequestedDateCustomerTime).toISOString();
+      }
   
       const res = await ApiCustomer.patch(`/api/material-order/${materialOrderInformation.MOID}`, payload);
   
@@ -198,6 +222,7 @@ export const ServiceMaterial = () => {
   const handleDeliveryRequestedDateChange = (e) => {
     setMaterialOrderInformation((prev) => ({
       ...prev,
+      
       deliveryRequestedDateCustomerTime: e.target.value,
     }));
   };
@@ -208,10 +233,16 @@ export const ServiceMaterial = () => {
     }));
   };
   const handleResourceNameChange = (e) => {
+    const value = e.target.value;
+  
+    // Set ke state form
     setMaterialOrderInformation((prev) => ({
       ...prev,
-      resourceName: e.target.value,
+      resourceName: value,
     }));
+  
+    // Panggil pencarian resource yang didebounce
+    handleSearchResource(value);
   };
   const handleParentMOChange = (e) => {
     setMaterialOrderInformation((prev) => ({
@@ -233,7 +264,22 @@ export const ServiceMaterial = () => {
     }));
   };
   
-        
+  const [searchResultsResource, setSearchResultsResource] = useState([])
+    const handleSearchResource = debounce(async (keyword) => {
+      if (!keyword) {
+        setSearchResultsResource([]);
+        return;
+      }
+    
+      try {
+        const response = await ApiCustomer.get(`/api/resources`, {
+          params: { keyword }
+        });
+        setSearchResultsResource(response.data);
+      } catch (error) {
+        console.error("Error fetching Subk Technician search:", error);
+      }
+    }, 500); // 500ms delay
   
   return (
     <div>
@@ -302,7 +348,7 @@ export const ServiceMaterial = () => {
                 <div className="flex font-bold">
                   <span className="ml-7">Shipping Priority</span>
                   {/* <span className="ml-[142px]">{materialOrderInformation.shippingPriority}</span> */}
-                  <select className="ml-[142px]" value={materialOrderInformation.shippingPriority || '-'} onChange={handleShippingPriorityChange}>
+                  <select className="ml-[142px]" value={materialOrderInformation.shippingPriority } onChange={handleShippingPriorityChange}>
                     <option value="LOW">LOW</option>
                     <option value="MEDIUM">MEDIUM</option>
                     <option value="HIGH">HIGH</option>
@@ -323,14 +369,14 @@ export const ServiceMaterial = () => {
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
                   <span>Case ID</span>
-                  <span className="ml-[216px]">{materialOrderInformation.caseID || '-'}</span>
+                  <span className="ml-[216px]">{materialOrderInformation.caseID }</span>
                 </div>
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
                   <span>Contact</span>
                   <span className="ml-[212px]">
-                    {materialOrderInformation.contact || '-'}
+                    {materialOrderInformation.contact }
                   </span>
                 </div>
 
@@ -344,9 +390,10 @@ export const ServiceMaterial = () => {
                   <input
                     className="ml-10 mr-16"
                     type="datetime-local"
-                    value={materialOrderInformation.deliveryRequestedDateCustomerTime || '-'}
+                    value={materialOrderInformation.deliveryRequestedDateCustomerTime || ''}
                     onChange={handleDeliveryRequestedDateChange}
                   />
+
                   <CalendarDays />
                 </div>
                 <div className="flex items-center font-bold">
@@ -363,7 +410,7 @@ export const ServiceMaterial = () => {
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
                   <span>Promo Code</span>
-                  <span className="ml-[260px]">{materialOrderInformation.promoCode || '-'}</span>
+                  <span className="ml-[260px]">{materialOrderInformation.promoCode }</span>
                 </div>
 
                 <div className="flex font-bold">
@@ -390,53 +437,76 @@ export const ServiceMaterial = () => {
                   <input
                     className="ml-[158px]"
                     type="checkbox"
-                    checked={materialOrderInformation.defectiveMediaRetention || '-'}
+                    checked={materialOrderInformation.defectiveMediaRetention || ''}
                     onChange={handleDefectiveMediaRetentionChange}
                   />
+
                 </div>
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
                   <span>Notification Number</span>
-                  <span className="ml-[204px]">{materialOrderInformation.notificationNumber || '-'}</span>
+                  <span className="ml-[204px]">{materialOrderInformation.notificationNumber }</span>
                 </div>
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
                   <span>Sales Order Number</span>
-                  <span className="ml-[208px]">{materialOrderInformation.salesOrderNumber || '-'}</span>
+                  <span className="ml-[208px]">{materialOrderInformation.salesOrderNumber }</span>
                 </div>
 
                 <div className="flex font-bold">
                   <span className="ml-7">Resource Name</span>
                   {/* <span className="ml-[160px]">
-                    {materialOrderInformation.resourceName || '-'}
+                    {materialOrderInformation.resourceName }
                   </span> */}
                   <input
                     className="ml-[160px]"
                     type="text"
-                    value={materialOrderInformation.resourceName || '-'}
+                    value={materialOrderInformation.resourceName }
                     onChange={handleResourceNameChange}
                   />
+                  
+                  {/* Suggestion dropdown */}
+                  {searchResultsResource.length > 0 && (
+                    <ul className="absolute z-10 w-full mt-1 bg-white border rounded shadow">
+                      {searchResultsResource.map((res) => (
+                        <li
+                          key={res.id}
+                          className="p-2 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            setMaterialOrderInformation((prev) => ({
+                              ...prev,
+                              resourceName: res.name,
+                              resourceId: res.id,
+                            }));
+                            setSearchResultsResource([]); // Clear suggestions
+                          }}
+                        >
+                          {res.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
                   <span>Work Order</span>
                   <span className="ml-[188px]">
-                    {materialOrderInformation.workOrder?.WOID || '-'}
+                    {materialOrderInformation.workOrder?.WOID }
                   </span>
                 </div>
 
                 <div className="flex font-bold">
                   <span className="ml-7">Parent Mo</span>
                   {/* <span className="ml-[200px]">
-                    {materialOrderInformation.parentMO?.MOID || '-'}
+                    {materialOrderInformation.parentMO?.MOID }
                   </span> */}
                   <input
                     className="ml-[200px]"
                     type="text"
-                    value={materialOrderInformation.parentMO || '-'}
+                    value={materialOrderInformation.parentMO }
                     onChange={handleParentMOChange}
                   />
                 </div>
@@ -452,12 +522,12 @@ export const ServiceMaterial = () => {
                 <div className="flex font-bold">
                   <span className="ml-7">Material Order Type</span>
                   {/* <span className="ml-[128px]">
-                    {materialOrderInformation.materialOrderType || '-'}
+                    {materialOrderInformation.materialOrderType }
                   </span> */}
                   <input
                     className="ml-[128px]"
                     type="text"
-                    value={materialOrderInformation.materialOrderType || '-'}
+                    value={materialOrderInformation.materialOrderType }
                     onChange={handleMaterialOrderTypeChange}
                   />
                 </div>
@@ -465,11 +535,11 @@ export const ServiceMaterial = () => {
                 <div className="flex font-bold">
                   <span className="ml-7">EOT Order Number</span>
                   {/* <span className="ml-[136px]">
-                    {materialOrderInformation.eotOrderNumber || '-'}
+                    {materialOrderInformation.eotOrderNumber }
                   </span> */}
                   <input
                     type="text"
-                    value={materialOrderInformation.eotOrderNumber || '-'}
+                    value={materialOrderInformation.eotOrderNumber }
                     onChange={handleEOTOrderNumberChange}
                   />
                 </div>

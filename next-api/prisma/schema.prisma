@@ -148,6 +148,7 @@ model materialorder {
   OwnerID             Int?
   owner               User?               @relation("UserMaterialOrders", fields: [OwnerID], references: [IDUser], onDelete: Restrict)
 
+  resource               Resource?         @relation(fields: [ResourceId], references: [ResourceId])
   workorder              workorder?               @relation(fields: [WOID], references: [WOID], onDelete: Restrict, map: "materialorder_ibfk_1")
   materialorderlineitems materialorderlineitems[]
 

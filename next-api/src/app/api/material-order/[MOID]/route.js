@@ -114,9 +114,9 @@ export async function GET(request, { params }) {
       include: {
         // owner: true,
         materialorderlineitems: true,
-        // parentMO: true,
-        // childMOs: true,
-        // Resource: true,
+        parentMO: true,
+        childMOs: true,
+        resource: true,
         workorder: {
           include: {
             caseinformation: {
@@ -200,7 +200,7 @@ export async function PATCH(request, { params }) {
       IsBCPOrder,
       MaterialOrderType,
       EOTOrderNumber,
-    //   ResourceId,
+      ResourceId,
     } = body;
 
     const updatedMaterialOrder = await prisma.materialorder.update({
@@ -226,7 +226,7 @@ export async function PATCH(request, { params }) {
         IsBCPOrder,
         MaterialOrderType,
         EOTOrderNumber,
-        // ResourceId,
+        ResourceId,
       },
     });
 
