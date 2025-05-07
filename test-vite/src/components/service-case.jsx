@@ -1088,19 +1088,19 @@ const [endDate, setEndDate] = useState(null)
           <TabsContent value="case_info" className={'p-2'}>
             <Card className="flex-row">
               <CardContent className="grid gap-10 items-center grid-cols-6 p-3 ">  
-                <CaseField label="Case ID" icon >{caseDetails.CaseID}</CaseField>
-                <CaseField label="Case Subject"  span={3} >{caseDetails.CaseSubject}</CaseField>
-                <CaseField label="Incoming Channel"  icon >{caseDetails.IncomingChannel}</CaseField>
-                <CaseField label="Business Segment"  >---</CaseField>
-                <CaseField label="Email Status" >---</CaseField>
+                <CaseField label="Case ID" icon><Input variant='invisible' value={caseDetails.CaseID}/></CaseField>
+                <CaseField label="Case Subject"  span={3}><Input variant='invisible' value={caseDetails.CaseSubject}/></CaseField>
+                <CaseField label="Incoming Channel"  icon ><Input variant='invisible' value={caseDetails.IncomingChannel}/></CaseField>
+                <CaseField label="Business Segment" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Email Status" ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Case Status"  >{caseDetails.CaseStatus}</CaseField>
                 <CaseField label="Case Type"  >{caseDetails.CaseType}</CaseField>
                 <CaseField label="KCI For Case?"  >{caseDetails.KCI_Flag ? "Yes" : "No"}</CaseField>
                 <CaseField label="Case Priority"  >{caseDetails.CasePriority}</CaseField>
-                <CaseField label="HPI Segment"  >---</CaseField>
-                <CaseField label="Customer Tracking Number"  icon >---</CaseField>
+                <CaseField label="HPI Segment"  ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Customer Tracking Number"  icon ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Customer Severity"  >{caseDetails.CustomerSeverity}</CaseField>
-                <CaseField label="Update Customer Tracking Number"  span={3} >---</CaseField>
+                <CaseField label="Update Customer Tracking Number"  span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Created ON" icon span={3}>
                   <span className="flex gap-[5em]">
                     {/* {new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')} */}
@@ -1108,7 +1108,7 @@ const [endDate, setEndDate] = useState(null)
                     {/* {new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })} */}
                   </span>
                 </CaseField>
-                <CaseField label="Alternate Customer Tracking Number"> ---  </CaseField>
+                <CaseField label="Alternate Customer Tracking Number"><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Case Closed Date" icon span={3} > 
                   <span className="flex gap-[5em]">
                       {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
@@ -1116,7 +1116,10 @@ const [endDate, setEndDate] = useState(null)
                       
                     </span>
                 </CaseField>
-                <CaseField label="Irrelevant"  icon >--- </CaseField> 
+                <CaseField label="Irrelevant"  icon >
+                  <Input variant='invisible' placeholder='---'/>
+                </CaseField> 
+
                 <CaseField label="Submitted To Base" icon span={3}>
                     <span className="flex gap-[5em]">
                      
@@ -1134,13 +1137,13 @@ const [endDate, setEndDate] = useState(null)
               <hr />
             </CardHeader>
               <CardContent className="grid gap-10  grid-cols-6 p-3 ">
-                <CaseField label="Global Trade Status" > --- </CaseField>
-                <CaseField label="GT Override Reason" >--- </CaseField>
-                <CaseField label="GT Active Listening" > ---</CaseField>
-                <CaseField label="Embargoed Country" >--- </CaseField>
-                <CaseField label="GT Details" >--- </CaseField>
-                <CaseField label="GT All Comments" > ---</CaseField>
-                <CaseField className={'col-start-3'} label="Screening ID" > ---</CaseField>
+                <CaseField label="Global Trade Status" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="GT Override Reason" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="GT Active Listening"> <Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Embargoed Country" icon ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="GT Details" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="GT All Comments" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField className={'col-start-3'} label="Screening ID" ><Input variant='invisible' placeholder='---'/></CaseField>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1152,22 +1155,22 @@ const [endDate, setEndDate] = useState(null)
               <hr />
             </CardHeader>
               <CardContent className="grid gap-10 grid-cols-6">
-                <CaseField label="Customer Account" icon > {dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Company : dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName} </CaseField>
-                <CaseField label="Primary Contact" icon >{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</CaseField>
-                <CaseField label="Submitted By" > ---</CaseField>
-                <CaseField label="Is Partner" icon > ---</CaseField>
+                <CaseField label="Customer Account" icon ><Input variant='invisible' value={dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Company : dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName}/></CaseField>
+                <CaseField label="Primary Contact" icon ><Input variant='invisible'/>{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</CaseField>
+                <CaseField label="Submitted By" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Is Partner" icon ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label=" Primary Email" icon >{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</CaseField>
-                <CaseField label="Partner & Customer" icon > ---</CaseField>
-                <CaseField label="HIPAA" icon > ---</CaseField>
+                <CaseField label="Partner & Customer" icon ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="HIPAA" icon ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Phone" icon > {dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone: dataFetchCustomerData?.MainAccount?.Phone}</CaseField>
-                <CaseField label="Region" icon > ---</CaseField>
-                <CaseField label="PIN" > ---</CaseField>
-                <CaseField label="Secondary Contact" > ---</CaseField>
-                <CaseField label="Parent Company" > ---</CaseField>
-                <CaseField label="Customer Time Zone" icon > ---</CaseField>
-                <CaseField label="Country" icon > {dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Country : dataFetchCustomerData?.MainAccount?.Country}</CaseField>
-                <CaseField label="Parent Company Non-Latin" > ---</CaseField>
-                <CaseField label="Account Tier" className={'col-start-5'} > ---</CaseField>
+                <CaseField label="Region" icon ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="PIN" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Secondary Contact" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Parent Company" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Customer Time Zone" icon ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Country" icon ><Input variant='invisible' value={dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Country : dataFetchCustomerData?.MainAccount?.Country}/></CaseField>
+                <CaseField label="Parent Company Non-Latin" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Account Tier" className={'col-start-5'} ><Input variant='invisible' placeholder='---'/></CaseField>
               </CardContent>
             </Card>
 
@@ -1178,16 +1181,16 @@ const [endDate, setEndDate] = useState(null)
               </CardHeader>
               <CardContent className="grid gap-10 grid-cols-6 items-center">
                 <CaseField label="Assets" icon >{dataFetchAssetInformation?.AssetInformation?.SerialNumber} </CaseField>
-                <CaseField label="Product Number" icon> </CaseField>
-                <CaseField label="Asset Location" > ---</CaseField>
+                <CaseField label="Product Number" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Asset Location" ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Serial Number" icon >{dataFetchAssetInformation?.AssetInformation?.SerialNumber} </CaseField>
-                <CaseField label="HW Profit Center" icon> ---</CaseField>
-                <CaseField label="SNIC - Count" icon> ---</CaseField>
+                <CaseField label="HW Profit Center" icon> <Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="SNIC - Count" icon><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Product Name" icon>{dataFetchAssetInformation?.AssetInformation?.product_information?.ProductName} </CaseField>
-                <CaseField label="HWPC Code" icon> ---</CaseField>
-                <CaseField label="MV Product Description" icon> ---</CaseField>
+                <CaseField label="HWPC Code" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="MV Product Description" icon><Input variant='invisible' placeholder='---'/></CaseField>
                 <div className="p-5 gap-2 ring-1 col-span-2 grid grid-cols-2 items-center">
-                  <CaseField label="Device Properties" icon> ---</CaseField>
+                  <CaseField label="Device Properties" icon><Input variant='invisible' placeholder='---'/></CaseField>
                 </div>
               </CardContent>
             </Card>
@@ -1198,14 +1201,14 @@ const [endDate, setEndDate] = useState(null)
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-10 grid-cols-6 items-center">
-                <CaseField label="Latest Start Date (Cust Time)" icon>--- </CaseField>
-                <CaseField label="Coverage Window Used" icon> ---</CaseField>
-                <CaseField label="Response Time Value" icon> ---</CaseField>
-                <CaseField label="Guaranteed Fix Date (Cust Time)" icon> ---</CaseField>
-                <CaseField label="Coverage Window Value" icon> ---</CaseField>
-                <CaseField label="Repair Time Value" icon> ---</CaseField>
-                <CaseField label="Case Priority Index" icon> ---</CaseField>
-                <CaseField label="Case Priority Rule" icon> ---</CaseField>
+                <CaseField label="Latest Start Date (Cust Time)" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Coverage Window Used" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Response Time Value" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Guaranteed Fix Date (Cust Time)" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Coverage Window Value" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Repair Time Value" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Case Priority Index" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Case Priority Rule" icon><Input variant='invisible' placeholder='---'/></CaseField>
               </CardContent>
             </Card>
 
@@ -1214,16 +1217,16 @@ const [endDate, setEndDate] = useState(null)
                 <CardTitle className=' text-lg'>Entitlement Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-7 items-center">
-                <CaseField label="Case Entitlement" icon>---</CaseField>
-                <CaseField label="Start Date" icon span={2}> <DatePicker value={startDate} onChange={setstartDate} readOnly></DatePicker> </CaseField>
-                <CaseField label="OTC Code" icon> ---</CaseField>
-                <CaseField label="Entitlement Status" icon> ---</CaseField>
-                <CaseField label="End Date" icon span={2}> <DatePicker value={endDate} onChange={setEndDate} readOnly></DatePicker></CaseField>
-                <CaseField label="Entitlement Override" icon> ---</CaseField>
-                <CaseField label="Selected Entitlement Offer" icon> ---</CaseField>
-                <CaseField label="Days Left" icon span={2}> ---</CaseField>
-                <CaseField label="Authorizing Employee" icon> ---</CaseField>
+              <CardContent className="grid gap-10 grid-cols-6 items-center">
+                <CaseField label="Case Entitlenmet" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Start Date" icon> <DatePicker></DatePicker> </CaseField>
+                <CaseField label="OTC Code" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Entitlement Status" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="End Date" icon> <DatePicker></DatePicker></CaseField>
+                <CaseField label="Entitlement Override" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Selected Entitlement Offer" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Days Left" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Authorizing Employee" icon><Input variant='invisible' placeholder='---'/></CaseField>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1239,19 +1242,19 @@ const [endDate, setEndDate] = useState(null)
                   <div className='row-span-4 col-span-full'>
                     <textarea className='border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none'></textarea>
                   </div>
-                  <CaseField label="Related Device" className={'col-span-3'}  span={3}>--- </CaseField>
-                  <CaseField label="Device Manufacturer" className={'col-span-3'}  span={3} icon>--- </CaseField>
-                  <CaseField label="Device Model" className={'col-span-3'}  span={3}>--- </CaseField>
+                  <CaseField label="Related Device" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Device Manufacturer" className={'col-span-3'}  span={3} icon><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Device Model" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
                 </div>
 
                 <div className="flex-1 grid-flow-row gap-y-7 grid grid-cols-6">
-                  <CaseField label="Program/Category" className={'col-span-3'}  span={2}>---</CaseField>
-                  <CaseField label="Operating System" className={'col-span-3'}  span={3}>---</CaseField>
-                  <CaseField label="Version" className={'col-span-3'}  span={3} >---</CaseField>
-                  <CaseField label="Remote Diag Code" className={'col-span-3'}  span={3} >---</CaseField>
-                  <CaseField label="Application Information" className={'col-span-3'}  span={3}>---</CaseField>
-                  <CaseField label="Provider / Platform" className={'col-span-3'}  span={3}>---</CaseField>
-                  <CaseField label="Software Version" className={'col-span-3'}  span={3}>---</CaseField>
+                  <CaseField label="Program/Category" className={'col-span-3'}  span={2}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Operating System" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Version" className={'col-span-3'}  span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Remote Diag Code" className={'col-span-3'}  span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Application Information" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Provider / Platform" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Software Version" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
                 </div>
               </CardContent>
           </Card>
@@ -1276,9 +1279,9 @@ const [endDate, setEndDate] = useState(null)
                     </Select>
                   </CaseField>
 
-                  <CaseField label="Action Type" className={'col-span-2'}  span={4}>---</CaseField>
+                  <CaseField label="Action Type" className={'col-span-2'}  span={4}><Input variant='invisible' placeholder='---'/></CaseField>
 
-                  <CaseField label="Template" className={'col-span-2'} span={4}>---</CaseField>
+                  <CaseField label="Template" className={'col-span-2'} span={4}><Input variant='invisible' placeholder='---'/></CaseField>
 
                   <CaseField label="Visible Externally" className={'col-span-2'} span={4}>
                     <Select
@@ -1301,7 +1304,7 @@ const [endDate, setEndDate] = useState(null)
                     </Select>
                   </CaseField>
 
-                  <CaseField label="Number of Minutes Spent" className={'col-span-2'}  icon span={3} >---</CaseField>
+                  <CaseField label="Number of Minutes Spent" className={'col-span-2'}  icon span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
 
                   <CaseField label="Notes" className={'col-span-2 self-start'} span={4}>
                     <textarea
@@ -1517,9 +1520,10 @@ const [endDate, setEndDate] = useState(null)
                     </SelectContent>
                   </Select> 
                 </CaseField>
-                <CaseField label="Ready for Close Days" icon>--- </CaseField>
-                <CaseField  label="Customer Requested Close Date" icon span={2}> <DatePicker value={customerRequestedCloseDate} onChange={setCustomerRequestedCloseDate} /></CaseField>
-                <CaseField className={'col-start-3'} label="Ready for Closure Date"icon span={2} ><DatePicker value={ReadyForClosureDate} onChange={setReadyForClosureDate}/> </CaseField>
+                <CaseField label="Ready for Close Days" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField  label="Customer Requested Close Date" icon> <DatePicker /></CaseField>
+                <CaseField className={'col-start-3'} label="Ready for Closure Date"icon ><DatePicker /> </CaseField>
+
               
               </CardContent>
             </Card>
@@ -1551,13 +1555,13 @@ const [endDate, setEndDate] = useState(null)
               <hr />
             </CardHeader>
               <CardContent className="grid gap-10 grid-cols-4 items-center">
-                <CaseField label="Shipment Country">--- </CaseField>
-                <CaseField label="Exception Order"> ---</CaseField>
-                <CaseField label="Shipment State" icon> ---</CaseField>
-                <CaseField label="SBD Override"> ---</CaseField>
-                <CaseField label="Major Account Id"> ---</CaseField>
-                <CaseField label="Currency"> ---</CaseField>
-                <CaseField label="Promo Code" className={'col-start-3'}> ---</CaseField>
+                <CaseField label="Shipment Country"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Exception Order"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Shipment State" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="SBD Override"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Major Account Id"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Currency"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Promo Code" className={'col-start-3'}><Input variant='invisible' placeholder='---'/></CaseField>
 
               </CardContent>
             </Card>
@@ -1569,8 +1573,8 @@ const [endDate, setEndDate] = useState(null)
             </CardHeader>
               <CardContent className=" flex flex-col gap-5 p-3">
                     <div className="grid gap-5 grid-cols-4">
-                      <CaseField label="Incident Type" span={3}> --- </CaseField>
-                      <CaseField label="Work Order Description" span={3}>--- </CaseField>
+                      <CaseField label="Incident Type" span={3}><Input variant='invisible' placeholder='---'/></CaseField>
+                      <CaseField label="Work Order Description" span={3}><Input variant='invisible' placeholder='---'/></CaseField>
                     </div>
 
                 <Table>

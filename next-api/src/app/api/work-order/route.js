@@ -21,8 +21,6 @@ export async function GET(request) {
             whereCondition.CaseID = caseID;
         }
 
-
-
         const workorder = await prisma.workorder.findMany({
             where: whereCondition,
             include: {

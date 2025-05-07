@@ -193,8 +193,6 @@ const Search_case = () => {
     if (search.SerialNumber !== "") {
       setIsModalAssetOpen(true);     
       setActiveTab("ci");
-    
-   
       setTimeout(() => {
         Swal.fire({
           title: 'Memuat data asset...',
@@ -204,7 +202,6 @@ const Search_case = () => {
             Swal.showLoading(); // Tampilkan loading
           }
         });
-    
         setTimeout(() => {
           Swal.close();  
         }, 500);  
@@ -212,19 +209,16 @@ const Search_case = () => {
     } else if (search.Company !== "") {
       setIsModalCompanyOpen(true);
       setActiveTab("ci");
-    
-     
       setTimeout(() => {
         Swal.fire({
           title: 'Memuat data company...',
           text: 'Mohon tunggu sebentar',
           allowOutsideClick: false,
+          allowEscapeKey: false,
           didOpen: () => {
             Swal.showLoading(); // Tampilkan loading
           }
         });
-    
-   
         setTimeout(() => {
           Swal.close(); 
         }, 500); 
@@ -519,6 +513,7 @@ const Search_case = () => {
       title: 'Berhasil!',
       text: 'Contact berhasil disimpan.',
       confirmButtonText: 'OK',
+      allowEscapeKey: false,
     }).then((result) => {
       if (result.isConfirmed) {
         window.location.reload(); // Arahkan ke halaman lain
