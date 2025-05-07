@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from "react";
-import ApiCustomer from "@/api"; 
-import { ContactEdit, ContactDelete } from "@/components/sc-modal"
-import { CompanyEdit, CompanyDelete } from "@/components/sc-modal"
+import ApiCustomer from "@/api";
+import { ContactEdit, ContactDelete } from "@/components/sc-modal";
+import { CompanyEdit, CompanyDelete } from "@/components/sc-modal";
 import { ProductAdd, ProductEdit, ProductDelete } from "@/components/sc-modal";
-import { BtnModalAsset, AssetEdit, AssetDelete } from "@/components/sc-modal"
-import { ProductTypeAdd, ProductTypeEdit, ProductTypeDelete } from "@/components/sc-modal";
-import { WarrantyServiceAdd, WarrantyServiceEdit, WarrantyServiceDelete } from "@/components/sc-modal";
-import { MaterialOrderEdit, MaterialOrderDelete,  } from "@/components/sc-modal";
+import { BtnModalAsset, AssetEdit, AssetDelete } from "@/components/sc-modal";
+import {
+  ProductTypeAdd,
+  ProductTypeEdit,
+  ProductTypeDelete,
+} from "@/components/sc-modal";
+import {
+  WarrantyServiceAdd,
+  WarrantyServiceEdit,
+  WarrantyServiceDelete,
+} from "@/components/sc-modal";
+import { MaterialOrderEdit, MaterialOrderDelete } from "@/components/sc-modal";
 import { WorkOrderDelete, WorkOrderEdit } from "@/components/sc-modal";
+import { UserAdd, UserEdit, UserDelete } from "@/components/sc-modal";
+import { PartEdit, PartDelete } from "@/components/sc-modal";
+import { ResourceAdd, ResourceEdit, ResourceDelete } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
+import Swal from "sweetalert2";
 
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
@@ -20,24 +32,39 @@ export const Contact_table = () => {
   const itemsPerPage = 10;
 
   // Fungsi untuk mengambil data dari API
-    const fetchContacts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await ApiCustomer.get(`/api/contact-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
-        setContacts(response.data.data); 
-        setTotalPages(response.data.totalPages);
-      } catch (err) {
-        console.error("Error fetching contact data:", err);
-        setError("Failed to fetch data");
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    useEffect(() => {
-      fetchContacts();
-    }, [currentPage, searchTerm]);
+  const fetchContacts = async () => {
+    // Menampilkan indikator loading menggunakan SweetAlert2
+    Swal.fire({
+      title: "Memuat Data Kontak...",
+      text: "Mohon tunggu sebentar...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading(); // Menampilkan indikator loading
+      },
+    });
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await ApiCustomer.get(
+        `/api/contact-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`
+      );
+      setContacts(response.data.data); // Menyimpan data kontak ke state
+      setTotalPages(response.data.totalPages);
+    } catch (err) {
+      console.error("Error fetching contact data:", err);
+      setError("Failed to fetch data");
+    } finally {
+      setLoading(false);
+      Swal.close();
+    }
+  };
+
+  useEffect(() => {
+    fetchContacts();
+  }, [currentPage, searchTerm]);
 
   return (
     <div className="p-4">
@@ -54,9 +81,6 @@ export const Contact_table = () => {
           setCurrentPage(1); // Reset ke halaman pertama saat mencari
         }}
       />
-
-      {/* Tampilkan loading jika sedang mengambil data */}
-      {loading && <p>Loading data...</p>}
 
       {/* Tampilkan error jika terjadi kesalahan */}
       {error && <p className="text-red-500">{error}</p>}
@@ -92,35 +116,41 @@ export const Contact_table = () => {
           <tbody>
             {contacts.length > 0 ? (
               contacts.map((contact, index) => (
-              <tr key={contact.ContactID} className="hover:bg-gray-100 text-center">
-                <td className="border p-2 text-center">
-                  {(currentPage - 1) * itemsPerPage + index + 1}
-                </td>
-                <td className="border p-2">{contact.ContactID}</td>
-                <td className="border p-2">{contact.Company}</td>
-                <td className="border p-2">{contact.Salutation}</td>
-                <td className="border p-2">{contact.FirstName}</td>
-                <td className="border p-2">{contact.LastName}</td>
-                <td className="border p-2">{contact.Email}</td>
-                <td className="border p-2">{contact.PreferredLanguage}</td>
-                <td className="border p-2">{contact.Phone}</td>
-                <td className="border p-2">{contact.Mobile}</td>
-                <td className="border p-2">{contact.WorkPhone}</td>
-                <td className="border p-2">{contact.WorkExtension}</td>
-                <td className="border p-2">{contact.OtherPhone}</td>
-                <td className="border p-2">{contact.OtherExtension}</td>
-                <td className="border p-2">{contact.Fax}</td>
-                <td className="border p-2">{contact.AddressLine1}</td>
-                <td className="border p-2">{contact.AddressLine2}</td>
-                <td className="border p-2">{contact.City}</td>
-                <td className="border p-2">{contact.StateProvince}</td>
-                <td className="border p-2">{contact.Country}</td>
-                <td className="border p-2">{contact.ZipPostalCode}</td>
-                <td className="border p-2 flex space-x-2">
-                  <ContactEdit contactID={contact.ContactID} onUpdate={fetchContacts}/>
-                  <ContactDelete contactID={contact.ContactID}/>
-                </td>
-              </tr>
+                <tr
+                  key={contact.ContactID}
+                  className="hover:bg-gray-100 text-center"
+                >
+                  <td className="border p-2 text-center">
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </td>
+                  <td className="border p-2">{contact.ContactID}</td>
+                  <td className="border p-2">{contact.Company}</td>
+                  <td className="border p-2">{contact.Salutation}</td>
+                  <td className="border p-2">{contact.FirstName}</td>
+                  <td className="border p-2">{contact.LastName}</td>
+                  <td className="border p-2">{contact.Email}</td>
+                  <td className="border p-2">{contact.PreferredLanguage}</td>
+                  <td className="border p-2">{contact.Phone}</td>
+                  <td className="border p-2">{contact.Mobile}</td>
+                  <td className="border p-2">{contact.WorkPhone}</td>
+                  <td className="border p-2">{contact.WorkExtension}</td>
+                  <td className="border p-2">{contact.OtherPhone}</td>
+                  <td className="border p-2">{contact.OtherExtension}</td>
+                  <td className="border p-2">{contact.Fax}</td>
+                  <td className="border p-2">{contact.AddressLine1}</td>
+                  <td className="border p-2">{contact.AddressLine2}</td>
+                  <td className="border p-2">{contact.City}</td>
+                  <td className="border p-2">{contact.StateProvince}</td>
+                  <td className="border p-2">{contact.Country}</td>
+                  <td className="border p-2">{contact.ZipPostalCode}</td>
+                  <td className="border p-2 flex space-x-2">
+                    <ContactEdit
+                      contactID={contact.ContactID}
+                      onUpdate={fetchContacts}
+                    />
+                    <ContactDelete contactID={contact.ContactID} />
+                  </td>
+                </tr>
               ))
             ) : (
               <tr>
@@ -148,7 +178,9 @@ export const Contact_table = () => {
           </span>
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
           >
             Next
@@ -173,17 +205,37 @@ export const Company_table = () => {
 
   // Fungsi untuk mengambil data dari API
   const fetchCompanies = async () => {
-    setLoading(true);
+    Swal.fire({
+      title: "Memuat Data Company...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
     setError(null);
+
     try {
-      const response = await ApiCustomer.get(`/api/site_account?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
-      setCompanies(response.data.data); 
+      const response = await ApiCustomer.get(
+        `/api/site_account?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`
+      );
+      setCompanies(response.data.data);
       setTotalPages(response.data.totalPages);
+
+      Swal.close();
     } catch (err) {
       console.error("Error fetching company data:", err);
       setError("Failed to fetch data");
-    } finally {
-      setLoading(false);
+
+      Swal.close(); // Tetap tutup loading walaupun error
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data perusahaan.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     }
   };
 
@@ -206,9 +258,6 @@ export const Company_table = () => {
           setCurrentPage(1); // Reset ke halaman pertama saat mencari
         }}
       />
-
-      {/* Tampilkan loading jika sedang mengambil data */}
-      {loading && <p>Loading data...</p>}
 
       {/* Tampilkan error jika terjadi kesalahan */}
       {error && <p className="text-red-500">{error}</p>}
@@ -242,8 +291,11 @@ export const Company_table = () => {
                   <td className="border p-2">{company.City}</td>
                   <td className="border p-2">{company.Country}</td>
                   <td className="border p-2 flex space-x-2">
-                    <CompanyEdit siteAccountId={company.SiteAccountID} onUpdate={fetchCompanies}/>
-                    <CompanyDelete 
+                    <CompanyEdit
+                      siteAccountId={company.SiteAccountID}
+                      onUpdate={fetchCompanies}
+                    />
+                    <CompanyDelete
                       siteAccountId={company.SiteAccountID}
                       isModalOpen={isModalOpen}
                       setIsModalOpen={setIsModalOpen}
@@ -278,7 +330,9 @@ export const Company_table = () => {
           </span>
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
           >
             Next
@@ -327,23 +381,43 @@ export const Case_table = () => {
   //   },
   // ]);
 
-  const fetchCaseDataTable=async () => {
-    setLoading(true);
+  const fetchCaseDataTable = async () => {
+    Swal.fire({
+      title: "Memuat Data Case....",
+      text: "Mohon Tunggu Sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
     setError(null);
+
     try {
       const response = await ApiCustomer.get("/api/case-information");
+
       if (response.data.success) {
         setCaseData(response.data.data);
       } else {
         setError("Failed to fetch case data");
       }
+
+      Swal.close(); // <-- Tambahkan Swal.close() setelah berhasil
     } catch (err) {
       console.error("Error fetching case data:", err);
       setError("Error fetching data");
-    } finally {
-      setLoading(false);
+
+      Swal.close(); // Tetap tutup loading jika error
+
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data perusahaan.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     }
-  }
+  };
 
   // 🔹 Load data when component mounts
   useEffect(() => {
@@ -366,7 +440,6 @@ export const Case_table = () => {
     currentPage * itemsPerPage
   );
 
-
   //navigate
   const navigate = useNavigate();
 
@@ -381,7 +454,6 @@ export const Case_table = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      
       {/* 🔹 Loading & Error Messages */}
       {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -407,8 +479,16 @@ export const Case_table = () => {
           </thead>
           <tbody>
             {currentData.map((caseItem) => (
-              <tr key={caseItem.CaseID} className="hover:bg-gray-100 text-center">
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/case/${caseItem.CaseID}`)} >{caseItem.CaseID}</td>
+              <tr
+                key={caseItem.CaseID}
+                className="hover:bg-gray-100 text-center"
+              >
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() => navigate(`/case/${caseItem.CaseID}`)}
+                >
+                  {caseItem.CaseID}
+                </td>
                 <td className="border p-2">{caseItem.CreatedOn}</td>
                 <td className="border p-2">{caseItem.CaseSubject}</td>
                 <td className="border p-2">{caseItem.CustomerAccount}</td>
@@ -438,10 +518,14 @@ export const Case_table = () => {
         >
           Previous
         </button>
-        <span>Page {currentPage} of {totalPages}</span>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
           disabled={currentPage === totalPages}
         >
           Next
@@ -451,7 +535,7 @@ export const Case_table = () => {
   );
 };
 
-export const Assets_table = () => {  
+export const Assets_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -467,13 +551,37 @@ export const Assets_table = () => {
   const fetchAssets = async () => {
     setLoading(true);
     setError(null);
+
+    Swal.fire({
+      title: "Memuat Data Asset...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
     try {
-      const response = await ApiCustomer.get(`/api/asset-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
-      setAssets(response.data.data); 
+      const response = await ApiCustomer.get(
+        `/api/asset-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`
+      );
+      setAssets(response.data.data);
       setTotalPages(response.data.totalPages);
+
+      Swal.close(); // Tutup loading kalau berhasil
     } catch (err) {
       console.error("Error fetching asset data:", err);
       setError("Failed to fetch data");
+
+      Swal.close(); // Tetap tutup loading walau error
+
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data asset.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     } finally {
       setLoading(false);
     }
@@ -483,21 +591,19 @@ export const Assets_table = () => {
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Asset Information Table</h2>
       <div className="space-x-2">
-      <BtnModalAsset />
+        {/* <BtnModalAsset /> */}
         {/* Input Pencarian */}
-      <input
-        type="text"
-        placeholder="Search asset... "
-        className="mb-4 p-2 border border-gray-300 rounded w-1/3"
-        value={searchTerm}
-        onChange={(e) => {
-          setSearchTerm(e.target.value);
-          setCurrentPage(1); // Reset ke halaman pertama saat mencari
-        }}
-      />
-      </div>      
-      {/* Tampilkan loading jika sedang mengambil data */}
-      {loading && <p>Loading data...</p>}
+        <input
+          type="text"
+          placeholder="Search asset... "
+          className="mb-4 p-2 border border-gray-300 rounded w-1/3"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // Reset ke halaman pertama saat mencari
+          }}
+        />
+      </div>
 
       {/* Tampilkan error jika terjadi kesalahan */}
       {error && <p className="text-red-500">{error}</p>}
@@ -526,25 +632,28 @@ export const Assets_table = () => {
                   </td>
                   <td className="border p-2">{asset.AssetID}</td>
                   <td className="border p-2">{asset.SerialNumber}</td>
-                  <td className="border p-2">{asset.product_information?.ProductName}</td>
+                  <td className="border p-2">
+                    {asset.product_information?.ProductName}
+                  </td>
                   <td className="border p-2">{asset.ProductNumber}</td>
-                  <td className="border p-2">{asset.product_information?.ProductLine}</td>
+                  <td className="border p-2">
+                    {asset.product_information?.ProductLine}
+                  </td>
                   <td className="border p-2">{asset.SiteAccountID}</td>
                   <td className="border p-2">{asset.ContactID}</td>
                   <td className="border p-2 flex space-x-2">
-                    <AssetEdit 
-                    assetId={asset.AssetID} onUpdate={fetchAssets}/>
+                    <AssetEdit assetId={asset.AssetID} onUpdate={fetchAssets} />
                     <AssetDelete assetId={asset.AssetID} />
                   </td>
                 </tr>
               ))
             ) : (
-                <tr>
-                  <td colSpan="7" className="text-center p-4">
-                    No data found.
-                  </td>
-                </tr>
-              )}
+              <tr>
+                <td colSpan="7" className="text-center p-4">
+                  No data found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -563,7 +672,9 @@ export const Assets_table = () => {
           </span>
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
           >
             Next
@@ -575,136 +686,168 @@ export const Assets_table = () => {
 };
 
 export const Product_table = () => {
-    const [products, setProducts] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const itemsPerPage = 10;
-  
-    //set modal
-    const [isModalOpen, setIsModalOpen] = useState(false);
-  
-    // Fungsi untuk mengambil data dari API
-    const fetchProducts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await ApiCustomer.get(`/api/product-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`);
-        setProducts(response.data.data); 
-        setTotalPages(response.data.totalPages);
-      } catch (err) {
-        console.error("Error fetching company data:", err);
-        setError("Failed to fetch data");
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    useEffect(() => {
-      fetchProducts();
-    }, [currentPage, searchTerm]);
-  
-    return (
-      <div className="p-4">
-        <h2 className="text-xl font-bold mb-4">Product Table</h2>
-  
-        {/* Input Pencarian */}
-        <input
-          type="text"
-          placeholder="Search product..."
-          className="mb-4 p-2 border border-gray-300 rounded w-1/3"
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1); // Reset ke halaman pertama saat mencari
-          }}
-        />
-  
-        {/* Tampilkan loading jika sedang mengambil data */}
-        {loading && <p>Loading data...</p>}
-  
-        {/* Tampilkan error jika terjadi kesalahan */}
-        {error && <p className="text-red-500">{error}</p>}
-        
-        <ProductAdd></ProductAdd>
-        {/* Tabel Data */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-300">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="border p-2">No</th>
-                <th className="border p-2">Product Number</th>
-                <th className="border p-2">Product Line</th>
-                <th className="border p-2">Product Name</th>
-                <th className="border p-2">Product Type</th>
-                <th className="border p-2">Product Group</th>
-                <th className="border p-2">Product Tower</th>
-                <th className="border p-2">Vendor</th>
-                <th className="border p-2">Actions</th>
-              </tr>
-            </thead>    
-            <tbody>
-              {products.length > 0 ? (
-                products.map((product, index) => (
-                  <tr key={product.ProductNumber} className="hover:bg-gray-100">
-                    <td className="border p-2 text-center">
-                      {(currentPage - 1) * itemsPerPage + index + 1}
-                    </td>
-                    <td className="border p-2">{product.ProductNumber}</td>
-                    <td className="border p-2">{product.ProductLine}</td>
-                    <td className="border p-2">{product.ProductName}</td>
-                    <td className="border p-2">{product.product_type?.ProductType}</td>
-                    <td className="border p-2">{product.product_type?.ProductGroup}</td>
-                    <td className="border p-2">{product.product_type?.ProductTower}</td>
-                    <td className="border p-2">-</td>
-                    <td className="border p-2 flex space-x-2">
-                      <ProductEdit ProductNumber={product.ProductNumber} onUpdate={fetchProducts}/>
-                      <ProductDelete
-                        ProductNumber={product.ProductNumber}
-                        isModalOpen={isModalOpen}
-                        setIsModalOpen={setIsModalOpen}
-                        onUpdate={fetchProducts}
-                      />
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" className="text-center p-4">
-                    No data found.
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const itemsPerPage = 10;
+
+  //set modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Fungsi untuk mengambil data dari API
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
+
+    Swal.fire({
+      title: "Memuat Data Produk...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      const response = await ApiCustomer.get(
+        `/api/product-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`
+      );
+      setProducts(response.data.data);
+      setTotalPages(response.data.totalPages);
+
+      Swal.close(); // Tutup loading Swal setelah sukses
+    } catch (err) {
+      console.error("Error fetching product data:", err);
+      setError("Failed to fetch data");
+
+      Swal.close(); // Tutup Swal kalau error juga
+
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data produk.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, [currentPage, searchTerm]);
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Product Table</h2>
+
+      {/* Input Pencarian */}
+      <input
+        type="text"
+        placeholder="Search product..."
+        className="mb-4 p-2 border border-gray-300 rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setCurrentPage(1); // Reset ke halaman pertama saat mencari
+        }}
+      />
+
+      {/* Tampilkan error jika terjadi kesalahan */}
+      {error && <p className="text-red-500">{error}</p>}
+
+      <ProductAdd></ProductAdd>
+      {/* Tabel Data */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="border p-2">No</th>
+              <th className="border p-2">Product Number</th>
+              <th className="border p-2">Product Line</th>
+              <th className="border p-2">Product Name</th>
+              <th className="border p-2">Product Type</th>
+              <th className="border p-2">Product Group</th>
+              <th className="border p-2">Product Tower</th>
+              <th className="border p-2">Vendor</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.length > 0 ? (
+              products.map((product, index) => (
+                <tr key={product.ProductNumber} className="hover:bg-gray-100">
+                  <td className="border p-2 text-center">
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </td>
+                  <td className="border p-2">{product.ProductNumber}</td>
+                  <td className="border p-2">{product.ProductLine}</td>
+                  <td className="border p-2">{product.ProductName}</td>
+                  <td className="border p-2">
+                    {product.product_type?.ProductType}
+                  </td>
+                  <td className="border p-2">
+                    {product.product_type?.ProductGroup}
+                  </td>
+                  <td className="border p-2">
+                    {product.product_type?.ProductTower}
+                  </td>
+                  <td className="border p-2">-</td>
+                  <td className="border p-2 flex space-x-2">
+                    <ProductEdit
+                      ProductNumber={product.ProductNumber}
+                      onUpdate={fetchProducts}
+                    />
+                    <ProductDelete
+                      ProductNumber={product.ProductNumber}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchProducts}
+                    />
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-  
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center mt-4 space-x-2">
-            <button
-              className="p-2 bg-gray-300 rounded disabled:opacity-50"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              className="p-2 bg-gray-300 rounded disabled:opacity-50"
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
-          </div>
-        )}
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center p-4">
+                  No data found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
-    );
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center mt-4 space-x-2">
+          <button
+            className="p-2 bg-gray-300 rounded disabled:opacity-50"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="p-2 bg-gray-300 rounded disabled:opacity-50"
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export const ProductType_table = () => {
@@ -714,26 +857,53 @@ export const ProductType_table = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [ProductTypeData, setProductTypeData] = useState([]);
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchProductTypeDataTable=async () => {
+  const fetchProductTypeDataTable = async () => {
     setLoading(true);
     setError(null);
+
+    Swal.fire({
+      title: "Memuat Data Tipe Produk...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
     try {
       const response = await ApiCustomer.get("/api/product-type");
       if (response.data.success) {
         setProductTypeData(response.data.data);
+        Swal.close(); // Tutup Swal saat sukses
       } else {
-        setError("Failed to fetch ProducType data");
+        setError("Failed to fetch ProductType data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data tipe produk.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
     } catch (err) {
       console.error("Error fetching ProductType data:", err);
       setError("Error fetching data");
+
+      Swal.close(); // Tutup Swal saat error
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data tipe produk.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   // 🔹 Load data when component mounts
   useEffect(() => {
@@ -756,7 +926,6 @@ export const ProductType_table = () => {
     currentPage * itemsPerPage
   );
 
-
   //navigate
   const navigate = useNavigate();
 
@@ -772,9 +941,7 @@ export const ProductType_table = () => {
       />
 
       <ProductTypeAdd> </ProductTypeAdd>
-      
-      {/* 🔹 Loading & Error Messages */}
-      {loading && <p>Loading cases...</p>}
+
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
@@ -791,18 +958,31 @@ export const ProductType_table = () => {
           </thead>
           <tbody>
             {currentData.map((ProductTypeItem) => (
-              <tr key={ProductTypeItem.ProductTypeID} className="hover:bg-gray-100 text-center">
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/case/${ProductTypeItem.ProductTypeID}`)} >{ProductTypeItem.ProductTypeID}</td>
+              <tr
+                key={ProductTypeItem.ProductTypeID}
+                className="hover:bg-gray-100 text-center"
+              >
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() =>
+                    navigate(`/case/${ProductTypeItem.ProductTypeID}`)
+                  }
+                >
+                  {ProductTypeItem.ProductTypeID}
+                </td>
                 <td className="border p-2">{ProductTypeItem.ProductTower}</td>
                 <td className="border p-2">{ProductTypeItem.ProductGroup}</td>
                 <td className="border p-2">{ProductTypeItem.ProductType}</td>
                 <td className="border p-2 flex space-x-2">
-                  <ProductTypeEdit ProductTypeID={ProductTypeItem.ProductTypeID} onUpdate={fetchProductTypeDataTable}/>
+                  <ProductTypeEdit
+                    ProductTypeID={ProductTypeItem.ProductTypeID}
+                    onUpdate={fetchProductTypeDataTable}
+                  />
                   <ProductTypeDelete
-                      ProductTypeID={ProductTypeItem.ProductTypeID}
-                      isModalOpen={isModalOpen}
-                      setIsModalOpen={setIsModalOpen}
-                      onUpdate={fetchProductTypeDataTable}
+                    ProductTypeID={ProductTypeItem.ProductTypeID}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchProductTypeDataTable}
                   />
                 </td>
               </tr>
@@ -810,7 +990,7 @@ export const ProductType_table = () => {
           </tbody>
         </table>
         {filteredProductTypeTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
         )}
       </div>
 
@@ -823,10 +1003,14 @@ export const ProductType_table = () => {
         >
           Previous
         </button>
-        <span>Page {currentPage} of {totalPages}</span>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
           disabled={currentPage === totalPages}
         >
           Next
@@ -843,26 +1027,53 @@ export const WarrantyService_table = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [WarrantyServiceData, setWarrantyServiceData] = useState([]);
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchWarrantyServiceDataTable=async () => {
+  const fetchWarrantyServiceDataTable = async () => {
     setLoading(true);
     setError(null);
+
+    Swal.fire({
+      title: "Memuat Data Warranty Service...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
     try {
       const response = await ApiCustomer.get("/api/warranty-services");
       if (response.data.success) {
         setWarrantyServiceData(response.data.data);
+        Swal.close(); // Tutup Swal kalau sukses
       } else {
         setError("Failed to fetch Warranty Service data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data Warranty Service.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
     } catch (err) {
       console.error("Error fetching Warranty Service data:", err);
       setError("Error fetching data");
+
+      Swal.close(); // Tutup Swal kalau error
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data Warranty Service.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   // 🔹 Load data when component mounts
   useEffect(() => {
@@ -877,14 +1088,15 @@ export const WarrantyService_table = () => {
   );
 
   // Hitung total halaman
-  const totalPages = Math.ceil(filteredWarrantyServiceTable.length / itemsPerPage);
+  const totalPages = Math.ceil(
+    filteredWarrantyServiceTable.length / itemsPerPage
+  );
 
   // Ambil data sesuai halaman saat ini
   const currentData = filteredWarrantyServiceTable.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
 
   //navigate
   const navigate = useNavigate();
@@ -900,10 +1112,9 @@ export const WarrantyService_table = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-    <WarrantyServiceAdd></WarrantyServiceAdd>
-      
+      <WarrantyServiceAdd></WarrantyServiceAdd>
+
       {/* 🔹 Loading & Error Messages */}
-      {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
@@ -924,22 +1135,39 @@ export const WarrantyService_table = () => {
           </thead>
           <tbody>
             {currentData.map((WarrantyServiceItem) => (
-              <tr key={WarrantyServiceItem.Service_offerID} className="hover:bg-gray-100 text-center">
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/case/${WarrantyServiceItem.Service_offerID}`)} >{WarrantyServiceItem.Service_offerID}</td>
-                <td className="border p-2">{WarrantyServiceItem.Service_description}</td>
+              <tr
+                key={WarrantyServiceItem.Service_offerID}
+                className="hover:bg-gray-100 text-center"
+              >
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() =>
+                    navigate(`/case/${WarrantyServiceItem.Service_offerID}`)
+                  }
+                >
+                  {WarrantyServiceItem.Service_offerID}
+                </td>
+                <td className="border p-2">
+                  {WarrantyServiceItem.Service_description}
+                </td>
                 <td className="border p-2">{WarrantyServiceItem.CTat_RTime}</td>
                 <td className="border p-2">{WarrantyServiceItem.Price}</td>
-                <td className="border p-2">{WarrantyServiceItem.Shipping_Fee}</td>
+                <td className="border p-2">
+                  {WarrantyServiceItem.Shipping_Fee}
+                </td>
                 <td className="border p-2">{WarrantyServiceItem.qty_ws}</td>
                 <td className="border p-2">{WarrantyServiceItem.Tax}</td>
                 <td className="border p-2">{WarrantyServiceItem.Total}</td>
                 <td className="border p-2 flex space-x-2">
-                  <WarrantyServiceEdit Service_offerID={WarrantyServiceItem.Service_offerID} onUpdate={fetchWarrantyServiceDataTable}></WarrantyServiceEdit>
+                  <WarrantyServiceEdit
+                    Service_offerID={WarrantyServiceItem.Service_offerID}
+                    onUpdate={fetchWarrantyServiceDataTable}
+                  ></WarrantyServiceEdit>
                   <WarrantyServiceDelete
-                      Service_offerID={WarrantyServiceItem.Service_offerID}
-                      isModalOpen={isModalOpen}
-                      setIsModalOpen={setIsModalOpen}
-                      onUpdate={fetchWarrantyServiceDataTable}
+                    Service_offerID={WarrantyServiceItem.Service_offerID}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchWarrantyServiceDataTable}
                   />
                 </td>
               </tr>
@@ -947,7 +1175,7 @@ export const WarrantyService_table = () => {
           </tbody>
         </table>
         {filteredWarrantyServiceTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
         )}
       </div>
 
@@ -960,10 +1188,14 @@ export const WarrantyService_table = () => {
         >
           Previous
         </button>
-        <span>Page {currentPage} of {totalPages}</span>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
           disabled={currentPage === totalPages}
         >
           Next
@@ -980,26 +1212,53 @@ export const Mo_table = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [MaterialOrderData, setMaterialOrderData] = useState([]);
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchMaterialOrderDataTable=async () => {
+  const fetchMaterialOrderDataTable = async () => {
     setLoading(true);
     setError(null);
+
+    Swal.fire({
+      title: "Memuat Data Material Order...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
     try {
       const response = await ApiCustomer.get("/api/mo-detaill");
       if (response.data.success) {
         setMaterialOrderData(response.data.data);
+        Swal.close(); // Tutup loading kalau sukses
       } else {
         setError("Failed to fetch Material Order data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data Material Order.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
     } catch (err) {
       console.error("Error fetching Material Order data:", err);
       setError("Error fetching data");
+
+      Swal.close();
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data Material Order.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   // 🔹 Load data when component mounts
   useEffect(() => {
@@ -1014,14 +1273,15 @@ export const Mo_table = () => {
   );
 
   // Hitung total halaman
-  const totalPages = Math.ceil(filteredMaterialOrderTable.length / itemsPerPage);
+  const totalPages = Math.ceil(
+    filteredMaterialOrderTable.length / itemsPerPage
+  );
 
   // Ambil data sesuai halaman saat ini
   const currentData = filteredMaterialOrderTable.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
 
   //navigate
   const navigate = useNavigate();
@@ -1037,8 +1297,6 @@ export const Mo_table = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {/* 🔹 Loading & Error Messages */}
-      {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
@@ -1061,28 +1319,50 @@ export const Mo_table = () => {
           </thead>
           <tbody>
             {currentData.map((MaterialOrderItem) => (
-              <tr key={MaterialOrderItem.MOID} className="hover:bg-gray-100 text-center">
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/material-order/${MaterialOrderItem.MOID}`)} >{MaterialOrderItem.MOID}</td>
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline"onClick={() => navigate(`/work/${MaterialOrderItem.WOID}`)} >{MaterialOrderItem.WOID}</td>
+              <tr
+                key={MaterialOrderItem.MOID}
+                className="hover:bg-gray-100 text-center"
+              >
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() =>
+                    navigate(`/material-order/${MaterialOrderItem.MOID}`)
+                  }
+                >
+                  {MaterialOrderItem.MOID}
+                </td>
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() => navigate(`/work/${MaterialOrderItem.WOID}`)}
+                >
+                  {MaterialOrderItem.WOID}
+                </td>
                 <td className="border p-2">{MaterialOrderItem.OrderNumber}</td>
                 <td className="border p-2">{MaterialOrderItem.OrderStatus}</td>
                 <td className="border p-2">{MaterialOrderItem.OrderType}</td>
                 <td className="border p-2">{MaterialOrderItem.CreatedOn}</td>
-                <td className="border p-2">{MaterialOrderItem.SalesOrderNumber}</td>
+                <td className="border p-2">
+                  {MaterialOrderItem.SalesOrderNumber}
+                </td>
                 <td className="border p-2">{MaterialOrderItem.RMANumber}</td>
-                <td className="border p-2">{MaterialOrderItem.ReadyForClosureDate}</td>
+                <td className="border p-2">
+                  {MaterialOrderItem.ReadyForClosureDate}
+                </td>
                 <td className="border p-2">{MaterialOrderItem.Owner}</td>
                 <td className="border p-2 flex space-x-2">
                   {/* <WarrantyServiceEdit Service_offerID={WarrantyServiceItem.Service_offerID} onUpdate={fetchWarrantyServiceDataTable}></WarrantyServiceEdit>
                    */}
 
-                  <MaterialOrderEdit MOID={MaterialOrderItem.MOID} onUpdate={fetchMaterialOrderDataTable}/>
+                  <MaterialOrderEdit
+                    MOID={MaterialOrderItem.MOID}
+                    onUpdate={fetchMaterialOrderDataTable}
+                  />
 
-                  <MaterialOrderDelete 
-                      MOID={MaterialOrderItem.MOID}
-                      isModalOpen={isModalOpen}
-                      setIsModalOpen={setIsModalOpen}
-                      onUpdate={fetchMaterialOrderDataTable}
+                  <MaterialOrderDelete
+                    MOID={MaterialOrderItem.MOID}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchMaterialOrderDataTable}
                   />
                 </td>
               </tr>
@@ -1090,7 +1370,7 @@ export const Mo_table = () => {
           </tbody>
         </table>
         {filteredMaterialOrderTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
         )}
       </div>
 
@@ -1103,10 +1383,14 @@ export const Mo_table = () => {
         >
           Previous
         </button>
-        <span>Page {currentPage} of {totalPages}</span>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
           disabled={currentPage === totalPages}
         >
           Next
@@ -1123,26 +1407,52 @@ export const Wo_table = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [WorkOrderData, setWorkOrderData] = useState([]);
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchWorkOrderDataTable=async () => {
+  const fetchWorkOrderDataTable = async () => {
     setLoading(true);
     setError(null);
+
+    Swal.fire({
+      title: "Memuat Data Work Order...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
     try {
       const response = await ApiCustomer.get("/api/work-order");
       if (response.data.success) {
         setWorkOrderData(response.data.data);
+        Swal.close();
       } else {
         setError("Failed to fetch Work Order data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data Work Order.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
     } catch (err) {
       console.error("Error fetching Work Order data:", err);
       setError("Error fetching data");
+      Swal.close();
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data Work Order.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   // 🔹 Load data when component mounts
   useEffect(() => {
@@ -1165,7 +1475,6 @@ export const Wo_table = () => {
     currentPage * itemsPerPage
   );
 
-
   //navigate
   const navigate = useNavigate();
 
@@ -1180,15 +1489,13 @@ export const Wo_table = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {/* 🔹 Loading & Error Messages */}
-      {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">         
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
               <th className="border p-2">WOID</th>
               <th className="border p-2">Case ID</th>
               <th className="border p-2">Work Order Type</th>
@@ -1196,7 +1503,7 @@ export const Wo_table = () => {
               <th className="border p-2">System Status</th>
               <th className="border p-2">Sub Status</th>
               <th className="border p-2">Preferred Day</th>
-              <th className="border p-2">Preferred Time</th>      
+              <th className="border p-2">Preferred Time</th>
               <th className="border p-2">Shipment Country</th>
               <th className="border p-2">Shipment State</th>
               <th className="border p-2">Created On</th>
@@ -1225,9 +1532,22 @@ export const Wo_table = () => {
           </thead>
           <tbody>
             {currentData.map((WorkOrderItem) => (
-              <tr key={WorkOrderItem.WOID} className="hover:bg-gray-100 text-center">
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/work/${WorkOrderItem.WOID}`)} >{WorkOrderItem.WOID}</td>
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/case/${WorkOrderItem.CaseID}`)} >{WorkOrderItem.CaseID}</td>
+              <tr
+                key={WorkOrderItem.WOID}
+                className="hover:bg-gray-100 text-center"
+              >
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() => navigate(`/work/${WorkOrderItem.WOID}`)}
+                >
+                  {WorkOrderItem.WOID}
+                </td>
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() => navigate(`/case/${WorkOrderItem.CaseID}`)}
+                >
+                  {WorkOrderItem.CaseID}
+                </td>
                 <td className="border p-2">{WorkOrderItem.WorkOrderType}</td>
                 <td className="border p-2">{WorkOrderItem.Priority}</td>
                 <td className="border p-2">{WorkOrderItem.SystemStatus}</td>
@@ -1243,28 +1563,46 @@ export const Wo_table = () => {
                 <td className="border p-2">{WorkOrderItem.CoverageWindow}</td>
                 <td className="border p-2">{WorkOrderItem.Response}</td>
                 <td className="border p-2">{WorkOrderItem.OTCCode}</td>
-                <td className="border p-2">{WorkOrderItem.RequestedDateTimeCustomer}</td>
-                <td className="border p-2">{WorkOrderItem.GuaranteedFixTimeCustomer}</td>
-                <td className="border p-2">{WorkOrderItem.EarlyStartDateTimeCustomer}</td>
-                <td className="border p-2">{WorkOrderItem.LatestStartDateTimeCustomer}</td>
+                <td className="border p-2">
+                  {WorkOrderItem.RequestedDateTimeCustomer}
+                </td>
+                <td className="border p-2">
+                  {WorkOrderItem.GuaranteedFixTimeCustomer}
+                </td>
+                <td className="border p-2">
+                  {WorkOrderItem.EarlyStartDateTimeCustomer}
+                </td>
+                <td className="border p-2">
+                  {WorkOrderItem.LatestStartDateTimeCustomer}
+                </td>
                 <td className="border p-2">{WorkOrderItem.SLAReschedule}</td>
-                <td className="border p-2">{WorkOrderItem.ActiveScheduleDate}</td>
-                <td className="border p-2">{WorkOrderItem.SLAErrorDescription}</td>
-                <td className="border p-2">{WorkOrderItem.CasePriorityIndex}</td>
+                <td className="border p-2">
+                  {WorkOrderItem.ActiveScheduleDate}
+                </td>
+                <td className="border p-2">
+                  {WorkOrderItem.SLAErrorDescription}
+                </td>
+                <td className="border p-2">
+                  {WorkOrderItem.CasePriorityIndex}
+                </td>
                 <td className="border p-2">{WorkOrderItem.PartnerStatus}</td>
-                <td className="border p-2">{WorkOrderItem.WorkOrderDescription}</td>
+                <td className="border p-2">
+                  {WorkOrderItem.WorkOrderDescription}
+                </td>
                 <td className="border p-2">{WorkOrderItem.PartnerNotes}</td>
                 <td className="border p-2">{WorkOrderItem.IncomingChannel}</td>
                 <td className="border p-2">{WorkOrderItem.MaterialOrder}</td>
                 <td className="border p-2">{WorkOrderItem.CaseInformation}</td>
                 <td className="border p-2 flex space-x-2">
-
-                  <WorkOrderEdit WOID={WorkOrderItem.WOID} onUpdate={fetchWorkOrderDataTable}/>
-                  <WorkOrderDelete 
-                      MOID={WorkOrderItem.MOID}
-                      isModalOpen={isModalOpen}
-                      setIsModalOpen={setIsModalOpen}
-                      onUpdate={fetchWorkOrderDataTable}
+                  <WorkOrderEdit
+                    WOID={WorkOrderItem.WOID}
+                    onUpdate={fetchWorkOrderDataTable}
+                  />
+                  <WorkOrderDelete
+                    MOID={WorkOrderItem.MOID}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchWorkOrderDataTable}
                   />
                 </td>
               </tr>
@@ -1272,7 +1610,7 @@ export const Wo_table = () => {
           </tbody>
         </table>
         {filteredWorkOrderTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
         )}
       </div>
 
@@ -1285,10 +1623,14 @@ export const Wo_table = () => {
         >
           Previous
         </button>
-        <span>Page {currentPage} of {totalPages}</span>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
           disabled={currentPage === totalPages}
         >
           Next
@@ -1297,3 +1639,519 @@ export const Wo_table = () => {
     </div>
   );
 };
+
+export const User_table = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Jumlah data per halaman
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [UserData, setUserData] = useState([]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchUserDataTable = async () => {
+    setLoading(true);
+    setError(null);
+
+    Swal.fire({
+      title: "Memuat Data User...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      const response = await ApiCustomer.get("/api/user");
+      if (response.data.success) {
+        setUserData(response.data.data);
+        Swal.close();
+      } else {
+        setError("Failed to fetch Userr data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data User.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching User data:", err);
+      setError("Error fetching data");
+      Swal.close();
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data User.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔹 Load data when component mounts
+  useEffect(() => {
+    fetchUserDataTable();
+  }, []);
+
+  // Filter data berdasarkan pencarian
+  const filteredUserTable = UserData.filter((item) =>
+    Object.values(item).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Hitung total halaman
+  const totalPages = Math.ceil(filteredUserTable.length / itemsPerPage);
+
+  // Ambil data sesuai halaman saat ini
+  const currentData = filteredUserTable.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  //navigate
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">User Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+      <UserAdd></UserAdd>
+
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+              <th className="border p-2">ID User</th>
+              <th className="border p-2">Email</th>
+              <th className="border p-2">Username</th>
+              <th className="border p-2">Password</th>
+              <th className="border p-2">Name</th>
+              <th className="border p-2">Role</th>
+              <th className="border p-2">Profil Photo</th>
+              <th className="border p-2">CreatedAt</th>
+              <th className="border p-2">UpdateAt</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((UserItem) => (
+              <tr
+                key={UserItem.IDUser}
+                className="hover:bg-gray-100 text-center"
+              >
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline">
+                  {UserItem.IDUser}
+                </td>
+                <td className="border p-2">{UserItem.Email}</td>
+                <td className="border p-2">{UserItem.Username}</td>
+                <td className="border p-2">{UserItem.Password}</td>
+                <td className="border p-2">{UserItem.Name}</td>
+                <td className="border p-2">{UserItem.Role}</td>
+                <td className="border p-2">{UserItem.ProfilPhoto}</td>
+                <td className="border p-2">{UserItem.CreatedAt}</td>
+                <td className="border p-2">{UserItem.UpdatedAt}</td>
+                <td className="border p-2 flex space-x-2">
+                  <UserEdit
+                    IDUser={UserItem.IDUser}
+                    onUpdate={fetchUserDataTable}
+                  ></UserEdit>
+                  <UserDelete
+                    IDUser={UserItem.IDUser}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchUserDataTable}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredUserTable.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const Part_table = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Jumlah data per halaman
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [PartData, setPartData] = useState([]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchPartDataTable = async () => {
+    setLoading(true);
+    setError(null);
+
+    Swal.fire({
+      title: "Memuat Data Part...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      const response = await ApiCustomer.get("/api/service-log/parts-catalog");
+      if (response.data.success) {
+        setPartData(response.data.data);
+        Swal.close();
+      } else {
+        setError("Failed to fetch Part data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data Part.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching Part data:", err);
+      setError("Error fetching data");
+      Swal.close();
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data Part.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔹 Load data when component mounts
+  useEffect(() => {
+    fetchPartDataTable();
+  }, []);
+
+  // Filter data berdasarkan pencarian
+  const filteredPartTable = PartData.filter((item) =>
+    Object.values(item).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Hitung total halaman
+  const totalPages = Math.ceil(filteredPartTable.length / itemsPerPage);
+
+  // Ambil data sesuai halaman saat ini
+  const currentData = filteredPartTable.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  //navigate
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Part Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+              <th className="border p-2">PartNumber</th>
+              <th className="border p-2"> Keyword </th>
+              <th className="border p-2">PartDescription </th>
+              <th className="border p-2">Orderability</th>
+              <th className="border p-2">RestrictionReason</th>
+              <th className="border p-2">CSR_Flag</th>
+              <th className="border p-2"> ROHS Flag </th>
+              <th className="border p-2">Returnable Flag</th>
+              <th className="border p-2">HardRoll Flag</th>
+              <th className="border p-2">DangerousGoods Flag</th>
+              <th className="border p-2">LithiumBattery Flag</th>
+              <th className="border p-2">Oversize Flag </th>
+              <th className="border p-2">Heavy Flag </th>
+              <th className="border p-2">Price </th>
+              <th className="border p-2">FreightPrice </th>
+              <th className="border p-2">Tax</th>
+              <th className="border p-2">Total</th>
+              <th className="border p-2">Shipping_Fee</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((PartItem) => (
+              <tr
+                key={PartItem.PartNumber}
+                className="hover:bg-gray-100 text-center"
+              >
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline">
+                  {PartItem.PartNumber}
+                </td>
+                <td className="border p-2">{PartItem.Keyword}</td>
+                <td className="border p-2">{PartItem.PartDescription}</td>
+                <td className="border p-2">{PartItem.Orderability}</td>
+                <td className="border p-2">{PartItem.RestrictionReason}</td>
+                <td className="border p-2">{PartItem.CSR_Flag}</td>
+                <td className="border p-2">{PartItem.ROHS_Flag}</td>
+                <td className="border p-2">{PartItem.Returnable_Flag}</td>
+                <td className="border p-2">{PartItem.HardRoll_Flag}</td>
+                <td className="border p-2">{PartItem.DangerousGoods_Flag}</td>
+                <td className="border p-2">{PartItem.LithiumBattery_Flag}</td>
+                <td className="border p-2">{PartItem.Oversize_Flag}</td>
+                <td className="border p-2">{PartItem.Heavy_Flag}</td>
+                <td className="border p-2">{PartItem.Price}</td>
+                <td className="border p-2">{PartItem.FreightPrice}</td>
+                <td className="border p-2">{PartItem.Tax}</td>
+                <td className="border p-2">{PartItem.Total}</td>
+                <td className="border p-2">{PartItem.Shipping_Fee}</td>
+                <td className="border p-2 flex space-x-2">
+                <PartEdit PartNumber={PartItem.PartNumber} onUpdate={fetchPartDataTable}></PartEdit>
+                <PartDelete
+                  PartNumber={PartItem.PartNumber}
+                  isModalOpen={isModalOpen}
+                  setIsModalOpen={setIsModalOpen}
+                  onUpdate={fetchPartDataTable}
+                />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredPartTable.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const Resource_table = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [ResourceData, setResourceData] = useState([]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchResourceDataTable = async () => {
+    setLoading(true);
+    setError(null);
+
+    Swal.fire({
+      title: "Memuat Data Resource...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      const response = await ApiCustomer.get("/api/resources");
+      if (response.data.success) {
+        setResourceData(response.data.data);
+        Swal.close();
+      } else {
+        setError("Failed to fetch Resource data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data Resource.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching Resource data:", err);
+      setError("Error fetching data");
+      Swal.close();
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data Resource.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔹 Load data when component mounts
+  useEffect(() => {
+    fetchResourceDataTable();
+  }, []);
+
+  // Filter data berdasarkan pencarian
+  const filteredResourceTable = ResourceData.filter((item) =>
+    Object.values(item).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Hitung total halaman
+  const totalPages = Math.ceil(filteredResourceTable.length / itemsPerPage);
+
+  // Ambil data sesuai halaman saat ini
+  const currentData = filteredResourceTable.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  //navigate
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Resource Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      <ResourceAdd/>  
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+              <th className="border p-2">Resource ID</th>
+              <th className="border p-2">Name</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((ResourceItem) => (
+              <tr
+                key={ResourceItem.ResourceId}
+                className="hover:bg-gray-100 text-center"
+              >
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline">
+                  {ResourceItem.ResourceId}
+                </td>
+                <td className="border p-2">{ResourceItem.Name}</td>
+                <td className="border p-2 flex space-x-2">
+                <ResourceEdit ResourceId={ResourceItem.ResourceId} onUpdate={fetchResourceDataTable}></ResourceEdit>
+                <ResourceDelete
+                  ResourceId={ResourceItem.ResourceId}
+                  isModalOpen={isModalOpen}
+                  setIsModalOpen={setIsModalOpen}
+                  onUpdate={fetchResourceDataTable}                
+                />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredResourceTable.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};  

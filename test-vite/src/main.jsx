@@ -18,9 +18,12 @@ import
   ProductType_table,
   WarrantyService_table,
   Mo_table,
-  Wo_table
+  Wo_table,
+  Resource_table
  } from './master_table';
 import { Bookings } from './bookings';
+import { User_table } from './master_table';
+import { Part_table } from './master_table';
 // import { ModalContextProvider } from './components/modal-context';
 
 import { GateKeepingRouting } from './components/GateKeepingRouting';
@@ -52,6 +55,9 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/WarrantyService_table' element={<WarrantyService_table/>}/>
             <Route path='/master/Mo_table' element={<Mo_table/>}/>
             <Route path='/master/Wo_table' element={<Wo_table/>}/>
+            <Route path='/master/User_table' element={<User_table/>}/>
+            <Route path='/master/Part_table' element={<Part_table/>}/>
+            <Route path='/master/Resource_table' element={<Resource_table/>}/>
             {/* </Route> */}
           </Route>
             {/* </Route> */}

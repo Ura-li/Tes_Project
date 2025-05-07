@@ -19,6 +19,13 @@ export function LoginForm({
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
+      Swal.fire({
+      title: 'Logging in...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
       const res = await ApiCustomer.post('/api/auth/login',{
         identifier,
         password
@@ -27,7 +34,13 @@ export function LoginForm({
       const { token } = res.data;
       localStorage.setItem('token', token);
 
-      Swal.fire('Success', 'Login Success', 'success').then((result) => {
+      Swal.fire({
+      title: "Success",
+      icon: "success",
+      allowOutsideClick: false,
+      timer: 1500, 
+      showConfirmButton: false
+      }).then((result) => {
         window.location.href = '/';
       });
     } catch (error) {

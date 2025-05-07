@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/table"; 
 import { Link } from "react-router";
 import { TabsServiceMO } from "./service-case";
+import Swal from "sweetalert2";
 
 import { useParams } from "react-router";
 
@@ -64,9 +65,27 @@ export const ServiceMaterial = () => {
   }
 
   useEffect(() => {
-    fetchMaterialOrder();
-    fetchMaterialLineOrdersInMODetail();
-  }, [])
+    // Menampilkan SweetAlert2 loading indicator sebelum memulai fetch
+    Swal.fire({
+      title: 'Memuat Data...',
+      text: 'Mohon tunggu sebentar...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading(); // Menampilkan indikator loading
+      }
+    });
+
+    // Menjalankan kedua fungsi fetching data secara bersamaan
+    Promise.all([fetchMaterialOrder(), fetchMaterialLineOrdersInMODetail()])
+      .then(() => {
+        Swal.close(); // Menutup SweetAlert2 setelah data berhasil diambil
+      })
+      .catch((err) => {
+        Swal.close(); // Menutup SweetAlert2 jika ada error
+        setError("Error fetching data");
+      });
+  }, []); 
+
   return (
     <div>
       {materialOrders.OrderStatus === 'Closed' && (
