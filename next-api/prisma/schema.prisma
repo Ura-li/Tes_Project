@@ -128,6 +128,7 @@ model materialorder {
   SalesOrderNumber    String?             @db.VarChar(100)
   RMANumber           String?             @db.VarChar(100)
   ReadyForClosureDate DateTime?           @db.DateTime(0)
+  
   ShippingPriority    ShippingPriority? @default(MEDIUM)
   CustomerInducedDamage Boolean? @default(false)
   AccidentalDamageProtection Boolean? @default(false)
