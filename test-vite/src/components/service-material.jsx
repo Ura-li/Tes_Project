@@ -38,10 +38,6 @@ import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
 
-// import { debounce } from "lodash";
-
-import debounce from 'lodash.debounce';
-
 function formatDateForInput(dateString) {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -86,43 +82,6 @@ export const ServiceMaterial = () => {
 
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
-
-  // const fetchMaterialOrder = async () => {
-  //   try{
-  //     const res = await ApiCustomer.get(`/api/material-order/${moid}`)
-  //     setMaterialOrders(res.data.data)
-  //     const data = res.data.data;
-      
-  //     setMaterialOrderInformation({
-  //       MOID: data.MOID || '',
-  //       orderNumber: data.OrderNumber || '',
-  //       serviceOfferID: data.ServiceOfferID || '', // Sesuaikan dengan field jika ada di backend
-  //       serviceDescription: data.ServiceDescription || '', // Sama seperti di atas
-  //       orderType: data.OrderType || '',
-  //       shippingPriority: data.ShippingPriority || '',
-  //       readyForClosureDate: data.ReadyForClosureDate || '',
-  //       caseID: data.workorder?.CaseID || '',
-  //       contact: data.workorder?.caseinformation?.contact_information.FirstName . data.workorder?.caseinformation?.contact_information.LastName || null,
-  //       deliveryRequestedDateCustomerTime: data.DeliveryRequestedDate || '',
-  //       collectionRequestedDate: data.CollectionRequestedDate || '',
-  //       promoCode: data.PromoCode || '',
-  //       customerInducedDamage: data.CustomerInducedDamage || false,
-  //       accidentalDamageProtection: data.AccidentalDamageProtection || false,
-  //       defectiveMediaRetention: data.DefectiveMediaRetention || false,
-  //       notificationNumber: data.NotificationNumber || '',
-  //       salesOrderNumber: data.SalesOrderNumber || '',
-  //       resourceName: data.Resource?.Name || '', // Atur field sesuai schema user Anda
-  //       workOrder: data.WOID || null,
-  //       parentMO: data.parentMO || null,
-  //       isBCPOrder: data.IsBCPOrder || false,
-  //       materialOrderType: data.MaterialOrderType || '',
-  //       eotOrderNumber: data.EOTOrderNumber || '',
-  //     });
-  //     console.log(res.data.data)
-  //   }catch(err){
-  //     console.error("Failed to fetch material orders:", err);
-  //   }
-  // }
 
   const fetchMaterialOrder = async () => {
     try {
@@ -180,106 +139,6 @@ export const ServiceMaterial = () => {
     fetchMaterialOrder();
     fetchMaterialLineOrdersInMODetail();
   }, [])
-
-  const handleUpdate = async () => {
-    try {
-      const payload = {
-        ShippingPriority: materialOrderInformation.shippingPriority,
-        // DeliveryRequestedDate: materialOrderInformation.deliveryRequestedDateCustomerTime
-        // ? new Date(materialOrderInformation.deliveryRequestedDateCustomerTime).toISOString()
-        // : undefined,
-        DefectiveMediaRetention: materialOrderInformation.defectiveMediaRetention,
-        MaterialOrderType: materialOrderInformation.materialOrderType,
-        EOTOrderNumber: materialOrderInformation.eotOrderNumber,
-        ParentMOID: materialOrderInformation.parentMO,
-        ResourceId: materialOrderInformation.resourceId,
-      };
-
-      // Tambahkan hanya jika valid
-      if (materialOrderInformation.deliveryRequestedDateCustomerTime) {
-        payload.DeliveryRequestedDate = new Date(materialOrderInformation.deliveryRequestedDateCustomerTime).toISOString();
-      }
-  
-      const res = await ApiCustomer.patch(`/api/material-order/${materialOrderInformation.MOID}`, payload);
-  
-      if (res.data.success) {
-        toast.success("Material Order updated successfully");
-      } else {
-        toast.error("Update failed: " + res.data.message);
-      }
-    } catch (error) {
-      console.error("Update error:", error);
-      toast.error("An error occurred while updating the Material Order");
-    }
-  };
-
-  const handleShippingPriorityChange = (e) => {
-    setMaterialOrderInformation((prev) => ({
-      ...prev,
-      shippingPriority: e.target.value,
-    }));
-  };
-  const handleDeliveryRequestedDateChange = (e) => {
-    setMaterialOrderInformation((prev) => ({
-      ...prev,
-      
-      deliveryRequestedDateCustomerTime: e.target.value,
-    }));
-  };
-  const handleDefectiveMediaRetentionChange = (e) => {
-    setMaterialOrderInformation((prev) => ({
-      ...prev,
-      defectiveMediaRetention: e.target.checked,
-    }));
-  };
-  const handleResourceNameChange = (e) => {
-    const value = e.target.value;
-  
-    // Set ke state form
-    setMaterialOrderInformation((prev) => ({
-      ...prev,
-      resourceName: value,
-    }));
-  
-    // Panggil pencarian resource yang didebounce
-    handleSearchResource(value);
-  };
-  const handleParentMOChange = (e) => {
-    setMaterialOrderInformation((prev) => ({
-      ...prev,
-      parentMO: e.target.value,
-    }));
-  };
-  
-  const handleMaterialOrderTypeChange = (e) => {
-    setMaterialOrderInformation((prev) => ({
-      ...prev,
-      materialOrderType: e.target.value,
-    }));
-  };
-  const handleEOTOrderNumberChange = (e) => {
-    setMaterialOrderInformation((prev) => ({
-      ...prev,
-      eotOrderNumber: e.target.value,
-    }));
-  };
-  
-  const [searchResultsResource, setSearchResultsResource] = useState([])
-    const handleSearchResource = debounce(async (keyword) => {
-      if (!keyword) {
-        setSearchResultsResource([]);
-        return;
-      }
-    
-      try {
-        const response = await ApiCustomer.get(`/api/resources`, {
-          params: { keyword }
-        });
-        setSearchResultsResource(response.data);
-      } catch (error) {
-        console.error("Error fetching Subk Technician search:", error);
-      }
-    }, 500); // 500ms delay
   
   return (
     <div>
@@ -324,41 +183,41 @@ export const ServiceMaterial = () => {
               <CardContent className="grid grid-flow-col gap-5 grid-rows-8 h-115">
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>Order Number</span>
+                  <span>Order Number (MOID)</span>
                   <span className="ml-40">{materialOrderInformation.orderNumber}</span>
                 </div>
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>Service Offer ID</span>
+                  <span>Service Offer ID (Case)</span>
                   <span className="ml-[150px]">{materialOrderInformation.serviceOfferID}</span>
                 </div>
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>Service Description</span>
+                  <span>Service Description (Case)</span>
                   <span className="ml-[124px]">{materialOrderInformation.serviceDescription}</span>
                 </div>
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>Order Type</span>
+                  <span>Order Type  (MO)</span>
                   <span className="ml-[186px]">{materialOrderInformation.orderType}</span>
                 </div>
                 <div className="flex font-bold">
-                  <span className="ml-7">Shipping Priority</span>
-                  {/* <span className="ml-[142px]">{materialOrderInformation.shippingPriority}</span> */}
-                  <select className="ml-[142px]" value={materialOrderInformation.shippingPriority } onChange={handleShippingPriorityChange}>
+                  <span className="ml-7">Shipping Priority (MO)</span>
+                  <span className="ml-[142px]">{materialOrderInformation.shippingPriority}</span>
+                  {/* <select className="ml-[142px]" value={materialOrderInformation.shippingPriority } onChange={handleShippingPriorityChange}>
                     <option value="LOW">LOW</option>
                     <option value="MEDIUM">MEDIUM</option>
                     <option value="HIGH">HIGH</option>
                     <option value="CRITICAL">CRITICAL</option>
-                  </select>
+                  </select> */}
                 </div>
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>Ready For Closure Date</span>
+                  <span>Ready For Closure Date (WO)</span>
                   <span className="ml-[96px]">
                     {materialOrderInformation.readyForClosureDate 
                       ? new Date(materialOrderInformation.readyForClosureDate).toLocaleDateString() 
@@ -368,37 +227,31 @@ export const ServiceMaterial = () => {
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>Case ID</span>
+                  <span>Case ID  (Case)</span>
                   <span className="ml-[216px]">{materialOrderInformation.caseID }</span>
                 </div>
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>Contact</span>
+                  <span>Contact (Contact)</span>
                   <span className="ml-[212px]">
                     {materialOrderInformation.contact }
                   </span>
                 </div>
 
                 <div className="flex items-center font-bold">
-                  <span className="ml-7">Delivery Requested Date (Customer Time)</span>
-                  {/* <span className="ml-10 mr-16">
+                  <span className="ml-7">Delivery Requested Date (Customer Time) (MO)</span>
+                  <span className="ml-10 mr-16">
                     {materialOrderInformation.deliveryRequestedDateCustomerTime
                       ? new Date(materialOrderInformation.deliveryRequestedDateCustomerTime).toLocaleString()
                       : '-'}
-                  </span> */}
-                  <input
-                    className="ml-10 mr-16"
-                    type="datetime-local"
-                    value={materialOrderInformation.deliveryRequestedDateCustomerTime || ''}
-                    onChange={handleDeliveryRequestedDateChange}
-                  />
-
+                  </span>
+                  
                   <CalendarDays />
                 </div>
                 <div className="flex items-center font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>Collection Requested Date</span>
+                  <span>Collection Requested Date (MO)</span>
                   <span className="ml-[156px] mr-16">
                     {materialOrderInformation.collectionRequestedDate
                       ? new Date(materialOrderInformation.collectionRequestedDate).toLocaleString()
@@ -415,7 +268,7 @@ export const ServiceMaterial = () => {
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>Customer Induced Damage</span>
+                  <span>Customer Induced Damage (MO)</span>
                   <span className="ml-[150px]">
                     {materialOrderInformation.customerInducedDamage ? 'Yes' : 'No'}
                   </span>
@@ -423,71 +276,37 @@ export const ServiceMaterial = () => {
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>Accidental Damage Protection</span>
+                  <span>Accidental Damage Protection (MO)</span>
                   <span className="ml-[128px]">
                     {materialOrderInformation.accidentalDamageProtection ? 'Yes' : 'No'}
                   </span>
                 </div>
 
                 <div className="flex font-bold">
-                  <span className="ml-7">Defective Media Retention</span>
-                  {/* <span className="ml-[158px]">
+                  <span className="ml-7">Defective Media Retention (MO)</span>
+                  <span className="ml-[158px]">
                     {materialOrderInformation.defectiveMediaRetention ? 'Yes' : 'No'}
-                  </span> */}
-                  <input
-                    className="ml-[158px]"
-                    type="checkbox"
-                    checked={materialOrderInformation.defectiveMediaRetention || ''}
-                    onChange={handleDefectiveMediaRetentionChange}
-                  />
+                  </span>
 
                 </div>
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>Notification Number</span>
+                  <span>Notification Number (MO?)</span>
                   <span className="ml-[204px]">{materialOrderInformation.notificationNumber }</span>
                 </div>
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>Sales Order Number</span>
+                  <span>Sales Order Number (MO?)</span>
                   <span className="ml-[208px]">{materialOrderInformation.salesOrderNumber }</span>
                 </div>
 
                 <div className="flex font-bold">
-                  <span className="ml-7">Resource Name</span>
-                  {/* <span className="ml-[160px]">
+                  <span className="ml-7">Resource Name (WO)</span>
+                  <span className="ml-[160px]">
                     {materialOrderInformation.resourceName }
-                  </span> */}
-                  <input
-                    className="ml-[160px]"
-                    type="text"
-                    value={materialOrderInformation.resourceName }
-                    onChange={handleResourceNameChange}
-                  />
-                  
-                  {/* Suggestion dropdown */}
-                  {searchResultsResource.length > 0 && (
-                    <ul className="absolute z-10 w-full mt-1 bg-white border rounded shadow">
-                      {searchResultsResource.map((res) => (
-                        <li
-                          key={res.id}
-                          className="p-2 cursor-pointer hover:bg-gray-100"
-                          onClick={() => {
-                            setMaterialOrderInformation((prev) => ({
-                              ...prev,
-                              resourceName: res.name,
-                              resourceId: res.id,
-                            }));
-                            setSearchResultsResource([]); // Clear suggestions
-                          }}
-                        >
-                          {res.name}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  </span>                  
                 </div>
 
                 <div className="flex font-bold">
@@ -500,20 +319,14 @@ export const ServiceMaterial = () => {
 
                 <div className="flex font-bold">
                   <span className="ml-7">Parent Mo</span>
-                  {/* <span className="ml-[200px]">
+                  <span className="ml-[200px]">
                     {materialOrderInformation.parentMO?.MOID }
-                  </span> */}
-                  <input
-                    className="ml-[200px]"
-                    type="text"
-                    value={materialOrderInformation.parentMO }
-                    onChange={handleParentMOChange}
-                  />
+                  </span>
                 </div>
 
                 <div className="flex font-bold">
                   <Lock className="mr-2 size-5" />
-                  <span>BCP Order</span>
+                  <span>BCP Order (MO?)</span>
                   <span className="ml-[200px]">
                     {materialOrderInformation.isBCPOrder ? 'Yes' : 'No'}
                   </span>
@@ -521,38 +334,17 @@ export const ServiceMaterial = () => {
 
                 <div className="flex font-bold">
                   <span className="ml-7">Material Order Type</span>
-                  {/* <span className="ml-[128px]">
+                  <span className="ml-[128px]">
                     {materialOrderInformation.materialOrderType }
-                  </span> */}
-                  <input
-                    className="ml-[128px]"
-                    type="text"
-                    value={materialOrderInformation.materialOrderType }
-                    onChange={handleMaterialOrderTypeChange}
-                  />
+                  </span>
                 </div>
 
                 <div className="flex font-bold">
-                  <span className="ml-7">EOT Order Number</span>
-                  {/* <span className="ml-[136px]">
+                  <span className="text-blue-500 ml-7">EOT Order Number</span>
+                  <span className="ml-[136px]">
                     {materialOrderInformation.eotOrderNumber }
-                  </span> */}
-                  <input
-                    type="text"
-                    value={materialOrderInformation.eotOrderNumber }
-                    onChange={handleEOTOrderNumberChange}
-                  />
-                </div>
-                
-                <div className="flex font-bold">
-                  <button
-                    onClick={handleUpdate}
-                    className="px-6 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700"
-                  >
-                    Update
-                  </button>
-                </div>
-
+                  </span>
+                </div>              
               </CardContent>
             </Card>
           </TabsContent>
