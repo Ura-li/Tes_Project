@@ -15,6 +15,25 @@ export async function GET(request, {params}) {
     try{
         const materialorder = await prisma.materialorder.findUnique({
             where: { MOID: moid },
+            include: {
+                workorder: {
+                    include: {
+                        caseinformation: {
+                            include:{
+                                site_account : true,
+                                contact_information : true
+                            }
+                        },
+                        bookings: {
+                            include: {
+                                bookingDetails: true
+                            }
+                        }
+                    }
+                },
+                owner: true,
+                // materialorderlineitems: true
+            }
         });
     
         if (!materialorder) {

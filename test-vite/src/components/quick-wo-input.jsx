@@ -61,7 +61,13 @@ export const CaseField = ({ label, children, icon = false, span = 1, className, 
 };
 
 
-export function QuickWOInput ({ WOID, workOrderData, caseInformation }) {
+export function QuickWOInput ({ 
+  WOID, 
+  workOrderData, 
+  caseInformation,
+  SLA,
+  setSLA
+}) {
   // State untuk 8 field General
   // console.log('case_informtion in quick wo input : ', caseInformation)
   const [tab, setTab] = useState("Quick_WO_Input");
@@ -141,21 +147,7 @@ export function QuickWOInput ({ WOID, workOrderData, caseInformation }) {
   // const [latitude, setLatitude] = useState("");
 
   //SLA
-  const [SLA, setSLA] = useState({
-    slaJeopardy: "",
-    dueDateCustomer: "",
-    coverageWindow: "",
-    response: "",
-    otcCode: "",
-    requestedDateTimeCustomer: "",
-    guaranteedFixTimeCustomer: "",
-    earlyStartDateTimeCustomer: "",
-    latestStartDateTimeCustomer: "",
-    slaReschedule: "",
-    activeScheduleDate: "",
-    slaErrorDescription: "",
-    casePriorityIndex: "",
-  });
+  
 
   const handleChangeSLA = (field) => (e) => {
     setSLA((prev) => ({
@@ -222,21 +214,21 @@ export function QuickWOInput ({ WOID, workOrderData, caseInformation }) {
       // setWorkOrderInstruction(wo.WorkOrderInstruction || "...");
 
       //SLA
-      setSLA({
-        slaJeopardy: wo.SLAJeopardy || "...",
-        dueDateCustomer: wo.DueDateCustomer || "...",
-        coverageWindow: wo.CoverageWindow || "...",
-        response: wo.Response || "...",
-        otcCode: wo.OTCCode || "...",
-        requestedDateTimeCustomer: wo.RequestedDateTimeCustomer || "...",
-        guaranteedFixTimeCustomer: wo.GuaranteedFixTimeCustomer || "...",
-        earlyStartDateTimeCustomer: wo.EarlyStartDateTimeCustomer || "...",
-        latestStartDateTimeCustomer: wo.LatestStartDateTimeCustomer || "...",
-        slaReschedule: wo.SLAReschedule || "...",
-        activeScheduleDate: wo.ActiveScheduleDate || "...",
-        slaErrorDescription: wo.SLAErrorDescription || "...",
-        casePriorityIndex: wo.CasePriorityIndex?.toString() || "...",
-      })
+      // setSLA({
+      //   slaJeopardy: wo.SLAJeopardy || "...",
+      //   dueDateCustomer: wo.DueDateCustomer || "...",
+      //   coverageWindow: wo.CoverageWindow || "...",
+      //   response: wo.Response || "...",
+      //   otcCode: wo.OTCCode || "...",
+      //   requestedDateTimeCustomer: wo.RequestedDateTimeCustomer || "...",
+      //   guaranteedFixTimeCustomer: wo.GuaranteedFixTimeCustomer || "...",
+      //   earlyStartDateTimeCustomer: wo.EarlyStartDateTimeCustomer || "...",
+      //   latestStartDateTimeCustomer: wo.LatestStartDateTimeCustomer || "...",
+      //   slaReschedule: wo.SLAReschedule || "...",
+      //   activeScheduleDate: wo.ActiveScheduleDate || "...",
+      //   slaErrorDescription: wo.SLAErrorDescription || "...",
+      //   casePriorityIndex: wo.CasePriorityIndex?.toString() || "...",
+      // })
 
       // setSlaJeopardy(wo.SLAJeopardy || "...");
       // setDueDateCustomer(wo.DueDateCustomer || "...");
@@ -316,25 +308,33 @@ export function QuickWOInput ({ WOID, workOrderData, caseInformation }) {
     })();
   }, [WOID]);
 
-  // Simpel update PATCH
-  const handleSave = async () => {
-    await ApiCustomer.patch(`/api/workorder/${WOID}`, {
-      WorkOrderType: general.workOrderType,
-      SubStatus: general.subStatus,
-      PartnerStatus: general.partnerStatus,
-      CoverageWindow: SLA.coverageWindow,
-      OTCCode: SLA.otcCode,
-      RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer,
-    });
-
-    // Simpan Service Delivery Address
-    await ApiCustomer.patch(`/api/workorder/${WOID}/service-address`, {
-      ContactFirstName: ServiceDeliveryAddress.contactFirstName,
-      PhoneNumber: ServiceDeliveryAddress.phoneNumber,
-      Email: ServiceDeliveryAddress.email,
-      City: ServiceDeliveryAddress.city,
-    });
+  const handleSLAChange = (field) => (value) => {
+    setSLA((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
+  
+  console.log("SLA IN QUICK WO INPUT : ",SLA)
+  // Simpel update PATCH
+  // const handleSave = async () => {
+  //   await ApiCustomer.patch(`/api/work-order/${WOID}`, {
+  //     WorkOrderType: general.workOrderType,
+  //     SubStatus: general.subStatus,
+  //     PartnerStatus: general.partnerStatus,
+  //     CoverageWindow: SLA.coverageWindow,
+  //     OTCCode: SLA.otcCode,
+  //     RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer,
+  //   });
+
+  //   // Simpan Service Delivery Address
+  //   // await ApiCustomer.patch(`/api/workorder/${WOID}/service-address`, {
+  //   //   ContactFirstName: ServiceDeliveryAddress.contactFirstName,
+  //   //   PhoneNumber: ServiceDeliveryAddress.phoneNumber,
+  //   //   Email: ServiceDeliveryAddress.email,
+  //   //   City: ServiceDeliveryAddress.city,
+  //   // });
+  // };
 
   return (
       <CardContent>
@@ -418,9 +418,13 @@ export function QuickWOInput ({ WOID, workOrderData, caseInformation }) {
               </CardHeader>
               <CardContent className="grid gap-5 auto-rows-auto grid-cols-6 place-content-between">
                 <CaseField label="SLA Jeopardy" className={''} icon > <Input className="" value={SLA.slaJeopardy} readOnly/> </CaseField>
-                <CaseField label="Requested Date Time (Customer)" className={''}  >
-                  <DatePicker></DatePicker>
+                <CaseField label="Requested Date Time (Customer)" className={''}>
+                  <DatePicker
+                    value={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}
+                    onChange={handleSLAChange("requestedDateTimeCustomer")}
+                  />
                 </CaseField>
+
                 <CaseField label="SLA Reschedule" className={''} icon > <Input className="" value={SLA.slaReschedule} readOnly/> </CaseField>
                 <CaseField label="Due Date (Customer)" className={''} icon >
                   <DatePicker></DatePicker>
@@ -431,7 +435,10 @@ export function QuickWOInput ({ WOID, workOrderData, caseInformation }) {
                 <CaseField label="Active Schedule Date" className={''} icon > <Input className="" value={SLA.activeScheduleDate} readOnly/> </CaseField>
                 <CaseField label="Coverage Window" className={''}  > <Input className="" value={SLA.coverageWindow} onChange={e => setCoverageWindow(e.target.value)} /> </CaseField>
                 <CaseField label="Early Start Date Time (Customer)" className={''}  >
-                  <DatePicker></DatePicker>
+                  <DatePicker
+                  value={SLA.earlyStartDateTimeCustomer ? new Date(SLA.earlyStartDateTimeCustomer) : null}
+                  onChange={handleSLAChange("earlyStartDateTimeCustomer")}
+                  ></DatePicker>
                 </CaseField>
                 <CaseField label="SLA Error Description" className={'row-span-2 items-start'} childClass={'row-span-2'} icon >
                    <textarea value={SLA.slaErrorDescription} className='border-0 ring-0 ring-gray-400 w-[100%] h-[100%] resize-none'></textarea>

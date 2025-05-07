@@ -84,6 +84,29 @@ export const ServiceWork = () => {
     SiteAccount: null,
     Type: null,
   });
+
+  const [SLA, setSLA] = useState({
+    slaJeopardy: "",
+    dueDateCustomer: "",
+    coverageWindow: "",
+    response: "",
+    otcCode: "",
+    requestedDateTimeCustomer: "",
+    guaranteedFixTimeCustomer: "",
+    earlyStartDateTimeCustomer: "",
+    latestStartDateTimeCustomer: "",
+    slaReschedule: "",
+    activeScheduleDate: "",
+    slaErrorDescription: "",
+    casePriorityIndex: "",
+  });
+  const handleSLAChange = (field) => (value) => {
+    setSLA((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
   useEffect(() => {
     const fetchAllData = async () => {
       Swal.fire({
@@ -138,6 +161,24 @@ export const ServiceWork = () => {
             
           setOwnerWorkOrder(resOwner.data.data);
           setBookings(resBooking.data.data)
+
+          setSLA((prev) => ({
+            ...prev,
+            requestedDateTimeCustomer: resWO.data.data.RequestedDateTimeCustomer || "",
+            slaJeopardy: resWO.data.data.SLAJeopardy || "",
+            dueDateCustomer: resWO.data.data.DueDateCustomer || "",
+            coverageWindow: resWO.data.data.CoverageWindow || "",
+            response: resWO.data.data.Response || "",
+            otcCode: resWO.data.data.OTCCode || "",
+            guaranteedFixTimeCustomer: resWO.data.data.GuaranteedFixTimeCustomer || "",
+            earlyStartDateTimeCustomer: resWO.data.data.EarlyStartDateTimeCustomer || "",
+            latestStartDateTimeCustomer: resWO.data.data.LatestStartDateTimeCustomer || "",
+            slaReschedule: resWO.data.data.SLAReschedule || "",
+            activeScheduleDate: resWO.data.data.ActiveScheduleDate || "",
+            slaErrorDescription: resWO.data.data.SLAErrorDescription || "",
+            casePriorityIndex: resWO.data.data.CasePriorityIndex ?? "", // use ?? to allow 0
+          }));
+          
           console.log("Res WO : ", resWO.data.data)
           console.log("Res MO : ", resMO.data.data)
           console.log("Res CI : ", resCI.data.data)
@@ -197,6 +238,12 @@ export const ServiceWork = () => {
     const [requestedDateTimeCustomer, setrequestedDateTimeCustomer] = useState(null);
     const [guaranteedFixTimeCustomer, setGuaranteedFixTimeCustomer] = useState(null);
     const [dueDate, setDuedate] = useState(null);
+
+   
+
+   
+    
+
   return (
     <>
     {workOrders.SystemStatus === 'CLOSED_POSTED' && (
@@ -204,7 +251,13 @@ export const ServiceWork = () => {
         This work order is <strong>read-only</strong> because it is <strong>Closed</strong>.
       </div>
     )}
-    <TabsServiceWO  workOrders={workOrders} />
+    {workOrders?.WOID && caseInformation?.CaseID && (
+      <TabsServiceWO  
+        workOrders={workOrders} 
+        SLA={SLA}
+        setSLA={setSLA}
+      />
+    )}
     <Card className="mt-2 rounded-none p-0 border-0">
         <Tabs defaultValue="Quick_WO_Input" className="">
           <CardHeader className={'flex flex-col gap-3 border-2 w-full p-2 sticky'}>
@@ -443,17 +496,11 @@ export const ServiceWork = () => {
                           {material.MOID} on {material.WOID} 
                           </Link>
                           </TableCell>
-                        <TableCell>{material.CaseID}</TableCell>
-                        {/* <TableCell>{work.serviceaccount}</TableCell>
-                        <TableCell>{work.substatus}</TableCell>
-                        <TableCell>{work.systemstatus}</TableCell>
-                        <TableCell>{work.priority}</TableCell>
-                        <TableCell>{work.workorder}</TableCell>
-                        <TableCell>{work.primaryincident}</TableCell>
-                        <TableCell>{work.duedate}</TableCell>
-                        <TableCell>{work.orion}</TableCell>
-                        <TableCell>{work.owner}</TableCell>
-                        <TableCell>{work.created}</TableCell> */}
+                        <TableCell>{material.workorder?.CaseID}</TableCell>
+                        <TableCell>{material.CreatedOn}</TableCell>
+                        <TableCell>{material.OrderStatus}</TableCell>
+                        <TableCell>{material.OrderType}</TableCell>
+                        <TableCell>{material.ReadyForClosureDate}</TableCell>
                       </TableRow>
                     ))
                   ): (
@@ -853,6 +900,8 @@ export const ServiceWork = () => {
                 WOID={woid}
                 workOrderData={workOrders}
                 caseInformation={caseInformation}
+                SLA={SLA}
+                setSLA={setSLA}
               />
             </TabsContent>
           )}

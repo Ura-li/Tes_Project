@@ -98,49 +98,56 @@ export async function PATCH(request, { params }) {
         }
 
         // Update data
-        const casePriorityIndexFormatted = CasePriorityIndex ? parseInt(CasePriorityIndex, 10) : null;
-        const preferredDayFormatted = PreferredDay ? new Date(PreferredDay) : null;
-        const preferredTimeFormatted = PreferredTime ? new Date(PreferredTime) : null;
-        const createdOnFormatted = CreatedOn ? new Date(CreatedOn) : new Date();
-        const dueDateCustomerFormatted = DueDateCustomer ? new Date(DueDateCustomer) : null;
-        const requestedDateTimeCustomerFormatted = RequestedDateTimeCustomer ? new Date(RequestedDateTimeCustomer) : null;
-        const guaranteedFixTimeCustomerFormatted = GuaranteedFixTimeCustomer ? new Date(GuaranteedFixTimeCustomer) : null;
-        const earlyStartDateTimeCustomerFormatted = EarlyStartDateTimeCustomer ? new Date(EarlyStartDateTimeCustomer) : null;
-        const latestStartDateTimeCustomerFormatted = LatestStartDateTimeCustomer ? new Date(LatestStartDateTimeCustomer) : null;
-        const activeScheduleDateFormatted = ActiveScheduleDate ? new Date(ActiveScheduleDate) : null;
-    
-        const updatedWorkOrderInformation = await prisma.workorder.update({
-          where: { WOID },
-          data: {
-            WorkOrderType,
-            Priority,
-            SystemStatus,
-            SubStatus,
-            PreferredDay: preferredDayFormatted,
-            PreferredTime: preferredTimeFormatted,
-            ShipmentCountry,
-            ShipmentState,
-            CreatedOn: createdOnFormatted,
-            Owner,
-            SLAJeopardy,
-            DueDateCustomer: dueDateCustomerFormatted,
-            CoverageWindow,
-            Response,
-            OTCCode,
-            RequestedDateTimeCustomer: requestedDateTimeCustomerFormatted,
-            GuaranteedFixTimeCustomer: guaranteedFixTimeCustomerFormatted,
-            EarlyStartDateTimeCustomer: earlyStartDateTimeCustomerFormatted,
-            LatestStartDateTimeCustomer: latestStartDateTimeCustomerFormatted,
-            SLAReschedule,
-            ActiveScheduleDate: activeScheduleDateFormatted,
-            SLAErrorDescription,
-            CasePriorityIndex: casePriorityIndexFormatted,
-            PartnerStatus,
-            WorkOrderDescription,
-            PartnerNotes,
-            IncomingChannel
+        const isValidDate = (val) => {
+            const d = new Date(val);
+            return !isNaN(d.getTime());
+          };
+          
+          const fieldMap = {
+            WorkOrderType: v => v,
+            Priority: v => v,
+            SystemStatus: v => v,
+            SubStatus: v => v,
+            PreferredDay: v => isValidDate(v) ? new Date(v) : undefined,
+            PreferredTime: v => isValidDate(v) ? new Date(v) : undefined,
+            ShipmentCountry: v => v,
+            ShipmentState: v => v,
+            CreatedOn: v => isValidDate(v) ? new Date(v) : undefined,
+            Owner: v => v,
+            SLAJeopardy: v => v,
+            DueDateCustomer: v => isValidDate(v) ? new Date(v) : undefined,
+            CoverageWindow: v => v,
+            Response: v => v,
+            OTCCode: v => v,
+            RequestedDateTimeCustomer: v => isValidDate(v) ? new Date(v) : undefined,
+            GuaranteedFixTimeCustomer: v => isValidDate(v) ? new Date(v) : undefined,
+            EarlyStartDateTimeCustomer: v => isValidDate(v) ? new Date(v) : undefined,
+            LatestStartDateTimeCustomer: v => isValidDate(v) ? new Date(v) : undefined,
+            SLAReschedule: v => v,
+            ActiveScheduleDate: v => isValidDate(v) ? new Date(v) : undefined,
+            SLAErrorDescription: v => v,
+            CasePriorityIndex: v => isNaN(parseInt(v, 10)) ? undefined : parseInt(v, 10),
+            PartnerStatus: v => v,
+            WorkOrderDescription: v => v,
+            PartnerNotes: v => v,
+            IncomingChannel: v => v,
+          };
+          
+          
+          const dataToUpdate = {};
+          
+          for (const [field, transform] of Object.entries(fieldMap)) {
+            if (body[field] !== undefined) {
+              dataToUpdate[field] = transform(body[field]);
+            }
           }
-        });
+          
+    
+          const updatedWorkOrderInformation = await prisma.workorder.update({
+            where: { WOID: WOID },
+            data: dataToUpdate
+          });
+          
     
         return NextResponse.json({
           success: true,
