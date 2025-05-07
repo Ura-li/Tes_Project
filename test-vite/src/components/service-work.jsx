@@ -733,7 +733,7 @@ export const ServiceWork = () => {
                   </TableHeader>
 
                   <TableBody>
-                    {materialOrders.length > 0 ? (
+                    { materialOrders.length > 0 ? (
                       materialOrders.map((material) => (
                         <TableRow key={material.MOID}>
                           <TableCell className="font-medium">
@@ -747,7 +747,8 @@ export const ServiceWork = () => {
                         <TableCell>{material.OrderType}</TableCell>
                         <TableCell>{material.ReadyForClosureDate}</TableCell>
                       </TableRow>
-                    )}
+                    ))
+                  ) : null }
                   </TableBody>
                 </Table>
               </CardContent>
