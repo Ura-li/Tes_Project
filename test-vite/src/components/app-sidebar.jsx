@@ -115,6 +115,10 @@ const data = {
           title: "Parts",
           url: "/master/Part_table",
         },  
+        {
+          title: "Resource",
+          url: "/master/Resource_table",
+        }, 
       ],
     },
     {

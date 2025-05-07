@@ -16,8 +16,9 @@ import {
 } from "@/components/sc-modal";
 import { MaterialOrderEdit, MaterialOrderDelete } from "@/components/sc-modal";
 import { WorkOrderDelete, WorkOrderEdit } from "@/components/sc-modal";
-import { UserEdit, UserDelete } from "@/components/sc-modal";
+import { UserAdd, UserEdit, UserDelete } from "@/components/sc-modal";
 import { PartEdit, PartDelete } from "@/components/sc-modal";
+import { ResourceAdd, ResourceEdit, ResourceDelete } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 
@@ -37,6 +38,7 @@ export const Contact_table = () => {
       title: "Memuat Data Kontak...",
       text: "Mohon tunggu sebentar...",
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading(); // Menampilkan indikator loading
       },
@@ -207,6 +209,7 @@ export const Company_table = () => {
       title: "Memuat Data Company...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       },
@@ -383,6 +386,7 @@ export const Case_table = () => {
       title: "Memuat Data Case....",
       text: "Mohon Tunggu Sebentar",
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       },
@@ -552,6 +556,7 @@ export const Assets_table = () => {
       title: "Memuat Data Asset...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       },
@@ -701,6 +706,7 @@ export const Product_table = () => {
       title: "Memuat Data Produk...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       },
@@ -862,6 +868,7 @@ export const ProductType_table = () => {
       title: "Memuat Data Tipe Produk...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       },
@@ -983,7 +990,7 @@ export const ProductType_table = () => {
           </tbody>
         </table>
         {filteredProductTypeTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
         )}
       </div>
 
@@ -1031,6 +1038,7 @@ export const WarrantyService_table = () => {
       title: "Memuat Data Warranty Service...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       },
@@ -1167,7 +1175,7 @@ export const WarrantyService_table = () => {
           </tbody>
         </table>
         {filteredWarrantyServiceTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
         )}
       </div>
 
@@ -1215,6 +1223,7 @@ export const Mo_table = () => {
       title: "Memuat Data Material Order...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       },
@@ -1361,7 +1370,7 @@ export const Mo_table = () => {
           </tbody>
         </table>
         {filteredMaterialOrderTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
         )}
       </div>
 
@@ -1409,6 +1418,7 @@ export const Wo_table = () => {
       title: "Memuat Data Work Order...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       },
@@ -1600,7 +1610,7 @@ export const Wo_table = () => {
           </tbody>
         </table>
         {filteredWorkOrderTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
         )}
       </div>
 
@@ -1648,6 +1658,7 @@ export const User_table = () => {
       title: "Memuat Data User...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       },
@@ -1717,6 +1728,7 @@ export const User_table = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
+      <UserAdd></UserAdd>
 
       {error && <p className="text-red-500">{error}</p>}
 
@@ -1771,7 +1783,7 @@ export const User_table = () => {
           </tbody>
         </table>
         {filteredUserTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
         )}
       </div>
 
@@ -1819,6 +1831,7 @@ export const Part_table = () => {
       title: "Memuat Data Part...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       },
@@ -1957,7 +1970,7 @@ export const Part_table = () => {
           </tbody>
         </table>
         {filteredPartTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
         )}
       </div>
 
@@ -1986,3 +1999,159 @@ export const Part_table = () => {
     </div>
   );
 };
+
+export const Resource_table = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [ResourceData, setResourceData] = useState([]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchResourceDataTable = async () => {
+    setLoading(true);
+    setError(null);
+
+    Swal.fire({
+      title: "Memuat Data Resource...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      const response = await ApiCustomer.get("/api/resources");
+      if (response.data.success) {
+        setResourceData(response.data.data);
+        Swal.close();
+      } else {
+        setError("Failed to fetch Resource data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data Resource.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching Resource data:", err);
+      setError("Error fetching data");
+      Swal.close();
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data Resource.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔹 Load data when component mounts
+  useEffect(() => {
+    fetchResourceDataTable();
+  }, []);
+
+  // Filter data berdasarkan pencarian
+  const filteredResourceTable = ResourceData.filter((item) =>
+    Object.values(item).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Hitung total halaman
+  const totalPages = Math.ceil(filteredResourceTable.length / itemsPerPage);
+
+  // Ambil data sesuai halaman saat ini
+  const currentData = filteredResourceTable.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  //navigate
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Resource Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      <ResourceAdd/>  
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+              <th className="border p-2">Resource ID</th>
+              <th className="border p-2">Name</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((ResourceItem) => (
+              <tr
+                key={ResourceItem.ResourceId}
+                className="hover:bg-gray-100 text-center"
+              >
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline">
+                  {ResourceItem.ResourceId}
+                </td>
+                <td className="border p-2">{ResourceItem.Name}</td>
+                <td className="border p-2 flex space-x-2">
+                <ResourceEdit ResourceId={ResourceItem.ResourceId} onUpdate={fetchResourceDataTable}></ResourceEdit>
+                <ResourceDelete
+                  ResourceId={ResourceItem.ResourceId}
+                  isModalOpen={isModalOpen}
+                  setIsModalOpen={setIsModalOpen}
+                  onUpdate={fetchResourceDataTable}                
+                />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredResourceTable.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No data found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};  

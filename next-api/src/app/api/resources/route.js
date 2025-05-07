@@ -57,3 +57,30 @@ export async function GET(request) {
     );
   }
 }
+
+export async function POST(req) {
+  const body = await req.json();
+  const { ResourceId, Name } = body;
+
+  if (!ResourceId || !Name) {
+    return NextResponse.json({
+      success: false,
+      error: 'ResourceId and Name are required.'
+    }, { status: 400 });
+  }
+
+  try {
+    const Resources = await prisma.resource.create({
+      data: {
+        ResourceId,
+        Name
+      },
+    });
+
+    return NextResponse.json({ success: true, data: Resources });
+  } catch (error) {
+    console.error("Resource creation error:", error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+

@@ -214,6 +214,7 @@ const Search_case = () => {
           title: 'Memuat data company...',
           text: 'Mohon tunggu sebentar',
           allowOutsideClick: false,
+          allowEscapeKey: false,
           didOpen: () => {
             Swal.showLoading(); // Tampilkan loading
           }
@@ -509,6 +510,7 @@ const Search_case = () => {
       title: 'Berhasil!',
       text: 'Contact berhasil disimpan.',
       confirmButtonText: 'OK',
+      allowEscapeKey: false,
     }).then((result) => {
       if (result.isConfirmed) {
         window.location.reload(); // Arahkan ke halaman lain
