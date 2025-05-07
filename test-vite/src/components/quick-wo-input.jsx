@@ -23,10 +23,10 @@ import { SelectBarRelated } from "./sc-select";
 import { Car, Lock, Plus } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import { KeyRound } from "lucide-react";
+import { twMerge } from "tailwind-merge";
 
 //import API
 import ApiCustomer from "@/api";
-import { twMerge } from "tailwind-merge";
 import DatePicker from "./date-picker";
 // import { CaseField } from "./service-case";
 const spanMap = {
@@ -65,6 +65,16 @@ export function QuickWOInput ({ WOID, caseInformation }) {
   // State untuk 8 field General
   // console.log('case_informtion in quick wo input : ', caseInformation)
   const [tab, setTab] = useState("Quick_WO_Input");
+  const [general, setGeneral] = useState({
+    incomingChannel: "",
+    workOrderNumber: "",
+    workOrderType: "",
+    systemStatus: "",
+    subStatus: "",
+    partnerStatus: "",
+    workOrderDescription: "",
+    workOrderInstruction: "",
+  });
   const [incomingChannel, setIncomingChannel] = useState("");
   const [workOrderNumber, setWorkOrderNumber] = useState("");
   const [workOrderType, setWorkOrderType] = useState("");
@@ -76,6 +86,26 @@ export function QuickWOInput ({ WOID, caseInformation }) {
 
   //Service Delivery Address
   const [addressID, setAddressID] = useState(""); // nanti bisa jadi ID
+
+  const [ServiceDeliveryAddress, setServiceDeliveryAddress] = useState({
+    companyName: "",
+    contactFirstName: "",
+    contactLastName: "",
+    phoneNumber: "",
+    email: "",
+    addressLine1: "",
+    addressLine2: "",
+    addressLine3: "",
+    city: "",
+    stateOrProvince: "",
+    countryOrRegion: "",
+    postalCode: "",
+    timezone: "",
+    serviceTerritory: "",
+    businessSegment: "",
+    longitude: "",
+    latitude: "",
+  });
   const [companyName, setCompanyName] = useState("");
   const [contactFirstName, setContactFirstName] = useState("");
   const [contactLastName, setContactLastName] = useState("");
@@ -95,6 +125,22 @@ export function QuickWOInput ({ WOID, caseInformation }) {
   const [latitude, setLatitude] = useState("");
 
   //SLA
+  const [SLA, setSLA] = useState({
+    slaJeopardy: "",
+    dueDateCustomer: "",
+    coverageWindow: "",
+    response: "",
+    otcCode: "",
+    requestedDateTimeCustomer: "",
+    guaranteedFixTimeCustomer: "",
+    earlyStartDateTimeCustomer: "",
+    latestStartDateTimeCustomer: "",
+    slaReschedule: "",
+    activeScheduleDate: "",
+    slaErrorDescription: "",
+    casePriorityIndex: "",
+    siteAccountInformation: "",
+  });
   const [slaJeopardy, setSlaJeopardy] = useState("");
   const [dueDateCustomer, setDueDateCustomer] = useState("");
   const [coverageWindow, setCoverageWindow] = useState("");

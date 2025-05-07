@@ -46,6 +46,7 @@ import { NewBookableResourceBooking } from "./service-booking";
 import { getUserFromToken } from "@/lib/utils/auth";
 
 import { useNavigate } from "react-router";
+import DatePicker from "./date-picker";
 
 export const ServiceWork = () => {
 
@@ -103,6 +104,7 @@ export const ServiceWork = () => {
           setCaseInformation(resCI.data.data);
 
           const resBooking = await ApiCustomer.get(`/api/bookings?WOID=${woid}`);
+          console.log("Res Booking : ",resBooking.data.data)
           setBookings(resBooking.data.data)
         }
   
@@ -146,8 +148,8 @@ export const ServiceWork = () => {
 
     const [selected, setSelected] = useState("work_order"); 
 
-    const location = useLocation();
-    const { ownerUserData, dataFetchCustomerData } = location.state || {}; 
+    // const location = useLocation();
+    // const { ownerUserData, dataFetchCustomerData } = location.state || {}; 
 
     const navigate = useNavigate();
   return (
@@ -157,7 +159,7 @@ export const ServiceWork = () => {
         This work order is <strong>read-only</strong> because it is <strong>Closed</strong>.
       </div>
     )}
-    <TabsServiceWO/>
+    <TabsServiceWO  workOrders={workOrders} />
     <Card className="mt-2 rounded-none p-0 border-0">
         <Tabs defaultValue="Quick_WO_Input" className="">
           <CardHeader className={'flex flex-col gap-3 border-2 w-full p-2 sticky'}>
@@ -182,7 +184,9 @@ export const ServiceWork = () => {
               </CardTitle>
               <CardTitle className="flex">
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>{ownerUserData.Name}</h1>
+                  <h1 className='text-blue-500'>
+                    {/* {ownerUserData.Name} */}
+                    </h1>
                   <p className="text-sm font-light ">Owner</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
@@ -190,7 +194,9 @@ export const ServiceWork = () => {
                   <p className="text-sm font-light ">Queue</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</h1>
+                  <h1 className='text-blue-500'>
+                    {/* {dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName} */}
+                    </h1>
                   <p className="text-sm font-light ">Contact</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
@@ -200,7 +206,10 @@ export const ServiceWork = () => {
                   </SelectTrigger>
                   <SelectContent className="p-0">
                     <SelectGroup className="p-0">
-                    <SelectItem value="first" className="p-0">{dataFetchCustomerData.SiteAccount?.Company}</SelectItem>
+                    <SelectItem value="first" className="p-0">
+                      {/* {dataFetchCustomerData.SiteAccount?.Company} */}
+
+                    </SelectItem>
                     <SelectItem value="??">??</SelectItem>
                       <SelectItem value="!!">!!</SelectItem>
                       <SelectItem value="**">**</SelectItem>
@@ -445,26 +454,27 @@ export const ServiceWork = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="wo_bookings" className="w-390">
+          <TabsContent value="wo_bookings" >
             <Card className="mt-5 flex-col">
               <span className="ml-5 font-bold text-xl">WO Bookings</span>
               <CardContent className="grid gap-5">
                 <div className="font-bold flex">
                   <span>Requested Date Time (Customer)</span>
                   <span className="ml-50 mr-10">...</span>
-                  <CalendarDays></CalendarDays>
+                  <DatePicker></DatePicker>
                 </div>
 
                 <div className="font-bold flex">
                   <span>Guaranteed Fix Time (Customer)</span>
                   <span className="ml-51 mr-10">...</span>
-                  <CalendarDays></CalendarDays>
+                  {/* <DatePicker></DatePicker> */}
+                  <DatePicker></DatePicker>
                 </div>
 
                 <div className="font-bold flex">
                   <span>Due Date (Customer) </span>
                   <span className="ml-72.5 mr-10">...</span>
-                  <CalendarDays></CalendarDays>
+                  <DatePicker></DatePicker>
                 </div>
               </CardContent>
             </Card>
@@ -501,9 +511,9 @@ export const ServiceWork = () => {
                   <TableBody>
                   {bookings.length > 0 ? (
                     bookings.map((booking, index) => (
-                      <TableRow key={booking.BookingId || index} onClick={() => navigate(`/bookings`,{ state: { BookingId: booking.BookingId }})} >
-                        <TableCell>{booking.workorder?.Owner || '-'}</TableCell>
-                        <TableCell>{booking.workorder?.WorkOrderNumber || '-'}</TableCell>
+                      <TableRow key={booking.BookingId || index} onClick={() => navigate(`/bookings/${booking.BookingId}`)} >
+                        <TableCell>{booking.bookingDetails?.[0].resource?.Name || '-'}</TableCell>
+                        <TableCell>{booking.bookingDetails?.[0].resourceaccount?.Name || '-'}</TableCell>
                         <TableCell>{booking.BookingStatus || '-'}</TableCell>
                         <TableCell>{booking.CeScheduleChange ? 'Yes' : 'No'}</TableCell>
                         <TableCell>{booking.ScheduleJeopardy ? 'Jeopardy' : '-'}</TableCell>
@@ -807,7 +817,7 @@ export const ServiceWork = () => {
             </Card> 
           </TabsContent>
 
-          <TabsContent value="Quick_WO_Input" className="w-400">
+          <TabsContent value="Quick_WO_Input" >
             <QuickWOInput WOID={woid} caseInformation={caseInformation} />
           </TabsContent>
         </Tabs>

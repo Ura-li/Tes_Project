@@ -51,9 +51,8 @@ import {
   ChevronDown
  } from 'lucide-react'
 
- import { useLocation } from "react-router-dom";
+ import { useLocation, useNavigate } from "react-router";
  import { useState, useEffect } from "react";
- import { useNavigate } from 'react-router'
  import { useSidebar } from '@/components/ui/sidebar'
  import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -961,7 +960,7 @@ const handleClick = async () => {
   // await fetchCustomerData(); 
   {workOrders.map((work) => {
   navigate(`/work/${work.WOID}`, {
-    state: { ownerUserData, dataFetchCustomerData }
+    // state: { ownerUserData, dataFetchCustomerData }
   });
   })}
 };

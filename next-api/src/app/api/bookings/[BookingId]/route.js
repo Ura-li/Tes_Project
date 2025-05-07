@@ -76,12 +76,14 @@ export async function PATCH(request, { params }) {
 
     const changedBy = parseInt(ChangedBy);
     console.log("booking dataID", bookingDetails2Data)
-    
-    const resourceId = bookingDetailsData.ResourceId?.toString() ?? "default-id";
-    const accountId = bookingDetailsData.AccountId?.toString() ?? "default-id";
-    const subkTechnicianId = bookingDetailsData.SubkTechnicianId?.toString() ?? null;
+    const bookingDetailToUpdate = bookingDetailsData;
+    console.log("booking Detail Data To update ", bookingDetailToUpdate)
+
+    const resourceId = bookingDetailToUpdate?.ResourceId ?? "default-id";
+    const accountId = bookingDetailToUpdate?.ResourceAccountId ?? "default-id";
+    const subkTechnicianId = bookingDetailToUpdate?.SubkTechnicianId ?? null;
+
     console.log("Resource ID:", resourceId)
-    console.log("booking Detail Data", bookingDetailsData)
     console.log("booking Changed By", changedBy)
 
 
@@ -120,9 +122,20 @@ export async function PATCH(request, { params }) {
         },
       });
 
+      const existingDetail = await tx.bookingDetails.findFirst({
+        where: { BookingId: bookingId },
+        orderBy: { ChangedAt: 'desc' }, // use the correct field
+      });
+      
+      
+      if (!existingDetail) {
+        throw new Error('No bookingDetails found to update.');
+      }
+      
       // Insert BookingDetails baru
-      const createdBookingDetail = await tx.bookingDetails.create({
-        data: {
+      const updatedBookingDetail = await tx.bookingDetails.update({
+        where: { BookingDetailId: existingDetail.BookingDetailId },
+        data : {
           ChangedBy: changedBy,
           // ResourceId: resourceId,
           // ResourceAccountId: accountId,
@@ -149,13 +162,18 @@ export async function PATCH(request, { params }) {
         },
       });
 
-      return { updatedBooking, createdBookingDetail };
+      // return { updatedBooking, createdBookingDetail };
+      return NextResponse.json(
+        {
+          message: 'Booking dan BookingDetails berhasil diperbarui.',
+          data: { updatedBooking, updatedBookingDetail }
+        },
+        { status: 200 }
+      );
     });
 
-    return NextResponse.json(
-      { message: 'Booking dan BookingDetails berhasil diperbarui.', data: result },
-      { status: 200 }
-    );
+    return result;
+ 
 
   } catch (error) {
     console.error('[BOOKING_PATCH_ERROR]', error);

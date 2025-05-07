@@ -488,7 +488,10 @@ const Search_case = () => {
   if (
     !formDataContact.FirstName ||
     !formDataContact.LastName ||
-    !formDataContact.Email
+    !formDataContact.Email ||
+    !formDataContact.Phone ||
+    !formDataContact.AddressLine1 ||
+    !formDataContact.City
   ) {
     Swal.fire({
       icon: 'warning',
@@ -1155,7 +1158,9 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <Label htmlFor="FirstName">First Name</Label>
+                    <Label htmlFor="FirstName">First Name 
+                      <span className='text-red-500'>*</span>
+                    </Label>
                     <Input
                       id="FirstName"
                       type="text"
@@ -1165,7 +1170,9 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <Label htmlFor="LastName">Last Name</Label>
+                    <Label htmlFor="LastName">Last Name
+                    <span className='text-red-500'>*</span>
+                    </Label>
                     <Input
                       id="LastName"
                       type="text"
@@ -1175,7 +1182,9 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <Label htmlFor="Email">Email</Label>
+                    <Label htmlFor="Email">Email                      
+                    <span className='text-red-500'>*</span>
+                    </Label>
                     <Input
                       id="Email"
                       type="email"
@@ -1190,7 +1199,10 @@ const Search_case = () => {
                 </CardHeader>
                 <CardContent className="grid gap-5 grid-cols-4">
                   <div className="space-y-0.5">
-                    <Label htmlFor="Phone">Phone</Label>
+                    <Label htmlFor="Phone">Phone
+                      
+                    <span className='text-red-500'>*</span>
+                    </Label>
                     <Input
                       id="Phone"
                       type="text"
@@ -1200,7 +1212,10 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <Label htmlFor="Mobile">Mobile</Label>
+                    <Label htmlFor="Mobile">Mobile
+                      
+                    <span className='text-red-500'>*</span>
+                    </Label>
                     <Input
                       id="Mobile"
                       type="text"
@@ -1265,7 +1280,10 @@ const Search_case = () => {
                 </CardHeader>
                 <CardContent className="grid gap-5 grid-cols-3">
                   <div className="space-y-0.5">
-                    <Label htmlFor="AddressLine1">Address Line 1</Label>
+                    <Label htmlFor="AddressLine1">Address Line 1
+                      
+                    <span className='text-red-500'>*</span>
+                    </Label>
                     <Input
                       id="AddressLine1"
                       type="text"
@@ -1285,7 +1303,10 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="City">City</Label>
+                    <Label htmlFor="City">City
+                      
+                    <span className='text-red-500'>*</span>
+                    </Label>
                     <Input
                       id="City"
                       type="text"
@@ -1295,7 +1316,10 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <Label htmlFor="StateProvince">State/Province</Label>
+                    <Label htmlFor="StateProvince">State/Province
+                      
+                    <span className='text-red-500'>*</span>
+                    </Label>
                     <Input
                       id="StateProvince"
                       type="text"
@@ -1305,7 +1329,10 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5 flex flex-col">
-                    <Label htmlFor="current">Country</Label>
+                    <Label htmlFor="current">Country
+                      
+                    <span className='text-red-500'>*</span>
+                    </Label>
                     <SelectBar
                       id="Country"
                       value={formDataContact.Country}
@@ -1313,7 +1340,10 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
+                    <Label htmlFor="ZipPostalCode">Zip/Postal Code
+                      
+                    <span className='text-red-500'>*</span>
+                    </Label>
                     <Input
                       id="ZipPostalCode"
                       type="text"
