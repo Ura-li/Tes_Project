@@ -20,7 +20,9 @@ import
   Mo_table,
   Wo_table,
   SubkTechnician_table,
-  SymptomCodeTable
+  SymptomCodeTable,
+  BookingsTable,
+  BookingDetailsTable
  } from './master_table';
 import { Bookings } from './bookings';
 // import { ModalContextProvider } from './components/modal-context';
@@ -61,6 +63,8 @@ createRoot(document.getElementById('root')).render(
             <Route path='master/ResourceAccount' element={<ResourceAccountTable/>}/>
             <Route path='master/SubkTechnician' element={<SubkTechnician_table/>}/>
             <Route path='master/symptom_codes' element={<SymptomCodeTable/>}/>
+            <Route path='master/Bookings' element={<BookingsTable/>}/>
+            <Route path='master/BookingDetails' element={<BookingDetailsTable/>}/>
             {/* </Route> */}
           </Route>
             {/* </Route> */}

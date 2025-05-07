@@ -11,6 +11,9 @@ import { WorkOrderDelete, WorkOrderEdit } from "@/components/sc-modal";
 import { ResourceAccountAdd, ResourceAccountEdit, ResourceAccountDelete } from "@/components/sc-modal";
 import { SubkTechnicianAdd, SubkTechnicianEdit, SubkTechnicianDelete} from "@/components/sc-modal";
 import { SymptomCodeAdd, SymptomCodeEdit , SymptomCodeDelete } from "@/components/sc-modal";
+import { BookingsAdd, BookingsEdit, BookingsDelete } from "@/components/sc-modal";
+import { BookingDetailsAdd, BookingDetailsEdit, BookingDetailsDelete } from "@/components/sc-modal";
+
 import { useNavigate } from "react-router";
 
 export const Contact_table = () => {
@@ -1677,6 +1680,314 @@ export const SymptomCodeTable = () => {
           Previous
         </button>
         <span>Page {currentPage} of {totalPages}</span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const BookingsTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [bookingData, setBookingData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchBookingData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/booking");
+      if (response.data.success) {
+        setBookingData(response.data.data);
+      } else {
+        setError("Failed to fetch booking data");
+      }
+    } catch (err) {
+      console.error("Error fetching booking data:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookingData();
+  }, []);
+
+  const filteredData = bookingData.filter((item) =>
+    Object.values(item).some((value) =>
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const currentData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Bookings Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      <BookingsAdd onUpdate={fetchBookingData} />
+
+      {loading && <p>Loading data...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+              <th className="border p-2">Booking ID</th>
+              <th className="border p-2">WOID</th>
+              <th className="border p-2">Status</th>
+              <th className="border p-2">Schedule Jeopardy</th>
+              <th className="border p-2">Jeopardy Time</th>
+              <th className="border p-2">Do Not Disturb</th>
+              <th className="border p-2">CE Schedule Change</th>
+              <th className="border p-2">Durations (min)</th>
+              <th className="border p-2">Created By</th>
+              <th className="border p-2">Created At</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((item) => (
+              <tr key={item.BookingId} className="hover:bg-gray-100 text-center">
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() => navigate(`/bookings/${item.BookingId}`)}
+                >
+                  {item.BookingId}
+                </td>
+                <td className="border p-2">{item.WOID}</td>
+                <td className="border p-2">{item.BookingStatus || "-"}</td>
+                <td className="border p-2">{item.ScheduleJeopardy ? "Yes" : "No"}</td>
+                <td className="border p-2">
+                  {item.ScheduleJeopardyTime
+                    ? new Date(item.ScheduleJeopardyTime).toLocaleString("id-ID")
+                    : "-"}
+                </td>
+                <td className="border p-2">{item.DoNotDisturb ? "Yes" : "No"}</td>
+                <td className="border p-2">{item.CeScheduleChange ? "Yes" : "No"}</td>
+                <td className="border p-2">
+                  Total Billable: {item.TotalBillableDurationInMinutes || 0} <br/> 
+                  Total In Progress: {item.TotalInProgressDurationInMinutes || 0}  <br/>
+                  Total Break: {item.TotalBreakDurationInMinutes || 0}
+                </td>
+                <td className="border p-2">{item.CreatedBy}</td>
+                <td className="border p-2">
+                  {new Date(item.CreatedAt).toLocaleDateString("id-ID", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </td>
+                <td className="border p-2 flex space-x-2 justify-center">
+                  <BookingsEdit BookingId={item.BookingId} onUpdate={fetchBookingData} />
+                  <BookingsDelete
+                    BookingId={item.BookingId}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchBookingData}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredData.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No entries found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const BookingDetailsTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [bookingDetailsData, setBookingDetailsData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const fetchBookingDetails = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/bookingDetails");
+      if (response.data.success) {
+        setBookingDetailsData(response.data.data);
+      } else {
+        setError("Failed to fetch booking details data");
+      }
+    } catch (err) {
+      console.error("Error fetching booking details data:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookingDetails();
+  }, []);
+
+  const filteredData = bookingDetailsData.filter((item) =>
+    Object.values(item).some((value) =>
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const currentData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Booking Details Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      <BookingDetailsAdd onUpdate={fetchBookingDetails} />
+
+      {loading && <p>Loading data...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
+              <th className="border p-2">Booking Detail ID</th>
+              <th className="border p-2">Booking ID</th>
+              <th className="border p-2">Name</th>
+              <th className="border p-2">Status</th>
+              <th className="border p-2">Customer Time</th>
+              <th className="border p-2">User Time</th>
+              <th className="border p-2">Changed By</th>
+              <th className="border p-2">Changed At</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((item) => (
+              <tr key={item.BookingDetailId} className="hover:bg-gray-100 text-center text-sm">
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() => navigate(`/booking-details/${item.BookingDetailId}`)}
+                >
+                  {item.BookingDetailId}
+                </td>
+                <td className="border p-2">{item.BookingId}</td>
+                <td className="border p-2">{item.Name}</td>
+                <td className="border p-2">{item.Status}</td>
+
+                <td className="border p-2 text-left">
+                  <div>Start: {item.StartTimeCustomerTime ? new Date(item.StartTimeCustomerTime).toLocaleString() : "-"}</div>
+                  <div>End: {item.EndTimeCustomerTime ? new Date(item.EndTimeCustomerTime).toLocaleString() : "-"}</div>
+                  <div>Est. Arrival: {item.EstimatedArrivalTimeCustomerTime ? new Date(item.EstimatedArrivalTimeCustomerTime).toLocaleString() : "-"}</div>
+                  <div>Actual Arrival: {item.ActualArrivalTimeCustomerTime ? new Date(item.ActualArrivalTimeCustomerTime).toLocaleString() : "-"}</div>
+                </td>
+
+                <td className="border p-2 text-left">
+                  <div>Start: {item.StartTimeUserTime ? new Date(item.StartTimeUserTime).toLocaleString() : "-"}</div>
+                  <div>End: {item.EndTimeUserTime ? new Date(item.EndTimeUserTime).toLocaleString() : "-"}</div>
+                  <div>Duration: {item.DurationInMinutesUserTime || 0} min</div>
+                  <div>Est. Arrival: {item.EstimatedArrivalTimeUserTime ? new Date(item.EstimatedArrivalTimeUserTime).toLocaleString() : "-"}</div>
+                  <div>Actual Arrival: {item.ActualArrivalTimeUserTime ? new Date(item.ActualArrivalTimeUserTime).toLocaleString() : "-"}</div>
+                </td>
+
+                <td className="border p-2">{item.ChangedBy}</td>
+                <td className="border p-2">
+                  {new Date(item.ChangedAt).toLocaleDateString("id-ID", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </td>
+                <td className="border p-2 flex justify-center gap-2">
+                  <BookingDetailsEdit
+                    BookingDetailId={item.BookingDetailId}
+                    onUpdate={fetchBookingDetails}
+                  />
+                  <BookingDetailsDelete
+                    BookingDetailId={item.BookingDetailId}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchBookingDetails}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {filteredData.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No entries found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}

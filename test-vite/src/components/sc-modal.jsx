@@ -99,48 +99,87 @@ export function BtnModal({
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
-          onClick={handleCreateCase}
-          disabled={!selectedAssetForCase || !selectedContactForCase } // 🔥 Button disabled if no asset selected
-          className={`mr-4${(!selectedAssetForCase || !selectedContactForCase) ? "bg-white cursor-not-allowed" : "bg-blue-500"}`}
-        >
-          <Plus></Plus>Create Case
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[700px] bg-white">
-        <DialogHeader>
-          <DialogTitle>Case Information</DialogTitle>
-        </DialogHeader>
-        <div className="flex items-center space-x-3">
-          <div className="">
-            <Label htmlFor="name" className="text-right">
-              Case Subject
-            </Label>
-            <Input id="CaseSubject" className="col-span-3 border-b-black p-1" />
+    <DialogTrigger asChild>
+      <Button 
+        variant="outline" 
+        onClick={handleCreateCase}
+        disabled={!selectedAssetForCase || !selectedContactForCase}
+        className={`mr-4 ${(!selectedAssetForCase || !selectedContactForCase) ? "bg-white cursor-not-allowed" : "bg-blue-500"}`}
+      >
+        <Plus className="mr-2" />Create Case
+      </Button>
+    </DialogTrigger>
+
+    <DialogContent className="sm:max-w-[700px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Case Information</DialogTitle>
+      </DialogHeader>
+
+      <form className="space-y-5">
+        {/* Subject & Type */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col">
+            <Label htmlFor="CaseSubject">Case Subject</Label>
+            <Input id="CaseSubject" className="border p-2" placeholder="Enter subject" />
           </div>
-          <div className="">
-            <Label htmlFor="CaseType" className="text-right">
-              Case Type
-            </Label>
-            <SelectBar3 value={caseType} onChange={setCaseType}></SelectBar3>
-          </div>
-          <div className="flex items-center space-x-2 mt-5">
-            <Checkbox id="KCI_Flag" />
-            <label
-              htmlFor="KCI_Flag"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              KCI For this case?
-            </label>
+
+          <div className="flex flex-col">
+            <Label htmlFor="CaseType">Case Type</Label>
+            <SelectBar3 value={caseType} onChange={setCaseType} />
           </div>
         </div>
+
+        {/* KCI Flag */}
+        <div className="flex items-center space-x-2">
+          <Checkbox id="KCI_Flag" />
+          <Label
+            htmlFor="KCI_Flag"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            KCI For this case?
+          </Label>
+        </div>
+
+        {/* Problem Description */}
+        <div className="flex flex-col">
+          <Label htmlFor="ProblemDesc">Problem Description</Label>
+          <textarea
+            id="ProblemDesc"
+            className="w-full p-2 border rounded-md"
+            rows={3}
+            placeholder="Describe the problem here..."
+          />
+        </div>
+
+        {/* Case Note */}
+        <div className="flex flex-col">
+          <Label htmlFor="CaseNote">Case Note</Label>
+          <textarea
+            id="CaseNote"
+            className="w-full p-2 border rounded-md"
+            rows={3}
+            placeholder="Additional notes..."
+          />
+        </div>
+
+        {/* Accessories */}
+        <div className="flex flex-col">
+          <Label>Accessories</Label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+            <Input placeholder="Accessory name" />
+            <Input placeholder="Note" />
+            <Input placeholder="CT / SN code" />
+          </div>
+          <p className="text-sm text-gray-500 mt-1">Total accessories: 1</p>
+        </div>
+
         <DialogFooter>
           <Button type="submit" onClick={handleCreateCase}>DONE</Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </form>
+    </DialogContent>
+  </Dialog>
+
   );
 }
 
@@ -4703,6 +4742,832 @@ export function SymptomCodeDelete({ SymptomCodeID, onUpdate }) {
           <DialogDescription>Confirm deletion of this Symptom Code.</DialogDescription>
         </DialogHeader>
         <p>Apakah Anda yakin ingin menghapus data ini?</p>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingsAdd({ onUpdate }) {
+  const [formData, setFormData] = useState({
+    WOID: "",
+    BookingStatus: "",
+    ScheduleJeopardy: false,
+    ScheduleJeopardyTime: "",
+    DoNotDisturb: false,
+    CeScheduleChange: false,
+    TotalBillableDurationInMinutes: "",
+    TotalInProgressDurationInMinutes: "",
+    TotalBreakDurationInMinutes: "",
+    CreatedBy: "",
+  });
+
+  const [workorders, setWorkorders] = useState([]);
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        const [woRes, userRes] = await Promise.all([
+          ApiCustomer.get("/api/work-order"),
+          ApiCustomer.get("/api/user"),
+        ]);
+        setWorkorders(woRes.data.data || []);
+        setUsers(userRes.data.data || []);
+      } catch (error) {
+        console.error("Failed to load dropdown data:", error);
+      }
+    };
+
+    fetchDropdownData();
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.WOID || !formData.CreatedBy) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "WOID and CreatedBy are required.",
+        icon: "warning",
+        timer: 1500,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      return;
+    }
+
+    const dataToSend = {
+      ...formData,
+      ScheduleJeopardyTime: formData.ScheduleJeopardyTime ? new Date(formData.ScheduleJeopardyTime) : null,
+      TotalBillableDurationInMinutes: formData.TotalBillableDurationInMinutes ? parseInt(formData.TotalBillableDurationInMinutes) : null,
+      TotalInProgressDurationInMinutes: formData.TotalInProgressDurationInMinutes ? parseInt(formData.TotalInProgressDurationInMinutes) : null,
+      TotalBreakDurationInMinutes: formData.TotalBreakDurationInMinutes ? parseInt(formData.TotalBreakDurationInMinutes) : null,
+      CreatedBy: parseInt(formData.CreatedBy),
+    };
+
+    try {
+      await ApiCustomer.post("/api/booking", dataToSend);
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Booking berhasil disimpan.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        onUpdate?.();
+      });
+    } catch (error) {
+      console.error("Error saving Booking:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menyimpan data. Silakan coba lagi.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm mb-4">Add Booking</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Booking</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>WOID *</Label>
+          <select
+            id="WOID"
+            value={formData.WOID}
+            onChange={handleInputChange}
+            className="w-full border p-2 rounded"
+          >
+            <option value="">-- Select WOID --</option>
+            {workorders.map((wo) => (
+              <option key={wo.WOID} value={wo.WOID}>{wo.WOID}</option>
+            ))}
+          </select>
+
+          <Label>Booking Status</Label>
+          <Input id="BookingStatus" value={formData.BookingStatus} onChange={handleInputChange} />
+
+          <div className="flex items-center space-x-2">
+            <input type="checkbox" id="ScheduleJeopardy" checked={formData.ScheduleJeopardy} onChange={handleInputChange} />
+            <Label htmlFor="ScheduleJeopardy">Schedule Jeopardy</Label>
+          </div>
+
+          <Label>Schedule Jeopardy Time</Label>
+          <Input id="ScheduleJeopardyTime" type="datetime-local" value={formData.ScheduleJeopardyTime} onChange={handleInputChange} />
+
+          <div className="flex items-center space-x-2">
+            <input type="checkbox" id="DoNotDisturb" checked={formData.DoNotDisturb} onChange={handleInputChange} />
+            <Label htmlFor="DoNotDisturb">Do Not Disturb</Label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input type="checkbox" id="CeScheduleChange" checked={formData.CeScheduleChange} onChange={handleInputChange} />
+            <Label htmlFor="CeScheduleChange">CE Schedule Change</Label>
+          </div>
+
+          <Label>Total Billable Duration (minutes)</Label>
+          <Input id="TotalBillableDurationInMinutes" type="number" value={formData.TotalBillableDurationInMinutes} onChange={handleInputChange} />
+
+          <Label>Total In Progress Duration (minutes)</Label>
+          <Input id="TotalInProgressDurationInMinutes" type="number" value={formData.TotalInProgressDurationInMinutes} onChange={handleInputChange} />
+
+          <Label>Total Break Duration (minutes)</Label>
+          <Input id="TotalBreakDurationInMinutes" type="number" value={formData.TotalBreakDurationInMinutes} onChange={handleInputChange} />
+
+          <Label>Created By *</Label>
+          <select
+            id="CreatedBy"
+            value={formData.CreatedBy}
+            onChange={handleInputChange}
+            className="w-full border p-2 rounded"
+          >
+            <option value="">-- Select User --</option>
+            {users.map((user) => (
+              <option key={user.IDUser} value={user.IDUser}>
+                {user.Name || `User ${user.IDUser}`}
+              </option>
+            ))}
+          </select>
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingsEdit({ BookingId, onUpdate }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [bookingData, setBookingData] = useState({
+    BookingStatus: "",
+    ScheduleJeopardy: false,
+    ScheduleJeopardyTime: "",
+    DoNotDisturb: false,
+    CeScheduleChange: false,
+    TotalBillableDurationInMinutes: 0,
+    TotalInProgressDurationInMinutes: 0,
+    TotalBreakDurationInMinutes: 0,
+  });
+
+  const fetchBookingData = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/booking/${BookingId}`);
+      const data = res.data.data;
+      setBookingData({
+        BookingStatus: data.BookingStatus || "",
+        ScheduleJeopardy: data.ScheduleJeopardy || false,
+        ScheduleJeopardyTime: data.ScheduleJeopardyTime?.slice(0, 16) || "",
+        DoNotDisturb: data.DoNotDisturb || false,
+        CeScheduleChange: data.CeScheduleChange || false,
+        TotalBillableDurationInMinutes: data.TotalBillableDurationInMinutes || 0,
+        TotalInProgressDurationInMinutes: data.TotalInProgressDurationInMinutes || 0,
+        TotalBreakDurationInMinutes: data.TotalBreakDurationInMinutes || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching booking:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) fetchBookingData();
+  }, [isOpen]);
+
+  const handleChange = (e) => {
+    const { id, value, type, checked } = e.target;
+  
+    setBookingData((prev) => ({
+      ...prev,
+      [id]:
+        type === "checkbox"
+          ? checked
+          : type === "number"
+          ? parseInt(value) || 0
+          : value,
+    }));
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await ApiCustomer.patch(`/api/booking/${BookingId}`, bookingData);
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: "Booking has been updated.",
+        timer: 1200,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      setIsOpen(false);
+      onUpdate?.();
+    } catch (error) {
+      console.error("Error updating booking:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "Could not update Booking.",
+        timer: 1500,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Edit Booking</DialogTitle>
+          <DialogDescription>Update booking status and details below.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <Input id="BookingStatus" value={bookingData.BookingStatus} onChange={handleChange} placeholder="Booking Status" />
+
+          <div className="flex items-center space-x-2">
+            <label htmlFor="ScheduleJeopardy">Schedule Jeopardy</label>
+            <Checkbox
+                id="ScheduleJeopardy"
+                checked={bookingData.ScheduleJeopardy}
+                onCheckedChange={(checked) =>
+                  setBookingData((prev) => ({ ...prev, ScheduleJeopardy: checked }))
+                }
+              />
+          </div>
+
+          <Input
+            id="ScheduleJeopardyTime"
+            type="datetime-local"
+            value={bookingData.ScheduleJeopardyTime}
+            onChange={handleChange}
+          />
+
+          <div className="flex items-center space-x-2">
+            <Checkbox id="DoNotDisturb" checked={bookingData.DoNotDisturb} onChange={handleChange} />
+            <label htmlFor="DoNotDisturb">Do Not Disturb</label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox id="CeScheduleChange" checked={bookingData.CeScheduleChange} onChange={handleChange} />
+            <label htmlFor="CeScheduleChange">CE Schedule Change</label>
+          </div>
+
+          <Input
+            id="TotalBillableDurationInMinutes"
+            type="number"
+            value={bookingData.TotalBillableDurationInMinutes}
+            onChange={handleChange}
+            placeholder="Total Billable Duration (min)"
+          />
+          <Input
+            id="TotalInProgressDurationInMinutes"
+            type="number"
+            value={bookingData.TotalInProgressDurationInMinutes}
+            onChange={handleChange}
+            placeholder="In-Progress Duration (min)"
+          />
+          <Input
+            id="TotalBreakDurationInMinutes"
+            type="number"
+            value={bookingData.TotalBreakDurationInMinutes}
+            onChange={handleChange}
+            placeholder="Break Duration (min)"
+          />
+        </div>
+
+        <DialogFooter className="pt-4">
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingsDelete({ BookingId, onUpdate }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      const response = await ApiCustomer.delete(`/api/booking/${BookingId}`);
+
+      if (response.status === 409 || response.data.success === false) {
+        Swal.fire({
+          icon: "error",
+          title: "Cannot Delete",
+          text: response.data.message || "This booking cannot be deleted due to relational restrictions.",
+          timer: 1400,
+          showConfirmButton: false,
+          timerProgressBar: true,
+        });
+        return;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Deleted",
+        text: "Booking has been deleted successfully.",
+        timer: 1100,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+
+      setIsModalOpen(false);
+      onUpdate?.(); // Refresh list
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: error?.response?.data?.message || "Failed to delete booking.",
+        timer: 1400,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Booking</DialogTitle>
+          <DialogDescription>Are you sure you want to delete this booking? This action cannot be undone.</DialogDescription>
+        </DialogHeader>
+        <p>This will permanently remove the booking record from the system.</p>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingDetailsAdd({ onUpdate }) {
+  const [formData, setFormData] = useState({
+    BookingId: "",
+    ResourceId: "",
+    ResourceAccountId: "",
+    SubkTechnicianId: "",
+    Name: "",
+    Status: "",
+    StartTimeCustomerTime: "",
+    EndTimeCustomerTime: "",
+    EstimatedArrivalTimeCustomerTime: "",
+    ActualArrivalTimeCustomerTime: "",
+    StartTimeUserTime: "",
+    EndTimeUserTime: "",
+    DurationInMinutesUserTime: "",
+    EstimatedArrivalTimeUserTime: "",
+    ActualArrivalTimeUserTime: "",
+    ChangedBy: "",
+  });
+
+  const [bookings, setBookings] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [technicians, setTechnicians] = useState([]);
+
+  useEffect(() => {
+    const fetchDropdowns = async () => {
+      try {
+        const [bookingRes, resourceRes, accountRes, techRes] = await Promise.all([
+          ApiCustomer.get("/api/booking"),
+          ApiCustomer.get("/api/resources"),
+          ApiCustomer.get("/api/resource-account"),
+          ApiCustomer.get("/api/subk-technician"),
+        ]);
+        setBookings(bookingRes.data.data || []);
+        setResources(resourceRes.data.data || []);
+        setAccounts(accountRes.data.data || []);
+        setTechnicians(techRes.data.data || []);
+      } catch (error) {
+        console.error("Dropdown fetch failed:", error);
+      }
+    };
+    fetchDropdowns();
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const toFullISOString = (value) => {
+    if (!value) return null;
+    // Tambah ":00" jika hanya sampai menit
+    return value.length === 16 ? value + ":00" : value;
+  };
+  
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        ...formData,
+        BookingId: parseInt(formData.BookingId),
+        ResourceId: formData.ResourceId || null,
+        ResourceAccountId: formData.ResourceAccountId || null,
+        SubkTechnicianId: formData.SubkTechnicianId || null,
+        DurationInMinutesUserTime: formData.DurationInMinutesUserTime ? parseInt(formData.DurationInMinutesUserTime) : null,
+        ChangedBy: parseInt(formData.ChangedBy),
+        StartTimeCustomerTime: toFullISOString(formData.StartTimeCustomerTime),
+        EndTimeCustomerTime: toFullISOString(formData.EndTimeCustomerTime),
+        EstimatedArrivalTimeCustomerTime: toFullISOString(formData.EstimatedArrivalTimeCustomerTime),
+        ActualArrivalTimeCustomerTime: toFullISOString(formData.ActualArrivalTimeCustomerTime),
+        StartTimeUserTime: toFullISOString(formData.StartTimeUserTime),
+        EndTimeUserTime: toFullISOString(formData.EndTimeUserTime),
+        EstimatedArrivalTimeUserTime: toFullISOString(formData.EstimatedArrivalTimeUserTime),
+        ActualArrivalTimeUserTime: toFullISOString(formData.ActualArrivalTimeUserTime),
+      };
+  
+      await ApiCustomer.post("/api/bookingDetails", payload);
+      Swal.fire({ icon: "success", title: "Success", text: "Booking detail saved", timer: 1200, showConfirmButton: false });
+      onUpdate?.();
+    } catch (error) {
+      console.error("ERROR in BookingDetails POST:", error);
+      Swal.fire({ icon: "error", title: "Failed", text: "Failed to save data", timer: 1500, showConfirmButton: false });
+    }
+  };
+  
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm mb-4">Add Booking Detail</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl overflow-y-auto max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle>Add Booking Detail</DialogTitle>
+          <DialogDescription>Lengkapi data berikut sesuai kebutuhan.</DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Booking Info */}
+          <div>
+            <Label>Booking *</Label>
+            <select id="BookingId" value={formData.BookingId} onChange={handleInputChange} className="w-full border p-2 rounded">
+              <option value="">-- Select Booking --</option>
+              {bookings.map((b) => <option key={b.BookingId} value={b.BookingId}>{b.BookingId}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <Label>Resource</Label>
+            <select id="ResourceId" value={formData.ResourceId} onChange={handleInputChange} className="w-full border p-2 rounded">
+              <option value="">-- Select Resource --</option>
+              {resources.map((r) => <option key={r.ResourceId} value={r.ResourceId}>{r.Name || r.ResourceId}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <Label>Resource Account</Label>
+            <select id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} className="w-full border p-2 rounded">
+              <option value="">-- Select Account --</option>
+              {accounts.map((a) => <option key={a.ResourceAccountId} value={a.ResourceAccountId}>{a.Name || a.ResourceAccountId}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <Label>Subk Technician</Label>
+            <select id="SubkTechnicianId" value={formData.SubkTechnicianId} onChange={handleInputChange} className="w-full border p-2 rounded">
+              <option value="">-- Select Technician --</option>
+              {technicians.map((t) => <option key={t.SubkTechnicianId} value={t.SubkTechnicianId}>{t.Name || t.SubkTechnicianId}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <Label>Name</Label>
+            <Input id="Name" value={formData.Name} onChange={handleInputChange} />
+          </div>
+
+          <div>
+            <Label>Status</Label>
+            <Input id="Status" value={formData.Status} onChange={handleInputChange} />
+          </div>
+
+          {/* Customer Time */}
+          <div className="md:col-span-2 border-t pt-2">
+            <p className="font-semibold mb-1">Customer Time</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div><Label>Start Time</Label><Input type="datetime-local" id="StartTimeCustomerTime" value={formData.StartTimeCustomerTime} onChange={handleInputChange} /></div>
+              <div><Label>End Time</Label><Input type="datetime-local" id="EndTimeCustomerTime" value={formData.EndTimeCustomerTime} onChange={handleInputChange} /></div>
+              <div><Label>Estimated Arrival</Label><Input type="datetime-local" id="EstimatedArrivalTimeCustomerTime" value={formData.EstimatedArrivalTimeCustomerTime} onChange={handleInputChange} /></div>
+              <div><Label>Actual Arrival</Label><Input type="datetime-local" id="ActualArrivalTimeCustomerTime" value={formData.ActualArrivalTimeCustomerTime} onChange={handleInputChange} /></div>
+            </div>
+          </div>
+
+          {/* User Time */}
+          <div className="md:col-span-2 border-t pt-2">
+            <p className="font-semibold mb-1">User Time</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div><Label>Start Time</Label><Input type="datetime-local" id="StartTimeUserTime" value={formData.StartTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>End Time</Label><Input type="datetime-local" id="EndTimeUserTime" value={formData.EndTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>Estimated Arrival</Label><Input type="datetime-local" id="EstimatedArrivalTimeUserTime" value={formData.EstimatedArrivalTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>Actual Arrival</Label><Input type="datetime-local" id="ActualArrivalTimeUserTime" value={formData.ActualArrivalTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>Duration (minutes)</Label><Input type="number" id="DurationInMinutesUserTime" value={formData.DurationInMinutesUserTime} onChange={handleInputChange} /></div>
+            </div>
+          </div>
+
+          <div>
+            <Label>Changed By *</Label>
+            <Input id="ChangedBy" type="number" value={formData.ChangedBy} onChange={handleInputChange} />
+          </div>
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={handleSubmit}>Submit</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [form, setForm] = useState({
+    BookingId: 0,
+    ResourceId: "",
+    ResourceAccountId: "",
+    SubkTechnicianId: "",
+    Name: "",
+    Status: "",
+
+    // Customer Time
+    StartTimeCustomerTime: "",
+    EndTimeCustomerTime: "",
+    EstimatedArrivalTimeCustomerTime: "",
+    ActualArrivalTimeCustomerTime: "",
+
+    // User Time
+    StartTimeUserTime: "",
+    EndTimeUserTime: "",
+    DurationInMinutesUserTime: 0,
+    EstimatedArrivalTimeUserTime: "",
+    ActualArrivalTimeUserTime: "",
+
+    ChangedBy: 0,
+  });
+
+  const fetchDetail = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/bookingDetails/${BookingDetailId}`);
+      const data = res.data.data;
+
+      setForm({
+        BookingId: data.BookingId || 0,
+        ResourceId: data.ResourceId || "",
+        ResourceAccountId: data.ResourceAccountId || "",
+        SubkTechnicianId: data.SubkTechnicianId || "",
+        Name: data.Name || "",
+        Status: data.Status || "",
+
+        StartTimeCustomerTime: data.StartTimeCustomerTime?.slice(0, 16) || "",
+        EndTimeCustomerTime: data.EndTimeCustomerTime?.slice(0, 16) || "",
+        EstimatedArrivalTimeCustomerTime: data.EstimatedArrivalTimeCustomerTime?.slice(0, 16) || "",
+        ActualArrivalTimeCustomerTime: data.ActualArrivalTimeCustomerTime?.slice(0, 16) || "",
+
+        StartTimeUserTime: data.StartTimeUserTime?.slice(0, 16) || "",
+        EndTimeUserTime: data.EndTimeUserTime?.slice(0, 16) || "",
+        EstimatedArrivalTimeUserTime: data.EstimatedArrivalTimeUserTime?.slice(0, 16) || "",
+        ActualArrivalTimeUserTime: data.ActualArrivalTimeUserTime?.slice(0, 16) || "",
+        DurationInMinutesUserTime: data.DurationInMinutesUserTime || 0,
+
+        ChangedBy: data.ChangedBy || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching booking detail:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && BookingDetailId) fetchDetail();
+  }, [isOpen]);
+
+  const handleChange = (e) => {
+    const { id, value, type } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [id]: type === "number" ? parseInt(value) || 0 : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await ApiCustomer.patch(`/api/bookingDetails/${BookingDetailId}`, form);
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: "Booking detail has been updated.",
+        timer: 1200,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      setIsOpen(false);
+      onUpdate?.();
+    } catch (error) {
+      console.error("Error updating booking detail:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "Could not update booking detail.",
+        timer: 1500,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Edit Booking Detail</DialogTitle>
+          <DialogDescription>Update all necessary fields below.</DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto">
+          <div>
+            <label htmlFor="BookingId">Booking ID</label>
+            <Input id="BookingId" type="number" value={form.BookingId} onChange={handleChange} />
+          </div>
+          <div>
+            <label htmlFor="Name">Name</label>
+            <Input id="Name" value={form.Name} onChange={handleChange} />
+          </div>
+          <div>
+            <label htmlFor="Status">Status</label>
+            <Input id="Status" value={form.Status} onChange={handleChange} />
+          </div>
+          <div>
+            <label htmlFor="ResourceId">Resource ID</label>
+            <Input id="ResourceId" value={form.ResourceId || ""} onChange={handleChange} />
+          </div>
+          <div>
+            <label htmlFor="ResourceAccountId">Resource Account ID</label>
+            <Input id="ResourceAccountId" value={form.ResourceAccountId || ""} onChange={handleChange} />
+          </div>
+          <div>
+            <label htmlFor="SubkTechnicianId">Subk Technician ID</label>
+            <Input id="SubkTechnicianId" value={form.SubkTechnicianId || ""} onChange={handleChange} />
+          </div>
+        </div>
+
+        {/* Customer Time Section */}
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-2">Customer Time</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="StartTimeCustomerTime">Start Time</label>
+              <Input id="StartTimeCustomerTime" type="datetime-local" value={form.StartTimeCustomerTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="EndTimeCustomerTime">End Time</label>
+              <Input id="EndTimeCustomerTime" type="datetime-local" value={form.EndTimeCustomerTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="EstimatedArrivalTimeCustomerTime">Estimated Arrival Time</label>
+              <Input id="EstimatedArrivalTimeCustomerTime" type="datetime-local" value={form.EstimatedArrivalTimeCustomerTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="ActualArrivalTimeCustomerTime">Actual Arrival Time</label>
+              <Input id="ActualArrivalTimeCustomerTime" type="datetime-local" value={form.ActualArrivalTimeCustomerTime} onChange={handleChange} />
+            </div>
+          </div>
+        </div>
+
+        {/* User Time Section */}
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-2">User Time</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="StartTimeUserTime">Start Time</label>
+              <Input id="StartTimeUserTime" type="datetime-local" value={form.StartTimeUserTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="EndTimeUserTime">End Time</label>
+              <Input id="EndTimeUserTime" type="datetime-local" value={form.EndTimeUserTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="EstimatedArrivalTimeUserTime">Estimated Arrival Time</label>
+              <Input id="EstimatedArrivalTimeUserTime" type="datetime-local" value={form.EstimatedArrivalTimeUserTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="ActualArrivalTimeUserTime">Actual Arrival Time</label>
+              <Input id="ActualArrivalTimeUserTime" type="datetime-local" value={form.ActualArrivalTimeUserTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="DurationInMinutesUserTime">Duration (min)</label>
+              <Input id="DurationInMinutesUserTime" type="number" value={form.DurationInMinutesUserTime} onChange={handleChange} />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="ChangedBy">Changed By (User ID)</label>
+            <Input id="ChangedBy" type="number" value={form.ChangedBy} onChange={handleChange} />
+          </div>
+        </div>
+
+        <DialogFooter className="pt-4">
+          <Button onClick={handleSubmit}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingDetailsDelete({ BookingDetailId, onUpdate }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      const response = await ApiCustomer.delete(`/api/bookingDetails/${BookingDetailId}`);
+
+      if (response.status === 409 || response.data.success === false) {
+        Swal.fire({
+          icon: "error",
+          title: "Cannot Delete",
+          text: response.data.message || "This booking detail cannot be deleted due to relational restrictions.",
+          timer: 1400,
+          showConfirmButton: false,
+          timerProgressBar: true,
+        });
+        return;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Deleted",
+        text: "Booking detail has been deleted successfully.",
+        timer: 1100,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+
+      setIsModalOpen(false);
+      onUpdate?.(); // Refresh list
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: error?.response?.data?.message || "Failed to delete booking detail.",
+        timer: 1400,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Booking Detail</DialogTitle>
+          <DialogDescription>Are you sure you want to delete this booking detail? This action cannot be undone.</DialogDescription>
+        </DialogHeader>
+        <p>This will permanently remove the booking detail record from the system.</p>
         <DialogFooter>
           <Button variant="destructive" onClick={handleDelete}>
             Delete

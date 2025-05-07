@@ -126,7 +126,16 @@ const data = {
         {
           title: "Symptom Codes",
           url: "/master/symptom_codes",
-        },     
+        },
+        {
+          title: "Bookings",
+          url: "/master/Bookings",
+        },
+        {
+          title: "Booking Details",
+          url: "/master/BookingDetails",
+        },
+
       ],
     },
     {
