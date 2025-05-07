@@ -128,6 +128,23 @@ model materialorder {
   SalesOrderNumber    String?             @db.VarChar(100)
   RMANumber           String?             @db.VarChar(100)
   ReadyForClosureDate DateTime?           @db.DateTime(0)
+  ShippingPriority    ShippingPriority? @default(MEDIUM)
+  CustomerInducedDamage Boolean? @default(false)
+  AccidentalDamageProtection Boolean? @default(false)
+  DefectiveMediaRetention Boolean? @default(false)
+  
+  DeliveryRequestedDate  DateTime? @db.DateTime(0)
+  CollectionRequestedDate DateTime? @db.DateTime(0)
+  PromoCode              String?   @db.VarChar(50)
+  NotificationNumber     String?   @db.VarChar(100)
+  ParentMOID             String?   @db.VarChar(13)
+  IsBCPOrder             Boolean?  @default(false)
+  MaterialOrderType      String?   @db.VarChar(50)
+  EOTOrderNumber         String?   @db.VarChar(50)
+  ResourceId String? @db.VarChar(255)
+  parentMO               materialorder? @relation("ParentMaterialOrder", fields: [ParentMOID], references: [MOID], onDelete: Restrict)
+  childMOs               materialorder[] @relation("ParentMaterialOrder")
+
   OwnerID             Int?
   owner               User?               @relation("UserMaterialOrders", fields: [OwnerID], references: [IDUser], onDelete: Restrict)
 
@@ -135,6 +152,8 @@ model materialorder {
   materialorderlineitems materialorderlineitems[]
 
   @@index([WOID], map: "WOID")
+
+  @@index([ResourceId], map: "ResourceId")
   @@index([OwnerID])
 }
 
@@ -514,4 +533,11 @@ enum WorkOrderStatus {
 enum CaseStatus {
   Open
   Close
+}
+
+enum ShippingPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
