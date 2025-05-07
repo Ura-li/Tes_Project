@@ -38,22 +38,118 @@ import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
 
-
-
 export const ServiceMaterial = () => {
   const { moid } = useParams();
+
+  const [materialOrderInformation, setMaterialOrderInformation] = useState({
+    MOID: '',
+    orderNumber: '',
+    serviceOfferID: '',
+    serviceDescription: '',
+    orderType: '',
+    shippingPriority: '', // Enum: LOW | MEDIUM | HIGH | CRITICAL
+    readyForClosureDate: '',
+    caseID: '',
+    contact: null, // Bisa objek: { firstName, lastName, email, ... }
+    deliveryRequestedDateCustomerTime: '',
+    collectionRequestedDate: '',
+    promoCode: '',
+    customerInducedDamage: false,
+    accidentalDamageProtection: false,
+    defectiveMediaRetention: false,
+    notificationNumber: '',
+    salesOrderNumber: '',
+    resourceName: '', // Mungkin berasal dari relasi user/owner
+    workOrder: null, // Bisa objek berisi info workorder
+    parentMO: null, // Jika parent material order ada
+    isBCPOrder: false,
+    materialOrderType: '',
+    eotOrderNumber: '',
+  });
+  
 
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
 
+  // const fetchMaterialOrder = async () => {
+  //   try{
+  //     const res = await ApiCustomer.get(`/api/material-order/${moid}`)
+  //     setMaterialOrders(res.data.data)
+  //     const data = res.data.data;
+      
+  //     setMaterialOrderInformation({
+  //       MOID: data.MOID || '',
+  //       orderNumber: data.OrderNumber || '',
+  //       serviceOfferID: data.ServiceOfferID || '', // Sesuaikan dengan field jika ada di backend
+  //       serviceDescription: data.ServiceDescription || '', // Sama seperti di atas
+  //       orderType: data.OrderType || '',
+  //       shippingPriority: data.ShippingPriority || '',
+  //       readyForClosureDate: data.ReadyForClosureDate || '',
+  //       caseID: data.workorder?.CaseID || '',
+  //       contact: data.workorder?.caseinformation?.contact_information.FirstName . data.workorder?.caseinformation?.contact_information.LastName || null,
+  //       deliveryRequestedDateCustomerTime: data.DeliveryRequestedDate || '',
+  //       collectionRequestedDate: data.CollectionRequestedDate || '',
+  //       promoCode: data.PromoCode || '',
+  //       customerInducedDamage: data.CustomerInducedDamage || false,
+  //       accidentalDamageProtection: data.AccidentalDamageProtection || false,
+  //       defectiveMediaRetention: data.DefectiveMediaRetention || false,
+  //       notificationNumber: data.NotificationNumber || '',
+  //       salesOrderNumber: data.SalesOrderNumber || '',
+  //       resourceName: data.Resource?.Name || '', // Atur field sesuai schema user Anda
+  //       workOrder: data.WOID || null,
+  //       parentMO: data.parentMO || null,
+  //       isBCPOrder: data.IsBCPOrder || false,
+  //       materialOrderType: data.MaterialOrderType || '',
+  //       eotOrderNumber: data.EOTOrderNumber || '',
+  //     });
+  //     console.log(res.data.data)
+  //   }catch(err){
+  //     console.error("Failed to fetch material orders:", err);
+  //   }
+  // }
+
   const fetchMaterialOrder = async () => {
-    try{
-      const res = await ApiCustomer.get(`/api/material-order/${moid}`)
-      setMaterialOrders(res.data.data)
-    }catch(err){
-      console.error("Failed to fetch material orders:", err);
+    try {
+      const res = await ApiCustomer.get(`/api/material-order/${moid}`);
+      const data = res.data.data;
+  
+      setMaterialOrders(data);
+  
+      setMaterialOrderInformation({
+        MOID: data.MOID || '',
+        orderNumber: data.OrderNumber || '',
+        serviceOfferID: data.ServiceOfferID || '',
+        serviceDescription: data.ServiceDescription || '',
+        orderType: data.OrderType || '',
+        shippingPriority: data.ShippingPriority || '',
+        readyForClosureDate: data.ReadyForClosureDate || '',
+        caseID: data.workorder?.CaseID || '',
+        contact: data.workorder?.caseinformation?.contact_information
+          ? `${data.workorder.caseinformation.contact_information.FirstName} ${data.workorder.caseinformation.contact_information.LastName}`
+          : null,
+        deliveryRequestedDateCustomerTime: data.DeliveryRequestedDate || '',
+        collectionRequestedDate: data.CollectionRequestedDate || '',
+        promoCode: data.PromoCode || '',
+        customerInducedDamage: data.CustomerInducedDamage || false,
+        accidentalDamageProtection: data.AccidentalDamageProtection || false,
+        defectiveMediaRetention: data.DefectiveMediaRetention || false,
+        notificationNumber: data.NotificationNumber || '',
+        salesOrderNumber: data.SalesOrderNumber || '',
+        resourceName: data.Resource?.Name || '',
+        workOrder: data.WOID || null,
+        parentMO: data.parentMO?.MOID || null,
+        isBCPOrder: data.IsBCPOrder || false,
+        materialOrderType: data.MaterialOrderType || '',
+        eotOrderNumber: data.EOTOrderNumber || '',
+      });
+  
+      console.log('Fetched Material Order:', data);
+    } catch (err) {
+      console.error('Failed to fetch material orders:', err);
     }
-  }
+  };
+  
+  
   const fetchMaterialLineOrdersInMODetail = async () => {
     try{
       const res = await ApiCustomer.get(`/api/material-order/material-order-line-items?MOID=${moid}`)
@@ -67,10 +163,82 @@ export const ServiceMaterial = () => {
     fetchMaterialOrder();
     fetchMaterialLineOrdersInMODetail();
   }, [])
+
+  const handleUpdate = async () => {
+    try {
+      const payload = {
+        ShippingPriority: materialOrderInformation.shippingPriority,
+        DeliveryRequestedDate: materialOrderInformation.deliveryRequestedDateCustomerTime,
+        DefectiveMediaRetention: materialOrderInformation.defectiveMediaRetention,
+        MaterialOrderType: materialOrderInformation.materialOrderType,
+        EOTOrderNumber: materialOrderInformation.eotOrderNumber,
+        ParentMOID: materialOrderInformation.parentMO,
+        // ResourceId: materialOrderInformation.resourceId,
+      };
+  
+      const res = await ApiCustomer.patch(`/api/material-order/${materialOrderInformation.MOID}`, payload);
+  
+      if (res.data.success) {
+        toast.success("Material Order updated successfully");
+      } else {
+        toast.error("Update failed: " + res.data.message);
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      toast.error("An error occurred while updating the Material Order");
+    }
+  };
+
+  const handleShippingPriorityChange = (e) => {
+    setMaterialOrderInformation((prev) => ({
+      ...prev,
+      shippingPriority: e.target.value,
+    }));
+  };
+  const handleDeliveryRequestedDateChange = (e) => {
+    setMaterialOrderInformation((prev) => ({
+      ...prev,
+      deliveryRequestedDateCustomerTime: e.target.value,
+    }));
+  };
+  const handleDefectiveMediaRetentionChange = (e) => {
+    setMaterialOrderInformation((prev) => ({
+      ...prev,
+      defectiveMediaRetention: e.target.checked,
+    }));
+  };
+  const handleResourceNameChange = (e) => {
+    setMaterialOrderInformation((prev) => ({
+      ...prev,
+      resourceName: e.target.value,
+    }));
+  };
+  const handleParentMOChange = (e) => {
+    setMaterialOrderInformation((prev) => ({
+      ...prev,
+      parentMO: e.target.value,
+    }));
+  };
+  
+  const handleMaterialOrderTypeChange = (e) => {
+    setMaterialOrderInformation((prev) => ({
+      ...prev,
+      materialOrderType: e.target.value,
+    }));
+  };
+  const handleEOTOrderNumberChange = (e) => {
+    setMaterialOrderInformation((prev) => ({
+      ...prev,
+      eotOrderNumber: e.target.value,
+    }));
+  };
+  
+        
+  
   return (
     <div>
       {materialOrders.OrderStatus === 'Closed' && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-2">
+        <div className="p-4 my-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
           This material order is <strong>read-only</strong> because it is <strong>Closed</strong>.
         </div>
       )}
@@ -105,145 +273,223 @@ export const ServiceMaterial = () => {
           </TabsList>
 
           <TabsContent value="mo_information">
-            <Card className=" mt-7 rounded-md">
-              <span className="ml-5 font-bold text-xl">Order Information</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-8 h-115">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+            <Card className="rounded-md mt-7">
+              <span className="ml-5 text-xl font-bold">Order Information</span>
+              <CardContent className="grid grid-flow-col gap-5 grid-rows-8 h-115">
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
                   <span>Order Number</span>
-                  <span className="ml-40">...</span>
+                  <span className="ml-40">{materialOrderInformation.orderNumber}</span>
                 </div>
 
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
                   <span>Service Offer ID</span>
-                  <span className="ml-37.5">...</span>
+                  <span className="ml-[150px]">{materialOrderInformation.serviceOfferID}</span>
                 </div>
 
-                <div className="font-bold flex">
-                <Lock className="size-5 mr-2"></Lock>
-                  <span >Service Description</span>
-                  <span className="ml-31">...</span>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
+                  <span>Service Description</span>
+                  <span className="ml-[124px]">{materialOrderInformation.serviceDescription}</span>
                 </div>
 
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
                   <span>Order Type</span>
-                  <span className="ml-46.5">...</span>
+                  <span className="ml-[186px]">{materialOrderInformation.orderType}</span>
                 </div>
-
-                <div className="font-bold flex">
+                <div className="flex font-bold">
                   <span className="ml-7">Shipping Priority</span>
-                  <span className="ml-35.5">...</span>
+                  {/* <span className="ml-[142px]">{materialOrderInformation.shippingPriority}</span> */}
+                  <select className="ml-[142px]" value={materialOrderInformation.shippingPriority || '-'} onChange={handleShippingPriorityChange}>
+                    <option value="LOW">LOW</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="HIGH">HIGH</option>
+                    <option value="CRITICAL">CRITICAL</option>
+                  </select>
                 </div>
 
-                <div className="font-bold flex">
-                <Lock className="size-5 mr-2"></Lock>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
                   <span>Ready For Closure Date</span>
-                  <span className="ml-24">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Case ID</span>
-                  <span className="ml-54">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Contact</span>
-                  <span className="ml-53">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Delivery Requested Date (Customer Time)</span>
-                  <span className="ml-10 mr-16">...</span>
-                  <CalendarDays></CalendarDays>
-                </div>
-
-                <div className="font-bold flex">
-                <Lock className="size-5 mr-2"></Lock>
-                  <span>Collection Requested Date</span>
-                  <span className="ml-39 mr-16">...</span>
-                  <CalendarDays></CalendarDays>
-                </div>
-
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>Promo Code</span>
-                  <span className="ml-65">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                <Lock className="size-5 mr-2"></Lock>
-                  <span >Customer Induced Damage</span>
-                  <span className="ml-37.5">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                <Lock className="size-5 mr-2"></Lock>
-                  <span >Accidental Damage Protection</span>
-                  <span className="ml-32">...</span>
-                </div>
-
-                <div className="font-bold flex">
-                  <span className="ml-7">Defective Media Retention
+                  <span className="ml-[96px]">
+                    {materialOrderInformation.readyForClosureDate 
+                      ? new Date(materialOrderInformation.readyForClosureDate).toLocaleDateString() 
+                      : '-'}
                   </span>
-                  <span className="ml-39.5">...</span>
                 </div>
 
-                <div className="font-bold flex">
-                <Lock className="size-5 mr-2"></Lock>
-                  <span >Notification Number</span>
-                  <span className="ml-51">...</span>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
+                  <span>Case ID</span>
+                  <span className="ml-[216px]">{materialOrderInformation.caseID || '-'}</span>
                 </div>
 
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
+                  <span>Contact</span>
+                  <span className="ml-[212px]">
+                    {materialOrderInformation.contact || '-'}
+                  </span>
+                </div>
+
+                <div className="flex items-center font-bold">
+                  <span className="ml-7">Delivery Requested Date (Customer Time)</span>
+                  {/* <span className="ml-10 mr-16">
+                    {materialOrderInformation.deliveryRequestedDateCustomerTime
+                      ? new Date(materialOrderInformation.deliveryRequestedDateCustomerTime).toLocaleString()
+                      : '-'}
+                  </span> */}
+                  <input
+                    className="ml-10 mr-16"
+                    type="datetime-local"
+                    value={materialOrderInformation.deliveryRequestedDateCustomerTime || '-'}
+                    onChange={handleDeliveryRequestedDateChange}
+                  />
+                  <CalendarDays />
+                </div>
+                <div className="flex items-center font-bold">
+                  <Lock className="mr-2 size-5" />
+                  <span>Collection Requested Date</span>
+                  <span className="ml-[156px] mr-16">
+                    {materialOrderInformation.collectionRequestedDate
+                      ? new Date(materialOrderInformation.collectionRequestedDate).toLocaleString()
+                      : '-'}
+                  </span>
+                  <CalendarDays />
+                </div>
+
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
+                  <span>Promo Code</span>
+                  <span className="ml-[260px]">{materialOrderInformation.promoCode || '-'}</span>
+                </div>
+
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
+                  <span>Customer Induced Damage</span>
+                  <span className="ml-[150px]">
+                    {materialOrderInformation.customerInducedDamage ? 'Yes' : 'No'}
+                  </span>
+                </div>
+
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
+                  <span>Accidental Damage Protection</span>
+                  <span className="ml-[128px]">
+                    {materialOrderInformation.accidentalDamageProtection ? 'Yes' : 'No'}
+                  </span>
+                </div>
+
+                <div className="flex font-bold">
+                  <span className="ml-7">Defective Media Retention</span>
+                  {/* <span className="ml-[158px]">
+                    {materialOrderInformation.defectiveMediaRetention ? 'Yes' : 'No'}
+                  </span> */}
+                  <input
+                    className="ml-[158px]"
+                    type="checkbox"
+                    checked={materialOrderInformation.defectiveMediaRetention || '-'}
+                    onChange={handleDefectiveMediaRetentionChange}
+                  />
+                </div>
+
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
+                  <span>Notification Number</span>
+                  <span className="ml-[204px]">{materialOrderInformation.notificationNumber || '-'}</span>
+                </div>
+
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
                   <span>Sales Order Number</span>
-                  <span className="ml-52">...</span>
+                  <span className="ml-[208px]">{materialOrderInformation.salesOrderNumber || '-'}</span>
                 </div>
 
-                <div className="font-bold flex">
+                <div className="flex font-bold">
                   <span className="ml-7">Resource Name</span>
-                  <span className="ml-40">...</span>
+                  {/* <span className="ml-[160px]">
+                    {materialOrderInformation.resourceName || '-'}
+                  </span> */}
+                  <input
+                    className="ml-[160px]"
+                    type="text"
+                    value={materialOrderInformation.resourceName || '-'}
+                    onChange={handleResourceNameChange}
+                  />
                 </div>
 
-                <div className="font-bold flex">
-                <Lock className="size-5 mr-2"></Lock>
-                    <span>Work Order</span>
-                    <span className="ml-47">...</span>
-                  </div>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
+                  <span>Work Order</span>
+                  <span className="ml-[188px]">
+                    {materialOrderInformation.workOrder?.WOID || '-'}
+                  </span>
+                </div>
 
-                  <div className="font-bold flex">
-                    <span className="ml-7">Parent Mo</span>
-                    <span className="ml-50">...</span>
-                  </div>
+                <div className="flex font-bold">
+                  <span className="ml-7">Parent Mo</span>
+                  {/* <span className="ml-[200px]">
+                    {materialOrderInformation.parentMO?.MOID || '-'}
+                  </span> */}
+                  <input
+                    className="ml-[200px]"
+                    type="text"
+                    value={materialOrderInformation.parentMO || '-'}
+                    onChange={handleParentMOChange}
+                  />
+                </div>
 
-                  <div className="font-bold flex">
-                    <Lock className="size-5 mr-2"></Lock>
-                    <span>BCP Order</span>
-                    <span className="ml-50">...</span>
-                  </div>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5" />
+                  <span>BCP Order</span>
+                  <span className="ml-[200px]">
+                    {materialOrderInformation.isBCPOrder ? 'Yes' : 'No'}
+                  </span>
+                </div>
 
-                  <div className="font-bold flex">
-                  
-                    <span className="ml-7">Material Order Type</span>
-                    <span className="ml-32">...</span>
-                  </div>
+                <div className="flex font-bold">
+                  <span className="ml-7">Material Order Type</span>
+                  {/* <span className="ml-[128px]">
+                    {materialOrderInformation.materialOrderType || '-'}
+                  </span> */}
+                  <input
+                    className="ml-[128px]"
+                    type="text"
+                    value={materialOrderInformation.materialOrderType || '-'}
+                    onChange={handleMaterialOrderTypeChange}
+                  />
+                </div>
 
-                  <div className="font-bold flex">
-                    
-                    <span className="ml-7">EOT Order Number</span>
-                    <span className="ml-34">...</span>
-                  </div>
+                <div className="flex font-bold">
+                  <span className="ml-7">EOT Order Number</span>
+                  {/* <span className="ml-[136px]">
+                    {materialOrderInformation.eotOrderNumber || '-'}
+                  </span> */}
+                  <input
+                    type="text"
+                    value={materialOrderInformation.eotOrderNumber || '-'}
+                    onChange={handleEOTOrderNumberChange}
+                  />
+                </div>
+                
+                <div className="flex font-bold">
+                  <button
+                    onClick={handleUpdate}
+                    className="px-6 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700"
+                  >
+                    Update
+                  </button>
+                </div>
+
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="mo_items">
             <Card className="flex-col mt-7">
-              <span className="ml-5 font-bold text-xl">
+              <span className="ml-5 text-xl font-bold">
                  Material Order Line Items 
               </span>
               <CardContent className="grid">
@@ -293,50 +539,50 @@ export const ServiceMaterial = () => {
               </CardContent>
             </Card>
 
-            <Card className=" mt-7 rounded-md">
-              <span className="ml-5 font-bold text-xl">Failure Code</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-2 h-25">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+            <Card className="rounded-md mt-7">
+              <span className="ml-5 text-xl font-bold">Failure Code</span>
+              <CardContent className="grid grid-flow-col grid-rows-2 gap-5 h-25">
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5"></Lock>
                   <span>Category 1</span>
                   <span className="ml-40">...</span>
                 </div>
 
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5"></Lock>
                   <span>Failure code 1</span>
                   <span className="ml-35">...</span>
                 </div>
 
-                <div className="font-bold flex">
+                <div className="flex font-bold">
                   <span className="ml-7">Category 2</span>
                   <span className="ml-42">...</span>
                 </div>
 
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5"></Lock>
                   <span>Failure code 2</span>
                   <span className="ml-37">...</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className=" mt-7 rounded-md">
-              <span className="ml-5 font-bold text-xl">Security Check</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-2 h-10">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+            <Card className="rounded-md mt-7">
+              <span className="ml-5 text-xl font-bold">Security Check</span>
+              <CardContent className="grid h-10 grid-flow-col grid-rows-2 gap-5">
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5"></Lock>
                   <span>Security Check</span>
                   <span className="ml-40">...</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className=" mt-7 rounded-md">
-              <span className="ml-5 font-bold text-xl">S4 Messages</span>
-              <CardContent className="grid gap-5 grid-flow-col grid-rows-2 h-10">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+            <Card className="rounded-md mt-7">
+              <span className="ml-5 text-xl font-bold">S4 Messages</span>
+              <CardContent className="grid h-10 grid-flow-col grid-rows-2 gap-5">
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5"></Lock>
                   <span>S4 Messages</span>
                   <span className="ml-40">...</span>
                 </div>
@@ -345,18 +591,18 @@ export const ServiceMaterial = () => {
           </TabsContent>
 
           <TabsContent value="entitlement_sla">
-            <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">Entitlement & SLA</span>
+            <Card className="flex-col mt-5">
+              <span className="ml-5 text-xl font-bold">Entitlement & SLA</span>
               <CardContent className="grid gap-5">
-                <div className="font-bold flex">
+                <div className="flex font-bold">
                   <span>Entitlement & SLA</span>
                   <span className="ml-60">...</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">Booking</span>
+            <Card className="flex-col mt-5">
+              <span className="ml-5 text-xl font-bold">Booking</span>
               <CardContent className="grid">
               <Table>
                   <TableHeader>
@@ -381,42 +627,42 @@ export const ServiceMaterial = () => {
               </CardContent>
             </Card>
 
-            <Card className="mt-5 flex-col">
-              <span className="ml-5 font-bold text-xl">Actions</span>
+            <Card className="flex-col mt-5">
+              <span className="ml-5 text-xl font-bold">Actions</span>
               <CardContent className="grid gap-4.5 grid-flow-col grid-rows-3">
-                <div className="font-bold flex">
+                <div className="flex font-bold">
                   <span className="ml-7">Action Booking</span>
                   <span className="ml-49.5">...</span>
                 </div>
 
-                <div className="font-bold flex">
+                <div className="flex font-bold">
                   <span className="ml-7">Action Booking Status</span>
                   <span className="ml-37">...</span>
                 </div>
 
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5"></Lock>
                   <span>Action Date</span>
                   <span className="ml-56.5">...</span>
                 </div>
 
-                <div className="font-bold flex">
+                <div className="flex font-bold">
                   <span className="ml-7">Action Count</span>
                   <span className="ml-50">...</span>
                 </div>
 
-                <div className="font-bold flex">
+                <div className="flex font-bold">
                   <span className="ml-7">Finished By</span>
                   <span className="ml-53.5">...</span>
                 </div>
 
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5"></Lock>
                   <span>Finished on Date</span>
                   <span className="ml-43.5">...</span>
                 </div>
 
-                <div className="font-bold flex">
+                <div className="flex font-bold">
                   <span>Partner Contact</span>
                   <span className="ml-40">...</span>
                 </div>
@@ -426,12 +672,12 @@ export const ServiceMaterial = () => {
 
           <TabsContent value="billing_quotation">
           <Card className="flex-col mt-7">
-              <span className="ml-5 font-bold text-xl">
+              <span className="ml-5 text-xl font-bold">
               Billing & Quotation
               </span>
               <CardContent className="grid">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5"></Lock>
                   <span> Billing & Quotation</span>
                   <span className="ml-30">...</span>
                 </div>
@@ -441,12 +687,12 @@ export const ServiceMaterial = () => {
 
           <TabsContent value="notes_attaechment">
           <Card className="flex-col mt-7">
-              <span className="ml-5 font-bold text-xl">
+              <span className="ml-5 text-xl font-bold">
               Notes & Attachment
               </span>
               <CardContent className="grid">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5"></Lock>
                   <span>Notes & Attachment</span>
                   <span className="ml-30">...</span>
                 </div>
