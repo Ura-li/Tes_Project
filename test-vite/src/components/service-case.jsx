@@ -1116,11 +1116,11 @@ const [endDate, setEndDate] = useState(null)
                 <CaseField label="Customer Severity"  >{caseDetails.CustomerSeverity}</CaseField>
                 <CaseField label="Update Customer Tracking Number"  span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Created ON" icon span={3}>
-                  <span className="flex gap-[5em]">
+                  {/* <span className="flex gap-[5em]"> */}
                     {/* {new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')} */}
                         <DatePicker variant='icon' value={createdOn} onChange={setCreatedOn} readOnly></DatePicker>
                     {/* {new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })} */}
-                  </span>
+                  {/* </span> */}
                 </CaseField>
                 <CaseField label="Alternate Customer Tracking Number"><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Case Closed Date" icon span={3} > 
@@ -1168,12 +1168,12 @@ const [endDate, setEndDate] = useState(null)
             <CardTitle className=' text-lg'>Customer Information</CardTitle>
               <hr />
             </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6">
+              <CardContent className="grid gap-10 grid-cols-6 items-center">
                 <CaseField label="Customer Account" icon ><Input variant='invisible' value={dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Company : dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName}/></CaseField>
-                <CaseField label="Primary Contact" icon ><Input variant='invisible'/>{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</CaseField>
+                <CaseField label="Primary Contact" icon ><Input variant='invisible'value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`} /></CaseField>
                 <CaseField label="Submitted By" ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Is Partner" icon ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label=" Primary Email" icon >{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</CaseField>
+                <CaseField label=" Primary Email" icon ><Input variant='invisible' value={dataFetchCustomerData.MainAccount?.Email} placeholder='---'/></CaseField>
                 <CaseField label="Partner & Customer" icon ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="HIPAA" icon ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Phone" icon > {dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone: dataFetchCustomerData?.MainAccount?.Phone}</CaseField>
@@ -1233,10 +1233,10 @@ const [endDate, setEndDate] = useState(null)
               </CardHeader>
               <CardContent className="grid gap-10 grid-cols-6 items-center">
                 <CaseField label="Case Entitlenmet" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Start Date" icon> <DatePicker></DatePicker> </CaseField>
+                <CaseField label="Start Date" icon> <DatePicker value={startDate} onChange={setstartDate} readOnly></DatePicker> </CaseField>
                 <CaseField label="OTC Code" icon><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Entitlement Status" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="End Date" icon> <DatePicker></DatePicker></CaseField>
+                <CaseField label="End Date" icon> <DatePicker value={endDate} onChange={setEndDate} readOnly></DatePicker></CaseField>
                 <CaseField label="Entitlement Override" icon><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Selected Entitlement Offer" icon><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Days Left" icon><Input variant='invisible' placeholder='---'/></CaseField>
@@ -1522,7 +1522,7 @@ const [endDate, setEndDate] = useState(null)
                     </SelectContent>
                   </Select> 
                 </CaseField>
-                <CaseField label="Pending Customer Action" icon span={2}><DatePicker value={pendingCustomerAction} onChange={setPendingCustomerAction}/></CaseField>
+                <CaseField label="Pending Customer Action" icon span={2}><DatePicker value={pendingCustomerAction} onChange={setPendingCustomerAction} readOnly/></CaseField>
                 <CaseField label="Auto Close" >
                 <Select className='' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
                     <SelectTrigger className={'w-full'}>
@@ -1535,8 +1535,8 @@ const [endDate, setEndDate] = useState(null)
                   </Select> 
                 </CaseField>
                 <CaseField label="Ready for Close Days" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField  label="Customer Requested Close Date" icon> <DatePicker /></CaseField>
-                <CaseField className={'col-start-3'} label="Ready for Closure Date"icon ><DatePicker /> </CaseField>
+                <CaseField  label="Customer Requested Close Date" icon span={2}> <DatePicker value={customerRequestedCloseDate} onChange={setCustomerRequestedCloseDate} readOnly /></CaseField>
+                <CaseField className={'col-start-3'} label="Ready for Closure Date"icon span={2}><DatePicker value={ReadyForClosureDate} onChange={setReadyForClosureDate} readOnly/> </CaseField>
 
               
               </CardContent>
