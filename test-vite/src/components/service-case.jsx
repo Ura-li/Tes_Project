@@ -388,7 +388,7 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
       {label}
     </CardTitle>
 
-    <div className={`${spanMap[span]} truncate`}>
+    <div className={`${spanMap[span]} `}>
       {children}
     </div>
   </>
@@ -1215,7 +1215,7 @@ const [endDate, setEndDate] = useState(null)
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-10 grid-cols-7 items-center">
-                <CaseField label="Case Entitlement" icon> Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quam beatae debitis veniam, natus voluptatum, quos officiis, necessitatibus maxime et neque enim deleniti delectus magni ipsum non harum explicabo praesentium sapiente.</CaseField>
+                <CaseField label="Case Entitlement" icon>---</CaseField>
                 <CaseField label="Start Date" icon span={2}> <DatePicker value={startDate} onChange={setstartDate} readOnly></DatePicker> </CaseField>
                 <CaseField label="OTC Code" icon> ---</CaseField>
                 <CaseField label="Entitlement Status" icon> ---</CaseField>

@@ -152,6 +152,10 @@ export const ServiceWork = () => {
     // const { ownerUserData, dataFetchCustomerData } = location.state || {}; 
 
     const navigate = useNavigate();
+
+    const [requestedDateTimeCustomer, setrequestedDateTimeCustomer] = useState(null);
+    const [guaranteedFixTimeCustomer, setGuaranteedFixTimeCustomer] = useState(null);
+    const [dueDate, setDuedate] = useState(null);
   return (
     <>
     {workOrders.SystemStatus === 'CLOSED_POSTED' && (
@@ -457,25 +461,10 @@ export const ServiceWork = () => {
           <TabsContent value="wo_bookings" >
             <Card className="mt-5 flex-col">
               <span className="ml-5 font-bold text-xl">WO Bookings</span>
-              <CardContent className="grid gap-5">
-                <div className="font-bold flex">
-                  <span>Requested Date Time (Customer)</span>
-                  <span className="ml-50 mr-10">...</span>
-                  <DatePicker></DatePicker>
-                </div>
-
-                <div className="font-bold flex">
-                  <span>Guaranteed Fix Time (Customer)</span>
-                  <span className="ml-51 mr-10">...</span>
-                  {/* <DatePicker></DatePicker> */}
-                  <DatePicker></DatePicker>
-                </div>
-
-                <div className="font-bold flex">
-                  <span>Due Date (Customer) </span>
-                  <span className="ml-72.5 mr-10">...</span>
-                  <DatePicker></DatePicker>
-                </div>
+              <CardContent className="grid gap-5 grid-cols-3">
+                <CaseField label={'Requested Date Time (Customer)'} span={2}><DatePicker variant="icon" value={requestedDateTimeCustomer} onChange={setrequestedDateTimeCustomer}></DatePicker></CaseField>
+                <CaseField label={'Guaranteed Fix Time (Customer)'} span={2}><DatePicker variant="icon" value={guaranteedFixTimeCustomer} onChange={setGuaranteedFixTimeCustomer}></DatePicker></CaseField>
+                <CaseField label={'Due Date  (Customer)'} span={2}><DatePicker variant="icon" value={dueDate} onChange={setDuedate}></DatePicker></CaseField>
               </CardContent>
             </Card>
 
