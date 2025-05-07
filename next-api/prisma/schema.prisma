@@ -52,6 +52,8 @@ model caseinformation {
   casenotes_casenotes_CaseIDTocaseinformation   casenotes[]          @relation("casenotes_CaseIDTocaseinformation")
   workorder                                     workorder[]
   createdByUser                                 User?                @relation("UserCreatedCases", fields: [CreatedBy], references: [IDUser], onDelete: Restrict, onUpdate: Cascade)
+  ServiceCatalogID                              Int?
+  servicecatalog                                servicecatalog?      @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID], onDelete: Restrict)
 
   @@index([AssetID], map: "AssetID")
   @@index([CaseNote], map: "CaseNote")
@@ -188,6 +190,7 @@ model servicecatalog {
   asset_information    asset_information     @relation(fields: [AssetID], references: [AssetID], map: "servicecatalog_ibfk_1")
   servicecatalog_parts servicecatalog_parts? @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "servicecatalog_ibfk_2")
   warranty_services    warranty_services     @relation(fields: [Service_offerID], references: [Service_offerID], map: "servicecatalog_ibfk_3")
+  caseinformation      caseinformation[]
 
   @@index([AssetID], map: "AssetID")
   @@index([PartNumber], map: "PartNumber")

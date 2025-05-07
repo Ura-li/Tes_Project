@@ -61,7 +61,7 @@ export const CaseField = ({ label, children, icon = false, span = 1, className, 
 };
 
 
-export function QuickWOInput ({ WOID, caseInformation }) {
+export function QuickWOInput ({ WOID, workOrderData, caseInformation }) {
   // State untuk 8 field General
   // console.log('case_informtion in quick wo input : ', caseInformation)
   const [tab, setTab] = useState("Quick_WO_Input");
@@ -115,9 +115,9 @@ export function QuickWOInput ({ WOID, caseInformation }) {
   useEffect(() => {
     const fetchDataSiteAccounts = async () => {
       try {
-        const res = await ApiCustomer.get(`/api/site_account/${caseInformation?.SiteAccountID}`)
-        console.log('res in quick wo input : ',res)
-        setSiteAccountInformation(res.data.data)
+        
+        console.log('res in quick wo input : ',caseInformation.site_account)
+        setSiteAccountInformation(caseInformation.site_account)
       } catch (error) {
         
       }
@@ -130,8 +130,12 @@ export function QuickWOInput ({ WOID, caseInformation }) {
   useEffect(() => {
     if (!WOID) return;
     (async () => {
-      const res = await ApiCustomer.get(`/api/work-order/${WOID}`);
-      const wo = res.data.data; 
+      // const res = await ApiCustomer.get(`/api/work-order/${WOID}`);
+      // const wo = res.data.data;
+      const wo = workOrderData; 
+      const siteAccount = caseInformation.site_account;
+      const contact = caseInformation.contact_information;
+      console.log(siteAccount);
       setIncomingChannel(wo.IncomingChannel || "..."); 
       setWorkOrderNumber(wo.WorkOrderNumber || "...");
       setWorkOrderType(wo.WorkOrderType || "...");
@@ -157,27 +161,28 @@ export function QuickWOInput ({ WOID, caseInformation }) {
       setCasePriorityIndex(wo.CasePriorityIndex?.toString() || "...");
 
       //Service Delivery Address
-      const res2 = await ApiCustomer.get(`/api/workorder/${WOID}/service-address`);
-      const address = res2.data.data;
+      // const res2 = await ApiCustomer.get(`/api/workorder/${WOID}/service-address`);
+      // const address = res2.data.data;
 
-      setAddressID(address.AddressID || "---");
-      setCompanyName(address.CompanyName || "---");
-      setContactFirstName(address.ContactFirstName || "---");
-      setContactLastName(address.ContactLastName || "---");
-      setPhoneNumber(address.PhoneNumber || "---");
-      setEmail(address.Email || "---");
-      setAddressLine1(address.AddressLine1 || "---");
-      setAddressLine2(address.AddressLine2 || "---");
-      setAddressLine3(address.AddressLine3 || "---");
-      setCity(address.City || "---");
-      setStateOrProvince(address.StateOrProvince || "---");
-      setCountryOrRegion(address.CountryOrRegion || "---");
-      setPostalCode(address.PostalCode || "---");
-      setTimezone(address.TimeZone || "---");
-      setServiceTerritory(address.ServiceTerritory || "---");
-      setBusinessSegment(address.BusinessSegment || "---");
-      setLongitude(address.Longitude || "---");
-      setLatitude(address.Latitude || "---");
+
+      setAddressID(siteAccount.SiteAccountID || "---");
+      setCompanyName(siteAccount.Company || "---");
+      setContactFirstName(contact.FirstName || "---");
+      setContactLastName(contact.LastName || "---");
+      setPhoneNumber(siteAccount.PrimaryPhone || contact.Phone || "---");
+      setEmail(siteAccount.Email || contact.Email || "---");
+      setAddressLine1(siteAccount.AddressLine1 || contact.AddressLine1 || "---");
+      setAddressLine2(siteAccount.AddressLine2 || contact.AddressLine2 || "---");
+      setAddressLine3("---");
+      setCity(siteAccount.City || contact.City || "---");
+      setStateOrProvince(siteAccount.StateProvince || contact.StateProvince || "---");
+      setCountryOrRegion(siteAccount.Country || contact.Country || "---");
+      setPostalCode(siteAccount.ZipPostalCode || contact.ZipPostalCode || "---");
+      setTimezone("---");
+      setServiceTerritory("---");
+      setBusinessSegment("---");
+      setLongitude("---");
+      setLatitude( "---");
     })();
   }, [WOID]);
 
@@ -271,7 +276,7 @@ export function QuickWOInput ({ WOID, caseInformation }) {
                 <CaseField label="Choose Address" className={''}  >Site Account address</CaseField>
                 <CaseField label="Address Line1" className={''}  > <Input variant={'invisible'} className=" " value={addressLine1} readOnly/> </CaseField>
                 <CaseField label="Postal Code" className={''}  > <Input variant={'invisible'}  className="" value={postalCode} readOnly/> </CaseField>
-                <CaseField label="Company Name" className={''}  > <Input variant={'invisible'} className="" value={siteAccountInformation.Company} readOnly/> </CaseField>
+                <CaseField label="Company Name" className={''}  > <Input variant={'invisible'} className="" value={companyName} readOnly/> </CaseField>
                 <CaseField label="Address Line2" className={''}  > <Input variant={'invisible'} className="" value={addressLine2} readOnly/> </CaseField>
                 <CaseField label="Timezone" className={''} icon > <Input variant={'invisible'} className="" value={timezone} readOnly/> </CaseField>
                 <CaseField label="Contact First Name" className={''}  > <Input variant={'invisible'} className="" value={contactFirstName} onChange={e => setContactFirstName(e.target.value)} /> </CaseField>

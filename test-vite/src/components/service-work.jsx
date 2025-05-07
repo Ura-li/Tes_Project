@@ -77,8 +77,13 @@ export const ServiceWork = () => {
 
   const [caseInformation, setCaseInformation] = useState([])
   const [bookings, setBookings] = useState([])
+  const [ownerWorkOrder, setOwnerWorkOrder] = useState([])
   
-
+  const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
+    MainAccount: null,
+    SiteAccount: null,
+    Type: null,
+  });
   useEffect(() => {
     const fetchAllData = async () => {
       Swal.fire({
@@ -104,12 +109,44 @@ export const ServiceWork = () => {
           setCaseInformation(resCI.data.data);
 
           const resBooking = await ApiCustomer.get(`/api/bookings?WOID=${woid}`);
-          console.log("Res Booking : ",resBooking.data.data)
+          // console.log("Res Booking : ",resBooking.data.data)
+
+          const resOwner = await ApiCustomer.get(`/api/user/${workOrderData.OwnerID}`)
+
+          
+          // console.log("Case Detail : ", caseDetails);
+          const resMainAccount = resCI.data.data.contact_information
+          setDataFetchCustomerData({
+            MainAccount: resMainAccount
+          })
+          if(caseInformation.SiteAccountID !== null) {
+            const resSiteAccount = resCI.data.data.site_account
+            setDataFetchCustomerData((prev) => ({
+              ...prev,
+              SiteAccount: resSiteAccount,
+              Type: "SiteAccount"
+            }));
+            
+          }else{
+            setDataFetchCustomerData((prev) => ({
+              ...prev,
+              type: "Individual", // fallback if no site account
+            }));
+          }
+        
+              // const res = await ApiCustomer.get(`/api/`)
+            
+          setOwnerWorkOrder(resOwner.data.data);
           setBookings(resBooking.data.data)
+          console.log("Res WO : ", resWO.data.data)
+          console.log("Res MO : ", resMO.data.data)
+          console.log("Res CI : ", resCI.data.data)
+          console.log("Res Booking : ", resBooking.data.data)
+          console.log("Res Owner : ", resOwner.data.data)
+          console.log("Res Main Account : ", resMainAccount)
         }
   
         Swal.close(); 
-  
       } catch (err) {
         console.error("Fetch error:", err);
         Swal.fire({
@@ -122,6 +159,10 @@ export const ServiceWork = () => {
   
     if (woid) fetchAllData();
   }, [woid]);
+
+  useEffect(() => {
+    console.log("Data Fetch Customer Data in WO : ",dataFetchCustomerData);
+  }, [dataFetchCustomerData])
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -185,7 +226,7 @@ export const ServiceWork = () => {
               <CardTitle className="flex">
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
                   <h1 className='text-blue-500'>
-                    {/* {ownerUserData.Name} */}
+                    {ownerWorkOrder.Name}
                     </h1>
                   <p className="text-sm font-light ">Owner</p>
                 </div>
@@ -195,7 +236,7 @@ export const ServiceWork = () => {
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
                   <h1 className='text-blue-500'>
-                    {/* {dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName} */}
+                    {dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}
                     </h1>
                   <p className="text-sm font-light ">Contact</p>
                 </div>
@@ -207,7 +248,7 @@ export const ServiceWork = () => {
                   <SelectContent className="p-0">
                     <SelectGroup className="p-0">
                     <SelectItem value="first" className="p-0">
-                      {/* {dataFetchCustomerData.SiteAccount?.Company} */}
+                      {dataFetchCustomerData.SiteAccount?.Company}
 
                     </SelectItem>
                     <SelectItem value="??">??</SelectItem>
@@ -256,19 +297,19 @@ export const ServiceWork = () => {
                   <CaseField label="Incoming Channel"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
                 </div>
                 <CaseField label="Patner Case Id"  ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
-                <CaseField label="Work Order Number"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Work Order Number"  icon><Input variant={'invisible'} className="" value={workOrders.WOID || '---'} readOnly/></CaseField>
                 <CaseField label="Patner Status"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
                 <CaseField label="Work Order Type"  ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
                 <div className="p-3 ring-1 col-span-2"></div>
                 <CaseField label="Priority" icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
                 <CaseField label="Recommended Resource"  ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
-                <CaseField label="System Status"  ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="System Status"  ><Input variant={'invisible'} className="" value={workOrders.SystemStatus || '---'} readOnly/></CaseField>
                 <CaseField label="Shipment Country"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
                 <CaseField label="Sub-Status"  icon={KeyRound}><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
                 <CaseField label="Shipment State" icon ><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
-                <CaseField label="Bookable Resource Booking"  icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
-                <CaseField label="Service Offer ID" className={'col-start-1'} icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
-                <CaseField label="Service Description" className={'col-start-1'} icon><Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                <CaseField label="Bookable Resource Booking"  icon><Input variant={'invisible'} className="" value={ '---'} readOnly/></CaseField>
+                <CaseField label="Service Offer ID" className={'col-start-1'} icon><Input variant={'invisible'} className="" value={caseInformation.servicecatalog?.Service_offerID || '---'} readOnly/></CaseField>
+                <CaseField label="Service Description" className={'col-start-1'} icon><Input variant={'invisible'} className="" value={caseInformation.servicecatalog?.warranty_services?.Service_description || '---'} readOnly/></CaseField>
   
               </CardContent>
             </Card>
@@ -276,7 +317,7 @@ export const ServiceWork = () => {
             <div className="flex-1 flex flex-col gap-4">
               <Card className="rounded-sm ">
                 <CardContent className="grid grid-cols-4 items-center">
-                    <CaseField label="Currently Worked By"  className={'col-span-3'}> <Input variant={'invisible'} className="" value={'---'} readOnly/></CaseField>
+                    <CaseField label="Currently Worked By"  className={'col-span-3'}> <Input variant={'invisible'} className="" value={ownerWorkOrder.Name || '---'} readOnly/></CaseField>
                 </CardContent>
               </Card>
 
@@ -817,9 +858,16 @@ export const ServiceWork = () => {
             </Card> 
           </TabsContent>
 
-          <TabsContent value="Quick_WO_Input" >
-            <QuickWOInput WOID={woid} caseInformation={caseInformation} />
-          </TabsContent>
+          {workOrders?.WOID && caseInformation?.CaseID && (
+            <TabsContent value="Quick_WO_Input">
+              <QuickWOInput
+                WOID={woid}
+                workOrderData={workOrders}
+                caseInformation={caseInformation}
+              />
+            </TabsContent>
+          )}
+
         </Tabs>
       
     </Card>

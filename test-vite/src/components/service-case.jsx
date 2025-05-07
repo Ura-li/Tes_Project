@@ -51,12 +51,15 @@ import {
   ChevronDown
  } from 'lucide-react'
 
+
+
  import { useLocation, useNavigate } from "react-router";
  import { useState, useEffect } from "react";
  import { useSidebar } from '@/components/ui/sidebar'
  import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import ApiCustomer from '@/api'
+import { getUserFromToken } from '@/lib/utils/auth'
 
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
@@ -117,6 +120,7 @@ export const TabsService = ({ caseDetails }) => {
     MinutesSpent: 0,
     Note: ''
   });
+  // const [apa, setApa] = useState(null)
 
   const handleCaseNoteChange = (key, value) => {
     setCaseNoteFormData(prev => { 
@@ -129,14 +133,22 @@ export const TabsService = ({ caseDetails }) => {
     
   console.log("📝 Form Data to Submit:", caseNoteFormData); // ✅ Log the form data
     try {
+      const user = getUserFromToken();
+      const timestamp = new Date().toLocaleString(); // e.g. "5/6/2025, 10:30:15 AM"
+      const author = user?.name || user?.email || "Unknown User";
+      const role = user?.role || "Unknown";
+    
+      const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.Note}`;
       const response = await ApiCustomer.post("/api/case-information/case-notes", {
         ...caseNoteFormData,
+        Note: modifiedNote,
         CaseID: caseDetails.CaseID
       });
       console.log("Saved successfully:", response.data);
       alert("Case Note Saved!");
+      const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
       setCaseNotes({
-        NotesDisplay: response.data.data.Note
+        NotesDisplay: NotedDisplay
       })
       console.log("Case Notes Infor after save : ",caseNotes)
       console.log("Case Notes Display Infor after save : ",response)
@@ -225,8 +237,9 @@ export const TabsService = ({ caseDetails }) => {
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
       if(noteDetail ){
+        const NotedDisplay = `@Created On : ${noteDetail.CreatedOn}\n${noteDetail.Note}`;
         setCaseNotes({
-          NotesDisplay: noteDetail.Note
+          NotesDisplay: NotedDisplay
         })
       } 
       const symptomCodeDetail = await fetchSymptomCodes();
@@ -868,7 +881,8 @@ useEffect(() => {
     const noteDetail = await fetchCaseNotes();
     if(noteDetail ){
       setCaseNotes({
-        NotesDisplay: noteDetail.Note
+        NotesDisplay: noteDetail.Note,
+        CreatedOn: noteDetail.CreatedOn
       })
     }
   }
