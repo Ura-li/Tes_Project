@@ -1,5 +1,5 @@
 import React from 'react'
-import { ServiceWork } from './components/service-work'
+import { ServiceWork } from './components/service'
 
 export const Work = () => {
   return (
