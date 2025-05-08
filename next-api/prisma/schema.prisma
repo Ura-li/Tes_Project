@@ -296,27 +296,6 @@ model warranty_services {
   servicecatalog      servicecatalog[]
 }
 
-model Resource {
-  ResourceId String @id @db.VarChar(255)
-  Name       String @db.VarChar(255)
-
-  // Relations
-  resourceAccounts ResourceAccount[] // <-- 1 Resource has many ResourceAccounts
-  bookingDetails   BookingDetails[]
-}
-
-model ResourceAccount {
-  ResourceAccountId String @id @db.VarChar(255)
-  Name              String @db.VarChar(255)
-
-  // Foreign key to Resource
-  ResourceId String?   @db.VarChar(255)
-  resource   Resource? @relation(fields: [ResourceId], references: [ResourceId])
-
-  // Relations
-  subkTechnicians SubkTechnician[] // <-- 1 ResourceAccount has many SubkTechnicians
-  bookingDetails  BookingDetails[]
-}
 
 model SubkTechnician {
   SubkTechnicianId String @id @db.VarChar(255)
@@ -424,10 +403,32 @@ model workorder {
   IncomingChannel             String?          @db.VarChar(50)
   materialorder               materialorder[]
   caseinformation             caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict, map: "workorder_ibfk_1")
-  Bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
+  bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
 
   @@index([CaseID], map: "CaseID")
   @@index([OwnerID])
+}
+
+model Resource {
+  ResourceId String @id @db.VarChar(255)
+  Name       String @db.VarChar(255)
+
+  // Relations
+  resourceAccounts ResourceAccount[] // <-- 1 Resource has many ResourceAccounts
+  bookingDetails   BookingDetails[]
+}
+
+model ResourceAccount {
+  ResourceAccountId String @id @db.VarChar(255)
+  Name              String @db.VarChar(255)
+
+  // Foreign key to Resource
+  ResourceId String?   @db.VarChar(255)
+  resource   Resource? @relation(fields: [ResourceId], references: [ResourceId])
+
+  // Relations
+  subkTechnicians SubkTechnician[] // <-- 1 ResourceAccount has many SubkTechnicians
+  bookingDetails  BookingDetails[]
 }
 
 model workorder_service_delivery {

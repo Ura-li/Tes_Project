@@ -32,6 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table"; 
 import { Link } from "react-router";
+import Swal from "sweetalert2";
 
 import { useParams } from "react-router";
 import ApiCustomer from "@/api";
@@ -39,19 +40,37 @@ import ApiCustomer from "@/api";
 import { TabsServiceMOLineItems } from "./service-case";
 
 export const ServiceMoDetail = () => {
-  const { molineid } = useParams();
-  const [moLineItems, setMoLineItems] = useState([])
+  const { molineid } = useParams(); // Mendapatkan 'molineid' dari URL
+  const [moLineItems, setMoLineItems] = useState([]); // State untuk menyimpan data material order line items
+
   const fetchMoLineItems = async () => {
-    try{
-      const res = await ApiCustomer.get(`/api/material-order/material-order-line-items/${molineid}`)
-      setMoLineItems(res.data.data)
-    }catch(err){
-      console.error("Failed to fetch Material Line Items orders:", err);
+    try {
+      // Menampilkan indikator loading menggunakan SweetAlert2
+      Swal.fire({
+        title: 'Memuat Data...',
+        text: 'Mohon tunggu sebentar...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading(); // Menampilkan indikator loading
+        },
+      });
+
+      // Fetch data dari API
+      const res = await ApiCustomer.get(`/api/material-order/material-order-line-items/${molineid}`);
+      setMoLineItems(res.data.data); // Menyimpan data ke state
+
+      // Menutup indikator loading setelah data berhasil diambil
+      Swal.close();
+    } catch (err) {
+      // Menutup indikator loading dan menangani error
+      Swal.close();
+      console.error('Failed to fetch Material Line Items orders:', err);
     }
-  }
+  };
+
   useEffect(() => {
-    fetchMoLineItems()
-  }, [])
+    fetchMoLineItems(); // Memanggil fungsi fetch saat komponen pertama kali dirender
+  }, [molineid]); 
   return (
     <>
     {moLineItems.Status === 'Closed' && (

@@ -39,13 +39,17 @@ export function NavUser({
 
   const logout = () => {
     localStorage.removeItem('token');
+  
     Swal.fire({
       title: "Success",
-      text: "User has been log out",
-      icon: "Success"
-    }).then((result) => {
-      window.location.href = '/lorem'; // back to login page
-    })
+      text: "User has been logged out",
+      icon: "success",
+      allowOutsideClick: false,
+      timer: 1500, 
+      showConfirmButton: false
+    }).then(() => {
+      window.location.href = '/lorem'; 
+    });
   };
   
 

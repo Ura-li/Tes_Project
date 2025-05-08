@@ -135,7 +135,18 @@ const data = {
           title: "Booking Details",
           url: "/master/BookingDetails",
         },
-
+        {
+          title: "User",
+          url: "/master/User_table",
+        },  
+        {
+          title: "Parts",
+          url: "/master/Part_table",
+        },  
+        {
+          title: "Resource",
+          url: "/master/Resource_table",
+        }, 
       ],
     },
     {

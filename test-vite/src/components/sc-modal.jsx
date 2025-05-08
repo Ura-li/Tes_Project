@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -310,7 +308,8 @@ export function BtnModalContact({
           icon: 'success',
           title: 'Berhasil!',
           text: responseMessage,
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
+          allowEscapeKey: false,
         });
   
         // ✅ Refresh data kontak setelah SweetAlert ditutup
@@ -329,6 +328,7 @@ export function BtnModalContact({
         text: 'Terjadi kesalahan saat menyimpan kontak.',
         timer: 1500,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });
     }
   };
@@ -503,7 +503,6 @@ export function BtnModalContact({
   );
 }
 
-
 /**
  * TODO 
  * MAKE ROUTE FOR PRODUCT
@@ -642,6 +641,7 @@ export function BtnModalAsset({
       title: 'Memperbarui asset...',
       text: 'Mohon tunggu sebentar',
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       }
@@ -664,7 +664,8 @@ export function BtnModalAsset({
           title: 'Berhasil!',
           text: 'Asset berhasil diperbarui!',
           timer: 2000,
-          showConfirmButton: false
+          showConfirmButton: false,
+          allowEscapeKey: false,
         });
       }
     } catch (error) {
@@ -674,7 +675,8 @@ export function BtnModalAsset({
         title: 'Gagal',
         text: 'Terjadi kesalahan saat memperbarui asset.',
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
+        allowEscapeKey: false,
       });
       console.error("Terjadi kesalahan : ", error);
     }
@@ -842,10 +844,6 @@ export function BtnModalAsset({
   )
 };
 
-
-
-
-
 //? MODAL FOR MASTER SITE
 
 export function AssetEdit ({ assetId, onUpdate }) {
@@ -890,16 +888,17 @@ export function AssetEdit ({ assetId, onUpdate }) {
   const handleUpdate = async () => {
     if (!serialNumber || !productName || !productNumber) {
       Swal.fire({
-        icon: 'Incomplete Data',
+        icon: 'warning',
         title: 'Warning!',
         text: 'Please fill in all fields before submitting.',
-        time: 1100,
+        timer: 1100,
         timerProgressBar: false,
         showConfirmButton: false,
-      })
+        allowEscapeKey: false,
+      });
       return;
     }
-
+  
     try {
       await ApiCustomer.patch(`/api/asset-information/${assetId}`, {
         SerialNumber: serialNumber,
@@ -907,12 +906,32 @@ export function AssetEdit ({ assetId, onUpdate }) {
         ProductNumber: productNumber,
         ProductLine: productLine,
       });
-      onUpdate();
-      setIsOpen(false);
+  
+      // ✅ Tambahan SweetAlert berhasil update
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Asset information updated successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+  
+      onUpdate();       // refresh data
+      setIsOpen(false); // tutup modal
+  
     } catch (error) {
       console.error("Error updating asset:", error);
+  
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'An error occurred while updating the asset.',
+        allowEscapeKey: false,
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -944,34 +963,80 @@ export function AssetEdit ({ assetId, onUpdate }) {
 
 export function AssetDelete ({ assetId }) {
   const handleDelete = async () => {
-    try {
-      await ApiCustomer.delete(`/api/asset-information/${assetId}`);
-    } catch (error) {
-      console.error("Error deleting asset:", error);
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Data ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/asset-information/${assetId}`);
+  
+        if (response.status === 409 || response.data.success === false) {
+          return Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || 'Data ini memiliki keterkaitan dan tidak dapat dihapus.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Data berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        }).then(() => {
+          window.location.reload();
+        });
+        
+        if (onUpdate) onUpdate();
+  
+      } catch (error) {
+        const message = error?.response?.data?.message;
+        if (error?.response?.status === 409) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: message || 'Data ini memiliki keterkaitan dan tidak dapat dihapus.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        }
+      }
     }
   };
-
+  
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="text-red-500 hover:text-red-700">
-          <Trash />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Asset</DialogTitle>
-          <DialogDescription>
-            Delete asset confirm. 
-          </DialogDescription>
-        </DialogHeader>
-        <h1>Anda yakin ingin menghapus data ini?</h1>
-        <DialogFooter>
-          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+    <Button 
+      variant="outline" 
+      className="text-red-500 hover:text-red-700" 
+      onClick={handleDelete} >
+      <Trash />
+    </Button>
+  );  
 };
 
 export function CompanyEdit({ siteAccountId, onUpdate }) {
@@ -1039,10 +1104,11 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         timer: 1100,
         timerProgressBar: true,
         showConfirmButton: false,
-      }); 
+        allowEscapeKey: false,
+      });
       return;
     }
-
+  
     try {
       await ApiCustomer.patch(`/api/site_account/${siteAccountId}`, {
         Company: companyName,
@@ -1056,12 +1122,31 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         Country: country,
         ZipPostalCode: zipPostalCode,
       });
+  
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Company information updated successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+  
       onUpdate();
       setIsOpen(false);
+      
     } catch (error) {
       console.error("Error updating company:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'An error occurred while updating company information.',
+        allowEscapeKey: false,
+        timer: 1500,
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -1098,63 +1183,83 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
 };
 
 export function CompanyDelete ({ siteAccountId, isModalOpen, setIsModalOpen, onUpdate }) {
-    //set modal
-  const handleDelete = async () => {
+const handleDelete = async () => {
+  const result = await Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "Data ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, hapus!',
+    cancelButtonText: 'Batal',
+  });
+
+  if (result.isConfirmed) {
     try {
       const response = await ApiCustomer.delete(`/api/site_account/${siteAccountId}`);
-      
-      console.log("Server Response:", response.data);
+
       if (response.status === 409 || response.data.success === false) {
-        // 🚨 Restriction triggered - Show alert message
-        alert(response.data.message || "Cannot delete this company due to restrictions.");
-        return;
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Tidak Bisa Dihapus!',
+          text: response.data.message || 'Data ini memiliki keterkaitan dan tidak dapat dihapus.',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        });
       }
-      
+
       Swal.fire({
-        icon: 'Success',
+        icon: 'success',
         title: 'Berhasil!',
-        text: 'Company berhasil dihapus.',
-        timer: 1100,  
+        text: 'Data berhasil dihapus.',
+        timer: 1500,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        window.location.reload();
       });
-      // ✅ Close the modal if it's open
-      setIsModalOpen(false);
-      // ✅ Refresh the table by calling `onUpdate()`
-      if (onUpdate) {
-        onUpdate();
-      }
+      
+      if (onUpdate) onUpdate();
+
     } catch (error) {
-      if (error.response && error.response.status === 409) {
-        // 🚨 Handle 409 Conflict error from backend
-        alert(error.response.data.message || "Cannot delete! This company has related Contacts or Assets.");
+      const message = error?.response?.data?.message;
+      if (error?.response?.status === 409) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Tidak Bisa Dihapus!',
+          text: message || 'Data ini memiliki keterkaitan dan tidak dapat dihapus.',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        });
       } else {
-        alert("Failed to delete site account. Please try again.");
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal Menghapus!',
+          text: 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        });
       }
     }
-  };
+  }
+};
 
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="text-red-500 hover:text-red-700">
-          <Trash />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Asset</DialogTitle>
-          <DialogDescription>
-            Delete asset confirm. 
-          </DialogDescription>
-        </DialogHeader>
-        <h1>Anda yakin ingin menghapus data ini?</h1>
-        <DialogFooter>
-          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+return (
+  <Button 
+    variant="outline" 
+    className="text-red-500 hover:text-red-700" 
+    onClick={handleDelete}
+  >
+    <Trash />
+  </Button>
+);
+
 };
 
 export function ContactEdit({ contactID, onUpdate }) {
@@ -1217,10 +1322,11 @@ export function ContactEdit({ contactID, onUpdate }) {
         timer: 1100,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });  
       return;
     }
-
+  
     try {
       await ApiCustomer.patch(`/api/contact-information/${contactID}`, {
         Salutation: salutation,
@@ -1239,12 +1345,33 @@ export function ContactEdit({ contactID, onUpdate }) {
         Country: country,
         ZipPostalCode: zipPostalCode,
       });
-      onUpdate();
-      setIsOpen(false);
+  
+      // ✅ Tampilkan notifikasi berhasil
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Contact information updated successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+  
+      onUpdate();       // perbarui data di tampilan
+      setIsOpen(false); // tutup modal
+  
     } catch (error) {
       console.error("Error updating contact:", error);
+  
+      // ❌ Tampilkan notifikasi gagal
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'An error occurred while updating contact information.',
+        allowEscapeKey: false,
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -1286,130 +1413,169 @@ export function ContactEdit({ contactID, onUpdate }) {
 };
 
 export function ContactDelete ({ contactID }) {
-  const [delecteContact, setDelecteContact] = useState(false)
-
   const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Data kontak akan dihapus secara permanen.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        await ApiCustomer.delete(`/api/contact-information/${contactID}`);
+        await Swal.fire('Berhasil!', 'Kontak berhasil dihapus.', 'success');
+        window.location.reload();
+      } catch (error) {
+        console.error("Error deleting contact:", error);
+        await Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus.', 'error');
+      }
+    }
+  };
+  
+  return (
+    <Button 
+      variant="outline" 
+      className="text-red-500 hover:text-red-700" 
+      onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
+}
+
+export function ProductAdd() {
+  // Form Product
+  const [formDataProduct, setFormDataProduct] = useState({
+    ProductNumber: '',
+    ProductLine: '',
+    ProductName: '',
+    ProductTypeID: '', // <- penting!
+  });
+
+  // List ProductType untuk dropdown
+  const [productTypes, setProductTypes] = useState([]);
+
+  // Ambil data product type saat pertama render
+  useEffect(() => {
+    async function fetchProductTypes() {
+      try {
+        const response = await ApiCustomer.get("/api/product-type");
+        setProductTypes(response.data.data || []);
+      } catch (err) {
+        console.error("Failed to fetch product types:", err);
+      }
+    }
+    fetchProductTypes();
+  }, []);
+
+  // Input Handler
+  const handlerInputProduct = (e) => {
+    const { id, value } = e.target;
+    setFormDataProduct(prev => ({ ...prev, [id]: value }));
+  };
+
+  // Submit Handler
+  const handlerProduct = async () => {
+    const { ProductNumber, ProductLine, ProductName, ProductTypeID } = formDataProduct;
+
+    if (!ProductNumber || !ProductLine || !ProductName || !ProductTypeID) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all fields before submitting.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+      return;
+    }
+
     try {
-      await ApiCustomer.delete(`/api/contact-information/${contactID}`);
-      setDelecteContact(!delecteContact);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting contact:", error);
+      const response = await ApiCustomer.post("/api/product-information", formDataProduct);
+      console.log("Success:", response.data);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Product berhasil disimpan.',
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(() => window.location.reload());
+    } catch (err) {
+      console.error("Error saving product:", err);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to save Product. Please try again.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
     }
   };
 
   return (
-    <Dialog open={delecteContact}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setDelecteContact(true)}>
-          <Trash />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Asset</DialogTitle>
-          <DialogDescription>
-            Delete asset confirm. 
-          </DialogDescription>
-        </DialogHeader>
-        <h1>Anda yakin ingin menghapus data ini?</h1>
-        <DialogFooter>
-          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-export function ProductAdd () {
-  // Form Product
-   const [formDataProduct, setFormDataProduct] = useState({
-      ProductNumber: '',
-      ProductLine: '',
-      ProductName: '',
-    })
-    
-    // Make Handler Product
-    const handlerInputProduct = (e) => {
-      const { id, value } = e.target
-      setFormDataProduct(prevState => ({
-        ...prevState,
-        [id]:value
-      }));
-    };
-
-    // Handler Submit
-    const handlerProduct = async () => {
-      if (!formDataProduct.ProductNumber || !formDataProduct.ProductLine || !formDataProduct.ProductName) {
-          Swal.fire({
-          title: "Incomplete Data",
-          text: "Please fill in all fields before submitting.",
-          icon: "warning",
-          timer: 1500,
-          timerProgressBar: true,
-          showConfirmButton: false,
-        });
-        return;
-      }
-      try {
-        const response = await ApiCustomer.post("/api/product-information", formDataProduct);
-        console.log("Success:", response.data);
-        Swal.fire({
-          icon: 'success',
-          title: 'Berhasil!',
-          text: 'Product berhasil disimpan.',
-          timer: 1200,
-          timerProgressBar: true,
-          showConfirmButton: false,
-        }).then(() => {
-          window.location.reload();
-        });
-      } catch (err) {
-        console.error("Error saving product: ", err);
-        Swal.fire({
-          title: "Error!",
-          text: "Failed to save Product. Please try again.",
-          icon: "error",
-          timer: 1200,
-          timerProgressBar: true,
-          showConfirmButton: false,
-        });
-      }
-    };
-  return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm ml-2"> Product Add</Button>
+        <Button variant="outline" className="h-11 rounded-sm ml-2">Product Add</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Product Information</DialogTitle>
-          <DialogDescription>
-            Add the product Fields marked with * are required.
-          </DialogDescription>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
         </DialogHeader>
+
         <div className="space-y-3">
-          <Label>Product Number</Label>
+          <Label>Product Number *</Label>
           <Input type="text" id="ProductNumber" value={formDataProduct.ProductNumber} onChange={handlerInputProduct} />
-   
-          <Label>Product Line</Label>
+
+          <Label>Product Line *</Label>
           <Input type="text" id="ProductLine" value={formDataProduct.ProductLine} onChange={handlerInputProduct} />
-         
-          <Label>Product Name</Label>
+
+          <Label>Product Name *</Label>
           <Input type="text" id="ProductName" value={formDataProduct.ProductName} onChange={handlerInputProduct} />
+
+          <Label>Product Type *</Label>
+          <Select
+            value={formDataProduct.ProductTypeID?.toString() || ""}
+            onValueChange={(value) =>
+              setFormDataProduct((prev) => ({
+                ...prev,
+                ProductTypeID: parseInt(value),
+              }))
+          }>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select Product Type" />
+            </SelectTrigger>
+            <SelectContent>
+              {productTypes.map((type) => (
+                <SelectItem key={type.ProductTypeID} value={type.ProductTypeID.toString()}>
+                  {type.ProductType}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+
         <DialogFooter>
           <Button onClick={handlerProduct}>Add</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 export function ProductEdit({ ProductNumber, onUpdate }) {
   const [products, setProducts] = useState(null);
   const [productLine, setProductLine] = useState("");
   const [productName, setProductName] = useState("");
+  const [productTypeID, setProductTypeID] = useState("");
+  const [productTypes, setProductTypes] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
   const fetchProducts = async () => {
@@ -1420,14 +1586,25 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
       setProducts(data);
       setProductLine(data?.ProductLine || "");
       setProductName(data?.ProductName || "");
+      setProductTypeID(data?.ProductTypeID || "");
     } catch (error) {
-      console.error("Error fetching company information:", error);
+      console.error("Error fetching product:", error);
+    }
+  };
+
+  const fetchProductTypes = async () => {
+    try {
+      const response = await ApiCustomer.get("/api/product-type");
+      setProductTypes(response.data.data);
+    } catch (error) {
+      console.error("Error fetching product types:", error);
     }
   };
 
   useEffect(() => {
-    if (ProductNumber && isOpen) {
+    if (isOpen) {
       fetchProducts();
+      fetchProductTypes();
     }
   }, [ProductNumber, isOpen]);
 
@@ -1435,51 +1612,86 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
     if (!isOpen) {
       setProductLine("");
       setProductName("");
+      setProductTypeID("");
     }
   }, [isOpen]);
 
   const handleUpdate = async () => {
-    if (!productLine || !productName) {
+    if (!productLine || !productName || !productTypeID) {
       Swal.fire({
         title: "Incomplete Data",
         text: "Please fill in all fields before submitting.",
         icon: "warning",
-        timer: 1100,
+        timer: 1200,
         timerProgressBar: true,
         showConfirmButton: false,
-      });  
+        allowEscapeKey: false,
+      });
       return;
     }
-
+  
     try {
       await ApiCustomer.patch(`/api/product-information/${ProductNumber}`, {
         ProductLine: productLine,
         ProductName: productName,
+        ProductTypeID: parseInt(productTypeID),
       });
-      onUpdate();
-      setIsOpen(false);
+  
+      // ✅ Notifikasi jika berhasil
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Product information updated successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,  
+      });
+  
+      onUpdate();     // refresh data
+      setIsOpen(false); // tutup modal
+  
     } catch (error) {
       console.error("Error updating product:", error);
+  
+      // ❌ Notifikasi jika gagal
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'An error occurred while updating product information.',
+        allowEscapeKey: false,
+        timer: 1500,
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => { setIsOpen(true); fetchProducts(); }}>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
           <Pencil />
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Product Information</DialogTitle>
-          <DialogDescription>
-            Update the details of the product Fields marked with * are required.
-          </DialogDescription>
+          <DialogDescription>Update the details of the product. Fields marked with * are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <Input value={productLine} onChange={(e) => setProductLine(e.target.value)} placeholder="Product Line*" />
           <Input value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name*" />
+          <Select value={productTypeID} onValueChange={setProductTypeID}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select Product Type" />
+          </SelectTrigger>
+          <SelectContent>
+            {productTypes.map((type) => (
+              <SelectItem key={type.ProductTypeID} value={String(type.ProductTypeID)}>
+                {type.ProductType}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         </div>
         <DialogFooter>
           <Button onClick={handleUpdate}>Update</Button>
@@ -1487,66 +1699,82 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export function ProductDelete ({ ProductNumber, isModalOpen, setIsModalOpen, onUpdate }) {
   //set modal
-const handleDelete = async () => {
-  try {
-    const response = await ApiCustomer.delete(`/api/product-information/${ProductNumber}`);
-    
-    console.log("Server Response:", response.data);
-    if (response.status === 409 || response.data.success === false) {
-      // 🚨 Restriction triggered - Show alert message
-      alert(response.data.message || "Cannot delete this product due to restrictions.");
-      return;
-    }
-    
-    Swal.fire({
-      icon: 'Success',
-      title: 'Berhasil!',
-      text: 'ProductType berhasil dihapus.',
-      timer: 1100,  
-      timerProgressBar: true,
-      showConfirmButton: false,
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Product ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
     });
-    // ✅ Close the modal if it's open
-    setIsModalOpen(false);
-    // ✅ Refresh the table by calling `onUpdate()`
-    if (onUpdate) {
-      onUpdate();
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/product-information/${ProductNumber}`);
+  
+        console.log("Server Response:", response.data);
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Product ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Product berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          // Refresh table or take any action after successful deletion
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+  
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Product ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus product. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
     }
-  } catch (error) {
-    if (error.response && error.response.status === 409) {
-      // 🚨 Handle 409 Conflict error from backend
-      alert(error.response.data.message || "Cannot delete! This product has related Product Type.");
-    } else {
-      alert("Failed to delete product. Please try again.");
-    }
-  }
-};
-
-return (
-  <Dialog>
-    <DialogTrigger asChild>
-      <Button variant="outline" className="text-red-500 hover:text-red-700">
-        <Trash />
-      </Button>
-    </DialogTrigger>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Delete Product</DialogTitle>
-        <DialogDescription>
-          Delete Product confirm. 
-        </DialogDescription>
-      </DialogHeader>
-      <h1>Anda yakin ingin menghapus data ini?</h1>
-      <DialogFooter>
-        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-);
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
 };
 
 export function ProductTypeAdd () {
@@ -1578,6 +1806,7 @@ export function ProductTypeAdd () {
           timer: 1500,
           timerProgressBar: true,
           showConfirmButton: false,
+          allowEscapeKey: false,
         });
         return;
       }
@@ -1593,6 +1822,7 @@ export function ProductTypeAdd () {
           timer: 1200,
           timerProgressBar: true,
           showConfirmButton: false,
+          allowEscapeKey: false,
         }).then(() => {
           window.location.reload();
         });
@@ -1607,6 +1837,7 @@ export function ProductTypeAdd () {
           timer: 1200,
           timerProgressBar: true,
           showConfirmButton: false,
+          allowEscapeKey: false,
         });
       }
     };
@@ -1714,22 +1945,44 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
         timer: 1100,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });  
       return;
     }
-
+  
     try {
       await ApiCustomer.patch(`/api/product-type/${ProductTypeID}`, {
         ProductTower: productTower,
         ProductGroup: productGroup,
         ProductType: productType,
       });
-      onUpdate();
-      setIsOpen(false);
+  
+      // ✅ Notifikasi sukses
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Product type updated successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+  
+      onUpdate();      // Refresh data parent
+      setIsOpen(false); // Tutup modal
+  
     } catch (error) {
       console.error("Error updating productType:", error);
+  
+      // ❌ Notifikasi error
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'An error occurred while updating product type.',
+        allowEscapeKey: false, 
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -1794,66 +2047,82 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
 };
 
 export function ProductTypeDelete ({ ProductTypeID, isModalOpen, setIsModalOpen, onUpdate }) {
-  //set modal
-const handleDelete = async () => {
-  try {
-    const response = await ApiCustomer.delete(`/api/product-type/${ProductTypeID}`);
-    
-    console.log("Server Response:", response.data);
-    if (response.status === 409 || response.data.success === false) {
-      // 🚨 Restriction triggered - Show alert message
-      alert(response.data.message || "Cannot delete this product due to restrictions.");
-      return;
-    }
-    Swal.fire({
-      icon: 'Success',
-      title: 'Berhasil!',
-      text: 'ProductType berhasil dihapus.',
-      timer: 1100,  
-      timerProgressBar: true,
-      showConfirmButton: false,
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Product Type ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
     });
-    // ✅ Close the modal if it's open
-    setIsModalOpen(false);
-    // ✅ Refresh the table by calling `onUpdate()`
-    if (onUpdate) {
-      onUpdate();
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/product-type/${ProductTypeID}`);
+  
+        console.log("Server Response:", response.data);
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "ProductType ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'ProductType berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          // ✅ Close the modal if it's open
+          window.location.reload();
+          // ✅ Refresh the table by calling `onUpdate()`
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "ProductType ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus ProductType. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
     }
-  } catch (error) {
-    if (error.response && error.response.status === 409) {
-      // 🚨 Handle 409 Conflict error from backend
-      alert(error.response.data.message || "Cannot delete! This product has related Product Type.");
-    } else {
-      alert("Failed to delete productType. Please try again.");
-    }
-  }
-};
-
-return (
-  <Dialog>
-    <DialogTrigger asChild>
-      <Button variant="outline" className="text-red-500 hover:text-red-700">
-        <Trash />
-      </Button>
-    </DialogTrigger>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Delete ProductType</DialogTitle>
-        <DialogDescription>
-          Delete ProductType confirm. 
-        </DialogDescription>
-      </DialogHeader>
-      <h1>Anda yakin ingin menghapus data ini?</h1>
-      <DialogFooter>
-        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-);
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
 };
 
 export function WarrantyServiceAdd () {
-  // Form ProductType
    const [formDataWarratyService, setFormDataWarrantyService] = useState({
     Service_offerID: '',
     Service_description: '',	
@@ -1889,6 +2158,7 @@ export function WarrantyServiceAdd () {
           timer: 1500,
           timerProgressBar: true,
           showConfirmButton: false,
+          allowEscapeKey: false,
         });
         return;
       }
@@ -1904,6 +2174,7 @@ export function WarrantyServiceAdd () {
           timer: 1200,
           timerProgressBar: true,
           showConfirmButton: false,
+          allowEscapeKey: false,
         }).then(() => {
           window.location.reload();
         });
@@ -1918,6 +2189,7 @@ export function WarrantyServiceAdd () {
           timer: 1200,
           timerProgressBar: true,
           showConfirmButton: false,
+          allowEscapeKey: false,
         });
       }
     };
@@ -2025,7 +2297,10 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
   }, [isOpen]);
 
   const handleUpdate = async () => {
-    if (!Service_offerIDState || !Service_description || !CTat_RTime || !Price || !Shipping_Fee || !qty_ws || !Tax || !Total) {
+    if (
+      !Service_offerIDState || !Service_description || !CTat_RTime || !Price ||
+      !Shipping_Fee || !qty_ws || !Tax || !Total
+    ) {
       Swal.fire({
         title: "Incomplete Data",
         text: "Please fill in all fields before submitting.",
@@ -2033,26 +2308,61 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
         timer: 1100,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,  
       });  
       return;
     }
-
+  
     try {
-      await ApiCustomer.patch(`/api/warranty-services/${Service_offerID}`, {
-        Service_description : Service_description,	
-        CTat_RTime : CTat_RTime,
-        Price : parseFloat(Price),
-        Shipping_Fee : parseFloat(Shipping_Fee),
-        qty_ws : parseInt(qty_ws),
-        Tax : parseFloat(Tax),
-        Total : parseFloat(Total)
+      // ⏳ Tampilkan loading saat proses update
+      Swal.fire({
+        title: "Updating...",
+        text: "Please wait while saving data.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
       });
+  
+      await ApiCustomer.patch(`/api/warranty-services/${Service_offerID}`, {
+        Service_description,
+        CTat_RTime,
+        Price: parseFloat(Price),
+        Shipping_Fee: parseFloat(Shipping_Fee),
+        qty_ws: parseInt(qty_ws),
+        Tax: parseFloat(Tax),
+        Total: parseFloat(Total)
+      });
+  
+      Swal.close(); // Tutup loading
+  
+      // ✅ Notifikasi sukses
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Warranty service updated successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+  
       onUpdate();
       setIsOpen(false);
+  
     } catch (error) {
       console.error("Error updating Warranty Service:", error);
+  
+      Swal.close(); // Tutup loading jika error
+  
+      // ❌ Notifikasi error
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'An error occurred while updating warranty service.',
+        allowEscapeKey: false,
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -2105,62 +2415,79 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
 };
 
 export function WarrantyServiceDelete ({ Service_offerID, isModalOpen, setIsModalOpen, onUpdate }) {
-  //set modal
-const handleDelete = async () => {
-  try {
-    const response = await ApiCustomer.delete(`/api/warranty-services/${Service_offerID}`);
-    
-    console.log("Server Response:", response.data);
-    if (response.status === 409 || response.data.success === false) {
-      // 🚨 Restriction triggered - Show alert message
-      alert(response.data.message || "Cannot delete this Warranty Service due to restrictions.");
-      return;
-    }
-    Swal.fire({
-      icon: 'Success',
-      title: 'Berhasil!',
-      text: 'Warranty Service dihapus.',
-      timer: 1000,  
-      timerProgressBar: true,
-      showConfirmButton: false,
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Layanan Garansi ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
     });
-    // ✅ Close the modal if it's open
-    setIsModalOpen(false);
-    // ✅ Refresh the table by calling `onUpdate()`
-    if (onUpdate) {
-      onUpdate();
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/warranty-services/${Service_offerID}`);
+        
+        console.log("Server Response:", response.data);
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Layanan Garansi ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Layanan Garansi berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          // ✅ Close the modal if it's open
+          window.location.reload();
+          // ✅ Refresh the table by calling `onUpdate()`
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Layanan Garansi ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus Layanan Garansi. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
     }
-  } catch (error) {
-    if (error.response && error.response.status === 409) {
-      // 🚨 Handle 409 Conflict error from backend
-      alert(error.response.data.message || "Cannot delete! This Warranty has related Warranty Service.");
-    } else {
-      alert("Failed to delete Warranty Service. Please try again.");
-    }
-  }
-};
-
-return (
-  <Dialog>
-    <DialogTrigger asChild>
-      <Button variant="outline" className="text-red-500 hover:text-red-700">
-        <Trash />
-      </Button>
-    </DialogTrigger>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Delete Warranty Service</DialogTitle>
-        <DialogDescription>
-          Delete Warranty Service confirm. 
-        </DialogDescription>
-      </DialogHeader>
-      <h1>Anda yakin ingin menghapus data ini?</h1>
-      <DialogFooter>
-        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-);
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
 };
 
 export function MaterialOrderEdit({ MOID, onUpdate }) {
@@ -2226,36 +2553,74 @@ export function MaterialOrderEdit({ MOID, onUpdate }) {
   }, [isOpen]);
 
   const handleUpdate = async () => {
-    if (!WOID || !OrderNumber || !OrderStatus || !OrderType || !CreatedOn || !SalesOrderNumber || !RMANumber || !ReadyForClosureDate || !Owner) {
+    if (
+      !WOID || !OrderNumber || !OrderStatus || !OrderType ||
+      !CreatedOn || !SalesOrderNumber || !RMANumber ||
+      !ReadyForClosureDate || !Owner
+    ) {
       Swal.fire({
         title: "Incomplete Data",
-        text:  "Please fill in all fields before submitting.",
-        icon:  "warning",
+        text: "Please fill in all fields before submitting.",
+        icon: "warning",
         timer: 1100,
         timerProgressBar: true,
         showConfirmButton: false,
-      });  
+        allowEscapeKey: false,
+      });
       return;
     }
-
+  
     try {
-      await ApiCustomer.patch(`/api/mo-detaill/${MOID}`, {
-        WOID : WOID,
-        OrderNumber : OrderNumber, 
-        OrderStatus : OrderStatus,
-        OrderType   : OrderType,
-        CreatedOn   : CreatedOn,
-        SalesOrderNumber : SalesOrderNumber,
-        RMANumber : RMANumber,
-        ReadyForClosureDate : ReadyForClosureDate,
-        Owner : Owner,
+      // ⏳ Tampilkan loading
+      Swal.fire({
+        title: "Updating...",
+        text: "Please wait while saving data.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
       });
+  
+      await ApiCustomer.patch(`/api/mo-detaill/${MOID}`, {
+        WOID,
+        OrderNumber,
+        OrderStatus,
+        OrderType,
+        CreatedOn,
+        SalesOrderNumber,
+        RMANumber,
+        ReadyForClosureDate,
+        Owner,
+      });
+  
+      Swal.close(); // Tutup loading
+  
+      // ✅ Notifikasi sukses
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Material Order updated successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+  
       onUpdate();
       setIsOpen(false);
     } catch (error) {
       console.error("Error updating Material Order:", error);
+  
+      Swal.close(); // Tutup loading jika gagal
+  
+      // ❌ Notifikasi gagal
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "An error occurred while updating Material Order.",
+        allowEscapeKey: false,
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -2307,62 +2672,77 @@ export function MaterialOrderEdit({ MOID, onUpdate }) {
 };
 
 export function MaterialOrderDelete ({ MOID, isModalOpen, setIsModalOpen, onUpdate }) {
-  //set modal
-const handleDelete = async () => {
-  try {
-    const response = await ApiCustomer.delete(`/api/mo-detaill/${MOID}`);
-    
-    console.log("Server Response:", response.data);
-    if (response.status === 409 || response.data.success === false) {
-      // 🚨 Restriction triggered - Show alert message
-      alert(response.data.message || "Cannot delete this Material Order due to restrictions.");
-      return;
-    }
-    Swal.fire({
-      icon: 'Success',
-      title: 'Berhasil!',
-      text: 'Material Order dihapus.',
-      timer: 1000,  
-      timerProgressBar: true,
-      showConfirmButton: false,
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Material Order ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
     });
-    // ✅ Close the modal if it's open
-    setIsModalOpen(false);
-    // ✅ Refresh the table by calling `onUpdate()`
-    if (onUpdate) {
-      onUpdate();
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/mo-detaill/${MOID}`);
+        
+        console.log("Server Response:", response.data);
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Material Order ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Material Order berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+         window.location.reload();
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Material Order ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus Material Order. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
     }
-  } catch (error) {
-    if (error.response && error.response.status === 409) {
-      // 🚨 Handle 409 Conflict error from backend
-      alert(error.response.data.message || "Cannot delete! This Warranty has related Warranty Service.");
-    } else {
-      alert("Failed to delete Material Order. Please try again.");
-    }
-  }
-};
-
-return (
-  <Dialog>
-    <DialogTrigger asChild>
-      <Button variant="outline" className="text-red-500 hover:text-red-700">
-        <Trash />
-      </Button>
-    </DialogTrigger>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Delete Material Order</DialogTitle>
-        <DialogDescription>
-          Delete Material Order confirm. 
-        </DialogDescription>
-      </DialogHeader>
-      <h1>Anda yakin ingin menghapus data ini?</h1>
-      <DialogFooter>
-        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-);
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
 };
 
 export function WorkOrderEdit({ WOID, onUpdate }) {
@@ -2473,13 +2853,26 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
         timer: 1200,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });
       return;
     }
   
     try {
+      // ⏳ Tampilkan loading selama proses update
+      Swal.fire({
+        title: "Updating...",
+        text: "Please wait while saving data.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
+      });
+  
       await ApiCustomer.patch(`/api/work-order/${WOID}`, formData);
   
+      Swal.close(); // Tutup loading
+  
+      // ✅ Notifikasi sukses
       Swal.fire({
         title: "Success!",
         text: "Data berhasil diperbarui.",
@@ -2487,12 +2880,17 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
         timer: 1500,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });
   
-      onUpdate();      // Refresh data
-      setIsOpen(false); // Tutup modal atau form
+      onUpdate();       // Refresh data
+      setIsOpen(false); // Tutup modal/form
     } catch (error) {
       console.error("Error updating Work Order:", error);
+  
+      Swal.close(); // Tutup loading jika gagal
+  
+      // ❌ Notifikasi gagal
       Swal.fire({
         title: "Error",
         text: "Gagal memperbarui data!",
@@ -2500,9 +2898,11 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
         timer: 1500,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });
     }
   };
+  
   
 
   return (
@@ -2582,63 +2982,1015 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
 }
 
 export function WorkOrderDelete ({ WOID, isModalOpen, setIsModalOpen, onUpdate }) {
-  //set modal
-const handleDelete = async () => {
-  try {
-    const response = await ApiCustomer.delete(`/api/work-order/${WOID}`);
-    
-    console.log("Server Response:", response.data);
-    if (response.status === 409 || response.data.success === false) {
-      // 🚨 Restriction triggered - Show alert message
-      alert(response.data.message || "Cannot delete this Work Order due to restrictions.");
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Work Order ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/work-order/${WOID}`);
+        
+        console.log("Server Response:", response.data);
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Work Order ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Work Order berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.reload(); // Memuat ulang halaman
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Work Order ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus Work Order. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
+    }
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
+};
+
+export function UserAdd({ onAdd }) {
+  const [formData, setFormData] = useState({
+    Email: "",
+    Username: "",
+    Password: "",
+    Name: "",
+    Role: "",
+    ProfilePhoto: "",
+  });
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewPhoto, setPreviewPhoto] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: e.target.value,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    setPreviewPhoto(URL.createObjectURL(file));
+  };
+
+  const uploadImage = async () => {
+    if (!selectedFile) return "";
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", selectedFile);
+
+    try {
+      const res = await ApiCustomer.post("/api/upload", formDataUpload, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data.url;
+    } catch (error) {
+      console.error("Upload failed:", error);
+      return "";
+    }
+  };
+
+  const handleSubmit = async () => {
+    const { Email, Username, Password, Name } = formData;
+    if (!Email || !Username || !Password || !Name) {
+      Swal.fire({
+        title: "Data tidak lengkap",
+        text: "Silakan isi semua data wajib.",
+        icon: "warning",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
       return;
     }
-    Swal.fire({
-      icon: 'Success',
-      title: 'Berhasil!',
-      text: 'Work Order dihapus.',
-      timer: 1000,  
-      timerProgressBar: true,
-      showConfirmButton: false,
-    });
-    // ✅ Close the modal if it's open
-    setIsModalOpen(false);
-    // ✅ Refresh the table by calling `onUpdate()`
-    if (onUpdate) {
-      onUpdate();
+
+    try {
+      const uploadedPhoto = await uploadImage();
+
+      const payload = {
+        ...formData,
+        ProfilePhoto: uploadedPhoto,
+      };
+
+      await ApiCustomer.post("/api/user", payload);
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "User berhasil ditambahkan.",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        window.location.reload(); // Memuat ulang halaman
+      });
+
+      onAdd?.(); // panggil callback jika ada
+      setIsOpen(false);
+      setFormData({ Email: "", Username: "", Password: "", Name: "", Role: "", ProfilePhoto: "" });
+      setSelectedFile(null);
+      setPreviewPhoto(null);
+    } catch (err) {
+      console.error("Gagal tambah user:", err);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menambahkan user.",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
     }
-  } catch (error) {
-    if (error.response && error.response.status === 409) {
-      // 🚨 Handle 409 Conflict error from backend
-      alert(error.response.data.message || "Cannot delete! This Waork has related Work Order.");
-    } else {
-      alert("Failed to delete Work Order. Please try again.");
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2">Tambah User</Button>
+      </DialogTrigger>
+
+      <DialogContent className="h-[550px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Tambah Data User</DialogTitle>
+          <DialogDescription>Isikan semua data pengguna baru dengan benar.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div>
+            <Label>Email*</Label>
+            <Input type="email" value={formData.Email} onChange={handleChange("Email")} />
+          </div>
+          <div>
+            <Label>Username*</Label>
+            <Input type="text" value={formData.Username} onChange={handleChange("Username")} />
+          </div>
+          <div>
+            <Label>Password*</Label>
+            <Input type="password" value={formData.Password} onChange={handleChange("Password")} />
+          </div>
+          <div>
+            <Label>Nama*</Label>
+            <Input type="text" value={formData.Name} onChange={handleChange("Name")} />
+          </div>
+          <div>
+            <Label>Role</Label>
+            <Input type="text" value={formData.Role} onChange={handleChange("Role")} placeholder="Contoh: admin / user" />
+          </div>
+          {/* <div>
+            <Label>Foto Profil</Label>
+            <Input type="file" accept="image/*" onChange={handleFileChange} />
+            {previewPhoto && (
+              <img src={previewPhoto} alt="Preview" className="mt-2 h-24 w-24 rounded-md object-cover" />
+            )}
+          </div> */}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Simpan</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function UserEdit({ IDUser, onUpdate }) {
+  const [formData, setFormData] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
+  const [previewPhoto, setPreviewPhoto] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const defaultFormData = {
+    Email: "",
+    Username: "",
+    Password: "",
+    Name: "",
+    Role: "",
+    ProfilePhoto: "",
+  };
+
+  const fetchUser = async () => {
+    if (!IDUser) return;
+    try {
+      const response = await ApiCustomer.get(`/api/user/${IDUser}`);
+      const data = response.data.data || {};
+
+      setFormData({
+        Email: data.Email || "",
+        Username: data.Username || "",
+        Password: "",
+        Name: data.Name || "",
+        Role: data.Role || "",
+        ProfilePhoto: data.ProfilePhoto || "",
+      });
+
+      setPreviewPhoto(data.ProfilePhoto || null);
+    } catch (error) {
+      console.error("Error fetching User information:", error);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData(defaultFormData);
+    setPreviewPhoto(null);
+    setSelectedFile(null);
+  };
+
+  useEffect(() => {
+    if (IDUser && isOpen) fetchUser();
+  }, [IDUser, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) resetForm();
+  }, [isOpen]);
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: e.target.value,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    setPreviewPhoto(URL.createObjectURL(file));
+  };
+
+  const uploadImage = async () => {
+    if (!selectedFile) return formData.ProfilePhoto;
+
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", selectedFile);
+
+    try {
+      const res = await ApiCustomer.post("/api/upload", formDataUpload, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data.url; // Asumsikan API mengembalikan URL foto
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      return formData.ProfilePhoto; // fallback
+    }
+  };
+
+  const handleUpdate = async () => {
+    const { Email, Username, Password, Name, Role } = formData;
+
+    if (!Email || !Username || !Name) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all required fields.",
+        icon: "warning",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+      return;
+    }
+
+    try {
+      const uploadedPhotoURL = await uploadImage();
+
+      const updatedData = {
+        Email,
+        Username,
+        Name,
+        Role,
+        ProfilePhoto: uploadedPhotoURL,
+      };
+
+      if (Password) updatedData.Password = Password;
+
+      await ApiCustomer.patch(`/api/user/${IDUser}`, updatedData);
+
+      Swal.fire({
+        title: "Success!",
+        text: "Data berhasil diperbarui.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,  
+      });
+
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Gagal memperbarui data!",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchUser(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="h-[500px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit User Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the user. Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div>
+            <Label>Email*</Label>
+            <Input type="email" value={formData.Email} onChange={handleChange("Email")} />
+          </div>
+          <div>
+            <Label>Username*</Label>
+            <Input type="text" value={formData.Username} onChange={handleChange("Username")} />
+          </div>
+          {/* <div>
+            <Label>Password</Label>
+            <Input type="password" value={formData.Password} onChange={handleChange("Password")} placeholder="Kosongkan jika tidak ingin mengubah" />
+          </div> */}
+          <div>
+            <Label>Name*</Label>
+            <Input type="text" value={formData.Name} onChange={handleChange("Name")} />
+          </div>
+          <div>
+            <Label>Role</Label>
+            <Input type="text" value={formData.Role} onChange={handleChange("Role")} />
+          </div>
+
+          {/* <div>
+            <Label>Profile Photo</Label>
+            <Input type="file" accept="image/*" onChange={handleFileChange} />
+            {previewPhoto && (
+              <img src={previewPhoto} alt="Preview" className="mt-2 h-24 w-24 rounded-md object-cover" />
+            )}
+          </div> */}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function UserDelete ({ IDUser, isModalOpen, setIsModalOpen, onUpdate }) {
+ 
+const handleDelete = async () => {
+  const result = await Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "User ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, hapus!',
+    cancelButtonText: 'Batal',
+  });
+
+  if (result.isConfirmed) {
+    try {
+      const response = await ApiCustomer.delete(`/api/user/${IDUser}`);
+      
+      console.log("Server Response:", response.data);
+      if (response.status === 409 || response.data.success === false) {
+        // 🚨 Restriction triggered - Show alert message
+        Swal.fire({
+          icon: 'warning',
+          title: 'Tidak Bisa Dihapus!',
+          text: response.data.message || "User ini memiliki keterkaitan dan tidak dapat dihapus.",
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+        return;
+      }
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'User berhasil dihapus.',
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload(); // Memuat ulang halaman
+        if (onUpdate) {
+          onUpdate();
+        }
+      });
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        // 🚨 Handle 409 Conflict error from backend
+        Swal.fire({
+          icon: 'warning',
+          title: 'Tidak Bisa Dihapus!',
+          text: error.response.data.message || "User ini memiliki keterkaitan dan tidak dapat dihapus.",
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal Menghapus!',
+          text: 'Terjadi kesalahan saat menghapus User. Silakan coba lagi.',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+      }
     }
   }
 };
 
 return (
-  <Dialog>
-    <DialogTrigger asChild>
-      <Button variant="outline" className="text-red-500 hover:text-red-700">
-        <Trash />
-      </Button>
-    </DialogTrigger>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Delete Work Order</DialogTitle>
-        <DialogDescription>
-          Delete Work Order confirm. 
-        </DialogDescription>
-      </DialogHeader>
-      <h1>Anda yakin ingin menghapus data ini?</h1>
-      <DialogFooter>
-        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+  <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+    <Trash />
+  </Button>
 );
 };
+
+export function PartEdit({ PartNumber, onUpdate }) {
+  const [formData, setFormData] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
+
+  const defaultFormData = {
+    PartNumber: "",
+    Keyword: "",
+    PartDescription: "",
+    Orderability: false,
+    RestrictionReason: "",
+    CSR_Flag: false,
+    ROHS_Flag: false,
+    Returnable_Flag: false,
+    HardRoll_Flag: false,
+    DangerousGoods_Flag: false,
+    LithiumBattery_Flag: false,
+    Oversize_Flag: false,
+    Heavy_Flag: false,
+    Price: "",
+    FreightPrice: "",
+    Tax: "",
+    Total: "",
+    Shipping_Fee: "",
+  };
+
+  const fetchPart = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/service-log/parts-catalog/${PartNumber}`);
+      setFormData(res.data.data || defaultFormData);
+    } catch (e) {
+      console.error("Fetch failed", e);
+    }
+  };
+
+  const handleChange = (field) => (e) => {
+    const val = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    setFormData((prev) => ({ ...prev, [field]: val }));
+  };
+
+  const handleUpdate = async () => {
+    const {
+      PartNumber, Keyword, PartDescription,
+      Price, FreightPrice, Tax, Shipping_Fee,
+      ...restFlags
+    } = formData;
+  
+    if (!PartNumber || !Keyword || !PartDescription) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Incomplete Data",
+        text: "Lengkapi semua field wajib.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false
+      });
+    }
+  
+    const updatedData = {
+      PartNumber,
+      Keyword,
+      PartDescription,
+      Price: parseFloat(Price) || 0,
+      FreightPrice: parseFloat(FreightPrice) || 0,
+      Tax: parseFloat(Tax) || 0,
+      Shipping_Fee: parseFloat(Shipping_Fee) || 0,
+      Total:
+        (parseFloat(Price) || 0) +
+        (parseFloat(FreightPrice) || 0) +
+        (parseFloat(Tax) || 0),
+      ...restFlags,
+    };
+  
+    try {
+      Swal.fire({
+        title: "Menyimpan data...",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading()
+      });
+  
+      await ApiCustomer.patch(`/api/service-log/parts-catalog/${PartNumber}`, updatedData);
+  
+      Swal.close(); // Tutup loading setelah selesai
+  
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Data berhasil diperbarui.",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false
+      }).then(() => {
+        onUpdate();
+        setIsOpen(false);
+      });
+  
+    } catch (e) {
+      console.error(e);
+      Swal.close(); // Tutup loading jika gagal
+      Swal.fire({
+        icon: "error",
+        title: "Gagal!",
+        text: "Perbaruan data gagal!",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false
+      });
+    }
+  };
+  
+
+  useEffect(() => {
+    if (PartNumber && isOpen) fetchPart();
+    else if (!isOpen) setFormData(defaultFormData);
+  }, [isOpen]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="h-[500px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Part</DialogTitle>
+          <DialogDescription>Update data part. (*) wajib diisi.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {[
+            { id: "PartNumber", label: "Part Number", type: "text", readonly: true },
+            { id: "Keyword", label: "Keyword", type: "text", required: true },
+            { id: "PartDescription", label: "Description", type: "textarea", required: true },
+            { id: "RestrictionReason", label: "Restriction Reason", type: "textarea" },
+            { id: "Orderability", label: "Orderable", type: "checkbox" },
+            { id: "CSR_Flag", label: "CSR", type: "checkbox" },
+            { id: "ROHS_Flag", label: "ROHS", type: "checkbox" },
+            { id: "Returnable_Flag", label: "Returnable", type: "checkbox" },
+            { id: "HardRoll_Flag", label: "Hard Roll", type: "checkbox" },
+            { id: "DangerousGoods_Flag", label: "Dangerous Goods", type: "checkbox" },
+            { id: "LithiumBattery_Flag", label: "Lithium Battery", type: "checkbox" },
+            { id: "Oversize_Flag", label: "Oversize", type: "checkbox" },
+            { id: "Heavy_Flag", label: "Heavy", type: "checkbox" },
+            { id: "Price", label: "Price", type: "number" },
+            { id: "FreightPrice", label: "Freight Price", type: "number" },
+            { id: "Tax", label: "Tax", type: "number" },
+            { id: "Shipping_Fee", label: "Shipping Fee", type: "number" },
+          ].map(({ id, label, type, required, readonly }) => (
+            <div key={id}>
+              <Label htmlFor={id}>
+                {label} {required && <span className="text-red-500">*</span>}
+              </Label>
+              {type === "textarea" ? (
+                <Textarea id={id} value={formData[id] || ""} onChange={handleChange(id)} />
+              ) : type === "checkbox" ? (
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" id={id} checked={!!formData[id]} onChange={handleChange(id)} />
+                  <label htmlFor={id}>{label}</label>
+                </div>
+              ) : (
+                <Input type={type} id={id} value={formData[id] || ""} onChange={handleChange(id)} readOnly={readonly} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Simpan</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function PartDelete ({ PartNumber, isModalOpen, setIsModalOpen, onUpdate }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Part ini akan dihapus dan perubahan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/service-log/parts-catalog/${PartNumber}`);
+        
+        console.log("Server Response:", response.data);
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Part ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Part berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+         window.location.reload(); // Memuat ulang halaman
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Part ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus Part. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
+    }
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
+};
+
+export function ResourceAdd () {
+  const [formDataResource, setFormDataResource] = useState({
+   ResourceId: '',
+   Name: '',	
+   })
+   
+   // Make Handler ProductType
+   const handlerInputResource = (e) => {
+     const { id, value } = e.target
+     setFormDataResource(prevState => ({
+       ...prevState,
+       [id]:value
+     }));
+   };
+
+   // Handler Submit
+   const handlerResource = async () => {
+     const { 
+       ResourceId, Name
+     } = formDataResource;
+   
+     if (!ResourceId || !Name ) {
+       Swal.fire({
+         title: "Incomplete Data",
+         text: "Please fill in all fields before submitting.",
+         icon: "warning",
+         timer: 1500,
+         timerProgressBar: true,
+         showConfirmButton: false,
+         allowEscapeKey: false,
+       });
+       return;
+     }  
+   
+     try {
+       const response = await ApiCustomer.post("/api/resources", formDataResource);
+       console.log("Success:", response.data);
+   
+       Swal.fire({
+         icon: 'success',
+         title: 'Berhasil!',
+         text: 'Resource berhasil disimpan.',
+         timer: 1200,
+         timerProgressBar: true,
+         showConfirmButton: false,
+         allowEscapeKey: false,
+       }).then(() => {
+         window.location.reload();
+       });
+
+     } catch (err) {
+       console.error("Error saving Resource", err);
+   
+       Swal.fire({
+         title: "Error!",
+         text: "Failed to save Resource. Please try again.",
+         icon: "error",
+         timer: 1200,
+         timerProgressBar: true,
+         showConfirmButton: false,
+         allowEscapeKey: false,
+       });
+     }
+   };
+ return (
+   <Dialog>
+     <DialogTrigger asChild>
+       <Button variant="outline" className="h-11 rounded-sm ml-2"> Resource Add</Button>
+     </DialogTrigger>
+     <DialogContent className="h-[300px] overflow-y-auto">
+       <DialogHeader>
+         <DialogTitle>Add Resource Information</DialogTitle>
+         <DialogDescription>
+           Add the Resource Fields marked with * are required.
+         </DialogDescription>
+       </DialogHeader>
+       <div className="space-y-2">
+
+       <Label>Resource ID</Label>
+       <Input type="text" id="ResourceId" className="p-2" value={formDataResource.ResourceId} onChange={handlerInputResource} />
+
+       <Label>Name</Label>
+       <Input type="text" id="Name" className="p-2" value={formDataResource.Name} onChange={handlerInputResource} />
+       </div>
+       <DialogFooter>
+         <Button onClick={handlerResource}>Add</Button>
+       </DialogFooter>
+     </DialogContent>
+   </Dialog>
+ )
+};
+
+export function ResourceEdit({ ResourceId, onUpdate }) {
+  const [formData, setFormData] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
+
+  const defaultFormData = {
+    ResourceId: "",
+    Name: ""
+  };
+
+  const fetchResource = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/resources/${ResourceId}`);
+      setFormData(res.data.data || defaultFormData);
+    } catch (e) {
+      console.error("Fetch failed", e);
+    }
+  };
+
+  const handleChange = (field) => (e) => {
+    const val = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    setFormData((prev) => ({ ...prev, [field]: val }));
+  };
+
+  const handleUpdate = async () => {
+    const { Name } = formData;
+
+    if (!Name) {
+      return Swal.fire({
+        icon: "warning",
+        text: "Lengkapi semua field wajib.",
+        timer: 1200,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+    }
+
+    const updatedData = { Name };
+
+    try {
+      await ApiCustomer.patch(`/api/resources/${ResourceId}`, updatedData);
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Data diperbarui.",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        onUpdate();
+        setIsOpen(false);
+      });
+    } catch (e) {
+      console.error(e);
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Perbaruan gagal!",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (ResourceId && isOpen) fetchResource();
+    else if (!isOpen) setFormData(defaultFormData);
+  }, [isOpen]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="h-[300px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Resource</DialogTitle>
+          <DialogDescription>Update data Resource. (*) wajib diisi.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {[{ id: "ResourceId", label: "Resource Id", type: "text", required: true, readonly: true },
+            { id: "Name", label: "Name", type: "text", required: true }].map(({ id, label, type, required, readonly }) => (
+            <div key={id}>
+              <Label htmlFor={id}>
+                {label} {required && <span className="text-red-500">*</span>}
+              </Label>
+              <Input
+                type={type}
+                id={id}
+                value={formData[id] || ""}
+                onChange={handleChange(id)}
+                readOnly={readonly}
+              />
+            </div>
+          ))}
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={handleUpdate}>Simpan</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpdate }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Resource ini akan dihapus dan perubahan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/resources/${ResourceId}`);
+  
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Resource ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Resource berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.reload(); // Memuat ulang halaman
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Resource ini tidak bisa dihapus karena memiliki relasi.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus Resource. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
+    }
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
+}
+
+
 //? Service Case Tab List
 
 
@@ -3009,6 +4361,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
         icon: "success",
         timer: 1500,
         showConfirmButton: false,
+        allowEscapeKey: false,
       }).then(()=>{
         setOpen(false);
         const WOID = res.data.WOID
@@ -3022,6 +4375,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
         icon: "error",
         timer: 1500,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });
     }
   };

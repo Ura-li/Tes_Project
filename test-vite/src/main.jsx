@@ -22,9 +22,13 @@ import
   SubkTechnician_table,
   SymptomCodeTable,
   BookingsTable,
-  BookingDetailsTable
+  BookingDetailsTable,
+  Resource_table
  } from './master_table';
 import { Bookings } from './bookings';
+import { User_table } from './master_table';
+import { Part_table } from './master_table';
+import { Labor } from './labor';
 // import { ModalContextProvider } from './components/modal-context';
 import { ResourceAccountTable } from './master_table';
 
@@ -45,7 +49,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/mo_detail/:molineid' element={<MoDetail />}/>
             <Route path='/bookings' element={<Bookings />} />]
             <Route path='/bookings/:bookingid' element={<Bookings />} />]
-
+            <Route path='/labor' element={<Labor />} />
 
             {/* <Route path='/master' element> */}
             <Route path='/master/Company_table' element={<Company_table />} />
@@ -65,6 +69,9 @@ createRoot(document.getElementById('root')).render(
             <Route path='master/symptom_codes' element={<SymptomCodeTable/>}/>
             <Route path='master/Bookings' element={<BookingsTable/>}/>
             <Route path='master/BookingDetails' element={<BookingDetailsTable/>}/>
+            <Route path='/master/User_table' element={<User_table/>}/>
+            <Route path='/master/Part_table' element={<Part_table/>}/>
+            <Route path='/master/Resource_table' element={<Resource_table/>}/>
             {/* </Route> */}
           </Route>
             {/* </Route> */}

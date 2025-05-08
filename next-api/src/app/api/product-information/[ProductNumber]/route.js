@@ -3,74 +3,77 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 
 export async function GET(request, { params }) {
-    const productNumber = await params.ProductNumber;
+    const productNumber = params.ProductNumber;
 
-    if (isNaN(productNumber)) {
+    if (!productNumber) {
         return NextResponse.json({
             success: false,
-            message: "Invalid Product Number"
+            message: "Product number is required",
         }, { status: 400 });
     }
 
-    const product_information = await prisma.product_information.findUnique({
-        where: { ProductNumber: productNumber },
-    });
+    try {
+        const product = await prisma.product_information.findUnique({
+            where: { ProductNumber: productNumber },
+            include: { product_type: true },
+        });
 
-    if (!product_information) {
+        if (!product) {
+            return NextResponse.json({
+                success: false,
+                message: "Product not found",
+            }, { status: 404 });
+        }
+
+        return NextResponse.json({
+            success: true,
+            data: product,
+        });
+    } catch (error) {
+        console.error("🔥 ERROR:", error);
         return NextResponse.json({
             success: false,
-            message: "Detail Data Product Information Not Found!",
-            data: null
-        }, { status: 404 });
+            message: "Failed to fetch product data",
+            error: error.message,
+        }, { status: 500 });
     }
-
-    return NextResponse.json({
-        success: true,
-        message: "Detail Data Product Information",
-        data: product_information
-    }, { status: 200 });
 }
+
 
 
 // update data
 export async function PATCH(request, { params }) {
-    const productNumber = await params.ProductNumber;
-
+    const { ProductNumber } = params;
+    const { ProductLine, ProductName, ProductTypeID } = await request.json();
+  
     try {
-        const body = await request.json();
-        const {  ProductLine, ProductName } = body;
-
-        // Validasi input tidak boleh kosong
-        if (!ProductName || !ProductLine) {
-            return NextResponse.json({
-                success: false,
-                message: "All fields are required!"
-            }, { status: 400 });
-        }
-
-        // Update data
-        const updatedProductInformation = await prisma.product_information.update({
-            where: { ProductNumber: productNumber },
-            data: {
-                ProductName,
-                ProductLine
-            }
-        });
-
-        return NextResponse.json({
-            success: true,
-            message: "Data Product Information Updated!",
-            data: updatedProductInformation
-        }, { status: 200 });
-
+      const dataUpdate = {
+        ProductLine,
+        ProductName,
+      };
+  
+      if (ProductTypeID) {
+        dataUpdate.product_type = {
+          connect: { ProductTypeID: parseInt(ProductTypeID) },
+        };
+      }
+  
+      const updatedProduct = await prisma.product_information.update({
+        where: { ProductNumber },
+        data: dataUpdate,
+      });
+  
+      return NextResponse.json({
+        success: true,
+        message: "Product updated successfully",
+        data: updatedProduct,
+      });
     } catch (error) {
-        return NextResponse.json({
-            success: false,
-            message: "Failed to update asset",
-            error: error.message
-        }, { status: 500 });
+      console.error("Update error:", error);
+      return NextResponse.json({ success: false, message: "Failed to update" }, { status: 500 });
     }
-}
+  }
+  
 
 
 //delete data
