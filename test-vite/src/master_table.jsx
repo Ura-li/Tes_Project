@@ -475,6 +475,7 @@ export const Case_table = () => {
               <th className="border p-2">Created Name</th>
               <th className="border p-2">Owner</th>
               <th className="border p-2">WorkGroup</th>
+              <th className="border p-2">Case Status</th>
             </tr>
           </thead>
           <tbody>
@@ -500,6 +501,7 @@ export const Case_table = () => {
                 <td className="border p-2">{caseItem.CreatedName}</td>
                 <td className="border p-2">{caseItem.Owner}</td>
                 <td className="border p-2">{caseItem.WorkGroup}</td>
+                <td className="border p-2">{caseItem.CaseStatus}</td>
               </tr>
             ))}
           </tbody>

@@ -1,5 +1,5 @@
-import React from 'react'
-import { Button } from "@/components/ui/button"
+import React from "react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,10 +7,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Link } from 'react-router'
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/card";
+import { Link } from "react-router";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -19,14 +19,9 @@ import {
   SelectValue,
   SelectLabel,
   SelectGroup,
-} from "@/components/ui/select"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import { SelectBarRelated } from './sc-select'
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SelectBarRelated } from "./sc-select";
 import {
   Table,
   TableBody,
@@ -35,9 +30,9 @@ import {
   TableFooter,
   TableHead,
   TableHeader,
-  TableRow
-} from "@/components/ui/table"
-import { 
+  TableRow,
+} from "@/components/ui/table";
+import {
   ArrowLeftFromLine,
   SquareArrowOutUpRight,
   Save,
@@ -48,24 +43,31 @@ import {
   Lock,
   UserPen,
   ArrowUp,
-  ChevronDown
- } from 'lucide-react'
+  ChevronDown,
+} from "lucide-react";
 
+import { useLocation, useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { useSidebar } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
+import ApiCustomer from "@/api";
+import { getUserFromToken } from "@/lib/utils/auth";
 
- import { useLocation, useNavigate } from "react-router";
- import { useState, useEffect } from "react";
- import { useSidebar } from '@/components/ui/sidebar'
- import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-
-import ApiCustomer from '@/api'
-import { getUserFromToken } from '@/lib/utils/auth'
-
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { format } from 'date-fns'
-import { twMerge } from "tailwind-merge"
-import Swal from 'sweetalert2'
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { twMerge } from "tailwind-merge";
+import Swal from "sweetalert2";
 // const workorder = [
 //   {
 //     workordernumber: "WO-027816939",
@@ -94,12 +96,10 @@ const partsorder = [
     ordercloseddate: "-",
     createdby: "-",
   },
-]
+];
 
-import { BtnModalsWorkOrder } from './sc-modal'
-import DatePicker from './date-picker'
-
-
+import { BtnModalsWorkOrder } from "./sc-modal";
+import DatePicker from "./date-picker";
 
 export const TabsService = ({ caseDetails }) => {
   const navigate = useNavigate();
@@ -107,169 +107,192 @@ export const TabsService = ({ caseDetails }) => {
 
   const [selectedSymptom, setSelectedSymptom] = useState(null);
 
-
   const { open } = useSidebar();
 
-  
   //casenote
   const [caseNoteFormData, setCaseNoteFormData] = useState({
-    LogType: '',
-    ActionType: '',
-    Template: '',
+    LogType: "",
+    ActionType: "",
+    Template: "",
     VisibleExternally: null,
     MinutesSpent: 0,
-    Note: ''
+    Note: "",
   });
   // const [apa, setApa] = useState(null)
 
   const handleCaseNoteChange = (key, value) => {
-    setCaseNoteFormData(prev => { 
+    setCaseNoteFormData((prev) => {
       const updated = { ...prev, [key]: value };
       console.log("🔄 Updated Form:", updated); // ✅ Log on every change
       return updated;
-     });
+    });
   };
   const saveCaseNote = async () => {
-    
-  console.log("📝 Form Data to Submit:", caseNoteFormData); // ✅ Log the form data
+    console.log("📝 Form Data to Submit:", caseNoteFormData); // ✅ Log the form data
     try {
       const user = getUserFromToken();
       const timestamp = new Date().toLocaleString(); // e.g. "5/6/2025, 10:30:15 AM"
       const author = user?.name || user?.email || "Unknown User";
       const role = user?.role || "Unknown";
-    
+
       const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.Note}`;
-      const response = await ApiCustomer.post("/api/case-information/case-notes", {
-        ...caseNoteFormData,
-        Note: modifiedNote,
-        CaseID: caseDetails.CaseID
-      });
+      const response = await ApiCustomer.post(
+        "/api/case-information/case-notes",
+        {
+          ...caseNoteFormData,
+          Note: modifiedNote,
+          CaseID: caseDetails.CaseID,
+        }
+      );
       console.log("Saved successfully:", response.data);
       alert("Case Note Saved!");
       const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
       setCaseNotes({
-        NotesDisplay: NotedDisplay
-      })
-      console.log("Case Notes Infor after save : ",caseNotes)
-      console.log("Case Notes Display Infor after save : ",response)
+        NotesDisplay: NotedDisplay,
+      });
+      console.log("Case Notes Infor after save : ", caseNotes);
+      console.log("Case Notes Display Infor after save : ", response);
 
       let dataUpdated = {
-        CaseNote: response.data.data.NoteID
+        CaseNote: response.data.data.NoteID,
       };
       //symptom code
-      if(selectedSymptom) {
+      if (selectedSymptom) {
         dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
       }
-      await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated)
-
+      await ApiCustomer.patch(
+        `/api/case-information/${caseDetails.CaseID}`,
+        dataUpdated
+      );
     } catch (error) {
       console.error("Save failed:", error);
       alert("Failed to save note.");
     }
   };
-  
+
   const checkOrCreateNote = async () => {
-    const existing = await ApiCustomer.get(`/api/case-information/case-notes?caseId=${caseDetails.CaseID}`);
-    
+    const existing = await ApiCustomer.get(
+      `/api/case-information/case-notes?caseId=${caseDetails.CaseID}`
+    );
+
     if (existing.data.data.length > 0) {
       const noteID = existing.data.data[0].NoteID;
       await ApiCustomer.patch(`/api/case-information/case-notes/${noteID}`, {
         ...caseNoteFormData,
-        Note: existing.data.data[0].Note + "\n" + caseNoteFormData.Note
+        Note: existing.data.data[0].Note + "\n" + caseNoteFormData.Note,
       });
     } else {
       await ApiCustomer.post("/api/case-information/case-notes", {
         ...caseNoteFormData,
-        CaseID: caseDetails.CaseID
+        CaseID: caseDetails.CaseID,
       });
     }
   };
-  
+
   const fetchCaseNotes = async () => {
-    try{
-      const res = await ApiCustomer.get(`/api/case-information/case-notes`)
-      const notes = res.data.data
-  
-      const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
-  
-      let noteID = null
-  
-      if(existingNote){
-        noteID = existingNote.NoteID
-      }else{
-        const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
-          LogType: "NotesLog",
-          ActionType: "Initial",
-          Template: "",
-          VisibleExternally: false,
-          MinutesSpent: 0,
-          Note: "",
-          CaseID: caseID,
-        })
-        
+    try {
+      const res = await ApiCustomer.get(`/api/case-information/case-notes`);
+      const notes = res.data.data;
+
+      const existingNote = notes.find(
+        (note) => note.CaseID === caseDetails.CaseID
+      );
+
+      let noteID = null;
+
+      if (existingNote) {
+        noteID = existingNote.NoteID;
+      } else {
+        const createResponse = await ApiCustomer.post(
+          `/api/case-information/case-notes`,
+          {
+            LogType: "NotesLog",
+            ActionType: "Initial",
+            Template: "",
+            VisibleExternally: false,
+            MinutesSpent: 0,
+            Note: "",
+            CaseID: caseID,
+          }
+        );
+
         noteID = createResponse.data.data.NoteID;
       }
-  
-      const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
+
+      const detailRes = await ApiCustomer.get(
+        `/api/case-information/case-notes/${noteID}`
+      );
       const noteDetail = detailRes.data.data;
-  
+
       console.log("✅ Case Note Detail:", noteDetail);
       return noteDetail;
-    }catch(err){
+    } catch (err) {
       console.error("Error in fetchCaseNotes:", err);
       return null;
     }
-  }
+  };
   const fetchSymptomCodes = async () => {
-    try{
-      const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`)
-      const caseData = res.data.data
-      const symptomCode = caseData.SymptomCode
+    try {
+      const res = await ApiCustomer.get(
+        `/api/case-information/${caseDetails.CaseID}`
+      );
+      const caseData = res.data.data;
+      const symptomCode = caseData.SymptomCode;
 
-      const resSymptomCode = await ApiCustomer.get(`/api/case-information/symptom-codes/${symptomCode}`)
-      return resSymptomCode.data.data
-    }catch (err) {
+      const resSymptomCode = await ApiCustomer.get(
+        `/api/case-information/symptom-codes/${symptomCode}`
+      );
+      return resSymptomCode.data.data;
+    } catch (err) {
       console.error("Error in fetchSymptomCodes:", err);
       return null;
     }
-  }
+  };
   useEffect(() => {
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
-      if(noteDetail ){
+      if (noteDetail) {
         const NotedDisplay = `@Created On : ${noteDetail.CreatedOn}\n${noteDetail.Note}`;
         setCaseNotes({
-          NotesDisplay: NotedDisplay
-        })
-      } 
+          NotesDisplay: NotedDisplay,
+        });
+      }
       const symptomCodeDetail = await fetchSymptomCodes();
-      if(symptomCodeDetail){
+      if (symptomCodeDetail) {
         setSelectedSymptom({
           TopCategory: symptomCodeDetail.TopCategory,
           SubCategory: symptomCodeDetail.SubCategory,
           SymptomCode: symptomCodeDetail.SymptomCode,
-        })
+        });
       }
-    }
-    loadNote()
-  }, [])
+    };
+    loadNote();
+  }, []);
 
-  const [caseNotes, setCaseNotes] = useState([])
-
-
-  
-  
+  const [caseNotes, setCaseNotes] = useState([]);
 
   const buttons = [
-    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/master/Case_table`) },
+    {
+      icon: ArrowLeftFromLine,
+      label: "",
+      onClick: () => navigate(`/master/Case_table`),
+    },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
-    { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseCase() },
+    {
+      icon: FileSymlink,
+      label: "Save & Close",
+      onClick: () => saveAndCloseCase(),
+    },
     { icon: RotateCw, label: "Refresh", onClick: () => alert("not now") },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
     { icon: StepBack, label: "CSR", onClick: () => alert("not now") },
     { icon: StepBack, label: "Service Order", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Work Order", onClick: () => setOpenWorkOrder(true) },
+    {
+      icon: StepBack,
+      label: "Work Order",
+      onClick: () => setOpenWorkOrder(true),
+    },
     { icon: StepBack, label: "Sales Offer", onClick: () => alert("not now") },
     { icon: StepBack, label: "Close Case", onClick: () => alert("not now") },
     { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
@@ -281,13 +304,13 @@ export const TabsService = ({ caseDetails }) => {
   const hiddenButtons = open ? buttons.slice(-3) : [];
   const saveAndCloseCase = async () => {
     const confirmResult = await Swal.fire({
-      title: 'Confirm Save',
-      text: 'This will give the Case status as CLOSED. Are you sure you want to save changes?',
-      icon: 'warning',
+      title: "Confirm Save",
+      text: "This will give the Case status as CLOSED. Are you sure you want to save changes?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, Save it'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Save it",
     });
 
     if (!confirmResult.isConfirmed) {
@@ -295,61 +318,66 @@ export const TabsService = ({ caseDetails }) => {
     }
     try {
       Swal.fire({
-        title: 'Saving...',
-        text: 'Please wait while we update the Case.',
+        title: "Saving...",
+        text: "Please wait while we update the Case.",
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
-        }
+        },
       });
-      const res = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`,{
-        CaseStatus: 'Close'
-      })
+      const res = await ApiCustomer.patch(
+        `/api/case-information/${caseDetails.CaseID}`,
+        {
+          CaseStatus: "Close",
+        }
+      );
       if (res.data.success) {
         // Success alert
         Swal.fire({
-          icon: 'success',
-          title: 'Updated!',
+          icon: "success",
+          title: "Updated!",
           text: res.data.message,
           timer: 2000,
-          showConfirmButton: false
+          showConfirmButton: false,
         }).then(() => {
-          navigate(`/master/Case_table`)
-        })
+          navigate(`/master/Case_table`);
+        });
       } else {
         // Error from API
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: res.data.message
+          icon: "error",
+          title: "Error",
+          text: res.data.message,
         });
       }
     } catch (error) {
       Swal.fire({
-        icon: 'error',
-        title: 'Failed to update!',
-        text: error.message || 'Something went wrong.'
+        icon: "error",
+        title: "Failed to update!",
+        text: error.message || "Something went wrong.",
       });
     }
-  }
+  };
   return (
     <>
-    <div className='border-1 flex items-center '>
-       {visibleButtons.map((btn, index) => (
+      <div className="border-1 flex items-center ">
+        {visibleButtons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-            >
+          >
             <btn.icon className="h-4 w-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
 
-{open && hiddenButtons.length > 0 && (
+        {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">...</DropdownMenuTrigger>
+            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+              ...
+            </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
                 <DropdownMenuItem key={index}>
@@ -360,22 +388,26 @@ export const TabsService = ({ caseDetails }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/>
-    </div>
-    <div>
-    <ServiceCase 
-      caseDetails={caseDetails}
-      formData={caseNoteFormData}
-      onChange={handleCaseNoteChange}
-      caseNotes={caseNotes}
-      setCaseNotes={setCaseNotes}
-      selectedSymptom={selectedSymptom}
-      setSelectedSymptom={setSelectedSymptom}
-      />
-    </div>
-  </>
-  )
-}
+        <BtnModalsWorkOrder
+          open={openWorkOrder}
+          setOpen={setOpenWorkOrder}
+          caseDetails={caseDetails}
+        />
+      </div>
+      <div>
+        <ServiceCase
+          caseDetails={caseDetails}
+          formData={caseNoteFormData}
+          onChange={handleCaseNoteChange}
+          caseNotes={caseNotes}
+          setCaseNotes={setCaseNotes}
+          selectedSymptom={selectedSymptom}
+          setSelectedSymptom={setSelectedSymptom}
+        />
+      </div>
+    </>
+  );
+};
 
 const spanMap = {
   1: "col-span-1",
@@ -401,26 +433,19 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
       {label}
     </CardTitle>
 
-    <CardTitle className={spanMap[span]}>
-      {children}
-    </CardTitle>
+    <CardTitle className={spanMap[span]}>{children}</CardTitle>
   </>
 );
 
-export const TabsServiceWO = ({
-  workOrders,
-  SLA,
-  setSLA
-}) => {
-
-  const navigate = useNavigate();   
+export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
+  const navigate = useNavigate();
   const WOID = workOrders.WOID;
-   const handleSave = async () => {
+  const handleSave = async () => {
     try {
       // Show loading alert
       Swal.fire({
-        title: 'Updating WORK ORDER...',
-        text: 'Please wait',
+        title: "Updating WORK ORDER...",
+        text: "Please wait",
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
@@ -428,10 +453,9 @@ export const TabsServiceWO = ({
       });
 
       /**
-       * TODO : 
+       * TODO :
        * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
        */
-      
 
       //SLA
       const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
@@ -443,47 +467,55 @@ export const TabsServiceWO = ({
         RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer || undefined,
         GuaranteedFixTimeCustomer: SLA.guaranteedFixTimeCustomer || undefined,
         EarlyStartDateTimeCustomer: SLA.earlyStartDateTimeCustomer || undefined,
-        LatestStartDateTimeCustomer: SLA.latestStartDateTimeCustomer || undefined,
+        LatestStartDateTimeCustomer:
+          SLA.latestStartDateTimeCustomer || undefined,
         SLAReschedule: SLA.slaReschedule || undefined,
         ActiveScheduleDate: SLA.activeScheduleDate || undefined,
         SLAErrorDescription: SLA.slaErrorDescription || undefined,
-        CasePriorityIndex: SLA.casePriorityIndex !== "" ? parseInt(SLA.casePriorityIndex, 10) : undefined,
+        CasePriorityIndex:
+          SLA.casePriorityIndex !== ""
+            ? parseInt(SLA.casePriorityIndex, 10)
+            : undefined,
       });
-      
-      
+
       const result = response.data;
       console.log(response);
-  
+
       if (!result.success) {
         return Swal.fire({
-          icon: 'error',
-          title: 'Update Failed',
-          text: result.message || 'Unknown error',
+          icon: "error",
+          title: "Update Failed",
+          text: result.message || "Unknown error",
         });
       }
 
       return Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: 'SLA updated successfully!',
+        icon: "success",
+        title: "Success",
+        text: "SLA updated successfully!",
       });
-
     } catch (error) {
       return Swal.fire({
-        icon: 'error',
-        title: 'Request Error',
-        text: error.message || 'Something went wrong!',
+        icon: "error",
+        title: "Request Error",
+        text: error.message || "Something went wrong!",
       });
     }
   };
 
-
-
   const buttons = [
-    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/case/${workOrders.CaseID}`) },
+    {
+      icon: ArrowLeftFromLine,
+      label: "",
+      onClick: () => navigate(`/case/${workOrders.CaseID}`),
+    },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => handleSave() },
-    { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseWorkOrder() },
+    {
+      icon: FileSymlink,
+      label: "Save & Close",
+      onClick: () => saveAndCloseWorkOrder(),
+    },
     { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
     { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
@@ -492,20 +524,24 @@ export const TabsServiceWO = ({
     { icon: StepBack, label: "Process", onClick: () => alert("not now") },
     { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
     { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
-    { icon: UserPen, label:  "Create Material Order", onClick: () => alert("not now") },
+    {
+      icon: UserPen,
+      label: "Create Material Order",
+      onClick: () => alert("not now"),
+    },
     { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now") },
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
   const saveAndCloseWorkOrder = async () => {
     const confirmResult = await Swal.fire({
-      title: 'Confirm Save',
-      text: 'This will give the order status as CLOSED. Are you sure you want to save changes?',
-      icon: 'warning',
+      title: "Confirm Save",
+      text: "This will give the order status as CLOSED. Are you sure you want to save changes?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, Save it'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Save it",
     });
 
     if (!confirmResult.isConfirmed) {
@@ -513,61 +549,66 @@ export const TabsServiceWO = ({
     }
     try {
       Swal.fire({
-        title: 'Saving...',
-        text: 'Please wait while we update the Work Order.',
+        title: "Saving...",
+        text: "Please wait while we update the Work Order.",
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
-        }
+        },
       });
-      const res = await ApiCustomer.patch(`/api/work-order/${workOrders.WOID}`,{
-        SystemStatus: 'CLOSED_POSTED'
-      })
+      const res = await ApiCustomer.patch(
+        `/api/work-order/${workOrders.WOID}`,
+        {
+          SystemStatus: "CLOSED_POSTED",
+        }
+      );
       if (res.data.success) {
         // Success alert
         Swal.fire({
-          icon: 'success',
-          title: 'Updated!',
+          icon: "success",
+          title: "Updated!",
           text: res.data.message,
           timer: 2000,
-          showConfirmButton: false
+          showConfirmButton: false,
         }).then(() => {
-          navigate(`/case/${workOrders.CaseID}`)
-        })
+          navigate(`/case/${workOrders.CaseID}`);
+        });
       } else {
         // Error from API
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: res.data.message
+          icon: "error",
+          title: "Error",
+          text: res.data.message,
         });
       }
     } catch (error) {
       Swal.fire({
-        icon: 'error',
-        title: 'Failed to update!',
-        text: error.message || 'Something went wrong.'
+        icon: "error",
+        title: "Failed to update!",
+        text: error.message || "Something went wrong.",
       });
     }
-  }
+  };
   return (
     <>
-    <div className='border-1 flex items-center '>
-       {visibleButtons.map((btn, index) => (
+      <div className="border-1 flex items-center ">
+        {visibleButtons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-            >
+          >
             <btn.icon className="h-4 w-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
 
-{open && hiddenButtons.length > 0 && (
+        {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">...</DropdownMenuTrigger>
+            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+              ...
+            </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
                 <DropdownMenuItem key={index}>
@@ -578,10 +619,10 @@ export const TabsServiceWO = ({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-    </div>
-    <div>
-    {/* <ServiceCase 
+        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+      </div>
+      <div>
+        {/* <ServiceCase 
       caseDetails={caseDetails}
       formData={caseNoteFormData}
       onChange={handleCaseNoteChange}
@@ -590,19 +631,26 @@ export const TabsServiceWO = ({
       selectedSymptom={selectedSymptom}
       setSelectedSymptom={setSelectedSymptom}
       /> */}
-    </div>
-  </>
-  )
-}
+      </div>
+    </>
+  );
+};
 
-export const TabsServiceMO = ({materialOrders}) => {
-
-  const navigate = useNavigate();   
+export const TabsServiceMO = ({ materialOrders }) => {
+  const navigate = useNavigate();
   const buttons = [
-    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/work/${materialOrders.WOID}`) },
+    {
+      icon: ArrowLeftFromLine,
+      label: "",
+      onClick: () => navigate(`/work/${materialOrders.WOID}`),
+    },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
-    { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseMaterialOrder() },
+    {
+      icon: FileSymlink,
+      label: "Save & Close",
+      onClick: () => saveAndCloseMaterialOrder(),
+    },
     { icon: RotateCw, label: "ATP", onClick: () => alert("not now") },
     { icon: StepBack, label: "Cancel Order", onClick: () => alert("not now") },
     { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
@@ -611,7 +659,7 @@ export const TabsServiceMO = ({materialOrders}) => {
     { icon: StepBack, label: "Place Order", onClick: () => alert("not now") },
     { icon: StepBack, label: "Tax", onClick: () => alert("not now") },
     { icon: StepBack, label: "CustID Search", onClick: () => alert("not now") },
-    { icon: UserPen, label:  "PUDO Search", onClick: () => alert("not now") },
+    { icon: UserPen, label: "PUDO Search", onClick: () => alert("not now") },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
@@ -619,61 +667,66 @@ export const TabsServiceMO = ({materialOrders}) => {
   const saveAndCloseMaterialOrder = async () => {
     try {
       Swal.fire({
-        title: 'Saving...',
-        text: 'Please wait while we update the Material Order.',
+        title: "Saving...",
+        text: "Please wait while we update the Material Order.",
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
-        }
+        },
       });
-      const res = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`,{
-        OrderStatus: 'Closed'
-      })
+      const res = await ApiCustomer.patch(
+        `/api/material-order/${materialOrders.MOID}`,
+        {
+          OrderStatus: "Closed",
+        }
+      );
       if (res.data.success) {
         // Success alert
         Swal.fire({
-          icon: 'success',
-          title: 'Updated!',
+          icon: "success",
+          title: "Updated!",
           text: res.data.message,
           timer: 2000,
-          showConfirmButton: false
+          showConfirmButton: false,
         }).then(() => {
-          navigate(`/work/${materialOrders.WOID}`)
-        })
+          navigate(`/work/${materialOrders.WOID}`);
+        });
       } else {
         // Error from API
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: res.data.message
+          icon: "error",
+          title: "Error",
+          text: res.data.message,
         });
       }
     } catch (error) {
       Swal.fire({
-        icon: 'error',
-        title: 'Failed to update!',
-        text: error.message || 'Something went wrong.'
+        icon: "error",
+        title: "Failed to update!",
+        text: error.message || "Something went wrong.",
       });
     }
-  }
+  };
   return (
     <>
-    <div className='border-1 flex items-center '>
-       {visibleButtons.map((btn, index) => (
+      <div className="border-1 flex items-center ">
+        {visibleButtons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-            >
+          >
             <btn.icon className="h-4 w-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
 
-{open && hiddenButtons.length > 0 && (
+        {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">...</DropdownMenuTrigger>
+            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+              ...
+            </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
                 <DropdownMenuItem key={index}>
@@ -684,10 +737,10 @@ export const TabsServiceMO = ({materialOrders}) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-    </div>
-    <div>
-    {/* <ServiceCase 
+        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+      </div>
+      <div>
+        {/* <ServiceCase 
       caseDetails={caseDetails}
       formData={caseNoteFormData}
       onChange={handleCaseNoteChange}
@@ -696,28 +749,40 @@ export const TabsServiceMO = ({materialOrders}) => {
       selectedSymptom={selectedSymptom}
       setSelectedSymptom={setSelectedSymptom}
       /> */}
-    </div>
-  </>
-  )
-}
+      </div>
+    </>
+  );
+};
 
 export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
- const navigate = useNavigate();
+  const navigate = useNavigate();
   const buttons = [
-    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/material-order/${MOLineDetails.MOID}`) },
+    {
+      icon: ArrowLeftFromLine,
+      label: "",
+      onClick: () => navigate(`/material-order/${MOLineDetails.MOID}`),
+    },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
-    { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseMaterialLineItemsOrder() },
+    {
+      icon: FileSymlink,
+      label: "Save & Close",
+      onClick: () => saveAndCloseMaterialLineItemsOrder(),
+    },
     { icon: StepBack, label: "Cancl", onClick: () => alert("not now") },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
     { icon: RotateCw, label: "Assign", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Word Templates", onClick: () => alert("not now") },
+    {
+      icon: StepBack,
+      label: "Word Templates",
+      onClick: () => alert("not now"),
+    },
     { icon: StepBack, label: "Run Report", onClick: () => alert("not now") },
     { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
     { icon: StepBack, label: "Process", onClick: () => alert("not now") },
     { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
-      // { icon: UserPen, label:  "Add To Queue", onClick: () => alert("not now") },
-      // { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+    // { icon: UserPen, label:  "Add To Queue", onClick: () => alert("not now") },
+    // { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
@@ -725,61 +790,66 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
   const saveAndCloseMaterialLineItemsOrder = async () => {
     try {
       Swal.fire({
-        title: 'Saving...',
-        text: 'Please wait while we update the line item.',
+        title: "Saving...",
+        text: "Please wait while we update the line item.",
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
-        }
+        },
       });
-      const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${MOLineDetails.LineItemID}`,{
-        Status: 'Closed'
-      })
+      const res = await ApiCustomer.patch(
+        `/api/material-order/material-order-line-items/${MOLineDetails.LineItemID}`,
+        {
+          Status: "Closed",
+        }
+      );
       if (res.data.success) {
         // Success alert
         Swal.fire({
-          icon: 'success',
-          title: 'Updated!',
+          icon: "success",
+          title: "Updated!",
           text: res.data.message,
           timer: 2000,
-          showConfirmButton: false
+          showConfirmButton: false,
         }).then(() => {
-          navigate(`/material-order/${MOLineDetails.MOID}`)
-        })
+          navigate(`/material-order/${MOLineDetails.MOID}`);
+        });
       } else {
         // Error from API
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: res.data.message
+          icon: "error",
+          title: "Error",
+          text: res.data.message,
         });
       }
     } catch (error) {
       Swal.fire({
-        icon: 'error',
-        title: 'Failed to update!',
-        text: error.message || 'Something went wrong.'
+        icon: "error",
+        title: "Failed to update!",
+        text: error.message || "Something went wrong.",
       });
     }
-  }
+  };
   return (
     <>
-    <div className='border-1 flex items-center '>
-       {visibleButtons.map((btn, index) => (
+      <div className="border-1 flex items-center ">
+        {visibleButtons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-            >
+          >
             <btn.icon className="h-4 w-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
 
-{open && hiddenButtons.length > 0 && (
+        {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">...</DropdownMenuTrigger>
+            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+              ...
+            </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
                 <DropdownMenuItem key={index}>
@@ -790,10 +860,10 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-    </div>
-    <div>
-    {/* <ServiceCase 
+        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+      </div>
+      <div>
+        {/* <ServiceCase 
       caseDetails={caseDetails}
       formData={caseNoteFormData}
       onChange={handleCaseNoteChange}
@@ -802,40 +872,38 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
       selectedSymptom={selectedSymptom}
       setSelectedSymptom={setSelectedSymptom}
       /> */}
-    </div>
-  </>
-  )
-}
-export const ServiceCase = ({ 
-  caseDetails, 
-  formData, 
+      </div>
+    </>
+  );
+};
+export const ServiceCase = ({
+  caseDetails,
+  formData,
   onChange,
   caseNotes,
   setCaseNotes,
   selectedSymptom,
-  setSelectedSymptom
+  setSelectedSymptom,
 }) => {
   const { open } = useSidebar();
 
-  
-const [symptomSearchTerm, setSymptomSearchTerm] = useState("");
-const [symptomSuggestions, setSymptomSuggestions] = useState([]);
+  const [symptomSearchTerm, setSymptomSearchTerm] = useState("");
+  const [symptomSuggestions, setSymptomSuggestions] = useState([]);
 
-const [createdOn, setCreatedOn] = useState(null);
-const [caseClosedDate, setCaseClosedDate] = useState(null);
-const [submittedToBase, setsubmittedToBase] = useState(null);
+  const [createdOn, setCreatedOn] = useState(null);
+  const [caseClosedDate, setCaseClosedDate] = useState(null);
+  const [submittedToBase, setsubmittedToBase] = useState(null);
 
-const [pendingCustomerAction, setPendingCustomerAction] = useState(null);
-const [customerRequestedCloseDate, setCustomerRequestedCloseDate] = useState(null);
-const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
-// const [cr]
-useEffect(() => {
-  if (caseDetails?.CreatedOn) {
-    setCreatedOn(new Date(caseDetails.CreatedOn)); // includes date + time
-  }
-}, [caseDetails]);
-
-  
+  const [pendingCustomerAction, setPendingCustomerAction] = useState(null);
+  const [customerRequestedCloseDate, setCustomerRequestedCloseDate] =
+    useState(null);
+  const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
+  // const [cr]
+  useEffect(() => {
+    if (caseDetails?.CreatedOn) {
+      setCreatedOn(new Date(caseDetails.CreatedOn)); // includes date + time
+    }
+  }, [caseDetails]);
 
   const tabs = [
     { value: "case_info", label: "Case Information" },
@@ -858,42 +926,39 @@ useEffect(() => {
       ]
     : [];
 
+  const [selected, setSelected] = useState("--Selected--"); 
 
-    const [selected, setSelected] = useState("apple"); // Default to 'apple'
-
-    
-
-
-  
   const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
     MainAccount: null,
     SiteAccount: null,
     Type: null,
   });
   const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
-  const [ownerUserData, setOwnerUserData ] = useState([])
-  
+  const [ownerUserData, setOwnerUserData] = useState([]);
+
   const [workOrders, setWorkOrders] = useState([]);
 
   const [materialOrders, setMaterialOrders] = useState([]);
 
-
   const fetchCustomerData = async () => {
-    try{
+    try {
       // console.log("Case Detail : ", caseDetails);
-      const resMainAccount = await ApiCustomer.get(`/api/contact-information/${caseDetails.ContactID}`)
+      const resMainAccount = await ApiCustomer.get(
+        `/api/contact-information/${caseDetails.ContactID}`
+      );
       setDataFetchCustomerData({
-        MainAccount: resMainAccount.data.data
-      })
-      if(caseDetails.SiteAccountID !== null) {
-        const resSiteAccount = await ApiCustomer.get(`/api/site_account/${caseDetails.SiteAccountID}`)
+        MainAccount: resMainAccount.data.data,
+      });
+      if (caseDetails.SiteAccountID !== null) {
+        const resSiteAccount = await ApiCustomer.get(
+          `/api/site_account/${caseDetails.SiteAccountID}`
+        );
         setDataFetchCustomerData((prev) => ({
           ...prev,
           SiteAccount: resSiteAccount.data.data,
-          Type: "SiteAccount"
+          Type: "SiteAccount",
         }));
-        
-      }else{
+      } else {
         setDataFetchCustomerData((prev) => ({
           ...prev,
           type: "Individual", // fallback if no site account
@@ -901,75 +966,86 @@ useEffect(() => {
       }
 
       // const res = await ApiCustomer.get(`/api/`)
-    }catch(err){
-      console.error("Error returning Customer Data : ",err)
-      return null
+    } catch (err) {
+      console.error("Error returning Customer Data : ", err);
+      return null;
     }
-  }
+  };
   const fetchAssetInformation = async () => {
-    try{
-      const resAsset = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
+    try {
+      const resAsset = await ApiCustomer.get(
+        `/api/asset-information/${caseDetails.AssetID}`
+      );
       setDataFetchAssetInformation({
-        AssetInformation: resAsset.data.data
-      })
-    }catch(err){
-      console.error("Error returning Asset Data : ",err)
-      return null
+        AssetInformation: resAsset.data.data,
+      });
+    } catch (err) {
+      console.error("Error returning Asset Data : ", err);
+      return null;
     }
-  }
+  };
   const fetchCaseNotes = async () => {
-    try{
+    try {
       // console.log("Case Details : ", caseDetails)
-      const res = await ApiCustomer.get(`/api/case-information/case-notes`)
-      const notes = res.data.data
-  
-      const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
-  
-      let noteID = null
-  
-      if(existingNote){
-        noteID = existingNote.NoteID
-      }else{
-        const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
-          LogType: "NotesLog",
-          ActionType: "Initial",
-          Template: "",
-          VisibleExternally: false,
-          MinutesSpent: 0,
-          Note: "",
-          CaseID: caseID,
-        })
-        
+      const res = await ApiCustomer.get(`/api/case-information/case-notes`);
+      const notes = res.data.data;
+
+      const existingNote = notes.find(
+        (note) => note.CaseID === caseDetails.CaseID
+      );
+
+      let noteID = null;
+
+      if (existingNote) {
+        noteID = existingNote.NoteID;
+      } else {
+        const createResponse = await ApiCustomer.post(
+          `/api/case-information/case-notes`,
+          {
+            LogType: "NotesLog",
+            ActionType: "Initial",
+            Template: "",
+            VisibleExternally: false,
+            MinutesSpent: 0,
+            Note: "",
+            CaseID: caseID,
+          }
+        );
+
         noteID = createResponse.data.data.NoteID;
       }
-  
-      const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
+
+      const detailRes = await ApiCustomer.get(
+        `/api/case-information/case-notes/${noteID}`
+      );
       const noteDetail = detailRes.data.data;
-  
+
       console.log("✅ Case Note Detail:", noteDetail);
       return noteDetail;
-    }catch(err){
+    } catch (err) {
       console.error("Error in fetchCaseNotes:", err);
       return null;
     }
-  }
+  };
   const fetchOwnerUserData = async () => {
     try {
-      const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
-      setOwnerUserData(response.data.data)
-    } catch (error) {
-      
-    }
-  }
+      const response = await ApiCustomer.get(
+        `/api/user/${caseDetails.CreatedBy}`
+      );
+      setOwnerUserData(response.data.data);
+    } catch (error) {}
+  };
   const fetchSymptomCodes = async (term) => {
     try {
-      const response = await ApiCustomer.get("/api/case-information/symptom-codes");
+      const response = await ApiCustomer.get(
+        "/api/case-information/symptom-codes"
+      );
       const allCodes = response.data.data;
-  
+
       const filtered = allCodes.filter((sym) =>
         sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
       );
-  
+
       setSymptomSuggestions(filtered);
     } catch (err) {
       console.error("Error fetching symptom codes", err);
@@ -977,9 +1053,11 @@ useEffect(() => {
   };
   const fetchWorkOrders = async () => {
     try {
-      const res = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
+      const res = await ApiCustomer.get(
+        `/api/work-order?CaseID=${caseDetails.CaseID}`
+      );
       setWorkOrders(res.data.data); // adjust based on API response shape
-      console.log("Fetch Work Order: ",res.data.data)
+      console.log("Fetch Work Order: ", res.data.data);
     } catch (err) {
       console.error("Failed to fetch work orders:", err);
     }
@@ -987,158 +1065,169 @@ useEffect(() => {
   const fetchMaterialOrders = async () => {
     try {
       if (!workOrders.length) return;
-  
-      const woidList = workOrders.map((wo) => wo.WOID).join(',');
+
+      const woidList = workOrders.map((wo) => wo.WOID).join(",");
       const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
       setMaterialOrders(res.data.data);
     } catch (err) {
       console.error("Failed to fetch Material orders:", err);
     }
-  }
+  };
   //asset
 
+  //notes handler
+  useEffect(() => {
+    fetchCustomerData();
+    fetchAssetInformation();
+    fetchOwnerUserData();
 
+    fetchWorkOrders();
+    const loadNote = async () => {
+      const noteDetail = await fetchCaseNotes();
+      if (noteDetail) {
+        setCaseNotes({
+          NotesDisplay: noteDetail.Note,
+          CreatedOn: noteDetail.CreatedOn,
+        });
+      }
+    };
+    loadNote();
+  }, []);
 
-//notes handler
-useEffect(() => {
-  fetchCustomerData();
-  fetchAssetInformation();
-  fetchOwnerUserData();
-  
-  fetchWorkOrders();
-  const loadNote = async () => {
-    const noteDetail = await fetchCaseNotes();
-    if(noteDetail ){
-      setCaseNotes({
-        NotesDisplay: noteDetail.Note,
-        CreatedOn: noteDetail.CreatedOn
-      })
+  //data for upper style
+  // const []
+
+  useEffect(() => {
+    console.log("Data Asset Info : ", dataFetchAssetInformation);
+
+    console.log("Fetch Data Customer Success : ", dataFetchCustomerData);
+    console.log("Fetch Data User ", ownerUserData);
+  }, [ownerUserData]);
+
+  // useEffect(() =>{
+  //   console.log("Data Asset Info : ",dataFetchAssetInformation)
+  // }, dataFetchAssetInformation)
+
+  // console.log("Selected Symptopm ",selectedSymptom)
+
+  // useEffect(() => {
+  // }, selectedSymptom)
+
+  //order section
+  //workorder
+
+  useEffect(() => {
+    console.log("Work Orders Fetching L ", workOrders);
+    if (workOrders.length > 0) {
+      fetchMaterialOrders();
     }
-  }
-  loadNote()
-}, [])
+  }, [workOrders]);
 
-//data for upper style
-// const []
+  const navigate = useNavigate();
 
+  const handleClick = async () => {
+    // await fetchOwnerUserData();
+    // await fetchCustomerData();
+    {
+      workOrders.map((work) => {
+        navigate(`/work/${work.WOID}`, {
+          // state: { ownerUserData, dataFetchCustomerData }
+        });
+      });
+    }
+  };
 
-useEffect(() =>{
-  console.log("Data Asset Info : ",dataFetchAssetInformation)
-  
-  console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
-  console.log("Fetch Data User ", ownerUserData)
-}, [ownerUserData])
-
-// useEffect(() =>{
-//   console.log("Data Asset Info : ",dataFetchAssetInformation)
-// }, dataFetchAssetInformation)
-
-// console.log("Selected Symptopm ",selectedSymptom)
-
-// useEffect(() => {
-// }, selectedSymptom)
-
-
-//order section
-//workorder
-
-
-useEffect(() => {
-  console.log("Work Orders Fetching L ",workOrders)
-  if (workOrders.length > 0) {
-    fetchMaterialOrders();
-  }
-}, [workOrders]);
-
-const navigate = useNavigate();
-
-const handleClick = async () => {
-  // await fetchOwnerUserData();
-  // await fetchCustomerData(); 
-  {workOrders.map((work) => {
-  navigate(`/work/${work.WOID}`, {
-    // state: { ownerUserData, dataFetchCustomerData }
-  });
-  })}
-};
-
-const [startDate, setstartDate] = useState(null);
-const [endDate, setEndDate] = useState(null);
-
+  const [startDate, setstartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   return (
     <>
-    {caseDetails.CaseStatus === 'Close' && (
+      {caseDetails.CaseStatus === "Close" && (
         <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-2">
-          This Case is <strong>read-only</strong> because it is <strong>Closed</strong>.
+          This Case is <strong>read-only</strong> because it is{" "}
+          <strong>Closed</strong>.
         </div>
       )}
-    <Card className="mt-2 rounded-none p-0 border-0">
-      
-        <Tabs defaultValue="case_info"> 
-          
+      <Card className="mt-2 rounded-none p-0 border-0">
+        <Tabs defaultValue="case_info">
           <CardHeader className="flex flex-col gap-3 border-2 w-full p-2 sticky">
             <div className="flex justify-between">
               <CardTitle className="text-xl ">
                 {caseDetails.CaseID}
-                <span className="text-sm flex items-center">Case .
-                  <Select onValueChange={setSelected} defaultValue="case" className="shadow-xl">
-                  <SelectTrigger className="shadow-none border-none">
-                    <SelectValue  />
-                  </SelectTrigger>
-                  <SelectContent >
-                    <SelectGroup>
-                      <SelectItem value="case">Case</SelectItem>
-                      <SelectItem value="??">??</SelectItem>
-                      <SelectItem value="!!">!!</SelectItem>
-                      <SelectItem value="**">**</SelectItem>
-                      <SelectItem value="&&">&&</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
+                <span className="text-sm flex items-center">
+                  Case .
+                  <Select
+                    onValueChange={setSelected}
+                    defaultValue="case"
+                    className="shadow-xl"
+                  >
+                    <SelectTrigger className="shadow-none border-none">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="case">Case</SelectItem>
+                        <SelectItem value="??">??</SelectItem>
+                        <SelectItem value="!!">!!</SelectItem>
+                        <SelectItem value="**">**</SelectItem>
+                        <SelectItem value="&&">&&</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
                   </Select>
                 </span>
               </CardTitle>
               <CardTitle className="flex">
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>{ownerUserData.Name}</h1>
+                  <h1 className="text-blue-500">{ownerUserData.Name}</h1>
                   <p className="text-sm font-light ">Owner</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>---</h1>
+                  <h1 className="text-blue-500">---</h1>
                   <p className="text-sm font-light ">Queue</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</h1>
+                  <h1 className="text-blue-500">
+                    {dataFetchCustomerData.MainAccount?.Salutation}{" "}
+                    {dataFetchCustomerData.MainAccount?.FirstName}{" "}
+                    {dataFetchCustomerData.MainAccount?.LastName}
+                  </h1>
                   <p className="text-sm font-light ">Contact</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                <Select onValueChange={setSelected} defaultValue="first" >
-                  <SelectTrigger className="shadow-none border-none text-blue-500 p-0">
-                    <SelectValue  />
-                  </SelectTrigger>
-                  <SelectContent className="p-0">
-                    <SelectGroup className="p-0">
-                    <SelectItem value="first" className="p-0">{dataFetchCustomerData.SiteAccount?.Company}</SelectItem>
-                    <SelectItem value="??">??</SelectItem>
-                      <SelectItem value="!!">!!</SelectItem>
-                      <SelectItem value="**">**</SelectItem>
-                      <SelectItem value="&&">&&</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
+                  <Select onValueChange={setSelected} defaultValue="first">
+                    <SelectTrigger className="shadow-none border-none text-blue-500 p-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="p-0">
+                      <SelectGroup className="p-0">
+                        <SelectItem value="first" className="p-0">
+                          {dataFetchCustomerData.SiteAccount?.Company}
+                        </SelectItem>
+                        <SelectItem value="??">??</SelectItem>
+                        <SelectItem value="!!">!!</SelectItem>
+                        <SelectItem value="**">**</SelectItem>
+                        <SelectItem value="&&">&&</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
                   </Select>
                   <p className="text-sm font-light ">Site Account</p>
                 </div>
               </CardTitle>
             </div>
             <TabsList className="bg-white">
-            {visibleTabs.map((tab, index) => tab.component ? (
-            <div key={index}>{tab.component}</div> // Ensure SelectBarRelated renders properly
-          ) : (
-            <TabsTrigger key={index} variant="underline" value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          )
-        )}
+              {visibleTabs.map((tab, index) =>
+                tab.component ? (
+                  <div key={index}>{tab.component}</div> // Ensure SelectBarRelated renders properly
+                ) : (
+                  <TabsTrigger
+                    key={index}
+                    variant="underline"
+                    value={tab.value}
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                )
+              )}
               {/* <TabsTrigger variant="underline" value="case_info" className=" ">Case Information</TabsTrigger>
               <TabsTrigger variant="underline" value="customer,add,entitement" className="">Customer, Asset & Entitement</TabsTrigger>
               <TabsTrigger variant="underline" value="ci_notes" className="">Notes & Information</TabsTrigger>
@@ -1150,231 +1239,543 @@ const [endDate, setEndDate] = useState(null);
               <TabsTrigger variant="underline" value="ci_knowledge" className="">Knowledge & Attachments</TabsTrigger>
               <SelectBarRelated></SelectBarRelated> */}
               {open && (
-          <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">...</DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {hiddenTabs.map((tab, index) =>
-                tab.component ? (
-                  <DropdownMenuItem key={index}>{tab.component}</DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem key={index}>
-                    <TabsTrigger variant="underline" value={tab.value}>
-                      {tab.label}
-                    </TabsTrigger>
-                  </DropdownMenuItem>
-                )
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+                    ...
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {hiddenTabs.map((tab, index) =>
+                      tab.component ? (
+                        <DropdownMenuItem key={index}>
+                          {tab.component}
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem key={index}>
+                          <TabsTrigger variant="underline" value={tab.value}>
+                            {tab.label}
+                          </TabsTrigger>
+                        </DropdownMenuItem>
+                      )
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
             </TabsList>
           </CardHeader>
-      
-          <TabsContent value="case_info" className={'p-2'}>
-            <Card className="flex-row">
-              <CardContent className="grid gap-10 items-center grid-cols-6 p-3 ">  
-                <CaseField label="Case ID" icon><Input variant='invisible' value={caseDetails.CaseID}/></CaseField>
-                <CaseField label="Case Subject"  span={3}><Input variant='invisible' value={caseDetails.CaseSubject}/></CaseField>
-                <CaseField label="Incoming Channel"  icon ><Input variant='invisible' value={caseDetails.IncomingChannel}/></CaseField>
-                <CaseField label="Business Segment" ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Email Status" ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Case Status"  >{caseDetails.CaseStatus}</CaseField>
-                <CaseField label="Case Type"  >{caseDetails.CaseType}</CaseField>
-                <CaseField label="KCI For Case?"  >{caseDetails.KCI_Flag ? "Yes" : "No"}</CaseField>
-                <CaseField label="Case Priority"  >{caseDetails.CasePriority}</CaseField>
-                <CaseField label="HPI Segment"  ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Customer Tracking Number"  icon ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Customer Severity"  >{caseDetails.CustomerSeverity}</CaseField>
-                <CaseField label="Update Customer Tracking Number"  span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Created ON" icon span={3}>
-                <DatePicker variant='icon' value={createdOn} onChange={setCreatedOn} readOnly></DatePicker>
-                </CaseField>
-                <CaseField label="Alternate Customer Tracking Number"><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Case Closed Date" icon span={3} > 
-                  <span className="flex gap-[5em]">
-                      {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
-                      <DatePicker variant='icon' value={caseClosedDate} onChange={setCaseClosedDate} readOnly></DatePicker>
-                      
-                    </span>
-                </CaseField>
-                <CaseField label="Irrelevant"  icon >
-                  <Input variant='invisible' placeholder='---'/>
-                </CaseField> 
-                <CaseField label="Submitted To Base" icon span={3}>
-                    <span className="flex gap-[5em]">
-                     
-                    <DatePicker variant='icon' value={submittedToBase} onChange={setsubmittedToBase} readOnly></DatePicker>
-                      
-                    </span>
-                </CaseField>
 
+          <TabsContent value="case_info" className={"p-2"}>
+            <Card className="flex-row">
+              <CardContent className="grid gap-10 items-center grid-cols-6 p-3 ">
+                <CaseField label="Case ID" icon>
+                  <Input variant="invisible" value={caseDetails.CaseID} />
+                </CaseField>
+                <CaseField label="Case Subject" span={3}>
+                  <Input variant="invisible" value={caseDetails.CaseSubject} />
+                </CaseField>
+                <CaseField label="Incoming Channel" icon>
+                  <Input
+                    variant="invisible"
+                    value={caseDetails.IncomingChannel}
+                  />
+                </CaseField>
+                <CaseField label="Business Segment">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Email Status">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Case Status">
+                  {caseDetails.CaseStatus}
+                </CaseField>
+                <CaseField label="Case Type">{caseDetails.CaseType}</CaseField>
+                <CaseField label="KCI For Case?">
+                  {caseDetails.KCI_Flag ? "Yes" : "No"}
+                </CaseField>
+                <CaseField label="Case Priority">
+                  {caseDetails.CasePriority}
+                </CaseField>
+                <CaseField label="HPI Segment">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Customer Tracking Number" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Customer Severity">
+                  {caseDetails.CustomerSeverity}
+                </CaseField>
+                <CaseField label="Update Customer Tracking Number" span={3}>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Created ON" icon span={3}>
+                  <DatePicker
+                    variant="icon"
+                    value={createdOn}
+                    onChange={setCreatedOn}
+                    readOnly
+                  ></DatePicker>
+                </CaseField>
+                <CaseField label="Alternate Customer Tracking Number">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Case Closed Date" icon span={3}>
+                  <span className="flex gap-[5em]">
+                    {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
+                    <DatePicker
+                      variant="icon"
+                      value={caseClosedDate}
+                      onChange={setCaseClosedDate}
+                      readOnly
+                    ></DatePicker>
+                  </span>
+                </CaseField>
+                <CaseField label="Irrelevant" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Submitted To Base" icon span={3}>
+                  <span className="flex gap-[5em]">
+                    <DatePicker
+                      variant="icon"
+                      value={submittedToBase}
+                      onChange={setsubmittedToBase}
+                      readOnly
+                    ></DatePicker>
+                  </span>
+                </CaseField>
               </CardContent>
             </Card>
 
             <Card className="mt-5 flex-col">
-            <CardHeader>
-            <CardTitle className=' text-lg'>Global Trade Check</CardTitle>
-              <hr />
-            </CardHeader>
+              <CardHeader>
+                <CardTitle className=" text-lg">Global Trade Check</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="grid gap-10  grid-cols-6 p-3 ">
-                <CaseField label="Global Trade Status" ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="GT Override Reason" ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="GT Active Listening"> <Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Embargoed Country" icon ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="GT Details" ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="GT All Comments" ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField className={'col-start-3'} label="Screening ID" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Global Trade Status">
+                  <Select onChange={setSelected} defaultValue="--Select--">
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="Pass">Pass</SelectItem>
+                        <SelectItem value="Fail">Fail</SelectItem>
+                        <SelectItem value="Not Done">Not Done</SelectItem>
+                        <SelectItem value="Not Needed">Not Needed</SelectItem>
+                        <SelectItem value="Failed Confirmed">
+                          Failed Confirmed
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </CaseField>
+
+                <CaseField label="GT Override Reason">
+                <Select defaultValue="--select--">
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="Military Keyword False Match">Military Keyword False Match</SelectItem>
+                        <SelectItem value="Embargo False Match">Embargo False Match</SelectItem>
+                        <SelectItem value="RPL False Match">RPL False Match</SelectItem>
+                        <SelectItem value="Active Contract">Active Contract</SelectItem>
+                        <SelectItem value="United Status Government">United Status Government</SelectItem>
+                        <SelectItem value="Global Trade Authorization">Global Trade Authorization</SelectItem>
+                        <SelectItem value="RPL Manual Screening Passed">RPL Manual Screening Passed</SelectItem>
+                        <SelectItem value="Fail Confirmed by GT">Fail Confirmed by GT</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                        <SelectItem value="Failed Confirmed">
+                          Failed Confirmed
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </CaseField>
+                <CaseField label="GT Active Listening">
+                <Select defaultValue="--select--">
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="Fail">Fail</SelectItem>
+                        <SelectItem value="Pass">Pass</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </CaseField>
+                <CaseField label="Embargoed Country" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="GT Details">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="GT All Comments">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField className={"col-start-3"} label="Screening ID">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent  value="customer,add,entitement" className={'p-1 flex flex-col gap-4'}>
-          <Card className="flex-col ">
-            <CardHeader>
-            <CardTitle className=' text-lg'>Customer Information</CardTitle>
-              <hr />
-            </CardHeader>
+          <TabsContent
+            value="customer,add,entitement"
+            className={"p-1 flex flex-col gap-4"}
+          >
+            <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className=" text-lg">Customer Information</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="grid gap-10 grid-cols-6 items-center">
-                <CaseField label="Customer Account" icon ><Input variant='invisible' value={dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Company : dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName}/></CaseField>
-                <CaseField label="Primary Contact" icon ><Input variant='invisible'value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`} /></CaseField>
-                <CaseField label="Submitted By" ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Is Partner" icon ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label=" Primary Email" icon ><Input variant='invisible' value={dataFetchCustomerData.MainAccount?.Email} placeholder='---'/></CaseField>
-                <CaseField label="Partner & Customer" icon ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="HIPAA" icon ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Phone" icon > {dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone: dataFetchCustomerData?.MainAccount?.Phone}</CaseField>
-                <CaseField label="Region" icon ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="PIN" ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Secondary Contact" ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Parent Company" ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Customer Time Zone" icon ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Country" icon ><Input variant='invisible' value={dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Country : dataFetchCustomerData?.MainAccount?.Country}/></CaseField>
-                <CaseField label="Parent Company Non-Latin" ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Account Tier" className={'col-start-5'} ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Customer Account" icon>
+                  <Input
+                    variant="invisible"
+                    value={
+                      dataFetchCustomerData?.Type == "SiteAccount"
+                        ? dataFetchCustomerData?.SiteAccount?.Company
+                        : dataFetchCustomerData?.MainAccount?.FirstName +
+                          " " +
+                          dataFetchCustomerData?.MainAccount?.LastName
+                    }
+                  />
+                </CaseField>
+                <CaseField label="Primary Contact" icon>
+                  <Input
+                    variant="invisible"
+                    value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
+                  />
+                </CaseField>
+                <CaseField label="Submitted By">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Is Partner" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label=" Primary Email" icon>
+                  <Input
+                    variant="invisible"
+                    value={dataFetchCustomerData.MainAccount?.Email}
+                    placeholder="---"
+                  />
+                </CaseField>
+                <CaseField label="Partner & Customer" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="HIPAA" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Phone" icon>
+                  {" "}
+                  {dataFetchCustomerData?.Type == "SiteAccount"
+                    ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone
+                    : dataFetchCustomerData?.MainAccount?.Phone}
+                </CaseField>
+                <CaseField label="Region" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="PIN">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Secondary Contact">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Parent Company">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Customer Time Zone" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Country" icon>
+                  <Input
+                    variant="invisible"
+                    value={
+                      dataFetchCustomerData?.Type == "SiteAccount"
+                        ? dataFetchCustomerData?.SiteAccount?.Country
+                        : dataFetchCustomerData?.MainAccount?.Country
+                    }
+                  />
+                </CaseField>
+                <CaseField label="Parent Company Non-Latin">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Account Tier" className={"col-start-5"}>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
               </CardContent>
             </Card>
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=' text-lg'>Asset Information</CardTitle>
+                <CardTitle className=" text-lg">Asset Information</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-10 grid-cols-6 items-center">
-                <CaseField label="Assets" icon >{dataFetchAssetInformation?.AssetInformation?.SerialNumber} </CaseField>
-                <CaseField label="Product Number" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Asset Location" ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Serial Number" icon >{dataFetchAssetInformation?.AssetInformation?.SerialNumber} </CaseField>
-                <CaseField label="HW Profit Center" icon> <Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="SNIC - Count" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Product Name" icon>{dataFetchAssetInformation?.AssetInformation?.product_information?.ProductName} </CaseField>
-                <CaseField label="HWPC Code" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="MV Product Description" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Assets" icon>
+                  {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
+                </CaseField>
+                <CaseField label="Product Number" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Asset Location">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Serial Number" icon>
+                  {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
+                </CaseField>
+                <CaseField label="HW Profit Center" icon>
+                  {" "}
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="SNIC - Count" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Product Name" icon>
+                  {
+                    dataFetchAssetInformation?.AssetInformation
+                      ?.product_information?.ProductName
+                  }{" "}
+                </CaseField>
+                <CaseField label="HWPC Code" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="MV Product Description" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
                 <div className="p-5 gap-2 ring-1 col-span-2 grid grid-cols-2 items-center">
-                  <CaseField label="Device Properties" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Device Properties" icon>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=' text-lg'>SLA Information</CardTitle>
+                <CardTitle className=" text-lg">SLA Information</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-10 grid-cols-6 items-center">
-                <CaseField label="Latest Start Date (Cust Time)" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Coverage Window Used" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Response Time Value" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Guaranteed Fix Date (Cust Time)" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Coverage Window Value" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Repair Time Value" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Case Priority Index" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Case Priority Rule" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Latest Start Date (Cust Time)" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Coverage Window Used" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Response Time Value" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Guaranteed Fix Date (Cust Time)" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Coverage Window Value" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Repair Time Value" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Case Priority Index" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Case Priority Rule" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
               </CardContent>
             </Card>
 
             <Card className="flex-col ">
-            <CardHeader>
-                <CardTitle className=' text-lg'>Entitlement Information</CardTitle>
+              <CardHeader>
+                <CardTitle className=" text-lg">
+                  Entitlement Information
+                </CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-10 grid-cols-6 items-center">
-                <CaseField label="Case Entitlement" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Start Date" icon> <DatePicker value={startDate} onChange={setstartDate} readOnly></DatePicker> </CaseField>
-                <CaseField label="OTC Code" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Entitlement Status" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="End Date" icon> <DatePicker value={endDate} onChange={setEndDate} readOnly></DatePicker></CaseField>
-                <CaseField label="Entitlement Override" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Selected Entitlement Offer" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Days Left" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Authorizing Employee" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Case Entitlement" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Start Date" icon>
+                  {" "}
+                  <DatePicker
+                    value={startDate}
+                    onChange={setstartDate}
+                    readOnly
+                  ></DatePicker>{" "}
+                </CaseField>
+                <CaseField label="OTC Code" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Entitlement Status" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="End Date" icon>
+                  {" "}
+                  <DatePicker
+                    value={endDate}
+                    onChange={setEndDate}
+                    readOnly
+                  ></DatePicker>
+                </CaseField>
+                <CaseField label="Entitlement Override" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Selected Entitlement Offer" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Days Left" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Authorizing Employee" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="ci_notes" className={'p-2 flex flex-col gap-4'} >
-          <Card className="flex-col p-2  ">
-            <CardHeader>
-              <CardTitle className=' text-lg'>Customer Issue Description & System Information</CardTitle>
-              <hr />
-            </CardHeader>
+          <TabsContent value="ci_notes" className={"p-2 flex flex-col gap-4"}>
+            <Card className="flex-col p-2  ">
+              <CardHeader>
+                <CardTitle className=" text-lg">
+                  Customer Issue Description & System Information
+                </CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="flex gap-x-5 p-4">
                 <div className="flex-1 grid grid-row-7 grid-cols-6 items-center gap-y-7">
-                  <div className='row-span-4 col-span-full'>
-                    <textarea className='border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none'></textarea>
+                  <div className="row-span-4 col-span-full">
+                    <textarea className="border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none"></textarea>
                   </div>
-                  <CaseField label="Related Device" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
-                  <CaseField label="Device Manufacturer" className={'col-span-3'}  span={3} icon><Input variant='invisible' placeholder='---'/></CaseField>
-                  <CaseField label="Device Model" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField
+                    label="Related Device"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField
+                    label="Device Manufacturer"
+                    className={"col-span-3"}
+                    span={3}
+                    icon
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField
+                    label="Device Model"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
                 </div>
 
                 <div className="flex-1 grid-flow-row gap-y-7 grid grid-cols-6">
-                  <CaseField label="Program/Category" className={'col-span-3'}  span={2}><Input variant='invisible' placeholder='---'/></CaseField>
-                  <CaseField label="Operating System" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
-                  <CaseField label="Version" className={'col-span-3'}  span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
-                  <CaseField label="Remote Diag Code" className={'col-span-3'}  span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
-                  <CaseField label="Application Information" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
-                  <CaseField label="Provider / Platform" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
-                  <CaseField label="Software Version" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField
+                    label="Program/Category"
+                    className={"col-span-3"}
+                    span={2}
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField
+                    label="Operating System"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField label="Version" className={"col-span-3"} span={3}>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField
+                    label="Remote Diag Code"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField
+                    label="Application Information"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField
+                    label="Provider / Platform"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField
+                    label="Software Version"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
                 </div>
               </CardContent>
-          </Card>
+            </Card>
 
-          <Card className="flex-col p-2  ">
-            <CardHeader>
-              <CardTitle className=' text-lg'>Case Notes</CardTitle>
-              <hr />
-            </CardHeader>
+            <Card className="flex-col p-2  ">
+              <CardHeader>
+                <CardTitle className=" text-lg">Case Notes</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="flex gap-4">
                 <div className="grid grid-cols-6 gap-y-7 flex-1">
-
-                  <CaseField label="Log Type" className={'col-span-2'} span={4}>
+                  <CaseField label="Log Type" className={"col-span-2"} span={4}>
                     <Select onValueChange={(val) => onChange("LogType", val)}>
-                        <SelectTrigger className={'w-[100%] hover:shadow-lg border-b-0'}>
-                          <SelectValue placeholder="Log Type"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="NotesLog">Notes Log</SelectItem>
-                          <SelectItem value="PhoneLog">Phone Log</SelectItem>
-                        </SelectContent>
+                      <SelectTrigger
+                        className={"w-[100%] hover:shadow-lg border-b-0"}
+                      >
+                        <SelectValue placeholder="Log Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="NotesLog">Notes Log</SelectItem>
+                        <SelectItem value="PhoneLog">Phone Log</SelectItem>
+                      </SelectContent>
                     </Select>
                   </CaseField>
 
-                  <CaseField label="Action Type" className={'col-span-2'}  span={4}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField
+                    label="Action Type"
+                    className={"col-span-2"}
+                    span={4}
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
 
-                  <CaseField label="Template" className={'col-span-2'} span={4}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Template" className={"col-span-2"} span={4}>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
 
-                  <CaseField label="Visible Externally" className={'col-span-2'} span={4}>
+                  <CaseField
+                    label="Visible Externally"
+                    className={"col-span-2"}
+                    span={4}
+                  >
                     <Select
                       value={
-                        formData?.VisibleExternally === undefined || formData?.VisibleExternally === null
+                        formData?.VisibleExternally === undefined ||
+                        formData?.VisibleExternally === null
                           ? ""
                           : formData?.VisibleExternally
-                            ? "1"
-                            : "0"
+                          ? "1"
+                          : "0"
                       }
-                      onValueChange={(val) => onChange("VisibleExternally", val === "1")}
+                      onValueChange={(val) =>
+                        onChange("VisibleExternally", val === "1")
+                      }
                     >
-                      <SelectTrigger className={'w-[100%] hover:shadow-lg border-b-0'}>
+                      <SelectTrigger
+                        className={"w-[100%] hover:shadow-lg border-b-0"}
+                      >
                         <SelectValue placeholder="---" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1384,12 +1785,23 @@ const [endDate, setEndDate] = useState(null);
                     </Select>
                   </CaseField>
 
-                  <CaseField label="Number of Minutes Spent" className={'col-span-2'}  icon span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField
+                    label="Number of Minutes Spent"
+                    className={"col-span-2"}
+                    icon
+                    span={3}
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
 
-                  <CaseField label="Notes" className={'col-span-2 self-start'} span={4}>
+                  <CaseField
+                    label="Notes"
+                    className={"col-span-2 self-start"}
+                    span={4}
+                  >
                     <textarea
-                      className='h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500'
-                      value={formData?.Note || ''}
+                      className="h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500"
+                      value={formData?.Note || ""}
                       onChange={(e) => onChange("Note", e.target.value)}
                     />
                   </CaseField>
@@ -1398,8 +1810,7 @@ const [endDate, setEndDate] = useState(null);
                       value={formData?.Note || ''}
                       onChange={(e) => onChange("Note", e.target.value)}
                     /> */}
-                    
-                  
+
                   {/* <div className='font-bold flex'>
                     <span>Log Type</span>
                       <Select onValueChange={(val) => onChange("LogType", val)}>
@@ -1447,35 +1858,45 @@ const [endDate, setEndDate] = useState(null);
                     <span className='font-bold'>Notes</span>
                     <textarea className=' w-80 h-40 resize-none p-2 border-2 border-black ' value={formData?.Note || ''} onChange={(e) => onChange("Note", e.target.value)}></textarea>
                   </div> */}
-
                 </div>
 
-                <div className='flex flex-1'>
-                  <textarea className='w-[100%] h-[100%] resize-none p-2 ring-1 ring-gray-500' readOnly value={caseNotes?.NotesDisplay}> </textarea>
+                <div className="flex flex-1">
+                  <textarea
+                    className="w-[100%] h-[100%] resize-none p-2 ring-1 ring-gray-500"
+                    readOnly
+                    value={caseNotes?.NotesDisplay}
+                  >
+                    {" "}
+                  </textarea>
                 </div>
               </CardContent>
-          </Card>
+            </Card>
 
-          <Card className=" flex-col">
-            <CardHeader>
-              <CardTitle className=' text-lg'>Symtome Description / CardTitle</CardTitle>
-              <hr />
-            </CardHeader>
+            <Card className=" flex-col">
+              <CardHeader>
+                <CardTitle className=" text-lg">
+                  Symtome Description / CardTitle
+                </CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="flex gap-6">
-
                 <div className="grid grid-cols-5 gap-y-7 gap-x-2 flex-1">
-                  <CaseField label="Keyword Search" className={'col-span-2'} span={3}>
+                  <CaseField
+                    label="Keyword Search"
+                    className={"col-span-2"}
+                    span={3}
+                  >
                     <Input
-                        placeholder="..."
-                        type="search"
-                        className=""
-                        value={symptomSearchTerm}
-                        onChange={(e) => {
-                          const value = e.target.value
-                          setSymptomSearchTerm(value)
-                          if (value.length >= 2) fetchSymptomCodes(value)
-                            else setSymptomSuggestions([])
-                        }}
+                      placeholder="..."
+                      type="search"
+                      className=""
+                      value={symptomSearchTerm}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setSymptomSearchTerm(value);
+                        if (value.length >= 2) fetchSymptomCodes(value);
+                        else setSymptomSuggestions([]);
+                      }}
                     />
                   </CaseField>
 
@@ -1513,10 +1934,28 @@ const [endDate, setEndDate] = useState(null);
                     </ul>
                   )}
 
-                  <CaseField label="Top Category" className={'col-span-2'}  span={3} >{selectedSymptom?.TopCategory}</CaseField>
-                  <CaseField label="Sub Category" className={'col-span-2'}  span={3} >{selectedSymptom?.SubCategory}</CaseField>
-                  <CaseField label="Spesific Symptom" className={'col-span-2'}  span={3} >{selectedSymptom?.SymptomCode}</CaseField>
-                  
+                  <CaseField
+                    label="Top Category"
+                    className={"col-span-2"}
+                    span={3}
+                  >
+                    {selectedSymptom?.TopCategory}
+                  </CaseField>
+                  <CaseField
+                    label="Sub Category"
+                    className={"col-span-2"}
+                    span={3}
+                  >
+                    {selectedSymptom?.SubCategory}
+                  </CaseField>
+                  <CaseField
+                    label="Spesific Symptom"
+                    className={"col-span-2"}
+                    span={3}
+                  >
+                    {selectedSymptom?.SymptomCode}
+                  </CaseField>
+
                   {/* <div className='font-bold flex'>
                     <span>Top Category</span>
                     <span className=''>...{selectedSymptom?.TopCategory}</span>
@@ -1531,279 +1970,346 @@ const [endDate, setEndDate] = useState(null);
                   </div> */}
                 </div>
 
-                <div className='font-bold flex flex-1'>
-                <Table className="pverflow-auto">
-                  <TableCaption className="caption-top">
-                    {/* Optional caption content here */}
-                  </TableCaption>
+                <div className="font-bold flex flex-1">
+                  <Table className="pverflow-auto">
+                    <TableCaption className="caption-top">
+                      {/* Optional caption content here */}
+                    </TableCaption>
 
-                  <TableHeader>
-                    <TableRow className={''}>
-                      <TableHead>Quality Codes</TableHead>
-                      <TableHead className={'text-right'}>Add Existing QA Code</TableHead>
-                    </TableRow>
-                    <TableRow>
-                      <TableHead className="">
-                        <div className="flex items-center  gap-1">
-                          QA Level 1 <ArrowUp /> <ChevronDown />
-                        </div>
-                      </TableHead>
-                      <TableHead className="">
-                        <div className="flex items-center  gap-1">
-                          QA Level 2 <ArrowUp /> <ChevronDown />
-                        </div>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
+                    <TableHeader>
+                      <TableRow className={""}>
+                        <TableHead>Quality Codes</TableHead>
+                        <TableHead className={"text-right"}>
+                          Add Existing QA Code
+                        </TableHead>
+                      </TableRow>
+                      <TableRow>
+                        <TableHead className="">
+                          <div className="flex items-center  gap-1">
+                            QA Level 1 <ArrowUp /> <ChevronDown />
+                          </div>
+                        </TableHead>
+                        <TableHead className="">
+                          <div className="flex items-center  gap-1">
+                            QA Level 2 <ArrowUp /> <ChevronDown />
+                          </div>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
 
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Entry</TableCell>
-                      <TableCell>0A - see comments</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-
-                  
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>Entry</TableCell>
+                        <TableCell>0A - see comments</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
                 </div>
               </CardContent>
-          </Card>
+            </Card>
 
-          <Card className="mt-5 flex-col">
-            <CardHeader>
-              <CardTitle className=' text-lg'>Case Resolution</CardTitle>
-              <hr />
-            </CardHeader>
-            
-            <CardContent className="grid gap-5 grid-cols-7 p-3 ">
-                <CaseField label="Case Resolution Code" > --- </CaseField>
-                <CaseField label="Case Ready for Closure" icon >
-                  <Select className='' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
-                    <SelectTrigger className={'w-full'}>
-                      <SelectValue placeholder="---"/>
+            <Card className="mt-5 flex-col">
+              <CardHeader>
+                <CardTitle className=" text-lg">Case Resolution</CardTitle>
+                <hr />
+              </CardHeader>
+
+              <CardContent className="grid gap-5 grid-cols-7 p-3 ">
+                <CaseField label="Case Resolution Code"> --- </CaseField>
+                <CaseField label="Case Ready for Closure" icon>
+                  <Select
+                    className=""
+                    onValueChange={(val) =>
+                      onChange("VisibleExternally", val === "1")
+                    }
+                  >
+                    <SelectTrigger className={"w-full"}>
+                      <SelectValue placeholder="---" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="1">Yes</SelectItem>
                       <SelectItem value="0">No</SelectItem>
                     </SelectContent>
-                  </Select> 
+                  </Select>
                 </CaseField>
-                <CaseField label="Pending Customer Action" icon span={2}><DatePicker value={pendingCustomerAction} onChange={setPendingCustomerAction} readOnly/></CaseField>
-                <CaseField label="Auto Close" >
-                <Select className='' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
-                    <SelectTrigger className={'w-full'}>
-                      <SelectValue placeholder="---"/>
+                <CaseField label="Pending Customer Action" icon span={2}>
+                  <DatePicker
+                    value={pendingCustomerAction}
+                    onChange={setPendingCustomerAction}
+                    readOnly
+                  />
+                </CaseField>
+                <CaseField label="Auto Close">
+                  <Select
+                    className=""
+                    onValueChange={(val) =>
+                      onChange("VisibleExternally", val === "1")
+                    }
+                  >
+                    <SelectTrigger className={"w-full"}>
+                      <SelectValue placeholder="---" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="1">Yes</SelectItem>
                       <SelectItem value="0">No</SelectItem>
                     </SelectContent>
-                  </Select> 
+                  </Select>
                 </CaseField>
-                <CaseField label="Ready for Close Days" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField  label="Customer Requested Close Date" icon span={2}> <DatePicker value={customerRequestedCloseDate} onChange={setCustomerRequestedCloseDate} readOnly /></CaseField>
-                <CaseField className={'col-start-3'} label="Ready for Closure Date"icon span={2}><DatePicker value={ReadyForClosureDate} onChange={setReadyForClosureDate} readOnly/> </CaseField>
-              
+                <CaseField label="Ready for Close Days" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Customer Requested Close Date" icon span={2}>
+                  {" "}
+                  <DatePicker
+                    value={customerRequestedCloseDate}
+                    onChange={setCustomerRequestedCloseDate}
+                    readOnly
+                  />
+                </CaseField>
+                <CaseField
+                  className={"col-start-3"}
+                  label="Ready for Closure Date"
+                  icon
+                  span={2}
+                >
+                  <DatePicker
+                    value={ReadyForClosureDate}
+                    onChange={setReadyForClosureDate}
+                    readOnly
+                  />{" "}
+                </CaseField>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="ci_activitas" >
+          <TabsContent value="ci_activitas">
             <Card className="mt-7">
               <CardHeader>Hello Word</CardHeader>
               {/* <DatePicker icon={<Calendar>}></DatePicker> */}
             </Card>
           </TabsContent>
 
-          <TabsContent value="ci_actions" >
+          <TabsContent value="ci_actions">
             <Card className="mt-7">
               <CardHeader>Hello Word</CardHeader>
             </Card>
           </TabsContent>
 
-          <TabsContent value="ci_wo" >
+          <TabsContent value="ci_wo">
             <Card className="mt-7">
               <CardHeader>Hello Word</CardHeader>
             </Card>
           </TabsContent>
 
-          <TabsContent value="ci_orders" className={'p-2 flex flex-col gap-4'} >
-          <Card className="flex-col ">
-            <CardHeader>
-            <CardTitle className=' text-lg'>Shipment Information</CardTitle>
-              <hr />
-            </CardHeader>
+          <TabsContent value="ci_orders" className={"p-2 flex flex-col gap-4"}>
+            <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className=" text-lg">Shipment Information</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="grid gap-10 grid-cols-4 items-center">
-                <CaseField label="Shipment Country"><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Exception Order"><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Shipment State" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="SBD Override"><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Major Account Id"><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Currency"><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Promo Code" className={'col-start-3'}><Input variant='invisible' placeholder='---'/></CaseField>
-
+                <CaseField label="Shipment Country">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Exception Order">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Shipment State" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="SBD Override">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Major Account Id">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Currency">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Promo Code" className={"col-start-3"}>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
               </CardContent>
             </Card>
 
-          <Card className="flex-col ">
-          <CardHeader>
-            <CardTitle className=' text-lg'>Work Order</CardTitle>
-              <hr />
-            </CardHeader>
+            <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className=" text-lg">Work Order</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className=" flex flex-col gap-5 p-3">
-                    <div className="grid gap-5 grid-cols-4">
-                      <CaseField label="Incident Type" span={3}><Input variant='invisible' placeholder='---'/></CaseField>
-                      <CaseField label="Work Order Description" span={3}><Input variant='invisible' placeholder='---'/></CaseField>
-                    </div>
+                <div className="grid gap-5 grid-cols-4">
+                  <CaseField label="Incident Type" span={3}>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField label="Work Order Description" span={3}>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                </div>
 
                 <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Work Order Number</TableHead>
-                    <TableHead>Case ID</TableHead>
-                    <TableHead>Service Account</TableHead>
-                    <TableHead >Sub-Status</TableHead>
-                    <TableHead>System Status</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Work Order</TableHead>
-                    <TableHead>Primary Incident</TableHead>
-                    <TableHead>Due Date</TableHead>
-                    <TableHead>Orion</TableHead>
-                    <TableHead>Owner</TableHead>
-                    <TableHead>Created By</TableHead>
-                    <TableHead>Created At</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {workOrders.map((work) => (
-                    <TableRow key={work.WOID} className="hover:bg-gray-300 cursor-pointer">
-                      <TableCell className="font-medium " onClick={handleClick}>
-                        {/* <Link to={`/work/${work.WOID}`}> */}
-                        {work.WOID}
-                        {/* </Link> */}
-                        </TableCell>
-                      <TableCell>{work.CaseID}</TableCell>
-                      <TableCell>
-                          {work.caseinformation?.site_account?.Company || (work.caseinformation?.contact_information?.FirstName + " " + work.caseinformation?.contact_information?.LastName) || "-"}
-                      </TableCell>
-
-                      <TableCell>{work.SubStatus}</TableCell>
-                      <TableCell>{work.SystemStatus}</TableCell>
-                      <TableCell>{work.Priority}</TableCell>
-                      <TableCell></TableCell>
-                      <TableCell></TableCell>
-                      <TableCell></TableCell>
-                      <TableCell></TableCell>
-                      <TableCell>{work.owner?.Name}</TableCell>
-                      <TableCell>{work.owner?.Name}</TableCell>
-                      <TableCell>{work.CreatedOn}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              </CardContent>
-            </Card>
-
-          <Card className="flex-col ">
-            <CardHeader>
-            <CardTitle className=' text-lg'>Parts Order</CardTitle>
-              <hr />
-            </CardHeader>
-              <CardContent className="grid gap-5">
-    
-                <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Name</TableHead>
-                    <TableHead>Order Status</TableHead>
-                    <TableHead>Work Order</TableHead>
-                    <TableHead>Customer Self Repair (CSR)</TableHead>
-                    <TableHead>Owner</TableHead>
-                    <TableHead>Created On</TableHead>
-                    <TableHead>Order Closed Date</TableHead>
-                    <TableHead>Created By</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {partsorder.map((parts) => (
-                    <TableRow key={parts.name}>
-                      <TableCell className="font-medium">{parts.name}</TableCell>
-                      <TableCell>{parts.orderstatus}</TableCell>
-                      <TableCell>{parts.workorder}</TableCell>
-                      <TableCell>{parts.customerselfrepair}</TableCell>
-                      <TableCell>{parts.owner}</TableCell>
-                      <TableCell>{parts.createdon}</TableCell>
-                      <TableCell>{parts.ordercloseddate}</TableCell>
-                      <TableCell>{parts.createdby}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              </CardContent>
-            </Card>
-
-          <Card className="flex-col ">
-          <CardHeader>
-            <CardTitle className=' text-lg'>Service Order</CardTitle>
-              <hr />
-            </CardHeader>
-              <CardContent className="grid gap-5">
-    
-                <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Name</TableHead>
-                    <TableHead>Order Refere</TableHead>
-                    <TableHead>Case ID</TableHead>
-                    <TableHead>Service Status</TableHead>
-                    <TableHead>Site</TableHead>
-                    <TableHead>Submit</TableHead>
-                    <TableHead>Date and Time</TableHead>
-                    <TableHead>EMEA</TableHead>
-                    <TableHead>Custom Owner</TableHead>
-                    <TableHead>Created By</TableHead>
-                    <TableHead>Created On</TableHead>
-                  </TableRow>
-                </TableHeader>
-
-                <TableBody>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell className="font-medium">No data available</TableCell>
+                      <TableHead className="w-[100px]">
+                        Work Order Number
+                      </TableHead>
+                      <TableHead>Case ID</TableHead>
+                      <TableHead>Service Account</TableHead>
+                      <TableHead>Sub-Status</TableHead>
+                      <TableHead>System Status</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Work Order</TableHead>
+                      <TableHead>Primary Incident</TableHead>
+                      <TableHead>Due Date</TableHead>
+                      <TableHead>Orion</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Created By</TableHead>
+                      <TableHead>Created At</TableHead>
                     </TableRow>
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {workOrders.map((work) => (
+                      <TableRow
+                        key={work.WOID}
+                        className="hover:bg-gray-300 cursor-pointer"
+                      >
+                        <TableCell
+                          className="font-medium "
+                          onClick={handleClick}
+                        >
+                          {/* <Link to={`/work/${work.WOID}`}> */}
+                          {work.WOID}
+                          {/* </Link> */}
+                        </TableCell>
+                        <TableCell>{work.CaseID}</TableCell>
+                        <TableCell>
+                          {work.caseinformation?.site_account?.Company ||
+                            work.caseinformation?.contact_information
+                              ?.FirstName +
+                              " " +
+                              work.caseinformation?.contact_information
+                                ?.LastName ||
+                            "-"}
+                        </TableCell>
+
+                        <TableCell>{work.SubStatus}</TableCell>
+                        <TableCell>{work.SystemStatus}</TableCell>
+                        <TableCell>{work.Priority}</TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell>{work.owner?.Name}</TableCell>
+                        <TableCell>{work.owner?.Name}</TableCell>
+                        <TableCell>{work.CreatedOn}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
 
-          <Card className="flex-col ">
-          <CardHeader>
-            <CardTitle className=' text-lg'>Material Order</CardTitle>
-              <hr />
-            </CardHeader>
+            <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className=" text-lg">Parts Order</CardTitle>
+                <hr />
+              </CardHeader>
               <CardContent className="grid gap-5">
-    
                 <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Name</TableHead>
-                    <TableHead>Case ID</TableHead>
-                    <TableHead>Created On</TableHead>
-                    <TableHead>Order Status</TableHead>
-                    <TableHead>Order Type</TableHead>
-                    <TableHead>Owner</TableHead>
-                    <TableHead>Work Order</TableHead>
-                    <TableHead>Ready For Closure Date</TableHead>
-                  </TableRow>
-                </TableHeader>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Name</TableHead>
+                      <TableHead>Order Status</TableHead>
+                      <TableHead>Work Order</TableHead>
+                      <TableHead>Customer Self Repair (CSR)</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Created On</TableHead>
+                      <TableHead>Order Closed Date</TableHead>
+                      <TableHead>Created By</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {partsorder.map((parts) => (
+                      <TableRow key={parts.name}>
+                        <TableCell className="font-medium">
+                          {parts.name}
+                        </TableCell>
+                        <TableCell>{parts.orderstatus}</TableCell>
+                        <TableCell>{parts.workorder}</TableCell>
+                        <TableCell>{parts.customerselfrepair}</TableCell>
+                        <TableCell>{parts.owner}</TableCell>
+                        <TableCell>{parts.createdon}</TableCell>
+                        <TableCell>{parts.ordercloseddate}</TableCell>
+                        <TableCell>{parts.createdby}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
 
-                <TableBody>
-                  {materialOrders.map((material) => (
+            <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className=" text-lg">Service Order</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid gap-5">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Name</TableHead>
+                      <TableHead>Order Refere</TableHead>
+                      <TableHead>Case ID</TableHead>
+                      <TableHead>Service Status</TableHead>
+                      <TableHead>Site</TableHead>
+                      <TableHead>Submit</TableHead>
+                      <TableHead>Date and Time</TableHead>
+                      <TableHead>EMEA</TableHead>
+                      <TableHead>Custom Owner</TableHead>
+                      <TableHead>Created By</TableHead>
+                      <TableHead>Created On</TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium">
+                        No data available
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className=" text-lg">Material Order</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid gap-5">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Name</TableHead>
+                      <TableHead>Case ID</TableHead>
+                      <TableHead>Created On</TableHead>
+                      <TableHead>Order Status</TableHead>
+                      <TableHead>Order Type</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Work Order</TableHead>
+                      <TableHead>Ready For Closure Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {materialOrders.map((material) => (
                       <TableRow key={material.MOID}>
                         <TableCell className="font-medium">
                           <Link to={`/material-order/${material.MOID}`}>
-                          {material.MOID} on {material.WOID} 
+                            {material.MOID} on {material.WOID}
                           </Link>
-                          </TableCell>
+                        </TableCell>
                         <TableCell>{material.workorder?.CaseID}</TableCell>
                         <TableCell>{material.CreatedOn}</TableCell>
                         <TableCell>{material.OrderStatus}</TableCell>
@@ -1820,33 +2326,31 @@ const [endDate, setEndDate] = useState(null);
                         </Link>
                       </TableCell>
                     </TableRow> */}
-                </TableBody>
-              </Table>
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
-
           </TabsContent>
 
-          <TabsContent value="ci_salles" >
+          <TabsContent value="ci_salles">
             <Card className="mt-7">
               <CardHeader>Hello Word</CardHeader>
             </Card>
           </TabsContent>
 
-          <TabsContent value="ci_knowledge" >
+          <TabsContent value="ci_knowledge">
             <Card className="mt-7">
               <CardHeader>Hello Word</CardHeader>
             </Card>
           </TabsContent>
 
-          <TabsContent value="ci_related" >
+          <TabsContent value="ci_related">
             <Card className="mt-7">
               <CardHeader>Hello Word</CardHeader>
             </Card>
           </TabsContent>
         </Tabs>
-      
-    </Card>
-    </>            
-  )
-}
+      </Card>
+    </>
+  );
+};
