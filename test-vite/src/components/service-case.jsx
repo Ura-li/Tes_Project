@@ -230,24 +230,20 @@ export const TabsService = ({ caseDetails }) => {
       console.error("Error in fetchCaseNotes:", err);
       return null;
     }
-  };
-  const fetchSymptomCodes = async () => {
-    try {
-      const res = await ApiCustomer.get(
-        `/api/case-information/${caseDetails.CaseID}`
-      );
-      const caseData = res.data.data;
-      const symptomCode = caseData.SymptomCode;
+  }
+  // const fetchSymptomCodes = async () => {
+  //   try{
+  //     const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`)
+  //     const caseData = res.data.data
+  //     const symptomCode = caseData.SymptomCode
 
-      const resSymptomCode = await ApiCustomer.get(
-        `/api/case-information/symptom-codes/${symptomCode}`
-      );
-      return resSymptomCode.data.data;
-    } catch (err) {
-      console.error("Error in fetchSymptomCodes:", err);
-      return null;
-    }
-  };
+  //     const resSymptomCode = await ApiCustomer.get(`/api/symptom-codes/${symptomCode}`)
+  //     return resSymptomCode.data.data
+  //   }catch (err) {
+  //     console.error("Error in fetchSymptomCodes:", err);
+  //     return null;
+  //   }
+  // }
   useEffect(() => {
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
@@ -1029,28 +1025,26 @@ export const ServiceCase = ({
   };
   const fetchOwnerUserData = async () => {
     try {
-      const response = await ApiCustomer.get(
-        `/api/user/${caseDetails.CreatedBy}`
-      );
-      setOwnerUserData(response.data.data);
-    } catch (error) {}
-  };
-  const fetchSymptomCodes = async (term) => {
-    try {
-      const response = await ApiCustomer.get(
-        "/api/case-information/symptom-codes"
-      );
-      const allCodes = response.data.data;
-
-      const filtered = allCodes.filter((sym) =>
-        sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
-      );
-
-      setSymptomSuggestions(filtered);
-    } catch (err) {
-      console.error("Error fetching symptom codes", err);
+      const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
+      setOwnerUserData(response.data.data)
+    } catch (error) {
+      
     }
-  };
+  }
+  // const fetchSymptomCodes = async (term) => {
+  //   try {
+  //     const response = await ApiCustomer.get("/api/case-information/symptom-codes");
+  //     const allCodes = response.data.data;
+  
+  //     const filtered = allCodes.filter((sym) =>
+  //       sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+  //     );
+  
+  //     setSymptomSuggestions(filtered);
+  //   } catch (err) {
+  //     console.error("Error fetching symptom codes", err);
+  //   }
+  // };
   const fetchWorkOrders = async () => {
     try {
       const res = await ApiCustomer.get(
@@ -1137,8 +1131,44 @@ export const ServiceCase = ({
     }
   };
 
-  const [startDate, setstartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+useEffect(() =>{
+  console.log("Data Asset Info : ",dataFetchAssetInformation)
+  
+  console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
+  console.log("Fetch Data User ", ownerUserData)
+}, [ownerUserData])
+
+// useEffect(() =>{
+//   console.log("Data Asset Info : ",dataFetchAssetInformation)
+// }, dataFetchAssetInformation)
+
+const fetchSymptomCodes = async (term) => {
+  try {
+    const response = await ApiCustomer.get("/api/symptom-codes");
+    const allCodes = response.data.data;
+
+    const filtered = allCodes.filter((sym) =>
+      sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+    );
+
+    setSymptomSuggestions(filtered);
+  } catch (err) {
+    console.error("Error fetching symptom codes", err);
+  }
+};
+// console.log("Selected Symptopm ",selectedSymptom)
+
+// useEffect(() => {
+// }, selectedSymptom)
+
+
+//order section
+//workorder
+
+
+const [startDate, setstartDate] = useState(null);
+const [endDate, setEndDate] = useState(null);
+
 
   return (
     <>
