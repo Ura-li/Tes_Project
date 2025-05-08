@@ -163,6 +163,7 @@ export const ServiceWork = () => {
         </div>
       )}
       <TabsServiceWO workOrders={workOrders} />
+
       <Card className="mt-2 rounded-none p-0 border-0">
         <Tabs defaultValue="Quick_WO_Input" className="">
           <CardHeader
@@ -1177,6 +1178,7 @@ export const ServiceMaterial = () => {
           </div>
         )}
         <TabsServiceMO materialOrders={materialOrders}/>
+        
       <Card className="mt-2 rounded-none h-[160px]">
         <CardHeader>
           <CardTitle className="text-xl ">{materialOrders.MOID} for {materialOrders.WOID}</CardTitle>

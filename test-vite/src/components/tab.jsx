@@ -766,6 +766,146 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
   )
 }
 
+export const TabsBooking = ({workOrders}) => {
+
+  const navigate = useNavigate();   
+  const buttons = [
+    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/case/${workOrders.CaseID}`) },
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseWorkOrder() },
+    { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Refresh", onClick: () => refresh() },
+    { icon: StepBack, label: "Process", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
+    { icon: UserPen, label:  "Create Material Order", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now") },
+  ];
+  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  const hiddenButtons = open ? buttons.slice(-3) : [];
+  const saveAndCloseWorkOrder = async () => {
+    const confirmResult = await Swal.fire({
+      title: 'Confirm Save',
+      text: 'This will give the order status as CLOSED. Are you sure you want to save changes?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, Save it'
+    });
+
+    if (!confirmResult.isConfirmed) {
+      return; // User canceled
+    }
+    try {
+      Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we update the Work Order.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      const res = await ApiCustomer.patch(`/api/work-order/${workOrders.WOID}`,{
+        SystemStatus: 'CLOSED_POSTED'
+      })
+      if (res.data.success) {
+        // Success alert
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          navigate(`/case/${workOrders.CaseID}`)
+        })
+      } else {
+        // Error from API
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: res.data.message
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to update!',
+        text: error.message || 'Something went wrong.'
+      });
+    }
+  }
+
+  const refresh = async () => {
+    try {
+      Swal.fire({
+        title: 'Refreshing...',
+        text: 'Please wait while we refresh the data.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading(); 
+        }
+      });
+  
+      // Tunggu sebentar sebelum reload agar user bisa melihat loading
+      setTimeout(() => {
+        location.reload();
+      }, 1500); // 1.5 detik delay
+    } catch (err) {
+      console.error("Error in refresh:", err);
+    }
+  };
+  return (
+    <>
+    <div className='border-1 flex items-center '>
+       {visibleButtons.map((btn, index) => (
+          <Button
+            key={index}
+            onClick={btn.onClick}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+            >
+            <btn.icon className="h-4 w-4" />
+            {btn.label && <span className="text-md">{btn.label}</span>}
+          </Button>
+        ))}
+
+{open && hiddenButtons.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">...</DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                <DropdownMenuItem key={index}>
+                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  {btn.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    </div>
+    <div>
+    {/* <ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
+      /> */}
+    </div>
+  </>
+  )
+}
+
 export const ServiceCase = ({ 
   caseDetails, 
   formData, 
@@ -1568,9 +1708,22 @@ const handleClick = async () => {
           </TabsContent>
 
           <TabsContent value="ci_wo" >
-            <Card className="mt-7">
-              <CardHeader>Hello Word</CardHeader>
-            </Card>
+          <Card className="flex-col ">
+            <CardHeader>
+            <CardTitle className=' text-lg'>Shipment Information</CardTitle>
+              <hr />
+            </CardHeader>
+              <CardContent className="grid gap-10 grid-cols-4 items-center">
+                <CaseField label="Shipment Country"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Exception Order"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Shipment State" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="SBD Override"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Major Account Id"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Currency"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Promo Code" className={'col-start-3'}><Input variant='invisible' placeholder='---'/></CaseField>
+
+              </CardContent>
+            </Card> 
           </TabsContent>
 
           <TabsContent value="ci_orders" className={'p-2 flex flex-col gap-4'} >
