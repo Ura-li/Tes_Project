@@ -109,30 +109,30 @@ export const ServiceMoDetail = () => {
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
                   <span>MO Order Name</span>
-                  <span className="ml-31">...</span>
+                  <span className="ml-31">{moLineItems.MOID} - {moLineItems.LineItemID}</span>
                 </div>
 
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
-                  <span>MO Order Name</span>
+                  <span>Sales Order Name</span>
                   <span className="ml-30.5">...</span>
                 </div>
 
                 <div className="font-bold flex">
                 <Lock className="size-5 mr-2"></Lock>
                   <span >Line Number</span>
-                  <span className="ml-37">...</span>
+                  <span className="ml-37">{moLineItems.LineNumber}</span>
                 </div>
 
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
                   <span>Part/Product Number</span>
-                  <span className="ml-20">...</span>
+                  <span className="ml-20">{moLineItems.PartNumber}</span>
                 </div>
 
                 <div className="font-bold flex">
                   <span className="ml-7">Description</span>
-                  <span className="ml-39">...</span>
+                  <span className="ml-39">{moLineItems.Description}</span>
                 </div>
 
                 <div className="font-bold flex">

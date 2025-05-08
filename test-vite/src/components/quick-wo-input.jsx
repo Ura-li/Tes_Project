@@ -61,7 +61,13 @@ export const CaseField = ({ label, children, icon = false, span = 1, className, 
 };
 
 
-export function QuickWOInput ({ WOID, caseInformation }) {
+export function QuickWOInput ({ 
+  WOID, 
+  workOrderData, 
+  caseInformation,
+  SLA,
+  setSLA
+}) {
   // State untuk 8 field General
   // console.log('case_informtion in quick wo input : ', caseInformation)
   const [tab, setTab] = useState("Quick_WO_Input");
@@ -141,21 +147,7 @@ export function QuickWOInput ({ WOID, caseInformation }) {
   // const [latitude, setLatitude] = useState("");
 
   //SLA
-  const [SLA, setSLA] = useState({
-    slaJeopardy: "",
-    dueDateCustomer: "",
-    coverageWindow: "",
-    response: "",
-    otcCode: "",
-    requestedDateTimeCustomer: "",
-    guaranteedFixTimeCustomer: "",
-    earlyStartDateTimeCustomer: "",
-    latestStartDateTimeCustomer: "",
-    slaReschedule: "",
-    activeScheduleDate: "",
-    slaErrorDescription: "",
-    casePriorityIndex: "",
-  });
+  
 
   const handleChangeSLA = (field) => (e) => {
     setSLA((prev) => ({
@@ -184,9 +176,9 @@ export function QuickWOInput ({ WOID, caseInformation }) {
   useEffect(() => {
     const fetchDataSiteAccounts = async () => {
       try {
-        const res = await ApiCustomer.get(`/api/site_account/${caseInformation?.SiteAccountID}`)
-        console.log('res in quick wo input : ',res)
-        setSiteAccountInformation(res.data.data)
+        
+        console.log('res in quick wo input : ',caseInformation.site_account)
+        setSiteAccountInformation(caseInformation.site_account)
       } catch (error) {
         
       }
@@ -199,8 +191,9 @@ export function QuickWOInput ({ WOID, caseInformation }) {
   useEffect(() => {
     if (!WOID) return;
     (async () => {
-      const res = await ApiCustomer.get(`/api/work-order/${WOID}`);
-      const wo = res.data.data; 
+      const wo = workOrderData; 
+      const siteAccount = caseInformation.site_account;
+      const contact = caseInformation.contact_information; 
       setGeneral({
         incomingChannel: wo.IncomingChannel || "...",
         workOrderNumber: wo.WorkOrderNumber || "...",
@@ -221,21 +214,21 @@ export function QuickWOInput ({ WOID, caseInformation }) {
       // setWorkOrderInstruction(wo.WorkOrderInstruction || "...");
 
       //SLA
-      setSLA({
-        slaJeopardy: wo.SLAJeopardy || "...",
-        dueDateCustomer: wo.DueDateCustomer || "...",
-        coverageWindow: wo.CoverageWindow || "...",
-        response: wo.Response || "...",
-        otcCode: wo.OTCCode || "...",
-        requestedDateTimeCustomer: wo.RequestedDateTimeCustomer || "...",
-        guaranteedFixTimeCustomer: wo.GuaranteedFixTimeCustomer || "...",
-        earlyStartDateTimeCustomer: wo.EarlyStartDateTimeCustomer || "...",
-        latestStartDateTimeCustomer: wo.LatestStartDateTimeCustomer || "...",
-        slaReschedule: wo.SLAReschedule || "...",
-        activeScheduleDate: wo.ActiveScheduleDate || "...",
-        slaErrorDescription: wo.SLAErrorDescription || "...",
-        casePriorityIndex: wo.CasePriorityIndex?.toString() || "...",
-      })
+      // setSLA({
+      //   slaJeopardy: wo.SLAJeopardy || "...",
+      //   dueDateCustomer: wo.DueDateCustomer || "...",
+      //   coverageWindow: wo.CoverageWindow || "...",
+      //   response: wo.Response || "...",
+      //   otcCode: wo.OTCCode || "...",
+      //   requestedDateTimeCustomer: wo.RequestedDateTimeCustomer || "...",
+      //   guaranteedFixTimeCustomer: wo.GuaranteedFixTimeCustomer || "...",
+      //   earlyStartDateTimeCustomer: wo.EarlyStartDateTimeCustomer || "...",
+      //   latestStartDateTimeCustomer: wo.LatestStartDateTimeCustomer || "...",
+      //   slaReschedule: wo.SLAReschedule || "...",
+      //   activeScheduleDate: wo.ActiveScheduleDate || "...",
+      //   slaErrorDescription: wo.SLAErrorDescription || "...",
+      //   casePriorityIndex: wo.CasePriorityIndex?.toString() || "...",
+      // })
 
       // setSlaJeopardy(wo.SLAJeopardy || "...");
       // setDueDateCustomer(wo.DueDateCustomer || "...");
@@ -252,30 +245,49 @@ export function QuickWOInput ({ WOID, caseInformation }) {
       // setCasePriorityIndex(wo.CasePriorityIndex?.toString() || "...");
 
       //Service Delivery Address
-      const res2 = await ApiCustomer.get(`/api/workorder/${WOID}/service-address`);
-      const address = res2.data.data;
+      // const res2 = await ApiCustomer.get(`/api/workorder/${WOID}/service-address`);
+      // const address = res2.data.data;
 
+
+      // setAddressID(siteAccount.SiteAccountID || "---");
+      // setCompanyName(siteAccount.Company || "---");
+      // setContactFirstName(contact.FirstName || "---");
+      // setContactLastName(contact.LastName || "---");
+      // setPhoneNumber(siteAccount.PrimaryPhone || contact.Phone || "---");
+      // setEmail(siteAccount.Email || contact.Email || "---");
+      // setAddressLine1(siteAccount.AddressLine1 || contact.AddressLine1 || "---");
+      // setAddressLine2(siteAccount.AddressLine2 || contact.AddressLine2 || "---");
+      // setAddressLine3("---");
+      // setCity(siteAccount.City || contact.City || "---");
+      // setStateOrProvince(siteAccount.StateProvince || contact.StateProvince || "---");
+      // setCountryOrRegion(siteAccount.Country || contact.Country || "---");
+      // setPostalCode(siteAccount.ZipPostalCode || contact.ZipPostalCode || "---");
+      // setTimezone("---");
+      // setServiceTerritory("---");
+      // setBusinessSegment("---");
+      // setLongitude("---");
+      // setLatitude( "---");
       setServiceDeliveryAddress({
-        companyName: address.CompanyName || "---",
-        contactFirstName: address.ContactFirstName || "---",
-        contactLastName: address.ContactLastName || "---",
-        phoneNumber: address.PhoneNumber || "---",
-        email: address.Email || "---",
-        addressLine1: address.AddressLine1 || "---",
-        addressLine2: address.AddressLine2 || "---",
-        addressLine3: address.AddressLine3 || "---",
-        city: address.City || "---",
-        stateOrProvince: address.StateOrProvince || "---",
-        countryOrRegion: address.CountryOrRegion || "---",
-        postalCode: address.PostalCode || "---",
-        timezone: address.TimeZone || "---",
-        serviceTerritory: address.ServiceTerritory || "---",
-        businessSegment: address.BusinessSegment || "---",
-        longitude: address.Longitude || "---",
-        latitude: address.Latitude || "---",
+        companyName: siteAccount.Company || "---",
+        contactFirstName: contact.FirstName || "---",
+        contactLastName: contact.LastName || "---",
+        phoneNumber: siteAccount.PrimaryPhone || contact.Phone || "---",
+        email: siteAccount.Email || contact.Email || "---",
+        addressLine1: siteAccount.AddressLine1 || contact.AddressLine1  || "---",
+        addressLine2: siteAccount.AddressLine2 || contact.AddressLine2  || "---",
+        addressLine3: "---",
+        city: siteAccount.City || contact.City || "---",
+        stateOrProvince: siteAccount.StateProvince || contact.StateProvince || "---",
+        countryOrRegion: siteAccount.Country || contact.Country || "---",
+        postalCode: siteAccount.ZipPostalCode || contact.ZipPostalCode || "---",
+        timezone: "---",
+        serviceTerritory:  "---",
+        businessSegment: "---",
+        longitude:  "---",
+        latitude: "---",
       })
 
-      setAddressID(address.AddressID || "---");
+      setAddressID(siteAccount.SiteAccountID || "---" );
       // setCompanyName(address.CompanyName || "---");
       // setContactFirstName(address.ContactFirstName || "---");
       // setContactLastName(address.ContactLastName || "---");
@@ -296,25 +308,33 @@ export function QuickWOInput ({ WOID, caseInformation }) {
     })();
   }, [WOID]);
 
-  // Simpel update PATCH
-  const handleSave = async () => {
-    await ApiCustomer.patch(`/api/workorder/${WOID}`, {
-      WorkOrderType: general.workOrderType,
-      SubStatus: general.subStatus,
-      PartnerStatus: general.partnerStatus,
-      CoverageWindow: SLA.coverageWindow,
-      OTCCode: SLA.otcCode,
-      RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer,
-    });
-
-    // Simpan Service Delivery Address
-    await ApiCustomer.patch(`/api/workorder/${WOID}/service-address`, {
-      ContactFirstName: ServiceDeliveryAddress.contactFirstName,
-      PhoneNumber: ServiceDeliveryAddress.phoneNumber,
-      Email: ServiceDeliveryAddress.email,
-      City: ServiceDeliveryAddress.city,
-    });
+  const handleSLAChange = (field) => (value) => {
+    setSLA((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
+  
+  console.log("SLA IN QUICK WO INPUT : ",SLA)
+  // Simpel update PATCH
+  // const handleSave = async () => {
+  //   await ApiCustomer.patch(`/api/work-order/${WOID}`, {
+  //     WorkOrderType: general.workOrderType,
+  //     SubStatus: general.subStatus,
+  //     PartnerStatus: general.partnerStatus,
+  //     CoverageWindow: SLA.coverageWindow,
+  //     OTCCode: SLA.otcCode,
+  //     RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer,
+  //   });
+
+  //   // Simpan Service Delivery Address
+  //   // await ApiCustomer.patch(`/api/workorder/${WOID}/service-address`, {
+  //   //   ContactFirstName: ServiceDeliveryAddress.contactFirstName,
+  //   //   PhoneNumber: ServiceDeliveryAddress.phoneNumber,
+  //   //   Email: ServiceDeliveryAddress.email,
+  //   //   City: ServiceDeliveryAddress.city,
+  //   // });
+  // };
 
   return (
       <CardContent>
@@ -398,9 +418,13 @@ export function QuickWOInput ({ WOID, caseInformation }) {
               </CardHeader>
               <CardContent className="grid gap-5 auto-rows-auto grid-cols-6 place-content-between">
                 <CaseField label="SLA Jeopardy" className={''} icon > <Input className="" value={SLA.slaJeopardy} readOnly/> </CaseField>
-                <CaseField label="Requested Date Time (Customer)" className={''}  >
-                  <DatePicker></DatePicker>
+                <CaseField label="Requested Date Time (Customer)" className={''}>
+                  <DatePicker
+                    value={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}
+                    onChange={handleSLAChange("requestedDateTimeCustomer")}
+                  />
                 </CaseField>
+
                 <CaseField label="SLA Reschedule" className={''} icon > <Input className="" value={SLA.slaReschedule} readOnly/> </CaseField>
                 <CaseField label="Due Date (Customer)" className={''} icon >
                   <DatePicker></DatePicker>
@@ -411,7 +435,10 @@ export function QuickWOInput ({ WOID, caseInformation }) {
                 <CaseField label="Active Schedule Date" className={''} icon > <Input className="" value={SLA.activeScheduleDate} readOnly/> </CaseField>
                 <CaseField label="Coverage Window" className={''}  > <Input className="" value={SLA.coverageWindow} onChange={e => setCoverageWindow(e.target.value)} /> </CaseField>
                 <CaseField label="Early Start Date Time (Customer)" className={''}  >
-                  <DatePicker></DatePicker>
+                  <DatePicker
+                  value={SLA.earlyStartDateTimeCustomer ? new Date(SLA.earlyStartDateTimeCustomer) : null}
+                  onChange={handleSLAChange("earlyStartDateTimeCustomer")}
+                  ></DatePicker>
                 </CaseField>
                 <CaseField label="SLA Error Description" className={'row-span-2 items-start'} childClass={'row-span-2'} icon >
                    <textarea value={SLA.slaErrorDescription} className='border-0 ring-0 ring-gray-400 w-[100%] h-[100%] resize-none'></textarea>

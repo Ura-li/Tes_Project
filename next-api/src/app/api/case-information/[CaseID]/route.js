@@ -22,7 +22,21 @@ export async function GET(request, { params }) {
         include: { 
             asset_information: true, 
             contact_information: true, 
-            site_account: true 
+            site_account: true,
+            servicecatalog: {
+                include: {
+                    warranty_services: {
+                        select: {
+                            Service_offerID: true,
+                            Service_description: true,
+                            CTat_RTime: true,
+                            Price: true,
+                            Tax: true,
+                            Total: true,
+                        }
+                    }
+                }
+            }, 
         }
     });
 
