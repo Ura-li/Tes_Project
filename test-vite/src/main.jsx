@@ -44,7 +44,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/mo_detail/:molineid' element={<MoDetail />}/>
             <Route path='/bookings' element={<Bookings />} />]
             <Route path='/bookings/:bookingid' element={<Bookings />} />]
-
+            <Route path='/labor' element={<Labor />} />
 
             {/* <Route path='/master' element> */}
             <Route path='/master/Company_table' element={<Company_table />} />
