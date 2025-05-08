@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
-
-import { TabsService } from './components/tab';
+import { 
+  ServiceCase,
+  TabsService
+ } from './components/service-case'
 import { useParams } from 'react-router'
 import ApiCustomer from './api'
 import Swal from 'sweetalert2';
@@ -17,7 +19,6 @@ export const Case = () => {
         title: 'Memuat Case Detail...',
         text: 'Mohon tunggu sebentar',
         allowOutsideClick: false,
-        allowEscapeKey: false,
         didOpen: () => {
           Swal.showLoading();
         }

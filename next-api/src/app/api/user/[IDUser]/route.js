@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 
 // GET - Ambil detail user berdasarkan ID
 export async function GET(request, { params }) {
-  const { IDUser } = params;
+  const { IDUser } = await params;
   const idUser = parseInt(IDUser);
 
   if (isNaN(idUser)) {
@@ -35,7 +35,7 @@ export async function GET(request, { params }) {
 
 // PATCH - Update user berdasarkan ID
 export async function PATCH(request, { params }) {
-  const { IDUser } = params;
+  const { IDUser } = await params;
   const idUser = parseInt(IDUser);
 
   if (isNaN(idUser)) {
