@@ -15,7 +15,7 @@ export async function GET(request, { params }) {
     console.log("LineItemID: ".LineItemID);
     // console.log(parsedLineNumber);
 
-    if (isNaN(parsedLineItemID) || isNaN(parsedLineNumber)) {
+    if (isNaN(parsedLineItemID)) {
         return NextResponse.json({
             success: false,
             message: "Invalid Line Item ID or Line Number"
@@ -67,7 +67,7 @@ export async function PATCH(request, {params}) {
     const parsedLineItemID = parseInt(LineItemID);
     // const parsedLineNumber = parseInt(lineNumber);
     
-    if (isNaN(parsedLineItemID) || isNaN(parsedLineNumber)) {
+    if (isNaN(parsedLineItemID)) {
         return NextResponse.json({
             success: false,
             message: "Invalid Line Item ID or Line Number"
