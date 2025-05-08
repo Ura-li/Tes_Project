@@ -17,7 +17,7 @@ import {
 import { MaterialOrderEdit, MaterialOrderDelete } from "@/components/sc-modal";
 import { WorkOrderDelete, WorkOrderEdit } from "@/components/sc-modal";
 import { UserAdd, UserEdit, UserDelete } from "@/components/sc-modal";
-import { PartEdit, PartDelete } from "@/components/sc-modal";
+import { PartAdd,PartEdit, PartDelete } from "@/components/sc-modal";
 import { ResourceAdd, ResourceEdit, ResourceDelete } from "@/components/sc-modal";
 import { ResourceAccountAdd, ResourceAccountEdit, ResourceAccountDelete } from "@/components/sc-modal";
 import { SubkTechnicianAdd, SubkTechnicianEdit, SubkTechnicianDelete } from "@/components/sc-modal";
@@ -1906,7 +1906,7 @@ export const Part_table = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-
+      <PartAdd/>
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
@@ -1946,17 +1946,53 @@ export const Part_table = () => {
                 </td>
                 <td className="border p-2">{PartItem.Keyword}</td>
                 <td className="border p-2">{PartItem.PartDescription}</td>
-                <td className="border p-2">{PartItem.Orderability}</td>
+                <td className="border p-2">
+  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Orderability ? "bg-green-500" : "bg-red-500"}`}>
+    {PartItem.Orderability ? "Yes" : "No"}
+  </span>
+</td>
                 <td className="border p-2">{PartItem.RestrictionReason}</td>
-                <td className="border p-2">{PartItem.CSR_Flag}</td>
-                <td className="border p-2">{PartItem.ROHS_Flag}</td>
-                <td className="border p-2">{PartItem.Returnable_Flag}</td>
-                <td className="border p-2">{PartItem.HardRoll_Flag}</td>
-                <td className="border p-2">{PartItem.DangerousGoods_Flag}</td>
-                <td className="border p-2">{PartItem.LithiumBattery_Flag}</td>
-                <td className="border p-2">{PartItem.Oversize_Flag}</td>
-                <td className="border p-2">{PartItem.Heavy_Flag}</td>
-                <td className="border p-2">{PartItem.Price}</td>
+                 <td className="border p-2">
+  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.CSR_Flag ? "bg-green-500" : "bg-red-500"}`}>
+    {PartItem.CSR_Flag ? "Yes" : "No"}
+  </span>
+</td>
+                <td className="border p-2">
+  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.ROHS_Flag ? "bg-green-500" : "bg-red-500"}`}>
+    {PartItem.ROHS_Flag ? "Yes" : "No"}
+  </span>
+</td>
+<td className="border p-2">
+  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Returnable_Flag ? "bg-green-500" : "bg-red-500"}`}>
+    {PartItem.Returnable_Flag ? "Yes" : "No"}
+  </span>
+</td>
+<td className="border p-2">
+  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.HardRoll_Flag ? "bg-green-500" : "bg-red-500"}`}>
+    {PartItem.HardRoll_Flag ? "Yes" : "No"}
+  </span>
+</td>
+<td className="border p-2">
+  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.DangerousGoods_Flag ? "bg-green-500" : "bg-red-500"}`}>
+    {PartItem.DangerousGoods_Flag ? "Yes" : "No"}
+  </span>
+</td>
+<td className="border p-2">
+  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.LithiumBattery_Flag ? "bg-green-500" : "bg-red-500"}`}>
+    {PartItem.LithiumBattery_Flag ? "Yes" : "No"}
+  </span>
+</td>
+<td className="border p-2">
+  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Oversize_Flag ? "bg-green-500" : "bg-red-500"}`}>
+    {PartItem.Oversize_Flag ? "Yes" : "No"}
+  </span>
+</td>
+<td className="border p-2">
+  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Heavy_Flag ? "bg-green-500" : "bg-red-500"}`}>
+    {PartItem.Heavy_Flag ? "Yes" : "No"}
+  </span>
+</td>
+ <td className="border p-2">{PartItem.Price}</td>
                 <td className="border p-2">{PartItem.FreightPrice}</td>
                 <td className="border p-2">{PartItem.Tax}</td>
                 <td className="border p-2">{PartItem.Total}</td>
