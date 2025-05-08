@@ -24,6 +24,7 @@ import
 import { Bookings } from './bookings';
 import { User_table } from './master_table';
 import { Part_table } from './master_table';
+import { Labor } from './labor';
 // import { ModalContextProvider } from './components/modal-context';
 
 import { GateKeepingRouting } from './components/GateKeepingRouting';

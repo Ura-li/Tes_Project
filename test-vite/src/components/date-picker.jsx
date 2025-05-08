@@ -126,7 +126,7 @@ export default function DatePicker({ value, onChange, variant = "full", classNam
   
 
   return (
-    <div className={cn("flex gap-5 items-center ", variant === "icon" && "flex-col gap-15")}>
+    <div className={cn("flex gap-5 items-center ", variant === "icon" && " gap-15")}>
       {/* Date Picker */}
       <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
         <PopoverTrigger asChild>
