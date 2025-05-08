@@ -5365,8 +5365,25 @@ export function ResourceAccountAdd() {
   const [formData, setFormData] = useState({
     ResourceAccountId: '',
     Name: '',
-    ResourceId: null,
+    ResourceId: '',
   });
+
+  const [resources, setResources] = useState([]);
+
+  useEffect(() => {
+    // Fetch list of Resources untuk opsi select
+    const fetchResources = async () => {
+      try {
+        const response = await ApiCustomer.get("/api/resources"); // pastikan endpoint ini sesuai
+        setResources(response.data.data);
+        // console.log("Hasil Respon",response.data.data);
+      } catch (error) {
+        console.error("Error fetching resources:", error);
+      }
+    };
+
+    fetchResources();
+  }, []);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -5432,8 +5449,20 @@ export function ResourceAccountAdd() {
           <Label>Name *</Label>
           <Input id="Name" value={formData.Name} onChange={handleInputChange} />
 
-          {/* <Label>ResourceId (optional)</Label>
-          <Input id="ResourceId" value={formData.ResourceId} onChange={handleInputChange} /> */}
+          <Label>Resource (optional)</Label>
+          <select
+            id="ResourceId"
+            value={formData.ResourceId || ""}
+            onChange={handleInputChange}
+            className="w-full border rounded px-3 py-2"
+          >
+            <option value="">-- Select Resource --</option>
+            {resources.map((resource) => (
+              <option key={resource.ResourceId} value={resource.ResourceId}>
+                {resource.Name || resource.ResourceId}
+              </option>
+            ))}
+          </select>
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit}>Add</Button>
@@ -5443,7 +5472,7 @@ export function ResourceAccountAdd() {
   );
 }
 
-export function ResourceAccountEdit({ ResourceAccountId, onUpdate }) {
+export function ResourceAccountEdit({ ResourceAccountId, onUpdate, resources }) {
   const [resourceAccount, setResourceAccount] = useState(null);
   const [name, setName] = useState("");
   const [resourceId, setResourceId] = useState("");
@@ -5538,11 +5567,18 @@ export function ResourceAccountEdit({ ResourceAccountId, onUpdate }) {
             onChange={(e) => setName(e.target.value)}
             placeholder="Name*"
           />
-          <Input
-            value={resourceId}
+          <select
+            value={resourceId || ""}
             onChange={(e) => setResourceId(e.target.value)}
-            placeholder="ResourceId (optional)"
-          />
+            className="w-full border rounded px-3 py-2"
+          >
+            <option value="">-- Select Resource (optional) --</option>
+            {resources.map((res) => (
+              <option key={res.ResourceId} value={res.ResourceId}>
+                {res.Name || res.ResourceId}
+              </option>
+            ))}
+          </select>
         </div>
         <DialogFooter>
           <Button onClick={handleUpdate}>Update</Button>
