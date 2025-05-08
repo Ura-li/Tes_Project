@@ -48,6 +48,8 @@ import debounce from 'lodash.debounce';
 import Swal from 'sweetalert2';
 import { CaseField } from './quick-wo-input';
 import DatePicker from './date-picker';
+import { TabsBooking } from './tab';
+
 const workorder = [
   {
     workordernumber: "WO-027816939",
@@ -366,13 +368,12 @@ export function ServiceBooking ({BookingId , woid}) {
     }
   }, 500); // 500ms delay
 
-
-  
-
   return (
+    <div>
+      <TabsBooking/>
     <Card className="mt-2 rounded-none ">
       {/* <Button onClick={handleUpdate}>Save</Button> */}
-
+      
       <Tabs value={tab} onValueChange={setTab}>
         <CardHeader className={"flex flex-col border-2 p-2 gap-3 w-full"}>
           <CardTitle className="text-xl ">
@@ -1074,6 +1075,7 @@ export function ServiceBooking ({BookingId , woid}) {
         </TabsContent>
       </Tabs>
     </Card>
+    </div>
   );
 }
 

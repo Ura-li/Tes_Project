@@ -51,21 +51,20 @@ import {
   ChevronDown
  } from 'lucide-react'
 
-
-
  import { useLocation, useNavigate } from "react-router";
  import { useState, useEffect } from "react";
  import { useSidebar } from '@/components/ui/sidebar'
  import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+ import { Calendar } from "@/components/ui/calendar"
+ import { format } from 'date-fns'
+ import { twMerge } from "tailwind-merge"
+ import Swal from 'sweetalert2'
+ import { BtnModalsWorkOrder } from './sc-modal'
+ import DatePicker from './date-picker'
+ 
+ import ApiCustomer from '@/api'
 
-import ApiCustomer from '@/api'
-import { getUserFromToken } from '@/lib/utils/auth'
-
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { format } from 'date-fns'
-import { twMerge } from "tailwind-merge"
-import Swal from 'sweetalert2'
 // const workorder = [
 //   {
 //     workordernumber: "WO-027816939",
@@ -96,20 +95,23 @@ const partsorder = [
   },
 ]
 
-import { BtnModalsWorkOrder } from './sc-modal'
-import DatePicker from './date-picker'
+const spanMap = {
+  1: "col-span-1",
+  2: "col-span-2",
+  3: "col-span-3",
+  4: "col-span-4",
+  5: "col-span-5",
+  6: "col-span-6",
+};
 
 
 
 export const TabsService = ({ caseDetails }) => {
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
-
   const [selectedSymptom, setSelectedSymptom] = useState(null);
 
-
   const { open } = useSidebar();
-
   
   //casenote
   const [caseNoteFormData, setCaseNoteFormData] = useState({
@@ -120,7 +122,6 @@ export const TabsService = ({ caseDetails }) => {
     MinutesSpent: 0,
     Note: ''
   });
-  // const [apa, setApa] = useState(null)
 
   const handleCaseNoteChange = (key, value) => {
     setCaseNoteFormData(prev => { 
@@ -133,22 +134,14 @@ export const TabsService = ({ caseDetails }) => {
     
   console.log("📝 Form Data to Submit:", caseNoteFormData); // ✅ Log the form data
     try {
-      const user = getUserFromToken();
-      const timestamp = new Date().toLocaleString(); // e.g. "5/6/2025, 10:30:15 AM"
-      const author = user?.name || user?.email || "Unknown User";
-      const role = user?.role || "Unknown";
-    
-      const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.Note}`;
       const response = await ApiCustomer.post("/api/case-information/case-notes", {
         ...caseNoteFormData,
-        Note: modifiedNote,
         CaseID: caseDetails.CaseID
       });
       console.log("Saved successfully:", response.data);
       alert("Case Note Saved!");
-      const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
       setCaseNotes({
-        NotesDisplay: NotedDisplay
+        NotesDisplay: response.data.data.Note
       })
       console.log("Case Notes Infor after save : ",caseNotes)
       console.log("Case Notes Display Infor after save : ",response)
@@ -220,6 +213,7 @@ export const TabsService = ({ caseDetails }) => {
       return null;
     }
   }
+
   const fetchSymptomCodes = async () => {
     try{
       const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`)
@@ -233,13 +227,13 @@ export const TabsService = ({ caseDetails }) => {
       return null;
     }
   }
+
   useEffect(() => {
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
       if(noteDetail ){
-        const NotedDisplay = `@Created On : ${noteDetail.CreatedOn}\n${noteDetail.Note}`;
         setCaseNotes({
-          NotesDisplay: NotedDisplay
+          NotesDisplay: noteDetail.Note
         })
       } 
       const symptomCodeDetail = await fetchSymptomCodes();
@@ -256,16 +250,12 @@ export const TabsService = ({ caseDetails }) => {
 
   const [caseNotes, setCaseNotes] = useState([])
 
-
-  
-  
-
   const buttons = [
     { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/master/Case_table`) },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
     { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseCase() },
-    { icon: RotateCw, label: "Refresh", onClick: () => alert("not now") },
+    { icon: RotateCw, label: "Refresh", onClick: () => refresh() },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
     { icon: StepBack, label: "CSR", onClick: () => alert("not now") },
     { icon: StepBack, label: "Service Order", onClick: () => alert("not now") },
@@ -279,6 +269,7 @@ export const TabsService = ({ caseDetails }) => {
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
+
   const saveAndCloseCase = async () => {
     const confirmResult = await Swal.fire({
       title: 'Confirm Save',
@@ -332,6 +323,28 @@ export const TabsService = ({ caseDetails }) => {
       });
     }
   }
+  
+  const refresh = async () => {
+    try {
+      Swal.fire({
+        title: 'Refreshing...',
+        text: 'Please wait while we refresh the data.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading(); 
+        }
+      });
+  
+      // Tunggu sebentar sebelum reload agar user bisa melihat loading
+      setTimeout(() => {
+        location.reload();
+      }, 1500); // 1.5 detik delay
+    } catch (err) {
+      console.error("Error in refresh:", err);
+    }
+  };
+  
   return (
     <>
     <div className='border-1 flex items-center '>
@@ -377,15 +390,6 @@ export const TabsService = ({ caseDetails }) => {
   )
 }
 
-const spanMap = {
-  1: "col-span-1",
-  2: "col-span-2",
-  3: "col-span-3",
-  4: "col-span-4",
-  5: "col-span-5",
-  6: "col-span-6",
-};
-
 export const CaseField = ({ label, children, icon, span = 1, className }) => (
   <>
     <CardTitle
@@ -407,88 +411,19 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
   </>
 );
 
-export const TabsServiceWO = ({
-  workOrders,
-  SLA,
-  setSLA
-}) => {
+export const TabsServiceWO = ({workOrders}) => {
 
   const navigate = useNavigate();   
-  const WOID = workOrders.WOID;
-   const handleSave = async () => {
-    try {
-      // Show loading alert
-      Swal.fire({
-        title: 'Updating WORK ORDER...',
-        text: 'Please wait',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      /**
-       * TODO : 
-       * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
-       */
-      
-
-      //SLA
-      const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
-        SLAJeopardy: SLA.slaJeopardy || undefined,
-        DueDateCustomer: SLA.dueDateCustomer || undefined,
-        CoverageWindow: SLA.coverageWindow || undefined,
-        Response: SLA.response || undefined,
-        OTCCode: SLA.otcCode || undefined,
-        RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer || undefined,
-        GuaranteedFixTimeCustomer: SLA.guaranteedFixTimeCustomer || undefined,
-        EarlyStartDateTimeCustomer: SLA.earlyStartDateTimeCustomer || undefined,
-        LatestStartDateTimeCustomer: SLA.latestStartDateTimeCustomer || undefined,
-        SLAReschedule: SLA.slaReschedule || undefined,
-        ActiveScheduleDate: SLA.activeScheduleDate || undefined,
-        SLAErrorDescription: SLA.slaErrorDescription || undefined,
-        CasePriorityIndex: SLA.casePriorityIndex !== "" ? parseInt(SLA.casePriorityIndex, 10) : undefined,
-      });
-      
-      
-      const result = response.data;
-      console.log(response);
-  
-      if (!result.success) {
-        return Swal.fire({
-          icon: 'error',
-          title: 'Update Failed',
-          text: result.message || 'Unknown error',
-        });
-      }
-
-      return Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: 'SLA updated successfully!',
-      });
-
-    } catch (error) {
-      return Swal.fire({
-        icon: 'error',
-        title: 'Request Error',
-        text: error.message || 'Something went wrong!',
-      });
-    }
-  };
-
-
-
   const buttons = [
     { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/case/${workOrders.CaseID}`) },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-    { icon: Save, label: "Save", onClick: () => handleSave() },
+    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
     { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseWorkOrder() },
     { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
     { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
     { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Refresh", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Refresh", onClick: () => refresh() },
     { icon: StepBack, label: "Process", onClick: () => alert("not now") },
     { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
     { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
@@ -550,6 +485,27 @@ export const TabsServiceWO = ({
       });
     }
   }
+
+  const refresh = async () => {
+    try {
+      Swal.fire({
+        title: 'Refreshing...',
+        text: 'Please wait while we refresh the data.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading(); 
+        }
+      });
+  
+      // Tunggu sebentar sebelum reload agar user bisa melihat loading
+      setTimeout(() => {
+        location.reload();
+      }, 1500); // 1.5 detik delay
+    } catch (err) {
+      console.error("Error in refresh:", err);
+    }
+  };
   return (
     <>
     <div className='border-1 flex items-center '>
@@ -656,6 +612,9 @@ export const TabsServiceMO = ({materialOrders}) => {
       });
     }
   }
+
+  
+    
   return (
     <>
     <div className='border-1 flex items-center '>
@@ -806,6 +765,147 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
   </>
   )
 }
+
+export const TabsBooking = ({workOrders}) => {
+
+  const navigate = useNavigate();   
+  const buttons = [
+    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/case/${workOrders.CaseID}`) },
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseWorkOrder() },
+    { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Refresh", onClick: () => refresh() },
+    { icon: StepBack, label: "Process", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
+    { icon: UserPen, label:  "Create Material Order", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now") },
+  ];
+  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  const hiddenButtons = open ? buttons.slice(-3) : [];
+  const saveAndCloseWorkOrder = async () => {
+    const confirmResult = await Swal.fire({
+      title: 'Confirm Save',
+      text: 'This will give the order status as CLOSED. Are you sure you want to save changes?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, Save it'
+    });
+
+    if (!confirmResult.isConfirmed) {
+      return; // User canceled
+    }
+    try {
+      Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we update the Work Order.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      const res = await ApiCustomer.patch(`/api/work-order/${workOrders.WOID}`,{
+        SystemStatus: 'CLOSED_POSTED'
+      })
+      if (res.data.success) {
+        // Success alert
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          navigate(`/case/${workOrders.CaseID}`)
+        })
+      } else {
+        // Error from API
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: res.data.message
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to update!',
+        text: error.message || 'Something went wrong.'
+      });
+    }
+  }
+
+  const refresh = async () => {
+    try {
+      Swal.fire({
+        title: 'Refreshing...',
+        text: 'Please wait while we refresh the data.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading(); 
+        }
+      });
+  
+      // Tunggu sebentar sebelum reload agar user bisa melihat loading
+      setTimeout(() => {
+        location.reload();
+      }, 1500); // 1.5 detik delay
+    } catch (err) {
+      console.error("Error in refresh:", err);
+    }
+  };
+  return (
+    <>
+    <div className='border-1 flex items-center '>
+       {visibleButtons.map((btn, index) => (
+          <Button
+            key={index}
+            onClick={btn.onClick}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+            >
+            <btn.icon className="h-4 w-4" />
+            {btn.label && <span className="text-md">{btn.label}</span>}
+          </Button>
+        ))}
+
+{open && hiddenButtons.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">...</DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                <DropdownMenuItem key={index}>
+                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  {btn.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    </div>
+    <div>
+    {/* <ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
+      /> */}
+    </div>
+  </>
+  )
+}
+
 export const ServiceCase = ({ 
   caseDetails, 
   formData, 
@@ -821,19 +921,7 @@ export const ServiceCase = ({
 const [symptomSearchTerm, setSymptomSearchTerm] = useState("");
 const [symptomSuggestions, setSymptomSuggestions] = useState([]);
 
-const [createdOn, setCreatedOn] = useState(null);
 const [caseClosedDate, setCaseClosedDate] = useState(null);
-const [submittedToBase, setsubmittedToBase] = useState(null);
-
-const [pendingCustomerAction, setPendingCustomerAction] = useState(null);
-const [customerRequestedCloseDate, setCustomerRequestedCloseDate] = useState(null);
-const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
-// const [cr]
-useEffect(() => {
-  if (caseDetails?.CreatedOn) {
-    setCreatedOn(new Date(caseDetails.CreatedOn)); // includes date + time
-  }
-}, [caseDetails]);
 
   
 
@@ -864,20 +952,13 @@ useEffect(() => {
     
 
 
-  
+  //customer, asset, entitlement
+  //customer
   const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
     MainAccount: null,
     SiteAccount: null,
     Type: null,
   });
-  const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
-  const [ownerUserData, setOwnerUserData ] = useState([])
-  
-  const [workOrders, setWorkOrders] = useState([]);
-
-  const [materialOrders, setMaterialOrders] = useState([]);
-
-
   const fetchCustomerData = async () => {
     try{
       // console.log("Case Detail : ", caseDetails);
@@ -906,6 +987,8 @@ useEffect(() => {
       return null
     }
   }
+  //asset
+  const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
   const fetchAssetInformation = async () => {
     try{
       const resAsset = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
@@ -917,89 +1000,46 @@ useEffect(() => {
       return null
     }
   }
-  const fetchCaseNotes = async () => {
-    try{
-      // console.log("Case Details : ", caseDetails)
-      const res = await ApiCustomer.get(`/api/case-information/case-notes`)
-      const notes = res.data.data
-  
-      const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
-  
-      let noteID = null
-  
-      if(existingNote){
-        noteID = existingNote.NoteID
-      }else{
-        const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
-          LogType: "NotesLog",
-          ActionType: "Initial",
-          Template: "",
-          VisibleExternally: false,
-          MinutesSpent: 0,
-          Note: "",
-          CaseID: caseID,
-        })
-        
-        noteID = createResponse.data.data.NoteID;
-      }
-  
-      const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
-      const noteDetail = detailRes.data.data;
-  
-      console.log("✅ Case Note Detail:", noteDetail);
-      return noteDetail;
-    }catch(err){
-      console.error("Error in fetchCaseNotes:", err);
-      return null;
-    }
-  }
-  const fetchOwnerUserData = async () => {
-    try {
-      const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
-      setOwnerUserData(response.data.data)
-    } catch (error) {
-      
-    }
-  }
-  const fetchSymptomCodes = async (term) => {
-    try {
-      const response = await ApiCustomer.get("/api/case-information/symptom-codes");
-      const allCodes = response.data.data;
-  
-      const filtered = allCodes.filter((sym) =>
-        sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
-      );
-  
-      setSymptomSuggestions(filtered);
-    } catch (err) {
-      console.error("Error fetching symptom codes", err);
-    }
-  };
-  const fetchWorkOrders = async () => {
-    try {
-      const res = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
-      setWorkOrders(res.data.data); // adjust based on API response shape
-      console.log("Fetch Work Order: ",res.data.data)
-    } catch (err) {
-      console.error("Failed to fetch work orders:", err);
-    }
-  };
-  const fetchMaterialOrders = async () => {
-    try {
-      if (!workOrders.length) return;
-  
-      const woidList = workOrders.map((wo) => wo.WOID).join(',');
-      const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
-      setMaterialOrders(res.data.data);
-    } catch (err) {
-      console.error("Failed to fetch Material orders:", err);
-    }
-  }
-  //asset
 
 
 
 //notes handler
+const fetchCaseNotes = async () => {
+  try{
+    // console.log("Case Details : ", caseDetails)
+    const res = await ApiCustomer.get(`/api/case-information/case-notes`)
+    const notes = res.data.data
+
+    const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
+
+    let noteID = null
+
+    if(existingNote){
+      noteID = existingNote.NoteID
+    }else{
+      const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
+        LogType: "NotesLog",
+        ActionType: "Initial",
+        Template: "",
+        VisibleExternally: false,
+        MinutesSpent: 0,
+        Note: "",
+        CaseID: caseID,
+      })
+      
+      noteID = createResponse.data.data.NoteID;
+    }
+
+    const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
+    const noteDetail = detailRes.data.data;
+
+    console.log("✅ Case Note Detail:", noteDetail);
+    return noteDetail;
+  }catch(err){
+    console.error("Error in fetchCaseNotes:", err);
+    return null;
+  }
+}
 useEffect(() => {
   fetchCustomerData();
   fetchAssetInformation();
@@ -1010,8 +1050,7 @@ useEffect(() => {
     const noteDetail = await fetchCaseNotes();
     if(noteDetail ){
       setCaseNotes({
-        NotesDisplay: noteDetail.Note,
-        CreatedOn: noteDetail.CreatedOn
+        NotesDisplay: noteDetail.Note
       })
     }
   }
@@ -1019,7 +1058,16 @@ useEffect(() => {
 }, [])
 
 //data for upper style
+const [ownerUserData, setOwnerUserData ] = useState([])
 // const []
+const fetchOwnerUserData = async () => {
+  try {
+    const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
+    setOwnerUserData(response.data.data)
+  } catch (error) {
+    
+  }
+}
 
 
 useEffect(() =>{
@@ -1033,6 +1081,20 @@ useEffect(() =>{
 //   console.log("Data Asset Info : ",dataFetchAssetInformation)
 // }, dataFetchAssetInformation)
 
+const fetchSymptomCodes = async (term) => {
+  try {
+    const response = await ApiCustomer.get("/api/case-information/symptom-codes");
+    const allCodes = response.data.data;
+
+    const filtered = allCodes.filter((sym) =>
+      sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+    );
+
+    setSymptomSuggestions(filtered);
+  } catch (err) {
+    console.error("Error fetching symptom codes", err);
+  }
+};
 // console.log("Selected Symptopm ",selectedSymptom)
 
 // useEffect(() => {
@@ -1041,6 +1103,29 @@ useEffect(() =>{
 
 //order section
 //workorder
+const [workOrders, setWorkOrders] = useState([]);
+const fetchWorkOrders = async () => {
+  try {
+    const res = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
+    setWorkOrders(res.data.data); // adjust based on API response shape
+    // console.log("Fetch Work Order: ",res)
+  } catch (err) {
+    console.error("Failed to fetch work orders:", err);
+  }
+};
+
+const [materialOrders, setMaterialOrders] = useState([]);
+const fetchMaterialOrders = async () => {
+  try {
+    if (!workOrders.length) return;
+
+    const woidList = workOrders.map((wo) => wo.WOID).join(',');
+    const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
+    setMaterialOrders(res.data.data);
+  } catch (err) {
+    console.error("Failed to fetch Material orders:", err);
+  }
+}
 
 
 useEffect(() => {
@@ -1061,9 +1146,6 @@ const handleClick = async () => {
   });
   })}
 };
-
-const [startDate, setstartDate] = useState(null);
-const [endDate, setEndDate] = useState(null);
 
 
   return (
@@ -1187,14 +1269,18 @@ const [endDate, setEndDate] = useState(null);
                 <CaseField label="Customer Severity"  >{caseDetails.CustomerSeverity}</CaseField>
                 <CaseField label="Update Customer Tracking Number"  span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Created ON" icon span={3}>
-                <DatePicker variant='icon' value={createdOn} onChange={setCreatedOn} readOnly></DatePicker>
+                  <span className="flex gap-[5em]">
+                    {new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')}
+                        <DatePicker variant='icon'></DatePicker>
+                    {new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })}
+                  </span>
                 </CaseField>
                 <CaseField label="Alternate Customer Tracking Number"><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Case Closed Date" icon span={3} > 
                   <span className="flex gap-[5em]">
                       {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
-                      <DatePicker variant='icon' value={caseClosedDate} onChange={setCaseClosedDate} readOnly></DatePicker>
-                      
+                      <DatePicker variant='icon' value={caseClosedDate} onChange={setCaseClosedDate}></DatePicker>
+                      ---
                     </span>
                 </CaseField>
                 <CaseField label="Irrelevant"  icon >
@@ -1203,8 +1289,8 @@ const [endDate, setEndDate] = useState(null);
                 <CaseField label="Submitted To Base" icon span={3}>
                     <span className="flex gap-[5em]">
                      
-                    <DatePicker variant='icon' value={submittedToBase} onChange={setsubmittedToBase} readOnly></DatePicker>
-                      
+                      <DatePicker variant='icon'></DatePicker>
+                      ---
                     </span>
                 </CaseField>
 
@@ -1234,12 +1320,12 @@ const [endDate, setEndDate] = useState(null);
             <CardTitle className=' text-lg'>Customer Information</CardTitle>
               <hr />
             </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6 items-center">
+              <CardContent className="grid gap-10 grid-cols-6">
                 <CaseField label="Customer Account" icon ><Input variant='invisible' value={dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Company : dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName}/></CaseField>
-                <CaseField label="Primary Contact" icon ><Input variant='invisible'value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`} /></CaseField>
+                <CaseField label="Primary Contact" icon ><Input variant='invisible'/>{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</CaseField>
                 <CaseField label="Submitted By" ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Is Partner" icon ><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label=" Primary Email" icon ><Input variant='invisible' value={dataFetchCustomerData.MainAccount?.Email} placeholder='---'/></CaseField>
+                <CaseField label=" Primary Email" icon >{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</CaseField>
                 <CaseField label="Partner & Customer" icon ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="HIPAA" icon ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Phone" icon > {dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone: dataFetchCustomerData?.MainAccount?.Phone}</CaseField>
@@ -1299,10 +1385,10 @@ const [endDate, setEndDate] = useState(null);
               </CardHeader>
               <CardContent className="grid gap-10 grid-cols-6 items-center">
                 <CaseField label="Case Entitlement" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="Start Date" icon> <DatePicker value={startDate} onChange={setstartDate} readOnly></DatePicker> </CaseField>
+                <CaseField label="Start Date" icon> <DatePicker></DatePicker> </CaseField>
                 <CaseField label="OTC Code" icon><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Entitlement Status" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField label="End Date" icon> <DatePicker value={endDate} onChange={setEndDate} readOnly></DatePicker></CaseField>
+                <CaseField label="End Date" icon> <DatePicker></DatePicker></CaseField>
                 <CaseField label="Entitlement Override" icon><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Selected Entitlement Offer" icon><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Days Left" icon><Input variant='invisible' placeholder='---'/></CaseField>
@@ -1575,11 +1661,11 @@ const [endDate, setEndDate] = useState(null);
               <hr />
             </CardHeader>
             
-            <CardContent className="grid gap-5 grid-cols-7 p-3 ">
+            <CardContent className="grid gap-5 grid-cols-6 p-3 ">
                 <CaseField label="Case Resolution Code" > --- </CaseField>
                 <CaseField label="Case Ready for Closure" icon >
                   <Select className='' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
-                    <SelectTrigger className={'w-full'}>
+                    <SelectTrigger>
                       <SelectValue placeholder="---"/>
                     </SelectTrigger>
                     <SelectContent>
@@ -1588,10 +1674,10 @@ const [endDate, setEndDate] = useState(null);
                     </SelectContent>
                   </Select> 
                 </CaseField>
-                <CaseField label="Pending Customer Action" icon span={2}><DatePicker value={pendingCustomerAction} onChange={setPendingCustomerAction} readOnly/></CaseField>
+                <CaseField label="Pending Customer Action" icon ><DatePicker /></CaseField>
                 <CaseField label="Auto Close" >
                 <Select className='' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
-                    <SelectTrigger className={'w-full'}>
+                    <SelectTrigger>
                       <SelectValue placeholder="---"/>
                     </SelectTrigger>
                     <SelectContent>
@@ -1601,8 +1687,8 @@ const [endDate, setEndDate] = useState(null);
                   </Select> 
                 </CaseField>
                 <CaseField label="Ready for Close Days" icon><Input variant='invisible' placeholder='---'/></CaseField>
-                <CaseField  label="Customer Requested Close Date" icon span={2}> <DatePicker value={customerRequestedCloseDate} onChange={setCustomerRequestedCloseDate} readOnly /></CaseField>
-                <CaseField className={'col-start-3'} label="Ready for Closure Date"icon span={2}><DatePicker value={ReadyForClosureDate} onChange={setReadyForClosureDate} readOnly/> </CaseField>
+                <CaseField  label="Customer Requested Close Date" icon> <DatePicker /></CaseField>
+                <CaseField className={'col-start-3'} label="Ready for Closure Date"icon ><DatePicker /> </CaseField>
               
               </CardContent>
             </Card>
@@ -1622,9 +1708,22 @@ const [endDate, setEndDate] = useState(null);
           </TabsContent>
 
           <TabsContent value="ci_wo" >
-            <Card className="mt-7">
-              <CardHeader>Hello Word</CardHeader>
-            </Card>
+          <Card className="flex-col ">
+            <CardHeader>
+            <CardTitle className=' text-lg'>Shipment Information</CardTitle>
+              <hr />
+            </CardHeader>
+              <CardContent className="grid gap-10 grid-cols-4 items-center">
+                <CaseField label="Shipment Country"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Exception Order"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Shipment State" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="SBD Override"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Major Account Id"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Currency"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Promo Code" className={'col-start-3'}><Input variant='invisible' placeholder='---'/></CaseField>
+
+              </CardContent>
+            </Card> 
           </TabsContent>
 
           <TabsContent value="ci_orders" className={'p-2 flex flex-col gap-4'} >
@@ -1670,33 +1769,28 @@ const [endDate, setEndDate] = useState(null);
                     <TableHead>Due Date</TableHead>
                     <TableHead>Orion</TableHead>
                     <TableHead>Owner</TableHead>
-                    <TableHead>Created By</TableHead>
-                    <TableHead>Created At</TableHead>
+                    <TableHead>Created</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {workOrders.map((work) => (
-                    <TableRow key={work.WOID} className="hover:bg-gray-300 cursor-pointer">
+                    <TableRow key={work.WOID} className="hover:bg-gray-500 cursor-pointer">
                       <TableCell className="font-medium " onClick={handleClick}>
                         {/* <Link to={`/work/${work.WOID}`}> */}
                         {work.WOID}
                         {/* </Link> */}
                         </TableCell>
                       <TableCell>{work.CaseID}</TableCell>
-                      <TableCell>
-                          {work.caseinformation?.site_account?.Company || (work.caseinformation?.contact_information?.FirstName + " " + work.caseinformation?.contact_information?.LastName) || "-"}
-                      </TableCell>
-
-                      <TableCell>{work.SubStatus}</TableCell>
-                      <TableCell>{work.SystemStatus}</TableCell>
-                      <TableCell>{work.Priority}</TableCell>
-                      <TableCell></TableCell>
-                      <TableCell></TableCell>
-                      <TableCell></TableCell>
-                      <TableCell></TableCell>
-                      <TableCell>{work.owner?.Name}</TableCell>
-                      <TableCell>{work.owner?.Name}</TableCell>
-                      <TableCell>{work.CreatedOn}</TableCell>
+                      {/* <TableCell>{work.serviceaccount}</TableCell>
+                      <TableCell>{work.substatus}</TableCell>
+                      <TableCell>{work.systemstatus}</TableCell>
+                      <TableCell>{work.priority}</TableCell>
+                      <TableCell>{work.workorder}</TableCell>
+                      <TableCell>{work.primaryincident}</TableCell>
+                      <TableCell>{work.duedate}</TableCell>
+                      <TableCell>{work.orion}</TableCell>
+                      <TableCell>{work.owner}</TableCell>
+                      <TableCell>{work.created}</TableCell> */}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1804,13 +1898,17 @@ const [endDate, setEndDate] = useState(null);
                           {material.MOID} on {material.WOID} 
                           </Link>
                           </TableCell>
-                        <TableCell>{material.workorder?.CaseID}</TableCell>
-                        <TableCell>{material.CreatedOn}</TableCell>
-                        <TableCell>{material.OrderStatus}</TableCell>
-                        <TableCell>{material.OrderType}</TableCell>
-                        <TableCell>{material.owner?.Name}</TableCell>
-                        <TableCell>{material.WOID}</TableCell>
-                        <TableCell>{material.ReadyForClosureDate}</TableCell>
+                        <TableCell>{material.CaseID}</TableCell>
+                        {/* <TableCell>{work.serviceaccount}</TableCell>
+                        <TableCell>{work.substatus}</TableCell>
+                        <TableCell>{work.systemstatus}</TableCell>
+                        <TableCell>{work.priority}</TableCell>
+                        <TableCell>{work.workorder}</TableCell>
+                        <TableCell>{work.primaryincident}</TableCell>
+                        <TableCell>{work.duedate}</TableCell>
+                        <TableCell>{work.orion}</TableCell>
+                        <TableCell>{work.owner}</TableCell>
+                        <TableCell>{work.created}</TableCell> */}
                       </TableRow>
                     ))}
                     {/* <TableRow>
@@ -1850,3 +1948,166 @@ const [endDate, setEndDate] = useState(null);
     </>            
   )
 }
+
+// export const ServiceTab = () => {
+//   return (
+//     <div className='border-1 flex items-center'>
+//       <Button variant="link" className="rounded-none">
+//          <ArrowLeftFromLine></ArrowLeftFromLine>
+//       </Button>
+
+//       <Button variant="link" className="rounded-none">
+//         <SquareArrowOutUpRight></SquareArrowOutUpRight>
+//       </Button>
+
+//       <Button variant="link" className="rounded-none gap-1">
+//          <Save></Save>
+//          <span>Save</span>
+//       </Button>
+
+//       <Button variant="link" className="rounded-none gap-1">
+//          <FileSymlink></FileSymlink>
+//          <span>Save & Close</span>
+//       </Button>
+
+//       <Button variant="link" className="rounded-none gap-1">
+//         <RotateCw></RotateCw>
+//          <span>Refresh</span>
+//       </Button>    
+
+//        <Button variant="link" className="rounded-none gap-1">
+//         <StepBack></StepBack>
+//          <span>Complaint</span>
+//       </Button>    
+
+//       <Button variant="link" className="rounded-none gap-1">
+//         <StepBack></StepBack>
+//          <span>CSR</span>
+//       </Button>    
+
+//       <Button variant="link" className="rounded-none gap-1">
+//         <StepBack></StepBack>
+//          <span>Service Order</span>
+//       </Button>    
+
+//       <Button variant="link" className="rounded-none gap-1">
+//         <StepBack></StepBack>
+//          <span>Work Order</span>
+//       </Button>    
+
+//       <Button variant="link" className="rounded-none gap-1">
+//         <StepBack></StepBack>
+//          <span>Sales Offer</span>
+//       </Button>    
+
+//       <Button variant="link" className="rounded-none gap-1">
+//         <StepBack></StepBack>
+//          <span>Close Case</span>
+//       </Button>    
+
+//       <Button variant="link" className="rounded-none gap-1">
+//         <StepBack></StepBack>
+//          <span>Pick</span>
+//       </Button>    
+
+//       <Button variant="link" className="rounded-none gap-1">
+//         <StepBack></StepBack>
+//          <span>Queue Details</span>
+//       </Button>    
+
+//       <Button variant="link" className="rounded-none gap-1">
+//         <UserPen></UserPen>
+//          <span>Assign</span>
+//       </Button>    
+
+//       <Button variant="link" className="rounded-none gap-1">
+//         <StepBack></StepBack>
+//          <span>Add to Queue</span>
+//       </Button>    
+//     </div>
+//   )
+// }
+
+// export const ServiceTabMo = () => {
+//     return (
+//       <div className='border-1 flex items-center'>
+//         <Button variant="link" className="rounded-none">
+//            <ArrowLeftFromLine></ArrowLeftFromLine>
+//         </Button>
+  
+//         <Button variant="link" className="rounded-none">
+//           <SquareArrowOutUpRight></SquareArrowOutUpRight>
+//         </Button>
+  
+//         <Button variant="link" className="rounded-none gap-1">
+//            <Save></Save>
+//            <span>Save</span>
+//         </Button>
+  
+//         <Button variant="link" className="rounded-none gap-1">
+//            <FileSymlink></FileSymlink>
+//            <span>Save & Close</span>
+//         </Button>
+  
+//         <Button variant="link" className="rounded-none gap-1">
+//           <RotateCw></RotateCw>
+//            <span>Refresh</span>
+//         </Button>    
+  
+//          <Button variant="link" className="rounded-none gap-1">
+//           <StepBack></StepBack>
+//            <span>Complaint</span>
+//         </Button>    
+  
+//         <Button variant="link" className="rounded-none gap-1">
+//           <StepBack></StepBack>
+//            <span>CSR</span>
+//         </Button>    
+  
+//         <Button variant="link" className="rounded-none gap-1">
+//           <StepBack></StepBack>
+//            <span>Service Order</span>
+//         </Button>    
+  
+//         <Button variant="link" className="rounded-none gap-1">
+//           <StepBack></StepBack>
+//            <span>Work Order</span>
+//         </Button>    
+  
+//         <Button variant="link" className="rounded-none gap-1">
+//           <StepBack></StepBack>
+//            <span>Sales Offer</span>
+//         </Button>    
+  
+//         <Button variant="link" className="rounded-none gap-1">
+//           <StepBack></StepBack>
+//            <span>Close Case</span>
+//         </Button>    
+  
+//         <Button variant="link" className="rounded-none gap-1">
+//           <StepBack></StepBack>
+//            <span>Pick</span>
+//         </Button>    
+  
+//         <Button variant="link" className="rounded-none gap-1">
+//           <StepBack></StepBack>
+//            <span>Queue Details</span>
+//         </Button>    
+  
+//         <Button variant="link" className="rounded-none gap-1">
+//           <UserPen></UserPen>
+//            <span>Assign</span>
+//         </Button>    
+  
+//         <Button variant="link" className="rounded-none gap-1">
+//           <StepBack></StepBack>
+//            <span>Add to Queue</span>
+//         </Button>    
+//       </div>
+//     )
+// }
+
+
+
+
+
