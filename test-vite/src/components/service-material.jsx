@@ -92,7 +92,7 @@ export const ServiceMaterial = () => {
   
       setMaterialOrderInformation({
         MOID: data.MOID || '',
-        orderNumber: data.OrderNumber || '',
+        orderNumber: data.MOID || '',
         serviceOfferID: data.ServiceOfferID || '',
         serviceDescription: data.ServiceDescription || '',
         orderType: data.OrderType || '',
@@ -377,7 +377,7 @@ export const ServiceMaterial = () => {
                     {materialLineOrders.map((lineitem) => (
                       <TableRow key={lineitem.LineItemID}>
                         <TableCell className="font-medium">
-                        <Link to={`/mo_detail/${lineitem.LineItemID}/${lineitem.LineNumber}`}>
+                        <Link to={`/mo_detail/${lineitem.LineItemID}`}>
                           {lineitem.MOID} - {lineitem.LineNumber}
                           </Link>
                           </TableCell>

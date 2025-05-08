@@ -41,7 +41,7 @@ import { Description } from "@radix-ui/react-dialog";
 
 export const ServiceMoDetail = () => {
 
-  const { lineItemID, lineNumber } = useParams();
+  const { lineItemID } = useParams();
 
   const [moLineItems, setMoLineItems] = useState([])
 
@@ -72,7 +72,7 @@ export const ServiceMoDetail = () => {
     
   const fetchMoLineItems = async () => {
     try {
-      const res = await ApiCustomer.get(`/api/material-order/material-order-line-items/${lineItemID}?lineNumber=${lineNumber}`);
+      const res = await ApiCustomer.get(`/api/material-order/material-order-line-items/${lineItemID}`);
       const data = res.data.data;
   
       setMoLineItems(data);
@@ -124,7 +124,7 @@ export const ServiceMoDetail = () => {
   
   const handleUpdate = async () => {
     try {
-      await ApiCustomer.patch(`/api/material-order/material-order-line-items/${lineItemID}?lineNumber=${lineNumber}`, {
+      await ApiCustomer.patch(`/api/material-order/material-order-line-items/${lineItemID}`, {
         Description: MODetailInput.description,
         PickPackInstructions: MODetailInput.pickPackInstructions,
         CollectionInstructions: MODetailInput.collectionInstructions,

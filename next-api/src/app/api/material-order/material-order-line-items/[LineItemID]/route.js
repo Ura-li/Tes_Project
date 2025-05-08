@@ -6,14 +6,14 @@ export async function GET(request, { params }) {
 
 
     // Ambil query param `lineNumber` dari request.url
-    const { searchParams } = new URL(request.url);
-    const lineNumber = searchParams.get("lineNumber");
+    // const { searchParams } = new URL(request.url);
+    // const lineNumber = searchParams.get("lineNumber");
 
     const parsedLineItemID = parseInt(LineItemID);
-    const parsedLineNumber = parseInt(lineNumber);
+    // const parsedLineNumber = parseInt(lineNumber);
 
-    console.log(parsedLineItemID);
-    console.log(parsedLineNumber);
+    console.log("LineItemID: ".LineItemID);
+    // console.log(parsedLineNumber);
 
     if (isNaN(parsedLineItemID) || isNaN(parsedLineNumber)) {
         return NextResponse.json({
@@ -23,10 +23,10 @@ export async function GET(request, { params }) {
     }
 
     try {
-        const materialLineItem = await prisma.materialorderlineitems.findFirst({
+        const materialLineItem = await prisma.materialorderlineitems.findUnique({
             where: {
                 LineItemID: parsedLineItemID,
-                LineNumber: parsedLineNumber
+                // LineNumber: parsedLineNumber
             },
             include: {
                 servicecatalog_parts: true,
@@ -61,11 +61,11 @@ export async function GET(request, { params }) {
 export async function PATCH(request, {params}) {
     const {LineItemID } = await params
     
-    const { searchParams } = new URL(request.url);
-    const lineNumber = searchParams.get("lineNumber");
+    // const { searchParams } = new URL(request.url);
+    // const lineNumber = searchParams.get("lineNumber");
 
     const parsedLineItemID = parseInt(LineItemID);
-    const parsedLineNumber = parseInt(lineNumber);
+    // const parsedLineNumber = parseInt(lineNumber);
     
     if (isNaN(parsedLineItemID) || isNaN(parsedLineNumber)) {
         return NextResponse.json({
@@ -75,7 +75,7 @@ export async function PATCH(request, {params}) {
     }
 
     console.log(parsedLineItemID)
-    console.log(parsedLineNumber)
+    // console.log(parsedLineNumber)
 
     try {
         const body = await request.json();
@@ -83,7 +83,7 @@ export async function PATCH(request, {params}) {
         const existingMOLineItems = await prisma.materialorderlineitems.findFirst({
             where: { 
                 LineItemID: parsedLineItemID,
-                LineNumber: parsedLineNumber },
+            }
         });
         
         
@@ -112,7 +112,8 @@ export async function PATCH(request, {params}) {
         const updatedMOLineItems = await prisma.materialorderlineitems.update({
             where: { 
                 LineItemID: parsedLineItemID,
-                LineNumber: parsedLineNumber },
+                // LineNumber: parsedLineNumber 
+            },
             data: {
                 PartNumber,
                 Description,
