@@ -42,6 +42,27 @@ export async function GET(request) {
                         select: { Company: true }
                     }
                 } 
+            },
+            servicecatalog: { 
+                select: {
+                  ServiceCatalogID: true,
+                  Service_offerID: true,
+                  PartNumber: true,
+                  WarrantyStatus: true,
+                  Price: true,
+                  Tax: true,
+                  Total: true,
+                  warranty_services: { 
+                    select: {
+                      Service_offerID: true,
+                      Service_description: true,
+                      CTat_RTime: true,
+                      Price: true,
+                      Total: true,
+                      Tax: true
+                    }
+                  }
+                }
             }
         }
     });
