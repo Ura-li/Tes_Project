@@ -79,31 +79,29 @@ export const ServiceMoDetail = () => {
         </div>
       )}
       <TabsServiceMOLineItems MOLineDetails={moLineItems}/>
-    <Card className="mt-2 rounded-none h-[160px]">
-      <CardHeader>
-        <CardTitle className="text-xl ">{moLineItems.MOID} - {moLineItems.LineItemID}</CardTitle>
-        <CardTitle className="text-sm">Material Order Line Item . Information</CardTitle>
-      </CardHeader>
+    <Card className="mt-2 rounded-none">
 
-      <CardContent>
+      <CardContent className={'p-0'}>
         <Tabs>
-          <TabsList className="bg-white w-[440px] gap-2">
-            <TabsTrigger value="mo_details" className="cursor-pointer">
-            MO Details
-            </TabsTrigger>
-            <TabsTrigger
-              value="mo_failure"
-              className="cursor-pointer white">
-             Failure & Return Details
-            </TabsTrigger>
-            <TabsTrigger value="mo_attachments" className="cursor-pointer">
-            Attachments
-            </TabsTrigger>
-            <SelectBarRelated></SelectBarRelated>
-          </TabsList>
+            <Card className={'p-2'}>
+              <CardTitle className="text-xl ">{moLineItems.MOID} - {moLineItems.LineItemID}</CardTitle>
+              <CardTitle className="text-sm">Material Order Line Item . Information</CardTitle>
+              <TabsList className="bg-white gap-2">
+                <TabsTrigger variant={'underline'} value="mo_details" className="cursor-pointer">
+                  MO Details
+                </TabsTrigger>
+                <TabsTrigger variant={'underline'} value="mo_failure" className="cursor-pointer white">
+                  Failure & Return Details
+                </TabsTrigger>
+                <TabsTrigger variant={'underline'} value="mo_attachments" className="cursor-pointer">
+                  Attachments
+                </TabsTrigger>
+                <SelectBarRelated></SelectBarRelated>
+              </TabsList>
+            </Card>
 
-          <TabsContent value="mo_details">
-            <Card className=" mt-7 rounded-md">
+          <TabsContent value="mo_details" className={'p-2 flex flex-col gap-2'}>
+            <Card className="  rounded-md">
               <span className="ml-5 font-bold text-xl">MO Order Details</span>
               <CardContent className="grid gap-5 grid-flow-col grid-rows-8 ">
                 <div className="font-bold flex">
@@ -241,7 +239,7 @@ export const ServiceMoDetail = () => {
               </CardContent>
             </Card>
 
-            <Card className=" mt-7 rounded-md">
+            <Card className="  rounded-md">
               <span className="ml-5 font-bold text-xl">Outbound to Customer</span>
               <CardContent className="grid gap-5 grid-flow-col grid-rows-2 h-10">
                 <div className="font-bold flex">
@@ -254,7 +252,7 @@ export const ServiceMoDetail = () => {
           </TabsContent>
 
           <TabsContent value="mo_failure">
-          <Card className=" mt-7 rounded-md">
+          <Card className="  rounded-md">
               <span className="ml-5 font-bold text-xl">Failure & Usage Details
               </span>
               <CardContent className="grid gap-5 grid-flow-col grid-rows-5 h-70">
@@ -321,7 +319,7 @@ export const ServiceMoDetail = () => {
               </CardContent>
             </Card>
 
-            <Card className=" mt-7 rounded-md"> 
+            <Card className="  rounded-md"> 
               <span className="ml-5 font-bold text-xl">Part Return Details</span>
               <CardContent className="grid gap-5 grid-flow-col grid-rows-5 h-80">
                 <div className="font-bold flex">
