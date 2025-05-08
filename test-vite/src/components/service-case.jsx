@@ -220,19 +220,19 @@ export const TabsService = ({ caseDetails }) => {
       return null;
     }
   }
-  const fetchSymptomCodes = async () => {
-    try{
-      const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`)
-      const caseData = res.data.data
-      const symptomCode = caseData.SymptomCode
+  // const fetchSymptomCodes = async () => {
+  //   try{
+  //     const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`)
+  //     const caseData = res.data.data
+  //     const symptomCode = caseData.SymptomCode
 
-      const resSymptomCode = await ApiCustomer.get(`/api/case-information/symptom-codes/${symptomCode}`)
-      return resSymptomCode.data.data
-    }catch (err) {
-      console.error("Error in fetchSymptomCodes:", err);
-      return null;
-    }
-  }
+  //     const resSymptomCode = await ApiCustomer.get(`/api/symptom-codes/${symptomCode}`)
+  //     return resSymptomCode.data.data
+  //   }catch (err) {
+  //     console.error("Error in fetchSymptomCodes:", err);
+  //     return null;
+  //   }
+  // }
   useEffect(() => {
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
@@ -961,20 +961,20 @@ useEffect(() => {
       
     }
   }
-  const fetchSymptomCodes = async (term) => {
-    try {
-      const response = await ApiCustomer.get("/api/case-information/symptom-codes");
-      const allCodes = response.data.data;
+  // const fetchSymptomCodes = async (term) => {
+  //   try {
+  //     const response = await ApiCustomer.get("/api/case-information/symptom-codes");
+  //     const allCodes = response.data.data;
   
-      const filtered = allCodes.filter((sym) =>
-        sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
-      );
+  //     const filtered = allCodes.filter((sym) =>
+  //       sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+  //     );
   
-      setSymptomSuggestions(filtered);
-    } catch (err) {
-      console.error("Error fetching symptom codes", err);
-    }
-  };
+  //     setSymptomSuggestions(filtered);
+  //   } catch (err) {
+  //     console.error("Error fetching symptom codes", err);
+  //   }
+  // };
   const fetchWorkOrders = async () => {
     try {
       const res = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
@@ -1033,6 +1033,20 @@ useEffect(() =>{
 //   console.log("Data Asset Info : ",dataFetchAssetInformation)
 // }, dataFetchAssetInformation)
 
+const fetchSymptomCodes = async (term) => {
+  try {
+    const response = await ApiCustomer.get("/api/symptom-codes");
+    const allCodes = response.data.data;
+
+    const filtered = allCodes.filter((sym) =>
+      sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+    );
+
+    setSymptomSuggestions(filtered);
+  } catch (err) {
+    console.error("Error fetching symptom codes", err);
+  }
+};
 // console.log("Selected Symptopm ",selectedSymptom)
 
 // useEffect(() => {
