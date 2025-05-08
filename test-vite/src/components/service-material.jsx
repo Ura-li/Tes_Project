@@ -130,7 +130,7 @@ export const ServiceMaterial = () => {
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
                   <span>Order Number</span>
-                  <span className="ml-40">...</span>
+                  <span className="ml-40">{materialOrders.MOID}</span>
                 </div>
 
                 <div className="font-bold flex">
@@ -148,30 +148,30 @@ export const ServiceMaterial = () => {
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
                   <span>Order Type</span>
-                  <span className="ml-46.5">...</span>
+                  <span className="ml-46.5">{materialOrders.OrderType}</span>
                 </div>
 
                 <div className="font-bold flex">
                   <span className="ml-7">Shipping Priority</span>
-                  <span className="ml-35.5">...</span>
+                  <span className="ml-35.5">{materialOrders.ShippingPriority}</span>
                 </div>
 
                 <div className="font-bold flex">
                 <Lock className="size-5 mr-2"></Lock>
                   <span>Ready For Closure Date</span>
-                  <span className="ml-24">...</span>
+                  <span className="ml-24">{materialOrders.ReadyForClosureDate}</span>
                 </div>
 
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
                   <span>Case ID</span>
-                  <span className="ml-54">...</span>
+                  <span className="ml-54">{materialOrders.workorder?.CaseID}</span>
                 </div>
 
                 <div className="font-bold flex">
                   <Lock className="size-5 mr-2"></Lock>
                   <span>Contact</span>
-                  <span className="ml-53">...</span>
+                  <span className="ml-53">{materialOrders.workorder?.caseinformation?.contact_information?.Salutation} {materialOrders.workorder?.caseinformation?.contact_information?.FirstName} {materialOrders.workorder?.caseinformation?.contact_information?.LastName}</span>
                 </div>
 
                 <div className="font-bold flex">
@@ -225,13 +225,13 @@ export const ServiceMaterial = () => {
 
                 <div className="font-bold flex">
                   <span className="ml-7">Resource Name</span>
-                  <span className="ml-40">...</span>
+                  <span className="ml-40">{materialOrders.workorder?.bookings?.[0].bookingDetails?.[0].ResourceId}</span>
                 </div>
 
                 <div className="font-bold flex">
                 <Lock className="size-5 mr-2"></Lock>
                     <span>Work Order</span>
-                    <span className="ml-47">...</span>
+                    <span className="ml-47">{materialOrders.WOID}</span>
                   </div>
 
                   <div className="font-bold flex">
@@ -292,7 +292,10 @@ export const ServiceMaterial = () => {
                           {lineitem.MOID} - {lineitem.LineItemID}
                           </Link>
                           </TableCell>
-                        {/* <TableCell>{lineitem.CaseID}</TableCell> */}
+                        <TableCell>{lineitem.Status}</TableCell>
+                        <TableCell>{lineitem.ATPStatus}</TableCell>
+                        <TableCell>{lineitem.PartNumber}</TableCell>
+                        <TableCell>{lineitem.Description}</TableCell>
 
                       </TableRow>
                     ))}

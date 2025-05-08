@@ -51,12 +51,15 @@ import {
   ChevronDown
  } from 'lucide-react'
 
+
+
  import { useLocation, useNavigate } from "react-router";
  import { useState, useEffect } from "react";
  import { useSidebar } from '@/components/ui/sidebar'
  import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import ApiCustomer from '@/api'
+import { getUserFromToken } from '@/lib/utils/auth'
 
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
@@ -117,6 +120,7 @@ export const TabsService = ({ caseDetails }) => {
     MinutesSpent: 0,
     Note: ''
   });
+  // const [apa, setApa] = useState(null)
 
   const handleCaseNoteChange = (key, value) => {
     setCaseNoteFormData(prev => { 
@@ -129,14 +133,22 @@ export const TabsService = ({ caseDetails }) => {
     
   console.log("📝 Form Data to Submit:", caseNoteFormData); // ✅ Log the form data
     try {
+      const user = getUserFromToken();
+      const timestamp = new Date().toLocaleString(); // e.g. "5/6/2025, 10:30:15 AM"
+      const author = user?.name || user?.email || "Unknown User";
+      const role = user?.role || "Unknown";
+    
+      const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.Note}`;
       const response = await ApiCustomer.post("/api/case-information/case-notes", {
         ...caseNoteFormData,
+        Note: modifiedNote,
         CaseID: caseDetails.CaseID
       });
       console.log("Saved successfully:", response.data);
       alert("Case Note Saved!");
+      const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
       setCaseNotes({
-        NotesDisplay: response.data.data.Note
+        NotesDisplay: NotedDisplay
       })
       console.log("Case Notes Infor after save : ",caseNotes)
       console.log("Case Notes Display Infor after save : ",response)
@@ -225,8 +237,9 @@ export const TabsService = ({ caseDetails }) => {
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
       if(noteDetail ){
+        const NotedDisplay = `@Created On : ${noteDetail.CreatedOn}\n${noteDetail.Note}`;
         setCaseNotes({
-          NotesDisplay: noteDetail.Note
+          NotesDisplay: NotedDisplay
         })
       } 
       const symptomCodeDetail = await fetchSymptomCodes();
@@ -394,13 +407,82 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
   </>
 );
 
-export const TabsServiceWO = ({workOrders}) => {
+export const TabsServiceWO = ({
+  workOrders,
+  SLA,
+  setSLA
+}) => {
 
   const navigate = useNavigate();   
+  const WOID = workOrders.WOID;
+   const handleSave = async () => {
+    try {
+      // Show loading alert
+      Swal.fire({
+        title: 'Updating WORK ORDER...',
+        text: 'Please wait',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      /**
+       * TODO : 
+       * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
+       */
+      
+
+      //SLA
+      const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
+        SLAJeopardy: SLA.slaJeopardy || undefined,
+        DueDateCustomer: SLA.dueDateCustomer || undefined,
+        CoverageWindow: SLA.coverageWindow || undefined,
+        Response: SLA.response || undefined,
+        OTCCode: SLA.otcCode || undefined,
+        RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer || undefined,
+        GuaranteedFixTimeCustomer: SLA.guaranteedFixTimeCustomer || undefined,
+        EarlyStartDateTimeCustomer: SLA.earlyStartDateTimeCustomer || undefined,
+        LatestStartDateTimeCustomer: SLA.latestStartDateTimeCustomer || undefined,
+        SLAReschedule: SLA.slaReschedule || undefined,
+        ActiveScheduleDate: SLA.activeScheduleDate || undefined,
+        SLAErrorDescription: SLA.slaErrorDescription || undefined,
+        CasePriorityIndex: SLA.casePriorityIndex !== "" ? parseInt(SLA.casePriorityIndex, 10) : undefined,
+      });
+      
+      
+      const result = response.data;
+      console.log(response);
+  
+      if (!result.success) {
+        return Swal.fire({
+          icon: 'error',
+          title: 'Update Failed',
+          text: result.message || 'Unknown error',
+        });
+      }
+
+      return Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'SLA updated successfully!',
+      });
+
+    } catch (error) {
+      return Swal.fire({
+        icon: 'error',
+        title: 'Request Error',
+        text: error.message || 'Something went wrong!',
+      });
+    }
+  };
+
+
+
   const buttons = [
     { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/case/${workOrders.CaseID}`) },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: Save, label: "Save", onClick: () => handleSave() },
     { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseWorkOrder() },
     { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
@@ -782,13 +864,20 @@ useEffect(() => {
     
 
 
-  //customer, asset, entitlement
-  //customer
+  
   const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
     MainAccount: null,
     SiteAccount: null,
     Type: null,
   });
+  const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
+  const [ownerUserData, setOwnerUserData ] = useState([])
+  
+  const [workOrders, setWorkOrders] = useState([]);
+
+  const [materialOrders, setMaterialOrders] = useState([]);
+
+
   const fetchCustomerData = async () => {
     try{
       // console.log("Case Detail : ", caseDetails);
@@ -817,8 +906,6 @@ useEffect(() => {
       return null
     }
   }
-  //asset
-  const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
   const fetchAssetInformation = async () => {
     try{
       const resAsset = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
@@ -830,46 +917,89 @@ useEffect(() => {
       return null
     }
   }
+  const fetchCaseNotes = async () => {
+    try{
+      // console.log("Case Details : ", caseDetails)
+      const res = await ApiCustomer.get(`/api/case-information/case-notes`)
+      const notes = res.data.data
+  
+      const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
+  
+      let noteID = null
+  
+      if(existingNote){
+        noteID = existingNote.NoteID
+      }else{
+        const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
+          LogType: "NotesLog",
+          ActionType: "Initial",
+          Template: "",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: "",
+          CaseID: caseID,
+        })
+        
+        noteID = createResponse.data.data.NoteID;
+      }
+  
+      const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
+      const noteDetail = detailRes.data.data;
+  
+      console.log("✅ Case Note Detail:", noteDetail);
+      return noteDetail;
+    }catch(err){
+      console.error("Error in fetchCaseNotes:", err);
+      return null;
+    }
+  }
+  const fetchOwnerUserData = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
+      setOwnerUserData(response.data.data)
+    } catch (error) {
+      
+    }
+  }
+  const fetchSymptomCodes = async (term) => {
+    try {
+      const response = await ApiCustomer.get("/api/case-information/symptom-codes");
+      const allCodes = response.data.data;
+  
+      const filtered = allCodes.filter((sym) =>
+        sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+      );
+  
+      setSymptomSuggestions(filtered);
+    } catch (err) {
+      console.error("Error fetching symptom codes", err);
+    }
+  };
+  const fetchWorkOrders = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
+      setWorkOrders(res.data.data); // adjust based on API response shape
+      console.log("Fetch Work Order: ",res.data.data)
+    } catch (err) {
+      console.error("Failed to fetch work orders:", err);
+    }
+  };
+  const fetchMaterialOrders = async () => {
+    try {
+      if (!workOrders.length) return;
+  
+      const woidList = workOrders.map((wo) => wo.WOID).join(',');
+      const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
+      setMaterialOrders(res.data.data);
+    } catch (err) {
+      console.error("Failed to fetch Material orders:", err);
+    }
+  }
+  //asset
 
 
 
 //notes handler
-const fetchCaseNotes = async () => {
-  try{
-    // console.log("Case Details : ", caseDetails)
-    const res = await ApiCustomer.get(`/api/case-information/case-notes`)
-    const notes = res.data.data
-
-    const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
-
-    let noteID = null
-
-    if(existingNote){
-      noteID = existingNote.NoteID
-    }else{
-      const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
-        LogType: "NotesLog",
-        ActionType: "Initial",
-        Template: "",
-        VisibleExternally: false,
-        MinutesSpent: 0,
-        Note: "",
-        CaseID: caseID,
-      })
-      
-      noteID = createResponse.data.data.NoteID;
-    }
-
-    const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
-    const noteDetail = detailRes.data.data;
-
-    console.log("✅ Case Note Detail:", noteDetail);
-    return noteDetail;
-  }catch(err){
-    console.error("Error in fetchCaseNotes:", err);
-    return null;
-  }
-}
 useEffect(() => {
   fetchCustomerData();
   fetchAssetInformation();
@@ -880,7 +1010,8 @@ useEffect(() => {
     const noteDetail = await fetchCaseNotes();
     if(noteDetail ){
       setCaseNotes({
-        NotesDisplay: noteDetail.Note
+        NotesDisplay: noteDetail.Note,
+        CreatedOn: noteDetail.CreatedOn
       })
     }
   }
@@ -888,16 +1019,7 @@ useEffect(() => {
 }, [])
 
 //data for upper style
-const [ownerUserData, setOwnerUserData ] = useState([])
 // const []
-const fetchOwnerUserData = async () => {
-  try {
-    const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
-    setOwnerUserData(response.data.data)
-  } catch (error) {
-    
-  }
-}
 
 
 useEffect(() =>{
@@ -911,20 +1033,6 @@ useEffect(() =>{
 //   console.log("Data Asset Info : ",dataFetchAssetInformation)
 // }, dataFetchAssetInformation)
 
-const fetchSymptomCodes = async (term) => {
-  try {
-    const response = await ApiCustomer.get("/api/case-information/symptom-codes");
-    const allCodes = response.data.data;
-
-    const filtered = allCodes.filter((sym) =>
-      sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
-    );
-
-    setSymptomSuggestions(filtered);
-  } catch (err) {
-    console.error("Error fetching symptom codes", err);
-  }
-};
 // console.log("Selected Symptopm ",selectedSymptom)
 
 // useEffect(() => {
@@ -933,29 +1041,6 @@ const fetchSymptomCodes = async (term) => {
 
 //order section
 //workorder
-const [workOrders, setWorkOrders] = useState([]);
-const fetchWorkOrders = async () => {
-  try {
-    const res = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
-    setWorkOrders(res.data.data); // adjust based on API response shape
-    // console.log("Fetch Work Order: ",res)
-  } catch (err) {
-    console.error("Failed to fetch work orders:", err);
-  }
-};
-
-const [materialOrders, setMaterialOrders] = useState([]);
-const fetchMaterialOrders = async () => {
-  try {
-    if (!workOrders.length) return;
-
-    const woidList = workOrders.map((wo) => wo.WOID).join(',');
-    const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
-    setMaterialOrders(res.data.data);
-  } catch (err) {
-    console.error("Failed to fetch Material orders:", err);
-  }
-}
 
 
 useEffect(() => {
@@ -1591,7 +1676,8 @@ const [endDate, setEndDate] = useState(null)
                     <TableHead>Due Date</TableHead>
                     <TableHead>Orion</TableHead>
                     <TableHead>Owner</TableHead>
-                    <TableHead>Created</TableHead>
+                    <TableHead>Created By</TableHead>
+                    <TableHead>Created At</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1603,16 +1689,20 @@ const [endDate, setEndDate] = useState(null)
                         {/* </Link> */}
                         </TableCell>
                       <TableCell>{work.CaseID}</TableCell>
-                      {/* <TableCell>{work.serviceaccount}</TableCell>
-                      <TableCell>{work.substatus}</TableCell>
-                      <TableCell>{work.systemstatus}</TableCell>
-                      <TableCell>{work.priority}</TableCell>
-                      <TableCell>{work.workorder}</TableCell>
-                      <TableCell>{work.primaryincident}</TableCell>
-                      <TableCell>{work.duedate}</TableCell>
-                      <TableCell>{work.orion}</TableCell>
-                      <TableCell>{work.owner}</TableCell>
-                      <TableCell>{work.created}</TableCell> */}
+                      <TableCell>
+                          {work.caseinformation?.site_account?.Company || (work.caseinformation?.contact_information?.FirstName + " " + work.caseinformation?.contact_information?.LastName) || "-"}
+                      </TableCell>
+
+                      <TableCell>{work.SubStatus}</TableCell>
+                      <TableCell>{work.SystemStatus}</TableCell>
+                      <TableCell>{work.Priority}</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell>{work.owner?.Name}</TableCell>
+                      <TableCell>{work.owner?.Name}</TableCell>
+                      <TableCell>{work.CreatedOn}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1720,17 +1810,13 @@ const [endDate, setEndDate] = useState(null)
                           {material.MOID} on {material.WOID} 
                           </Link>
                           </TableCell>
-                        <TableCell>{material.CaseID}</TableCell>
-                        {/* <TableCell>{work.serviceaccount}</TableCell>
-                        <TableCell>{work.substatus}</TableCell>
-                        <TableCell>{work.systemstatus}</TableCell>
-                        <TableCell>{work.priority}</TableCell>
-                        <TableCell>{work.workorder}</TableCell>
-                        <TableCell>{work.primaryincident}</TableCell>
-                        <TableCell>{work.duedate}</TableCell>
-                        <TableCell>{work.orion}</TableCell>
-                        <TableCell>{work.owner}</TableCell>
-                        <TableCell>{work.created}</TableCell> */}
+                        <TableCell>{material.workorder?.CaseID}</TableCell>
+                        <TableCell>{material.CreatedOn}</TableCell>
+                        <TableCell>{material.OrderStatus}</TableCell>
+                        <TableCell>{material.OrderType}</TableCell>
+                        <TableCell>{material.owner?.Name}</TableCell>
+                        <TableCell>{material.WOID}</TableCell>
+                        <TableCell>{material.ReadyForClosureDate}</TableCell>
                       </TableRow>
                     ))}
                     {/* <TableRow>

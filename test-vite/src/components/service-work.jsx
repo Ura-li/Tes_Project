@@ -96,7 +96,35 @@ export const ServiceWork = () => {
 
   const [caseInformation, setCaseInformation] = useState([])
   const [bookings, setBookings] = useState([])
+  const [ownerWorkOrder, setOwnerWorkOrder] = useState([])
   
+  const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
+    MainAccount: null,
+    SiteAccount: null,
+    Type: null,
+  });
+
+  const [SLA, setSLA] = useState({
+    slaJeopardy: "",
+    dueDateCustomer: "",
+    coverageWindow: "",
+    response: "",
+    otcCode: "",
+    requestedDateTimeCustomer: "",
+    guaranteedFixTimeCustomer: "",
+    earlyStartDateTimeCustomer: "",
+    latestStartDateTimeCustomer: "",
+    slaReschedule: "",
+    activeScheduleDate: "",
+    slaErrorDescription: "",
+    casePriorityIndex: "",
+  });
+  const handleSLAChange = (field) => (value) => {
+    setSLA((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -123,12 +151,62 @@ export const ServiceWork = () => {
           setCaseInformation(resCI.data.data);
 
           const resBooking = await ApiCustomer.get(`/api/bookings?WOID=${woid}`);
-          console.log("Res Booking : ",resBooking.data.data)
+          // console.log("Res Booking : ",resBooking.data.data)
+
+          const resOwner = await ApiCustomer.get(`/api/user/${workOrderData.OwnerID}`)
+
+          
+          // console.log("Case Detail : ", caseDetails);
+          const resMainAccount = resCI.data.data.contact_information
+          setDataFetchCustomerData({
+            MainAccount: resMainAccount
+          })
+          if(caseInformation.SiteAccountID !== null) {
+            const resSiteAccount = resCI.data.data.site_account
+            setDataFetchCustomerData((prev) => ({
+              ...prev,
+              SiteAccount: resSiteAccount,
+              Type: "SiteAccount"
+            }));
+            
+          }else{
+            setDataFetchCustomerData((prev) => ({
+              ...prev,
+              type: "Individual", // fallback if no site account
+            }));
+          }
+        
+              // const res = await ApiCustomer.get(`/api/`)
+            
+          setOwnerWorkOrder(resOwner.data.data);
           setBookings(resBooking.data.data)
+
+          setSLA((prev) => ({
+            ...prev,
+            requestedDateTimeCustomer: resWO.data.data.RequestedDateTimeCustomer || "",
+            slaJeopardy: resWO.data.data.SLAJeopardy || "",
+            dueDateCustomer: resWO.data.data.DueDateCustomer || "",
+            coverageWindow: resWO.data.data.CoverageWindow || "",
+            response: resWO.data.data.Response || "",
+            otcCode: resWO.data.data.OTCCode || "",
+            guaranteedFixTimeCustomer: resWO.data.data.GuaranteedFixTimeCustomer || "",
+            earlyStartDateTimeCustomer: resWO.data.data.EarlyStartDateTimeCustomer || "",
+            latestStartDateTimeCustomer: resWO.data.data.LatestStartDateTimeCustomer || "",
+            slaReschedule: resWO.data.data.SLAReschedule || "",
+            activeScheduleDate: resWO.data.data.ActiveScheduleDate || "",
+            slaErrorDescription: resWO.data.data.SLAErrorDescription || "",
+            casePriorityIndex: resWO.data.data.CasePriorityIndex ?? "", // use ?? to allow 0
+          }));
+          
+          console.log("Res WO : ", resWO.data.data)
+          console.log("Res MO : ", resMO.data.data)
+          console.log("Res CI : ", resCI.data.data)
+          console.log("Res Booking : ", resBooking.data.data)
+          console.log("Res Owner : ", resOwner.data.data)
+          console.log("Res Main Account : ", resMainAccount)
         }
   
         Swal.close(); 
-  
       } catch (err) {
         console.error("Fetch error:", err);
         Swal.fire({
@@ -141,6 +219,10 @@ export const ServiceWork = () => {
   
     if (woid) fetchAllData();
   }, [woid]);
+
+  useEffect(() => {
+    console.log("Data Fetch Customer Data in WO : ",dataFetchCustomerData);
+  }, [dataFetchCustomerData])
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -191,7 +273,13 @@ export const ServiceWork = () => {
           <strong>Closed</strong>.
         </div>
       )}
-      <TabsServiceWO workOrders={workOrders} />
+      {workOrders?.WOID && caseInformation?.CaseID && (
+        <TabsServiceWO  
+          workOrders={workOrders} 
+          SLA={SLA}
+          setSLA={setSLA}
+        />
+      )}
       <Card className="mt-2 rounded-none p-0 border-0">
         <Tabs defaultValue="Quick_WO_Input" className="">
           <CardHeader
@@ -224,9 +312,9 @@ export const ServiceWork = () => {
               </CardTitle>
               <CardTitle className="flex">
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className="text-blue-500">
-                    {/* {ownerUserData.Name} */}
-                  </h1>
+                  <h1 className='text-blue-500'>
+                    {ownerWorkOrder.Name}
+                    </h1>
                   <p className="text-sm font-light ">Owner</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
@@ -234,27 +322,28 @@ export const ServiceWork = () => {
                   <p className="text-sm font-light ">Queue</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className="text-blue-500">
-                    {/* {dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName} */}
-                  </h1>
+                  <h1 className='text-blue-500'>
+                    {dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}
+                    </h1>
                   <p className="text-sm font-light ">Contact</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <Select onValueChange={setSelected} defaultValue="first">
-                    <SelectTrigger className="shadow-none border-none text-blue-500 p-0">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="p-0">
-                      <SelectGroup className="p-0">
-                        <SelectItem value="first" className="p-0">
-                          {/* {dataFetchCustomerData.SiteAccount?.Company} */}
-                        </SelectItem>
-                        <SelectItem value="??">??</SelectItem>
-                        <SelectItem value="!!">!!</SelectItem>
-                        <SelectItem value="**">**</SelectItem>
-                        <SelectItem value="&&">&&</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
+                <Select onValueChange={setSelected} defaultValue="first" >
+                  <SelectTrigger className="shadow-none border-none text-blue-500 p-0">
+                    <SelectValue  />
+                  </SelectTrigger>
+                  <SelectContent className="p-0">
+                    <SelectGroup className="p-0">
+                    <SelectItem value="first" className="p-0">
+                      {dataFetchCustomerData.SiteAccount?.Company}
+
+                    </SelectItem>
+                    <SelectItem value="??">??</SelectItem>
+                      <SelectItem value="!!">!!</SelectItem>
+                      <SelectItem value="**">**</SelectItem>
+                      <SelectItem value="&&">&&</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
                   </Select>
                   <p className="text-sm font-light ">Site Account</p>
                 </div>
@@ -337,7 +426,7 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={"---"}
+                      value={workOrders.WOID || '---'}
                       readOnly
                     />
                   </CaseField>
@@ -378,7 +467,7 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={"---"}
+                      value={workOrders.SystemStatus || '---'}
                       readOnly
                     />
                   </CaseField>
@@ -422,7 +511,7 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={"---"}
+                      value={caseInformation.servicecatalog?.Service_offerID || '---'}
                       readOnly
                     />
                   </CaseField>
@@ -434,7 +523,7 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={"---"}
+                      value={caseInformation.servicecatalog?.warranty_services?.Service_description || '---'}
                       readOnly
                     />
                   </CaseField>
@@ -644,7 +733,7 @@ export const ServiceWork = () => {
                   </TableHeader>
 
                   <TableBody>
-                    {materialOrders.length > 0 ? (
+                    { materialOrders.length > 0 ? (
                       materialOrders.map((material) => (
                         <TableRow key={material.MOID}>
                           <TableCell className="font-medium">
@@ -652,26 +741,14 @@ export const ServiceWork = () => {
                               {material.MOID} on {material.WOID}
                             </Link>
                           </TableCell>
-                          <TableCell>{material.CaseID}</TableCell>
-                          {/* <TableCell>{work.serviceaccount}</TableCell>
-                        <TableCell>{work.substatus}</TableCell>
-                        <TableCell>{work.systemstatus}</TableCell>
-                        <TableCell>{work.priority}</TableCell>
-                        <TableCell>{work.workorder}</TableCell>
-                        <TableCell>{work.primaryincident}</TableCell>
-                        <TableCell>{work.duedate}</TableCell>
-                        <TableCell>{work.orion}</TableCell>
-                        <TableCell>{work.owner}</TableCell>
-                        <TableCell>{work.created}</TableCell> */}
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell className="font-medium">
-                          No data available
-                        </TableCell>
+                        <TableCell>{material.workorder?.CaseID}</TableCell>
+                        <TableCell>{material.CreatedOn}</TableCell>
+                        <TableCell>{material.OrderStatus}</TableCell>
+                        <TableCell>{material.OrderType}</TableCell>
+                        <TableCell>{material.ReadyForClosureDate}</TableCell>
                       </TableRow>
-                    )}
+                    ))
+                  ) : null }
                   </TableBody>
                 </Table>
               </CardContent>
@@ -1258,9 +1335,18 @@ export const ServiceWork = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="Quick_WO_Input">
-            <QuickWOInput WOID={woid} caseInformation={caseInformation} />
-          </TabsContent>
+          {workOrders?.WOID && caseInformation?.CaseID && (
+            <TabsContent value="Quick_WO_Input">
+              <QuickWOInput
+                WOID={woid}
+                workOrderData={workOrders}
+                caseInformation={caseInformation}
+                SLA={SLA}
+                setSLA={setSLA}
+              />
+            </TabsContent>
+          )}
+
         </Tabs>
       </Card>
     </>
