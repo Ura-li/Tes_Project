@@ -3,8 +3,6 @@ import prisma from "../../../../../../prisma/client";
 
 export async function GET(request, { params }) {
     const { LineItemID } = params;
-    console.log("params:", await params);
-console.log("request.url:", request.url);
 
 
     // Ambil query param `lineNumber` dari request.url
@@ -62,18 +60,30 @@ console.log("request.url:", request.url);
 
 export async function PATCH(request, {params}) {
     const {LineItemID } = await params
-    const lineItemID = LineItemID
-    if (!lineItemID) {
+    
+    const { searchParams } = new URL(request.url);
+    const lineNumber = searchParams.get("lineNumber");
+
+    const parsedLineItemID = parseInt(LineItemID);
+    const parsedLineNumber = parseInt(lineNumber);
+    
+    if (isNaN(parsedLineItemID) || isNaN(parsedLineNumber)) {
         return NextResponse.json({
             success: false,
-            message: "Invalid Material Order ID"
+            message: "Invalid Line Item ID or Line Number"
         }, { status: 400 });
     }
+
+    console.log(parsedLineItemID)
+    console.log(parsedLineNumber)
+
     try {
         const body = await request.json();
         // Cek apakah AssetID ada
-        const existingMOLineItems = await prisma.materialorderlineitems.findUnique({
-            where: { LineItemID: parseInt(lineItemID) }
+        const existingMOLineItems = await prisma.materialorderlineitems.findFirst({
+            where: { 
+                LineItemID: parsedLineItemID,
+                LineNumber: parsedLineNumber },
         });
         
         
@@ -83,18 +93,38 @@ export async function PATCH(request, {params}) {
                 message: "Line Items not found!"
             }, { status: 404 });
         }
-        
-        const { PartNumber, Description, ATPStatus, Price, Quantity, Status } = body;
+        const {
+            PartNumber,
+            Description,
+            ATPStatus,
+            Price,
+            Quantity,
+            Status,
+            PickPackInstructions,
+            CollectionInstructions,
+            CustomerResponse,
+            RejectedReason,
+            OtherReason
+          } = body;
+        console.log(body);
+
         // Update data
         const updatedMOLineItems = await prisma.materialorderlineitems.update({
-            where: { LineItemID: parseInt(lineItemID) },
+            where: { 
+                LineItemID: parsedLineItemID,
+                LineNumber: parsedLineNumber },
             data: {
                 PartNumber,
                 Description,
                 ATPStatus,
                 Price,
                 Quantity,
-                Status
+                Status,
+                PickPackInstructions,
+                CollectionInstructions,
+                CustomerResponse,
+                RejectedReason,
+                OtherReason
             }
         });
 

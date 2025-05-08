@@ -85,7 +85,7 @@ export const ServiceMoDetail = () => {
         salesOrderNumber: data.SalesOrderNumber || '',
         lineNumber: data.LineNumber?.toString() || '',
         partNumber: data.PartNumber || '',
-        description: data.servicecatalog_parts?.PartDescription || '',
+        description: data.Description || '',
         rohs: data.servicecatalog_parts?.ROHS_Flag || false,
         returnabilityFlag: data.servicecatalog_parts?.Returnable_Flag || false,
         functionalEquivalence: data.FunctionalEquivalence || '',
@@ -120,6 +120,23 @@ export const ServiceMoDetail = () => {
       ...prev,
       [name]: value,
     }));
+  };
+  
+  const handleUpdate = async () => {
+    try {
+      await ApiCustomer.patch(`/api/material-order/material-order-line-items/${lineItemID}?lineNumber=${lineNumber}`, {
+        Description: MODetailInput.description,
+        PickPackInstructions: MODetailInput.pickPackInstructions,
+        CollectionInstructions: MODetailInput.collectionInstructions,
+        CustomerResponse: MODetailInput.customerResponse,
+        RejectedReason: MODetailInput.rejectedReason,
+        OtherReason: MODetailInput.otherReason,
+      });
+  
+      console.log("Material Order Line Item updated successfully.");
+    } catch (error) {
+      console.error("Error updating Material Order Line Item:", error);
+    }
   };
   
   
@@ -338,6 +355,10 @@ export const ServiceMoDetail = () => {
                   <Lock className="mr-2 size-5" />
                   <span>ATP Status</span>
                   <span className="ml-51.5">{MODetailInput.atpStatus}</span>
+                </div>
+                
+                <div className="flex font-bold">
+                  <Button onClick={handleUpdate}>Save</Button>
                 </div>
               </CardContent>
             </Card>
