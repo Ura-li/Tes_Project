@@ -37,7 +37,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/case/:caseId' element={<Case />} />
             <Route path='/work/:woid' element={<Work />}/>
             <Route path='/material-order/:moid' element={<MaterialOrder />}/>
-            <Route path='/mo_detail/:molineid' element={<MoDetail />}/>
+            <Route path="/mo_detail/:lineItemID/:lineNumber" element={<MoDetail />} />
             <Route path='/bookings' element={<Bookings />} />]
             <Route path='/bookings/:bookingid' element={<Bookings />} />]
 
