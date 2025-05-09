@@ -497,6 +497,18 @@ model workorder_service_delivery_skillset {
   @@index([WOID], map: "fk_skillset_workorder")
 }
 
+model repairClassCode { 
+  Code                String                    @id @db.VarChar(3)
+  Description         String                    @db.VarChar(100)
+  Definition          String                    @db.VarChar(255)
+  PaymentEligibility  product_type_ProductTower
+  CreatedOn           DateTime?                 @default(now()) @db.DateTime(0)
+}
+
+enum payment_eligibility {
+  Eligible
+  Not_Eligible
+}
 enum product_type_ProductTower {
   PSG
   IPG
