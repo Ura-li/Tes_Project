@@ -37,6 +37,7 @@ export async function GET(request, { params }) {
                     }
                 }
             }, 
+            global_trade_check: true,
         }
     });
 

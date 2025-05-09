@@ -101,6 +101,7 @@ const partsorder = [
 import { BtnModalsWorkOrder } from "./sc-modal";
 import DatePicker from "./date-picker";
 
+
 export const TabsService = ({ caseDetails }) => {
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
@@ -118,7 +119,17 @@ export const TabsService = ({ caseDetails }) => {
     MinutesSpent: 0,
     Note: "",
   });
-  // const [apa, setApa] = useState(null)
+
+  const [gtcForm, setGtcForm] = useState({
+    global_trade_status: "",
+    embargoed_country: "",
+    gt_override_reason: "",
+    gt_details: "",
+    screening_id: "",
+    gt_active_listening: "",
+    gt_al_comments: "",
+  });
+
 
   const handleCaseNoteChange = (key, value) => {
     setCaseNoteFormData((prev) => {
@@ -127,48 +138,90 @@ export const TabsService = ({ caseDetails }) => {
       return updated;
     });
   };
-  const saveCaseNote = async () => {
-    console.log("📝 Form Data to Submit:", caseNoteFormData); // ✅ Log the form data
+
+  const handleGtcChange = (field) => (value) => {
+    setGtcForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    console.log("📝 Form Data to Submit:", caseNoteFormData, gtcForm);
+  
     try {
       const user = getUserFromToken();
-      const timestamp = new Date().toLocaleString(); // e.g. "5/6/2025, 10:30:15 AM"
+      const timestamp = new Date().toLocaleString();
       const author = user?.name || user?.email || "Unknown User";
       const role = user?.role || "Unknown";
-
-      const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.Note}`;
-      const response = await ApiCustomer.post(
-        "/api/case-information/case-notes",
-        {
+  
+      const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
+      const gtcFilled = gtcForm && Object.values(gtcForm).some(val => val !== null && val !== "");
+  
+      let noteResponse = null;
+      let gtcResponse = null;
+  
+      if (!noteFilled && !gtcFilled) {
+        alert("Tidak ada data yang disimpan. Mohon isi catatan atau data GTC terlebih dahulu.");
+        return;
+      }
+  
+      if (noteFilled) {
+        const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.Note}`;
+        const response = await ApiCustomer.post("/api/case-information/case-notes", {
           ...caseNoteFormData,
           Note: modifiedNote,
           CaseID: caseDetails.CaseID,
+        });
+  
+        noteResponse = response.data;
+        console.log("✅ Note saved:", noteResponse);
+  
+        const NotedDisplay = `@Created On : ${noteResponse.data.CreatedOn}\n${noteResponse.data.Note}`;
+        setCaseNotes({
+          NotesDisplay: NotedDisplay,
+        });
+  
+        let dataUpdated = {
+          CaseNote: noteResponse.data.NoteID,
+        };
+  
+        if (selectedSymptom) {
+          dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
         }
-      );
-      console.log("Saved successfully:", response.data);
-      alert("Case Note Saved!");
-      const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
-      setCaseNotes({
-        NotesDisplay: NotedDisplay,
-      });
-      console.log("Case Notes Infor after save : ", caseNotes);
-      console.log("Case Notes Display Infor after save : ", response);
-
-      let dataUpdated = {
-        CaseNote: response.data.data.NoteID,
-      };
-      //symptom code
-      if (selectedSymptom) {
-        dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
+  
+        await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated);
       }
-      await ApiCustomer.patch(
-        `/api/case-information/${caseDetails.CaseID}`,
-        dataUpdated
-      );
+  
+      if (gtcFilled) {
+        const response = await ApiCustomer.patch("/api/case-information/global-trade-check", {
+          ...gtcForm,
+          screening_id: gtcForm.screening_id || "",
+          CaseID: caseDetails.CaseID,
+        });
+  
+        gtcResponse = response.data;
+        console.log("✅ GTC saved:", gtcResponse);
+      }
+      
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Data berhasil disimpan!",
+        timer: 2000,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          // reload setelah 2 detik
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        },
+      });
     } catch (error) {
-      console.error("Save failed:", error);
-      alert("Failed to save note.");
+      console.error("❌ Save failed:", error);
+      alert("Gagal menyimpan perubahan.");
     }
   };
+  
 
   const checkOrCreateNote = async () => {
     const existing = await ApiCustomer.get(
@@ -274,7 +327,7 @@ export const TabsService = ({ caseDetails }) => {
       onClick: () => navigate(`/master/Case_table`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: Save, label: "Save", onClick: () => handleSave() },
     {
       icon: FileSymlink,
       label: "Save & Close",
@@ -394,6 +447,9 @@ export const TabsService = ({ caseDetails }) => {
         <ServiceCase
           caseDetails={caseDetails}
           formData={caseNoteFormData}
+          formGtc={gtcForm}
+          setFormGtc={setGtcForm}
+          onChangeGtc={handleGtcChange}
           onChange={handleCaseNoteChange}
           caseNotes={caseNotes}
           setCaseNotes={setCaseNotes}
@@ -463,8 +519,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
         RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer || undefined,
         GuaranteedFixTimeCustomer: SLA.guaranteedFixTimeCustomer || undefined,
         EarlyStartDateTimeCustomer: SLA.earlyStartDateTimeCustomer || undefined,
-        LatestStartDateTimeCustomer:
-          SLA.latestStartDateTimeCustomer || undefined,
+        LatestStartDateTimeCustomer: SLA.latestStartDateTimeCustomer || undefined,
         SLAReschedule: SLA.slaReschedule || undefined,
         ActiveScheduleDate: SLA.activeScheduleDate || undefined,
         SLAErrorDescription: SLA.slaErrorDescription || undefined,
@@ -552,6 +607,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
           Swal.showLoading();
         },
       });
+
       const res = await ApiCustomer.patch(
         `/api/work-order/${workOrders.WOID}`,
         {
@@ -872,6 +928,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
     </>
   );
 };
+
 export const ServiceCase = ({
   caseDetails,
   formData,
@@ -880,6 +937,9 @@ export const ServiceCase = ({
   setCaseNotes,
   selectedSymptom,
   setSelectedSymptom,
+  formGtc,
+  setFormGtc,
+  onChangeGtc,
 }) => {
   const { open } = useSidebar();
 
@@ -967,6 +1027,7 @@ export const ServiceCase = ({
       return null;
     }
   };
+
   const fetchAssetInformation = async () => {
     try {
       const resAsset = await ApiCustomer.get(
@@ -980,6 +1041,7 @@ export const ServiceCase = ({
       return null;
     }
   };
+
   const fetchCaseNotes = async () => {
     try {
       // console.log("Case Details : ", caseDetails)
@@ -1023,6 +1085,7 @@ export const ServiceCase = ({
       return null;
     }
   };
+
   const fetchOwnerUserData = async () => {
     try {
       const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
@@ -1056,6 +1119,7 @@ export const ServiceCase = ({
       console.error("Failed to fetch work orders:", err);
     }
   };
+
   const fetchMaterialOrders = async () => {
     try {
       if (!workOrders.length) return;
@@ -1067,7 +1131,17 @@ export const ServiceCase = ({
       console.error("Failed to fetch Material orders:", err);
     }
   };
-  //asset
+
+  const fetchGtc = async () => {
+    try {
+      const gtcData = caseDetails.global_trade_check;
+      setFormGtc(gtcData ?? formGtc); // pakai default jika null/undefined
+    } catch (err) {
+      console.error("Error fetching GTC:", err);
+      setFormGtc(formGtc); // fallback jika error
+    }
+  };
+
 
   //notes handler
   useEffect(() => {
@@ -1086,6 +1160,7 @@ export const ServiceCase = ({
       }
     };
     loadNote();
+    fetchGtc(); 
   }, []);
 
   //data for upper style
@@ -1379,80 +1454,85 @@ const [endDate, setEndDate] = useState(null);
                 <CardTitle className=" text-lg">Global Trade Check</CardTitle>
                 <hr />
               </CardHeader>
+              
               <CardContent className="grid gap-10  grid-cols-6 p-3 ">
                 <CaseField label="Global Trade Status">
-                  <Select onChange={setSelected} defaultValue="--Select--">
+                  <Select value={formGtc.global_trade_status} onValueChange={onChangeGtc("global_trade_status")} defaultValue="--Select--">
                     <SelectTrigger className="w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="Pass">Pass</SelectItem>
-                        <SelectItem value="Fail">Fail</SelectItem>
-                        <SelectItem value="Not Done">Not Done</SelectItem>
-                        <SelectItem value="Not Needed">Not Needed</SelectItem>
-                        <SelectItem value="Failed Confirmed">
-                          Failed Confirmed
-                        </SelectItem>
+                      {["Pass", "Fail", "Not Done", "Not Needed", "Failed Confirmed"].map((status) => (
+                      <SelectItem key={status} value={status}>{status}</SelectItem>
+                      ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 </CaseField>
 
                 <CaseField label="GT Override Reason">
-                <Select defaultValue="--select--">
+                <Select  value={formGtc.gt_override_reason} onValueChange={onChangeGtc("gt_override_reason")} defaultValue="--select--">
                     <SelectTrigger className="w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="Military Keyword False Match">Military Keyword False Match</SelectItem>
-                        <SelectItem value="Embargo False Match">Embargo False Match</SelectItem>
-                        <SelectItem value="RPL False Match">RPL False Match</SelectItem>
-                        <SelectItem value="Active Contract">Active Contract</SelectItem>
-                        <SelectItem value="United Status Government">United Status Government</SelectItem>
-                        <SelectItem value="Global Trade Authorization">Global Trade Authorization</SelectItem>
-                        <SelectItem value="RPL Manual Screening Passed">RPL Manual Screening Passed</SelectItem>
-                        <SelectItem value="Fail Confirmed by GT">Fail Confirmed by GT</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                        <SelectItem value="Failed Confirmed">
-                          Failed Confirmed
-                        </SelectItem>
+                      {[
+                    "Military Keyword False Match",
+                    "Embargo False Match",
+                    "RPL False Match",
+                    "Active Contract",
+                    "United States Government",
+                    "Global Trade Authorization",
+                    "RPL Manual Screening Passed",
+                    "Fail Confirmed by GT",
+                    "Other",
+                  ].map((reason) => (
+                    <SelectItem key={reason} value={reason}>{reason}</SelectItem>
+                  ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 </CaseField>
                 <CaseField label="GT Active Listening">
-                <Select defaultValue="--select--">
+                <Select    value={formGtc.gt_active_listening} onValueChange={onChangeGtc("gt_active_listening")} defaultValue="--select--">
                     <SelectTrigger className="w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="Fail">Fail</SelectItem>
-                        <SelectItem value="Pass">Pass</SelectItem>
+                      {["Pass", "Fail"].map((opt) => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 </CaseField>
                 <CaseField label="Embargoed Country" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---"    value={formGtc.embargoed_country}
+            onChange={(e) => onChangeGtc("embargoed_country")(e.target.value)} />
                 </CaseField>
                 <CaseField label="GT Details">
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible"   placeholder="---"
+            value={formGtc.gt_details}
+            onChange={(e) => onChangeGtc("gt_details")(e.target.value)} />
                 </CaseField>
                 <CaseField label="GT All Comments">
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible"  placeholder="---"
+            value={formGtc.gt_al_comments}
+            onChange={(e) => onChangeGtc("gt_al_comments")(e.target.value)}/>
                 </CaseField>
                 <CaseField className={"col-start-3"} label="Screening ID">
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible"         placeholder="---"
+              value={formGtc.screening_id}
+              onChange={(e) => onChangeGtc("screening_id")(e.target.value)}/>
                 </CaseField>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent
-            value="customer,add,entitement"
+          <TabsContent value="customer,add,entitement"
             className={"p-1 flex flex-col gap-4"}
           >
             <Card className="flex-col ">
@@ -1636,7 +1716,18 @@ const [endDate, setEndDate] = useState(null);
                   ></DatePicker>{" "}
                 </CaseField>
                 <CaseField label="OTC Code" icon>
-                  <Input variant="invisible" placeholder="---" />
+                <Select >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                      {["01-Trade", "05K-Extended Warranty", "06M", "06J"].map((status) => (
+                      <SelectItem key={status} value={status}>{status}</SelectItem>
+                      ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </CaseField>
                 <CaseField label="Entitlement Status" icon>
                   <Input variant="invisible" placeholder="---" />
@@ -2125,11 +2216,81 @@ const [endDate, setEndDate] = useState(null);
             </Card>
           </TabsContent>
 
-          <TabsContent value="ci_wo">
-            <Card className="mt-7">
-              <CardHeader>Hello Word</CardHeader>
-            </Card>
-          </TabsContent>
+           <TabsContent value="ci_wo">
+                      <div className="flex gap-4">
+                        <Card className="flex-1/3  rounded-md">
+                          <CardHeader>
+                            <CardTitle className=" text-lg">Case Information</CardTitle>
+                            <hr />
+                          </CardHeader>
+                          <CardContent className="grid gap-5 grid-cols-2">
+                          <CaseField label="Case Subject" span={1}>
+                          {caseDetails.CaseSubject}
+                          </CaseField>
+                          <CaseField label="Case Type">{caseDetails.CaseType}</CaseField>
+                            <CaseField label="Businnes Segment">
+                              <Input
+                                variant={"invisible"}
+                                className=""
+                                value={"---"}
+                                readOnly
+                              />
+                            </CaseField>
+                            <CaseField label="HPI Segment">
+                              <Input
+                                variant={"invisible"}
+                                className=""
+                                value={"---"}
+                                readOnly
+                              />
+                            </CaseField>
+          
+                            <CaseField label="Global Trade Status">
+                            {caseDetails.global_trade_check?.global_trade_status || "---"}
+                            </CaseField>
+                            <CaseField label="Global Trade Ovveride Reason">
+                            {caseDetails.global_trade_check?.gt_override_reason || "---"}
+                            </CaseField>
+                            <CaseField label="GT Active Listening">
+                            {caseDetails.global_trade_check?.gt_active_listening || "---"}
+                            </CaseField>
+                            <CaseField label="Security Status" icon>
+                              <Input
+                                variant={"invisible"}
+                                className=""
+                                value={"---"}
+                                readOnly
+                              />
+                            </CaseField>
+                            <CaseField label="Security Ovveride Reason" icon>
+                              <Input
+                                variant={"invisible"}
+                                className=""
+                                value={"---"}
+                                readOnly
+                              />
+                            </CaseField>
+                          </CardContent>
+                        </Card>
+                        <div className="flex-3 flex flex-col gap-4">
+                          <Card className="rounded-md">
+                            <CardHeader>
+                              <CardTitle className="text-lg">Case Notes History</CardTitle>
+                              <hr />
+                            </CardHeader>
+                            <CardContent>
+                              <CaseField label="Notes History" icon>
+                                <textarea
+                                  className="mt-4 resize-none w-full min-h-[400px] p-2 ring-1 ring-gray-300 rounded-md text-md"
+                                  readOnly
+                                  value={caseNotes?.NotesDisplay}
+                                />
+                              </CaseField>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    </TabsContent>
 
           <TabsContent value="ci_orders" className={"p-2 flex flex-col gap-4"}>
             <Card className="flex-col ">
