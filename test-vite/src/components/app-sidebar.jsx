@@ -147,6 +147,14 @@ const data = {
           title: "Resource",
           url: "/master/Resource_table",
         }, 
+        {
+          title: "Repair Class Code",
+          url: "/master/repairClassCode",
+        }, 
+        {
+          title: "Service Catalog",
+          url: "/master/ServiceCatalog",
+        }, 
       ],
     },
     {

@@ -5653,6 +5653,20 @@ export function SubkTechnicianAdd() {
     ResourceAccountId: '',
   });
 
+  const [resourceAccounts, setResourceAccounts] = useState([])
+  const fetchResourceAccounts = async () => {
+    try {
+      const res = await ApiCustomer.get("/api/resource-account?limit=1000"); // atau sesuaikan dengan pagination
+      setResourceAccounts(res.data.data); // ambil array data
+    } catch (error) {
+      console.error("Failed to fetch resource accounts:", error);
+    }
+  };
+  useEffect(() => {
+    fetchResourceAccounts();
+  }, []);
+
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData(prev => ({
@@ -5722,6 +5736,20 @@ export function SubkTechnicianAdd() {
           <Label>Name *</Label>
           <Input id="Name" value={formData.Name} onChange={handleInputChange} />
 
+          <Label htmlFor="ResourceAccountId">Resource Account (optional)</Label>
+          <select
+            id="ResourceAccountId"
+            value={formData.ResourceAccountId}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          >
+            <option value="">-- Select Resource Account --</option>
+            {resourceAccounts.map((ra) => (
+              <option key={ra.ResourceAccountId} value={ra.ResourceAccountId}>
+                {ra.Name} ({ra.ResourceAccountId})
+              </option>
+            ))}
+          </select>
           {/* <Label>ResourceAccountId (optional)</Label>
           <Input id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} /> */}
         </div>
@@ -5737,6 +5765,7 @@ export function SubkTechnicianEdit({ SubkTechnicianId, onUpdate }) {
   const [subkTechnician, setSubkTechnician] = useState(null);
   const [name, setName] = useState("");
   const [resourceAccountId, setResourceAccountId] = useState("");
+  const [resourceAccounts, setResourceAccounts] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
   const fetchSubkTechnician = async () => {
@@ -5752,9 +5781,29 @@ export function SubkTechnicianEdit({ SubkTechnicianId, onUpdate }) {
     }
   };
 
+  
+  const fetchResourceAccounts = async () => {
+    try {
+      const res = await ApiCustomer.get("/api/resource-account?limit=1000");
+      setResourceAccounts(res.data.data);
+    } catch (error) {
+      console.error("Failed to fetch resource accounts:", error);
+    }
+  };
+
+
   useEffect(() => {
     if (SubkTechnicianId && isOpen) {
+      Swal.fire({
+        title: "Auto close alert!",
+        html: "I will close in milliseconds.",
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      })
       fetchSubkTechnician();
+      fetchResourceAccounts();
+      Swal.close();
     }
   }, [SubkTechnicianId, isOpen]);
 
@@ -5823,16 +5872,26 @@ export function SubkTechnicianEdit({ SubkTechnicianId, onUpdate }) {
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
+        <Label>Name *</Label>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Name*"
           />
-          <Input
+           <Label htmlFor="ResourceAccountId">Resource Account (optional)</Label>
+          <select
+            id="ResourceAccountId"
             value={resourceAccountId}
             onChange={(e) => setResourceAccountId(e.target.value)}
-            placeholder="ResourceAccountId (optional)"
-          />
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          >
+            <option value="">-- Select Resource Account --</option>
+            {resourceAccounts.map((ra) => (
+              <option key={ra.ResourceAccountId} value={ra.ResourceAccountId}>
+                {ra.Name} ({ra.ResourceAccountId})
+              </option>
+            ))}
+          </select>
         </div>
         <DialogFooter>
           <Button onClick={handleUpdate}>Update</Button>
@@ -6549,6 +6608,8 @@ export function BookingDetailsAdd({ onUpdate }) {
   const [accounts, setAccounts] = useState([]);
   const [technicians, setTechnicians] = useState([]);
 
+  
+
   useEffect(() => {
     const fetchDropdowns = async () => {
       try {
@@ -6558,7 +6619,9 @@ export function BookingDetailsAdd({ onUpdate }) {
           ApiCustomer.get("/api/resource-account"),
           ApiCustomer.get("/api/subk-technician"),
         ]);
+
         setBookings(bookingRes.data.data || []);
+        // console.log(getUserFromToken())
         setResources(resourceRes.data.data || []);
         setAccounts(accountRes.data.data || []);
         setTechnicians(techRes.data.data || []);
@@ -6581,6 +6644,7 @@ export function BookingDetailsAdd({ onUpdate }) {
   };
   
   const handleSubmit = async () => {
+    const userSubmit = getUserFromToken();
     try {
       const payload = {
         ...formData,
@@ -6589,7 +6653,7 @@ export function BookingDetailsAdd({ onUpdate }) {
         ResourceAccountId: formData.ResourceAccountId || null,
         SubkTechnicianId: formData.SubkTechnicianId || null,
         DurationInMinutesUserTime: formData.DurationInMinutesUserTime ? parseInt(formData.DurationInMinutesUserTime) : null,
-        ChangedBy: parseInt(formData.ChangedBy),
+        ChangedBy: userSubmit.id,
         StartTimeCustomerTime: toFullISOString(formData.StartTimeCustomerTime),
         EndTimeCustomerTime: toFullISOString(formData.EndTimeCustomerTime),
         EstimatedArrivalTimeCustomerTime: toFullISOString(formData.EstimatedArrivalTimeCustomerTime),
@@ -6627,8 +6691,22 @@ export function BookingDetailsAdd({ onUpdate }) {
             <Label>Booking *</Label>
             <select id="BookingId" value={formData.BookingId} onChange={handleInputChange} className="w-full border p-2 rounded">
               <option value="">-- Select Booking --</option>
-              {bookings.map((b) => <option key={b.BookingId} value={b.BookingId}>{b.BookingId}</option>)}
+              {bookings.map((b) => <option key={b.BookingId} value={b.BookingId}>{b.BookingId} - {b.bookingDetails?.[0]?.ResourceId}</option>)}
             </select>
+            {/* <Label htmlFor="BookingID">Booking ID</Label>
+            <select
+              id="BookingID"
+              value={resourceAccountId}
+              onChange={(e) => setResourceAccountId(e.target.value)}
+              className="w-full border border-gray-300 rounded px-3 py-2"
+            >
+              <option value="">-- Select Resource Account --</option>
+              {resourceAccounts.map((ra) => (
+                <option key={ra.ResourceAccountId} value={ra.ResourceAccountId}>
+                  {ra.Name} ({ra.ResourceAccountId})
+                </option>
+              ))}
+            </select> */}
           </div>
 
           <div>
@@ -6688,10 +6766,10 @@ export function BookingDetailsAdd({ onUpdate }) {
             </div>
           </div>
 
-          <div>
+          {/* <div>
             <Label>Changed By *</Label>
             <Input id="ChangedBy" type="number" value={formData.ChangedBy} onChange={handleInputChange} />
-          </div>
+          </div> */}
         </div>
 
         <DialogFooter className="mt-4">
@@ -6967,3 +7045,280 @@ export function BookingDetailsDelete({ BookingDetailId, onUpdate }) {
     </Dialog>
   );
 }
+
+export function RepairClassCodeAdd() {
+  const [formData, setFormData] = useState({
+    Code: "",
+    Description: "",
+    Definition: "",
+    PaymentEligibility: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.Code || !formData.Description || !formData.PaymentEligibility) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Data",
+        text: "Code, Description, and PaymentEligibility are required.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.post("/api/repairClassCode", formData);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Repair Class Code saved",
+        timer: 1200,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Failed to save repairClassCode:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Failed to save data",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm mb-4">Add Repair Class Code</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Repair Class Code</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>Code *</Label>
+          <Input id="Code" value={formData.Code} onChange={handleInputChange} maxLength={3} />
+
+          <Label>Description *</Label>
+          <Input id="Description" value={formData.Description} onChange={handleInputChange} maxLength={100} />
+
+          <Label>Definition</Label>
+          <Input id="Definition" value={formData.Definition} onChange={handleInputChange} maxLength={255} />
+
+          <Label>Payment Eligibility *</Label>
+          <select
+            id="PaymentEligibility"
+            value={formData.PaymentEligibility}
+            onChange={handleInputChange}
+            className="w-full border p-2 rounded"
+          >
+            <option value="">-- Select Eligibility --</option>
+            <option value="Eligible">Eligible</option>
+            <option value="Not_Eligible">Not Eligible</option>
+          </select>
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={handleSubmit}>Submit</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function RepairClassCodeEdit({ Code }) {
+  const [description, setDescription] = useState("");
+  const [definition, setDefinition] = useState("");
+  const [paymentEligibility, setPaymentEligibility] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/repairClassCode/${Code}`);
+      const data = response.data.data;
+      setDescription(data.Description || "");
+      setDefinition(data.Definition || "");
+      setPaymentEligibility(data.PaymentEligibility || "");
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchData();
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!description || !definition || !paymentEligibility) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Data",
+        text: "All fields are required.",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/repairClassCode/${Code}`, {
+        Description: description,
+        Definition: definition,
+        PaymentEligibility: paymentEligibility,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Updated!",
+        text: "Repair Class Code has been updated.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Update error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "Failed to update Repair Class Code. Please try again.",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil size={16} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Repair Class Code</DialogTitle>
+          <DialogDescription>
+            Update the repair class code data. All fields are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Input
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description"
+          />
+          <Input
+            value={definition}
+            onChange={(e) => setDefinition(e.target.value)}
+            placeholder="Definition"
+          />
+          <select
+            value={paymentEligibility}
+            onChange={(e) => setPaymentEligibility(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+          >
+            <option value="">-- Select Payment Eligibility --</option>
+            <option value="Eligible">Eligible</option>
+            <option value="Not_Eligible">Not Eligible</option>
+          </select>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function RepairClassCodeDelete({ Code, isModalOpen, setIsModalOpen, onUpdate }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Kode klasifikasi perbaikan ini akan dihapus dan perubahan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/repairClassCode/${Code}`);
+
+        if (response.status === 409 || response.data.success === false) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Data ini memiliki relasi dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Data klasifikasi berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.reload(); // Memuat ulang halaman
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Data ini tidak bisa dihapus karena memiliki keterkaitan.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
+    }
+  };
+
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
+}
+
