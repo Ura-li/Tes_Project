@@ -4143,7 +4143,7 @@ export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpda
 //   )
 // }
 
-export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
+export function BtnModalsServiceCatalog({ open, setOpen, caseDetails }) {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)

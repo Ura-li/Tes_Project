@@ -231,7 +231,6 @@ export function ServiceBooking ({BookingId , woid}) {
   }
 
   const handleUpdate = async () => {
-    console.log("Booking Data : ",bookingData)
     const updatedBookingData = {
       ...bookingData, // keep all original fields
       ResourceId: resourceId,
@@ -248,6 +247,7 @@ export function ServiceBooking ({BookingId , woid}) {
       ActualArrivalTimeUserTime: actualArrivalTimeUserTime || null,
     };
     
+    console.log("Booking Data : ",updatedBookingData)
     await setBookingData(updatedBookingData);
     try {
       await ApiCustomer.patch(`/api/bookings/${bookingid}`, {
@@ -260,7 +260,7 @@ export function ServiceBooking ({BookingId , woid}) {
         TotalBillableDurationInMinutes: totalBillableDurationInMinutes,
         TotalInProgressDurationInMinutes: totalInProgressDurationInMinutes,
         TotalBreakDurationInMinutes: totalBreakDurationInMinutes,
-        bookingDetailsData: bookingData,
+        bookingDetailsData: updatedBookingData,
         bookingDetails2Data: bookingDetailsData
       });
 
@@ -370,7 +370,10 @@ export function ServiceBooking ({BookingId , woid}) {
 
   return (
     <div>
-      <TabsBooking/>
+      <TabsBooking
+        handleUpdate={handleUpdate}
+        bookingData={bookingData}
+      />
     <Card className="mt-2 rounded-none ">
       {/* <Button onClick={handleUpdate}>Save</Button> */}
       
@@ -653,7 +656,7 @@ export function ServiceBooking ({BookingId , woid}) {
               <CaseField label={"Start Time"} span={2}>
                 <DatePicker
                   value={
-                    startTimeUserTime ? startTimeUserTime : ""
+                    startTimeUserTime ? new Date(startTimeCustomerTime) : ""
                   }
                   onChange={
                     setStartTimeUserTime
@@ -663,7 +666,7 @@ export function ServiceBooking ({BookingId , woid}) {
               <CaseField label={"End Time"} span={2}>
                 <DatePicker
                   
-                  value={endTimeUserTime ? endTimeUserTime : ""}
+                  value={endTimeUserTime ? new Date(endTimeUserTime) : ""}
                   onChange={
                     setEndTimeUserTime
                   }
@@ -681,7 +684,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   
                   value={
                     estimatedArrivalTimeUserTime
-                      ? estimatedArrivalTimeUserTime
+                      ? new Date(estimatedArrivalTimeUserTime)
                       : ""
                   }
                   onChange={
@@ -694,7 +697,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   
                   value={
                     actualArrivalTimeUserTime
-                      ? actualArrivalTimeUserTime
+                      ? new Date (actualArrivalTimeUserTime)
                       : ""
                   }
                   onChange={
@@ -841,7 +844,7 @@ export function ServiceBooking ({BookingId , woid}) {
               <CaseField label={'Schedule Jeopardy Time'} span={2}>
                 <DatePicker value={
                     scheduleJeopardyTime
-                      ? scheduleJeopardyTime
+                      ? new Date(scheduleJeopardyTime)
                       : ""
                   }
                   onChange={setScheduleJeopardyTime}></DatePicker>
@@ -877,25 +880,25 @@ export function ServiceBooking ({BookingId , woid}) {
             <CardContent className="grid gap-6 grid-cols-3 items-center">
               <CaseField label={'Start Time (Customer)'} span={2}>
                 <DatePicker 
-                  value={startTimeCustomerTime ? startTimeCustomerTime : ""}
+                  value={startTimeCustomerTime ? new Date(startTimeCustomerTime) : ""}
                   onChange={setStartTimeCustomerTime}
                 />
               </CaseField>
               <CaseField label={'End TIme (Customer)'} span={2}>
                 <DatePicker 
-                  value={endTimeCustomerTime ? endTimeCustomerTime : ""}
+                  value={endTimeCustomerTime ? new Date(endTimeCustomerTime) : ""}
                   onChange={setEndTimeCustomerTime}
                 />
               </CaseField>
               <CaseField label={'Estimated Arrival Time (Customer)'} span={2}>
                 <DatePicker 
-                  value={estimatedArrivalTimeCustomerTime ? estimatedArrivalTimeCustomerTime : ""}
+                  value={estimatedArrivalTimeCustomerTime ? new Date(estimatedArrivalTimeCustomerTime) : ""}
                   onChange={setEstimatedArrivalTimeCustomerTime}
                 />
               </CaseField>
               <CaseField label={'Actual Arrival Time (Customer)'} span={2}>
                 <DatePicker 
-                  value={actualArrivalTimeCustomerTime ? actualArrivalTimeCustomerTime : ""}
+                  value={actualArrivalTimeCustomerTime ? new Date(actualArrivalTimeCustomerTime) : ""}
                   onChange={setActualArrivalTimeCustomerTime}
                 />
               </CaseField>

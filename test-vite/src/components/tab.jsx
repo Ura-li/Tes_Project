@@ -766,14 +766,18 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
   )
 }
 
-export const TabsBooking = ({workOrders}) => {
+export const TabsBooking = ({
+  handleUpdate,
+  bookingData
+}) => {
 
   const navigate = useNavigate();   
+
   const buttons = [
-    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/case/${workOrders.CaseID}`) },
+    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/work/${bookingData.WOID}`) },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
-    { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseWorkOrder() },
+    { icon: Save, label: "Save", onClick: () => handleUpdate() },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now")  },
     { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
     { icon: StepBack, label: "Pick", onClick: () => alert("not now") },

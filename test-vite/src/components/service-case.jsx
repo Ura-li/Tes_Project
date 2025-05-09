@@ -96,7 +96,7 @@ const partsorder = [
   },
 ]
 
-import { BtnModalsWorkOrder } from './sc-modal'
+import { BtnModalsServiceCatalog } from './sc-modal'
 import DatePicker from './date-picker'
 
 
@@ -267,9 +267,9 @@ export const TabsService = ({ caseDetails }) => {
     { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseCase() },
     { icon: RotateCw, label: "Refresh", onClick: () => alert("not now") },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
-    { icon: StepBack, label: "CSR", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Service Order", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Work Order", onClick: () => setOpenWorkOrder(true) },
+    { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
+    { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
+    { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder") },
     { icon: StepBack, label: "Sales Offer", onClick: () => alert("not now") },
     { icon: StepBack, label: "Close Case", onClick: () => alert("not now") },
     { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
@@ -279,6 +279,11 @@ export const TabsService = ({ caseDetails }) => {
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
+  const [serviceCatalogType, setServiceCatalogType] = useState("null");
+  const openServiceCatalog = async (type) => {
+    setOpenWorkOrder(true);
+    setServiceCatalogType(type)
+  };
   const saveAndCloseCase = async () => {
     const confirmResult = await Swal.fire({
       title: 'Confirm Save',
@@ -360,7 +365,11 @@ export const TabsService = ({ caseDetails }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/>
+    <BtnModalsServiceCatalog 
+      open={openWorkOrder} 
+      setOpen={setOpenWorkOrder} 
+      caseDetails={caseDetails}
+    />
     </div>
     <div>
     <ServiceCase 
@@ -578,7 +587,7 @@ export const TabsServiceWO = ({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
     </div>
     <div>
     {/* <ServiceCase 
@@ -684,7 +693,7 @@ export const TabsServiceMO = ({materialOrders}) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
     </div>
     <div>
     {/* <ServiceCase 
@@ -790,7 +799,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
     </div>
     <div>
     {/* <ServiceCase 
@@ -937,7 +946,7 @@ useEffect(() => {
           VisibleExternally: false,
           MinutesSpent: 0,
           Note: "",
-          CaseID: caseID,
+          CaseID: caseDetails.CaseID,
         })
         
         noteID = createResponse.data.data.NoteID;
