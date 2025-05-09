@@ -147,6 +147,10 @@ const data = {
           title: "Resource",
           url: "/master/Resource_table",
         }, 
+        {
+          title: "OTC Code",
+          url: "/master/OTC_Code",
+        }, 
       ],
     },
     {

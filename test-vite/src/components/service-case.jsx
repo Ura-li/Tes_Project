@@ -96,29 +96,36 @@ const partsorder = [
     ordercloseddate: "-",
     createdby: "-",
   },
-];
+]
 
-import { BtnModalsWorkOrder } from "./sc-modal";
-import DatePicker from "./date-picker";
+import { BtnModalsServiceCatalog } from './sc-modal'
+import DatePicker from './date-picker'
 
 
-export const TabsService = ({ caseDetails }) => {
+export const TabsService = ({ 
+  caseDetails, 
+  caseNote,
+  caseNoteFormData,
+  setCaseNoteFormData
+}) => {
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
 
   const [selectedSymptom, setSelectedSymptom] = useState(null);
 
   const { open } = useSidebar();
-
+  const [entitlementStatus, setEntitlementStatus] = useState({
+    OTCCode: ''
+  })
   //casenote
-  const [caseNoteFormData, setCaseNoteFormData] = useState({
-    LogType: "",
-    ActionType: "",
-    Template: "",
-    VisibleExternally: null,
-    MinutesSpent: 0,
-    Note: "",
-  });
+  // const [caseNoteFormData, setCaseNoteFormData] = useState({
+  //   LogType: "",
+  //   ActionType: "",
+  //   Template: "",
+  //   VisibleExternally: null,
+  //   MinutesSpent: 0,
+  //   Note: "",
+  // });
 
   const [gtcForm, setGtcForm] = useState({
     global_trade_status: "",
@@ -130,6 +137,7 @@ export const TabsService = ({ caseDetails }) => {
     gt_al_comments: "",
   });
 
+  
 
   const handleCaseNoteChange = (key, value) => {
     setCaseNoteFormData((prev) => {
@@ -142,63 +150,76 @@ export const TabsService = ({ caseDetails }) => {
   const handleGtcChange = (field) => (value) => {
     setGtcForm((prev) => ({ ...prev, [field]: value }));
   };
+  
+  const handleEntitlementStatus = (field) => (value) => {
+    setEntitlementStatus((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSave = async () => {
-    console.log("📝 Form Data to Submit:", caseNoteFormData, gtcForm);
+    console.log("📝 Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
   
     try {
+      Swal.fire({
+        title: 'Saving Case...',
+        text: 'Mohon tunggu sebentar',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
       const user = getUserFromToken();
       const timestamp = new Date().toLocaleString();
       const author = user?.name || user?.email || "Unknown User";
       const role = user?.role || "Unknown";
-  
       const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
       const gtcFilled = gtcForm && Object.values(gtcForm).some(val => val !== null && val !== "");
+      const custEntitlementandSLA = entitlementStatus
   
       let noteResponse = null;
       let gtcResponse = null;
+      let entitlementResponse = null;
   
-      if (!noteFilled && !gtcFilled) {
+      if (!noteFilled && !gtcFilled && !entitlementResponse) {
         alert("Tidak ada data yang disimpan. Mohon isi catatan atau data GTC terlebih dahulu.");
         return;
       }
-  
       if (noteFilled) {
-        const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.Note}`;
+        const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
         const response = await ApiCustomer.post("/api/case-information/case-notes", {
           ...caseNoteFormData,
           Note: modifiedNote,
-          CaseID: caseDetails.CaseID,
+          CaseID: caseDetails.CaseID
         });
-  
-        noteResponse = response.data;
-        console.log("✅ Note saved:", noteResponse);
-  
-        const NotedDisplay = `@Created On : ${noteResponse.data.CreatedOn}\n${noteResponse.data.Note}`;
+        console.log("Saved successfully:", response.data);
+        
+        const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
         setCaseNotes({
-          NotesDisplay: NotedDisplay,
-        });
-  
+          NotesDisplay: NotedDisplay
+        })
+        console.log("Case Notes Infor after save : ",caseNotes)
+        console.log("Case Notes Display Infor after save : ",response)
+
         let dataUpdated = {
-          CaseNote: noteResponse.data.NoteID,
+          CaseNote: response.data.data.NoteID
         };
-  
-        if (selectedSymptom) {
+        //symptom code
+        if(selectedSymptom) {
           dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
         }
-  
-        await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated);
+        await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated)
       }
-  
       if (gtcFilled) {
         const response = await ApiCustomer.patch("/api/case-information/global-trade-check", {
           ...gtcForm,
           screening_id: gtcForm.screening_id || "",
           CaseID: caseDetails.CaseID,
         });
-  
+
         gtcResponse = response.data;
         console.log("✅ GTC saved:", gtcResponse);
+      }
+      if(custEntitlementandSLA){
+        const response = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, custEntitlementandSLA)
+        entitlementResponse = response.data
+        console.log("✅ Entitlement saved:", entitlementResponse);
       }
       
       Swal.fire({
@@ -216,6 +237,7 @@ export const TabsService = ({ caseDetails }) => {
           }, 2000);
         },
       });
+      // Swal.close();
     } catch (error) {
       console.error("❌ Save failed:", error);
       alert("Gagal menyimpan perubahan.");
@@ -223,100 +245,26 @@ export const TabsService = ({ caseDetails }) => {
   };
   
 
-  const checkOrCreateNote = async () => {
-    const existing = await ApiCustomer.get(
-      `/api/case-information/case-notes?caseId=${caseDetails.CaseID}`
-    );
-
-    if (existing.data.data.length > 0) {
-      const noteID = existing.data.data[0].NoteID;
-      await ApiCustomer.patch(`/api/case-information/case-notes/${noteID}`, {
-        ...caseNoteFormData,
-        Note: existing.data.data[0].Note + "\n" + caseNoteFormData.Note,
-      });
-    } else {
-      await ApiCustomer.post("/api/case-information/case-notes", {
-        ...caseNoteFormData,
-        CaseID: caseDetails.CaseID,
-      });
-    }
-  };
-
-  const fetchCaseNotes = async () => {
-    try {
-      const res = await ApiCustomer.get(`/api/case-information/case-notes`);
-      const notes = res.data.data;
-
-      const existingNote = notes.find(
-        (note) => note.CaseID === caseDetails.CaseID
-      );
-
-      let noteID = null;
-
-      if (existingNote) {
-        noteID = existingNote.NoteID;
-      } else {
-        const createResponse = await ApiCustomer.post(
-          `/api/case-information/case-notes`,
-          {
-            LogType: "NotesLog",
-            ActionType: "Initial",
-            Template: "",
-            VisibleExternally: false,
-            MinutesSpent: 0,
-            Note: "",
-            CaseID: caseID,
-          }
-        );
-
-        noteID = createResponse.data.data.NoteID;
-      }
-
-      const detailRes = await ApiCustomer.get(
-        `/api/case-information/case-notes/${noteID}`
-      );
-      const noteDetail = detailRes.data.data;
-
-      console.log("✅ Case Note Detail:", noteDetail);
-      return noteDetail;
-    } catch (err) {
-      console.error("Error in fetchCaseNotes:", err);
-      return null;
-    }
-  }
-  // const fetchSymptomCodes = async () => {
-  //   try{
-  //     const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`)
-  //     const caseData = res.data.data
-  //     const symptomCode = caseData.SymptomCode
-
-  //     const resSymptomCode = await ApiCustomer.get(`/api/symptom-codes/${symptomCode}`)
-  //     return resSymptomCode.data.data
-  //   }catch (err) {
-  //     console.error("Error in fetchSymptomCodes:", err);
-  //     return null;
-  //   }
-  // }
   useEffect(() => {
     const loadNote = async () => {
-      const noteDetail = await fetchCaseNotes();
-      if (noteDetail) {
+      const noteDetail = caseNote;
+      if(noteDetail ){
         const NotedDisplay = `@Created On : ${noteDetail.CreatedOn}\n${noteDetail.Note}`;
         setCaseNotes({
-          NotesDisplay: NotedDisplay,
-        });
-      }
-      const symptomCodeDetail = await fetchSymptomCodes();
-      if (symptomCodeDetail) {
-        setSelectedSymptom({
-          TopCategory: symptomCodeDetail.TopCategory,
-          SubCategory: symptomCodeDetail.SubCategory,
-          SymptomCode: symptomCodeDetail.SymptomCode,
-        });
-      }
-    };
-    loadNote();
-  }, []);
+          NotesDisplay: NotedDisplay
+        })
+      } 
+      // const symptomCodeDetail = await fetchSymptomCodes();
+      // if(symptomCodeDetail){
+      //   setSelectedSymptom({
+      //     TopCategory: symptomCodeDetail.TopCategory,
+      //     SubCategory: symptomCodeDetail.SubCategory,
+      //     SymptomCode: symptomCodeDetail.SymptomCode,
+      //   })
+      // }
+    }
+    loadNote()
+  }, [])
 
   const [caseNotes, setCaseNotes] = useState([]);
 
@@ -335,13 +283,9 @@ export const TabsService = ({ caseDetails }) => {
     },
     { icon: RotateCw, label: "Refresh", onClick: () => alert("not now") },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
-    { icon: StepBack, label: "CSR", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Service Order", onClick: () => alert("not now") },
-    {
-      icon: StepBack,
-      label: "Work Order",
-      onClick: () => setOpenWorkOrder(true),
-    },
+    { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
+    { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
+    { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder") },
     { icon: StepBack, label: "Sales Offer", onClick: () => alert("not now") },
     { icon: StepBack, label: "Close Case", onClick: () => alert("not now") },
     { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
@@ -351,6 +295,11 @@ export const TabsService = ({ caseDetails }) => {
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
+  const [serviceCatalogType, setServiceCatalogType] = useState("null");
+  const openServiceCatalog = async (type) => {
+    setOpenWorkOrder(true);
+    setServiceCatalogType(type)
+  };
   const saveAndCloseCase = async () => {
     const confirmResult = await Swal.fire({
       title: "Confirm Save",
@@ -437,25 +386,28 @@ export const TabsService = ({ caseDetails }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        <BtnModalsWorkOrder
+        <BtnModalsServiceCatalog 
           open={openWorkOrder}
           setOpen={setOpenWorkOrder}
           caseDetails={caseDetails}
+          serviceCatalogType={serviceCatalogType}
         />
       </div>
-      <div>
-        <ServiceCase
-          caseDetails={caseDetails}
-          formData={caseNoteFormData}
-          formGtc={gtcForm}
-          setFormGtc={setGtcForm}
-          onChangeGtc={handleGtcChange}
-          onChange={handleCaseNoteChange}
-          caseNotes={caseNotes}
-          setCaseNotes={setCaseNotes}
-          selectedSymptom={selectedSymptom}
-          setSelectedSymptom={setSelectedSymptom}
-        />
+        <div>
+          <ServiceCase
+            caseDetails={caseDetails}
+            formData={caseNoteFormData}
+            formGtc={gtcForm}
+            setFormGtc={setGtcForm}
+            onChangeGtc={handleGtcChange}
+            onChange={handleCaseNoteChange}
+            caseNotes={caseNotes}
+            setCaseNotes={setCaseNotes}
+            selectedSymptom={selectedSymptom}
+            setSelectedSymptom={setSelectedSymptom}
+            entitlementStatus={entitlementStatus}
+            handleEntitlementStatus={handleEntitlementStatus}
+          />
       </div>
     </>
   );
@@ -671,10 +623,10 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-      </div>
-      <div>
-        {/* <ServiceCase 
+    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    </div>
+    <div>
+    {/* <ServiceCase 
       caseDetails={caseDetails}
       formData={caseNoteFormData}
       onChange={handleCaseNoteChange}
@@ -789,10 +741,10 @@ export const TabsServiceMO = ({ materialOrders }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-      </div>
-      <div>
-        {/* <ServiceCase 
+    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    </div>
+    <div>
+    {/* <ServiceCase 
       caseDetails={caseDetails}
       formData={caseNoteFormData}
       onChange={handleCaseNoteChange}
@@ -912,10 +864,10 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-      </div>
-      <div>
-        {/* <ServiceCase 
+    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    </div>
+    <div>
+    {/* <ServiceCase 
       caseDetails={caseDetails}
       formData={caseNoteFormData}
       onChange={handleCaseNoteChange}
@@ -940,6 +892,8 @@ export const ServiceCase = ({
   formGtc,
   setFormGtc,
   onChangeGtc,
+  entitlementStatus,
+  handleEntitlementStatus
 }) => {
   const { open } = useSidebar();
 
@@ -1061,7 +1015,7 @@ export const ServiceCase = ({
           `/api/case-information/case-notes`,
           {
             LogType: "NotesLog",
-            ActionType: "Initial",
+            ActionType: 1,
             Template: "",
             VisibleExternally: false,
             MinutesSpent: 0,
@@ -1094,20 +1048,6 @@ export const ServiceCase = ({
       
     }
   }
-  // const fetchSymptomCodes = async (term) => {
-  //   try {
-  //     const response = await ApiCustomer.get("/api/case-information/symptom-codes");
-  //     const allCodes = response.data.data;
-  
-  //     const filtered = allCodes.filter((sym) =>
-  //       sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
-  //     );
-  
-  //     setSymptomSuggestions(filtered);
-  //   } catch (err) {
-  //     console.error("Error fetching symptom codes", err);
-  //   }
-  // };
   const fetchWorkOrders = async () => {
     try {
       const res = await ApiCustomer.get(
@@ -1142,6 +1082,16 @@ export const ServiceCase = ({
     }
   };
 
+  const [otcCode, setOtcCode] = useState([])
+  const fetchOTCCode = async () => {
+    try{
+      const res = await ApiCustomer.get('/api/otc-code')
+      setOtcCode(res.data.data)
+    }catch(e){
+      console.error("Failed to fetch OTC Code:", err);
+    }
+  }
+  
 
   //notes handler
   useEffect(() => {
@@ -1161,8 +1111,15 @@ export const ServiceCase = ({
     };
     loadNote();
     fetchGtc(); 
+    fetchOTCCode();
   }, []);
 
+  useEffect(() => {
+    // Autofill entitlementStatus.OTCCode once otcCode is fetched and caseDetails is available
+    if (otcCode.length > 0 && caseDetails?.OTCCode) {
+      handleEntitlementStatus("OTCCode")(caseDetails.OTCCode)
+    }
+  }, [otcCode, caseDetails]);
   //data for upper style
   // const []
 
@@ -1213,10 +1170,6 @@ useEffect(() =>{
   console.log("Fetch Data User ", ownerUserData)
 }, [ownerUserData])
 
-// useEffect(() =>{
-//   console.log("Data Asset Info : ",dataFetchAssetInformation)
-// }, dataFetchAssetInformation)
-
 const fetchSymptomCodes = async (term) => {
   try {
     const response = await ApiCustomer.get("/api/symptom-codes");
@@ -1231,14 +1184,6 @@ const fetchSymptomCodes = async (term) => {
     console.error("Error fetching symptom codes", err);
   }
 };
-// console.log("Selected Symptopm ",selectedSymptom)
-
-// useEffect(() => {
-// }, selectedSymptom)
-
-
-//order section
-//workorder
 
 
 const [startDate, setstartDate] = useState(null);
@@ -1716,15 +1661,20 @@ const [endDate, setEndDate] = useState(null);
                   ></DatePicker>{" "}
                 </CaseField>
                 <CaseField label="OTC Code" icon>
-                <Select >
+                  <Select
+                    value={entitlementStatus.OTCCode}
+                    onValueChange={(value) => handleEntitlementStatus("OTCCode")(value)}
+                  >
                     <SelectTrigger className="w-[180px]">
-                      <SelectValue />
+                      <SelectValue placeholder="Select OTC Code" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                      {["01-Trade", "05K-Extended Warranty", "06M", "06J"].map((status) => (
-                      <SelectItem key={status} value={status}>{status}</SelectItem>
-                      ))}
+                        {otcCode.map((status) => (
+                          <SelectItem key={status.OTCCode} value={status.OTCCode}>
+                            {status.OTCCode} - {status.Description}
+                          </SelectItem>
+                        ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>

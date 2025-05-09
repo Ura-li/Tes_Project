@@ -24,6 +24,7 @@ model asset_information {
   @@index([SiteAccountID], map: "SiteAccountID")
 }
 
+
 model caseinformation {
   CaseID                                        String               @id
   SiteAccountID                                 Int?
@@ -56,6 +57,8 @@ model caseinformation {
   ServiceCatalogID                              Int?
   servicecatalog                                servicecatalog?      @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID], onDelete: Restrict)
   global_trade_check                            global_trade_check?  @relation(fields: [id_gtc], references: [id_gtc], onDelete: Restrict)
+  OTCCode                                       String?        @db.VarChar(5) // Scalar field
+  otcCodeTable                                  OTCCodeTable?  @relation(fields: [OTCCode], references: [OTCCode])
 
   @@index([AssetID], map: "AssetID")
   @@index([CaseNote], map: "CaseNote")
@@ -64,23 +67,46 @@ model caseinformation {
   @@index([SymptomCode], map: "SymptomCode")
   @@index([CreatedBy])
   @@index([id_gtc])
+  @@index([OTCCode])
 }
 
+model OTCCodeTable {
+  OTCCode String @id @db.VarChar(5)
+  Description String @db.VarChar(100)
+  CreatedOn  DateTime?  @default(now()) @db.DateTime(0)
+
+  cases      caseinformation[]
+}
+
+// model actiontypecasenotes {
+//   ActionID   Int        @id @default(autoincrement())
+//   ActionType String     @db.VarChar(100)
+//   ActionFor  String     @db.VarChar(50)
+//   CreatedOn  DateTime?  @default(now()) @db.DateTime(0)
+
+//   casenotes  casenotes[] @relation("ActionTypeToCasenotes")
+// }
+
 model casenotes {
-  NoteID                                              Int               @id @default(autoincrement())
-  CaseID                                              String?
-  LogType                                             String?           @db.VarChar(50)
-  ActionType                                          String?           @db.VarChar(50)
-  Template                                            String?           @db.VarChar(100)
-  VisibleExternally                                   Boolean?          @default(false)
-  MinutesSpent                                        Int?
-  Note                                                String?           @db.Text
-  CreatedOn                                           DateTime?         @default(now()) @db.DateTime(0)
+  NoteID          Int       @id @default(autoincrement())
+  CaseID          String?
+  LogType         String?   @db.VarChar(50)
+  ActionType      String?   
+
+  // actionTypeInfo  actiontypecasenotes? @relation("ActionTypeToCasenotes", fields: [ActionTypeID], references: [ActionID])
+
+  Template        String?   @db.VarChar(100)
+  VisibleExternally Boolean? @default(false)
+  MinutesSpent    Int?
+  Note            String?   @db.Text
+  CreatedOn       DateTime? @default(now()) @db.DateTime(0)
+
   caseinformation_caseinformation_CaseNoteTocasenotes caseinformation[] @relation("caseinformation_CaseNoteTocasenotes")
   caseinformation_casenotes_CaseIDTocaseinformation   caseinformation?  @relation("casenotes_CaseIDTocaseinformation", fields: [CaseID], references: [CaseID], onDelete: Restrict, onUpdate: Restrict, map: "casenotes_ibfk_1")
 
   @@index([CaseID], map: "CaseID")
 }
+
 
 model contact_information {
   ContactID         Int                 @id @default(autoincrement())
@@ -215,6 +241,7 @@ model servicecatalog {
   servicecatalog_parts servicecatalog_parts? @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "servicecatalog_ibfk_2")
   warranty_services    warranty_services     @relation(fields: [Service_offerID], references: [Service_offerID], map: "servicecatalog_ibfk_3")
   caseinformation      caseinformation[]
+  serviceCatalogManytoMany ServiceCatalogManytoMany[]
 
   @@index([AssetID], map: "AssetID")
   @@index([PartNumber], map: "PartNumber")
@@ -242,6 +269,19 @@ model servicecatalog_parts {
   Shipping_Fee           Decimal                  @db.Decimal(10, 2)
   materialorderlineitems materialorderlineitems[]
   servicecatalog         servicecatalog[]
+  serviceCatalogManytoMany ServiceCatalogManytoMany[]
+  
+}
+
+model ServiceCatalogManytoMany {
+  id Int @id @default(autoincrement())
+  ServiceCatalogID Int
+  PartNumber String
+
+  servicecatalog servicecatalog @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID])
+  part servicecatalog_parts @relation(fields: [PartNumber], references: [PartNumber])
+
+  @@unique([ServiceCatalogID, PartNumber])
 }
 
 model site_account {
@@ -414,7 +454,7 @@ model workorder {
   DueDateCustomer             DateTime?        @db.DateTime(0)
   CoverageWindow              String?          @db.VarChar(100)
   Response                    String?          @db.VarChar(100)
-  OTCCode                     String?          @db.VarChar(50)
+  //OTCCode                     String?          @db.VarChar(50)
   RequestedDateTimeCustomer   DateTime?        @db.DateTime(0)
   GuaranteedFixTimeCustomer   DateTime?        @db.DateTime(0)
   EarlyStartDateTimeCustomer  DateTime?        @db.DateTime(0)
@@ -504,7 +544,7 @@ model repairClassCode {
   Code               String                    @id @db.VarChar(3)
   Description        String                    @db.VarChar(100)
   Definition         String                    @db.VarChar(255)
-  PaymentEligibility product_type_ProductTower
+  PaymentEligibility payment_eligibility
   CreatedOn          DateTime?                 @default(now()) @db.DateTime(0)
 }
 

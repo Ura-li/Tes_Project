@@ -74,6 +74,7 @@ import {
 } from "@/components/ui/pagination"
 
 import { getUserFromToken } from "@/lib/utils/auth";
+import { Description } from "@radix-ui/react-alert-dialog";
 
 // const assets = [
 //   {
@@ -4136,7 +4137,7 @@ export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpda
 //? Service Case Tab List
 
 
-// export function BtnModalsWorkOrder(){
+// export function BtnModalsServiceCatalog(){
 //   const [workOpen, setWorkOpen] = useState(false);
 
 //   const SC = [
@@ -4326,7 +4327,27 @@ export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpda
 //   )
 // }
 
-export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
+export function BtnModalsServiceCatalog({ 
+  open, 
+  setOpen, 
+  caseDetails,
+  serviceCatalogType
+}) {
+  useEffect(() => {
+    // Resetting modal state when serviceCatalogType changes
+    setCurrentStep(1);
+    setStep(0);
+    setSelectedWarrantyServices([]);
+    setSelectedPartCatalog([]);
+    setSubTotalConfirmServices(0);
+    setTotalTaxConfirmServices(0);
+    setTotalConfirmServices(0);
+    setPartNumberSearch("");
+    setKeywordSearch("");
+    setDescriptionSearch("");
+
+  }, [serviceCatalogType]);
+  
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -4507,7 +4528,19 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
       }).then(()=>{
         setOpen(false);
         const WOID = res.data.WOID
-        window.open(`/work/${WOID}`, '_blank');
+        const MOID = res.data.MOID
+        switch (serviceCatalogType) {
+          case "CSR":
+            window.open(`/material-order/${MOID}`, '_blank');
+            break;
+
+          case "workorder":
+            window.open(`/work/${WOID}`, '_blank');  
+            break;
+
+          default:
+            break;
+        }
       });
     } catch (err) {
       console.error("❌ Order Creation Failed:", err);
@@ -4886,6 +4919,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
               <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
               <Button variant={'search'} className="" onClick={() => setModalPart(true)}>Add Part</Button>
               <Button variant={'search'} className="" onClick={createOrder}>Create Order</Button>
+              
               <Label htmlFor="incident" className={'font-bold '}>Incident Type</Label>
               <Select onChange={setSelected} defaultValue="DepotRepair">
                 <SelectTrigger className="w-[180px]">
@@ -4910,6 +4944,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
                   </SelectGroup>
                 </SelectContent>
               </Select>
+              
             </DialogFooter>
           </DialogContent>
         );
@@ -7113,6 +7148,85 @@ export function BookingDetailsDelete({ BookingDetailId, onUpdate }) {
           <Button variant="destructive" onClick={handleDelete}>
             Delete
           </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function OTCAdd({ onUpdate }) {
+  const [formData, setFormData] = useState({
+    OTCCode: "",
+    Description: ""
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.OTCCode || !formData.Description) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "All fields are required.",
+        icon: "warning",
+        timer: 1500,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      return;
+    }
+
+    try {
+      console.log("Form Data : ",formData)
+      await ApiCustomer.post("/api/otc-code", formData);
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "OTC Code berhasil disimpan.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        onUpdate?.();
+      });
+    } catch (error) {
+      console.error("Error saving OTC Code:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menyimpan data. Silakan coba lagi.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm mb-4">Add OTC Code</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add OTC Code</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>OTC Code</Label>
+          <Input id="OTCCode" value={formData.OTCCode} onChange={handleInputChange} />
+
+          <Label>Description</Label>
+          <Input id="Description" value={formData.Description} onChange={handleInputChange} />
+
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

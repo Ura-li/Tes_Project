@@ -65,7 +65,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import Swal from "sweetalert2";
-import { BtnModalsWorkOrder } from "./sc-modal";
+import { BtnModalsServiceCatalog } from "./sc-modal";
 import DatePicker from "./date-picker";
 
 import ApiCustomer from "@/api";
@@ -410,7 +410,7 @@ export const TabsService = ({ caseDetails }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        <BtnModalsWorkOrder
+        <BtnModalsServiceCatalog
           open={openWorkOrder}
           setOpen={setOpenWorkOrder}
           caseDetails={caseDetails}
@@ -589,7 +589,7 @@ export const TabsServiceWO = ({ workOrders }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+        {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
         {/* <ServiceCase 
@@ -708,7 +708,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+        {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
         {/* <ServiceCase 
@@ -831,7 +831,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+        {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
         {/* <ServiceCase 
@@ -848,21 +848,18 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
   );
 };
 
-export const TabsBooking = ({ workOrders }) => {
-  const navigate = useNavigate();
+export const TabsBooking = ({
+  handleUpdate,
+  bookingData
+}) => {
+
+  const navigate = useNavigate();   
+
   const buttons = [
-    {
-      icon: ArrowLeftFromLine,
-      label: "",
-      onClick: () => navigate(`/case/${workOrders.CaseID}`),
-    },
+    { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/work/${bookingData.WOID}`) },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
-    {
-      icon: FileSymlink,
-      label: "Save & Close",
-      onClick: () => saveAndCloseWorkOrder(),
-    },
+    { icon: Save, label: "Save", onClick: () => handleUpdate() },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now")  },
     { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
     { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
@@ -987,7 +984,7 @@ export const TabsBooking = ({ workOrders }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+        {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
         {/* <ServiceCase 

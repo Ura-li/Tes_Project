@@ -90,6 +90,7 @@ export function DialogCloseButton({
       try {
         const response = await ApiCustomer.get("/api/asset-information");
         setAssets(response.data.data);
+        Swal.close();
       } catch (error) {
         console.error("Error fetching assets:", error);
       }
@@ -261,6 +262,7 @@ export function DialogCompanyBtn({
           try{
             const response = await ApiCustomer.get("/api/site_account")
             setSiteAccounts(response.data.data);
+            Swal.close();
           }catch (err) {
             console.error("error fetching ",err)
           }
@@ -364,6 +366,7 @@ export function DialogCompanyBtn({
           // console.log("Company Selected:", selectedSiteAccounts);
         }
       }
+      
       useEffect(() => {
         console.log("Company Selected (Updated):", selectedSiteAccounts);
       }, [selectedSiteAccounts]); // Runs when `selectedSiteAccounts` updates
