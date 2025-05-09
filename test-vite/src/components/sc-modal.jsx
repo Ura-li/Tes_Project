@@ -74,6 +74,7 @@ import {
 } from "@/components/ui/pagination"
 
 import { getUserFromToken } from "@/lib/utils/auth";
+import { Description } from "@radix-ui/react-alert-dialog";
 
 // const assets = [
 //   {
@@ -7147,6 +7148,85 @@ export function BookingDetailsDelete({ BookingDetailId, onUpdate }) {
           <Button variant="destructive" onClick={handleDelete}>
             Delete
           </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function OTCAdd({ onUpdate }) {
+  const [formData, setFormData] = useState({
+    OTCCode: "",
+    Description: ""
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.OTCCode || !formData.Description) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "All fields are required.",
+        icon: "warning",
+        timer: 1500,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      return;
+    }
+
+    try {
+      console.log("Form Data : ",formData)
+      await ApiCustomer.post("/api/otc-code", formData);
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "OTC Code berhasil disimpan.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        onUpdate?.();
+      });
+    } catch (error) {
+      console.error("Error saving OTC Code:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menyimpan data. Silakan coba lagi.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm mb-4">Add OTC Code</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add OTC Code</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>OTC Code</Label>
+          <Input id="OTCCode" value={formData.OTCCode} onChange={handleInputChange} />
+
+          <Label>Description</Label>
+          <Input id="Description" value={formData.Description} onChange={handleInputChange} />
+
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

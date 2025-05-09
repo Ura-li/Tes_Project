@@ -23,7 +23,8 @@ import
   SymptomCodeTable,
   BookingsTable,
   BookingDetailsTable,
-  Resource_table
+  Resource_table,
+  OTCCodeTable
  } from './master_table';
 import { Bookings } from './bookings';
 import { User_table } from './master_table';
@@ -72,6 +73,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/User_table' element={<User_table/>}/>
             <Route path='/master/Part_table' element={<Part_table/>}/>
             <Route path='/master/Resource_table' element={<Resource_table/>}/>
+            <Route path='/master/OTC_Code' element={<OTCCodeTable/>}/>
             {/* </Route> */}
           </Route>
             {/* </Route> */}

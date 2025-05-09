@@ -57,6 +57,8 @@ model caseinformation {
   ServiceCatalogID                              Int?
   servicecatalog                                servicecatalog?      @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID], onDelete: Restrict)
   global_trade_check                            global_trade_check?  @relation(fields: [id_gtc], references: [id_gtc], onDelete: Restrict)
+  OTCCode                                       String?        @db.VarChar(5) // Scalar field
+  otcCodeTable                                  OTCCodeTable?  @relation(fields: [OTCCode], references: [OTCCode])
 
   @@index([AssetID], map: "AssetID")
   @@index([CaseNote], map: "CaseNote")
@@ -65,26 +67,33 @@ model caseinformation {
   @@index([SymptomCode], map: "SymptomCode")
   @@index([CreatedBy])
   @@index([id_gtc])
+  @@index([OTCCode])
 }
 
-
-
-model actiontypecasenotes {
-  ActionID   Int        @id @default(autoincrement())
-  ActionType String     @db.VarChar(100)
-  ActionFor  String     @db.VarChar(50)
+model OTCCodeTable {
+  OTCCode String @id @db.VarChar(5)
+  Description String @db.VarChar(100)
   CreatedOn  DateTime?  @default(now()) @db.DateTime(0)
 
-  casenotes  casenotes[] @relation("ActionTypeToCasenotes")
+  cases      caseinformation[]
 }
+
+// model actiontypecasenotes {
+//   ActionID   Int        @id @default(autoincrement())
+//   ActionType String     @db.VarChar(100)
+//   ActionFor  String     @db.VarChar(50)
+//   CreatedOn  DateTime?  @default(now()) @db.DateTime(0)
+
+//   casenotes  casenotes[] @relation("ActionTypeToCasenotes")
+// }
 
 model casenotes {
   NoteID          Int       @id @default(autoincrement())
   CaseID          String?
   LogType         String?   @db.VarChar(50)
-  ActionTypeID    Int?     
+  ActionType      String?   
 
-  actionTypeInfo  actiontypecasenotes? @relation("ActionTypeToCasenotes", fields: [ActionTypeID], references: [ActionID])
+  // actionTypeInfo  actiontypecasenotes? @relation("ActionTypeToCasenotes", fields: [ActionTypeID], references: [ActionID])
 
   Template        String?   @db.VarChar(100)
   VisibleExternally Boolean? @default(false)
@@ -445,7 +454,7 @@ model workorder {
   DueDateCustomer             DateTime?        @db.DateTime(0)
   CoverageWindow              String?          @db.VarChar(100)
   Response                    String?          @db.VarChar(100)
-  OTCCode                     String?          @db.VarChar(50)
+  //OTCCode                     String?          @db.VarChar(50)
   RequestedDateTimeCustomer   DateTime?        @db.DateTime(0)
   GuaranteedFixTimeCustomer   DateTime?        @db.DateTime(0)
   EarlyStartDateTimeCustomer  DateTime?        @db.DateTime(0)

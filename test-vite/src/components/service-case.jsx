@@ -114,16 +114,18 @@ export const TabsService = ({
   const [selectedSymptom, setSelectedSymptom] = useState(null);
 
   const { open } = useSidebar();
-
+  const [entitlementStatus, setEntitlementStatus] = useState({
+    OTCCode: ''
+  })
   //casenote
-  const [caseNoteFormData, setCaseNoteFormData] = useState({
-    LogType: "",
-    ActionType: "",
-    Template: "",
-    VisibleExternally: null,
-    MinutesSpent: 0,
-    Note: "",
-  });
+  // const [caseNoteFormData, setCaseNoteFormData] = useState({
+  //   LogType: "",
+  //   ActionType: "",
+  //   Template: "",
+  //   VisibleExternally: null,
+  //   MinutesSpent: 0,
+  //   Note: "",
+  // });
 
   const [gtcForm, setGtcForm] = useState({
     global_trade_status: "",
@@ -135,6 +137,7 @@ export const TabsService = ({
     gt_al_comments: "",
   });
 
+  
 
   const handleCaseNoteChange = (key, value) => {
     setCaseNoteFormData((prev) => {
@@ -147,9 +150,13 @@ export const TabsService = ({
   const handleGtcChange = (field) => (value) => {
     setGtcForm((prev) => ({ ...prev, [field]: value }));
   };
+  
+  const handleEntitlementStatus = (field) => (value) => {
+    setEntitlementStatus((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSave = async () => {
-    console.log("📝 Form Data to Submit:", caseNoteFormData, gtcForm);
+    console.log("📝 Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
   
     try {
       Swal.fire({
@@ -164,65 +171,72 @@ export const TabsService = ({
       const role = user?.role || "Unknown";
       const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
       const gtcFilled = gtcForm && Object.values(gtcForm).some(val => val !== null && val !== "");
+      const custEntitlementandSLA = entitlementStatus
   
       let noteResponse = null;
       let gtcResponse = null;
+      let entitlementResponse = null;
   
-      if (!noteFilled && !gtcFilled) {
+      if (!noteFilled && !gtcFilled && !entitlementResponse) {
         alert("Tidak ada data yang disimpan. Mohon isi catatan atau data GTC terlebih dahulu.");
         return;
       }
       if (noteFilled) {
-      const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
-      const response = await ApiCustomer.post("/api/case-information/case-notes", {
-        ...caseNoteFormData,
-        Note: modifiedNote,
-        CaseID: caseDetails.CaseID
-      });
-      console.log("Saved successfully:", response.data);
-      
-      const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
-      setCaseNotes({
-        NotesDisplay: NotedDisplay
-      })
-      console.log("Case Notes Infor after save : ",caseNotes)
-      console.log("Case Notes Display Infor after save : ",response)
+        const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
+        const response = await ApiCustomer.post("/api/case-information/case-notes", {
+          ...caseNoteFormData,
+          Note: modifiedNote,
+          CaseID: caseDetails.CaseID
+        });
+        console.log("Saved successfully:", response.data);
+        
+        const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
+        setCaseNotes({
+          NotesDisplay: NotedDisplay
+        })
+        console.log("Case Notes Infor after save : ",caseNotes)
+        console.log("Case Notes Display Infor after save : ",response)
 
-      let dataUpdated = {
-        CaseNote: response.data.data.NoteID
-      };
-      //symptom code
-      if(selectedSymptom) {
-        dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
+        let dataUpdated = {
+          CaseNote: response.data.data.NoteID
+        };
+        //symptom code
+        if(selectedSymptom) {
+          dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
+        }
+        await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated)
       }
-      await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated)
-    }
-    if (gtcFilled) {
-      const response = await ApiCustomer.patch("/api/case-information/global-trade-check", {
-        ...gtcForm,
-        screening_id: gtcForm.screening_id || "",
-        CaseID: caseDetails.CaseID,
-      });
+      if (gtcFilled) {
+        const response = await ApiCustomer.patch("/api/case-information/global-trade-check", {
+          ...gtcForm,
+          screening_id: gtcForm.screening_id || "",
+          CaseID: caseDetails.CaseID,
+        });
 
-      gtcResponse = response.data;
-      console.log("✅ GTC saved:", gtcResponse);
-    }
-    
-    Swal.fire({
-      icon: "success",
-      title: "Success",
-      text: "Data berhasil disimpan!",
-      timer: 2000,
-      showConfirmButton: false,
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        // reload setelah 2 detik
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      },
-    });
+        gtcResponse = response.data;
+        console.log("✅ GTC saved:", gtcResponse);
+      }
+      if(custEntitlementandSLA){
+        const response = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, custEntitlementandSLA)
+        entitlementResponse = response.data
+        console.log("✅ Entitlement saved:", entitlementResponse);
+      }
+      
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Data berhasil disimpan!",
+        timer: 2000,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          // reload setelah 2 detik
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        },
+      });
       // Swal.close();
     } catch (error) {
       console.error("❌ Save failed:", error);
@@ -379,19 +393,21 @@ export const TabsService = ({
           serviceCatalogType={serviceCatalogType}
         />
       </div>
-      <div>
-        <ServiceCase
-          caseDetails={caseDetails}
-          formData={caseNoteFormData}
-          formGtc={gtcForm}
-          setFormGtc={setGtcForm}
-          onChangeGtc={handleGtcChange}
-          onChange={handleCaseNoteChange}
-          caseNotes={caseNotes}
-          setCaseNotes={setCaseNotes}
-          selectedSymptom={selectedSymptom}
-          setSelectedSymptom={setSelectedSymptom}
-        />
+        <div>
+          <ServiceCase
+            caseDetails={caseDetails}
+            formData={caseNoteFormData}
+            formGtc={gtcForm}
+            setFormGtc={setGtcForm}
+            onChangeGtc={handleGtcChange}
+            onChange={handleCaseNoteChange}
+            caseNotes={caseNotes}
+            setCaseNotes={setCaseNotes}
+            selectedSymptom={selectedSymptom}
+            setSelectedSymptom={setSelectedSymptom}
+            entitlementStatus={entitlementStatus}
+            handleEntitlementStatus={handleEntitlementStatus}
+          />
       </div>
     </>
   );
@@ -876,6 +892,8 @@ export const ServiceCase = ({
   formGtc,
   setFormGtc,
   onChangeGtc,
+  entitlementStatus,
+  handleEntitlementStatus
 }) => {
   const { open } = useSidebar();
 
@@ -1064,6 +1082,16 @@ export const ServiceCase = ({
     }
   };
 
+  const [otcCode, setOtcCode] = useState([])
+  const fetchOTCCode = async () => {
+    try{
+      const res = await ApiCustomer.get('/api/otc-code')
+      setOtcCode(res.data.data)
+    }catch(e){
+      console.error("Failed to fetch OTC Code:", err);
+    }
+  }
+  
 
   //notes handler
   useEffect(() => {
@@ -1083,8 +1111,15 @@ export const ServiceCase = ({
     };
     loadNote();
     fetchGtc(); 
+    fetchOTCCode();
   }, []);
 
+  useEffect(() => {
+    // Autofill entitlementStatus.OTCCode once otcCode is fetched and caseDetails is available
+    if (otcCode.length > 0 && caseDetails?.OTCCode) {
+      handleEntitlementStatus("OTCCode")(caseDetails.OTCCode)
+    }
+  }, [otcCode, caseDetails]);
   //data for upper style
   // const []
 
@@ -1626,15 +1661,20 @@ const [endDate, setEndDate] = useState(null);
                   ></DatePicker>{" "}
                 </CaseField>
                 <CaseField label="OTC Code" icon>
-                <Select >
+                  <Select
+                    value={entitlementStatus.OTCCode}
+                    onValueChange={(value) => handleEntitlementStatus("OTCCode")(value)}
+                  >
                     <SelectTrigger className="w-[180px]">
-                      <SelectValue />
+                      <SelectValue placeholder="Select OTC Code" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                      {["01-Trade", "05K-Extended Warranty", "06M", "06J"].map((status) => (
-                      <SelectItem key={status} value={status}>{status}</SelectItem>
-                      ))}
+                        {otcCode.map((status) => (
+                          <SelectItem key={status.OTCCode} value={status.OTCCode}>
+                            {status.OTCCode} - {status.Description}
+                          </SelectItem>
+                        ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
