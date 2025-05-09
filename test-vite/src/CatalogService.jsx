@@ -6,7 +6,5 @@ export const CatalogService = () => {
     <div>
         <CatalogService1></CatalogService1>
     </div>
-
-
   )
 }

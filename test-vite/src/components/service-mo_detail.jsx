@@ -32,6 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table"; 
 import { Link } from "react-router";
+import Swal from "sweetalert2";
 
 import { useParams } from "react-router";
 import ApiCustomer from "@/api";

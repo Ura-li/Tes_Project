@@ -128,6 +128,7 @@ model materialorder {
   SalesOrderNumber    String?             @db.VarChar(100)
   RMANumber           String?             @db.VarChar(100)
   ReadyForClosureDate DateTime?           @db.DateTime(0)
+  
   ShippingPriority    ShippingPriority? @default(MEDIUM)
   CustomerInducedDamage Boolean? @default(false)
   AccidentalDamageProtection Boolean? @default(false)
@@ -352,27 +353,6 @@ model warranty_services {
   servicecatalog      servicecatalog[]
 }
 
-model Resource {
-  ResourceId String @id @db.VarChar(255)
-  Name       String @db.VarChar(255)
-
-  // Relations
-  resourceAccounts ResourceAccount[] // <-- 1 Resource has many ResourceAccounts
-  bookingDetails   BookingDetails[]
-}
-
-model ResourceAccount {
-  ResourceAccountId String @id @db.VarChar(255)
-  Name              String @db.VarChar(255)
-
-  // Foreign key to Resource
-  ResourceId String?   @db.VarChar(255)
-  resource   Resource? @relation(fields: [ResourceId], references: [ResourceId])
-
-  // Relations
-  subkTechnicians SubkTechnician[] // <-- 1 ResourceAccount has many SubkTechnicians
-  bookingDetails  BookingDetails[]
-}
 
 model SubkTechnician {
   SubkTechnicianId String @id @db.VarChar(255)
@@ -480,10 +460,32 @@ model workorder {
   IncomingChannel             String?          @db.VarChar(50)
   materialorder               materialorder[]
   caseinformation             caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict, map: "workorder_ibfk_1")
-  Bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
+  bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
 
   @@index([CaseID], map: "CaseID")
   @@index([OwnerID])
+}
+
+model Resource {
+  ResourceId String @id @db.VarChar(255)
+  Name       String @db.VarChar(255)
+
+  // Relations
+  resourceAccounts ResourceAccount[] // <-- 1 Resource has many ResourceAccounts
+  bookingDetails   BookingDetails[]
+}
+
+model ResourceAccount {
+  ResourceAccountId String @id @db.VarChar(255)
+  Name              String @db.VarChar(255)
+
+  // Foreign key to Resource
+  ResourceId String?   @db.VarChar(255)
+  resource   Resource? @relation(fields: [ResourceId], references: [ResourceId])
+
+  // Relations
+  subkTechnicians SubkTechnician[] // <-- 1 ResourceAccount has many SubkTechnicians
+  bookingDetails  BookingDetails[]
 }
 
 model workorder_service_delivery {
@@ -529,6 +531,18 @@ model workorder_service_delivery_skillset {
   @@index([WOID], map: "fk_skillset_workorder")
 }
 
+model repairClassCode { 
+  Code                String                    @id @db.VarChar(3)
+  Description         String                    @db.VarChar(100)
+  Definition          String                    @db.VarChar(255)
+  PaymentEligibility  product_type_ProductTower
+  CreatedOn           DateTime?                 @default(now()) @db.DateTime(0)
+}
+
+enum payment_eligibility {
+  Eligible
+  Not_Eligible
+}
 enum product_type_ProductTower {
   PSG
   IPG

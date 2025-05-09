@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/table"; 
 import { Link } from "react-router";
 import { TabsServiceMO } from "./service-case";
+import Swal from "sweetalert2";
 
 import { useParams } from "react-router";
 
@@ -136,10 +137,27 @@ export const ServiceMaterial = () => {
   }
 
   useEffect(() => {
-    fetchMaterialOrder();
-    fetchMaterialLineOrdersInMODetail();
-  }, [])
-  
+    // Menampilkan SweetAlert2 loading indicator sebelum memulai fetch
+    Swal.fire({
+      title: 'Memuat Data...',
+      text: 'Mohon tunggu sebentar...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading(); // Menampilkan indikator loading
+      }
+    });
+
+    // Menjalankan kedua fungsi fetching data secara bersamaan
+    Promise.all([fetchMaterialOrder(), fetchMaterialLineOrdersInMODetail()])
+      .then(() => {
+        Swal.close(); // Menutup SweetAlert2 setelah data berhasil diambil
+      })
+      .catch((err) => {
+        Swal.close(); // Menutup SweetAlert2 jika ada error
+        setError("Error fetching data");
+      });
+  }, []); 
+
   return (
     <div>
       {materialOrders.OrderStatus === 'Closed' && (
@@ -182,9 +200,9 @@ export const ServiceMaterial = () => {
               <span className="ml-5 text-xl font-bold">Order Information</span>
               <CardContent className="grid grid-flow-col gap-5 grid-rows-8 h-115">
                 <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Order Number (MOID)</span>
-                  <span className="ml-40">{materialOrderInformation.orderNumber}</span>
+                  <Lock className="mr-2 size-5"></Lock>
+                  <span>Order Number</span>
+                  <span className="ml-40">{materialOrders.MOID}</span>
                 </div>
 
                 <div className="flex font-bold">
@@ -200,28 +218,67 @@ export const ServiceMaterial = () => {
                 </div>
 
                 <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Order Type  (MO)</span>
-                  <span className="ml-[186px]">{materialOrderInformation.orderType}</span>
-                </div>
-                <div className="flex font-bold">
-                  <span className="ml-7">Shipping Priority (MO)</span>
-                  <span className="ml-[142px]">{materialOrderInformation.shippingPriority}</span>
-                  {/* <select className="ml-[142px]" value={materialOrderInformation.shippingPriority } onChange={handleShippingPriorityChange}>
-                    <option value="LOW">LOW</option>
-                    <option value="MEDIUM">MEDIUM</option>
-                    <option value="HIGH">HIGH</option>
-                    <option value="CRITICAL">CRITICAL</option>
-                  </select> */}
+                  <Lock className="mr-2 size-5"></Lock>
+                  <span>Order Type</span>
+                  <span className="ml-46.5">{materialOrders.OrderType}</span>
                 </div>
 
                 <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Ready For Closure Date (WO)</span>
-                  <span className="ml-[96px]">
-                    {materialOrderInformation.readyForClosureDate 
-                      ? new Date(materialOrderInformation.readyForClosureDate).toLocaleDateString() 
-                      : '-'}
+                  <span className="ml-7">Shipping Priority</span>
+                  <span className="ml-35.5">{materialOrders.ShippingPriority}</span>
+                </div>
+
+                <div className="flex font-bold">
+                <Lock className="mr-2 size-5"></Lock>
+                  <span>Ready For Closure Date</span>
+                  <span className="ml-24">{materialOrders.ReadyForClosureDate}</span>
+                </div>
+
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5"></Lock>
+                  <span>Case ID</span>
+                  <span className="ml-54">{materialOrders.workorder?.CaseID}</span>
+                </div>
+
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5"></Lock>
+                  <span>Contact</span>
+                  <span className="ml-53">{materialOrders.workorder?.caseinformation?.contact_information?.Salutation} {materialOrders.workorder?.caseinformation?.contact_information?.FirstName} {materialOrders.workorder?.caseinformation?.contact_information?.LastName}</span>
+                </div>
+
+                <div className="flex font-bold">
+                  <span className="ml-7">Delivery Requested Date (Customer Time)</span>
+                  <span className="ml-10 mr-16">...</span>
+                  <CalendarDays></CalendarDays>
+                </div>
+
+                <div className="flex font-bold">
+                <Lock className="mr-2 size-5"></Lock>
+                  <span>Collection Requested Date</span>
+                  <span className="mr-16 ml-39">...</span>
+                  <CalendarDays></CalendarDays>
+                </div>
+
+                <div className="flex font-bold">
+                  <Lock className="mr-2 size-5"></Lock>
+                  <span>Promo Code</span>
+                  <span className="ml-65">...</span>
+                </div>
+
+                <div className="flex font-bold">
+                <Lock className="mr-2 size-5"></Lock>
+                  <span >Customer Induced Damage</span>
+                  <span className="ml-37.5">...</span>
+                </div>
+
+                <div className="flex font-bold">
+                <Lock className="mr-2 size-5"></Lock>
+                  <span >Accidental Damage Protection</span>
+                  <span className="ml-32">...</span>
+                </div>
+
+                <div className="flex font-bold">
+                  <span className="ml-7">Defective Media Retention
                   </span>
                 </div>
 
@@ -239,13 +296,29 @@ export const ServiceMaterial = () => {
                   </span>
                 </div>
 
-                <div className="flex items-center font-bold">
-                  <span className="ml-7">Delivery Requested Date (Customer Time) (MO)</span>
-                  <span className="ml-10 mr-16">
-                    {materialOrderInformation.deliveryRequestedDateCustomerTime
-                      ? new Date(materialOrderInformation.deliveryRequestedDateCustomerTime).toLocaleString()
-                      : '-'}
-                  </span>
+                <div className="flex font-bold">
+                  <span className="ml-7">Resource Name</span>
+                  <span className="ml-40">{materialOrders.workorder?.bookings?.[0].bookingDetails?.[0].ResourceId}</span>
+                </div>
+
+                <div className="flex font-bold">
+                <Lock className="mr-2 size-5"></Lock>
+                    <span>Work Order</span>
+                    <span className="ml-47">{materialOrders.WOID}</span>
+                  </div>
+
+                  <div className="flex font-bold">
+                    <span className="ml-7">Parent Mo</span>
+                    <span className="ml-50">...</span>
+                  </div>
+
+                  <div className="flex font-bold">
+                    <Lock className="mr-2 size-5"></Lock>
+                    <span>BCP Order</span>
+                    <span className="ml-50">...</span>
+                  </div>
+
+                  <div className="flex font-bold">
                   
                   <CalendarDays />
                 </div>
@@ -381,7 +454,10 @@ export const ServiceMaterial = () => {
                           {lineitem.MOID} - {lineitem.LineNumber}
                           </Link>
                           </TableCell>
-                        {/* <TableCell>{lineitem.CaseID}</TableCell> */}
+                        <TableCell>{lineitem.Status}</TableCell>
+                        <TableCell>{lineitem.ATPStatus}</TableCell>
+                        <TableCell>{lineitem.PartNumber}</TableCell>
+                        <TableCell>{lineitem.Description}</TableCell>
 
                       </TableRow>
                     ))}

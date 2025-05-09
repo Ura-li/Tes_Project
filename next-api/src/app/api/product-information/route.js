@@ -85,14 +85,12 @@ export async function POST(request) {
         ProductNumber,
         ProductName,
         ProductLine,
-        ProductTypeID
+        ProductTypeID 
     } = await request.json();
 
     
     try{
 
-    
-      // ✅ Check if ProductNumber already exists
         const existingProduct = await prisma.product_information.findUnique({
             where: { ProductNumber }
         });
@@ -106,15 +104,13 @@ export async function POST(request) {
             }, { status: 200 });
         }
 
-    
-
     //create data 
     const product_information = await prisma.product_information.create({
         data:{
             ProductNumber: ProductNumber,
             ProductName: ProductName,
             ProductLine: ProductLine,
-            ProductTypeID: ProductTypeID,
+            ProductTypeID: ProductTypeID
         },
     });
 

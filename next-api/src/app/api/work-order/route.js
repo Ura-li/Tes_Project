@@ -21,14 +21,19 @@ export async function GET(request) {
             whereCondition.CaseID = caseID;
         }
 
-
-
         const workorder = await prisma.workorder.findMany({
             where: whereCondition,
             include: {
-                caseinformation: true,
+                caseinformation: {
+                    include: {
+                        site_account: true,
+                        contact_information: true,
+                    },
+                },
+                owner: true,
             },
         });
+          
 
         return NextResponse.json({
             success: true,

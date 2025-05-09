@@ -1,8 +1,8 @@
-
-
 import React, { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
+
+
 import {
   Table,
   TableBody,
@@ -97,48 +97,87 @@ export function BtnModal({
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
-          onClick={handleCreateCase}
-          disabled={!selectedAssetForCase || !selectedContactForCase } // 🔥 Button disabled if no asset selected
-          className={`mr-4${(!selectedAssetForCase || !selectedContactForCase) ? "bg-white cursor-not-allowed" : "bg-blue-500"}`}
-        >
-          <Plus></Plus>Create Case
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[700px] bg-white">
-        <DialogHeader>
-          <DialogTitle>Case Information</DialogTitle>
-        </DialogHeader>
-        <div className="flex items-center space-x-3">
-          <div className="">
-            <Label htmlFor="name" className="text-right">
-              Case Subject
-            </Label>
-            <Input id="CaseSubject" className="col-span-3 border-b-black p-1" />
+    <DialogTrigger asChild>
+      <Button 
+        variant="outline" 
+        onClick={handleCreateCase}
+        disabled={!selectedAssetForCase || !selectedContactForCase}
+        className={`mr-4 ${(!selectedAssetForCase || !selectedContactForCase) ? "bg-white cursor-not-allowed" : "bg-blue-500"}`}
+      >
+        <Plus className="mr-2" />Create Case
+      </Button>
+    </DialogTrigger>
+
+    <DialogContent className="sm:max-w-[700px] bg-white">
+      <DialogHeader>
+        <DialogTitle>Case Information</DialogTitle>
+      </DialogHeader>
+
+      <form className="space-y-5">
+        {/* Subject & Type */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col">
+            <Label htmlFor="CaseSubject">Case Subject</Label>
+            <Input id="CaseSubject" className="border p-2" placeholder="Enter subject" />
           </div>
-          <div className="">
-            <Label htmlFor="CaseType" className="text-right">
-              Case Type
-            </Label>
-            <SelectBar3 value={caseType} onChange={setCaseType}></SelectBar3>
-          </div>
-          <div className="flex items-center space-x-2 mt-5">
-            <Checkbox id="KCI_Flag" />
-            <label
-              htmlFor="KCI_Flag"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              KCI For this case?
-            </label>
+
+          <div className="flex flex-col">
+            <Label htmlFor="CaseType">Case Type</Label>
+            <SelectBar3 value={caseType} onChange={setCaseType} />
           </div>
         </div>
+
+        {/* KCI Flag */}
+        <div className="flex items-center space-x-2">
+          <Checkbox id="KCI_Flag" />
+          <Label
+            htmlFor="KCI_Flag"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            KCI For this case?
+          </Label>
+        </div>
+
+        {/* Problem Description */}
+        <div className="flex flex-col">
+          <Label htmlFor="ProblemDesc">Problem Description</Label>
+          <textarea
+            id="ProblemDesc"
+            className="w-full p-2 border rounded-md"
+            rows={3}
+            placeholder="Describe the problem here..."
+          />
+        </div>
+
+        {/* Case Note */}
+        <div className="flex flex-col">
+          <Label htmlFor="CaseNote">Case Note</Label>
+          <textarea
+            id="CaseNote"
+            className="w-full p-2 border rounded-md"
+            rows={3}
+            placeholder="Additional notes..."
+          />
+        </div>
+
+        {/* Accessories */}
+        <div className="flex flex-col">
+          <Label>Accessories</Label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+            <Input placeholder="Accessory name" />
+            <Input placeholder="Note" />
+            <Input placeholder="CT / SN code" />
+          </div>
+          <p className="text-sm text-gray-500 mt-1">Total accessories: 1</p>
+        </div>
+
         <DialogFooter>
           <Button type="submit" onClick={handleCreateCase}>DONE</Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </form>
+    </DialogContent>
+  </Dialog>
+
   );
 }
 
@@ -269,7 +308,8 @@ export function BtnModalContact({
           icon: 'success',
           title: 'Berhasil!',
           text: responseMessage,
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
+          allowEscapeKey: false,
         });
   
         // ✅ Refresh data kontak setelah SweetAlert ditutup
@@ -288,6 +328,7 @@ export function BtnModalContact({
         text: 'Terjadi kesalahan saat menyimpan kontak.',
         timer: 1500,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });
     }
   };
@@ -462,7 +503,6 @@ export function BtnModalContact({
   );
 }
 
-
 /**
  * TODO 
  * MAKE ROUTE FOR PRODUCT
@@ -601,6 +641,7 @@ export function BtnModalAsset({
       title: 'Memperbarui asset...',
       text: 'Mohon tunggu sebentar',
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       }
@@ -623,7 +664,8 @@ export function BtnModalAsset({
           title: 'Berhasil!',
           text: 'Asset berhasil diperbarui!',
           timer: 2000,
-          showConfirmButton: false
+          showConfirmButton: false,
+          allowEscapeKey: false,
         });
       }
     } catch (error) {
@@ -633,7 +675,8 @@ export function BtnModalAsset({
         title: 'Gagal',
         text: 'Terjadi kesalahan saat memperbarui asset.',
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
+        allowEscapeKey: false,
       });
       console.error("Terjadi kesalahan : ", error);
     }
@@ -801,10 +844,6 @@ export function BtnModalAsset({
   )
 };
 
-
-
-
-
 //? MODAL FOR MASTER SITE
 
 export function AssetEdit ({ assetId, onUpdate }) {
@@ -849,16 +888,17 @@ export function AssetEdit ({ assetId, onUpdate }) {
   const handleUpdate = async () => {
     if (!serialNumber || !productName || !productNumber) {
       Swal.fire({
-        icon: 'Incomplete Data',
+        icon: 'warning',
         title: 'Warning!',
         text: 'Please fill in all fields before submitting.',
-        time: 1100,
+        timer: 1100,
         timerProgressBar: false,
         showConfirmButton: false,
-      })
+        allowEscapeKey: false,
+      });
       return;
     }
-
+  
     try {
       await ApiCustomer.patch(`/api/asset-information/${assetId}`, {
         SerialNumber: serialNumber,
@@ -866,12 +906,32 @@ export function AssetEdit ({ assetId, onUpdate }) {
         ProductNumber: productNumber,
         ProductLine: productLine,
       });
-      onUpdate();
-      setIsOpen(false);
+  
+      // ✅ Tambahan SweetAlert berhasil update
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Asset information updated successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+  
+      onUpdate();       // refresh data
+      setIsOpen(false); // tutup modal
+  
     } catch (error) {
       console.error("Error updating asset:", error);
+  
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'An error occurred while updating the asset.',
+        allowEscapeKey: false,
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -903,34 +963,80 @@ export function AssetEdit ({ assetId, onUpdate }) {
 
 export function AssetDelete ({ assetId }) {
   const handleDelete = async () => {
-    try {
-      await ApiCustomer.delete(`/api/asset-information/${assetId}`);
-    } catch (error) {
-      console.error("Error deleting asset:", error);
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Data ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/asset-information/${assetId}`);
+  
+        if (response.status === 409 || response.data.success === false) {
+          return Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || 'Data ini memiliki keterkaitan dan tidak dapat dihapus.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Data berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        }).then(() => {
+          window.location.reload();
+        });
+        
+        if (onUpdate) onUpdate();
+  
+      } catch (error) {
+        const message = error?.response?.data?.message;
+        if (error?.response?.status === 409) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: message || 'Data ini memiliki keterkaitan dan tidak dapat dihapus.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        }
+      }
     }
   };
-
+  
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="text-red-500 hover:text-red-700">
-          <Trash />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Asset</DialogTitle>
-          <DialogDescription>
-            Delete asset confirm. 
-          </DialogDescription>
-        </DialogHeader>
-        <h1>Anda yakin ingin menghapus data ini?</h1>
-        <DialogFooter>
-          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+    <Button 
+      variant="outline" 
+      className="text-red-500 hover:text-red-700" 
+      onClick={handleDelete} >
+      <Trash />
+    </Button>
+  );  
 };
 
 export function CompanyEdit({ siteAccountId, onUpdate }) {
@@ -998,10 +1104,11 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         timer: 1100,
         timerProgressBar: true,
         showConfirmButton: false,
-      }); 
+        allowEscapeKey: false,
+      });
       return;
     }
-
+  
     try {
       await ApiCustomer.patch(`/api/site_account/${siteAccountId}`, {
         Company: companyName,
@@ -1015,12 +1122,31 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         Country: country,
         ZipPostalCode: zipPostalCode,
       });
+  
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Company information updated successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+  
       onUpdate();
       setIsOpen(false);
+      
     } catch (error) {
       console.error("Error updating company:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'An error occurred while updating company information.',
+        allowEscapeKey: false,
+        timer: 1500,
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -1057,63 +1183,83 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
 };
 
 export function CompanyDelete ({ siteAccountId, isModalOpen, setIsModalOpen, onUpdate }) {
-    //set modal
-  const handleDelete = async () => {
+const handleDelete = async () => {
+  const result = await Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "Data ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, hapus!',
+    cancelButtonText: 'Batal',
+  });
+
+  if (result.isConfirmed) {
     try {
       const response = await ApiCustomer.delete(`/api/site_account/${siteAccountId}`);
-      
-      console.log("Server Response:", response.data);
+
       if (response.status === 409 || response.data.success === false) {
-        // 🚨 Restriction triggered - Show alert message
-        alert(response.data.message || "Cannot delete this company due to restrictions.");
-        return;
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Tidak Bisa Dihapus!',
+          text: response.data.message || 'Data ini memiliki keterkaitan dan tidak dapat dihapus.',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        });
       }
-      
+
       Swal.fire({
-        icon: 'Success',
+        icon: 'success',
         title: 'Berhasil!',
-        text: 'Company berhasil dihapus.',
-        timer: 1100,  
+        text: 'Data berhasil dihapus.',
+        timer: 1500,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        window.location.reload();
       });
-      // ✅ Close the modal if it's open
-      setIsModalOpen(false);
-      // ✅ Refresh the table by calling `onUpdate()`
-      if (onUpdate) {
-        onUpdate();
-      }
+      
+      if (onUpdate) onUpdate();
+
     } catch (error) {
-      if (error.response && error.response.status === 409) {
-        // 🚨 Handle 409 Conflict error from backend
-        alert(error.response.data.message || "Cannot delete! This company has related Contacts or Assets.");
+      const message = error?.response?.data?.message;
+      if (error?.response?.status === 409) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Tidak Bisa Dihapus!',
+          text: message || 'Data ini memiliki keterkaitan dan tidak dapat dihapus.',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        });
       } else {
-        alert("Failed to delete site account. Please try again.");
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal Menghapus!',
+          text: 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        });
       }
     }
-  };
+  }
+};
 
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="text-red-500 hover:text-red-700">
-          <Trash />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Asset</DialogTitle>
-          <DialogDescription>
-            Delete asset confirm. 
-          </DialogDescription>
-        </DialogHeader>
-        <h1>Anda yakin ingin menghapus data ini?</h1>
-        <DialogFooter>
-          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+return (
+  <Button 
+    variant="outline" 
+    className="text-red-500 hover:text-red-700" 
+    onClick={handleDelete}
+  >
+    <Trash />
+  </Button>
+);
+
 };
 
 export function ContactEdit({ contactID, onUpdate }) {
@@ -1176,10 +1322,11 @@ export function ContactEdit({ contactID, onUpdate }) {
         timer: 1100,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });  
       return;
     }
-
+  
     try {
       await ApiCustomer.patch(`/api/contact-information/${contactID}`, {
         Salutation: salutation,
@@ -1198,12 +1345,33 @@ export function ContactEdit({ contactID, onUpdate }) {
         Country: country,
         ZipPostalCode: zipPostalCode,
       });
-      onUpdate();
-      setIsOpen(false);
+  
+      // ✅ Tampilkan notifikasi berhasil
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Contact information updated successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+  
+      onUpdate();       // perbarui data di tampilan
+      setIsOpen(false); // tutup modal
+  
     } catch (error) {
       console.error("Error updating contact:", error);
+  
+      // ❌ Tampilkan notifikasi gagal
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'An error occurred while updating contact information.',
+        allowEscapeKey: false,
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -1245,130 +1413,169 @@ export function ContactEdit({ contactID, onUpdate }) {
 };
 
 export function ContactDelete ({ contactID }) {
-  const [delecteContact, setDelecteContact] = useState(false)
-
   const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Data kontak akan dihapus secara permanen.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        await ApiCustomer.delete(`/api/contact-information/${contactID}`);
+        await Swal.fire('Berhasil!', 'Kontak berhasil dihapus.', 'success');
+        window.location.reload();
+      } catch (error) {
+        console.error("Error deleting contact:", error);
+        await Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus.', 'error');
+      }
+    }
+  };
+  
+  return (
+    <Button 
+      variant="outline" 
+      className="text-red-500 hover:text-red-700" 
+      onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
+};
+
+export function ProductAdd() {
+  // Form Product
+  const [formDataProduct, setFormDataProduct] = useState({
+    ProductNumber: '',
+    ProductLine: '',
+    ProductName: '',
+    ProductTypeID: '', // <- penting!
+  });
+
+  // List ProductType untuk dropdown
+  const [productTypes, setProductTypes] = useState([]);
+
+  // Ambil data product type saat pertama render
+  useEffect(() => {
+    async function fetchProductTypes() {
+      try {
+        const response = await ApiCustomer.get("/api/product-type");
+        setProductTypes(response.data.data || []);
+      } catch (err) {
+        console.error("Failed to fetch product types:", err);
+      }
+    }
+    fetchProductTypes();
+  }, []);
+
+  // Input Handler
+  const handlerInputProduct = (e) => {
+    const { id, value } = e.target;
+    setFormDataProduct(prev => ({ ...prev, [id]: value }));
+  };
+
+  // Submit Handler
+  const handlerProduct = async () => {
+    const { ProductNumber, ProductLine, ProductName, ProductTypeID } = formDataProduct;
+
+    if (!ProductNumber || !ProductLine || !ProductName || !ProductTypeID) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all fields before submitting.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+      return;
+    }
+
     try {
-      await ApiCustomer.delete(`/api/contact-information/${contactID}`);
-      setDelecteContact(!delecteContact);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting contact:", error);
+      const response = await ApiCustomer.post("/api/product-information", formDataProduct);
+      console.log("Success:", response.data);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Product berhasil disimpan.',
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(() => window.location.reload());
+    } catch (err) {
+      console.error("Error saving product:", err);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to save Product. Please try again.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
     }
   };
 
   return (
-    <Dialog open={delecteContact}>
+    <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setDelecteContact(true)}>
-          <Trash />
-        </Button>
+        <Button variant="outline" className="h-11 rounded-sm ml-2">Product Add</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Asset</DialogTitle>
-          <DialogDescription>
-            Delete asset confirm. 
-          </DialogDescription>
+          <DialogTitle>Add Product Information</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
         </DialogHeader>
-        <h1>Anda yakin ingin menghapus data ini?</h1>
+
+        <div className="space-y-3">
+          <Label>Product Number *</Label>
+          <Input type="text" id="ProductNumber" value={formDataProduct.ProductNumber} onChange={handlerInputProduct} />
+
+          <Label>Product Line *</Label>
+          <Input type="text" id="ProductLine" value={formDataProduct.ProductLine} onChange={handlerInputProduct} />
+
+          <Label>Product Name *</Label>
+          <Input type="text" id="ProductName" value={formDataProduct.ProductName} onChange={handlerInputProduct} />
+
+          <Label>Product Type *</Label>
+          <Select
+            value={formDataProduct.ProductTypeID?.toString() || ""}
+            onValueChange={(value) =>
+              setFormDataProduct((prev) => ({
+                ...prev,
+                ProductTypeID: parseInt(value),
+              }))
+          }>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select Product Type" />
+            </SelectTrigger>
+            <SelectContent>
+              {productTypes.map((type) => (
+                <SelectItem key={type.ProductTypeID} value={type.ProductTypeID.toString()}>
+                  {type.ProductType}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <DialogFooter>
-          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+          <Button onClick={handlerProduct}>Add</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
 
-export function ProductAdd () {
-  // Form Product
-   const [formDataProduct, setFormDataProduct] = useState({
-      ProductNumber: '',
-      ProductLine: '',
-      ProductName: '',
-    })
-    
-    // Make Handler Product
-    const handlerInputProduct = (e) => {
-      const { id, value } = e.target
-      setFormDataProduct(prevState => ({
-        ...prevState,
-        [id]:value
-      }));
-    };
-
-    // Handler Submit
-    const handlerProduct = async () => {
-      if (!formDataProduct.ProductNumber || !formDataProduct.ProductLine || !formDataProduct.ProductName) {
-          Swal.fire({
-          title: "Incomplete Data",
-          text: "Please fill in all fields before submitting.",
-          icon: "warning",
-          timer: 1500,
-          timerProgressBar: true,
-          showConfirmButton: false,
-        });
-        return;
-      }
-      try {
-        const response = await ApiCustomer.post("/api/product-information", formDataProduct);
-        console.log("Success:", response.data);
-        Swal.fire({
-          icon: 'success',
-          title: 'Berhasil!',
-          text: 'Product berhasil disimpan.',
-          timer: 1200,
-          timerProgressBar: true,
-          showConfirmButton: false,
-        }).then(() => {
-          window.location.reload();
-        });
-      } catch (err) {
-        console.error("Error saving product: ", err);
-        Swal.fire({
-          title: "Error!",
-          text: "Failed to save Product. Please try again.",
-          icon: "error",
-          timer: 1200,
-          timerProgressBar: true,
-          showConfirmButton: false,
-        });
-      }
-    };
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm ml-2"> Product Add</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add Product Information</DialogTitle>
-          <DialogDescription>
-            Add the product Fields marked with * are required.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3">
-          <Label>Product Number</Label>
-          <Input type="text" id="ProductNumber" value={formDataProduct.ProductNumber} onChange={handlerInputProduct} />
-   
-          <Label>Product Line</Label>
-          <Input type="text" id="ProductLine" value={formDataProduct.ProductLine} onChange={handlerInputProduct} />
-         
-          <Label>Product Name</Label>
-          <Input type="text" id="ProductName" value={formDataProduct.ProductName} onChange={handlerInputProduct} />
-        </div>
-        <DialogFooter>
-          <Button onClick={handlerProduct}>Add</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
 export function ProductEdit({ ProductNumber, onUpdate }) {
   const [products, setProducts] = useState(null);
   const [productLine, setProductLine] = useState("");
   const [productName, setProductName] = useState("");
+  const [productTypeID, setProductTypeID] = useState("");
+  const [productTypes, setProductTypes] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
   const fetchProducts = async () => {
@@ -1379,14 +1586,25 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
       setProducts(data);
       setProductLine(data?.ProductLine || "");
       setProductName(data?.ProductName || "");
+      setProductTypeID(data?.ProductTypeID || "");
     } catch (error) {
-      console.error("Error fetching company information:", error);
+      console.error("Error fetching product:", error);
+    }
+  };
+
+  const fetchProductTypes = async () => {
+    try {
+      const response = await ApiCustomer.get("/api/product-type");
+      setProductTypes(response.data.data);
+    } catch (error) {
+      console.error("Error fetching product types:", error);
     }
   };
 
   useEffect(() => {
-    if (ProductNumber && isOpen) {
+    if (isOpen) {
       fetchProducts();
+      fetchProductTypes();
     }
   }, [ProductNumber, isOpen]);
 
@@ -1394,51 +1612,86 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
     if (!isOpen) {
       setProductLine("");
       setProductName("");
+      setProductTypeID("");
     }
   }, [isOpen]);
 
   const handleUpdate = async () => {
-    if (!productLine || !productName) {
+    if (!productLine || !productName || !productTypeID) {
       Swal.fire({
         title: "Incomplete Data",
         text: "Please fill in all fields before submitting.",
         icon: "warning",
-        timer: 1100,
+        timer: 1200,
         timerProgressBar: true,
         showConfirmButton: false,
-      });  
+        allowEscapeKey: false,
+      });
       return;
     }
-
+  
     try {
       await ApiCustomer.patch(`/api/product-information/${ProductNumber}`, {
         ProductLine: productLine,
         ProductName: productName,
+        ProductTypeID: parseInt(productTypeID),
       });
-      onUpdate();
-      setIsOpen(false);
+  
+      // ✅ Notifikasi jika berhasil
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Product information updated successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,  
+      });
+  
+      onUpdate();     // refresh data
+      setIsOpen(false); // tutup modal
+  
     } catch (error) {
       console.error("Error updating product:", error);
+  
+      // ❌ Notifikasi jika gagal
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'An error occurred while updating product information.',
+        allowEscapeKey: false,
+        timer: 1500,
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => { setIsOpen(true); fetchProducts(); }}>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
           <Pencil />
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Product Information</DialogTitle>
-          <DialogDescription>
-            Update the details of the product Fields marked with * are required.
-          </DialogDescription>
+          <DialogDescription>Update the details of the product. Fields marked with * are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <Input value={productLine} onChange={(e) => setProductLine(e.target.value)} placeholder="Product Line*" />
           <Input value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name*" />
+          <Select value={productTypeID} onValueChange={setProductTypeID}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select Product Type" />
+          </SelectTrigger>
+          <SelectContent>
+            {productTypes.map((type) => (
+              <SelectItem key={type.ProductTypeID} value={String(type.ProductTypeID)}>
+                {type.ProductType}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         </div>
         <DialogFooter>
           <Button onClick={handleUpdate}>Update</Button>
@@ -1450,62 +1703,78 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
 
 export function ProductDelete ({ ProductNumber, isModalOpen, setIsModalOpen, onUpdate }) {
   //set modal
-const handleDelete = async () => {
-  try {
-    const response = await ApiCustomer.delete(`/api/product-information/${ProductNumber}`);
-    
-    console.log("Server Response:", response.data);
-    if (response.status === 409 || response.data.success === false) {
-      // 🚨 Restriction triggered - Show alert message
-      alert(response.data.message || "Cannot delete this product due to restrictions.");
-      return;
-    }
-    
-    Swal.fire({
-      icon: 'Success',
-      title: 'Berhasil!',
-      text: 'ProductType berhasil dihapus.',
-      timer: 1100,  
-      timerProgressBar: true,
-      showConfirmButton: false,
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Product ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
     });
-    // ✅ Close the modal if it's open
-    setIsModalOpen(false);
-    // ✅ Refresh the table by calling `onUpdate()`
-    if (onUpdate) {
-      onUpdate();
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/product-information/${ProductNumber}`);
+  
+        console.log("Server Response:", response.data);
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Product ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Product berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          // Refresh table or take any action after successful deletion
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+  
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Product ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus product. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
     }
-  } catch (error) {
-    if (error.response && error.response.status === 409) {
-      // 🚨 Handle 409 Conflict error from backend
-      alert(error.response.data.message || "Cannot delete! This product has related Product Type.");
-    } else {
-      alert("Failed to delete product. Please try again.");
-    }
-  }
-};
-
-return (
-  <Dialog>
-    <DialogTrigger asChild>
-      <Button variant="outline" className="text-red-500 hover:text-red-700">
-        <Trash />
-      </Button>
-    </DialogTrigger>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Delete Product</DialogTitle>
-        <DialogDescription>
-          Delete Product confirm. 
-        </DialogDescription>
-      </DialogHeader>
-      <h1>Anda yakin ingin menghapus data ini?</h1>
-      <DialogFooter>
-        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-);
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
 };
 
 export function ProductTypeAdd () {
@@ -1537,6 +1806,7 @@ export function ProductTypeAdd () {
           timer: 1500,
           timerProgressBar: true,
           showConfirmButton: false,
+          allowEscapeKey: false,
         });
         return;
       }
@@ -1552,6 +1822,7 @@ export function ProductTypeAdd () {
           timer: 1200,
           timerProgressBar: true,
           showConfirmButton: false,
+          allowEscapeKey: false,
         }).then(() => {
           window.location.reload();
         });
@@ -1566,6 +1837,7 @@ export function ProductTypeAdd () {
           timer: 1200,
           timerProgressBar: true,
           showConfirmButton: false,
+          allowEscapeKey: false,
         });
       }
     };
@@ -1627,7 +1899,7 @@ export function ProductTypeAdd () {
       </DialogContent>
     </Dialog>
   )
-}
+};
 
 export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
   const [producttypes, setProductTypes] = useState(null);
@@ -1673,22 +1945,44 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
         timer: 1100,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });  
       return;
     }
-
+  
     try {
       await ApiCustomer.patch(`/api/product-type/${ProductTypeID}`, {
         ProductTower: productTower,
         ProductGroup: productGroup,
         ProductType: productType,
       });
-      onUpdate();
-      setIsOpen(false);
+  
+      // ✅ Notifikasi sukses
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Product type updated successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+  
+      onUpdate();      // Refresh data parent
+      setIsOpen(false); // Tutup modal
+  
     } catch (error) {
       console.error("Error updating productType:", error);
+  
+      // ❌ Notifikasi error
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'An error occurred while updating product type.',
+        allowEscapeKey: false, 
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -1753,66 +2047,82 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
 };
 
 export function ProductTypeDelete ({ ProductTypeID, isModalOpen, setIsModalOpen, onUpdate }) {
-  //set modal
-const handleDelete = async () => {
-  try {
-    const response = await ApiCustomer.delete(`/api/product-type/${ProductTypeID}`);
-    
-    console.log("Server Response:", response.data);
-    if (response.status === 409 || response.data.success === false) {
-      // 🚨 Restriction triggered - Show alert message
-      alert(response.data.message || "Cannot delete this product due to restrictions.");
-      return;
-    }
-    Swal.fire({
-      icon: 'Success',
-      title: 'Berhasil!',
-      text: 'ProductType berhasil dihapus.',
-      timer: 1100,  
-      timerProgressBar: true,
-      showConfirmButton: false,
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Product Type ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
     });
-    // ✅ Close the modal if it's open
-    setIsModalOpen(false);
-    // ✅ Refresh the table by calling `onUpdate()`
-    if (onUpdate) {
-      onUpdate();
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/product-type/${ProductTypeID}`);
+  
+        console.log("Server Response:", response.data);
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "ProductType ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'ProductType berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          // ✅ Close the modal if it's open
+          window.location.reload();
+          // ✅ Refresh the table by calling `onUpdate()`
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "ProductType ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus ProductType. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
     }
-  } catch (error) {
-    if (error.response && error.response.status === 409) {
-      // 🚨 Handle 409 Conflict error from backend
-      alert(error.response.data.message || "Cannot delete! This product has related Product Type.");
-    } else {
-      alert("Failed to delete productType. Please try again.");
-    }
-  }
-};
-
-return (
-  <Dialog>
-    <DialogTrigger asChild>
-      <Button variant="outline" className="text-red-500 hover:text-red-700">
-        <Trash />
-      </Button>
-    </DialogTrigger>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Delete ProductType</DialogTitle>
-        <DialogDescription>
-          Delete ProductType confirm. 
-        </DialogDescription>
-      </DialogHeader>
-      <h1>Anda yakin ingin menghapus data ini?</h1>
-      <DialogFooter>
-        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-);
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
 };
 
 export function WarrantyServiceAdd () {
-  // Form ProductType
    const [formDataWarratyService, setFormDataWarrantyService] = useState({
     Service_offerID: '',
     Service_description: '',	
@@ -1848,6 +2158,7 @@ export function WarrantyServiceAdd () {
           timer: 1500,
           timerProgressBar: true,
           showConfirmButton: false,
+          allowEscapeKey: false,
         });
         return;
       }
@@ -1863,6 +2174,7 @@ export function WarrantyServiceAdd () {
           timer: 1200,
           timerProgressBar: true,
           showConfirmButton: false,
+          allowEscapeKey: false,
         }).then(() => {
           window.location.reload();
         });
@@ -1877,6 +2189,7 @@ export function WarrantyServiceAdd () {
           timer: 1200,
           timerProgressBar: true,
           showConfirmButton: false,
+          allowEscapeKey: false,
         });
       }
     };
@@ -1984,7 +2297,10 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
   }, [isOpen]);
 
   const handleUpdate = async () => {
-    if (!Service_offerIDState || !Service_description || !CTat_RTime || !Price || !Shipping_Fee || !qty_ws || !Tax || !Total) {
+    if (
+      !Service_offerIDState || !Service_description || !CTat_RTime || !Price ||
+      !Shipping_Fee || !qty_ws || !Tax || !Total
+    ) {
       Swal.fire({
         title: "Incomplete Data",
         text: "Please fill in all fields before submitting.",
@@ -1992,26 +2308,61 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
         timer: 1100,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,  
       });  
       return;
     }
-
+  
     try {
-      await ApiCustomer.patch(`/api/warranty-services/${Service_offerID}`, {
-        Service_description : Service_description,	
-        CTat_RTime : CTat_RTime,
-        Price : parseFloat(Price),
-        Shipping_Fee : parseFloat(Shipping_Fee),
-        qty_ws : parseInt(qty_ws),
-        Tax : parseFloat(Tax),
-        Total : parseFloat(Total)
+      // ⏳ Tampilkan loading saat proses update
+      Swal.fire({
+        title: "Updating...",
+        text: "Please wait while saving data.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
       });
+  
+      await ApiCustomer.patch(`/api/warranty-services/${Service_offerID}`, {
+        Service_description,
+        CTat_RTime,
+        Price: parseFloat(Price),
+        Shipping_Fee: parseFloat(Shipping_Fee),
+        qty_ws: parseInt(qty_ws),
+        Tax: parseFloat(Tax),
+        Total: parseFloat(Total)
+      });
+  
+      Swal.close(); // Tutup loading
+  
+      // ✅ Notifikasi sukses
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Warranty service updated successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+  
       onUpdate();
       setIsOpen(false);
+  
     } catch (error) {
       console.error("Error updating Warranty Service:", error);
+  
+      Swal.close(); // Tutup loading jika error
+  
+      // ❌ Notifikasi error
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'An error occurred while updating warranty service.',
+        allowEscapeKey: false,
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -2064,62 +2415,79 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
 };
 
 export function WarrantyServiceDelete ({ Service_offerID, isModalOpen, setIsModalOpen, onUpdate }) {
-  //set modal
-const handleDelete = async () => {
-  try {
-    const response = await ApiCustomer.delete(`/api/warranty-services/${Service_offerID}`);
-    
-    console.log("Server Response:", response.data);
-    if (response.status === 409 || response.data.success === false) {
-      // 🚨 Restriction triggered - Show alert message
-      alert(response.data.message || "Cannot delete this Warranty Service due to restrictions.");
-      return;
-    }
-    Swal.fire({
-      icon: 'Success',
-      title: 'Berhasil!',
-      text: 'Warranty Service dihapus.',
-      timer: 1000,  
-      timerProgressBar: true,
-      showConfirmButton: false,
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Layanan Garansi ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
     });
-    // ✅ Close the modal if it's open
-    setIsModalOpen(false);
-    // ✅ Refresh the table by calling `onUpdate()`
-    if (onUpdate) {
-      onUpdate();
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/warranty-services/${Service_offerID}`);
+        
+        console.log("Server Response:", response.data);
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Layanan Garansi ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Layanan Garansi berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          // ✅ Close the modal if it's open
+          window.location.reload();
+          // ✅ Refresh the table by calling `onUpdate()`
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Layanan Garansi ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus Layanan Garansi. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
     }
-  } catch (error) {
-    if (error.response && error.response.status === 409) {
-      // 🚨 Handle 409 Conflict error from backend
-      alert(error.response.data.message || "Cannot delete! This Warranty has related Warranty Service.");
-    } else {
-      alert("Failed to delete Warranty Service. Please try again.");
-    }
-  }
-};
-
-return (
-  <Dialog>
-    <DialogTrigger asChild>
-      <Button variant="outline" className="text-red-500 hover:text-red-700">
-        <Trash />
-      </Button>
-    </DialogTrigger>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Delete Warranty Service</DialogTitle>
-        <DialogDescription>
-          Delete Warranty Service confirm. 
-        </DialogDescription>
-      </DialogHeader>
-      <h1>Anda yakin ingin menghapus data ini?</h1>
-      <DialogFooter>
-        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-);
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
 };
 
 export function MaterialOrderEdit({ MOID, onUpdate }) {
@@ -2185,36 +2553,74 @@ export function MaterialOrderEdit({ MOID, onUpdate }) {
   }, [isOpen]);
 
   const handleUpdate = async () => {
-    if (!WOID || !OrderNumber || !OrderStatus || !OrderType || !CreatedOn || !SalesOrderNumber || !RMANumber || !ReadyForClosureDate || !Owner) {
+    if (
+      !WOID || !OrderNumber || !OrderStatus || !OrderType ||
+      !CreatedOn || !SalesOrderNumber || !RMANumber ||
+      !ReadyForClosureDate || !Owner
+    ) {
       Swal.fire({
         title: "Incomplete Data",
-        text:  "Please fill in all fields before submitting.",
-        icon:  "warning",
+        text: "Please fill in all fields before submitting.",
+        icon: "warning",
         timer: 1100,
         timerProgressBar: true,
         showConfirmButton: false,
-      });  
+        allowEscapeKey: false,
+      });
       return;
     }
-
+  
     try {
-      await ApiCustomer.patch(`/api/mo-detaill/${MOID}`, {
-        WOID : WOID,
-        OrderNumber : OrderNumber, 
-        OrderStatus : OrderStatus,
-        OrderType   : OrderType,
-        CreatedOn   : CreatedOn,
-        SalesOrderNumber : SalesOrderNumber,
-        RMANumber : RMANumber,
-        ReadyForClosureDate : ReadyForClosureDate,
-        Owner : Owner,
+      // ⏳ Tampilkan loading
+      Swal.fire({
+        title: "Updating...",
+        text: "Please wait while saving data.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
       });
+  
+      await ApiCustomer.patch(`/api/mo-detaill/${MOID}`, {
+        WOID,
+        OrderNumber,
+        OrderStatus,
+        OrderType,
+        CreatedOn,
+        SalesOrderNumber,
+        RMANumber,
+        ReadyForClosureDate,
+        Owner,
+      });
+  
+      Swal.close(); // Tutup loading
+  
+      // ✅ Notifikasi sukses
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Material Order updated successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+  
       onUpdate();
       setIsOpen(false);
     } catch (error) {
       console.error("Error updating Material Order:", error);
+  
+      Swal.close(); // Tutup loading jika gagal
+  
+      // ❌ Notifikasi gagal
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "An error occurred while updating Material Order.",
+        allowEscapeKey: false,
+      });
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -2266,62 +2672,77 @@ export function MaterialOrderEdit({ MOID, onUpdate }) {
 };
 
 export function MaterialOrderDelete ({ MOID, isModalOpen, setIsModalOpen, onUpdate }) {
-  //set modal
-const handleDelete = async () => {
-  try {
-    const response = await ApiCustomer.delete(`/api/mo-detaill/${MOID}`);
-    
-    console.log("Server Response:", response.data);
-    if (response.status === 409 || response.data.success === false) {
-      // 🚨 Restriction triggered - Show alert message
-      alert(response.data.message || "Cannot delete this Material Order due to restrictions.");
-      return;
-    }
-    Swal.fire({
-      icon: 'Success',
-      title: 'Berhasil!',
-      text: 'Material Order dihapus.',
-      timer: 1000,  
-      timerProgressBar: true,
-      showConfirmButton: false,
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Material Order ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
     });
-    // ✅ Close the modal if it's open
-    setIsModalOpen(false);
-    // ✅ Refresh the table by calling `onUpdate()`
-    if (onUpdate) {
-      onUpdate();
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/mo-detaill/${MOID}`);
+        
+        console.log("Server Response:", response.data);
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Material Order ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Material Order berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+         window.location.reload();
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Material Order ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus Material Order. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
     }
-  } catch (error) {
-    if (error.response && error.response.status === 409) {
-      // 🚨 Handle 409 Conflict error from backend
-      alert(error.response.data.message || "Cannot delete! This Warranty has related Warranty Service.");
-    } else {
-      alert("Failed to delete Material Order. Please try again.");
-    }
-  }
-};
-
-return (
-  <Dialog>
-    <DialogTrigger asChild>
-      <Button variant="outline" className="text-red-500 hover:text-red-700">
-        <Trash />
-      </Button>
-    </DialogTrigger>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Delete Material Order</DialogTitle>
-        <DialogDescription>
-          Delete Material Order confirm. 
-        </DialogDescription>
-      </DialogHeader>
-      <h1>Anda yakin ingin menghapus data ini?</h1>
-      <DialogFooter>
-        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-);
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
 };
 
 export function WorkOrderEdit({ WOID, onUpdate }) {
@@ -2432,13 +2853,26 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
         timer: 1200,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });
       return;
     }
   
     try {
+      // ⏳ Tampilkan loading selama proses update
+      Swal.fire({
+        title: "Updating...",
+        text: "Please wait while saving data.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
+      });
+  
       await ApiCustomer.patch(`/api/work-order/${WOID}`, formData);
   
+      Swal.close(); // Tutup loading
+  
+      // ✅ Notifikasi sukses
       Swal.fire({
         title: "Success!",
         text: "Data berhasil diperbarui.",
@@ -2446,12 +2880,17 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
         timer: 1500,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });
   
-      onUpdate();      // Refresh data
-      setIsOpen(false); // Tutup modal atau form
+      onUpdate();       // Refresh data
+      setIsOpen(false); // Tutup modal/form
     } catch (error) {
       console.error("Error updating Work Order:", error);
+  
+      Swal.close(); // Tutup loading jika gagal
+  
+      // ❌ Notifikasi gagal
       Swal.fire({
         title: "Error",
         text: "Gagal memperbarui data!",
@@ -2459,9 +2898,11 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
         timer: 1500,
         timerProgressBar: true,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });
     }
   };
+  
   
 
   return (
@@ -2538,66 +2979,1160 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
       </DialogContent>
     </Dialog>
   );
-}
+};
 
 export function WorkOrderDelete ({ WOID, isModalOpen, setIsModalOpen, onUpdate }) {
-  //set modal
-const handleDelete = async () => {
-  try {
-    const response = await ApiCustomer.delete(`/api/work-order/${WOID}`);
-    
-    console.log("Server Response:", response.data);
-    if (response.status === 409 || response.data.success === false) {
-      // 🚨 Restriction triggered - Show alert message
-      alert(response.data.message || "Cannot delete this Work Order due to restrictions.");
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Work Order ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/work-order/${WOID}`);
+        
+        console.log("Server Response:", response.data);
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Work Order ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Work Order berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.reload(); // Memuat ulang halaman
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Work Order ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus Work Order. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
+    }
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
+};
+
+export function UserAdd({ onAdd }) {
+  const [formData, setFormData] = useState({
+    Email: "",
+    Username: "",
+    Password: "",
+    Name: "",
+    Role: "",
+    ProfilePhoto: "",
+  });
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewPhoto, setPreviewPhoto] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: e.target.value,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    setPreviewPhoto(URL.createObjectURL(file));
+  };
+
+  const uploadImage = async () => {
+    if (!selectedFile) return "";
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", selectedFile);
+
+    try {
+      const res = await ApiCustomer.post("/api/upload", formDataUpload, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data.url;
+    } catch (error) {
+      console.error("Upload failed:", error);
+      return "";
+    }
+  };
+
+  const handleSubmit = async () => {
+    const { Email, Username, Password, Name } = formData;
+    if (!Email || !Username || !Password || !Name) {
+      Swal.fire({
+        title: "Data tidak lengkap",
+        text: "Silakan isi semua data wajib.",
+        icon: "warning",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
       return;
     }
-    Swal.fire({
-      icon: 'Success',
-      title: 'Berhasil!',
-      text: 'Work Order dihapus.',
-      timer: 1000,  
-      timerProgressBar: true,
-      showConfirmButton: false,
-    });
-    // ✅ Close the modal if it's open
-    setIsModalOpen(false);
-    // ✅ Refresh the table by calling `onUpdate()`
-    if (onUpdate) {
-      onUpdate();
+
+    try {
+      const uploadedPhoto = await uploadImage();
+
+      const payload = {
+        ...formData,
+        ProfilePhoto: uploadedPhoto,
+      };
+
+      await ApiCustomer.post("/api/user", payload);
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "User berhasil ditambahkan.",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        window.location.reload(); // Memuat ulang halaman
+      });
+
+      onAdd?.(); // panggil callback jika ada
+      setIsOpen(false);
+      setFormData({ Email: "", Username: "", Password: "", Name: "", Role: "", ProfilePhoto: "" });
+      setSelectedFile(null);
+      setPreviewPhoto(null);
+    } catch (err) {
+      console.error("Gagal tambah user:", err);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menambahkan user.",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
     }
-  } catch (error) {
-    if (error.response && error.response.status === 409) {
-      // 🚨 Handle 409 Conflict error from backend
-      alert(error.response.data.message || "Cannot delete! This Waork has related Work Order.");
-    } else {
-      alert("Failed to delete Work Order. Please try again.");
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2">Tambah User</Button>
+      </DialogTrigger>
+
+      <DialogContent className="h-[550px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Tambah Data User</DialogTitle>
+          <DialogDescription>Isikan semua data pengguna baru dengan benar.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div>
+            <Label>Email*</Label>
+            <Input type="email" value={formData.Email} onChange={handleChange("Email")} />
+          </div>
+          <div>
+            <Label>Username*</Label>
+            <Input type="text" value={formData.Username} onChange={handleChange("Username")} />
+          </div>
+          <div>
+            <Label>Password*</Label>
+            <Input type="password" value={formData.Password} onChange={handleChange("Password")} />
+          </div>
+          <div>
+            <Label>Nama*</Label>
+            <Input type="text" value={formData.Name} onChange={handleChange("Name")} />
+          </div>
+          <div>
+            <Label>Role</Label>
+            <Input type="text" value={formData.Role} onChange={handleChange("Role")} placeholder="Contoh: admin / user" />
+          </div>
+          {/* <div>
+            <Label>Foto Profil</Label>
+            <Input type="file" accept="image/*" onChange={handleFileChange} />
+            {previewPhoto && (
+              <img src={previewPhoto} alt="Preview" className="mt-2 h-24 w-24 rounded-md object-cover" />
+            )}
+          </div> */}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Simpan</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export function UserEdit({ IDUser, onUpdate }) {
+  const [formData, setFormData] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
+  const [previewPhoto, setPreviewPhoto] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const defaultFormData = {
+    Email: "",
+    Username: "",
+    Password: "",
+    Name: "",
+    Role: "",
+    ProfilePhoto: "",
+  };
+
+  const fetchUser = async () => {
+    if (!IDUser) return;
+    try {
+      const response = await ApiCustomer.get(`/api/user/${IDUser}`);
+      const data = response.data.data || {};
+
+      setFormData({
+        Email: data.Email || "",
+        Username: data.Username || "",
+        Password: "",
+        Name: data.Name || "",
+        Role: data.Role || "",
+        ProfilePhoto: data.ProfilePhoto || "",
+      });
+
+      setPreviewPhoto(data.ProfilePhoto || null);
+    } catch (error) {
+      console.error("Error fetching User information:", error);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData(defaultFormData);
+    setPreviewPhoto(null);
+    setSelectedFile(null);
+  };
+
+  useEffect(() => {
+    if (IDUser && isOpen) fetchUser();
+  }, [IDUser, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) resetForm();
+  }, [isOpen]);
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: e.target.value,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    setPreviewPhoto(URL.createObjectURL(file));
+  };
+
+  const uploadImage = async () => {
+    if (!selectedFile) return formData.ProfilePhoto;
+
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", selectedFile);
+
+    try {
+      const res = await ApiCustomer.post("/api/upload", formDataUpload, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data.url; // Asumsikan API mengembalikan URL foto
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      return formData.ProfilePhoto; // fallback
+    }
+  };
+
+  const handleUpdate = async () => {
+    const { Email, Username, Password, Name, Role } = formData;
+
+    if (!Email || !Username || !Name) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all required fields.",
+        icon: "warning",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+      return;
+    }
+
+    try {
+      const uploadedPhotoURL = await uploadImage();
+
+      const updatedData = {
+        Email,
+        Username,
+        Name,
+        Role,
+        ProfilePhoto: uploadedPhotoURL,
+      };
+
+      if (Password) updatedData.Password = Password;
+
+      await ApiCustomer.patch(`/api/user/${IDUser}`, updatedData);
+
+      Swal.fire({
+        title: "Success!",
+        text: "Data berhasil diperbarui.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,  
+      });
+
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Gagal memperbarui data!",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchUser(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="h-[500px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit User Information</DialogTitle>
+          <DialogDescription>
+            Update the details of the user. Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div>
+            <Label>Email*</Label>
+            <Input type="email" value={formData.Email} onChange={handleChange("Email")} />
+          </div>
+          <div>
+            <Label>Username*</Label>
+            <Input type="text" value={formData.Username} onChange={handleChange("Username")} />
+          </div>
+          {/* <div>
+            <Label>Password</Label>
+            <Input type="password" value={formData.Password} onChange={handleChange("Password")} placeholder="Kosongkan jika tidak ingin mengubah" />
+          </div> */}
+          <div>
+            <Label>Name*</Label>
+            <Input type="text" value={formData.Name} onChange={handleChange("Name")} />
+          </div>
+          <div>
+            <Label>Role</Label>
+            <Input type="text" value={formData.Role} onChange={handleChange("Role")} />
+          </div>
+
+          {/* <div>
+            <Label>Profile Photo</Label>
+            <Input type="file" accept="image/*" onChange={handleFileChange} />
+            {previewPhoto && (
+              <img src={previewPhoto} alt="Preview" className="mt-2 h-24 w-24 rounded-md object-cover" />
+            )}
+          </div> */}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export function UserDelete ({ IDUser, isModalOpen, setIsModalOpen, onUpdate }) {
+ 
+const handleDelete = async () => {
+  const result = await Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "User ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, hapus!',
+    cancelButtonText: 'Batal',
+  });
+
+  if (result.isConfirmed) {
+    try {
+      const response = await ApiCustomer.delete(`/api/user/${IDUser}`);
+      
+      console.log("Server Response:", response.data);
+      if (response.status === 409 || response.data.success === false) {
+        // 🚨 Restriction triggered - Show alert message
+        Swal.fire({
+          icon: 'warning',
+          title: 'Tidak Bisa Dihapus!',
+          text: response.data.message || "User ini memiliki keterkaitan dan tidak dapat dihapus.",
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+        return;
+      }
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'User berhasil dihapus.',
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload(); // Memuat ulang halaman
+        if (onUpdate) {
+          onUpdate();
+        }
+      });
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        // 🚨 Handle 409 Conflict error from backend
+        Swal.fire({
+          icon: 'warning',
+          title: 'Tidak Bisa Dihapus!',
+          text: error.response.data.message || "User ini memiliki keterkaitan dan tidak dapat dihapus.",
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal Menghapus!',
+          text: 'Terjadi kesalahan saat menghapus User. Silakan coba lagi.',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+      }
     }
   }
 };
 
 return (
-  <Dialog>
-    <DialogTrigger asChild>
-      <Button variant="outline" className="text-red-500 hover:text-red-700">
-        <Trash />
-      </Button>
-    </DialogTrigger>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Delete Work Order</DialogTitle>
-        <DialogDescription>
-          Delete Work Order confirm. 
-        </DialogDescription>
-      </DialogHeader>
-      <h1>Anda yakin ingin menghapus data ini?</h1>
-      <DialogFooter>
-        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+  <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+    <Trash />
+  </Button>
 );
 };
+
+export function PartAdd () {
+  const [formData, setFormData] = useState({
+    PartNumber: '',
+    Keyword: '',
+    PartDescription: '',
+    RestrictionReason: '',
+    Orderability: false,
+    CSR_Flag: false,
+    ROHS_Flag: false,
+    Returnable_Flag: false,
+    HardRoll_Flag: false,
+    DangerousGoods_Flag: false,
+    LithiumBattery_Flag: false,
+    Oversize_Flag: false,
+    Heavy_Flag: false,
+    Price: 0,
+    FreightPrice: 0,
+    Shipping_Fee: 0,
+    Tax: 0,
+    Total: 0,
+  });
+
+  const handleChange = (e) => {
+    const { id, type, value, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
+    setFormData((prev) => ({ ...prev, [id]: newValue }));
+  };
+
+  const handleSubmit = async () => {
+    const { PartNumber, Keyword, PartDescription } = formData;
+
+    if (!PartNumber || !Keyword || !PartDescription) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "PartNumber, Keyword, and PartDescription are required.",
+        icon: "warning",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    // Convert types before sending
+    const payload = {
+      ...formData,
+      Orderability: Boolean(formData.Orderability),
+      CSR_Flag: Boolean(formData.CSR_Flag),
+      ROHS_Flag: Boolean(formData.ROHS_Flag),
+      Returnable_Flag: Boolean(formData.Returnable_Flag),
+      HardRoll_Flag: Boolean(formData.HardRoll_Flag),
+      DangerousGoods_Flag: Boolean(formData.DangerousGoods_Flag),
+      LithiumBattery_Flag: Boolean(formData.LithiumBattery_Flag),
+      Oversize_Flag: Boolean(formData.Oversize_Flag),
+      Heavy_Flag: Boolean(formData.Heavy_Flag),
+      Price: Number(formData.Price),
+      FreightPrice: Number(formData.FreightPrice),
+      Shipping_Fee: Number(formData.Shipping_Fee),
+      Tax: Number(formData.Tax),
+      Total: Number(formData.Total),
+    };
+
+    try {
+      const res = await ApiCustomer.post(`/api/service-log/parts-catalog`, payload);
+      Swal.fire({
+        title: "Success!",
+        text: "Part successfully added.",
+        icon: "success",
+        timer: 1200,
+        showConfirmButton: false,
+      }).then(() => window.location.reload());
+    } catch (err) {
+      Swal.fire({
+        title: "Error!",
+        text: err.response?.data?.message || "Failed to add part.",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2">Part Add</Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Add New Part</DialogTitle>
+          <DialogDescription>Fill in all part details below:</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-2">
+          <Label>Part Number *</Label>
+          <Input type="text" id="PartNumber" value={formData.PartNumber} onChange={handleChange} />
+
+          <Label>Keyword *</Label>
+          <Input type="text" id="Keyword" value={formData.Keyword} onChange={handleChange} />
+
+          <Label>Part Description *</Label>
+          <Input type="text" id="PartDescription" value={formData.PartDescription} onChange={handleChange} />
+
+          <Label>Restriction Reason</Label>
+          <Input type="text" id="RestrictionReason" value={formData.RestrictionReason} onChange={handleChange} />
+
+          <Label>Price</Label>
+          <Input type="number" id="Price" value={formData.Price} onChange={handleChange} />
+
+          <Label>Freight Price</Label>
+          <Input type="number" id="FreightPrice" value={formData.FreightPrice} onChange={handleChange} />
+
+          <Label>Shipping Fee</Label>
+          <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} />
+
+          <Label>Tax</Label>
+          <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} />
+
+          <Label>Total</Label>
+          <Input type="number" id="Total" value={formData.Total} onChange={handleChange} />
+
+          {/* Checkbox flags */}
+          {[
+            "Orderability", "CSR_Flag", "ROHS_Flag", "Returnable_Flag", "HardRoll_Flag",
+            "DangerousGoods_Flag", "LithiumBattery_Flag", "Oversize_Flag", "Heavy_Flag"
+          ].map((flag) => (
+            <div key={flag}>
+              <label className="flex items-center space-x-2">
+                <input type="checkbox" id={flag} checked={formData[flag]} onChange={handleChange} />
+                <span>{flag.replace(/_/g, " ")}</span>
+              </label>
+            </div>
+          ))}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Submit</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export function PartEdit({ PartNumber, onUpdate }) {
+  const [formData, setFormData] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
+
+  const defaultFormData = {
+    PartNumber: "",
+    Keyword: "",
+    PartDescription: "",
+    Orderability: false,
+    RestrictionReason: "",
+    CSR_Flag: false,
+    ROHS_Flag: false,
+    Returnable_Flag: false,
+    HardRoll_Flag: false,
+    DangerousGoods_Flag: false,
+    LithiumBattery_Flag: false,
+    Oversize_Flag: false,
+    Heavy_Flag: false,
+    Price: "",
+    FreightPrice: "",
+    Tax: "",
+    Total: "",
+    Shipping_Fee: "",
+  };
+
+  const fetchPart = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/service-log/parts-catalog/${PartNumber}`);
+      setFormData(res.data.data || defaultFormData);
+    } catch (e) {
+      console.error("Fetch failed", e);
+    }
+  };
+
+  const handleChange = (field) => (e) => {
+    const val = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    setFormData((prev) => ({ ...prev, [field]: val }));
+  };
+
+  const handleUpdate = async () => {
+    const {
+      PartNumber, Keyword, PartDescription,
+      Price, FreightPrice, Tax, Shipping_Fee,
+      ...restFlags
+    } = formData;
+  
+    if (!PartNumber || !Keyword || !PartDescription) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Incomplete Data",
+        text: "Lengkapi semua field wajib.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false
+      });
+    }
+  
+    const updatedData = {
+      PartNumber,
+      Keyword,
+      PartDescription,
+      Price: parseFloat(Price) || 0,
+      FreightPrice: parseFloat(FreightPrice) || 0,
+      Tax: parseFloat(Tax) || 0,
+      Shipping_Fee: parseFloat(Shipping_Fee) || 0,
+      Total:
+        (parseFloat(Price) || 0) +
+        (parseFloat(FreightPrice) || 0) +
+        (parseFloat(Tax) || 0),
+      ...restFlags,
+    };
+  
+    try {
+      Swal.fire({
+        title: "Menyimpan data...",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading()
+      });
+  
+      await ApiCustomer.patch(`/api/service-log/parts-catalog/${PartNumber}`, updatedData);
+  
+      Swal.close(); // Tutup loading setelah selesai
+  
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Data berhasil diperbarui.",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false
+      }).then(() => {
+        onUpdate();
+        setIsOpen(false);
+      });
+  
+    } catch (e) {
+      console.error(e);
+      Swal.close(); // Tutup loading jika gagal
+      Swal.fire({
+        icon: "error",
+        title: "Gagal!",
+        text: "Perbaruan data gagal!",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false
+      });
+    }
+  };
+  
+
+  useEffect(() => {
+    if (PartNumber && isOpen) fetchPart();
+    else if (!isOpen) setFormData(defaultFormData);
+  }, [isOpen]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="h-[500px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Part</DialogTitle>
+          <DialogDescription>Update data part. (*) wajib diisi.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {[
+            { id: "PartNumber", label: "Part Number", type: "text", readonly: true },
+            { id: "Keyword", label: "Keyword", type: "text", required: true },
+            { id: "PartDescription", label: "Description", type: "textarea", required: true },
+            { id: "RestrictionReason", label: "Restriction Reason", type: "textarea" },
+            { id: "Orderability", label: "Orderable", type: "checkbox" },
+            { id: "CSR_Flag", label: "CSR", type: "checkbox" },
+            { id: "ROHS_Flag", label: "ROHS", type: "checkbox" },
+            { id: "Returnable_Flag", label: "Returnable", type: "checkbox" },
+            { id: "HardRoll_Flag", label: "Hard Roll", type: "checkbox" },
+            { id: "DangerousGoods_Flag", label: "Dangerous Goods", type: "checkbox" },
+            { id: "LithiumBattery_Flag", label: "Lithium Battery", type: "checkbox" },
+            { id: "Oversize_Flag", label: "Oversize", type: "checkbox" },
+            { id: "Heavy_Flag", label: "Heavy", type: "checkbox" },
+            { id: "Price", label: "Price", type: "number" },
+            { id: "FreightPrice", label: "Freight Price", type: "number" },
+            { id: "Tax", label: "Tax", type: "number" },
+            { id: "Shipping_Fee", label: "Shipping Fee", type: "number" },
+          ].map(({ id, label, type, required, readonly }) => (
+            <div key={id}>
+              <Label htmlFor={id}>
+                {label} {required && <span className="text-red-500">*</span>}
+              </Label>
+              {type === "textarea" ? (
+                <Textarea id={id} value={formData[id] || ""} onChange={handleChange(id)} />
+              ) : type === "checkbox" ? (
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" id={id} checked={!!formData[id]} onChange={handleChange(id)} />
+                  <label htmlFor={id}>{label}</label>
+                </div>
+              ) : (
+                <Input type={type} id={id} value={formData[id] || ""} onChange={handleChange(id)} readOnly={readonly} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Simpan</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export function PartDelete ({ PartNumber, isModalOpen, setIsModalOpen, onUpdate }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Part ini akan dihapus dan perubahan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/service-log/parts-catalog/${PartNumber}`);
+        
+        console.log("Server Response:", response.data);
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Part ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Part berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+         window.location.reload(); // Memuat ulang halaman
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Part ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus Part. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
+    }
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
+};
+
+export function ResourceAdd () {
+  const [formDataResource, setFormDataResource] = useState({
+   ResourceId: '',
+   Name: '',	
+   })
+   
+   // Make Handler ProductType
+   const handlerInputResource = (e) => {
+     const { id, value } = e.target
+     setFormDataResource(prevState => ({
+       ...prevState,
+       [id]:value
+     }));
+   };
+
+   // Handler Submit
+   const handlerResource = async () => {
+     const { 
+       ResourceId, Name
+     } = formDataResource;
+   
+     if (!ResourceId || !Name ) {
+       Swal.fire({
+         title: "Incomplete Data",
+         text: "Please fill in all fields before submitting.",
+         icon: "warning",
+         timer: 1500,
+         timerProgressBar: true,
+         showConfirmButton: false,
+         allowEscapeKey: false,
+       });
+       return;
+     }  
+   
+     try {
+       const response = await ApiCustomer.post("/api/resources", formDataResource);
+       console.log("Success:", response.data);
+   
+       Swal.fire({
+         icon: 'success',
+         title: 'Berhasil!',
+         text: 'Resource berhasil disimpan.',
+         timer: 1200,
+         timerProgressBar: true,
+         showConfirmButton: false,
+         allowEscapeKey: false,
+       }).then(() => {
+         window.location.reload();
+       });
+
+     } catch (err) {
+       console.error("Error saving Resource", err);
+   
+       Swal.fire({
+         title: "Error!",
+         text: "Failed to save Resource. Please try again.",
+         icon: "error",
+         timer: 1200,
+         timerProgressBar: true,
+         showConfirmButton: false,
+         allowEscapeKey: false,
+       });
+     }
+   };
+ return (
+   <Dialog>
+     <DialogTrigger asChild>
+       <Button variant="outline" className="h-11 rounded-sm ml-2"> Resource Add</Button>
+     </DialogTrigger>
+     <DialogContent className="h-[300px] overflow-y-auto">
+       <DialogHeader>
+         <DialogTitle>Add Resource Information</DialogTitle>
+         <DialogDescription>
+           Add the Resource Fields marked with * are required.
+         </DialogDescription>
+       </DialogHeader>
+       <div className="space-y-2">
+
+       <Label>Resource ID</Label>
+       <Input type="text" id="ResourceId" className="p-2" value={formDataResource.ResourceId} onChange={handlerInputResource} />
+
+       <Label>Name</Label>
+       <Input type="text" id="Name" className="p-2" value={formDataResource.Name} onChange={handlerInputResource} />
+       </div>
+       <DialogFooter>
+         <Button onClick={handlerResource}>Add</Button>
+       </DialogFooter>
+     </DialogContent>
+   </Dialog>
+ )
+};
+
+export function ResourceEdit({ ResourceId, onUpdate }) {
+  const [formData, setFormData] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
+
+  const defaultFormData = {
+    ResourceId: "",
+    Name: ""
+  };
+
+  const fetchResource = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/resources/${ResourceId}`);
+      setFormData(res.data.data || defaultFormData);
+    } catch (e) {
+      console.error("Fetch failed", e);
+    }
+  };
+
+  const handleChange = (field) => (e) => {
+    const val = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    setFormData((prev) => ({ ...prev, [field]: val }));
+  };
+
+  const handleUpdate = async () => {
+    const { Name } = formData;
+
+    if (!Name) {
+      return Swal.fire({
+        icon: "warning",
+        text: "Lengkapi semua field wajib.",
+        timer: 1200,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+    }
+
+    const updatedData = { Name };
+
+    try {
+      await ApiCustomer.patch(`/api/resources/${ResourceId}`, updatedData);
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Data diperbarui.",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        onUpdate();
+        setIsOpen(false);
+      });
+    } catch (e) {
+      console.error(e);
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Perbaruan gagal!",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (ResourceId && isOpen) fetchResource();
+    else if (!isOpen) setFormData(defaultFormData);
+  }, [isOpen]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="h-[300px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Resource</DialogTitle>
+          <DialogDescription>Update data Resource. (*) wajib diisi.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {[{ id: "ResourceId", label: "Resource Id", type: "text", required: true, readonly: true },
+            { id: "Name", label: "Name", type: "text", required: true }].map(({ id, label, type, required, readonly }) => (
+            <div key={id}>
+              <Label htmlFor={id}>
+                {label} {required && <span className="text-red-500">*</span>}
+              </Label>
+              <Input
+                type={type}
+                id={id}
+                value={formData[id] || ""}
+                onChange={handleChange(id)}
+                readOnly={readonly}
+              />
+            </div>
+          ))}
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={handleUpdate}>Simpan</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpdate }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Resource ini akan dihapus dan perubahan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/resources/${ResourceId}`);
+  
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Resource ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Resource berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.reload(); // Memuat ulang halaman
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Resource ini tidak bisa dihapus karena memiliki relasi.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus Resource. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
+    }
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
+}
+
+
 //? Service Case Tab List
 
 
@@ -2791,7 +4326,7 @@ return (
 //   )
 // }
 
-export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
+export function BtnModalsServiceCatalog({ open, setOpen, caseDetails }) {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -2968,6 +4503,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
         icon: "success",
         timer: 1500,
         showConfirmButton: false,
+        allowEscapeKey: false,
       }).then(()=>{
         setOpen(false);
         const WOID = res.data.WOID
@@ -2981,6 +4517,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
         icon: "error",
         timer: 1500,
         showConfirmButton: false,
+        allowEscapeKey: false,
       });
     }
   };
@@ -3390,6 +4927,279 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
   );
 }
 
+export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen  }) {
+  const [formData, setFormData] = useState({
+    PartNumber: "",
+    Keyword: "",
+    PartDescription: "",
+    Orderability: "",
+    RestrictionReason: "",
+    Price: "",
+    FreightPrice: "",
+    Shipping_Fee: "",
+    qty_parts: "",
+    Tax: "",
+    Total: "",
+    CSR_Flag: false,
+    ROHS_Flag: false,
+    Returnable_Flag: false,
+    HardRoll_Flag: false,
+    DangerousGoods_Flag: false,
+    LithiumBattery_Flag: false,
+    Oversize_Flag: false,
+    Heavy_Flag: false,
+  });
+
+  const handleChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    const requiredFields = [
+      "PartNumber", "Keyword", "PartDescription", "Orderability",
+      "Price", "qty_parts", "Tax", "Total"
+    ];
+
+    const missingFields = requiredFields.filter((field) => !formData[field]);
+    if (missingFields.length > 0) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post("/api/servicecatalog-parts", formData);
+      alert("Service Catalog Part added successfully!");
+      onAddSuccess && onAddSuccess();
+      onClose && onClose();
+    } catch (error) {
+      console.error("Failed to add part:", error);
+      alert("Failed to save service catalog part.");
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2">Add Part</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Service Catalog Part</DialogTitle>
+          <DialogDescription>
+            Fill in the fields to add a new part. * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
+          <Label>Part Number*</Label>
+          <Input id="PartNumber" value={formData.PartNumber} onChange={handleChange} />
+
+          <Label>Keyword*</Label>
+          <Input id="Keyword" value={formData.Keyword} onChange={handleChange} />
+
+          <Label>Part Description*</Label>
+          <Input id="PartDescription" value={formData.PartDescription} onChange={handleChange} />
+
+          <Label>Orderability*</Label>
+          <Input id="Orderability" value={formData.Orderability} onChange={handleChange} />
+
+          <Label>Restriction Reason</Label>
+          <Input id="RestrictionReason" value={formData.RestrictionReason} onChange={handleChange} />
+
+          <Label>Price*</Label>
+          <Input type="number" id="Price" value={formData.Price} onChange={handleChange} />
+
+          <Label>Freight Price</Label>
+          <Input type="number" id="FreightPrice" value={formData.FreightPrice} onChange={handleChange} />
+
+          <Label>Shipping Fee</Label>
+          <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} />
+
+          <Label>Tax*</Label>
+          <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} />
+
+          <Label>Total*</Label>
+          <Input type="number" id="Total" value={formData.Total} onChange={handleChange} />
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-4">
+            <div><input type="checkbox" id="CSR_Flag" checked={formData.CSR_Flag} onChange={handleChange} /> <label htmlFor="CSR_Flag">CSR</label></div>
+            <div><input type="checkbox" id="ROHS_Flag" checked={formData.ROHS_Flag} onChange={handleChange} /> <label htmlFor="ROHS_Flag">ROHS</label></div>
+            <div><input type="checkbox" id="Returnable_Flag" checked={formData.Returnable_Flag} onChange={handleChange} /> <label htmlFor="Returnable_Flag">Returnable</label></div>
+            <div><input type="checkbox" id="HardRoll_Flag" checked={formData.HardRoll_Flag} onChange={handleChange} /> <label htmlFor="HardRoll_Flag">Hard Roll</label></div>
+            <div><input type="checkbox" id="DangerousGoods_Flag" checked={formData.DangerousGoods_Flag} onChange={handleChange} /> <label htmlFor="DangerousGoods_Flag">Dangerous Goods</label></div>
+            <div><input type="checkbox" id="LithiumBattery_Flag" checked={formData.LithiumBattery_Flag} onChange={handleChange} /> <label htmlFor="LithiumBattery_Flag">Lithium Battery</label></div>
+            <div><input type="checkbox" id="Oversize_Flag" checked={formData.Oversize_Flag} onChange={handleChange} /> <label htmlFor="Oversize_Flag">Oversize</label></div>
+            <div><input type="checkbox" id="Heavy_Flag" checked={formData.Heavy_Flag} onChange={handleChange} /> <label htmlFor="Heavy_Flag">Heavy</label></div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ServiceCatalogPartEdit({ PartNumber, onUpdate }) {
+  // console.log(PartNumber);
+  const [isOpen, setIsOpen] = useState(false);
+  const [partData, setPartData] = useState({
+    PartNumber: "",
+    Keyword: "",
+    PartDescription: "",
+    Orderability: "",
+    RestrictionReason: "",
+    Price: "",
+    FreightPrice: "",
+    Shipping_Fee: "",
+    Tax: "",
+    Total: "",
+    CSR_Flag: false,
+    ROHS_Flag: false,
+    Returnable_Flag: false,
+    HardRoll_Flag: false,
+    DangerousGoods_Flag: false,
+    LithiumBattery_Flag: false,
+    Oversize_Flag: false,
+    Heavy_Flag: false,
+  });
+
+  const fetchPart = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/servicecatalog-parts/${PartNumber}`);
+      const data = response.data.data;
+      console.log("Data Dari API", data);
+
+      setPartData((prev) => ({
+        ...prev,
+        ...data,
+      }));
+    } catch (error) {
+      console.error("Error fetching part data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (PartNumber && isOpen) {
+      fetchPart();
+      console.log("Sialan");
+    }
+  }, [PartNumber, isOpen]);
+
+  const handleChange = (key, value) => {
+    setPartData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await ApiCustomer.patch(`/api/servicecatalog-parts/${PartNumber}`, partData);
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating part:", error);
+    }
+  };
+
+  const flagFields = [
+    "CSR_Flag",
+    "ROHS_Flag",
+    "Returnable_Flag",
+    "HardRoll_Flag",
+    "DangerousGoods_Flag",
+    "LithiumBattery_Flag",
+    "Oversize_Flag",
+    "Heavy_Flag",
+  ];
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchPart();}}>
+          <Pencil size={16} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Service Catalog Part</DialogTitle>
+          <DialogDescription>
+            Update the part details and flags.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-2">
+          {/* Input fields */}
+          {Object.entries(partData).map(([key, value]) => {
+            if (flagFields.includes(key)) return null; // Skip flags here
+            return (
+              <Input
+                key={key}
+                value={value || ""}
+                placeholder={key}
+                onChange={(e) => handleChange(key, e.target.value)}
+              />
+            );
+          })}
+
+          {/* Checkbox flags */}
+          <div className="grid grid-cols-2 gap-2 pt-4">
+            {flagFields.map((flag) => (
+              <div key={flag} className="flex items-center space-x-2">
+                <Checkbox
+                  id={flag}
+                  checked={!!partData[flag]}
+                  onCheckedChange={(checked) => handleChange(flag, checked)}
+                />
+                <Label htmlFor={flag}>{flag.replace(/_/g, " ")}</Label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ServiceCatalogPartDelete({ PartNumber, onUpdate }) {
+  const handleDelete = async () => {
+    try {
+      await ApiCustomer.delete(`/api/servicecatalog-parts/${PartNumber}`);
+      if (onUpdate) {
+        onUpdate(); // untuk refresh data setelah delete
+      }
+    } catch (error) {
+      console.error("Error deleting part:", error);
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700">
+          <Trash size={16} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Part</DialogTitle>
+          <DialogDescription>
+            Konfirmasi penghapusan part dari katalog.
+          </DialogDescription>
+        </DialogHeader>
+        <h1>Anda yakin ingin menghapus part ini?</h1>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 export function BtnModalsPartAdd({
   open2, 
   setOpen2,
@@ -3563,4 +5373,1739 @@ export function BtnModalsPartAdd({
     </Dialog>
     </>
   )
+}
+
+export function BtnModalsResourceAccountAdd({
+  open,
+  setOpen,
+  resourceAccounts,
+  selectedResourceAccounts,
+  setSelectedResourceAccounts
+}) {
+  const [tempSelectedAccounts, setTempSelectedAccounts] = useState([]);
+  const [nameInput, setNameInput] = useState("");
+  const [nameSearch, setNameSearch] = useState("");
+
+  const handleSelectAccount = (account, checked) => {
+    if (checked) {
+      setTempSelectedAccounts((prev) => [...prev, account]);
+    } else {
+      setTempSelectedAccounts((prev) =>
+        prev.filter((item) => item.ResourceAccountId !== account.ResourceAccountId)
+      );
+    }
+  };
+
+  const filteredAccounts = resourceAccounts.filter(account =>
+    account.Name.toLowerCase().includes(nameSearch.toLowerCase())
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:min-w-[50vw] sm:min-h-[fit-content] flex flex-col justify-center">
+        <DialogHeader>
+          <DialogTitle className="text-blue-600 text-2xl">Add Resource Account</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex items-center justify-between">
+          <span className="flex gap-2 items-center">
+            <DialogDescription className="whitespace-nowrap">Name</DialogDescription>
+            <Input
+              className="ring-1 min-w-[10em] ring-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+            />
+            <Button variant="search" onClick={() => setNameSearch(nameInput)}>
+              Search
+            </Button>
+          </span>
+        </div>
+
+        <div className="overflow-x-auto max-w-full mt-4">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Select</TableHead>
+                <TableHead>Resource Account ID</TableHead>
+                <TableHead>Name</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredAccounts
+                .filter(account => !selectedResourceAccounts.some(sel => sel.ResourceAccountId === account.ResourceAccountId))
+                .map((account, index) => {
+                  const isChecked = tempSelectedAccounts.some(item => item.ResourceAccountId === account.ResourceAccountId);
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={(checked) => handleSelectAccount(account, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>{account.ResourceAccountId}</TableCell>
+                      <TableCell>{account.Name}</TableCell>
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+        </div>
+
+        <DialogFooter className="sm:justify-start mt-4">
+          <Button
+            variant="search"
+            onClick={() => {
+              setSelectedResourceAccounts((prev) => [
+                ...prev,
+                ...tempSelectedAccounts.filter(
+                  (acc) => !prev.some((a) => a.ResourceAccountId === acc.ResourceAccountId)
+                ),
+              ]);
+              setTempSelectedAccounts([]);
+              Swal.fire({
+                title: "Success!",
+                text: "Resource Account(s) added successfully!",
+                icon: "success",
+                timer: 1500,
+                showConfirmButton: false,
+              }).then(() => {
+                setOpen(false);
+              });
+            }}
+          >
+            Add Account
+          </Button>
+          <Button
+            variant="search"
+            onClick={() => {
+              setTempSelectedAccounts([]);
+              setNameInput("");
+              setNameSearch("");
+            }}
+          >
+            Clear
+          </Button>
+          <Button variant="search" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// import { useState } from "react";
+// import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+// import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import Swal from "sweetalert2";
+// import { ApiCustomer } from "@/lib/axios";
+
+export function ResourceAccountAdd() {
+  const [formData, setFormData] = useState({
+    ResourceAccountId: '',
+    Name: '',
+    ResourceId: '',
+  });
+
+  const [resources, setResources] = useState([]);
+
+  useEffect(() => {
+    // Fetch list of Resources untuk opsi select
+    const fetchResources = async () => {
+      try {
+        const response = await ApiCustomer.get("/api/resources"); // pastikan endpoint ini sesuai
+        setResources(response.data.data);
+        // console.log("Hasil Respon",response.data.data);
+      } catch (error) {
+        console.error("Error fetching resources:", error);
+      }
+    };
+
+    fetchResources();
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.ResourceAccountId || !formData.Name) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "ResourceAccountId and Name are required.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post("/api/resource-account", formData);
+      console.log("Success:", response.data);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'ResourceAccount berhasil disimpan.',
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Error saving ResourceAccount:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menyimpan ResourceAccount. Silakan coba lagi.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2">Add Resource Account</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add ResourceAccount</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>ResourceAccountId *</Label>
+          <Input id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} />
+
+          <Label>Name *</Label>
+          <Input id="Name" value={formData.Name} onChange={handleInputChange} />
+
+          <Label>Resource (optional)</Label>
+          <select
+            id="ResourceId"
+            value={formData.ResourceId || ""}
+            onChange={handleInputChange}
+            className="w-full border rounded px-3 py-2"
+          >
+            <option value="">-- Select Resource --</option>
+            {resources.map((resource) => (
+              <option key={resource.ResourceId} value={resource.ResourceId}>
+                {resource.Name || resource.ResourceId}
+              </option>
+            ))}
+          </select>
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ResourceAccountEdit({ ResourceAccountId, onUpdate, resources }) {
+  const [resourceAccount, setResourceAccount] = useState(null);
+  const [name, setName] = useState("");
+  const [resourceId, setResourceId] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchResourceAccount = async () => {
+    if (!ResourceAccountId) return;
+    try {
+      const response = await ApiCustomer.get(`/api/resource-account/${ResourceAccountId}`);
+      const data = response.data.data;
+      setResourceAccount(data);
+      setName(data?.Name || "");
+      setResourceId(data?.ResourceId || "");
+    } catch (error) {
+      console.error("Error fetching ResourceAccount:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (ResourceAccountId && isOpen) {
+      fetchResourceAccount();
+    }
+  }, [ResourceAccountId, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setName("");
+      setResourceId("");
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!name) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Name is required.",
+        icon: "warning",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/resource-account/${ResourceAccountId}`, {
+        Name: name,
+        ResourceId: resourceId || null,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "ResourceAccount has been updated.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+
+      onUpdate(); // Refresh parent data
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating ResourceAccount:", error);
+      Swal.fire({
+        title: "Update Failed",
+        text: "Could not update ResourceAccount. Please try again.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchResourceAccount(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit ResourceAccount</DialogTitle>
+          <DialogDescription>
+            Update the details of the ResourceAccount. Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name*"
+          />
+          <select
+            value={resourceId || ""}
+            onChange={(e) => setResourceId(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+          >
+            <option value="">-- Select Resource (optional) --</option>
+            {resources.map((res) => (
+              <option key={res.ResourceId} value={res.ResourceId}>
+                {res.Name || res.ResourceId}
+              </option>
+            ))}
+          </select>
+        </div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ResourceAccountDelete({ ResourceAccountId, onUpdate }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      const response = await ApiCustomer.delete(`/api/resource-account/${ResourceAccountId}`);
+
+      if (response.status === 409 || response.data.success === false) {
+        alert(response.data.message || "Cannot delete this ResourceAccount due to restrictions.");
+        return;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "ResourceAccount berhasil dihapus.",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+
+      setIsModalOpen(false);
+
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      if (error.response?.status === 409) {
+        alert(error.response.data.message || "Cannot delete! ResourceAccount has related records.");
+      } else {
+        alert("Failed to delete ResourceAccount. Please try again.");
+      }
+    }
+  };
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete ResourceAccount</DialogTitle>
+          <DialogDescription>
+            Confirm deletion of this ResourceAccount.
+          </DialogDescription>
+        </DialogHeader>
+        <p>Apakah Anda yakin ingin menghapus data ini?</p>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SubkTechnicianAdd() {
+  const [formData, setFormData] = useState({
+    SubkTechnicianId: '',
+    Name: '',
+    ResourceAccountId: '',
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.SubkTechnicianId || !formData.Name) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "SubkTechnicianId and Name are required.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post("/api/subk-technician", {
+        SubkTechnicianId: formData.SubkTechnicianId,
+        Name: formData.Name,
+        ResourceAccountId: formData.ResourceAccountId || null,
+      });
+
+      console.log("Success:", response.data);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'SubkTechnician berhasil disimpan.',
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Error saving SubkTechnician:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menyimpan SubkTechnician. Silakan coba lagi.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2">Add Subk Technician</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add SubkTechnician</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>SubkTechnicianId *</Label>
+          <Input id="SubkTechnicianId" value={formData.SubkTechnicianId} onChange={handleInputChange} />
+
+          <Label>Name *</Label>
+          <Input id="Name" value={formData.Name} onChange={handleInputChange} />
+
+          {/* <Label>ResourceAccountId (optional)</Label>
+          <Input id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} /> */}
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SubkTechnicianEdit({ SubkTechnicianId, onUpdate }) {
+  const [subkTechnician, setSubkTechnician] = useState(null);
+  const [name, setName] = useState("");
+  const [resourceAccountId, setResourceAccountId] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchSubkTechnician = async () => {
+    if (!SubkTechnicianId) return;
+    try {
+      const response = await ApiCustomer.get(`/api/subk-technician/${SubkTechnicianId}`);
+      const data = response.data.data;
+      setSubkTechnician(data);
+      setName(data?.Name || "");
+      setResourceAccountId(data?.ResourceAccountId || "");
+    } catch (error) {
+      console.error("Error fetching SubkTechnician:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (SubkTechnicianId && isOpen) {
+      fetchSubkTechnician();
+    }
+  }, [SubkTechnicianId, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setName("");
+      setResourceAccountId("");
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!name) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Name is required.",
+        icon: "warning",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/subk-technician/${SubkTechnicianId}`, {
+        Name: name,
+        ResourceAccountId: resourceAccountId || null,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "SubkTechnician has been updated.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+
+      onUpdate(); // Refresh parent data
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating SubkTechnician:", error);
+      Swal.fire({
+        title: "Update Failed",
+        text: "Could not update SubkTechnician. Please try again.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchSubkTechnician(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit SubkTechnician</DialogTitle>
+          <DialogDescription>
+            Update the details of the SubkTechnician. Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name*"
+          />
+          <Input
+            value={resourceAccountId}
+            onChange={(e) => setResourceAccountId(e.target.value)}
+            placeholder="ResourceAccountId (optional)"
+          />
+        </div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SubkTechnicianDelete({ SubkTechnicianId, onUpdate }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      const response = await ApiCustomer.delete(`/api/subk-technician/${SubkTechnicianId}`);
+
+      if (response.status === 409 || response.data.success === false) {
+        alert(response.data.message || "Cannot delete this SubkTechnician due to restrictions.");
+        return;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "SubkTechnician berhasil dihapus.",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+
+      setIsModalOpen(false);
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      if (error.response?.status === 409) {
+        alert(error.response.data.message || "Cannot delete! SubkTechnician has related records.");
+      } else {
+        alert("Failed to delete SubkTechnician. Please try again.");
+      }
+    }
+  };
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete SubkTechnician</DialogTitle>
+          <DialogDescription>
+            Confirm deletion of this SubkTechnician.
+          </DialogDescription>
+        </DialogHeader>
+        <p>Apakah Anda yakin ingin menghapus data ini?</p>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SymptomCodeAdd({ onUpdate }) {
+  const [formData, setFormData] = useState({
+    SymptomCode: '',
+    TopCategory: '',
+    SubCategory: '',
+    QualityCodes: '',
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.SymptomCode || !formData.TopCategory || !formData.SubCategory) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "SymptomCode, TopCategory, and SubCategory are required.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post("/api/symptom-codes", formData);
+
+      console.log("Success:", response.data);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Symptom Code berhasil disimpan.',
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        onUpdate?.();
+      });
+    } catch (error) {
+      console.error("Error saving Symptom Code:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menyimpan data. Silakan coba lagi.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm mb-4">Add Symptom Code</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Symptom Code</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>SymptomCode *</Label>
+          <Input id="SymptomCode" value={formData.SymptomCode} onChange={handleInputChange} />
+
+          <Label>TopCategory *</Label>
+          <Input id="TopCategory" value={formData.TopCategory} onChange={handleInputChange} />
+
+          <Label>SubCategory *</Label>
+          <Input id="SubCategory" value={formData.SubCategory} onChange={handleInputChange} />
+
+          <Label>QualityCodes</Label>
+          <Input id="QualityCodes" value={formData.QualityCodes} onChange={handleInputChange} />
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SymptomCodeEdit({ SymptomCodeID, onUpdate }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [symptomData, setSymptomData] = useState({
+    SymptomCode: "",
+    TopCategory: "",
+    SubCategory: "",
+    QualityCodes: "",
+  });
+
+  const fetchSymptomData = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/symptom-codes/${SymptomCodeID}`);
+      const data = response.data.data;
+      setSymptomData({
+        SymptomCode: data?.SymptomCode || "",
+        TopCategory: data?.TopCategory || "",
+        SubCategory: data?.SubCategory || "",
+        QualityCodes: data?.QualityCodes || "",
+      });
+    } catch (error) {
+      console.error("Error fetching Symptom Code:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) fetchSymptomData();
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    const { SymptomCode, TopCategory, SubCategory } = symptomData;
+    if (!SymptomCode || !TopCategory || !SubCategory) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "SymptomCode, TopCategory, and SubCategory are required.",
+        icon: "warning",
+        timer: 1200,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/symptom-codes/${SymptomCodeID}`, symptomData);
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: "Symptom Code has been updated.",
+        timer: 1200,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      setIsOpen(false);
+      onUpdate?.();
+    } catch (error) {
+      console.error("Error updating Symptom Code:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "Could not update Symptom Code.",
+        timer: 1200,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+    }
+  };
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setSymptomData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Symptom Code</DialogTitle>
+          <DialogDescription>Update the details of the symptom code. Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Input id="SymptomCode" value={symptomData.SymptomCode} onChange={handleChange} placeholder="SymptomCode *" />
+          <Input id="TopCategory" value={symptomData.TopCategory} onChange={handleChange} placeholder="TopCategory *" />
+          <Input id="SubCategory" value={symptomData.SubCategory} onChange={handleChange} placeholder="SubCategory *" />
+          <Input id="QualityCodes" value={symptomData.QualityCodes} onChange={handleChange} placeholder="QualityCodes" />
+        </div>
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SymptomCodeDelete({ SymptomCodeID, onUpdate }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      const response = await ApiCustomer.delete(`/api/symptom-codes/${SymptomCodeID}`);
+
+      if (response.status === 409 || response.data.success === false) {
+        alert(response.data.message || "Cannot delete this Symptom Code due to restrictions.");
+        return;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Deleted",
+        text: "Symptom Code has been deleted successfully.",
+        timer: 1100,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+
+      setIsModalOpen(false);
+      onUpdate?.();
+    } catch (error) {
+      if (error.response?.status === 409) {
+        alert(error.response.data.message || "Cannot delete! Symptom Code has related records.");
+      } else {
+        alert("Failed to delete Symptom Code. Please try again.");
+      }
+    }
+  };
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Symptom Code</DialogTitle>
+          <DialogDescription>Confirm deletion of this Symptom Code.</DialogDescription>
+        </DialogHeader>
+        <p>Apakah Anda yakin ingin menghapus data ini?</p>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingsAdd({ onUpdate }) {
+  const [formData, setFormData] = useState({
+    WOID: "",
+    BookingStatus: "",
+    ScheduleJeopardy: false,
+    ScheduleJeopardyTime: "",
+    DoNotDisturb: false,
+    CeScheduleChange: false,
+    TotalBillableDurationInMinutes: "",
+    TotalInProgressDurationInMinutes: "",
+    TotalBreakDurationInMinutes: "",
+    CreatedBy: "",
+  });
+
+  const [workorders, setWorkorders] = useState([]);
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        const [woRes, userRes] = await Promise.all([
+          ApiCustomer.get("/api/work-order"),
+          ApiCustomer.get("/api/user"),
+        ]);
+        setWorkorders(woRes.data.data || []);
+        setUsers(userRes.data.data || []);
+      } catch (error) {
+        console.error("Failed to load dropdown data:", error);
+      }
+    };
+
+    fetchDropdownData();
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.WOID || !formData.CreatedBy) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "WOID and CreatedBy are required.",
+        icon: "warning",
+        timer: 1500,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      return;
+    }
+
+    const dataToSend = {
+      ...formData,
+      ScheduleJeopardyTime: formData.ScheduleJeopardyTime ? new Date(formData.ScheduleJeopardyTime) : null,
+      TotalBillableDurationInMinutes: formData.TotalBillableDurationInMinutes ? parseInt(formData.TotalBillableDurationInMinutes) : null,
+      TotalInProgressDurationInMinutes: formData.TotalInProgressDurationInMinutes ? parseInt(formData.TotalInProgressDurationInMinutes) : null,
+      TotalBreakDurationInMinutes: formData.TotalBreakDurationInMinutes ? parseInt(formData.TotalBreakDurationInMinutes) : null,
+      CreatedBy: parseInt(formData.CreatedBy),
+    };
+
+    try {
+      await ApiCustomer.post("/api/booking", dataToSend);
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Booking berhasil disimpan.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        onUpdate?.();
+      });
+    } catch (error) {
+      console.error("Error saving Booking:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menyimpan data. Silakan coba lagi.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm mb-4">Add Booking</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Booking</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>WOID *</Label>
+          <select
+            id="WOID"
+            value={formData.WOID}
+            onChange={handleInputChange}
+            className="w-full border p-2 rounded"
+          >
+            <option value="">-- Select WOID --</option>
+            {workorders.map((wo) => (
+              <option key={wo.WOID} value={wo.WOID}>{wo.WOID}</option>
+            ))}
+          </select>
+
+          <Label>Booking Status</Label>
+          <Input id="BookingStatus" value={formData.BookingStatus} onChange={handleInputChange} />
+
+          <div className="flex items-center space-x-2">
+            <input type="checkbox" id="ScheduleJeopardy" checked={formData.ScheduleJeopardy} onChange={handleInputChange} />
+            <Label htmlFor="ScheduleJeopardy">Schedule Jeopardy</Label>
+          </div>
+
+          <Label>Schedule Jeopardy Time</Label>
+          <Input id="ScheduleJeopardyTime" type="datetime-local" value={formData.ScheduleJeopardyTime} onChange={handleInputChange} />
+
+          <div className="flex items-center space-x-2">
+            <input type="checkbox" id="DoNotDisturb" checked={formData.DoNotDisturb} onChange={handleInputChange} />
+            <Label htmlFor="DoNotDisturb">Do Not Disturb</Label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input type="checkbox" id="CeScheduleChange" checked={formData.CeScheduleChange} onChange={handleInputChange} />
+            <Label htmlFor="CeScheduleChange">CE Schedule Change</Label>
+          </div>
+
+          <Label>Total Billable Duration (minutes)</Label>
+          <Input id="TotalBillableDurationInMinutes" type="number" value={formData.TotalBillableDurationInMinutes} onChange={handleInputChange} />
+
+          <Label>Total In Progress Duration (minutes)</Label>
+          <Input id="TotalInProgressDurationInMinutes" type="number" value={formData.TotalInProgressDurationInMinutes} onChange={handleInputChange} />
+
+          <Label>Total Break Duration (minutes)</Label>
+          <Input id="TotalBreakDurationInMinutes" type="number" value={formData.TotalBreakDurationInMinutes} onChange={handleInputChange} />
+
+          <Label>Created By *</Label>
+          <select
+            id="CreatedBy"
+            value={formData.CreatedBy}
+            onChange={handleInputChange}
+            className="w-full border p-2 rounded"
+          >
+            <option value="">-- Select User --</option>
+            {users.map((user) => (
+              <option key={user.IDUser} value={user.IDUser}>
+                {user.Name || `User ${user.IDUser}`}
+              </option>
+            ))}
+          </select>
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingsEdit({ BookingId, onUpdate }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [bookingData, setBookingData] = useState({
+    BookingStatus: "",
+    ScheduleJeopardy: false,
+    ScheduleJeopardyTime: "",
+    DoNotDisturb: false,
+    CeScheduleChange: false,
+    TotalBillableDurationInMinutes: 0,
+    TotalInProgressDurationInMinutes: 0,
+    TotalBreakDurationInMinutes: 0,
+  });
+
+  const fetchBookingData = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/booking/${BookingId}`);
+      const data = res.data.data;
+      setBookingData({
+        BookingStatus: data.BookingStatus || "",
+        ScheduleJeopardy: data.ScheduleJeopardy || false,
+        ScheduleJeopardyTime: data.ScheduleJeopardyTime?.slice(0, 16) || "",
+        DoNotDisturb: data.DoNotDisturb || false,
+        CeScheduleChange: data.CeScheduleChange || false,
+        TotalBillableDurationInMinutes: data.TotalBillableDurationInMinutes || 0,
+        TotalInProgressDurationInMinutes: data.TotalInProgressDurationInMinutes || 0,
+        TotalBreakDurationInMinutes: data.TotalBreakDurationInMinutes || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching booking:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) fetchBookingData();
+  }, [isOpen]);
+
+  const handleChange = (e) => {
+    const { id, value, type, checked } = e.target;
+  
+    setBookingData((prev) => ({
+      ...prev,
+      [id]:
+        type === "checkbox"
+          ? checked
+          : type === "number"
+          ? parseInt(value) || 0
+          : value,
+    }));
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await ApiCustomer.patch(`/api/booking/${BookingId}`, bookingData);
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: "Booking has been updated.",
+        timer: 1200,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      setIsOpen(false);
+      onUpdate?.();
+    } catch (error) {
+      console.error("Error updating booking:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "Could not update Booking.",
+        timer: 1500,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Edit Booking</DialogTitle>
+          <DialogDescription>Update booking status and details below.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <Input id="BookingStatus" value={bookingData.BookingStatus} onChange={handleChange} placeholder="Booking Status" />
+
+          <div className="flex items-center space-x-2">
+            <label htmlFor="ScheduleJeopardy">Schedule Jeopardy</label>
+            <Checkbox
+                id="ScheduleJeopardy"
+                checked={bookingData.ScheduleJeopardy}
+                onCheckedChange={(checked) =>
+                  setBookingData((prev) => ({ ...prev, ScheduleJeopardy: checked }))
+                }
+              />
+          </div>
+
+          <Input
+            id="ScheduleJeopardyTime"
+            type="datetime-local"
+            value={bookingData.ScheduleJeopardyTime}
+            onChange={handleChange}
+          />
+
+          <div className="flex items-center space-x-2">
+            <Checkbox id="DoNotDisturb" checked={bookingData.DoNotDisturb} onChange={handleChange} />
+            <label htmlFor="DoNotDisturb">Do Not Disturb</label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox id="CeScheduleChange" checked={bookingData.CeScheduleChange} onChange={handleChange} />
+            <label htmlFor="CeScheduleChange">CE Schedule Change</label>
+          </div>
+
+          <Input
+            id="TotalBillableDurationInMinutes"
+            type="number"
+            value={bookingData.TotalBillableDurationInMinutes}
+            onChange={handleChange}
+            placeholder="Total Billable Duration (min)"
+          />
+          <Input
+            id="TotalInProgressDurationInMinutes"
+            type="number"
+            value={bookingData.TotalInProgressDurationInMinutes}
+            onChange={handleChange}
+            placeholder="In-Progress Duration (min)"
+          />
+          <Input
+            id="TotalBreakDurationInMinutes"
+            type="number"
+            value={bookingData.TotalBreakDurationInMinutes}
+            onChange={handleChange}
+            placeholder="Break Duration (min)"
+          />
+        </div>
+
+        <DialogFooter className="pt-4">
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingsDelete({ BookingId, onUpdate }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      const response = await ApiCustomer.delete(`/api/booking/${BookingId}`);
+
+      if (response.status === 409 || response.data.success === false) {
+        Swal.fire({
+          icon: "error",
+          title: "Cannot Delete",
+          text: response.data.message || "This booking cannot be deleted due to relational restrictions.",
+          timer: 1400,
+          showConfirmButton: false,
+          timerProgressBar: true,
+        });
+        return;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Deleted",
+        text: "Booking has been deleted successfully.",
+        timer: 1100,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+
+      setIsModalOpen(false);
+      onUpdate?.(); // Refresh list
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: error?.response?.data?.message || "Failed to delete booking.",
+        timer: 1400,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Booking</DialogTitle>
+          <DialogDescription>Are you sure you want to delete this booking? This action cannot be undone.</DialogDescription>
+        </DialogHeader>
+        <p>This will permanently remove the booking record from the system.</p>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingDetailsAdd({ onUpdate }) {
+  const [formData, setFormData] = useState({
+    BookingId: "",
+    ResourceId: "",
+    ResourceAccountId: "",
+    SubkTechnicianId: "",
+    Name: "",
+    Status: "",
+    StartTimeCustomerTime: "",
+    EndTimeCustomerTime: "",
+    EstimatedArrivalTimeCustomerTime: "",
+    ActualArrivalTimeCustomerTime: "",
+    StartTimeUserTime: "",
+    EndTimeUserTime: "",
+    DurationInMinutesUserTime: "",
+    EstimatedArrivalTimeUserTime: "",
+    ActualArrivalTimeUserTime: "",
+    ChangedBy: "",
+  });
+
+  const [bookings, setBookings] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [technicians, setTechnicians] = useState([]);
+
+  useEffect(() => {
+    const fetchDropdowns = async () => {
+      try {
+        const [bookingRes, resourceRes, accountRes, techRes] = await Promise.all([
+          ApiCustomer.get("/api/booking"),
+          ApiCustomer.get("/api/resources"),
+          ApiCustomer.get("/api/resource-account"),
+          ApiCustomer.get("/api/subk-technician"),
+        ]);
+        setBookings(bookingRes.data.data || []);
+        setResources(resourceRes.data.data || []);
+        setAccounts(accountRes.data.data || []);
+        setTechnicians(techRes.data.data || []);
+      } catch (error) {
+        console.error("Dropdown fetch failed:", error);
+      }
+    };
+    fetchDropdowns();
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const toFullISOString = (value) => {
+    if (!value) return null;
+    // Tambah ":00" jika hanya sampai menit
+    return value.length === 16 ? value + ":00" : value;
+  };
+  
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        ...formData,
+        BookingId: parseInt(formData.BookingId),
+        ResourceId: formData.ResourceId || null,
+        ResourceAccountId: formData.ResourceAccountId || null,
+        SubkTechnicianId: formData.SubkTechnicianId || null,
+        DurationInMinutesUserTime: formData.DurationInMinutesUserTime ? parseInt(formData.DurationInMinutesUserTime) : null,
+        ChangedBy: parseInt(formData.ChangedBy),
+        StartTimeCustomerTime: toFullISOString(formData.StartTimeCustomerTime),
+        EndTimeCustomerTime: toFullISOString(formData.EndTimeCustomerTime),
+        EstimatedArrivalTimeCustomerTime: toFullISOString(formData.EstimatedArrivalTimeCustomerTime),
+        ActualArrivalTimeCustomerTime: toFullISOString(formData.ActualArrivalTimeCustomerTime),
+        StartTimeUserTime: toFullISOString(formData.StartTimeUserTime),
+        EndTimeUserTime: toFullISOString(formData.EndTimeUserTime),
+        EstimatedArrivalTimeUserTime: toFullISOString(formData.EstimatedArrivalTimeUserTime),
+        ActualArrivalTimeUserTime: toFullISOString(formData.ActualArrivalTimeUserTime),
+      };
+  
+      await ApiCustomer.post("/api/bookingDetails", payload);
+      Swal.fire({ icon: "success", title: "Success", text: "Booking detail saved", timer: 1200, showConfirmButton: false });
+      onUpdate?.();
+    } catch (error) {
+      console.error("ERROR in BookingDetails POST:", error);
+      Swal.fire({ icon: "error", title: "Failed", text: "Failed to save data", timer: 1500, showConfirmButton: false });
+    }
+  };
+  
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm mb-4">Add Booking Detail</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl overflow-y-auto max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle>Add Booking Detail</DialogTitle>
+          <DialogDescription>Lengkapi data berikut sesuai kebutuhan.</DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Booking Info */}
+          <div>
+            <Label>Booking *</Label>
+            <select id="BookingId" value={formData.BookingId} onChange={handleInputChange} className="w-full border p-2 rounded">
+              <option value="">-- Select Booking --</option>
+              {bookings.map((b) => <option key={b.BookingId} value={b.BookingId}>{b.BookingId}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <Label>Resource</Label>
+            <select id="ResourceId" value={formData.ResourceId} onChange={handleInputChange} className="w-full border p-2 rounded">
+              <option value="">-- Select Resource --</option>
+              {resources.map((r) => <option key={r.ResourceId} value={r.ResourceId}>{r.Name || r.ResourceId}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <Label>Resource Account</Label>
+            <select id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} className="w-full border p-2 rounded">
+              <option value="">-- Select Account --</option>
+              {accounts.map((a) => <option key={a.ResourceAccountId} value={a.ResourceAccountId}>{a.Name || a.ResourceAccountId}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <Label>Subk Technician</Label>
+            <select id="SubkTechnicianId" value={formData.SubkTechnicianId} onChange={handleInputChange} className="w-full border p-2 rounded">
+              <option value="">-- Select Technician --</option>
+              {technicians.map((t) => <option key={t.SubkTechnicianId} value={t.SubkTechnicianId}>{t.Name || t.SubkTechnicianId}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <Label>Name</Label>
+            <Input id="Name" value={formData.Name} onChange={handleInputChange} />
+          </div>
+
+          <div>
+            <Label>Status</Label>
+            <Input id="Status" value={formData.Status} onChange={handleInputChange} />
+          </div>
+
+          {/* Customer Time */}
+          <div className="md:col-span-2 border-t pt-2">
+            <p className="font-semibold mb-1">Customer Time</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div><Label>Start Time</Label><Input type="datetime-local" id="StartTimeCustomerTime" value={formData.StartTimeCustomerTime} onChange={handleInputChange} /></div>
+              <div><Label>End Time</Label><Input type="datetime-local" id="EndTimeCustomerTime" value={formData.EndTimeCustomerTime} onChange={handleInputChange} /></div>
+              <div><Label>Estimated Arrival</Label><Input type="datetime-local" id="EstimatedArrivalTimeCustomerTime" value={formData.EstimatedArrivalTimeCustomerTime} onChange={handleInputChange} /></div>
+              <div><Label>Actual Arrival</Label><Input type="datetime-local" id="ActualArrivalTimeCustomerTime" value={formData.ActualArrivalTimeCustomerTime} onChange={handleInputChange} /></div>
+            </div>
+          </div>
+
+          {/* User Time */}
+          <div className="md:col-span-2 border-t pt-2">
+            <p className="font-semibold mb-1">User Time</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div><Label>Start Time</Label><Input type="datetime-local" id="StartTimeUserTime" value={formData.StartTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>End Time</Label><Input type="datetime-local" id="EndTimeUserTime" value={formData.EndTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>Estimated Arrival</Label><Input type="datetime-local" id="EstimatedArrivalTimeUserTime" value={formData.EstimatedArrivalTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>Actual Arrival</Label><Input type="datetime-local" id="ActualArrivalTimeUserTime" value={formData.ActualArrivalTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>Duration (minutes)</Label><Input type="number" id="DurationInMinutesUserTime" value={formData.DurationInMinutesUserTime} onChange={handleInputChange} /></div>
+            </div>
+          </div>
+
+          <div>
+            <Label>Changed By *</Label>
+            <Input id="ChangedBy" type="number" value={formData.ChangedBy} onChange={handleInputChange} />
+          </div>
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={handleSubmit}>Submit</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [form, setForm] = useState({
+    BookingId: 0,
+    ResourceId: "",
+    ResourceAccountId: "",
+    SubkTechnicianId: "",
+    Name: "",
+    Status: "",
+
+    // Customer Time
+    StartTimeCustomerTime: "",
+    EndTimeCustomerTime: "",
+    EstimatedArrivalTimeCustomerTime: "",
+    ActualArrivalTimeCustomerTime: "",
+
+    // User Time
+    StartTimeUserTime: "",
+    EndTimeUserTime: "",
+    DurationInMinutesUserTime: 0,
+    EstimatedArrivalTimeUserTime: "",
+    ActualArrivalTimeUserTime: "",
+
+    ChangedBy: 0,
+  });
+
+  const fetchDetail = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/bookingDetails/${BookingDetailId}`);
+      const data = res.data.data;
+
+      setForm({
+        BookingId: data.BookingId || 0,
+        ResourceId: data.ResourceId || "",
+        ResourceAccountId: data.ResourceAccountId || "",
+        SubkTechnicianId: data.SubkTechnicianId || "",
+        Name: data.Name || "",
+        Status: data.Status || "",
+
+        StartTimeCustomerTime: data.StartTimeCustomerTime?.slice(0, 16) || "",
+        EndTimeCustomerTime: data.EndTimeCustomerTime?.slice(0, 16) || "",
+        EstimatedArrivalTimeCustomerTime: data.EstimatedArrivalTimeCustomerTime?.slice(0, 16) || "",
+        ActualArrivalTimeCustomerTime: data.ActualArrivalTimeCustomerTime?.slice(0, 16) || "",
+
+        StartTimeUserTime: data.StartTimeUserTime?.slice(0, 16) || "",
+        EndTimeUserTime: data.EndTimeUserTime?.slice(0, 16) || "",
+        EstimatedArrivalTimeUserTime: data.EstimatedArrivalTimeUserTime?.slice(0, 16) || "",
+        ActualArrivalTimeUserTime: data.ActualArrivalTimeUserTime?.slice(0, 16) || "",
+        DurationInMinutesUserTime: data.DurationInMinutesUserTime || 0,
+
+        ChangedBy: data.ChangedBy || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching booking detail:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && BookingDetailId) fetchDetail();
+  }, [isOpen]);
+
+  const handleChange = (e) => {
+    const { id, value, type } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [id]: type === "number" ? parseInt(value) || 0 : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await ApiCustomer.patch(`/api/bookingDetails/${BookingDetailId}`, form);
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: "Booking detail has been updated.",
+        timer: 1200,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      setIsOpen(false);
+      onUpdate?.();
+    } catch (error) {
+      console.error("Error updating booking detail:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "Could not update booking detail.",
+        timer: 1500,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Edit Booking Detail</DialogTitle>
+          <DialogDescription>Update all necessary fields below.</DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto">
+          <div>
+            <label htmlFor="BookingId">Booking ID</label>
+            <Input id="BookingId" type="number" value={form.BookingId} onChange={handleChange} />
+          </div>
+          <div>
+            <label htmlFor="Name">Name</label>
+            <Input id="Name" value={form.Name} onChange={handleChange} />
+          </div>
+          <div>
+            <label htmlFor="Status">Status</label>
+            <Input id="Status" value={form.Status} onChange={handleChange} />
+          </div>
+          <div>
+            <label htmlFor="ResourceId">Resource ID</label>
+            <Input id="ResourceId" value={form.ResourceId || ""} onChange={handleChange} />
+          </div>
+          <div>
+            <label htmlFor="ResourceAccountId">Resource Account ID</label>
+            <Input id="ResourceAccountId" value={form.ResourceAccountId || ""} onChange={handleChange} />
+          </div>
+          <div>
+            <label htmlFor="SubkTechnicianId">Subk Technician ID</label>
+            <Input id="SubkTechnicianId" value={form.SubkTechnicianId || ""} onChange={handleChange} />
+          </div>
+        </div>
+
+        {/* Customer Time Section */}
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-2">Customer Time</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="StartTimeCustomerTime">Start Time</label>
+              <Input id="StartTimeCustomerTime" type="datetime-local" value={form.StartTimeCustomerTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="EndTimeCustomerTime">End Time</label>
+              <Input id="EndTimeCustomerTime" type="datetime-local" value={form.EndTimeCustomerTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="EstimatedArrivalTimeCustomerTime">Estimated Arrival Time</label>
+              <Input id="EstimatedArrivalTimeCustomerTime" type="datetime-local" value={form.EstimatedArrivalTimeCustomerTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="ActualArrivalTimeCustomerTime">Actual Arrival Time</label>
+              <Input id="ActualArrivalTimeCustomerTime" type="datetime-local" value={form.ActualArrivalTimeCustomerTime} onChange={handleChange} />
+            </div>
+          </div>
+        </div>
+
+        {/* User Time Section */}
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-2">User Time</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="StartTimeUserTime">Start Time</label>
+              <Input id="StartTimeUserTime" type="datetime-local" value={form.StartTimeUserTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="EndTimeUserTime">End Time</label>
+              <Input id="EndTimeUserTime" type="datetime-local" value={form.EndTimeUserTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="EstimatedArrivalTimeUserTime">Estimated Arrival Time</label>
+              <Input id="EstimatedArrivalTimeUserTime" type="datetime-local" value={form.EstimatedArrivalTimeUserTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="ActualArrivalTimeUserTime">Actual Arrival Time</label>
+              <Input id="ActualArrivalTimeUserTime" type="datetime-local" value={form.ActualArrivalTimeUserTime} onChange={handleChange} />
+            </div>
+            <div>
+              <label htmlFor="DurationInMinutesUserTime">Duration (min)</label>
+              <Input id="DurationInMinutesUserTime" type="number" value={form.DurationInMinutesUserTime} onChange={handleChange} />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="ChangedBy">Changed By (User ID)</label>
+            <Input id="ChangedBy" type="number" value={form.ChangedBy} onChange={handleChange} />
+          </div>
+        </div>
+
+        <DialogFooter className="pt-4">
+          <Button onClick={handleSubmit}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingDetailsDelete({ BookingDetailId, onUpdate }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      const response = await ApiCustomer.delete(`/api/bookingDetails/${BookingDetailId}`);
+
+      if (response.status === 409 || response.data.success === false) {
+        Swal.fire({
+          icon: "error",
+          title: "Cannot Delete",
+          text: response.data.message || "This booking detail cannot be deleted due to relational restrictions.",
+          timer: 1400,
+          showConfirmButton: false,
+          timerProgressBar: true,
+        });
+        return;
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Deleted",
+        text: "Booking detail has been deleted successfully.",
+        timer: 1100,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+
+      setIsModalOpen(false);
+      onUpdate?.(); // Refresh list
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: error?.response?.data?.message || "Failed to delete booking detail.",
+        timer: 1400,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
+          <Trash />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Booking Detail</DialogTitle>
+          <DialogDescription>Are you sure you want to delete this booking detail? This action cannot be undone.</DialogDescription>
+        </DialogHeader>
+        <p>This will permanently remove the booking detail record from the system.</p>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }

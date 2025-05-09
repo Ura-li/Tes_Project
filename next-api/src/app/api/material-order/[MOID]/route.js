@@ -4,50 +4,53 @@ import prisma from "../../../../../prisma/client";
 export async function GET(request, { params }) {
   const { MOID: moid } = params;
 
-  if (!moid || typeof moid !== "string" || moid.length > 13) {
-    return NextResponse.json({
-      success: false,
-      message: "Invalid Material Order ID",
-    }, { status: 400 });
-  }
-
-  try {
-    const materialorder = await prisma.materialorder.findUnique({
-      where: { MOID: moid },
-      include: {
-        // owner: true,
-        materialorderlineitems: true,
-        parentMO: true,
-        childMOs: true,
-        // resource: true,
-        workorder: {
-          include: {
-            caseinformation: {
-              include: {
-                contact_information: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!materialorder) {
-      return NextResponse.json({
-        success: false,
-        message: "Detail Data Material Order Not Found!",
-        data: null,
-      }, { status: 404 });
+    if (!moid) {
+        return NextResponse.json({
+            success: false,
+            message: "Invalid Material Order ID"
+        }, { status: 400 });
     }
+    try{
+        const materialorder = await prisma.materialorder.findUnique({
+            where: { MOID: moid },
+            include: {
+                workorder: {
+                    include: {
+                        caseinformation: {
+                            include:{
+                                site_account : true,
+                                contact_information : true
+                            }
+                        },
+                        bookings: {
+                            include: {
+                                bookingDetails: true
+                            }
+                        }
+                    }
+                },
+                owner: true,
+                // materialorderlineitems: true
+            }
+        });
+    
+        if (!materialorder) {
+            return NextResponse.json({
+                success: false,
+                message: "Detail Data Material Order Not Found!",
+                data: null
+            }, { status: 404 });
+        }
+    
+        return NextResponse.json({
+            success: true,
+            message: "Detail Data Material Order",
+            data: materialorder
+        }, { status: 200 });
+    }catch(err){
+        console.error("🔥 ERROR in GET API:", err);
 
-    return NextResponse.json({
-      success: true,
-      message: "Detail Data Material Order",
-      data: materialorder,
-    });
-
-  } catch (err) {
-    console.error("🔥 ERROR in GET API:", err);
+  
     return NextResponse.json({
       success: false,
       message: "Failed to fetch data",

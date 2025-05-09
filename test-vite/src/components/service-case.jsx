@@ -96,7 +96,7 @@ const partsorder = [
   },
 ]
 
-import { BtnModalsWorkOrder } from './sc-modal'
+import { BtnModalsServiceCatalog } from './sc-modal'
 import DatePicker from './date-picker'
 
 
@@ -220,19 +220,19 @@ export const TabsService = ({ caseDetails }) => {
       return null;
     }
   }
-  const fetchSymptomCodes = async () => {
-    try{
-      const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`)
-      const caseData = res.data.data
-      const symptomCode = caseData.SymptomCode
+  // const fetchSymptomCodes = async () => {
+  //   try{
+  //     const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`)
+  //     const caseData = res.data.data
+  //     const symptomCode = caseData.SymptomCode
 
-      const resSymptomCode = await ApiCustomer.get(`/api/case-information/symptom-codes/${symptomCode}`)
-      return resSymptomCode.data.data
-    }catch (err) {
-      console.error("Error in fetchSymptomCodes:", err);
-      return null;
-    }
-  }
+  //     const resSymptomCode = await ApiCustomer.get(`/api/symptom-codes/${symptomCode}`)
+  //     return resSymptomCode.data.data
+  //   }catch (err) {
+  //     console.error("Error in fetchSymptomCodes:", err);
+  //     return null;
+  //   }
+  // }
   useEffect(() => {
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
@@ -267,9 +267,9 @@ export const TabsService = ({ caseDetails }) => {
     { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseCase() },
     { icon: RotateCw, label: "Refresh", onClick: () => alert("not now") },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
-    { icon: StepBack, label: "CSR", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Service Order", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Work Order", onClick: () => setOpenWorkOrder(true) },
+    { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
+    { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
+    { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder") },
     { icon: StepBack, label: "Sales Offer", onClick: () => alert("not now") },
     { icon: StepBack, label: "Close Case", onClick: () => alert("not now") },
     { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
@@ -279,6 +279,11 @@ export const TabsService = ({ caseDetails }) => {
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
+  const [serviceCatalogType, setServiceCatalogType] = useState("null");
+  const openServiceCatalog = async (type) => {
+    setOpenWorkOrder(true);
+    setServiceCatalogType(type)
+  };
   const saveAndCloseCase = async () => {
     const confirmResult = await Swal.fire({
       title: 'Confirm Save',
@@ -360,7 +365,11 @@ export const TabsService = ({ caseDetails }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/>
+    <BtnModalsServiceCatalog 
+      open={openWorkOrder} 
+      setOpen={setOpenWorkOrder} 
+      caseDetails={caseDetails}
+    />
     </div>
     <div>
     <ServiceCase 
@@ -407,13 +416,82 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
   </>
 );
 
-export const TabsServiceWO = ({workOrders}) => {
+export const TabsServiceWO = ({
+  workOrders,
+  SLA,
+  setSLA
+}) => {
 
   const navigate = useNavigate();   
+  const WOID = workOrders.WOID;
+   const handleSave = async () => {
+    try {
+      // Show loading alert
+      Swal.fire({
+        title: 'Updating WORK ORDER...',
+        text: 'Please wait',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      /**
+       * TODO : 
+       * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
+       */
+      
+
+      //SLA
+      const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
+        SLAJeopardy: SLA.slaJeopardy || undefined,
+        DueDateCustomer: SLA.dueDateCustomer || undefined,
+        CoverageWindow: SLA.coverageWindow || undefined,
+        Response: SLA.response || undefined,
+        OTCCode: SLA.otcCode || undefined,
+        RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer || undefined,
+        GuaranteedFixTimeCustomer: SLA.guaranteedFixTimeCustomer || undefined,
+        EarlyStartDateTimeCustomer: SLA.earlyStartDateTimeCustomer || undefined,
+        LatestStartDateTimeCustomer: SLA.latestStartDateTimeCustomer || undefined,
+        SLAReschedule: SLA.slaReschedule || undefined,
+        ActiveScheduleDate: SLA.activeScheduleDate || undefined,
+        SLAErrorDescription: SLA.slaErrorDescription || undefined,
+        CasePriorityIndex: SLA.casePriorityIndex !== "" ? parseInt(SLA.casePriorityIndex, 10) : undefined,
+      });
+      
+      
+      const result = response.data;
+      console.log(response);
+  
+      if (!result.success) {
+        return Swal.fire({
+          icon: 'error',
+          title: 'Update Failed',
+          text: result.message || 'Unknown error',
+        });
+      }
+
+      return Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'SLA updated successfully!',
+      });
+
+    } catch (error) {
+      return Swal.fire({
+        icon: 'error',
+        title: 'Request Error',
+        text: error.message || 'Something went wrong!',
+      });
+    }
+  };
+
+
+
   const buttons = [
     { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/case/${workOrders.CaseID}`) },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: Save, label: "Save", onClick: () => handleSave() },
     { icon: FileSymlink, label: "Save & Close", onClick: () => saveAndCloseWorkOrder() },
     { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
@@ -509,7 +587,7 @@ export const TabsServiceWO = ({workOrders}) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
     </div>
     <div>
     {/* <ServiceCase 
@@ -615,7 +693,7 @@ export const TabsServiceMO = ({materialOrders}) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
     </div>
     <div>
     {/* <ServiceCase 
@@ -721,7 +799,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-    {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
     </div>
     <div>
     {/* <ServiceCase 
@@ -752,7 +830,19 @@ export const ServiceCase = ({
 const [symptomSearchTerm, setSymptomSearchTerm] = useState("");
 const [symptomSuggestions, setSymptomSuggestions] = useState([]);
 
+const [createdOn, setCreatedOn] = useState(null);
 const [caseClosedDate, setCaseClosedDate] = useState(null);
+const [submittedToBase, setsubmittedToBase] = useState(null);
+
+const [pendingCustomerAction, setPendingCustomerAction] = useState(null);
+const [customerRequestedCloseDate, setCustomerRequestedCloseDate] = useState(null);
+const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
+// const [cr]
+useEffect(() => {
+  if (caseDetails?.CreatedOn) {
+    setCreatedOn(new Date(caseDetails.CreatedOn)); // includes date + time
+  }
+}, [caseDetails]);
 
   
 
@@ -783,13 +873,20 @@ const [caseClosedDate, setCaseClosedDate] = useState(null);
     
 
 
-  //customer, asset, entitlement
-  //customer
+  
   const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
     MainAccount: null,
     SiteAccount: null,
     Type: null,
   });
+  const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
+  const [ownerUserData, setOwnerUserData ] = useState([])
+  
+  const [workOrders, setWorkOrders] = useState([]);
+
+  const [materialOrders, setMaterialOrders] = useState([]);
+
+
   const fetchCustomerData = async () => {
     try{
       // console.log("Case Detail : ", caseDetails);
@@ -818,8 +915,6 @@ const [caseClosedDate, setCaseClosedDate] = useState(null);
       return null
     }
   }
-  //asset
-  const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
   const fetchAssetInformation = async () => {
     try{
       const resAsset = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
@@ -831,46 +926,89 @@ const [caseClosedDate, setCaseClosedDate] = useState(null);
       return null
     }
   }
+  const fetchCaseNotes = async () => {
+    try{
+      // console.log("Case Details : ", caseDetails)
+      const res = await ApiCustomer.get(`/api/case-information/case-notes`)
+      const notes = res.data.data
+  
+      const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
+  
+      let noteID = null
+  
+      if(existingNote){
+        noteID = existingNote.NoteID
+      }else{
+        const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
+          LogType: "NotesLog",
+          ActionType: "Initial",
+          Template: "",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: "",
+          CaseID: caseDetails.CaseID,
+        })
+        
+        noteID = createResponse.data.data.NoteID;
+      }
+  
+      const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
+      const noteDetail = detailRes.data.data;
+  
+      console.log("✅ Case Note Detail:", noteDetail);
+      return noteDetail;
+    }catch(err){
+      console.error("Error in fetchCaseNotes:", err);
+      return null;
+    }
+  }
+  const fetchOwnerUserData = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
+      setOwnerUserData(response.data.data)
+    } catch (error) {
+      
+    }
+  }
+  // const fetchSymptomCodes = async (term) => {
+  //   try {
+  //     const response = await ApiCustomer.get("/api/case-information/symptom-codes");
+  //     const allCodes = response.data.data;
+  
+  //     const filtered = allCodes.filter((sym) =>
+  //       sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+  //     );
+  
+  //     setSymptomSuggestions(filtered);
+  //   } catch (err) {
+  //     console.error("Error fetching symptom codes", err);
+  //   }
+  // };
+  const fetchWorkOrders = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
+      setWorkOrders(res.data.data); // adjust based on API response shape
+      console.log("Fetch Work Order: ",res.data.data)
+    } catch (err) {
+      console.error("Failed to fetch work orders:", err);
+    }
+  };
+  const fetchMaterialOrders = async () => {
+    try {
+      if (!workOrders.length) return;
+  
+      const woidList = workOrders.map((wo) => wo.WOID).join(',');
+      const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
+      setMaterialOrders(res.data.data);
+    } catch (err) {
+      console.error("Failed to fetch Material orders:", err);
+    }
+  }
+  //asset
 
 
 
 //notes handler
-const fetchCaseNotes = async () => {
-  try{
-    // console.log("Case Details : ", caseDetails)
-    const res = await ApiCustomer.get(`/api/case-information/case-notes`)
-    const notes = res.data.data
-
-    const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
-
-    let noteID = null
-
-    if(existingNote){
-      noteID = existingNote.NoteID
-    }else{
-      const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
-        LogType: "NotesLog",
-        ActionType: "Initial",
-        Template: "",
-        VisibleExternally: false,
-        MinutesSpent: 0,
-        Note: "",
-        CaseID: caseID,
-      })
-      
-      noteID = createResponse.data.data.NoteID;
-    }
-
-    const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
-    const noteDetail = detailRes.data.data;
-
-    console.log("✅ Case Note Detail:", noteDetail);
-    return noteDetail;
-  }catch(err){
-    console.error("Error in fetchCaseNotes:", err);
-    return null;
-  }
-}
 useEffect(() => {
   fetchCustomerData();
   fetchAssetInformation();
@@ -890,16 +1028,7 @@ useEffect(() => {
 }, [])
 
 //data for upper style
-const [ownerUserData, setOwnerUserData ] = useState([])
 // const []
-const fetchOwnerUserData = async () => {
-  try {
-    const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
-    setOwnerUserData(response.data.data)
-  } catch (error) {
-    
-  }
-}
 
 
 useEffect(() =>{
@@ -915,7 +1044,7 @@ useEffect(() =>{
 
 const fetchSymptomCodes = async (term) => {
   try {
-    const response = await ApiCustomer.get("/api/case-information/symptom-codes");
+    const response = await ApiCustomer.get("/api/symptom-codes");
     const allCodes = response.data.data;
 
     const filtered = allCodes.filter((sym) =>
@@ -935,29 +1064,6 @@ const fetchSymptomCodes = async (term) => {
 
 //order section
 //workorder
-const [workOrders, setWorkOrders] = useState([]);
-const fetchWorkOrders = async () => {
-  try {
-    const res = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
-    setWorkOrders(res.data.data); // adjust based on API response shape
-    // console.log("Fetch Work Order: ",res)
-  } catch (err) {
-    console.error("Failed to fetch work orders:", err);
-  }
-};
-
-const [materialOrders, setMaterialOrders] = useState([]);
-const fetchMaterialOrders = async () => {
-  try {
-    if (!workOrders.length) return;
-
-    const woidList = workOrders.map((wo) => wo.WOID).join(',');
-    const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
-    setMaterialOrders(res.data.data);
-  } catch (err) {
-    console.error("Failed to fetch Material orders:", err);
-  }
-}
 
 
 useEffect(() => {
@@ -978,6 +1084,9 @@ const handleClick = async () => {
   });
   })}
 };
+
+const [startDate, setstartDate] = useState(null);
+const [endDate, setEndDate] = useState(null);
 
 
   return (
@@ -1087,42 +1196,38 @@ const handleClick = async () => {
           <TabsContent value="case_info" className={'p-2'}>
             <Card className="flex-row">
               <CardContent className="grid gap-10 items-center grid-cols-6 p-3 ">  
-                <CaseField label="Case ID" icon >{caseDetails.CaseID}</CaseField>
-                <CaseField label="Case Subject"  span={3} >{caseDetails.CaseSubject}</CaseField>
-                <CaseField label="Incoming Channel"  icon >{caseDetails.IncomingChannel}</CaseField>
-                <CaseField label="Business Segment"  >---</CaseField>
-                <CaseField label="Email Status" >---</CaseField>
+                <CaseField label="Case ID" icon><Input variant='invisible' value={caseDetails.CaseID}/></CaseField>
+                <CaseField label="Case Subject"  span={3}><Input variant='invisible' value={caseDetails.CaseSubject}/></CaseField>
+                <CaseField label="Incoming Channel"  icon ><Input variant='invisible' value={caseDetails.IncomingChannel}/></CaseField>
+                <CaseField label="Business Segment" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Email Status" ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Case Status"  >{caseDetails.CaseStatus}</CaseField>
                 <CaseField label="Case Type"  >{caseDetails.CaseType}</CaseField>
                 <CaseField label="KCI For Case?"  >{caseDetails.KCI_Flag ? "Yes" : "No"}</CaseField>
                 <CaseField label="Case Priority"  >{caseDetails.CasePriority}</CaseField>
-                <CaseField label="HPI Segment"  >---</CaseField>
-                <CaseField label="Customer Tracking Number"  icon >---</CaseField>
+                <CaseField label="HPI Segment"  ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Customer Tracking Number"  icon ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Customer Severity"  >{caseDetails.CustomerSeverity}</CaseField>
-                <CaseField label="Update Customer Tracking Number"  span={3} >---</CaseField>
+                <CaseField label="Update Customer Tracking Number"  span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Created ON" icon span={3}>
-                  <span className="flex gap-[5em]">
-                    {new Date(caseDetails.CreatedOn).toLocaleDateString('id-ID')}
-                        <DatePicker variant='icon'></DatePicker>
-                    {new Date(caseDetails.CreatedOn).toLocaleTimeString('id-ID', { hour12: true, hour: "2-digit", minute: "2-digit" })}
-                  </span>
+                <DatePicker variant='icon' value={createdOn} onChange={setCreatedOn} readOnly></DatePicker>
                 </CaseField>
-                <CaseField label="Alternate Customer Tracking Number"> ---  </CaseField>
+                <CaseField label="Alternate Customer Tracking Number"><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Case Closed Date" icon span={3} > 
                   <span className="flex gap-[5em]">
                       {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
-                      <DatePicker variant='icon' value={caseClosedDate} onChange={setCaseClosedDate}></DatePicker>
-                      ---
+                      <DatePicker variant='icon' value={caseClosedDate} onChange={setCaseClosedDate} readOnly></DatePicker>
+                      
                     </span>
                 </CaseField>
                 <CaseField label="Irrelevant"  icon >
-                  --- 
+                  <Input variant='invisible' placeholder='---'/>
                 </CaseField> 
                 <CaseField label="Submitted To Base" icon span={3}>
                     <span className="flex gap-[5em]">
                      
-                      <DatePicker variant='icon'></DatePicker>
-                      ---
+                    <DatePicker variant='icon' value={submittedToBase} onChange={setsubmittedToBase} readOnly></DatePicker>
+                      
                     </span>
                 </CaseField>
 
@@ -1135,13 +1240,13 @@ const handleClick = async () => {
               <hr />
             </CardHeader>
               <CardContent className="grid gap-10  grid-cols-6 p-3 ">
-                <CaseField label="Global Trade Status" > --- </CaseField>
-                <CaseField label="GT Override Reason" >--- </CaseField>
-                <CaseField label="GT Active Listening" > ---</CaseField>
-                <CaseField label="Embargoed Country" icon>--- </CaseField>
-                <CaseField label="GT Details" >--- </CaseField>
-                <CaseField label="GT All Comments" > ---</CaseField>
-                <CaseField className={'col-start-3'} label="Screening ID" > ---</CaseField>
+                <CaseField label="Global Trade Status" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="GT Override Reason" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="GT Active Listening"> <Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Embargoed Country" icon ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="GT Details" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="GT All Comments" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField className={'col-start-3'} label="Screening ID" ><Input variant='invisible' placeholder='---'/></CaseField>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1152,23 +1257,23 @@ const handleClick = async () => {
             <CardTitle className=' text-lg'>Customer Information</CardTitle>
               <hr />
             </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6">
-                <CaseField label="Customer Account" icon > {dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Company : dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName} </CaseField>
-                <CaseField label="Primary Contact" icon >{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</CaseField>
-                <CaseField label="Submitted By" > ---</CaseField>
-                <CaseField label="Is Partner" icon > ---</CaseField>
-                <CaseField label=" Primary Email" icon >{dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}</CaseField>
-                <CaseField label="Partner & Customer" icon > ---</CaseField>
-                <CaseField label="HIPAA" icon > ---</CaseField>
+              <CardContent className="grid gap-10 grid-cols-6 items-center">
+                <CaseField label="Customer Account" icon ><Input variant='invisible' value={dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Company : dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName}/></CaseField>
+                <CaseField label="Primary Contact" icon ><Input variant='invisible'value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`} /></CaseField>
+                <CaseField label="Submitted By" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Is Partner" icon ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label=" Primary Email" icon ><Input variant='invisible' value={dataFetchCustomerData.MainAccount?.Email} placeholder='---'/></CaseField>
+                <CaseField label="Partner & Customer" icon ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="HIPAA" icon ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Phone" icon > {dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone: dataFetchCustomerData?.MainAccount?.Phone}</CaseField>
-                <CaseField label="Region" icon > ---</CaseField>
-                <CaseField label="PIN" > ---</CaseField>
-                <CaseField label="Secondary Contact" > ---</CaseField>
-                <CaseField label="Parent Company" > ---</CaseField>
-                <CaseField label="Customer Time Zone" icon > ---</CaseField>
-                <CaseField label="Country" icon > {dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Country : dataFetchCustomerData?.MainAccount?.Country}</CaseField>
-                <CaseField label="Parent Company Non-Latin" > ---</CaseField>
-                <CaseField label="Account Tier" className={'col-start-5'} > ---</CaseField>
+                <CaseField label="Region" icon ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="PIN" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Secondary Contact" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Parent Company" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Customer Time Zone" icon ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Country" icon ><Input variant='invisible' value={dataFetchCustomerData?.Type == "SiteAccount" ? dataFetchCustomerData?.SiteAccount?.Country : dataFetchCustomerData?.MainAccount?.Country}/></CaseField>
+                <CaseField label="Parent Company Non-Latin" ><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Account Tier" className={'col-start-5'} ><Input variant='invisible' placeholder='---'/></CaseField>
               </CardContent>
             </Card>
 
@@ -1179,16 +1284,16 @@ const handleClick = async () => {
               </CardHeader>
               <CardContent className="grid gap-10 grid-cols-6 items-center">
                 <CaseField label="Assets" icon >{dataFetchAssetInformation?.AssetInformation?.SerialNumber} </CaseField>
-                <CaseField label="Product Number" icon> </CaseField>
-                <CaseField label="Asset Location" > ---</CaseField>
+                <CaseField label="Product Number" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Asset Location" ><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Serial Number" icon >{dataFetchAssetInformation?.AssetInformation?.SerialNumber} </CaseField>
-                <CaseField label="HW Profit Center" icon> ---</CaseField>
-                <CaseField label="SNIC - Count" icon> ---</CaseField>
+                <CaseField label="HW Profit Center" icon> <Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="SNIC - Count" icon><Input variant='invisible' placeholder='---'/></CaseField>
                 <CaseField label="Product Name" icon>{dataFetchAssetInformation?.AssetInformation?.product_information?.ProductName} </CaseField>
-                <CaseField label="HWPC Code" icon> ---</CaseField>
-                <CaseField label="MV Product Description" icon> ---</CaseField>
+                <CaseField label="HWPC Code" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="MV Product Description" icon><Input variant='invisible' placeholder='---'/></CaseField>
                 <div className="p-5 gap-2 ring-1 col-span-2 grid grid-cols-2 items-center">
-                  <CaseField label="Device Properties" icon> ---</CaseField>
+                  <CaseField label="Device Properties" icon><Input variant='invisible' placeholder='---'/></CaseField>
                 </div>
               </CardContent>
             </Card>
@@ -1199,14 +1304,14 @@ const handleClick = async () => {
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-10 grid-cols-6 items-center">
-                <CaseField label="Latest Start Date (Cust Time)" icon>--- </CaseField>
-                <CaseField label="Coverage Window Used" icon> ---</CaseField>
-                <CaseField label="Response Time Value" icon> ---</CaseField>
-                <CaseField label="Guaranteed Fix Date (Cust Time)" icon> ---</CaseField>
-                <CaseField label="Coverage Window Value" icon> ---</CaseField>
-                <CaseField label="Repair Time Value" icon> ---</CaseField>
-                <CaseField label="Case Priority Index" icon> ---</CaseField>
-                <CaseField label="Case Priority Rule" icon> ---</CaseField>
+                <CaseField label="Latest Start Date (Cust Time)" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Coverage Window Used" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Response Time Value" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Guaranteed Fix Date (Cust Time)" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Coverage Window Value" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Repair Time Value" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Case Priority Index" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Case Priority Rule" icon><Input variant='invisible' placeholder='---'/></CaseField>
               </CardContent>
             </Card>
 
@@ -1216,15 +1321,15 @@ const handleClick = async () => {
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-10 grid-cols-6 items-center">
-                <CaseField label="Case Entitlement" icon> ---</CaseField>
-                <CaseField label="Start Date" icon> <DatePicker></DatePicker> </CaseField>
-                <CaseField label="OTC Code" icon> ---</CaseField>
-                <CaseField label="Entitlement Status" icon> ---</CaseField>
-                <CaseField label="End Date" icon> <DatePicker></DatePicker></CaseField>
-                <CaseField label="Entitlement Override" icon> ---</CaseField>
-                <CaseField label="Selected Entitlement Offer" icon> ---</CaseField>
-                <CaseField label="Days Left" icon> ---</CaseField>
-                <CaseField label="Authorizing Employee" icon> ---</CaseField>
+                <CaseField label="Case Entitlement" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Start Date" icon> <DatePicker value={startDate} onChange={setstartDate} readOnly></DatePicker> </CaseField>
+                <CaseField label="OTC Code" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Entitlement Status" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="End Date" icon> <DatePicker value={endDate} onChange={setEndDate} readOnly></DatePicker></CaseField>
+                <CaseField label="Entitlement Override" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Selected Entitlement Offer" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Days Left" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Authorizing Employee" icon><Input variant='invisible' placeholder='---'/></CaseField>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1240,19 +1345,19 @@ const handleClick = async () => {
                   <div className='row-span-4 col-span-full'>
                     <textarea className='border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none'></textarea>
                   </div>
-                  <CaseField label="Related Device" className={'col-span-3'}  span={3}>--- </CaseField>
-                  <CaseField label="Device Manufacturer" className={'col-span-3'}  span={3} icon>--- </CaseField>
-                  <CaseField label="Device Model" className={'col-span-3'}  span={3}>--- </CaseField>
+                  <CaseField label="Related Device" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Device Manufacturer" className={'col-span-3'}  span={3} icon><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Device Model" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
                 </div>
 
                 <div className="flex-1 grid-flow-row gap-y-7 grid grid-cols-6">
-                  <CaseField label="Program/Category" className={'col-span-3'}  span={2}>---</CaseField>
-                  <CaseField label="Operating System" className={'col-span-3'}  span={3}>---</CaseField>
-                  <CaseField label="Version" className={'col-span-3'}  span={3} >---</CaseField>
-                  <CaseField label="Remote Diag Code" className={'col-span-3'}  span={3} >---</CaseField>
-                  <CaseField label="Application Information" className={'col-span-3'}  span={3}>---</CaseField>
-                  <CaseField label="Provider / Platform" className={'col-span-3'}  span={3}>---</CaseField>
-                  <CaseField label="Software Version" className={'col-span-3'}  span={3}>---</CaseField>
+                  <CaseField label="Program/Category" className={'col-span-3'}  span={2}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Operating System" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Version" className={'col-span-3'}  span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Remote Diag Code" className={'col-span-3'}  span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Application Information" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Provider / Platform" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
+                  <CaseField label="Software Version" className={'col-span-3'}  span={3}><Input variant='invisible' placeholder='---'/></CaseField>
                 </div>
               </CardContent>
           </Card>
@@ -1277,9 +1382,9 @@ const handleClick = async () => {
                     </Select>
                   </CaseField>
 
-                  <CaseField label="Action Type" className={'col-span-2'}  span={4}>---</CaseField>
+                  <CaseField label="Action Type" className={'col-span-2'}  span={4}><Input variant='invisible' placeholder='---'/></CaseField>
 
-                  <CaseField label="Template" className={'col-span-2'} span={4}>---</CaseField>
+                  <CaseField label="Template" className={'col-span-2'} span={4}><Input variant='invisible' placeholder='---'/></CaseField>
 
                   <CaseField label="Visible Externally" className={'col-span-2'} span={4}>
                     <Select
@@ -1302,7 +1407,7 @@ const handleClick = async () => {
                     </Select>
                   </CaseField>
 
-                  <CaseField label="Number of Minutes Spent" className={'col-span-2'}  icon span={3} >---</CaseField>
+                  <CaseField label="Number of Minutes Spent" className={'col-span-2'}  icon span={3} ><Input variant='invisible' placeholder='---'/></CaseField>
 
                   <CaseField label="Notes" className={'col-span-2 self-start'} span={4}>
                     <textarea
@@ -1493,11 +1598,11 @@ const handleClick = async () => {
               <hr />
             </CardHeader>
             
-            <CardContent className="grid gap-5 grid-cols-6 p-3 ">
+            <CardContent className="grid gap-5 grid-cols-7 p-3 ">
                 <CaseField label="Case Resolution Code" > --- </CaseField>
                 <CaseField label="Case Ready for Closure" icon >
                   <Select className='' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
-                    <SelectTrigger>
+                    <SelectTrigger className={'w-full'}>
                       <SelectValue placeholder="---"/>
                     </SelectTrigger>
                     <SelectContent>
@@ -1506,10 +1611,10 @@ const handleClick = async () => {
                     </SelectContent>
                   </Select> 
                 </CaseField>
-                <CaseField label="Pending Customer Action" icon ><DatePicker /></CaseField>
+                <CaseField label="Pending Customer Action" icon span={2}><DatePicker value={pendingCustomerAction} onChange={setPendingCustomerAction} readOnly/></CaseField>
                 <CaseField label="Auto Close" >
                 <Select className='' onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
-                    <SelectTrigger>
+                    <SelectTrigger className={'w-full'}>
                       <SelectValue placeholder="---"/>
                     </SelectTrigger>
                     <SelectContent>
@@ -1518,9 +1623,9 @@ const handleClick = async () => {
                     </SelectContent>
                   </Select> 
                 </CaseField>
-                <CaseField label="Ready for Close Days" icon>--- </CaseField>
-                <CaseField  label="Customer Requested Close Date" icon> <DatePicker /></CaseField>
-                <CaseField className={'col-start-3'} label="Ready for Closure Date"icon ><DatePicker /> </CaseField>
+                <CaseField label="Ready for Close Days" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField  label="Customer Requested Close Date" icon span={2}> <DatePicker value={customerRequestedCloseDate} onChange={setCustomerRequestedCloseDate} readOnly /></CaseField>
+                <CaseField className={'col-start-3'} label="Ready for Closure Date"icon span={2}><DatePicker value={ReadyForClosureDate} onChange={setReadyForClosureDate} readOnly/> </CaseField>
               
               </CardContent>
             </Card>
@@ -1552,13 +1657,13 @@ const handleClick = async () => {
               <hr />
             </CardHeader>
               <CardContent className="grid gap-10 grid-cols-4 items-center">
-                <CaseField label="Shipment Country">--- </CaseField>
-                <CaseField label="Exception Order"> ---</CaseField>
-                <CaseField label="Shipment State" icon> ---</CaseField>
-                <CaseField label="SBD Override"> ---</CaseField>
-                <CaseField label="Major Account Id"> ---</CaseField>
-                <CaseField label="Currency"> ---</CaseField>
-                <CaseField label="Promo Code" className={'col-start-3'}> ---</CaseField>
+                <CaseField label="Shipment Country"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Exception Order"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Shipment State" icon><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="SBD Override"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Major Account Id"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Currency"><Input variant='invisible' placeholder='---'/></CaseField>
+                <CaseField label="Promo Code" className={'col-start-3'}><Input variant='invisible' placeholder='---'/></CaseField>
 
               </CardContent>
             </Card>
@@ -1570,8 +1675,8 @@ const handleClick = async () => {
             </CardHeader>
               <CardContent className=" flex flex-col gap-5 p-3">
                     <div className="grid gap-5 grid-cols-4">
-                      <CaseField label="Incident Type" span={3}> --- </CaseField>
-                      <CaseField label="Work Order Description" span={3}>--- </CaseField>
+                      <CaseField label="Incident Type" span={3}><Input variant='invisible' placeholder='---'/></CaseField>
+                      <CaseField label="Work Order Description" span={3}><Input variant='invisible' placeholder='---'/></CaseField>
                     </div>
 
                 <Table>
@@ -1588,28 +1693,33 @@ const handleClick = async () => {
                     <TableHead>Due Date</TableHead>
                     <TableHead>Orion</TableHead>
                     <TableHead>Owner</TableHead>
-                    <TableHead>Created</TableHead>
+                    <TableHead>Created By</TableHead>
+                    <TableHead>Created At</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {workOrders.map((work) => (
-                    <TableRow key={work.WOID} className="hover:bg-gray-500 cursor-pointer">
+                    <TableRow key={work.WOID} className="hover:bg-gray-300 cursor-pointer">
                       <TableCell className="font-medium " onClick={handleClick}>
                         {/* <Link to={`/work/${work.WOID}`}> */}
                         {work.WOID}
                         {/* </Link> */}
                         </TableCell>
                       <TableCell>{work.CaseID}</TableCell>
-                      {/* <TableCell>{work.serviceaccount}</TableCell>
-                      <TableCell>{work.substatus}</TableCell>
-                      <TableCell>{work.systemstatus}</TableCell>
-                      <TableCell>{work.priority}</TableCell>
-                      <TableCell>{work.workorder}</TableCell>
-                      <TableCell>{work.primaryincident}</TableCell>
-                      <TableCell>{work.duedate}</TableCell>
-                      <TableCell>{work.orion}</TableCell>
-                      <TableCell>{work.owner}</TableCell>
-                      <TableCell>{work.created}</TableCell> */}
+                      <TableCell>
+                          {work.caseinformation?.site_account?.Company || (work.caseinformation?.contact_information?.FirstName + " " + work.caseinformation?.contact_information?.LastName) || "-"}
+                      </TableCell>
+
+                      <TableCell>{work.SubStatus}</TableCell>
+                      <TableCell>{work.SystemStatus}</TableCell>
+                      <TableCell>{work.Priority}</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell>{work.owner?.Name}</TableCell>
+                      <TableCell>{work.owner?.Name}</TableCell>
+                      <TableCell>{work.CreatedOn}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1717,17 +1827,13 @@ const handleClick = async () => {
                           {material.MOID} on {material.WOID} 
                           </Link>
                           </TableCell>
-                        <TableCell>{material.CaseID}</TableCell>
-                        {/* <TableCell>{work.serviceaccount}</TableCell>
-                        <TableCell>{work.substatus}</TableCell>
-                        <TableCell>{work.systemstatus}</TableCell>
-                        <TableCell>{work.priority}</TableCell>
-                        <TableCell>{work.workorder}</TableCell>
-                        <TableCell>{work.primaryincident}</TableCell>
-                        <TableCell>{work.duedate}</TableCell>
-                        <TableCell>{work.orion}</TableCell>
-                        <TableCell>{work.owner}</TableCell>
-                        <TableCell>{work.created}</TableCell> */}
+                        <TableCell>{material.workorder?.CaseID}</TableCell>
+                        <TableCell>{material.CreatedOn}</TableCell>
+                        <TableCell>{material.OrderStatus}</TableCell>
+                        <TableCell>{material.OrderType}</TableCell>
+                        <TableCell>{material.owner?.Name}</TableCell>
+                        <TableCell>{material.WOID}</TableCell>
+                        <TableCell>{material.ReadyForClosureDate}</TableCell>
                       </TableRow>
                     ))}
                     {/* <TableRow>
