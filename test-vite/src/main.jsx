@@ -19,6 +19,10 @@ import
   WarrantyService_table,
   Mo_table,
   Wo_table,
+  SubkTechnician_table,
+  SymptomCodeTable,
+  BookingsTable,
+  BookingDetailsTable,
   Resource_table
  } from './master_table';
 import { Bookings } from './bookings';
@@ -26,6 +30,7 @@ import { User_table } from './master_table';
 import { Part_table } from './master_table';
 import { Labor } from './labor';
 // import { ModalContextProvider } from './components/modal-context';
+import { ResourceAccountTable } from './master_table';
 
 import { GateKeepingRouting } from './components/GateKeepingRouting';
 
@@ -53,9 +58,17 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/Case_table' element={<Case_table />} />
             <Route path='/master/Product_table' element={<Product_table/>}/>
             <Route path='/master/ProductType_table' element={<ProductType_table/>}/>
+            {/* <Route path='/master/ServiceCatalogPartsTable' element={<ServiceCatalogPartsTable/>}/> */}
+            {/* <Route path='/master/GlobalTradeCheckTable' element={<GlobalTradeCheckTable/>}/> */}
             <Route path='/master/WarrantyService_table' element={<WarrantyService_table/>}/>
             <Route path='/master/Mo_table' element={<Mo_table/>}/>
             <Route path='/master/Wo_table' element={<Wo_table/>}/>
+            {/* <Route path='master/Resource' element={<ResourceTable/>}/> */}
+            <Route path='master/ResourceAccount' element={<ResourceAccountTable/>}/>
+            <Route path='master/SubkTechnician' element={<SubkTechnician_table/>}/>
+            <Route path='master/symptom_codes' element={<SymptomCodeTable/>}/>
+            <Route path='master/Bookings' element={<BookingsTable/>}/>
+            <Route path='master/BookingDetails' element={<BookingDetailsTable/>}/>
             <Route path='/master/User_table' element={<User_table/>}/>
             <Route path='/master/Part_table' element={<Part_table/>}/>
             <Route path='/master/Resource_table' element={<Resource_table/>}/>
