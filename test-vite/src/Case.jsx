@@ -27,7 +27,7 @@ export const Case = () => {
       try {
         const response = await ApiCustomer.get(`/api/case-information/${caseId}`);
         setCaseDetails(response.data.data);
-
+        console.log("Case Details:", response.data.data);
         // Tutup loading saat selesai
         Swal.close();
       } catch (error) {

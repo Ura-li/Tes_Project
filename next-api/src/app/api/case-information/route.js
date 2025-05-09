@@ -85,7 +85,8 @@ export async function GET(request) {
                     ProductName: caseData.asset_information?.product_information?.ProductName || "No Product Name",
                     CreatedName: "Miku21", // Replace with the database owned
                     Owner: "Miku21", // Replace with the database owned
-                    WorkGroup: "Miku21" // Replace with the database owned
+                    WorkGroup: "Miku21", // Replace with the database owned
+                    CaseStatus: caseData.CaseStatus
                 })),
         },
         {

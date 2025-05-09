@@ -55,8 +55,8 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
- 
+} from "@/components/ui/pagination";
+
 import {
   Command,
   CommandEmpty,
@@ -66,9 +66,8 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 export const ServiceWork = () => {
-
   const user = getUserFromToken();
   const { woid } = useParams();
 
@@ -77,27 +76,27 @@ export const ServiceWork = () => {
     try {
       const res = await ApiCustomer.get(`/api/work-order/${woid}`);
       setWorkOrders(res.data.data); // adjust based on API response shape
-      console.log("Fetch Work Order: ",res)
+      console.log("Fetch Work Order: ", res);
     } catch (err) {
       console.error("Failed to fetch work orders:", err);
     }
   };
 
-  const [materialOrders, setMaterialOrders] = useState([])
+  const [materialOrders, setMaterialOrders] = useState([]);
   const fetchMaterialOrders = async () => {
     try {
       const res = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
-      console.log("Material Order in WO Detail : ", res)
+      console.log("Material Order in WO Detail : ", res);
       setMaterialOrders(res.data.data);
     } catch (err) {
       console.error("Failed to fetch Material orders:", err);
     }
-  }
+  };
 
-  const [caseInformation, setCaseInformation] = useState([])
-  const [bookings, setBookings] = useState([])
-  const [ownerWorkOrder, setOwnerWorkOrder] = useState([])
-  
+  const [caseInformation, setCaseInformation] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [ownerWorkOrder, setOwnerWorkOrder] = useState([]);
+
   const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
     MainAccount: null,
     SiteAccount: null,
@@ -129,106 +128,110 @@ export const ServiceWork = () => {
   useEffect(() => {
     const fetchAllData = async () => {
       Swal.fire({
-        title: 'Please wait...',
-        text: 'Loading Work Order Details...',
+        title: "Please wait...",
+        text: "Loading Work Order Details...",
         allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
+        didOpen: () => Swal.showLoading(),
       });
-  
+
       try {
-        
         const resWO = await ApiCustomer.get(`/api/work-order/${woid}`);
         const workOrderData = resWO.data.data;
         setWorkOrders(workOrderData);
-  
-        
+
         const resMO = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
         setMaterialOrders(resMO.data.data);
-  
-        
+
         if (workOrderData?.CaseID) {
-          const resCI = await ApiCustomer.get(`/api/case-information/${workOrderData.CaseID}`);
+          const resCI = await ApiCustomer.get(
+            `/api/case-information/${workOrderData.CaseID}`
+          );
           setCaseInformation(resCI.data.data);
 
-          const resBooking = await ApiCustomer.get(`/api/bookings?WOID=${woid}`);
+          const resBooking = await ApiCustomer.get(
+            `/api/bookings?WOID=${woid}`
+          );
           // console.log("Res Booking : ",resBooking.data.data)
 
-          const resOwner = await ApiCustomer.get(`/api/user/${workOrderData.OwnerID}`)
+          const resOwner = await ApiCustomer.get(
+            `/api/user/${workOrderData.OwnerID}`
+          );
 
-          
           // console.log("Case Detail : ", caseDetails);
-          const resMainAccount = resCI.data.data.contact_information
+          const resMainAccount = resCI.data.data.contact_information;
           setDataFetchCustomerData({
-            MainAccount: resMainAccount
-          })
-          if(caseInformation.SiteAccountID !== null) {
-            const resSiteAccount = resCI.data.data.site_account
+            MainAccount: resMainAccount,
+          });
+          if (caseInformation.SiteAccountID !== null) {
+            const resSiteAccount = resCI.data.data.site_account;
             setDataFetchCustomerData((prev) => ({
               ...prev,
               SiteAccount: resSiteAccount,
-              Type: "SiteAccount"
+              Type: "SiteAccount",
             }));
-            
-          }else{
+          } else {
             setDataFetchCustomerData((prev) => ({
               ...prev,
               type: "Individual", // fallback if no site account
             }));
           }
-        
-              // const res = await ApiCustomer.get(`/api/`)
-            
+
+          // const res = await ApiCustomer.get(`/api/`)
+
           setOwnerWorkOrder(resOwner.data.data);
-          setBookings(resBooking.data.data)
+          setBookings(resBooking.data.data);
 
           setSLA((prev) => ({
             ...prev,
-            requestedDateTimeCustomer: resWO.data.data.RequestedDateTimeCustomer || "",
+            requestedDateTimeCustomer:
+              resWO.data.data.RequestedDateTimeCustomer || "",
             slaJeopardy: resWO.data.data.SLAJeopardy || "",
             dueDateCustomer: resWO.data.data.DueDateCustomer || "",
             coverageWindow: resWO.data.data.CoverageWindow || "",
             response: resWO.data.data.Response || "",
             otcCode: resWO.data.data.OTCCode || "",
-            guaranteedFixTimeCustomer: resWO.data.data.GuaranteedFixTimeCustomer || "",
-            earlyStartDateTimeCustomer: resWO.data.data.EarlyStartDateTimeCustomer || "",
-            latestStartDateTimeCustomer: resWO.data.data.LatestStartDateTimeCustomer || "",
+            guaranteedFixTimeCustomer:
+              resWO.data.data.GuaranteedFixTimeCustomer || "",
+            earlyStartDateTimeCustomer:
+              resWO.data.data.EarlyStartDateTimeCustomer || "",
+            latestStartDateTimeCustomer:
+              resWO.data.data.LatestStartDateTimeCustomer || "",
             slaReschedule: resWO.data.data.SLAReschedule || "",
             activeScheduleDate: resWO.data.data.ActiveScheduleDate || "",
             slaErrorDescription: resWO.data.data.SLAErrorDescription || "",
             casePriorityIndex: resWO.data.data.CasePriorityIndex ?? "", // use ?? to allow 0
           }));
-          
-          console.log("Res WO : ", resWO.data.data)
-          console.log("Res MO : ", resMO.data.data)
-          console.log("Res CI : ", resCI.data.data)
-          console.log("Res Booking : ", resBooking.data.data)
-          console.log("Res Owner : ", resOwner.data.data)
-          console.log("Res Main Account : ", resMainAccount)
+
+          console.log("Res WO : ", resWO.data.data);
+          console.log("Res MO : ", resMO.data.data);
+          console.log("Res CI : ", resCI.data.data);
+          console.log("Res Booking : ", resBooking.data.data);
+          console.log("Res Owner : ", resOwner.data.data);
+          console.log("Res Main Account : ", resMainAccount);
         }
-  
-        Swal.close(); 
+
+        Swal.close();
       } catch (err) {
         console.error("Fetch error:", err);
         Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Something went wrong while loading data!',
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong while loading data!",
         });
       }
     };
-  
+
     if (woid) fetchAllData();
   }, [woid]);
 
   useEffect(() => {
-    console.log("Data Fetch Customer Data in WO : ",dataFetchCustomerData);
-  }, [dataFetchCustomerData])
+    console.log("Data Fetch Customer Data in WO : ", dataFetchCustomerData);
+  }, [dataFetchCustomerData]);
 
   const formatDate = (dateString) => {
-    if (!dateString) return '-';
+    if (!dateString) return "-";
     return new Date(dateString).toLocaleString();
   };
-  
 
   // const fetchBookings = async () => {
   //   try {
@@ -243,28 +246,30 @@ export const ServiceWork = () => {
   //       });
   //   }
   // }
-  
+
   // useEffect(() => {
   // }, [workOrders])
 
-    const [selected, setSelected] = useState("work_order"); 
+  const [selected, setSelected] = useState("work_order");
 
-    // const location = useLocation();
-    // const { ownerUserData, dataFetchCustomerData } = location.state || {}; 
+  // const location = useLocation();
+  // const { ownerUserData, dataFetchCustomerData } = location.state || {};
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [requestedDateTimeCustomer, setrequestedDateTimeCustomer] = useState(null);
-    const [guaranteedFixTimeCustomer, setGuaranteedFixTimeCustomer] = useState(null);
-    const [dueDate, setDuedate] = useState(null);
+  const [requestedDateTimeCustomer, setrequestedDateTimeCustomer] =
+    useState(null);
+  const [guaranteedFixTimeCustomer, setGuaranteedFixTimeCustomer] =
+    useState(null);
+  const [dueDate, setDuedate] = useState(null);
 
-    const [followUpRequired, setFollowUpRequired] = useState(false);
-    const [followUpCompleted, setFollowUpCompleted] = useState(false);
+  const [followUpRequired, setFollowUpRequired] = useState(false);
+  const [followUpCompleted, setFollowUpCompleted] = useState(false);
 
-    const [finishedOnDateCustomer, setFinishedOnDateCustomer] = useState(null);
-    const [finishedOnDate, setFinishedOnDate] = useState(null);
+  const [finishedOnDateCustomer, setFinishedOnDateCustomer] = useState(null);
+  const [finishedOnDate, setFinishedOnDate] = useState(null);
 
-    const [meterReadAvailable, setMeterReadAvailable] = useState(false);
+  const [meterReadAvailable, setMeterReadAvailable] = useState(false);
   return (
     <>
       {workOrders.SystemStatus === "CLOSED_POSTED" && (
@@ -274,11 +279,7 @@ export const ServiceWork = () => {
         </div>
       )}
       {workOrders?.WOID && caseInformation?.CaseID && (
-        <TabsServiceWO  
-          workOrders={workOrders} 
-          SLA={SLA}
-          setSLA={setSLA}
-        />
+        <TabsServiceWO workOrders={workOrders} SLA={SLA} setSLA={setSLA} />
       )}
       <Card className="mt-2 rounded-none p-0 border-0">
         <Tabs defaultValue="Quick_WO_Input" className="">
@@ -312,9 +313,7 @@ export const ServiceWork = () => {
               </CardTitle>
               <CardTitle className="flex">
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>
-                    {ownerWorkOrder.Name}
-                    </h1>
+                  <h1 className="text-blue-500">{ownerWorkOrder.Name}</h1>
                   <p className="text-sm font-light ">Owner</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
@@ -322,28 +321,29 @@ export const ServiceWork = () => {
                   <p className="text-sm font-light ">Queue</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                  <h1 className='text-blue-500'>
-                    {dataFetchCustomerData.MainAccount?.Salutation} {dataFetchCustomerData.MainAccount?.FirstName} {dataFetchCustomerData.MainAccount?.LastName}
-                    </h1>
+                  <h1 className="text-blue-500">
+                    {dataFetchCustomerData.MainAccount?.Salutation}{" "}
+                    {dataFetchCustomerData.MainAccount?.FirstName}{" "}
+                    {dataFetchCustomerData.MainAccount?.LastName}
+                  </h1>
                   <p className="text-sm font-light ">Contact</p>
                 </div>
                 <div className="px-2 flex flex-col item-center justify-center border-r-2">
-                <Select onValueChange={setSelected} defaultValue="first" >
-                  <SelectTrigger className="shadow-none border-none text-blue-500 p-0">
-                    <SelectValue  />
-                  </SelectTrigger>
-                  <SelectContent className="p-0">
-                    <SelectGroup className="p-0">
-                    <SelectItem value="first" className="p-0">
-                      {dataFetchCustomerData.SiteAccount?.Company}
-
-                    </SelectItem>
-                    <SelectItem value="??">??</SelectItem>
-                      <SelectItem value="!!">!!</SelectItem>
-                      <SelectItem value="**">**</SelectItem>
-                      <SelectItem value="&&">&&</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
+                  <Select onValueChange={setSelected} defaultValue="first">
+                    <SelectTrigger className="shadow-none border-none text-blue-500 p-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="p-0">
+                      <SelectGroup className="p-0">
+                        <SelectItem value="first" className="p-0">
+                          {dataFetchCustomerData.SiteAccount?.Company}
+                        </SelectItem>
+                        <SelectItem value="??">??</SelectItem>
+                        <SelectItem value="!!">!!</SelectItem>
+                        <SelectItem value="**">**</SelectItem>
+                        <SelectItem value="&&">&&</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
                   </Select>
                   <p className="text-sm font-light ">Site Account</p>
                 </div>
@@ -426,7 +426,7 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={workOrders.WOID || '---'}
+                      value={workOrders.WOID || "---"}
                       readOnly
                     />
                   </CaseField>
@@ -467,7 +467,7 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={workOrders.SystemStatus || '---'}
+                      value={workOrders.SystemStatus || "---"}
                       readOnly
                     />
                   </CaseField>
@@ -511,7 +511,9 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={caseInformation.servicecatalog?.Service_offerID || '---'}
+                      value={
+                        caseInformation.servicecatalog?.Service_offerID || "---"
+                      }
                       readOnly
                     />
                   </CaseField>
@@ -523,7 +525,10 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={caseInformation.servicecatalog?.warranty_services?.Service_description || '---'}
+                      value={
+                        caseInformation.servicecatalog?.warranty_services
+                          ?.Service_description || "---"
+                      }
                       readOnly
                     />
                   </CaseField>
@@ -649,19 +654,116 @@ export const ServiceWork = () => {
               </CardContent>
             </Card>
 
-            <Card className="mt-5 flex-col">
+            <Card className="flex-col mt-7 ">
               <CardHeader>
                 <CardTitle className=" text-lg">
                   SLA in Customer Time Zone
                 </CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid">
-                <div className="font-bold flex">
-                  <Lock className="size-5 mr-2"></Lock>
-                  <span>SLA in Customer Time Zone</span>
-                  <span className="ml-33">...</span>
-                </div>
+              <CardContent className="grid gap-5 auto-rows-auto grid-cols-6 place-content-between">
+                <CaseField label="SLA Jeopardy" className={""} icon>
+                  {" "}
+                  <Input className="" value={SLA.slaJeopardy} readOnly />{" "}
+                </CaseField>
+                <CaseField
+                  label="Requested Date Time (Customer)"
+                  className={""}
+                >
+                  <DatePicker
+                    value={
+                      SLA.requestedDateTimeCustomer
+                        ? new Date(SLA.requestedDateTimeCustomer)
+                        : null
+                    }
+                    onChange={handleSLAChange("requestedDateTimeCustomer")}
+                  />
+                </CaseField>
+
+                <CaseField label="SLA Reschedule" className={""} icon>
+                  {" "}
+                  <Input className="" value={SLA.slaReschedule} readOnly />{" "}
+                </CaseField>
+                <CaseField label="Due Date (Customer)" className={""} icon>
+                  <DatePicker></DatePicker>
+                </CaseField>
+                <CaseField
+                  label="Guaranteed Fix Time (Customer)"
+                  className={""}
+                  icon
+                >
+                  <DatePicker></DatePicker>
+                </CaseField>
+                <CaseField label="Active Schedule Date" className={""} icon>
+                  {" "}
+                  <Input
+                    className=""
+                    value={SLA.activeScheduleDate}
+                    readOnly
+                  />{" "}
+                </CaseField>
+                <CaseField label="Coverage Window" className={""}>
+                  {" "}
+                  <Input
+                    className=""
+                    value={SLA.coverageWindow}
+                    onChange={(e) => setCoverageWindow(e.target.value)}
+                  />{" "}
+                </CaseField>
+                <CaseField
+                  label="Early Start Date Time (Customer)"
+                  className={""}
+                >
+                  <DatePicker
+                    value={
+                      SLA.earlyStartDateTimeCustomer
+                        ? new Date(SLA.earlyStartDateTimeCustomer)
+                        : null
+                    }
+                    onChange={handleSLAChange("earlyStartDateTimeCustomer")}
+                  ></DatePicker>
+                </CaseField>
+                <CaseField
+                  label="SLA Error Description"
+                  className={"row-span-2 items-start"}
+                  childClass={"row-span-2"}
+                  icon
+                >
+                  <textarea
+                    value={SLA.slaErrorDescription}
+                    className="border-0 ring-0 ring-gray-400 w-[100%] h-[100%] resize-none"
+                  ></textarea>
+                </CaseField>
+                <CaseField label="Response" className={""}>
+                  {" "}
+                  <Input className="" value={SLA.response} readOnly />{" "}
+                </CaseField>
+                <CaseField
+                  label="Latest Start Date Time (Customer)"
+                  className={""}
+                >
+                  <DatePicker></DatePicker>
+                </CaseField>
+                <CaseField label="OTC Code" className={""}>
+                  {" "}
+                  <Input
+                    className=""
+                    value={SLA.otcCode}
+                    onChange={(e) => setOtcCode(e.target.value)}
+                  />{" "}
+                </CaseField>
+                <CaseField
+                  label="Case Priority Index"
+                  className={"col-start-5"}
+                  icon
+                >
+                  {" "}
+                  <Input
+                    className=""
+                    value={SLA.casePriorityIndex}
+                    readOnly
+                  />{" "}
+                </CaseField>
               </CardContent>
             </Card>
 
@@ -733,22 +835,24 @@ export const ServiceWork = () => {
                   </TableHeader>
 
                   <TableBody>
-                    { materialOrders.length > 0 ? (
-                      materialOrders.map((material) => (
-                        <TableRow key={material.MOID}>
-                          <TableCell className="font-medium">
-                            <Link to={`/material-order/${material.MOID}`}>
-                              {material.MOID} on {material.WOID}
-                            </Link>
-                          </TableCell>
-                        <TableCell>{material.workorder?.CaseID}</TableCell>
-                        <TableCell>{material.CreatedOn}</TableCell>
-                        <TableCell>{material.OrderStatus}</TableCell>
-                        <TableCell>{material.OrderType}</TableCell>
-                        <TableCell>{material.ReadyForClosureDate}</TableCell>
-                      </TableRow>
-                    ))
-                  ) : null }
+                    {materialOrders.length > 0
+                      ? materialOrders.map((material) => (
+                          <TableRow key={material.MOID}>
+                            <TableCell className="font-medium">
+                              <Link to={`/material-order/${material.MOID}`}>
+                                {material.MOID} on {material.WOID}
+                              </Link>
+                            </TableCell>
+                            <TableCell>{material.workorder?.CaseID}</TableCell>
+                            <TableCell>{material.CreatedOn}</TableCell>
+                            <TableCell>{material.OrderStatus}</TableCell>
+                            <TableCell>{material.OrderType}</TableCell>
+                            <TableCell>
+                              {material.ReadyForClosureDate}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      : null}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -951,7 +1055,7 @@ export const ServiceWork = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="wo_Closure_Details" className={'p-4'}>
+          <TabsContent value="wo_Closure_Details" className={"p-4"}>
             <div className="flex gap-4">
               <div className="flex flex-col gap-4 w-2/3">
                 <Card className="flex-col">
@@ -976,13 +1080,21 @@ export const ServiceWork = () => {
                     <CardTitle className=" text-lg">Labor Types</CardTitle>
                     <hr />
                   </CardHeader>
-                  <CardContent className=" flex flex-col justify-end items-end p-0"> 
+                  <CardContent className=" flex flex-col justify-end items-end p-0">
                     <div className="flex gap-2">
-                      <Button variant={'ghost'}><span className="flex items-center gap-3"><Plus className=" size-5"/> New Labor Types</span></Button>
-                      <Button variant={'ghost'}><span className="flex items-center gap-3"><RotateCw className=" size-5"/> Refresh</span></Button>
+                      <Button variant={"ghost"}>
+                        <span className="flex items-center gap-3">
+                          <Plus className=" size-5" /> New Labor Types
+                        </span>
+                      </Button>
+                      <Button variant={"ghost"}>
+                        <span className="flex items-center gap-3">
+                          <RotateCw className=" size-5" /> Refresh
+                        </span>
+                      </Button>
                     </div>
                     <Table>
-                      <TableHeader className={' border-y-2'}>
+                      <TableHeader className={" border-y-2"}>
                         <TableRow>
                           <TableHead className="w-[100px]">Service</TableHead>
                           <TableHead>Duration</TableHead>
@@ -1041,13 +1153,23 @@ export const ServiceWork = () => {
                   </CardHeader>
                   <CardContent className="flex flex-col p-0 items-end">
                     <div className="flex gap-2">
-                      <Button variant={'ghost'}><span className="flex items-center gap-3"><Plus className=" size-5" /> New Miscellaneous Charges</span></Button>
-                      <Button variant={'ghost'}><span className="flex items-center gap-3"><RotateCw className=" size-5" /> Refresh</span></Button>
+                      <Button variant={"ghost"}>
+                        <span className="flex items-center gap-3">
+                          <Plus className=" size-5" /> New Miscellaneous Charges
+                        </span>
+                      </Button>
+                      <Button variant={"ghost"}>
+                        <span className="flex items-center gap-3">
+                          <RotateCw className=" size-5" /> Refresh
+                        </span>
+                      </Button>
                     </div>
-                  <Table>
+                    <Table>
                       <TableHeader>
-                        <TableRow className={'border-y-2'}>
-                          <TableHead className="w-[100px]">Product ID</TableHead>
+                        <TableRow className={"border-y-2"}>
+                          <TableHead className="w-[100px]">
+                            Product ID
+                          </TableHead>
                           <TableHead>Product</TableHead>
                           <TableHead>Quantity</TableHead>
                           <TableHead>Total Amount</TableHead>
@@ -1065,10 +1187,9 @@ export const ServiceWork = () => {
                         </TableRow>
                       </TableBody>
                     </Table>
-                    
                   </CardContent>
                   <CardFooter>
-                  <Pagination>
+                    <Pagination>
                       <PaginationContent>
                         <PaginationItem>
                           <PaginationPrevious href="#" />
@@ -1095,15 +1216,16 @@ export const ServiceWork = () => {
                   </CardFooter>
                 </Card>
 
-
                 <Card className="flex-col">
-                <CardHeader>
-                    <CardTitle className=" text-lg">Page Count Information</CardTitle>
+                  <CardHeader>
+                    <CardTitle className=" text-lg">
+                      Page Count Information
+                    </CardTitle>
                     <hr />
                   </CardHeader>
-                  
+
                   <CardContent className="grid gap-5 grid-cols-3 items-center">
-                    <CaseField label={'Meter Read Available'} span={2}>
+                    <CaseField label={"Meter Read Available"} span={2}>
                       <Select
                         className=""
                         value={meterReadAvailable ? "yes" : "no"}
@@ -1145,8 +1267,10 @@ export const ServiceWork = () => {
                 </Card>
 
                 <Card className="flex-col">
-                <CardHeader>
-                    <CardTitle className=" text-lg">DOA Letter (If DOA Case)</CardTitle>
+                  <CardHeader>
+                    <CardTitle className=" text-lg">
+                      DOA Letter (If DOA Case)
+                    </CardTitle>
                     <hr />
                   </CardHeader>
 
@@ -1296,7 +1420,7 @@ export const ServiceWork = () => {
                   </CardContent>
                 </Card>
                 <Card className="flex-col">
-                <CardHeader>
+                  <CardHeader>
                     <CardTitle className=" text-lg">Closure Codes</CardTitle>
                     <hr />
                   </CardHeader>
@@ -1312,7 +1436,7 @@ export const ServiceWork = () => {
                       </Command>
                     </CaseField>
                     <CaseField label={"Travel Zone"} span={2}>
-                      <Input variant={'invisible'} value={"---"}/>
+                      <Input variant={"invisible"} value={"---"} />
                     </CaseField>
                     {/* <div className="font-bold flex">
                       <Lock className="size-5 mr-2"></Lock>
@@ -1346,7 +1470,6 @@ export const ServiceWork = () => {
               />
             </TabsContent>
           )}
-
         </Tabs>
       </Card>
     </>

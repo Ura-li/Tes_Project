@@ -29,6 +29,7 @@ model caseinformation {
   SiteAccountID                                 Int?
   ContactID                                     Int?
   AssetID                                       Int?
+  id_gtc                                        Int?
   CaseSubject                                   String?              @db.VarChar(255)
   CaseType                                      String?              @db.VarChar(100)
   KCI_Flag                                      Boolean?             @default(false)
@@ -54,6 +55,7 @@ model caseinformation {
   createdByUser                                 User?                @relation("UserCreatedCases", fields: [CreatedBy], references: [IDUser], onDelete: Restrict, onUpdate: Cascade)
   ServiceCatalogID                              Int?
   servicecatalog                                servicecatalog?      @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID], onDelete: Restrict)
+  global_trade_check                            global_trade_check?  @relation(fields: [id_gtc], references: [id_gtc], onDelete: Restrict)
 
   @@index([AssetID], map: "AssetID")
   @@index([CaseNote], map: "CaseNote")
@@ -61,6 +63,7 @@ model caseinformation {
   @@index([SiteAccountID], map: "SiteAccountID")
   @@index([SymptomCode], map: "SymptomCode")
   @@index([CreatedBy])
+  @@index([id_gtc])
 }
 
 model casenotes {
@@ -116,6 +119,8 @@ model global_trade_check {
   screening_id        String @db.VarChar(25)
   gt_active_listening String @db.VarChar(30)
   gt_al_comments      String @db.VarChar(50)
+
+  caseinformation caseinformation[]
 }
 
 model materialorder {
@@ -128,32 +133,31 @@ model materialorder {
   SalesOrderNumber    String?             @db.VarChar(100)
   RMANumber           String?             @db.VarChar(100)
   ReadyForClosureDate DateTime?           @db.DateTime(0)
-  
-  ShippingPriority    ShippingPriority? @default(MEDIUM)
-  CustomerInducedDamage Boolean? @default(false)
-  AccidentalDamageProtection Boolean? @default(false)
-  DefectiveMediaRetention Boolean? @default(false)
-  
-  DeliveryRequestedDate  DateTime? @db.DateTime(0)
-  CollectionRequestedDate DateTime? @db.DateTime(0)
-  PromoCode              String?   @db.VarChar(50)
-  NotificationNumber     String?   @db.VarChar(100)
-  ParentMOID             String?   @db.VarChar(13)
-  IsBCPOrder             Boolean?  @default(false)
-  MaterialOrderType      String?   @db.VarChar(50)
-  EOTOrderNumber         String?   @db.VarChar(50)
-  ResourceId String? @db.VarChar(255)
-  parentMO               materialorder? @relation("ParentMaterialOrder", fields: [ParentMOID], references: [MOID], onDelete: Restrict)
-  childMOs               materialorder[] @relation("ParentMaterialOrder")
 
-  OwnerID             Int?
-  owner               User?               @relation("UserMaterialOrders", fields: [OwnerID], references: [IDUser], onDelete: Restrict)
+  ShippingPriority           ShippingPriority? @default(MEDIUM)
+  CustomerInducedDamage      Boolean?          @default(false)
+  AccidentalDamageProtection Boolean?          @default(false)
+  DefectiveMediaRetention    Boolean?          @default(false)
+
+  DeliveryRequestedDate   DateTime?       @db.DateTime(0)
+  CollectionRequestedDate DateTime?       @db.DateTime(0)
+  PromoCode               String?         @db.VarChar(50)
+  NotificationNumber      String?         @db.VarChar(100)
+  ParentMOID              String?         @db.VarChar(13)
+  IsBCPOrder              Boolean?        @default(false)
+  MaterialOrderType       String?         @db.VarChar(50)
+  EOTOrderNumber          String?         @db.VarChar(50)
+  ResourceId              String?         @db.VarChar(255)
+  parentMO                materialorder?  @relation("ParentMaterialOrder", fields: [ParentMOID], references: [MOID], onDelete: Restrict)
+  childMOs                materialorder[] @relation("ParentMaterialOrder")
+
+  OwnerID Int?
+  owner   User? @relation("UserMaterialOrders", fields: [OwnerID], references: [IDUser], onDelete: Restrict)
 
   workorder              workorder?               @relation(fields: [WOID], references: [WOID], onDelete: Restrict, map: "materialorder_ibfk_1")
   materialorderlineitems materialorderlineitems[]
 
   @@index([WOID], map: "WOID")
-
   @@index([ResourceId], map: "ResourceId")
   @@index([OwnerID])
 }
@@ -318,7 +322,6 @@ model warranty_services {
   Total               Float            @default(0) @db.Float
   servicecatalog      servicecatalog[]
 }
-
 
 model SubkTechnician {
   SubkTechnicianId String @id @db.VarChar(255)
@@ -495,6 +498,19 @@ model workorder_service_delivery_skillset {
   SkillLevel String? @db.VarChar(50)
 
   @@index([WOID], map: "fk_skillset_workorder")
+}
+
+model repairClassCode {
+  Code               String                    @id @db.VarChar(3)
+  Description        String                    @db.VarChar(100)
+  Definition         String                    @db.VarChar(255)
+  PaymentEligibility product_type_ProductTower
+  CreatedOn          DateTime?                 @default(now()) @db.DateTime(0)
+}
+
+enum payment_eligibility {
+  Eligible
+  Not_Eligible
 }
 
 enum product_type_ProductTower {
