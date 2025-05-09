@@ -154,6 +154,10 @@ const data = {
         {
           title: "Service Catalog",
           url: "/master/ServiceCatalog",
+        },
+        {
+          title: "OTC Code",
+          url: "/master/OTC_Code",
         }, 
       ],
     },

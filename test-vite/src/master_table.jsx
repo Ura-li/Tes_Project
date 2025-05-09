@@ -3143,26 +3143,31 @@ export const ServiceCatalogTable = () => {
               <th className="border p-2">Price</th>
               <th className="border p-2">Tax</th>
               <th className="border p-2">Total</th>
+              <th className="border p-2">Created On</th>
               <th className="border p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.ServiceCatalogID} className="hover:bg-gray-100 text-center text-sm">
+              <tr key={item.Code} className="hover:bg-gray-100 text-center text-sm">
                 <td
                   className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                  onClick={() => navigate(`/repair-class-code/${item.ServiceCatalogID}`)}
+                  onClick={() => navigate(`/repair-class-code/${item.Code}`)}
                 >
-                  {item.ServiceCatalogID}
+                  {item.Code}
                 </td>
-                <td className="border p-2">{item.asset_information?.SerialNumber}</td>
-                <td className="border p-2">{item.Service_offerID}</td>
-                <td className="border p-2">{item.PartNumber}</td>
-                <td className="border p-2">{item.WarrantyStatus}</td>
-                <td className="border p-2">{item.Currency}</td>
-                <td className="border p-2">{item.Price}</td>
-                <td className="border p-2">{item.Tax}</td>
-                <td className="border p-2">{item.Total}</td>
+                <td className="border p-2">{item.Description}</td>
+                <td className="border p-2">{item.Definition}</td>
+                <td className="border p-2">{item.PaymentEligibility}</td>
+                <td className="border p-2">
+                  {item.CreatedOn
+                    ? new Date(item.CreatedOn).toLocaleDateString("id-ID", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : "-"}
+                </td>
                 <td className="border p-2 flex justify-center gap-2">
                   <RepairClassCodeEdit Code={item.Code} onUpdate={fetchData} />
                   <RepairClassCodeDelete

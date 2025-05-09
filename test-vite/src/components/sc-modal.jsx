@@ -74,6 +74,7 @@ import {
 } from "@/components/ui/pagination"
 
 import { getUserFromToken } from "@/lib/utils/auth";
+import { Description } from "@radix-ui/react-alert-dialog";
 
 // const assets = [
 //   {
@@ -1443,7 +1444,7 @@ export function ContactDelete ({ contactID }) {
       <Trash />
     </Button>
   );
-}
+};
 
 export function ProductAdd() {
   // Form Product
@@ -1568,7 +1569,7 @@ export function ProductAdd() {
       </DialogContent>
     </Dialog>
   );
-}
+};
 
 export function ProductEdit({ ProductNumber, onUpdate }) {
   const [products, setProducts] = useState(null);
@@ -1699,7 +1700,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
       </DialogContent>
     </Dialog>
   );
-}
+};
 
 export function ProductDelete ({ ProductNumber, isModalOpen, setIsModalOpen, onUpdate }) {
   //set modal
@@ -1899,7 +1900,7 @@ export function ProductTypeAdd () {
       </DialogContent>
     </Dialog>
   )
-}
+};
 
 export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
   const [producttypes, setProductTypes] = useState(null);
@@ -2979,7 +2980,7 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
       </DialogContent>
     </Dialog>
   );
-}
+};
 
 export function WorkOrderDelete ({ WOID, isModalOpen, setIsModalOpen, onUpdate }) {
   const handleDelete = async () => {
@@ -3199,7 +3200,7 @@ export function UserAdd({ onAdd }) {
       </DialogContent>
     </Dialog>
   );
-}
+};
 
 export function UserEdit({ IDUser, onUpdate }) {
   const [formData, setFormData] = useState({});
@@ -3389,7 +3390,7 @@ export function UserEdit({ IDUser, onUpdate }) {
       </DialogContent>
     </Dialog>
   );
-}
+};
 
 export function UserDelete ({ IDUser, isModalOpen, setIsModalOpen, onUpdate }) {
  
@@ -3464,6 +3465,148 @@ return (
     <Trash />
   </Button>
 );
+};
+
+export function PartAdd () {
+  const [formData, setFormData] = useState({
+    PartNumber: '',
+    Keyword: '',
+    PartDescription: '',
+    RestrictionReason: '',
+    Orderability: false,
+    CSR_Flag: false,
+    ROHS_Flag: false,
+    Returnable_Flag: false,
+    HardRoll_Flag: false,
+    DangerousGoods_Flag: false,
+    LithiumBattery_Flag: false,
+    Oversize_Flag: false,
+    Heavy_Flag: false,
+    Price: 0,
+    FreightPrice: 0,
+    Shipping_Fee: 0,
+    Tax: 0,
+    Total: 0,
+  });
+
+  const handleChange = (e) => {
+    const { id, type, value, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
+    setFormData((prev) => ({ ...prev, [id]: newValue }));
+  };
+
+  const handleSubmit = async () => {
+    const { PartNumber, Keyword, PartDescription } = formData;
+
+    if (!PartNumber || !Keyword || !PartDescription) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "PartNumber, Keyword, and PartDescription are required.",
+        icon: "warning",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    // Convert types before sending
+    const payload = {
+      ...formData,
+      Orderability: Boolean(formData.Orderability),
+      CSR_Flag: Boolean(formData.CSR_Flag),
+      ROHS_Flag: Boolean(formData.ROHS_Flag),
+      Returnable_Flag: Boolean(formData.Returnable_Flag),
+      HardRoll_Flag: Boolean(formData.HardRoll_Flag),
+      DangerousGoods_Flag: Boolean(formData.DangerousGoods_Flag),
+      LithiumBattery_Flag: Boolean(formData.LithiumBattery_Flag),
+      Oversize_Flag: Boolean(formData.Oversize_Flag),
+      Heavy_Flag: Boolean(formData.Heavy_Flag),
+      Price: Number(formData.Price),
+      FreightPrice: Number(formData.FreightPrice),
+      Shipping_Fee: Number(formData.Shipping_Fee),
+      Tax: Number(formData.Tax),
+      Total: Number(formData.Total),
+    };
+
+    try {
+      const res = await ApiCustomer.post(`/api/service-log/parts-catalog`, payload);
+      Swal.fire({
+        title: "Success!",
+        text: "Part successfully added.",
+        icon: "success",
+        timer: 1200,
+        showConfirmButton: false,
+      }).then(() => window.location.reload());
+    } catch (err) {
+      Swal.fire({
+        title: "Error!",
+        text: err.response?.data?.message || "Failed to add part.",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm ml-2">Part Add</Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Add New Part</DialogTitle>
+          <DialogDescription>Fill in all part details below:</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-2">
+          <Label>Part Number *</Label>
+          <Input type="text" id="PartNumber" value={formData.PartNumber} onChange={handleChange} />
+
+          <Label>Keyword *</Label>
+          <Input type="text" id="Keyword" value={formData.Keyword} onChange={handleChange} />
+
+          <Label>Part Description *</Label>
+          <Input type="text" id="PartDescription" value={formData.PartDescription} onChange={handleChange} />
+
+          <Label>Restriction Reason</Label>
+          <Input type="text" id="RestrictionReason" value={formData.RestrictionReason} onChange={handleChange} />
+
+          <Label>Price</Label>
+          <Input type="number" id="Price" value={formData.Price} onChange={handleChange} />
+
+          <Label>Freight Price</Label>
+          <Input type="number" id="FreightPrice" value={formData.FreightPrice} onChange={handleChange} />
+
+          <Label>Shipping Fee</Label>
+          <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} />
+
+          <Label>Tax</Label>
+          <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} />
+
+          <Label>Total</Label>
+          <Input type="number" id="Total" value={formData.Total} onChange={handleChange} />
+
+          {/* Checkbox flags */}
+          {[
+            "Orderability", "CSR_Flag", "ROHS_Flag", "Returnable_Flag", "HardRoll_Flag",
+            "DangerousGoods_Flag", "LithiumBattery_Flag", "Oversize_Flag", "Heavy_Flag"
+          ].map((flag) => (
+            <div key={flag}>
+              <label className="flex items-center space-x-2">
+                <input type="checkbox" id={flag} checked={formData[flag]} onChange={handleChange} />
+                <span>{flag.replace(/_/g, " ")}</span>
+              </label>
+            </div>
+          ))}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Submit</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 export function PartEdit({ PartNumber, onUpdate }) {
@@ -3641,7 +3784,7 @@ export function PartEdit({ PartNumber, onUpdate }) {
       </DialogContent>
     </Dialog>
   );
-}
+};
 
 export function PartDelete ({ PartNumber, isModalOpen, setIsModalOpen, onUpdate }) {
   const handleDelete = async () => {
@@ -3994,7 +4137,7 @@ export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpda
 //? Service Case Tab List
 
 
-// export function BtnModalsWorkOrder(){
+// export function BtnModalsServiceCatalog(){
 //   const [workOpen, setWorkOpen] = useState(false);
 
 //   const SC = [
@@ -4184,7 +4327,27 @@ export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpda
 //   )
 // }
 
-export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
+export function BtnModalsServiceCatalog({ 
+  open, 
+  setOpen, 
+  caseDetails,
+  serviceCatalogType
+}) {
+  useEffect(() => {
+    // Resetting modal state when serviceCatalogType changes
+    setCurrentStep(1);
+    setStep(0);
+    setSelectedWarrantyServices([]);
+    setSelectedPartCatalog([]);
+    setSubTotalConfirmServices(0);
+    setTotalTaxConfirmServices(0);
+    setTotalConfirmServices(0);
+    setPartNumberSearch("");
+    setKeywordSearch("");
+    setDescriptionSearch("");
+
+  }, [serviceCatalogType]);
+  
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -4365,7 +4528,19 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
       }).then(()=>{
         setOpen(false);
         const WOID = res.data.WOID
-        window.open(`/work/${WOID}`, '_blank');
+        const MOID = res.data.MOID
+        switch (serviceCatalogType) {
+          case "CSR":
+            window.open(`/material-order/${MOID}`, '_blank');
+            break;
+
+          case "workorder":
+            window.open(`/work/${WOID}`, '_blank');  
+            break;
+
+          default:
+            break;
+        }
       });
     } catch (err) {
       console.error("❌ Order Creation Failed:", err);
@@ -4744,6 +4919,7 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
               <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
               <Button variant={'search'} className="" onClick={() => setModalPart(true)}>Add Part</Button>
               <Button variant={'search'} className="" onClick={createOrder}>Create Order</Button>
+              
               <Label htmlFor="incident" className={'font-bold '}>Incident Type</Label>
               <Select onChange={setSelected} defaultValue="DepotRepair">
                 <SelectTrigger className="w-[180px]">
@@ -4751,14 +4927,24 @@ export function BtnModalsWorkOrder({ open, setOpen, caseDetails }) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="DepotRepair">DepotRepair</SelectItem>
-                    <SelectItem value="banana">Banana</SelectItem>
-                    <SelectItem value="blueberry">Blueberry</SelectItem>
-                    <SelectItem value="grapes">Grapes</SelectItem>
-                    <SelectItem value="pineapple">Pineapple</SelectItem>
+                    <SelectItem value="CE Assist-APJ-Computing">CE Assist-APJ-Computing</SelectItem>
+                    <SelectItem value="CE Assist-APJ-Printing">CE Assist-APJ-Printing</SelectItem>
+                    <SelectItem value="Cust Sat-Issue-APJ-Computing">Cust Sat Issue-APJ-Computing</SelectItem>
+                    <SelectItem value="Cust Sat-Issue-APJ-Printing">Cust Sat Issue-APJ-Printing</SelectItem>
+                    <SelectItem value="IMACD-APJ-Computing">IMACD-APJ-Computing</SelectItem>
+                    <SelectItem value="IMACD-APJ-Printing">IMACD-APJ-Printing</SelectItem>
+                    <SelectItem value="Installation Only-APJ-Computing">Installation Only-APJ-Computing</SelectItem>
+                    <SelectItem value="Installation Only-APJ-Printing">Installation Only-APJ-Printing</SelectItem>
+                    <SelectItem value="PC Problem-APJ-Computing">PC Problem-APJ-Computing</SelectItem>
+                    <SelectItem value="Print Problem-APJ-Printing">Print Problem-APJ-Printing</SelectItem>
+                    <SelectItem value="Print Quality-APJ-Printing">Print Quality-APJ-Printing</SelectItem>
+                    <SelectItem value="Prev Maint-APJ-Computing">Prev Maint-APJ-Computing</SelectItem>
+                    <SelectItem value="Prev Maint-APJ-Printing">Prev Maint-APJ-Printing</SelectItem>
+                    <SelectItem value="DepotRepair">Depot Repair</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
+              
             </DialogFooter>
           </DialogContent>
         );
@@ -7322,3 +7508,81 @@ export function RepairClassCodeDelete({ Code, isModalOpen, setIsModalOpen, onUpd
   );
 }
 
+export function OTCAdd({ onUpdate }) {
+  const [formData, setFormData] = useState({
+    OTCCode: "",
+    Description: ""
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+  if (!formData.OTCCode || !formData.Description) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "All fields are required.",
+        icon: "warning",
+        timer: 1500,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      return;
+    }
+
+    try {
+console.log("Form Data : ",formData)
+      await ApiCustomer.post("/api/otc-code", formData);
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "OTC Code berhasil disimpan.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        onUpdate?.();
+      });
+    } catch (error) {
+      console.error("Error saving OTC Code:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menyimpan data. Silakan coba lagi.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+<Button variant="outline" className="h-11 rounded-sm mb-4">Add OTC Code</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add OTC Code</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>OTC Code</Label>
+          <Input id="OTCCode" value={formData.OTCCode} onChange={handleInputChange} />
+
+          <Label>Description</Label>
+          <Input id="Description" value={formData.Description} onChange={handleInputChange} />
+
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
