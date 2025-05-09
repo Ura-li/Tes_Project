@@ -149,7 +149,6 @@ model materialorder {
   OwnerID             Int?
   owner               User?               @relation("UserMaterialOrders", fields: [OwnerID], references: [IDUser], onDelete: Restrict)
 
-  resource               Resource?         @relation(fields: [ResourceId], references: [ResourceId])
   workorder              workorder?               @relation(fields: [WOID], references: [WOID], onDelete: Restrict, map: "materialorder_ibfk_1")
   materialorderlineitems materialorderlineitems[]
 
@@ -207,7 +206,6 @@ model materialorderlineitems {
   @@index([MOID], map: "MOID")
   @@index([PartNumber], map: "PartNumber")
 }
-
 
 model product_information {
   ProductNumber       String              @id @db.VarChar(11)
@@ -352,7 +350,6 @@ model warranty_services {
   Total               Float            @default(0) @db.Float
   servicecatalog      servicecatalog[]
 }
-
 
 model SubkTechnician {
   SubkTechnicianId String @id @db.VarChar(255)
@@ -543,6 +540,7 @@ enum payment_eligibility {
   Eligible
   Not_Eligible
 }
+
 enum product_type_ProductTower {
   PSG
   IPG

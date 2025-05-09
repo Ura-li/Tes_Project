@@ -42,11 +42,20 @@ export async function GET(request) {
     const search = searchParams.get("search") || "";
     const woidParam = searchParams.get("WOID");
 
+    
+    if (woidParam.length === 0) {
+      return NextResponse.json({
+        success: false,
+        message: "Parameter 'WOID' tidak valid atau kosong",
+        data: [],
+      }, { status: 400 });
+    }
+
         // console.log("Query Params:", { search, page, limit });
          // Initialize search filters
          const materialOrders = await prisma.materialorder.findMany({
             where: {
-              WOID: { in: woidArray }
+              WOID: { contains: woidParam }
             },
             include: {
                 workorder: {
@@ -69,14 +78,12 @@ export async function GET(request) {
 
             }
           });
+          return NextResponse.json({
+            success: true,
+            message: "List Data Material Order",
+            data: materialOrders,
+          });
 
-    if (woidArray.length === 0) {
-      return NextResponse.json({
-        success: false,
-        message: "Parameter 'WOID' tidak valid atau kosong",
-        data: [],
-      }, { status: 400 });
-    }
 }catch (err) {
   console.error("🔥 ERROR in GET API:", err);
 

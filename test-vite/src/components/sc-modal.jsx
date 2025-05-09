@@ -4136,7 +4136,7 @@ export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpda
 //? Service Case Tab List
 
 
-// export function BtnModalsWorkOrder(){
+// export function BtnModalsServiceCatalog(){
 //   const [workOpen, setWorkOpen] = useState(false);
 
 //   const SC = [
