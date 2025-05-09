@@ -1115,7 +1115,7 @@ const CheckRequestedDateTimeCustomer = (rawDateTime) => {
 };
 
 
-export function NewBookableResourceBooking({ WOID, CreatedBy}) {
+export function NewBookableResourceBooking({ WOID, CreatedBy, RequestedDateTimeCustomer}) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false)
 

@@ -827,6 +827,7 @@ export const ServiceWork = () => {
                 <NewBookableResourceBooking
                   WOID={workOrders.WOID}
                   CreatedBy={user.id}
+                  RequestedDateTimeCustomer={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}
                 />
                 {/* </Button> */}
                 <Table>

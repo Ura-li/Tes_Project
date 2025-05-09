@@ -572,6 +572,8 @@ enum MaterialOrderStatus {
 
 enum WorkOrderStatus {
   OPEN_UNSCHEDULED
+  // SCHEDULED
+  // IN_PROGRESS
   OPEN_COMPLETED
   CLOSED_POSTED
 }
