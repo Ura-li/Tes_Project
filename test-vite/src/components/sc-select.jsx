@@ -10,25 +10,25 @@ import {
     SelectValue,
   } from "@/components/ui/select"
    
-  export function SelectBar({ id, onChange, value }) {
+  export function SelectBar({ id, onChange, value, options, placeholder }) {
     return (
-      <Select value={value} onValueChange={(value) => onChange({ target: { id, value}})}>
+      <Select value={value} onValueChange={(val) => onChange({ target: { id, value: val } })}>
         <SelectTrigger className="w-full border-black">
-          <SelectValue placeholder="Select a Country"/>
+          <SelectValue placeholder={placeholder || "Select an option"} />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {/* <SelectItem value="">Select a Country</SelectItem> */}
-            <SelectItem value="Indonesia">Indonesia</SelectItem>
-            <SelectItem value="Malaysia">Malaysia</SelectItem>
-            <SelectItem value="Singapura">Singapura</SelectItem>
-            <SelectItem value="Inggris">Inggris</SelectItem>
-            <SelectItem value="Cina">Cina</SelectItem>
+            {options.map((opt) => (
+              <SelectItem key={opt.id} value={opt.name}>
+                {opt.name}
+              </SelectItem>
+            ))}
           </SelectGroup>
         </SelectContent>
       </Select>
-    )
+    );
   }
+  
 
   export function SelectBar1({ id, onChange, value }) {
     return (

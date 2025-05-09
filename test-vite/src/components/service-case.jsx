@@ -101,7 +101,12 @@ import DatePicker from './date-picker'
 
 
 
-export const TabsService = ({ caseDetails }) => {
+export const TabsService = ({ 
+  caseDetails, 
+  caseNote,
+  caseNoteFormData,
+  setCaseNoteFormData
+}) => {
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
 
@@ -111,15 +116,7 @@ export const TabsService = ({ caseDetails }) => {
   const { open } = useSidebar();
 
   
-  //casenote
-  const [caseNoteFormData, setCaseNoteFormData] = useState({
-    LogType: '',
-    ActionType: '',
-    Template: '',
-    VisibleExternally: null,
-    MinutesSpent: 0,
-    Note: ''
-  });
+  
   // const [apa, setApa] = useState(null)
 
   const handleCaseNoteChange = (key, value) => {
@@ -133,19 +130,25 @@ export const TabsService = ({ caseDetails }) => {
     
   console.log("📝 Form Data to Submit:", caseNoteFormData); // ✅ Log the form data
     try {
+      Swal.fire({
+        title: 'Saving Case...',
+        text: 'Mohon tunggu sebentar',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
       const user = getUserFromToken();
       const timestamp = new Date().toLocaleString(); // e.g. "5/6/2025, 10:30:15 AM"
       const author = user?.name || user?.email || "Unknown User";
       const role = user?.role || "Unknown";
     
-      const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.Note}`;
+      const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
       const response = await ApiCustomer.post("/api/case-information/case-notes", {
         ...caseNoteFormData,
         Note: modifiedNote,
         CaseID: caseDetails.CaseID
       });
       console.log("Saved successfully:", response.data);
-      alert("Case Note Saved!");
+      
       const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
       setCaseNotes({
         NotesDisplay: NotedDisplay
@@ -161,95 +164,32 @@ export const TabsService = ({ caseDetails }) => {
         dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
       }
       await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated)
-
+      
+      Swal.close();
     } catch (error) {
       console.error("Save failed:", error);
       alert("Failed to save note.");
     }
   };
   
-  const checkOrCreateNote = async () => {
-    const existing = await ApiCustomer.get(`/api/case-information/case-notes?caseId=${caseDetails.CaseID}`);
-    
-    if (existing.data.data.length > 0) {
-      const noteID = existing.data.data[0].NoteID;
-      await ApiCustomer.patch(`/api/case-information/case-notes/${noteID}`, {
-        ...caseNoteFormData,
-        Note: existing.data.data[0].Note + "\n" + caseNoteFormData.Note
-      });
-    } else {
-      await ApiCustomer.post("/api/case-information/case-notes", {
-        ...caseNoteFormData,
-        CaseID: caseDetails.CaseID
-      });
-    }
-  };
-  
-  const fetchCaseNotes = async () => {
-    try{
-      const res = await ApiCustomer.get(`/api/case-information/case-notes`)
-      const notes = res.data.data
-  
-      const existingNote = notes.find(note=> note.CaseID === caseDetails.CaseID)
-  
-      let noteID = null
-  
-      if(existingNote){
-        noteID = existingNote.NoteID
-      }else{
-        const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`,{
-          LogType: "NotesLog",
-          ActionType: "Initial",
-          Template: "",
-          VisibleExternally: false,
-          MinutesSpent: 0,
-          Note: "",
-          CaseID: caseID,
-        })
-        
-        noteID = createResponse.data.data.NoteID;
-      }
-  
-      const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`)
-      const noteDetail = detailRes.data.data;
-  
-      console.log("✅ Case Note Detail:", noteDetail);
-      return noteDetail;
-    }catch(err){
-      console.error("Error in fetchCaseNotes:", err);
-      return null;
-    }
-  }
-  // const fetchSymptomCodes = async () => {
-  //   try{
-  //     const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`)
-  //     const caseData = res.data.data
-  //     const symptomCode = caseData.SymptomCode
 
-  //     const resSymptomCode = await ApiCustomer.get(`/api/symptom-codes/${symptomCode}`)
-  //     return resSymptomCode.data.data
-  //   }catch (err) {
-  //     console.error("Error in fetchSymptomCodes:", err);
-  //     return null;
-  //   }
-  // }
   useEffect(() => {
     const loadNote = async () => {
-      const noteDetail = await fetchCaseNotes();
+      const noteDetail = caseNote;
       if(noteDetail ){
         const NotedDisplay = `@Created On : ${noteDetail.CreatedOn}\n${noteDetail.Note}`;
         setCaseNotes({
           NotesDisplay: NotedDisplay
         })
       } 
-      const symptomCodeDetail = await fetchSymptomCodes();
-      if(symptomCodeDetail){
-        setSelectedSymptom({
-          TopCategory: symptomCodeDetail.TopCategory,
-          SubCategory: symptomCodeDetail.SubCategory,
-          SymptomCode: symptomCodeDetail.SymptomCode,
-        })
-      }
+      // const symptomCodeDetail = await fetchSymptomCodes();
+      // if(symptomCodeDetail){
+      //   setSelectedSymptom({
+      //     TopCategory: symptomCodeDetail.TopCategory,
+      //     SubCategory: symptomCodeDetail.SubCategory,
+      //     SymptomCode: symptomCodeDetail.SymptomCode,
+      //   })
+      // }
     }
     loadNote()
   }, [])
@@ -369,6 +309,7 @@ export const TabsService = ({ caseDetails }) => {
       open={openWorkOrder} 
       setOpen={setOpenWorkOrder} 
       caseDetails={caseDetails}
+      serviceCatalogType={serviceCatalogType}
     />
     </div>
     <div>
@@ -970,20 +911,6 @@ useEffect(() => {
       
     }
   }
-  // const fetchSymptomCodes = async (term) => {
-  //   try {
-  //     const response = await ApiCustomer.get("/api/case-information/symptom-codes");
-  //     const allCodes = response.data.data;
-  
-  //     const filtered = allCodes.filter((sym) =>
-  //       sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
-  //     );
-  
-  //     setSymptomSuggestions(filtered);
-  //   } catch (err) {
-  //     console.error("Error fetching symptom codes", err);
-  //   }
-  // };
   const fetchWorkOrders = async () => {
     try {
       const res = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
@@ -1015,6 +942,10 @@ useEffect(() => {
   fetchOwnerUserData();
   
   fetchWorkOrders();
+
+  if (workOrders.length > 0) {
+    fetchMaterialOrders();
+  }
   const loadNote = async () => {
     const noteDetail = await fetchCaseNotes();
     if(noteDetail ){
@@ -1038,10 +969,6 @@ useEffect(() =>{
   console.log("Fetch Data User ", ownerUserData)
 }, [ownerUserData])
 
-// useEffect(() =>{
-//   console.log("Data Asset Info : ",dataFetchAssetInformation)
-// }, dataFetchAssetInformation)
-
 const fetchSymptomCodes = async (term) => {
   try {
     const response = await ApiCustomer.get("/api/symptom-codes");
@@ -1056,14 +983,6 @@ const fetchSymptomCodes = async (term) => {
     console.error("Error fetching symptom codes", err);
   }
 };
-// console.log("Selected Symptopm ",selectedSymptom)
-
-// useEffect(() => {
-// }, selectedSymptom)
-
-
-//order section
-//workorder
 
 
 useEffect(() => {
@@ -1076,11 +995,8 @@ useEffect(() => {
 const navigate = useNavigate();
 
 const handleClick = async () => {
-  // await fetchOwnerUserData();
-  // await fetchCustomerData(); 
   {workOrders.map((work) => {
   navigate(`/work/${work.WOID}`, {
-    // state: { ownerUserData, dataFetchCustomerData }
   });
   })}
 };

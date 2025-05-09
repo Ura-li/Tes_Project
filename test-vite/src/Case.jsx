@@ -8,50 +8,88 @@ import ApiCustomer from './api'
 import Swal from 'sweetalert2';
 
 
+
 export const Case = () => {
-  const { caseId } = useParams(); // 🔥 Ambil ID dari URL
+  const { caseId } = useParams();
   const [caseDetails, setCaseDetails] = useState(null);
+  const [caseNote, setCaseNote] = useState(null);
+  const [caseNoteFormData, setCaseNoteFormData] = useState({
+    LogType: '',
+    ActionType: '',
+    Template: '',
+    VisibleExternally: null,
+    MinutesSpent: 0,
+    Note: ''
+  });
 
   useEffect(() => {
-    const fetchCaseDetails = async () => {
-      // Tampilkan loading SweetAlert2
+    const loadCaseData = async () => {
       Swal.fire({
         title: 'Memuat Case Detail...',
         text: 'Mohon tunggu sebentar',
         allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
+        didOpen: () => Swal.showLoading()
       });
 
       try {
         const response = await ApiCustomer.get(`/api/case-information/${caseId}`);
         setCaseDetails(response.data.data);
-
-        // Tutup loading saat selesai
-        Swal.close();
       } catch (error) {
         console.error("Error fetching case details:", error);
-
-        // Tampilkan error alert
         Swal.fire({
           icon: 'error',
           title: 'Gagal memuat data',
-          text: 'Terjadi kesalahan saat mengambil data kasus.',
+          text: 'Terjadi kesalahan saat mengambil data kasus.'
         });
+      }
+
+      try {
+        const res = await ApiCustomer.get(`/api/case-information/case-notes`);
+        const notes = res.data.data;
+        const existingNote = notes.find(note => note.CaseID === caseId);
+
+        let noteID;
+        if (existingNote) {
+          noteID = existingNote.NoteID;
+        } else {
+          const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`, {
+            LogType: "NotesLog",
+            ActionType: "Initial",
+            Template: "",
+            VisibleExternally: false,
+            MinutesSpent: 0,
+            Note: "",
+            CaseID: caseId
+          });
+          noteID = createResponse.data.data.NoteID;
+        }
+
+        const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`);
+        setCaseNote(detailRes.data.data);
+
+      } catch (err) {
+        console.error("Error in fetchCaseNotes:", err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal memuat catatan',
+          text: 'Terjadi kesalahan saat mengambil/membuat catatan kasus.'
+        });
+      } finally {
+        Swal.close();
       }
     };
 
-    fetchCaseDetails();
+    loadCaseData();
   }, [caseId]);
 
-  // Tidak perlu return <p>Loading...</p> karena loading pakai Swal
   if (!caseDetails) return null;
 
   return (
-    <>
-      <TabsService caseDetails={caseDetails} />
-      {/* <ServiceCase caseDetails={caseDetails} /> */}
-    </>
+    <TabsService 
+      caseDetails={caseDetails} 
+      caseNote={caseNote}
+      caseNoteFormData={caseNoteFormData}
+      setCaseNoteFormData={setCaseNoteFormData}
+    />
   );
 };

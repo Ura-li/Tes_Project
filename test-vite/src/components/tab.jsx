@@ -65,7 +65,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import Swal from "sweetalert2";
-import { BtnModalsWorkOrder } from "./sc-modal";
+import { BtnModalsServiceCatalog } from "./sc-modal";
 import DatePicker from "./date-picker";
 
 import ApiCustomer from "@/api";
@@ -410,7 +410,7 @@ export const TabsService = ({ caseDetails }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        <BtnModalsWorkOrder
+        <BtnModalsServiceCatalog
           open={openWorkOrder}
           setOpen={setOpenWorkOrder}
           caseDetails={caseDetails}
@@ -589,7 +589,7 @@ export const TabsServiceWO = ({ workOrders }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+        {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
         {/* <ServiceCase 
@@ -708,7 +708,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+        {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
         {/* <ServiceCase 
@@ -831,7 +831,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+        {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
         {/* <ServiceCase 
@@ -984,7 +984,7 @@ export const TabsBooking = ({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {/* <BtnModalsWorkOrder open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+        {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
         {/* <ServiceCase 

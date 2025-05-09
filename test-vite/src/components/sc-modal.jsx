@@ -4136,7 +4136,7 @@ export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpda
 //? Service Case Tab List
 
 
-// export function BtnModalsWorkOrder(){
+// export function BtnModalsServiceCatalog(){
 //   const [workOpen, setWorkOpen] = useState(false);
 
 //   const SC = [
@@ -4326,7 +4326,27 @@ export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpda
 //   )
 // }
 
-export function BtnModalsServiceCatalog({ open, setOpen, caseDetails }) {
+export function BtnModalsServiceCatalog({ 
+  open, 
+  setOpen, 
+  caseDetails,
+  serviceCatalogType
+}) {
+  useEffect(() => {
+    // Resetting modal state when serviceCatalogType changes
+    setCurrentStep(1);
+    setStep(0);
+    setSelectedWarrantyServices([]);
+    setSelectedPartCatalog([]);
+    setSubTotalConfirmServices(0);
+    setTotalTaxConfirmServices(0);
+    setTotalConfirmServices(0);
+    setPartNumberSearch("");
+    setKeywordSearch("");
+    setDescriptionSearch("");
+
+  }, [serviceCatalogType]);
+  
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -4507,7 +4527,19 @@ export function BtnModalsServiceCatalog({ open, setOpen, caseDetails }) {
       }).then(()=>{
         setOpen(false);
         const WOID = res.data.WOID
-        window.open(`/work/${WOID}`, '_blank');
+        const MOID = res.data.MOID
+        switch (serviceCatalogType) {
+          case "CSR":
+            window.open(`/material-order/${MOID}`, '_blank');
+            break;
+
+          case "workorder":
+            window.open(`/work/${WOID}`, '_blank');  
+            break;
+
+          default:
+            break;
+        }
       });
     } catch (err) {
       console.error("❌ Order Creation Failed:", err);
@@ -4886,6 +4918,7 @@ export function BtnModalsServiceCatalog({ open, setOpen, caseDetails }) {
               <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
               <Button variant={'search'} className="" onClick={() => setModalPart(true)}>Add Part</Button>
               <Button variant={'search'} className="" onClick={createOrder}>Create Order</Button>
+              
               <Label htmlFor="incident" className={'font-bold '}>Incident Type</Label>
               <Select onChange={setSelected} defaultValue="DepotRepair">
                 <SelectTrigger className="w-[180px]">
@@ -4901,6 +4934,7 @@ export function BtnModalsServiceCatalog({ open, setOpen, caseDetails }) {
                   </SelectGroup>
                 </SelectContent>
               </Select>
+              
             </DialogFooter>
           </DialogContent>
         );
