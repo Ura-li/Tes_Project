@@ -461,7 +461,14 @@ export function BtnModalContact({
           </div>
           <div className="space-y-0.4 flex flex-col">
             <Label htmlFor="current">Country</Label>
-            <SelectBar id="Country" value={formDataContact.Country || ""} onChange={handlerInputContactChange}/>
+            <SelectBar id="Country" value={formDataContact.Country || ""} onChange={handlerInputContactChange}  options={[
+                        { id: "id", name: "Indonesia" },
+                        { id: "my", name: "Malaysia" },
+                        { id: "sg", name: "Singapura" },
+                        { id: "uk", name: "Inggris" },
+                        { id: "cn", name: "Cina" }
+                      ]}
+                      placeholder="Select a Country"/>
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="AddressLine2">Address Line 2</Label>

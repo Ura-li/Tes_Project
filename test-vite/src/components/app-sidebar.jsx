@@ -261,7 +261,7 @@ export function AppSidebar({
 }) {
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className={'bg-cyan-700'}>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>

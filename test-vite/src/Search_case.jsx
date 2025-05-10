@@ -761,7 +761,7 @@ const Search_case = () => {
   
 
   return (
-    <div className="flex flex-1 p-2 pt-0">
+    <div className="flex flex-1 p-0 pt-0">
       <SidebarProvider className=" overflow-auto min-h-[full]">
         <div className="flex flex-1 rounded-xl md:min-h-min">
           <Tabs
@@ -770,7 +770,7 @@ const Search_case = () => {
             value={activeTab}
             onValueChange={setActiveTab}
           >
-            <TabsList className="drop-shadow-xl bg-sky-700 w-full h-15 flex justify-between">
+            <TabsList className="drop-shadow-xl bg-sky-700 w-full h-15 flex justify-between rounded-none">
               <div className="w-2xs p-2 text-white ">
                 <TabsTrigger value="search" className="cursor-pointer">
                   Search
@@ -845,7 +845,7 @@ const Search_case = () => {
                         { id: "cn", name: "Cina" }
                       ]}
                       placeholder="Select a Country"
-                    ></SelectBar>
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="Company">Company</Label>

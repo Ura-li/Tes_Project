@@ -1,4 +1,5 @@
 import React from "react";
+import { ChartArea,ChartBar, ChartPie } from "./components/sc-chart";
 // import { Button } from "@/components/ui/button";
 // import { AppSidebar } from "@/components/app-sidebar";
 // import {
@@ -21,10 +22,16 @@ import React from "react";
 export default function Landing() {
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <div className="aspect-video rounded-xl bg-muted/50" />
-        <div className="aspect-video rounded-xl bg-muted/50" />
-        <div className="aspect-video rounded-xl bg-muted/50" />
+      <div className="grid auto-rows-min gap-4 md:grid-cols-3 p-3">
+        <div className="aspect-video rounded-xl bg-muted/50" >
+          <ChartArea></ChartArea>
+        </div>
+        <div className="aspect-video rounded-xl bg-muted/50" > 
+        <ChartBar></ChartBar>
+          </div>
+        <div className="aspect-video rounded-xl bg-muted/50" > 
+        <ChartPie></ChartPie>
+          </div>
       </div>
       <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
     </div>
