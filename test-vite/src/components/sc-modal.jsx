@@ -7523,7 +7523,7 @@ export function OTCAdd({ onUpdate }) {
   };
 
   const handleSubmit = async () => {
-  if (!formData.OTCCode || !formData.Description) {
+    if (!formData.OTCCode || !formData.Description) {
       Swal.fire({
         title: "Incomplete Data",
         text: "All fields are required.",
@@ -7536,7 +7536,7 @@ export function OTCAdd({ onUpdate }) {
     }
 
     try {
-console.log("Form Data : ",formData)
+      console.log("Form Data : ",formData)
       await ApiCustomer.post("/api/otc-code", formData);
       Swal.fire({
         icon: "success",
@@ -7564,7 +7564,7 @@ console.log("Form Data : ",formData)
   return (
     <Dialog>
       <DialogTrigger asChild>
-<Button variant="outline" className="h-11 rounded-sm mb-4">Add OTC Code</Button>
+        <Button variant="outline" className="h-11 rounded-sm mb-4">Add OTC Code</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
