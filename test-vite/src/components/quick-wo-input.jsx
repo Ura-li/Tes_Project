@@ -317,24 +317,24 @@ export function QuickWOInput ({
   
   console.log("SLA IN QUICK WO INPUT : ",SLA)
   // Simpel update PATCH
-  const handleSave = async () => {
-    await ApiCustomer.patch(`/api/work-order/${WOID}`, {
-      WorkOrderType: general.workOrderType,
-      SubStatus: general.subStatus,
-      PartnerStatus: general.partnerStatus,
-      CoverageWindow: SLA.coverageWindow,
-      OTCCode: SLA.otcCode,
-      RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer,
-    });
+  // const handleSave = async () => {
+  //   await ApiCustomer.patch(`/api/work-order/${WOID}`, {
+  //     WorkOrderType: general.workOrderType,
+  //     SubStatus: general.subStatus,
+  //     PartnerStatus: general.partnerStatus,
+  //     CoverageWindow: SLA.coverageWindow,
+  //     OTCCode: SLA.otcCode,
+  //     RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer,
+  //   });
 
-  //   // Simpan Service Delivery Address
-  //   // await ApiCustomer.patch(`/api/workorder/${WOID}/service-address`, {
-  //   //   ContactFirstName: ServiceDeliveryAddress.contactFirstName,
-  //   //   PhoneNumber: ServiceDeliveryAddress.phoneNumber,
-  //   //   Email: ServiceDeliveryAddress.email,
-  //   //   City: ServiceDeliveryAddress.city,
-  //   // });
-  };
+  // //   // Simpan Service Delivery Address
+  // //   // await ApiCustomer.patch(`/api/workorder/${WOID}/service-address`, {
+  // //   //   ContactFirstName: ServiceDeliveryAddress.contactFirstName,
+  // //   //   PhoneNumber: ServiceDeliveryAddress.phoneNumber,
+  // //   //   Email: ServiceDeliveryAddress.email,
+  // //   //   City: ServiceDeliveryAddress.city,
+  // //   // });
+  // };
 
   return (
       <CardContent>
@@ -414,7 +414,6 @@ export function QuickWOInput ({
             <Card className="flex-col mt-7 ">
               <CardHeader>
                 <CardTitle className='text-lg '>SLA in Customer Time Zone</CardTitle>
-                <Button onClick={handleSave}>Save SLA</Button>
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-6 gap-5 auto-rows-auto place-content-between">

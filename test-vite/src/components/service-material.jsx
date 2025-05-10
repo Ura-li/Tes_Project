@@ -251,77 +251,7 @@ export const ServiceMaterial = () => {
                   <span className="ml-10 mr-16">...</span>
                   <CalendarDays></CalendarDays>
                 </div>
-
-                <div className="flex font-bold">
-                <Lock className="mr-2 size-5"></Lock>
-                  <span>Collection Requested Date</span>
-                  <span className="mr-16 ml-39">...</span>
-                  <CalendarDays></CalendarDays>
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Promo Code</span>
-                  <span className="ml-65">...</span>
-                </div>
-
-                <div className="flex font-bold">
-                <Lock className="mr-2 size-5"></Lock>
-                  <span >Customer Induced Damage</span>
-                  <span className="ml-37.5">...</span>
-                </div>
-
-                <div className="flex font-bold">
-                <Lock className="mr-2 size-5"></Lock>
-                  <span >Accidental Damage Protection</span>
-                  <span className="ml-32">...</span>
-                </div>
-
-                <div className="flex font-bold">
-                  <span className="ml-7">Defective Media Retention
-                  </span>
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Case ID  (Case)</span>
-                  <span className="ml-[216px]">{materialOrderInformation.caseID }</span>
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Contact (Contact)</span>
-                  <span className="ml-[212px]">
-                    {materialOrderInformation.contact }
-                  </span>
-                </div>
-
-                <div className="flex font-bold">
-                  <span className="ml-7">Resource Name</span>
-                  <span className="ml-40">{materialOrders.workorder?.bookings?.[0].bookingDetails?.[0].ResourceId}</span>
-                </div>
-
-                <div className="flex font-bold">
-                <Lock className="mr-2 size-5"></Lock>
-                    <span>Work Order</span>
-                    <span className="ml-47">{materialOrders.WOID}</span>
-                  </div>
-
-                  <div className="flex font-bold">
-                    <span className="ml-7">Parent Mo</span>
-                    <span className="ml-50">...</span>
-                  </div>
-
-                  <div className="flex font-bold">
-                    <Lock className="mr-2 size-5"></Lock>
-                    <span>BCP Order</span>
-                    <span className="ml-50">...</span>
-                  </div>
-
-                  <div className="flex font-bold">
-                  
-                  <CalendarDays />
-                </div>
+                
                 <div className="flex items-center font-bold">
                   <Lock className="mr-2 size-5" />
                   <span>Collection Requested Date (MO)</span>
@@ -375,19 +305,17 @@ export const ServiceMaterial = () => {
                   <span className="ml-[208px]">{materialOrderInformation.salesOrderNumber }</span>
                 </div>
 
+                
+
                 <div className="flex font-bold">
-                  <span className="ml-7">Resource Name (WO)</span>
-                  <span className="ml-[160px]">
-                    {materialOrderInformation.resourceName }
-                  </span>                  
+                  <span className="ml-7">Resource Name</span>
+                  <span className="ml-40">{materialOrders.workorder?.bookings?.[0].bookingDetails?.[0].ResourceId}</span>
                 </div>
 
                 <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Work Order</span>
-                  <span className="ml-[188px]">
-                    {materialOrderInformation.workOrder?.WOID }
-                  </span>
+                <Lock className="mr-2 size-5"></Lock>
+                    <span>Work Order</span>
+                    <span className="ml-47">{materialOrders.WOID}</span>
                 </div>
 
                 <div className="flex font-bold">

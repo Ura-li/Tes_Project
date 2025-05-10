@@ -186,19 +186,19 @@ model materialorderlineitems {
   Status                     MaterialOrderLineItemStatus @default(New)
 
   // Revisi Tambahan
-  FunctionalEquivalence      String?                     @db.VarChar(100)
-  MediaHandlingPart          String?                     @db.VarChar(100)
-  PickPackInstructions       String?                     @db.Text
-  CollectionInstructions     CollectionInstructionType?  // Enum di bawah
-  CustomerResponse           String?                     @db.Text
-  RejectedReason             String?                     @db.Text
-  OtherReason                String?                     @db.Text
-  PartAuthorizationReason    String?                     @db.Text
-  PartAuthorizationDetail    String?                     @db.Text
-  OriginalPartNumber         String?                     @db.VarChar(100)
-  OfferedPartNumber          String?                     @db.VarChar(100)
-  OfferedPartDescription     String?                     @db.Text
-  MainComponent              String?                     @db.VarChar(100)
+  // FunctionalEquivalence      String?                     @db.VarChar(100)
+  // MediaHandlingPart          String?                     @db.VarChar(100)
+  // PickPackInstructions       String?                     @db.Text
+  // CollectionInstructions     CollectionInstructionType?  // Enum di bawah
+  // CustomerResponse           String?                     @db.Text
+  // RejectedReason             String?                     @db.Text
+  // OtherReason                String?                     @db.Text
+  // PartAuthorizationReason    String?                     @db.Text
+  // PartAuthorizationDetail    String?                     @db.Text
+  // OriginalPartNumber         String?                     @db.VarChar(100)
+  // OfferedPartNumber          String?                     @db.VarChar(100)
+  // OfferedPartDescription     String?                     @db.Text
+  // MainComponent              String?                     @db.VarChar(100)
 
   materialorder              materialorder?              @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
   servicecatalog_parts       servicecatalog_parts?       @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
@@ -442,7 +442,7 @@ model workorder {
   DueDateCustomer             DateTime?        @db.DateTime(0)
   CoverageWindow              String?          @db.VarChar(100)
   Response                    String?          @db.VarChar(100)
-  OTCCode                     String?          @db.VarChar(50)
+  // OTCCode                     String?          @db.VarChar(50)
   RequestedDateTimeCustomer   DateTime?        @db.DateTime(0)
   GuaranteedFixTimeCustomer   DateTime?        @db.DateTime(0)
   EarlyStartDateTimeCustomer  DateTime?        @db.DateTime(0)
