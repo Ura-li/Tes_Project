@@ -98,7 +98,6 @@ export function BtnModal({
     <DialogTrigger asChild>
       <Button 
         variant="outline" 
-        onClick={handleCreateCase}
         disabled={!selectedAssetForCase || !selectedContactForCase}
         className={`mr-4 ${(!selectedAssetForCase || !selectedContactForCase) ? "bg-white cursor-not-allowed" : "bg-blue-500"}`}
       >
@@ -169,7 +168,7 @@ export function BtnModal({
           <p className="text-sm text-gray-500 mt-1">Total accessories: 1</p>
         </div>
         <DialogFooter>
-         <Button onClick={(e) => {
+          <Button type="submit" onClick={(e) => {
             e.preventDefault(); // Prevents form submission
             handleCreateCase();
           }}>DONE</Button>
@@ -209,15 +208,18 @@ export function BtnModalContact({
   console.log("Company Data in Modal Contact : ",companyData)
   const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);
   
-  const open = externalOpen || isModalContactSearchInput;
+  const isControlled = externalOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? externalOpen : internalOpen;
 
   const handleChange = (value) => {
-    if (externalOpen !== undefined) {
-      externalOnChange?.(false);
+    if (isControlled) {
+      externalOnChange?.(value); // ✅ Don't force false always
     } else {
-      setIsModalContactSearchInput(value);
+      setInternalOpen(value);
     }
   };
+
 
    const [formDataContact, setFormDataContact] = useState({
       Salutation: '',
@@ -261,10 +263,15 @@ export function BtnModalContact({
       }, [formDataContact.StateProvince]);
     
     //handle input
-    const handlerInputContactChange = (e) => {
-      const { id, value } = e.target;
-      setFormDataContact((prev) => ({ ...prev, [id]: value }));
+    const handlerInputContactChange = (eOrId, value) => {
+      if (typeof eOrId === 'string') {
+        setFormDataContact((prev) => ({ ...prev, [eOrId]: value }));
+      } else {
+        const { id, value } = eOrId.target;
+        setFormDataContact((prev) => ({ ...prev, [id]: value }));
+      }
     };
+
     
     const handleClearAllContact = () => {
       setFormDataContact({
@@ -379,6 +386,26 @@ export function BtnModalContact({
     setFormDataContact(contact);
   };
 
+  
+    // const [provinces, setProvinces] = useState([]);
+    // const [cities, setCities] = useState([]);
+     useEffect(() => {
+        fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json")
+          .then((res) => res.json())
+          .then(setProvinces)
+          .catch(console.error);
+      }, []);
+    
+      useEffect(() => {
+        const selectedProvince = provinces.find((p) => p.name === formDataContact.StateProvince);
+        if (selectedProvince) {
+          fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${selectedProvince.id}.json`)
+            .then((res) => res.json())
+            .then(setCities)
+            .catch(console.error);
+        }
+      }, [formDataContact.StateProvince]);
+
 
   return (
     <Dialog open={open} onOpenChange={handleChange}>
@@ -405,11 +432,30 @@ export function BtnModalContact({
         <div className="grid gap-2 grid-cols-6">
           <div className="space-y-0.5 flex flex-col">
             <Label htmlFor="Salutation">Salutation</Label>
-            <SelectBar1 value={formDataContact.Salutation} id="Salutation" onChange={handlerInputContactChange} />
+            <SelectBar 
+              value={formDataContact.Salutation} 
+              id="Salutation" 
+              onChange={handlerInputContactChange} 
+              placeholder="Select Salutation"
+              options={[
+                { value: "Mr. ", label: "Mr." },
+                { value: "Mrs. ", label: "Mrs." },
+              ]}
+            />
           </div>
           <div className="space-y-0.5 flex flex-col"> 
             <Label htmlFor="PreferredLanguage" >Preferred Language</Label>
-            <SelectBar2 value={formDataContact.PreferredLanguage} id="PreferredLanguage" onChange={handlerInputContactChange} />
+            <SelectBar2 
+              value={formDataContact.PreferredLanguage} 
+              id="PreferredLanguage" 
+              onChange={handlerInputContactChange} 
+              placeholder="Select Preferred Language"
+              options={[
+                { value: "English", label: "English" },
+                { value: "Spanish", label: "Spanish" },
+                { value: "Bahasa Indonesia", label: "Bahasa Indonesia" },
+              ]}
+            />
           </div>
           <div className="space-y-0.5">
             <Label htmlFor="FirstName">First Name</Label>
@@ -479,9 +525,9 @@ export function BtnModalContact({
           </div>
           <div className="space-y-0.4 flex flex-col">
             <Label htmlFor="current">Country</Label>
-            <SelectBar
-              id="Country"
-              value={formDataContact.Country}
+            <SelectBar 
+              id="Country" 
+              value={formDataContact.Country || ""} 
               onChange={handlerInputContactChange}
               options={[
                 { id: "id", name: "Indonesia" },
@@ -494,7 +540,8 @@ export function BtnModalContact({
             />
           </div>
           <div className="space-y-0.4 ">
-            <Label htmlFor="AddressLine2">Address Line 2</Label>
+            <Label htmlFor="AddressL
+            ine2">Address Line 2</Label>
             <Input id="AddressLine2" value={formDataContact.AddressLine2 || ""} type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 ">
@@ -503,11 +550,12 @@ export function BtnModalContact({
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="City">City</Label>
-            <SelectBar
-              id="City"
-              value={formDataContact.City}
-              onChange={handlerInputContactChange}
-              options={cities}
+            <SelectBar 
+              id="City" 
+              value={formDataContact.City || ""} 
+              className="border-b-black p-1 text-sm" 
+              onChange={handlerInputContactChange} 
+              options={cities} 
               placeholder="Select a City"
             />
 
@@ -515,13 +563,14 @@ export function BtnModalContact({
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="StateProvince">State/Province</Label>
-            <SelectBar
-              id="StateProvince"
-              value={formDataContact.StateProvince}
-              onChange={handlerInputContactChange}
+            <SelectBar 
+              id="StateProvince" 
+              value={formDataContact.StateProvince || ""} 
+              className="border-b-black p-1 text-sm" 
+              onChange={handlerInputContactChange} 
               options={provinces}
               placeholder="Select a Province"
-            />  
+            />
 
             
                   {/* Hidden Input for SiteAccountID */}

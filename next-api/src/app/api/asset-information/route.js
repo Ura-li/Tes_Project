@@ -12,7 +12,7 @@ export async function GET(request) {
         const contactID = searchParams.get("ContactID") ? parseInt(searchParams.get("ContactID")) : null;
 
         const page = parseInt(searchParams.get("page")) || 1;
-        const limit = parseInt(searchParams.get("limit")) || 10;
+        const limit = parseInt(searchParams.get("limit")) || 100;
 
         console.log("Query Params:", { search, page, limit });
 

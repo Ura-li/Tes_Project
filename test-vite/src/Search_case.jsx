@@ -604,7 +604,7 @@ const Search_case = () => {
         icon: "warning",
         confirmButtonText: "OK"
       });
-      return;
+      // return;
     }
   
     const siteAccountID = selectedSiteAccounts
@@ -623,7 +623,7 @@ const Search_case = () => {
         icon: "warning",
         confirmButtonText: "OK"
       });
-      return;
+      // return;
     }
   
     try {
@@ -680,13 +680,6 @@ const Search_case = () => {
   // const selectedCompanyForCase = companies ? companies[0] : null;
 
   const [selectedCompanyForCase, setSelectedCompanyForCase] = useState(null);
-
-  /**
-   * TODO :
-   * Make the select is automatic when it's related
-   * right now is not automated, so i skiped this part
-   * but this is still used rn
-   */
   const handleSelectedAssetForCaseRelated = (asset) => {
     setSelectedAssetForCase(asset);
 
@@ -722,23 +715,6 @@ const Search_case = () => {
     console.log(search);
   };
 
-  // const initialSearchState = {
-  //   Email: "",
-  //   SerialNumber: "",
-  //   Country: "",
-  //   Company: "",
-  //   ZipPostalCode: "",
-  //   City: "",
-  //   Phone: "",
-  //   AssetTag: "",
-  //   ContractID: "",
-  //   TransactionType: "",
-  //   TransactiontID: "",
-  //   Opsi: "",
-  // };
-  
-  // const [initial, setInitialsearch] = useState(initialSearchState);
-  
 
   const handleClearAll = () => {
     updateFormFieldsInSearch({
