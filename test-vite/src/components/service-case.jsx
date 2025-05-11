@@ -1412,6 +1412,7 @@ const [endDate, setEndDate] = useState(null);
                 </CaseField>
                 <CaseField label="Case Status">
                   {caseDetails.CaseStatus}
+                  
                 </CaseField>
                 <CaseField label="Case Type">{caseDetails.CaseType}</CaseField>
                 <CaseField label="KCI For Case?">
