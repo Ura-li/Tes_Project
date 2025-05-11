@@ -11,7 +11,7 @@ export async function GET(request) {
         const phone = searchParams.get("phone") || "";
         
         const page = parseInt(searchParams.get("page")) || 1;
-        const limit = parseInt(searchParams.get("limit")) || 10;
+        const limit = parseInt(searchParams.get("limit")) || 100;
 
         console.log("Query Params:", { search, page, limit });
 
@@ -59,8 +59,7 @@ export async function GET(request) {
         // Ambil data dengan filter & pagination
         const site_accounts = await prisma.site_account.findMany({
             where: whereCondition,
-            skip: skip,
-            take: limit,
+            skip: skip, 
             orderBy: { Company: "asc" }
         });
 

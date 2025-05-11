@@ -27,6 +27,7 @@ import
   RepairClassCodeTable,
   ServiceCatalogTable,
   OTCCodeTable,
+  CrsTable
  } from './master_table';
 import { Bookings } from './bookings';
 import { User_table } from './master_table';
@@ -78,6 +79,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/repairClassCode' element={<RepairClassCodeTable/>} />
             <Route path='/master/ServiceCatalog' element={<ServiceCatalogTable/>} />
             <Route path='/master/OTC_Code' element={<OTCCodeTable/>}/>
+            <Route path='/master/CrsTable' element={<CrsTable/>}/>
             {/* </Route> */}
           </Route>
             {/* </Route> */}

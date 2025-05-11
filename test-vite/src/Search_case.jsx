@@ -604,7 +604,7 @@ const Search_case = () => {
         icon: "warning",
         confirmButtonText: "OK"
       });
-      return;
+      // return;
     }
   
     const siteAccountID = selectedSiteAccounts
@@ -623,7 +623,7 @@ const Search_case = () => {
         icon: "warning",
         confirmButtonText: "OK"
       });
-      return;
+      // return;
     }
   
     try {
@@ -680,13 +680,6 @@ const Search_case = () => {
   // const selectedCompanyForCase = companies ? companies[0] : null;
 
   const [selectedCompanyForCase, setSelectedCompanyForCase] = useState(null);
-
-  /**
-   * TODO :
-   * Make the select is automatic when it's related
-   * right now is not automated, so i skiped this part
-   * but this is still used rn
-   */
   const handleSelectedAssetForCaseRelated = (asset) => {
     setSelectedAssetForCase(asset);
 
@@ -722,23 +715,6 @@ const Search_case = () => {
     console.log(search);
   };
 
-  // const initialSearchState = {
-  //   Email: "",
-  //   SerialNumber: "",
-  //   Country: "",
-  //   Company: "",
-  //   ZipPostalCode: "",
-  //   City: "",
-  //   Phone: "",
-  //   AssetTag: "",
-  //   ContractID: "",
-  //   TransactionType: "",
-  //   TransactiontID: "",
-  //   Opsi: "",
-  // };
-  
-  // const [initial, setInitialsearch] = useState(initialSearchState);
-  
 
   const handleClearAll = () => {
     updateFormFieldsInSearch({
@@ -761,7 +737,7 @@ const Search_case = () => {
   
 
   return (
-    <div className="flex flex-1 p-2 pt-0">
+    <div className="flex flex-1 p-0 pt-0">
       <SidebarProvider className=" overflow-auto min-h-[full]">
         <div className="flex flex-1 rounded-xl md:min-h-min">
           <Tabs
@@ -770,7 +746,7 @@ const Search_case = () => {
             value={activeTab}
             onValueChange={setActiveTab}
           >
-            <TabsList className="drop-shadow-xl bg-sky-700 w-full h-15 flex justify-between">
+            <TabsList className="drop-shadow-xl bg-sky-700 w-full h-15 flex justify-between rounded-none">
               <div className="w-2xs p-2 text-white ">
                 <TabsTrigger value="search" className="cursor-pointer">
                   Search
@@ -845,7 +821,7 @@ const Search_case = () => {
                         { id: "cn", name: "Cina" }
                       ]}
                       placeholder="Select a Country"
-                    ></SelectBar>
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="Company">Company</Label>

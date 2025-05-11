@@ -280,11 +280,15 @@ export function DialogCompanyBtn({
       const [filteredSiteAccount, setFilteredSiteAccount] = useState([]);
           // ✅ Wait for `siteAccounts` to be updated before filtering
       useEffect(() => {
-        if (siteAccounts.length > 0 && search.Company?.trim()) {  
+        if (siteAccounts.length > 0 && search.Company?.trim()) { 
+          console.log("Company searched : ", search) 
           const lowerSearch = search.Company.toLowerCase().trim();
+          console.log("Lower Company searched : ", lowerSearch) 
+          console.log("SIte Accounr Company searched : ", siteAccounts) 
           const filteredResults = siteAccounts.filter(company =>
             company.Company?.toLowerCase().includes(lowerSearch)
           );
+          console.log("Filter Company searched : ", filteredResults) 
 
           
           if (filteredResults.length > 0) {

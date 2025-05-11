@@ -11,16 +11,24 @@ import {
   } from "@/components/ui/select"
    
   export function SelectBar({ id, onChange, value, options, placeholder }) {
+    console.log("SelectBar value:", value);
+    const handleValueChange = (selectedValue) => {
+      // Avoid looping by only firing if value actually changes
+      if (selectedValue !== value) {
+        onChange({ target: { id, value: selectedValue } });
+      }
+    };
+
     return (
-      <Select value={value} onValueChange={(val) => onChange({ target: { id, value: val } })}>
+      <Select value={value} onValueChange={handleValueChange}>
         <SelectTrigger className="w-full border-black">
-          <SelectValue placeholder={placeholder || "Select an option"} />
+          <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {options.map((opt) => (
-              <SelectItem key={opt.id} value={opt.name}>
-                {opt.name}
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
               </SelectItem>
             ))}
           </SelectGroup>
@@ -28,6 +36,9 @@ import {
       </Select>
     );
   }
+
+
+
   
 
   export function SelectBar1({ id, onChange, value }) {
@@ -164,3 +175,20 @@ import {
       </Select>
     )
   }
+
+  export function SelectYN({ value, onValueChange }) {
+  return (
+    <Select value={value} onValueChange={onValueChange}>
+      <SelectTrigger className="w-full hover:shadow-lg border-b-0">
+        {/* Menampilkan value terpilih */}
+        <span>{value}</span>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectItem value="Yes">Yes</SelectItem>
+          <SelectItem value="No">No</SelectItem>
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+}

@@ -119,6 +119,7 @@ export const ServiceWork = () => {
     casePriorityIndex: "",
   });
   const handleSLAChange = (field) => (value) => {
+    console.log("Changed:", field, value); 
     setSLA((prev) => ({
       ...prev,
       [field]: value,
@@ -262,6 +263,8 @@ export const ServiceWork = () => {
   const [guaranteedFixTimeCustomer, setGuaranteedFixTimeCustomer] =
     useState(null);
   const [dueDate, setDuedate] = useState(null);
+  // const [dueDateCustomer, setDueDateCustomer] = useState(null);
+const [first, setFirst] = useState(null);
 
   const [followUpRequired, setFollowUpRequired] = useState(false);
   const [followUpCompleted, setFollowUpCompleted] = useState(false);
@@ -661,14 +664,15 @@ export const ServiceWork = () => {
                 </CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-5 auto-rows-auto grid-cols-6 place-content-between">
-                <CaseField label="SLA Jeopardy" className={""} icon>
+              <CardContent className="grid gap-5 auto-rows-auto grid-cols-8 place-content-between">
+                <CaseField label="SLA Jeopardy" className={""} icon span={2}>
                   {" "}
                   <Input className="" value={SLA.slaJeopardy} readOnly />{" "}
                 </CaseField>
                 <CaseField
                   label="Requested Date Time (Customer)"
                   className={""}
+                  span={2}
                 >
                   <DatePicker
                     value={
@@ -684,15 +688,26 @@ export const ServiceWork = () => {
                   {" "}
                   <Input className="" value={SLA.slaReschedule} readOnly />{" "}
                 </CaseField>
-                <CaseField label="Due Date (Customer)" className={""} icon>
-                  <DatePicker></DatePicker>
+                <CaseField label="Due Date (Customer)" className={""} icon span={2}>
+                  <DatePicker value={
+                      SLA.dueDateCustomer
+                        ? new Date(SLA.dueDateCustomer)
+                        : null
+                    }
+                    onChange={handleSLAChange("dueDateCustomer")}/>
                 </CaseField>
                 <CaseField
                   label="Guaranteed Fix Time (Customer)"
                   className={""}
                   icon
+                  span={2}
                 >
-                  <DatePicker></DatePicker>
+                  <DatePicker value={
+                      SLA.guaranteedFixTimeCustomer
+                        ? new Date(SLA.guaranteedFixTimeCustomer)
+                        : null
+                    }
+                    onChange={handleSLAChange("guaranteedFixTimeCustomer")}/>
                 </CaseField>
                 <CaseField label="Active Schedule Date" className={""} icon>
                   {" "}
@@ -702,7 +717,7 @@ export const ServiceWork = () => {
                     readOnly
                   />{" "}
                 </CaseField>
-                <CaseField label="Coverage Window" className={""}>
+                <CaseField label="Coverage Window" className={""} span={2}>
                   {" "}
                   <Input
                     className=""
@@ -713,6 +728,7 @@ export const ServiceWork = () => {
                 <CaseField
                   label="Early Start Date Time (Customer)"
                   className={""}
+                  span={2}
                 >
                   <DatePicker
                     value={
@@ -734,15 +750,21 @@ export const ServiceWork = () => {
                     className="border-0 ring-0 ring-gray-400 w-[100%] h-[100%] resize-none"
                   ></textarea>
                 </CaseField>
-                <CaseField label="Response" className={""}>
+                <CaseField label="Response" className={""} span={2}>
                   {" "}
                   <Input className="" value={SLA.response} readOnly />{" "}
                 </CaseField>
                 <CaseField
                   label="Latest Start Date Time (Customer)"
                   className={""}
+                  span={2}
                 >
-                  <DatePicker></DatePicker>
+                  <DatePicker value={
+                      SLA.latestStartDateTimeCustomer
+                        ? new Date(SLA.latestStartDateTimeCustomer)
+                        : null
+                    }
+                    onChange={handleSLAChange("latestStartDateTimeCustomer")}/>
                 </CaseField>
                 <CaseField label="OTC Code" className={""}>
                   {" "}
@@ -754,7 +776,7 @@ export const ServiceWork = () => {
                 </CaseField>
                 <CaseField
                   label="Case Priority Index"
-                  className={"col-start-5"}
+                  className={"col-start-7"}
                   icon
                 >
                   {" "}
