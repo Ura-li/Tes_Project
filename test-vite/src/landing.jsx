@@ -1,8 +1,9 @@
-import React from "react";
+import {useState, useEffect, useMemo} from "react";
 import { ChartArea,ChartBar, ChartPie } from "./components/sc-chart";
 import { Case_table } from "./master_table";
 import ApiCustomer from "@/api"
 import { parse } from "date-fns";
+import { Week } from "react-day-picker";
 // import { Button } from "@/components/ui/button";
 // import { AppSidebar } from "@/components/app-sidebar";
 // import {
@@ -23,9 +24,9 @@ import { parse } from "date-fns";
 // import { Link } from "react-router";
 
 export default function Landing() {
-const [caseData, setCaseData] = React.useState([]);
-const [monthlyChartData, setMonthlyChartData] = React.useState([]);
-
+const [caseData, setCaseData] = useState([]);
+const [monthlyChartData, setMonthlyChartData] = useState([]);
+const [weeklyChartData, setWeeklyChartData] = useState([])
 const fetchCaseData = async () => {
   try {
     const response = await ApiCustomer.get("/api/case-information");
@@ -37,17 +38,31 @@ const fetchCaseData = async () => {
   }
 };
 
-React.useEffect(() => {
+useEffect(() => {
   fetchCaseData();
 }, []);
 
-React.useEffect(() => {
+useEffect(() => {
   // Initialize all 12 months
   const months = Array.from({ length: 12 }, (_, i) => ({
     month: new Date(0, i).toLocaleString("en-US", { month: "long" }),
     open: 0,
     closed: 0,
   }));
+  // const days = Array.from({ length: 7 }, (_, i) => ({
+  //   week: new Date(0, i).toLocaleString("en-US", { weekday: "short" }),
+  //   open: 0,
+  //   closed: 0,
+  // }));
+    console.log("month",months);
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => ({
+      week: day,
+      open: 0,
+      closed: 0,
+    }));
+    console.log("days",days);
+
+  const currentYear = new Date().getFullYear();
 
   caseData.forEach((caseItem) => {
     // Parse CreatedOn string into Date
@@ -59,17 +74,20 @@ React.useEffect(() => {
     const caseDate = new Date(year, month, day);
 
     const caseMonthIndex = caseDate.getMonth(); // 0 for Jan, 1 for Feb, etc.
-
-    if (caseItem.CaseStatus.toLowerCase() === "open") {
-      months[caseMonthIndex].open += 1;
+   const weekday = caseDate.toLocaleDateString("en-US", { weekday: "short" });
+   const index = days.findIndex((d) => d.week === weekday);
+   if (caseItem.CaseStatus.toLowerCase() === "open") {
+     months[caseMonthIndex].open += 1;
+     if (index !== -1)  days[index].open +=1 ;
     } else if (caseItem.CaseStatus.toLowerCase() === "close") {
       months[caseMonthIndex].closed += 1;
+      if (index !== -1)  days[index].closed +=1 ;
     }
+    
   });
-
+  setWeeklyChartData(days);
   setMonthlyChartData(months);
 }, [caseData]);
-// console.log(monthlyChartData);
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <div className="grid auto-rows-min gap-4 md:grid-cols-3 p-3">
@@ -77,7 +95,7 @@ React.useEffect(() => {
           <ChartArea data={monthlyChartData}></ChartArea>
         </div>
         <div className="aspect-video rounded-xl bg-muted/50" > 
-        <ChartBar accessibilityLayer data={monthlyChartData}></ChartBar>
+        <ChartBar accessibilityLayer data={weeklyChartData}></ChartBar>
           </div>
         <div className="aspect-video rounded-xl bg-muted/50" > 
         <ChartPie></ChartPie>

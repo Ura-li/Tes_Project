@@ -114,21 +114,22 @@ export function ChartArea({data}) {
   )
 }
 
-export function ChartBar({data}) {
+export function ChartBar({data, month}) {
+  const monthName = new Date().toLocaleString('default', { month: 'long' });
   console.log("data",data)
 console.log("tes",chartData);
   return (
     <Card>
       <CardHeader>
         <CardTitle>Bar Chart - Open And Closed Case</CardTitle>
-        <CardDescription>January - December 2025</CardDescription>
+        <CardDescription>{monthName} 2025</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart accessibilityLayer data={data}>
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="week"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
@@ -148,7 +149,7 @@ console.log("tes",chartData);
           Bar Chart Of Cases <BarChart3 className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing total Cases for 1 year
+          Showing total Cases for 1 Week in a month
         </div>
       </CardFooter>
     </Card>

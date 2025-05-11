@@ -466,7 +466,7 @@ export const Case_table = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-       <Button variant={'ghost'} className={' self-end'} onClick={fetchCaseDataTable}>{openClose ? "Open Case Status" : "Close Case Status"}</Button>
+       <Button variant={'ghost'} className={' self-end'} onClick={fetchCaseDataTable}>{openClose ? "Toggle Open Case Status" : "Toggle Close Case Status"}</Button>
       {/* 🔹 Loading & Error Messages */}
       {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
