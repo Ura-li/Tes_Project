@@ -124,6 +124,13 @@ export async function POST(request) {
         }
       });
 
+      const workOrderupdate = await tx.workorder.update({
+        where: { WOID: woid },
+        data: {
+            WorkOrderStatus: "OPEN_SCHEDULED"
+        }
+      })
+
       return { BookingId: booking.BookingId };
     });
 
