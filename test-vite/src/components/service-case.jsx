@@ -1306,7 +1306,6 @@ const fetchSymptomCodes = async (term) => {
 const [startDate, setstartDate] = useState(null);
 const [endDate, setEndDate] = useState(null);
 
-
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (

@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { SheetBar } from './components/app-sheetbar'
 import { Button } from "@/components/ui/button"
 import { AppSidebar } from "@/components/app-sidebar"
 import { Input } from './components/ui/input'
 import {
+  Loader2,
   Search,
   Sheet
 } from 'lucide-react'
@@ -28,20 +29,20 @@ import Lorem from './Lorem'
 import ApiCustomer from './api'
 
 import {Outlet} from "react-router"
-
+import debounce from 'lodash.debounce';
 export function Breadcrumbs() {
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);
 
   return (
     <nav className="text-sm">
-      <Link to="/" className="text-gray-600">Home</Link>
+      <Link to="/" className="text-gray-400">Home</Link>
       {pathnames.map((segment, index) => {
         const to = '/' + pathnames.slice(0, index + 1).join('/');
         return (
           <span key={to}>
             {' / '}
-            <Link to={to} className="text-blue-600 capitalize">{decodeURIComponent(segment)}</Link>
+            <Link to={to} className="text-sky-100 capitalize">{decodeURIComponent(segment)}</Link>
           </span>
         );
       })}
@@ -52,31 +53,67 @@ export function Breadcrumbs() {
 export function GlobalSearchBar() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState(null);
+  const [showResults, setShowResults] = useState(false);
+  const containerRef = useRef(null);
+  const [loading, setLoading] = useState(false)
+  const fetchResults = async (q) => {
+    if (!q) {
+      setResults(null);
+      return;
+    }
 
-  const handleSearch = async () => {
-    if (!query) return;
     try {
-      const response = await ApiCustomer.get(`/api/global-search?query=${encodeURIComponent(query)}`);
+    setLoading(true);
+      const response = await ApiCustomer.get(`/api/global-search?query=${encodeURIComponent(q)}`);
       const data = response.data;
       setResults(data);
-      console.log("data",data)
+      setShowResults(true);
     } catch (error) {
       console.error('Search error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Debounce the search call
+  const debouncedFetch = useRef(debounce(fetchResults, 300)).current;
+
+  useEffect(() => {
+    debouncedFetch(query);
+    if (!query) {
+      setResults(null);
+      setShowResults(false);
+    }
+  }, [query, debouncedFetch]);
+
+  // Hide results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div>
-      <input
-        placeholder="Search"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        className="w-110 mr-45 border-b-black border border-b-2"
-      />
-      {/* Optional: Show results */}
-      {results && (
-        <div className="absolute bg-white shadow rounded p-2">
+    <div ref={containerRef} className="relative">
+      <span className='flex items-center gap-2'> 
+        <Input
+          placeholder="Search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="border border-b-2 border-b-black bg-sky-100"
+          onFocus={() => {
+            if (results) setShowResults(true);
+          }}
+        />
+        {loading ? <Loader2 className=' animate-spin'></Loader2> : ""}
+      </span>
+      {showResults && results && (
+        <div className="absolute bg-white shadow rounded p-2 z-50 w-full">
           <div>
             <strong>Cases</strong>
             {results.cases.map(c => (
@@ -101,7 +138,6 @@ export function GlobalSearchBar() {
               </Link>
             ))}
           </div>
-
         </div>
       )}
     </div>
@@ -118,7 +154,7 @@ const App = () => {
   }}>
       <AppSidebar />
       <SidebarInset className="overflow-auto">
-        <header className="border-2 rounded-b-xl flex h-14 items-center justify-between px-4 gap-2">
+        <header className="flex  items-center justify-between px-4 gap-2 bg-cyan-700">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
