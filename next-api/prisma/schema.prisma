@@ -60,6 +60,8 @@ model caseinformation {
   caseresolution                                caseresolution?      @relation(fields: [id_csr], references: [id_csr], onDelete: Restrict)
   OTCCode                                       String?              @db.VarChar(5) // Scalar field
   otcCodeTable                                  OTCCodeTable?        @relation(fields: [OTCCode], references: [OTCCode])
+  ProblemDescription                            String?              @db.VarChar(255)
+  CaseProductNote                               String?              @db.Text
 
   @@index([AssetID], map: "AssetID")
   @@index([CaseNote], map: "CaseNote")
@@ -597,12 +599,14 @@ enum MaterialOrderStatus {
 
 enum WorkOrderStatus {
   OPEN_UNSCHEDULED
+  OPEN_SCHEDULED
   OPEN_COMPLETED
   CLOSED_POSTED
 }
 
 enum CaseStatus {
   Open
+  InActive
   Close
 }
 

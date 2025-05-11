@@ -614,6 +614,8 @@ const Search_case = () => {
     // Ambil data form yang diisi
     const caseSubject = document.getElementById("CaseSubject").value;
     const kciFlag = document.getElementById("KCI_Flag").checked;
+    const problemDesc = document.getElementById("ProblemDesc").value;
+    const CaseNoteProduct = document.getElementById("CaseNote").value;
   
     // Validasi isi form jika perlu (contoh: CaseSubject wajib diisi)
     if (!caseSubject.trim()) {
@@ -648,7 +650,10 @@ const Search_case = () => {
         SymptomCode: null,
         CaseResolution: null,
         CreatedBy: data.user.id,
+        ProblemDescription : problemDesc,
+        CaseNoteProduct: CaseNoteProduct
       };
+      console.log("Create Case Data : ", newCase)
   
       const res = await ApiCustomer.post("/api/case-information", newCase);
   

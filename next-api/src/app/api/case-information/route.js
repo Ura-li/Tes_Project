@@ -73,7 +73,8 @@ export async function GET(request) {
                     }
                   }
                 }
-            }
+            },
+            createdByUser : true
         }
     });
 
@@ -93,9 +94,9 @@ export async function GET(request) {
                     SerialNumber: caseData.asset_information?.SerialNumber || "No Serial",
                     ProductNumber: caseData.asset_information?.ProductNumber || "No Product Number",
                     ProductName: caseData.asset_information?.product_information?.ProductName || "No Product Name",
-                    CreatedName: "Miku21", // Replace with the database owned
-                    Owner: "Miku21", // Replace with the database owned
-                    WorkGroup: "Miku21", // Replace with the database owned
+                    CreatedName: caseData.User?.Name, // Replace with the database owned
+                    Owner: caseData.User?.Name, // Replace with the database owned
+                    WorkGroup: "Miku21" , // Replace with the database owned
                     CaseStatus: caseData.CaseStatus,
                     
                 })),
@@ -128,10 +129,12 @@ export async function POST(request) {
         SymptomCode,
         CaseResolution,
         CreatedBy,
+        ProblemDescription,
+        CaseNoteProduct,
     } = await request.json();
 
     const CaseID = await generateID("C-", "caseinformation", "CaseID")
-    console.log("Generated ID:", CaseID, typeof CaseID);
+    console.log("Generated ID:", CaseNoteProduct);
     //validation
     if (!AssetID && !ContactID ) {
         return NextResponse.json(
@@ -162,6 +165,8 @@ export async function POST(request) {
             SymptomCode: SymptomCode,
             CaseResolution: CaseResolution,
             CreatedBy: parseInt(CreatedBy),
+            ProblemDescription: ProblemDescription,
+            CaseProductNote : CaseNoteProduct
         },
     });
 
