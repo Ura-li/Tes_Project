@@ -100,7 +100,7 @@ export async function POST(request) {
         caseResolutionCode,
         autoClose,
         caseReadyForClosure,
-        readyForCloseDays,
+        readyForCloseDays: parseInt(readyForCloseDays),
         readyForClosureDate: readyForClosureDate ? new Date(readyForClosureDate) : null,
         pendingCustomerAction: pendingCustomerAction ? new Date(pendingCustomerAction) : null,
         customerRequestedCloseDate: customerRequestedCloseDate ? new Date(customerRequestedCloseDate) : null,

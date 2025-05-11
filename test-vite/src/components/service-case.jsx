@@ -44,6 +44,11 @@ import {
   UserPen,
   ArrowUp,
   ChevronDown,
+  Smile,
+  User,
+  Calculator,
+  CreditCard,
+  Settings,
 } from "lucide-react";
 
 import { SelectYN } from "./sc-select";
@@ -69,38 +74,62 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import Swal from "sweetalert2";
-// const workorder = [
-//   {
-//     workordernumber: "WO-027816939",
-//     caseid: "54165182991",
-//     serviceaccount: "Icon Plus",
-//     substatus: "Waiting",
-//     systemstatus: "Open",
-//     priority: "WO Priority",
-//     workorder: "In-Country",
-//     primaryincident: "Depot Repair",
-//     duedate: "21/03/2025 00.53",
-//     orion: "-",
-//     owner : "Jokowi",
-//     created: "Widodo",
-//   },
-// ]
-
-// const partsorder = [
-//   {
-//     name: "Budiono",
-//     orderstatus: "-",
-//     workorder: "-",
-//     customerselfrepair: "-",
-//     owner: "Budiono",
-//     createdon: "W-",
-//     ordercloseddate: "-",
-//     createdby: "-",
-//   },
-// ]
 
 import { BtnModalsServiceCatalog } from './sc-modal'
 import DatePicker from './date-picker'
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@/components/ui/command"
+
+
+export const SearchCommandBlock = ({
+  options = [],
+  value,
+  onChange,
+  placeholder = "Search...",
+  renderLabel = (opt) => opt.label || opt,
+  getValue = (opt) => opt.value || opt,
+}) => {
+  
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative w-full">
+      <Command className="w-full">
+        <CommandInput
+          placeholder="Type a command or search..."
+          onFocus={() => setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)} // delay to allow click
+        />
+        {open && (
+          <CommandList className="absolute z-50 mt-10 w-full border rounded-md bg-white shadow-lg max-h-60 overflow-y-auto">
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup>
+              {options.map((opt) => (
+                <CommandItem
+                  key={getValue(opt)}
+                  onSelect={() => {
+                    onChange(getValue(opt));
+                    setOpen(false);
+                  }}
+                >
+                  {renderLabel(opt)}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        )}
+      </Command>
+    </div>
+  );
+}
 
 
 export const TabsService = ({ 
@@ -266,7 +295,17 @@ export const TabsService = ({
           id_csr: response.data.data.id_csr
         });
         console.log("Updated Case ID CSR : ", UpdatedCase)
-        return; 
+          Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "CSR updated successfully!",
+            timer: 2000,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+          }).then(() => {
+            window.location.reload();
+          });
       }}
       
     } catch (error) {
@@ -482,7 +521,9 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
       {label}
     </CardTitle>
 
-    <CardTitle className={spanMap[span]}>{children}</CardTitle>
+    <div className={twMerge(spanMap[span], "")}>
+      {children}
+    </div>
   </>
 );
 
@@ -1738,23 +1779,14 @@ const [endDate, setEndDate] = useState(null);
                   ></DatePicker>{" "}
                 </CaseField>
                 <CaseField label="OTC Code" icon>
-                  <Select
+                  <SearchCommandBlock
+                    options={otcCode} 
                     value={entitlementStatus.OTCCode}
-                    onValueChange={(value) => handleEntitlementStatus("OTCCode")(value)}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select OTC Code" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {otcCode.map((status) => (
-                          <SelectItem key={status.OTCCode} value={status.OTCCode}>
-                            {status.OTCCode} - {status.Description}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                    onChange={(value) => handleEntitlementStatus("OTCCode")(value)}
+                    placeholder="Select OTC Code"
+                    renderLabel={(opt) => `${opt.OTCCode} - ${opt.Description}`}
+                    getValue={(opt) => opt.OTCCode}
+                  />  
                 </CaseField>
                 <CaseField label="Entitlement Status" icon>
                   <Input variant="invisible" placeholder="---" />
@@ -2034,22 +2066,6 @@ const [endDate, setEndDate] = useState(null);
                       }}
                     />
                   </CaseField>
-
-                  {/* <div className='font-bold flex'>
-                    <span>Keyword Search</span>
-                    <Input
-                    placeholder="..."
-                      type="search"
-                      className=""
-                      value={symptomSearchTerm}
-                      onChange={(e) => {
-                        const value = e.target.value
-                        setSymptomSearchTerm(value)
-                        if (value.length >= 2) fetchSymptomCodes(value)
-                          else setSymptomSuggestions([])
-                      }}
-                    />
-                  </div> */}
 
                   {symptomSuggestions.length > 0 && (
                     <ul className="bg-white border  max-h-40 overflow-y-auto absolute z-10">
