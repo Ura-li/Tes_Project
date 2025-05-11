@@ -27,7 +27,10 @@ import { BookingDetailsAdd, BookingDetailsEdit, BookingDetailsDelete } from "@/c
 import { OTCAdd } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
-
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { Button } from "./components/ui/button";
+import { cn } from "./lib/utils";
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -356,6 +359,7 @@ export const Case_table = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [caseData, setCaseData] = useState([]);
+  const [openClose, setOpenClose] = useState(true)
   // const [casetable, setCaseTable] = useState([
   //   {
   //     CaseID: "51337",
@@ -388,6 +392,9 @@ export const Case_table = () => {
   // ]);
 
   const fetchCaseDataTable = async () => {
+    const newState = !openClose;
+    setOpenClose(newState);
+    const url = openClose ? "/api/case-information?CaseStatus=Open" : "/api/case-information?CaseStatus=Close";
     Swal.fire({
       title: "Memuat Data Case....",
       text: "Mohon Tunggu Sebentar",
@@ -401,7 +408,7 @@ export const Case_table = () => {
     setError(null);
 
     try {
-      const response = await ApiCustomer.get("/api/case-information");
+      const response = await ApiCustomer.get(url);
 
       if (response.data.success) {
         setCaseData(response.data.data);
@@ -450,7 +457,7 @@ export const Case_table = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="p-4">
+    <div className="p-4 flex flex-col gap-2">
       <h2 className="text-xl font-bold mb-4">ID Daily Aging Cases Javag FY</h2>
       <input
         type="text"
@@ -459,7 +466,7 @@ export const Case_table = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-
+       <Button variant={'ghost'} className={' self-end'} onClick={fetchCaseDataTable}>{openClose ? "Open Case Status" : "Close Case Status"}</Button>
       {/* 🔹 Loading & Error Messages */}
       {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -507,7 +514,7 @@ export const Case_table = () => {
                 <td className="border p-2">{caseItem.CreatedName}</td>
                 <td className="border p-2">{caseItem.Owner}</td>
                 <td className="border p-2">{caseItem.WorkGroup}</td>
-                <td className="border p-2">{caseItem.CaseStatus}</td>
+                <td className={cn("bg-emerald-300",caseItem.CaseStatus === "Close" && "bg-amber-300" )}>{caseItem.CaseStatus}</td>
               </tr>
             ))}
           </tbody>

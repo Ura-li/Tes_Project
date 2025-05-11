@@ -14,8 +14,18 @@ export async function GET(request) {
     //prisma query filter
     const filters = {};
     if(CaseStatus){
-        filters.CaseStatus = { contains: CaseStatus }
+        filters.CaseStatus = CaseStatus ;
     }
+    const openCount = await prisma.caseinformation.count({
+      where: {
+        CaseStatus: 'Open'
+      }
+    });
+    const closedCount = await prisma.caseinformation.count({
+      where: {
+        CaseStatus: 'Close'
+      }
+    });
     //get all data
     const case_information = await prisma.caseinformation.findMany({
         where: Object.keys(filters).length > 0 ? filters : undefined,
@@ -86,8 +96,13 @@ export async function GET(request) {
                     CreatedName: "Miku21", // Replace with the database owned
                     Owner: "Miku21", // Replace with the database owned
                     WorkGroup: "Miku21", // Replace with the database owned
-                    CaseStatus: caseData.CaseStatus
+                    CaseStatus: caseData.CaseStatus,
+                    
                 })),
+            value:{ 
+                open: openCount,
+                closed: closedCount
+            }
         },
         {
             status:200,

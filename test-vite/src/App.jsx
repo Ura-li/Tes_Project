@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { AppSidebar } from "@/components/app-sidebar"
 import { Input } from './components/ui/input'
 import {
+  Loader2,
   Search,
   Sheet
 } from 'lucide-react'
@@ -54,7 +55,7 @@ export function GlobalSearchBar() {
   const [results, setResults] = useState(null);
   const [showResults, setShowResults] = useState(false);
   const containerRef = useRef(null);
-
+  const [loading, setLoading] = useState(false)
   const fetchResults = async (q) => {
     if (!q) {
       setResults(null);
@@ -62,12 +63,15 @@ export function GlobalSearchBar() {
     }
 
     try {
+    setLoading(true);
       const response = await ApiCustomer.get(`/api/global-search?query=${encodeURIComponent(q)}`);
       const data = response.data;
       setResults(data);
       setShowResults(true);
     } catch (error) {
       console.error('Search error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,16 +100,18 @@ export function GlobalSearchBar() {
 
   return (
     <div ref={containerRef} className="relative">
-      <Input
-        placeholder="Search"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        className="border border-b-2 border-b-black bg-sky-100"
-        onFocus={() => {
-          if (results) setShowResults(true);
-        }}
-      />
-
+      <span className='flex items-center gap-2'> 
+        <Input
+          placeholder="Search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="border border-b-2 border-b-black bg-sky-100"
+          onFocus={() => {
+            if (results) setShowResults(true);
+          }}
+        />
+        {loading ? <Loader2 className=' animate-spin'></Loader2> : ""}
+      </span>
       {showResults && results && (
         <div className="absolute bg-white shadow rounded p-2 z-50 w-full">
           <div>
