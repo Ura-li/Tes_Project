@@ -155,7 +155,6 @@ export async function PATCH(request, { params }) {
         where: { BookingDetailId: existingDetail.BookingDetailId },
         data: dataToUpdate,
       });
-
       return NextResponse.json(
         {
           message: 'Booking dan BookingDetails berhasil diperbarui.',

@@ -1444,6 +1444,9 @@ const [endDate, setEndDate] = useState(null);
                     value={caseDetails.IncomingChannel}
                   />
                 </CaseField>
+                {/* <CaseField label="Case Subject" span={3}>
+                  <Input variant="invisible" value={caseDetails.CaseSubject} />
+                </CaseField> */}
                 <CaseField label="Business Segment">
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
@@ -1825,7 +1828,11 @@ const [endDate, setEndDate] = useState(null);
               <CardContent className="flex gap-x-5 p-4">
                 <div className="flex-1 grid grid-row-7 grid-cols-6 items-center gap-y-7">
                   <div className="row-span-4 col-span-full">
-                    <textarea className="border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none"></textarea>
+                    <textarea 
+                      className="border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none"
+                      readOnly
+                      value={caseDetails?.CaseProductNote}
+                    ></textarea>
                   </div>
                   <CaseField
                     label="Related Device"
