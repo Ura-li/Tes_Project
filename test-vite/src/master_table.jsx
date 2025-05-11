@@ -25,6 +25,7 @@ import { SymptomCodeAdd, SymptomCodeEdit, SymptomCodeDelete } from "@/components
 import { BookingsAdd, BookingsEdit, BookingsDelete } from "@/components/sc-modal";
 import { BookingDetailsAdd, BookingDetailsEdit, BookingDetailsDelete } from "@/components/sc-modal";
 import { OTCAdd } from "@/components/sc-modal";
+import { CrsAdd } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { Label } from "@/components/ui/label"
@@ -3051,6 +3052,184 @@ export const OTCCodeTable = () => {
                 <td className="border p-2">{item.Description}</td>
                 <td className="border p-2">
                   {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </td>
+                {/* <td className="border p-2 flex space-x-2 justify-center">
+                  <BookingsEdit BookingId={item.BookingId} onUpdate={fetchBookingData} />
+                  <BookingsDelete
+                    BookingId={item.BookingId}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchBookingData}
+                  />
+                </td> */}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredData.length === 0 && (
+          <p className="text-center mt-4 text-gray-500">No entries found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const CrsTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [CrsData, setCrsData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchCrs = async () => {
+    Swal.fire({
+      title: "Memuat Data CRS",
+      text: "Mohon tunggu sebentar...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading(); // Menampilkan indikator loading
+      },
+    });
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/caseResolution");
+      if (response.data.success) {
+        setCrsData(response.data.data);
+      } else {
+        setError("Failed to fetch crs data");
+      }
+    } catch (err) {
+      console.error("Error fetching crs data:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+      Swal.close();
+    }
+  };
+
+  useEffect(() => {
+    fetchCrs();
+  }, []);
+
+  const filteredData = CrsData.filter((item) =>
+    Object.values(item).some((value) =>
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const currentData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Case Resolution Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="mb-4 p-2 border rounded w-1/3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+    <CrsAdd/>
+
+      {loading && <p>Loading data...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
+              <th className="border p-2">ID Csr</th>
+              <th className="border p-2">Case Resolution Code</th>
+              <th className="border p-2">Auto Close</th>
+              <th className="border p-2">Case Ready For Closure</th>
+              <th className="border p-2">Ready For Close Days</th>
+              <th className="border p-2">Ready For Closure Date</th>
+              <th className="border p-2">Pending Customer Action</th>
+              <th className="border p-2">Customer Requested CloseDate</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((item) => (
+              <tr key={item.id_csr} className="hover:bg-gray-100 text-center">
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() => navigate(`/case-resolution/${item.id_csr}`)}
+                > 
+                  {item.id_csr}
+                </td> 
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  // onClick={() => navigate(`/bookings/${item.BookingId}`)}
+                >
+                  {item.caseResolutionCode}
+                </td>
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  // onClick={() => navigate(`/bookings/${item.BookingId}`)}
+                >
+                  {item.autoClose}
+                </td>
+                <td className="border p-2">{item.caseReadyForClosure}</td>
+                <td className="border p-2">
+                  {new Date(item.readyForCloseDays).toLocaleDateString("id-ID", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </td>
+                 <td className="border p-2">
+                  {new Date(item.readyForClosureDate).toLocaleDateString("id-ID", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </td>
+                 <td className="border p-2">
+                  {new Date(item.pendingCustomerAction).toLocaleDateString("id-ID", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </td>
+                <td className="border p-2">
+                  {new Date(item.customerRequestedCloseDate).toLocaleDateString("id-ID", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",

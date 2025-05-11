@@ -151,13 +151,15 @@ export function ServiceBooking ({BookingId , woid}) {
   useEffect(() => {
     async function fetchBooking() {
       if (bookingid == ""){
-        // try {
-        //   const addData = await ApiCustomer.post(`/api/bookings`)
-        //   console.log("ADDING BOOKING")
-        // } catch (error) {
-          
-        // }
-        return console.log('error')
+         Swal.fire({
+      title: 'Memuat data booking...',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
       };
       try {
         const response = await ApiCustomer.get(`/api/bookings/${bookingid}`);
@@ -218,6 +220,13 @@ export function ServiceBooking ({BookingId , woid}) {
         // setBookingData(updatedBookingData);
       } catch (error) {
         console.error("Failed to fetch booking data:", error);
+        Swal.fire({
+        icon: 'error',
+        title: 'Gagal memuat data',
+        text: error.message || 'Terjadi kesalahan saat mengambil data.',
+      });
+      }finally {
+        Swal.close();
       }
     }
     
@@ -227,7 +236,15 @@ export function ServiceBooking ({BookingId , woid}) {
   }, []);
 
   if (!bookingData) {
-    return <div>Loadinsg...</div>;
+     Swal.fire({
+      title: 'Memuat data booking...',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
   }
 
   const handleUpdate = async () => {
@@ -266,7 +283,7 @@ export function ServiceBooking ({BookingId , woid}) {
 
       Swal.fire({
         title: 'Success',
-        icon: "Success",
+        icon: "success",
         text: "Booking telas berhasil di simpan",
       }).then(() => {
         window.location.href = `/work/${bookingData.WOID}`

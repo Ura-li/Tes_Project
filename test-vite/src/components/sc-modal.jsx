@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 
-
 import {
   Table,
   TableBody,
@@ -28,7 +27,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"
 import { Plus,PhoneCall, Copy, ExternalLink, XIcon } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
-import { SelectBar3, SelectBarContact4 } from "./sc-select";
+import { SelectBar3, SelectBarContact4, SelectYN } from "./sc-select";
 import { 
   SelectBarContact,
   SelectBarContact2,
@@ -53,8 +52,6 @@ import { Pencil, Trash } from "lucide-react";
 import ApiCustomer from "@/api";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { Textarea } from "./ui/textarea";
-
 
 import {
   Tabs,
@@ -171,9 +168,11 @@ export function BtnModal({
           </div>
           <p className="text-sm text-gray-500 mt-1">Total accessories: 1</p>
         </div>
-
         <DialogFooter>
-          <Button type="submit" onClick={handleCreateCase}>DONE</Button>
+         <Button onClick={(e) => {
+            e.preventDefault(); // Prevents form submission
+            handleCreateCase();
+          }}>DONE</Button>
         </DialogFooter>
       </form>
     </DialogContent>
@@ -200,6 +199,9 @@ export function BtnModalContact({
   onOpenChange : externalOnChange,
   companyData
   }) {
+
+    const [provinces, setProvinces] = useState([]);
+    const [cities, setCities] = useState([]);
     console.log("CHECK DATA FORM BTN MOdAL",selectedContact)
 
   //set modal state 
@@ -240,7 +242,23 @@ export function BtnModalContact({
       ? selectedCompany.SiteAccountID ?? "" 
       : selectedCompany
     });
+
+     useEffect(() => {
+        fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json")
+          .then((res) => res.json())
+          .then(setProvinces)
+          .catch(console.error);
+      }, []);
     
+      useEffect(() => {
+        const selectedProvince = provinces.find((p) => p.name === formDataContact.StateProvince);
+        if (selectedProvince) {
+          fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${selectedProvince.id}.json`)
+            .then((res) => res.json())
+            .then(setCities)
+            .catch(console.error);
+        }
+      }, [formDataContact.StateProvince]);
     
     //handle input
     const handlerInputContactChange = (e) => {
@@ -461,14 +479,19 @@ export function BtnModalContact({
           </div>
           <div className="space-y-0.4 flex flex-col">
             <Label htmlFor="current">Country</Label>
-            <SelectBar id="Country" value={formDataContact.Country || ""} onChange={handlerInputContactChange}  options={[
-                        { id: "id", name: "Indonesia" },
-                        { id: "my", name: "Malaysia" },
-                        { id: "sg", name: "Singapura" },
-                        { id: "uk", name: "Inggris" },
-                        { id: "cn", name: "Cina" }
-                      ]}
-                      placeholder="Select a Country"/>
+            <SelectBar
+              id="Country"
+              value={formDataContact.Country}
+              onChange={handlerInputContactChange}
+              options={[
+                { id: "id", name: "Indonesia" },
+                { id: "my", name: "Malaysia" },
+                { id: "sg", name: "Singapura" },
+                { id: "uk", name: "Inggris" },
+                { id: "cn", name: "Cina" }
+              ]}
+              placeholder="Select a Country"
+            />
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="AddressLine2">Address Line 2</Label>
@@ -480,13 +503,25 @@ export function BtnModalContact({
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="City">City</Label>
-            <Input id="City" type="text" value={formDataContact.City || ""} className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <SelectBar
+              id="City"
+              value={formDataContact.City}
+              onChange={handlerInputContactChange}
+              options={cities}
+              placeholder="Select a City"
+            />
 
             
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="StateProvince">State/Province</Label>
-            <Input id="StateProvince" value={formDataContact.StateProvince || ""} type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <SelectBar
+              id="StateProvince"
+              value={formDataContact.StateProvince}
+              onChange={handlerInputContactChange}
+              options={provinces}
+              placeholder="Select a Province"
+            />  
 
             
                   {/* Hidden Input for SiteAccountID */}
@@ -7161,7 +7196,7 @@ export function BookingDetailsDelete({ BookingDetailId, onUpdate }) {
   );
 }
 
-export function OTCAdd({ onUpdate }) {
+export function OTCAdd() {
   const [formData, setFormData] = useState({
     OTCCode: "",
     Description: ""
@@ -7185,7 +7220,7 @@ export function OTCAdd({ onUpdate }) {
         showConfirmButton: false,
         timerProgressBar: true,
       });
-      return;
+      return
     }
 
     try {
@@ -7199,8 +7234,8 @@ export function OTCAdd({ onUpdate }) {
         timerProgressBar: true,
         showConfirmButton: false,
       }).then(() => {
-        onUpdate?.();
-      });
+        window.location.reload();
+      })
     } catch (error) {
       console.error("Error saving OTC Code:", error);
       Swal.fire({
@@ -7217,7 +7252,7 @@ export function OTCAdd({ onUpdate }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm mb-4">Add OTC Code</Button>
+        <Button variant="outline" className="h-11 rounded-sm mb-4 ml-2">Add OTC Code</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -7231,6 +7266,117 @@ export function OTCAdd({ onUpdate }) {
           <Label>Description</Label>
           <Input id="Description" value={formData.Description} onChange={handleInputChange} />
 
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function CrsAdd() {
+  const [formData, setFormData] = useState({
+    caseResolutionCode: "",
+    autoClose: "",
+    caseReadyForClosure: "",
+    readyForCloseDays: "",
+    readyForClosureDate: "",
+    pendingCustomerAction: "",
+    customerRequestedCloseDate: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    // Validasi input
+    if (!formData.caseResolutionCode || !formData.autoClose || !formData.caseReadyForClosure) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "All fields are required.",
+        icon: "warning",
+        timer: 1500,
+        showConfirmButton: false,
+        timerProgressBar: true,
+      });
+      return;
+    }
+
+    try {
+      console.log("Form Data : ", formData);
+
+      // Mengirim data ke API menggunakan POST untuk membuat data baru
+      await ApiCustomer.post("/api/caseResolution", formData);
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Case Resolution berhasil disimpan.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload(); // Refresh setelah berhasil
+      });
+    } catch (error) {
+      console.error("Error saving Case Resolution:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal menyimpan data. Silakan coba lagi.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm mb-4 ml-2">Add Case Resolution</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Case Resolution</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>Case Resolution Code</Label>
+          <Input id="caseResolutionCode" value={formData.caseResolutionCode} onChange={handleInputChange} />
+
+          <Label>Auto Close</Label>
+          <SelectYN
+          id="autoClose"
+          value={formData.autoClose}
+          onValueChange={(value) => handleInputChange({ target: { id: "autoClose", value } })}
+        />
+
+          <Label>Case Ready For Closure</Label>
+          <SelectYN
+            id="caseReadyForClosure"
+            value={formData.caseReadyForClosure}
+            onValueChange={(value) => handleInputChange({ target: { id: "caseReadyForClosure", value } })}
+          />
+
+          <Label>Ready For Close Days</Label>
+          <Input id="readyForCloseDays" type="number" value={formData.readyForCloseDays} onChange={handleInputChange} />
+
+
+          <Label>Ready For Closure Date</Label>
+          <Input id="readyForClosureDate" type="datetime-local" value={formData.readyForClosureDate} onChange={handleInputChange} />
+
+          <Label>Pending Customer Action</Label>
+          <Input id="pendingCustomerAction" type="datetime-local" value={formData.pendingCustomerAction} onChange={handleInputChange} />
+
+          <Label>Customer Requested Close Date</Label>
+          <Input id="customerRequestedCloseDate" type="datetime-local" value={formData.customerRequestedCloseDate} onChange={handleInputChange} />
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit}>Add</Button>

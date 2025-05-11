@@ -46,6 +46,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 
+import { SelectYN } from "./sc-select";
 import { useLocation, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -85,18 +86,18 @@ import Swal from "sweetalert2";
 //   },
 // ]
 
-const partsorder = [
-  {
-    name: "Budiono",
-    orderstatus: "-",
-    workorder: "-",
-    customerselfrepair: "-",
-    owner: "Budiono",
-    createdon: "W-",
-    ordercloseddate: "-",
-    createdby: "-",
-  },
-]
+// const partsorder = [
+//   {
+//     name: "Budiono",
+//     orderstatus: "-",
+//     workorder: "-",
+//     customerselfrepair: "-",
+//     owner: "Budiono",
+//     createdon: "W-",
+//     ordercloseddate: "-",
+//     createdby: "-",
+//   },
+// ]
 
 import { BtnModalsServiceCatalog } from './sc-modal'
 import DatePicker from './date-picker'
@@ -137,6 +138,16 @@ export const TabsService = ({
     gt_al_comments: "",
   });
 
+   const [csrForm, setCsrForm] = useState({
+    caseResolutionCode: "",
+    autoClose: "",
+    caseReadyForClosure: "",
+    readyForCloseDays: "",
+    readyForClosureDate: "",
+    pendingCustomerAction: "",
+    customerRequestedCloseDate: "",
+  });
+
   
 
   const handleCaseNoteChange = (key, value) => {
@@ -153,6 +164,10 @@ export const TabsService = ({
   
   const handleEntitlementStatus = (field) => (value) => {
     setEntitlementStatus((prev) => ({ ...prev, [field]: value }));
+  };
+
+   const handleCsrChange = (field) => (value) => {
+    setCsrForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = async () => {
@@ -172,12 +187,14 @@ export const TabsService = ({
       const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
       const gtcFilled = gtcForm && Object.values(gtcForm).some(val => val !== null && val !== "");
       const custEntitlementandSLA = entitlementStatus
+      const csrFilled = csrForm && Object.values(csrForm).some(val => val !== null && val !== "");
   
       let noteResponse = null;
       let gtcResponse = null;
       let entitlementResponse = null;
+      let csrResponse = null;
   
-      if (!noteFilled && !gtcFilled && !entitlementResponse) {
+      if (!noteFilled && !gtcFilled && !entitlementResponse && !csrFilled) {
         alert("Tidak ada data yang disimpan. Mohon isi catatan atau data GTC terlebih dahulu.");
         return;
       }
@@ -220,27 +237,49 @@ export const TabsService = ({
         const response = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, custEntitlementandSLA)
         entitlementResponse = response.data
         console.log("✅ Entitlement saved:", entitlementResponse);
-      }
+      }  
+     if (csrFilled) {
+      if (caseDetails.id_csr) {
+        const response = await ApiCustomer.patch(`/api/caseResolution/${caseDetails.id_csr}`, {
+          ...csrForm,
+          caseResolutionCode: csrForm.caseResolutionCode || "",
+        });
+       csrResponse = response.data;
+       console.log("✅ CSR saved:", csrResponse);
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "CSR updated successfully!",
+          timer: 2000,
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        }).then(() => {
+          window.location.reload();
+        });
+      }else{
+        const response = await ApiCustomer.post("/api/caseResolution", {
+          ...csrForm,
+          caseResolutionCode: csrForm.caseResolutionCode || "",
+        });
+        const UpdatedCase = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, {
+          id_csr: response.data.data.id_csr
+        });
+        console.log("Updated Case ID CSR : ", UpdatedCase)
+        return; 
+      }}
       
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Data berhasil disimpan!",
-        timer: 2000,
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: () => {
-          // reload setelah 2 detik
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
-        },
-      });
-      // Swal.close();
     } catch (error) {
       console.error("❌ Save failed:", error);
-      alert("Gagal menyimpan perubahan.");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Something went wrong.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        Swal.close();
+      })
     }
   };
   
@@ -319,6 +358,7 @@ export const TabsService = ({
         title: "Saving...",
         text: "Please wait while we update the Case.",
         allowOutsideClick: false,
+        allowEscapeKey: false,
         didOpen: () => {
           Swal.showLoading();
         },
@@ -337,6 +377,8 @@ export const TabsService = ({
           text: res.data.message,
           timer: 2000,
           showConfirmButton: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
         }).then(() => {
           navigate(`/master/Case_table`);
         });
@@ -407,6 +449,9 @@ export const TabsService = ({
             setSelectedSymptom={setSelectedSymptom}
             entitlementStatus={entitlementStatus}
             handleEntitlementStatus={handleEntitlementStatus}
+            csrForm={csrForm}
+            setCsrForm={setCsrForm}
+            onChangeCsr={handleCsrChange}
           />
       </div>
     </>
@@ -893,7 +938,10 @@ export const ServiceCase = ({
   setFormGtc,
   onChangeGtc,
   entitlementStatus,
-  handleEntitlementStatus
+  handleEntitlementStatus,
+  csrForm,
+  setCsrForm,
+  onChangeCsr,
 }) => {
   const { open } = useSidebar();
 
@@ -1048,6 +1096,7 @@ export const ServiceCase = ({
       
     }
   }
+
   const fetchWorkOrders = async () => {
     try {
       const res = await ApiCustomer.get(
@@ -1083,6 +1132,7 @@ export const ServiceCase = ({
   };
 
   const [otcCode, setOtcCode] = useState([])
+  
   const fetchOTCCode = async () => {
     try{
       const res = await ApiCustomer.get('/api/otc-code')
@@ -1091,8 +1141,33 @@ export const ServiceCase = ({
       console.error("Failed to fetch OTC Code:", err);
     }
   }
-  
 
+  const fetchCsr = async () => {
+  try {
+    const csrData = caseDetails.caseresolution;
+    console.log("CSR Data: ", csrData);
+
+    if (csrData) {
+      setCsrForm({
+        caseResolutionCode: csrData.caseResolutionCode || "",
+        autoClose: csrData.autoClose || "",
+        caseReadyForClosure: csrData.caseReadyForClosure || "",
+        readyForCloseDays: csrData.readyForCloseDays || "",
+        readyForClosureDate: csrData.readyForClosureDate ? new Date(csrData.readyForClosureDate) : "",
+        pendingCustomerAction: csrData.pendingCustomerAction ? new Date(csrData.pendingCustomerAction) : "",
+        customerRequestedCloseDate: csrData.customerRequestedCloseDate ? new Date(csrData.customerRequestedCloseDate) : "",
+      });
+    } else {
+      setCsrForm(csrForm); // fallback jika null
+    }
+  } catch (err) {
+    console.error("Error fetching CSR:", err);
+    setCsrForm(csrForm); // fallback jika error
+  }
+};
+
+
+  
   //notes handler
   useEffect(() => {
     fetchCustomerData();
@@ -1112,6 +1187,7 @@ export const ServiceCase = ({
     loadNote();
     fetchGtc(); 
     fetchOTCCode();
+    fetchCsr();
   }, []);
 
   useEffect(() => {
@@ -1828,31 +1904,18 @@ const [endDate, setEndDate] = useState(null);
                   <CaseField
                     label="Visible Externally"
                     className={"col-span-2"}
-                    span={4}
-                  >
-                    <Select
-                      value={
+                    span={4}>                  
+                    <SelectYN  value={
                         formData?.VisibleExternally === undefined ||
                         formData?.VisibleExternally === null
                           ? ""
                           : formData?.VisibleExternally
-                          ? "1"
-                          : "0"
+                          ? "Yes"
+                          : "No"
                       }
                       onValueChange={(val) =>
-                        onChange("VisibleExternally", val === "1")
-                      }
-                    >
-                      <SelectTrigger
-                        className={"w-[100%] hover:shadow-lg border-b-0"}
-                      >
-                        <SelectValue placeholder="---" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">Yes</SelectItem>
-                        <SelectItem value="0">No</SelectItem>
-                      </SelectContent>
-                    </Select>
+                        onChange("VisibleExternally", val === "Yes")
+                      }></SelectYN>
                   </CaseField>
 
                   <CaseField
@@ -1945,7 +2008,7 @@ const [endDate, setEndDate] = useState(null);
             <Card className=" flex-col">
               <CardHeader>
                 <CardTitle className=" text-lg">
-                  Symtome Description / CardTitle
+                  Symptom Description / CardTitle
                 </CardTitle>
                 <hr />
               </CardHeader>
@@ -2085,56 +2148,47 @@ const [endDate, setEndDate] = useState(null);
               </CardHeader>
 
               <CardContent className="grid gap-5 grid-cols-7 p-3 ">
-                <CaseField label="Case Resolution Code"> --- </CaseField>
+                <CaseField label="Case Resolution Code">
+                <Input
+                  variant='invisible'
+                  value={csrForm.caseResolutionCode}
+                  onChange={(e) => onChangeCsr("caseResolutionCode")(e.target.value)}
+                />
+      
+                </CaseField>
                 <CaseField label="Case Ready for Closure" icon>
-                  <Select
-                    className=""
-                    onValueChange={(val) =>
-                      onChange("VisibleExternally", val === "1")
-                    }
-                  >
-                    <SelectTrigger className={"w-full"}>
-                      <SelectValue placeholder="---" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">Yes</SelectItem>
-                      <SelectItem value="0">No</SelectItem>
-                    </SelectContent>
-                  </Select>
+                 <SelectYN
+                  value={csrForm.caseReadyForClosure}
+                  onValueChange={(val) => onChangeCsr("caseReadyForClosure")(val)}
+                />
+
                 </CaseField>
+
                 <CaseField label="Pending Customer Action" icon span={2}>
-                  <DatePicker
-                    value={pendingCustomerAction}
-                    onChange={setPendingCustomerAction}
-                    readOnly
-                  />
+                 <DatePicker
+  value={csrForm.pendingCustomerAction}
+  onChange={onChangeCsr("pendingCustomerAction")}
+/>
                 </CaseField>
-                <CaseField label="Auto Close">
-                  <Select
-                    className=""
-                    onValueChange={(val) =>
-                      onChange("VisibleExternally", val === "1")
-                    }
-                  >
-                    <SelectTrigger className={"w-full"}>
-                      <SelectValue placeholder="---" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">Yes</SelectItem>
-                      <SelectItem value="0">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </CaseField>
+              <CaseField label="Auto Close">
+              <SelectYN
+                value={csrForm.autoClose}
+                onValueChange={(val) => onChangeCsr("autoClose")(val)}
+              />
+            </CaseField>
                 <CaseField label="Ready for Close Days" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input
+                  type="number"
+                  variant='invisible'
+                  value={csrForm.readyForCloseDays}
+                  onChange={(e) => onChangeCsr("readyForCloseDays")(e.target.value)}
+                />
                 </CaseField>
                 <CaseField label="Customer Requested Close Date" icon span={2}>
-                  {" "}
-                  <DatePicker
-                    value={customerRequestedCloseDate}
-                    onChange={setCustomerRequestedCloseDate}
-                    readOnly
-                  />
+                <DatePicker
+  value={csrForm.customerRequestedCloseDate}
+  onChange={onChangeCsr("customerRequestedCloseDate")}
+/>
                 </CaseField>
                 <CaseField
                   className={"col-start-3"}
@@ -2142,11 +2196,11 @@ const [endDate, setEndDate] = useState(null);
                   icon
                   span={2}
                 >
-                  <DatePicker
-                    value={ReadyForClosureDate}
-                    onChange={setReadyForClosureDate}
-                    readOnly
-                  />{" "}
+                <DatePicker
+  value={csrForm.readyForClosureDate}
+  onChange={onChangeCsr("readyForClosureDate")}
+/>
+
                 </CaseField>
               </CardContent>
             </Card>
@@ -2239,7 +2293,7 @@ const [endDate, setEndDate] = useState(null);
                           </Card>
                         </div>
                       </div>
-                    </TabsContent>
+            </TabsContent>
 
           <TabsContent value="ci_orders" className={"p-2 flex flex-col gap-4"}>
             <Card className="flex-col ">
@@ -2369,7 +2423,7 @@ const [endDate, setEndDate] = useState(null);
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {partsorder.map((parts) => (
+                    {/* {partsorder.map((parts) => (
                       <TableRow key={parts.name}>
                         <TableCell className="font-medium">
                           {parts.name}
@@ -2382,7 +2436,12 @@ const [endDate, setEndDate] = useState(null);
                         <TableCell>{parts.ordercloseddate}</TableCell>
                         <TableCell>{parts.createdby}</TableCell>
                       </TableRow>
-                    ))}
+                    ))} */}
+                    <TableRow>
+                      <TableCell className="font-medium">
+                          No data available  
+                      </TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               </CardContent>
