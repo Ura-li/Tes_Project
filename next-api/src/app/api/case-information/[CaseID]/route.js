@@ -38,6 +38,7 @@ export async function GET(request, { params }) {
                 }
             }, 
             global_trade_check: true,
+            caseresolution: true,
         }
     });
 
@@ -85,7 +86,8 @@ export async function PATCH(request, { params }) {
         CaseNote,
         SymptomCode,
         CaseResolution,
-        OTCCode
+        OTCCode,
+        id_csr,
     } = await request.json();   
 
     //update data
@@ -108,7 +110,8 @@ export async function PATCH(request, { params }) {
             CaseNote: CaseNote,
             SymptomCode: SymptomCode,
             CaseResolution: CaseResolution,
-            OTCCode: OTCCode
+            OTCCode: OTCCode,
+            id_csr: id_csr,
         }
     })
 

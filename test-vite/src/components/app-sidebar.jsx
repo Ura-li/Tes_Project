@@ -151,6 +151,10 @@ const data = {
           title: "OTC Code",
           url: "/master/OTC_Code",
         }, 
+        {
+          title: "Case Resolution",
+          url: "/master/CrsTable",
+        }, 
       ],
     },
     {

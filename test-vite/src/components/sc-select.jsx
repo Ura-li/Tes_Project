@@ -164,3 +164,20 @@ import {
       </Select>
     )
   }
+
+  export function SelectYN({ value, onValueChange }) {
+  return (
+    <Select value={value} onValueChange={onValueChange}>
+      <SelectTrigger className="w-full hover:shadow-lg border-b-0">
+        {/* Menampilkan value terpilih */}
+        <span>{value}</span>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectItem value="Yes">Yes</SelectItem>
+          <SelectItem value="No">No</SelectItem>
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+}

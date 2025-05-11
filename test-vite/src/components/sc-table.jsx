@@ -34,7 +34,8 @@ import { useModal } from "@/components/modal-context";
 
 
 
-  export function TableCompany({ 
+
+export function TableCompany({ 
     selectedAsset = [],
     selectedCompany = [],
     selectedContact = [],
@@ -60,7 +61,7 @@ import { useModal } from "@/components/modal-context";
 
     // const { setActiveModal, setModalData } = useModal();
 
-    
+
     useEffect(() => {
       console.log("Updated selectedContact 123:", selectedContact);
     }, [selectedContact]); // ✅ Logs the updated value when `selectedAsset` changes

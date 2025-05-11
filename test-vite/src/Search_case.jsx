@@ -442,7 +442,7 @@ const Search_case = () => {
         confirmButtonText: 'OK',
       }).then((result) => {
         if (result.isConfirmed) {
-          window.location.reload();  // ✅ Arahkan ke halaman search
+          setActiveTab("ci");   
         }
       });
   
@@ -543,7 +543,7 @@ const Search_case = () => {
       allowEscapeKey: false,
     }).then((result) => {
       if (result.isConfirmed) {
-        window.location.reload(); // Arahkan ke halaman lain
+        setActiveTab("ci");   // Arahkan ke halaman lain
       }
     });
 
