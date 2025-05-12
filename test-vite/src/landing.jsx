@@ -48,6 +48,7 @@ useEffect(() => {
     month: new Date(0, i).toLocaleString("en-US", { month: "long" }),
     open: 0,
     closed: 0,
+    inActive: 0,
   }));
   // const days = Array.from({ length: 7 }, (_, i) => ({
   //   week: new Date(0, i).toLocaleString("en-US", { weekday: "short" }),
@@ -59,6 +60,7 @@ useEffect(() => {
       week: day,
       open: 0,
       closed: 0,
+      inActive: 0,
     }));
     console.log("days",days);
 
@@ -82,6 +84,9 @@ useEffect(() => {
     } else if (caseItem.CaseStatus.toLowerCase() === "close") {
       months[caseMonthIndex].closed += 1;
       if (index !== -1)  days[index].closed +=1 ;
+    } else if (caseItem.CaseStatus.toLowerCase() === "inactive") {
+      months[caseMonthIndex].inActive += 1;
+      if (index !== -1)  days[index].inActive +=1 ;
     }
     
   });

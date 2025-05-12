@@ -26,6 +26,11 @@ export async function GET(request) {
         CaseStatus: 'Close'
       }
     });
+    const inActiveCount = await prisma.caseinformation.count({
+        where: {
+            CaseStatus: 'InActive'
+        }
+    })
     //get all data
     const case_information = await prisma.caseinformation.findMany({
         where: Object.keys(filters).length > 0 ? filters : undefined,
@@ -102,7 +107,8 @@ export async function GET(request) {
                 })),
             value:{ 
                 open: openCount,
-                closed: closedCount
+                closed: closedCount,
+                inActive: inActiveCount,
             }
         },
         {
