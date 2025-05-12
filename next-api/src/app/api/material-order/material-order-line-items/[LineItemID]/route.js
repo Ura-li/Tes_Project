@@ -61,11 +61,8 @@ export async function GET(request, { params }) {
 export async function PATCH(request, {params}) {
     const {LineItemID } = await params
     
-    // const { searchParams } = new URL(request.url);
-    // const lineNumber = searchParams.get("lineNumber");
 
     const parsedLineItemID = parseInt(LineItemID);
-    // const parsedLineNumber = parseInt(lineNumber);
     
     if (isNaN(parsedLineItemID)) {
         return NextResponse.json({
@@ -74,8 +71,7 @@ export async function PATCH(request, {params}) {
         }, { status: 400 });
     }
 
-    console.log(parsedLineItemID)
-    // console.log(parsedLineNumber)
+    console.log("LineItemID: ".parsedLineItemID)
 
     try {
         const body = await request.json();
@@ -104,7 +100,12 @@ export async function PATCH(request, {params}) {
             CollectionInstructions,
             CustomerResponse,
             RejectedReason,
-            OtherReason
+            OtherReason,
+            FailureId,
+            SerialNumber,
+            RemovedPartNumber,
+            RemovedSerialNumber,
+            RemovedPartDescription
           } = body;
         console.log(body);
 
@@ -112,7 +113,6 @@ export async function PATCH(request, {params}) {
         const updatedMOLineItems = await prisma.materialorderlineitems.update({
             where: { 
                 LineItemID: parsedLineItemID,
-                // LineNumber: parsedLineNumber 
             },
             data: {
                 PartNumber,
@@ -125,7 +125,12 @@ export async function PATCH(request, {params}) {
                 CollectionInstructions,
                 CustomerResponse,
                 RejectedReason,
-                OtherReason
+                OtherReason,
+                FailureId,
+                SerialNumber,
+                RemovedPartNumber,
+                RemovedSerialNumber,
+                RemovedPartDescription
             }
         });
 

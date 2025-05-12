@@ -853,7 +853,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
       onClick: () => navigate(`/material-order/${MOLineDetails.MOID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: Save, label: "Save", onClick: () => saveMOLI() },
     {
       icon: FileSymlink,
       label: "Save & Close",
@@ -896,6 +896,10 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
         RejectedReason: MODetailInput.rejectedReason,
         OtherReason: MODetailInput.otherReason,
         FailureId: MODetailInput.failureId,
+        SerialNumber: MODetailInput.serialNumber,
+        RemovedPartNumber: MODetailInput.removedPartNumber,
+        RemovedSerialNumber: MODetailInput.removedSerialNumber,
+        RemovedPartDescription: MODetailInput.removedPartDescription,
       });
       if (res.data.success) {
         // Success alert

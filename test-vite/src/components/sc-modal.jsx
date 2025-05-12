@@ -112,10 +112,10 @@ export function BtnModal({
 
       <form className="space-y-5">
         {/* Subject & Type */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="flex flex-col">
             <Label htmlFor="CaseSubject">Case Subject</Label>
-            <Input id="CaseSubject" className="border p-2" placeholder="Enter subject" />
+            <Input id="CaseSubject" className="p-2 border" placeholder="Enter subject" />
           </div>
 
           <div className="flex flex-col">
@@ -160,12 +160,12 @@ export function BtnModal({
         {/* Accessories */}
         <div className="flex flex-col">
           <Label>Accessories</Label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+          <div className="grid grid-cols-1 gap-2 mt-2 md:grid-cols-3">
             <Input placeholder="Accessory name" />
             <Input placeholder="Note" />
             <Input placeholder="CT / SN code" />
           </div>
-          <p className="text-sm text-gray-500 mt-1">Total accessories: 1</p>
+          <p className="mt-1 text-sm text-gray-500">Total accessories: 1</p>
         </div>
         <DialogFooter>
           <Button type="submit" onClick={(e) => {
@@ -416,7 +416,7 @@ export function BtnModalContact({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[1000px]  bg-white">
         <DialogHeader className="flex-row items-center justify-between">
-          <DialogDescription className="text-xl font-semibold text-black gap-2 flex"><PhoneCall></PhoneCall>Contact Information</DialogDescription>
+          <DialogDescription className="flex gap-2 text-xl font-semibold text-black"><PhoneCall></PhoneCall>Contact Information</DialogDescription>
             <Button 
             className="self-end mr-2" 
             variant="ghost"
@@ -429,7 +429,7 @@ export function BtnModalContact({
           <DialogTitle className="text-md">Basic Information</DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-2 grid-cols-6">
+        <div className="grid grid-cols-6 gap-2">
           <div className="space-y-0.5 flex flex-col">
             <Label htmlFor="Salutation">Salutation</Label>
             <SelectBar 
@@ -459,19 +459,19 @@ export function BtnModalContact({
           </div>
           <div className="space-y-0.5">
             <Label htmlFor="FirstName">First Name</Label>
-            <Input value={formDataContact.FirstName} id="FirstName" type="text" className="border-b-black p-1 " onChange={handlerInputContactChange} />
+            <Input value={formDataContact.FirstName} id="FirstName" type="text" className="p-1 border-b-black " onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.5 ">
             <Label htmlFor="LastName">Last Name</Label>
-            <Input value={formDataContact.LastName} id="LastName" type="text" className="border-b-black p-1 " onChange={handlerInputContactChange} />
+            <Input value={formDataContact.LastName} id="LastName" type="text" className="p-1 border-b-black " onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.5 col-span-2">
             <Label htmlFor="Email">Email</Label>
-            <Input value={formDataContact.Email} id="Email" type="email" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.Email} id="Email" type="email" className="p-1 border-b-black" onChange={handlerInputContactChange} />
           </div>
           {/* <div className="space-y-0.4 ml-5">
             <Label htmlFor="new">EXTN</Label>
-            <Input id="new" type="text" className="border-b-black p-1 w-73 h-8 text-sm" />
+            <Input id="new" type="text" className="h-8 p-1 text-sm border-b-black w-73" />
           </div> */}
         </div>
 
@@ -483,45 +483,45 @@ export function BtnModalContact({
           <div className="space-y-0.4 col-span-2">
             <Label htmlFor="Phone">Phone</Label>
             <Input
-             value={formDataContact.Phone} id="Phone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+             value={formDataContact.Phone} id="Phone" type="text" className="p-1 border-b-black" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 col-span-2">
             <Label htmlFor="Mobile">Mobile</Label>
             <Input
-             value={formDataContact.Mobile} id="Mobile" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+             value={formDataContact.Mobile} id="Mobile" type="text" className="p-1 border-b-black" onChange={handlerInputContactChange} />
           </div> 
           <div className="space-y-0.4">
             <Label htmlFor="WorkPhone">Work</Label>
             <Input
-             value={formDataContact.WorkPhone} id="WorkPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+             value={formDataContact.WorkPhone} id="WorkPhone" type="text" className="p-1 border-b-black" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4">
             <Label htmlFor="WorkExtension">Work EXTN</Label>
-            <Input value={formDataContact.WorkExtension} id="WorkExtension" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.WorkExtension} id="WorkExtension" type="text" className="p-1 border-b-black" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4">
             <Label htmlFor="OtherPhone">Other</Label>
-            <Input value={formDataContact.OtherPhone} id="OtherPhone" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.OtherPhone} id="OtherPhone" type="text" className="p-1 border-b-black" onChange={handlerInputContactChange} />
           </div> 
           <div className="space-y-0.4 ">
             <Label htmlFor="OtherExtension"> Other EXTN</Label>
-            <Input value={formDataContact.OtherExtension} id="OtherExtension" type="text" className="border-b-black p-1 text-sm" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.OtherExtension} id="OtherExtension" type="text" className="p-1 text-sm border-b-black" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 col-span-2">
             <Label htmlFor="Fax">FAX</Label>
-            <Input value={formDataContact.Fax} id="Fax" type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input value={formDataContact.Fax} id="Fax" type="text" className="p-1 border-b-black" onChange={handlerInputContactChange} />
           </div>
         </div>
 
-        <DialogHeader className="flex-row justify-between items-center">
+        <DialogHeader className="flex-row items-center justify-between">
           <DialogTitle className="text-md">Address</DialogTitle>
-          <Button className="bg-white text-gray-400   " onClick={handleCopyFromAccount}><Copy></Copy>Same in Account Adress </Button>
+          <Button className="text-gray-400 bg-white " onClick={handleCopyFromAccount}><Copy></Copy>Same in Account Adress </Button>
         </DialogHeader>
 
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-0.4">
             <Label htmlFor="AddressLine1">Address Line 1</Label>
-            <Input id="AddressLine1" type="text" value={formDataContact.AddressLine1 || ""} className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input id="AddressLine1" type="text" value={formDataContact.AddressLine1 || ""} className="p-1 border-b-black" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 flex flex-col">
             <Label htmlFor="current">Country</Label>
@@ -542,18 +542,18 @@ export function BtnModalContact({
           <div className="space-y-0.4 ">
             <Label htmlFor="AddressL
             ine2">Address Line 2</Label>
-            <Input id="AddressLine2" value={formDataContact.AddressLine2 || ""} type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input id="AddressLine2" value={formDataContact.AddressLine2 || ""} type="text" className="p-1 border-b-black" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
-            <Input id="ZipPostalCode" value={formDataContact.ZipPostalCode || ""} type="text" className="border-b-black p-1" onChange={handlerInputContactChange} />
+            <Input id="ZipPostalCode" value={formDataContact.ZipPostalCode || ""} type="text" className="p-1 border-b-black" onChange={handlerInputContactChange} />
           </div>
           <div className="space-y-0.4 ">
             <Label htmlFor="City">City</Label>
             <SelectBar 
               id="City" 
               value={formDataContact.City || ""} 
-              className="border-b-black p-1 text-sm" 
+              className="p-1 text-sm border-b-black" 
               onChange={handlerInputContactChange} 
               options={cities} 
               placeholder="Select a City"
@@ -566,7 +566,7 @@ export function BtnModalContact({
             <SelectBar 
               id="StateProvince" 
               value={formDataContact.StateProvince || ""} 
-              className="border-b-black p-1 text-sm" 
+              className="p-1 text-sm border-b-black" 
               onChange={handlerInputContactChange} 
               options={provinces}
               placeholder="Select a Province"
@@ -588,7 +588,7 @@ export function BtnModalContact({
               KCI For this contact?
             </label>
           </div>
-        <Button variant="secondary" className="bg-white w-30 drop-shadow-md border-1 cursor-pointer text-xl" onClick={handlerContactSubmit}>Save</Button>
+        <Button variant="secondary" className="text-xl bg-white cursor-pointer w-30 drop-shadow-md border-1" onClick={handlerContactSubmit}>Save</Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -813,13 +813,13 @@ export function BtnModalAsset({
         </DialogHeader>
 
         {/* <div className="flex gap-3">  
-          <Input className="border-2 border-black rounded-2xl w-55 text-md h-10" type="Search" onChange={handleSearchInputAssetsChange}></Input>
-          <Button variant="outline" className="w-30 rounded-2xl h-10 border-blue-600 border-2">Search</Button>
+          <Input className="h-10 border-2 border-black rounded-2xl w-55 text-md" type="Search" onChange={handleSearchInputAssetsChange}></Input>
+          <Button variant="outline" className="h-10 border-2 border-blue-600 w-30 rounded-2xl">Search</Button>
           
         </div> */}
 
 
-        {/* <Table className="table-fixed border-spacing-0 mx-auto">
+        {/* <Table className="mx-auto table-fixed border-spacing-0">
           <TableHeader>
             <TableRow className="bg-blue-200">
               <TableHead className="text-black">Product Name</TableHead>
@@ -841,7 +841,7 @@ export function BtnModalAsset({
                 <TableRow>
                   <TableCell
                     colSpan={5}
-                    className="text-center font-medium whitespace-break-spaces"
+                    className="font-medium text-center whitespace-break-spaces"
                   >
                     Data Belum Tersedia
                   </TableCell>
@@ -850,11 +850,11 @@ export function BtnModalAsset({
           </TableBody>
         </Table> */}
 
-        {/* <h3 className="text-lg font-semibold mt-4">Unowned Assets</h3> */}
+        {/* <h3 className="mt-4 text-lg font-semibold">Unowned Assets</h3> */}
         
-        <div className="flex gap-3 items-center">
+        <div className="flex items-center gap-3">
           <Input
-            className="border-2 border-black rounded-2xl w-55 text-md h-10 my-2"
+            className="h-10 my-2 border-2 border-black rounded-2xl w-55 text-md"
             type="Search"
             value={searchUnowned}
             onChange={(e) => setSearchUnowned(e.target.value)}
@@ -866,11 +866,11 @@ export function BtnModalAsset({
           >
             Search
           </Button>
-          <div className="mt-2 flex items-center">
+          <div className="flex items-center mt-2">
           <Checkbox id="terms" className="w-5 h-5 border-2 border-black" checked={isCheckedForCreateProduct} onCheckedChange={setIsCheckedForCreateProduct} />
             <label
               htmlFor="terms"
-              className="text-md font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ml-2"
+              className="ml-2 font-medium leading-none text-md peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Not Available
             </label>
@@ -884,7 +884,7 @@ export function BtnModalAsset({
           }
         </div>
 
-        <Table className="table-fixed border-spacing-0 mx-auto mt-2">
+        <Table className="mx-auto mt-2 table-fixed border-spacing-0">
           <TableHeader>
             <TableRow className="bg-gray-200">
               <TableHead>Serial Number</TableHead>
@@ -1614,7 +1614,7 @@ export function ProductAdd() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm ml-2">Product Add</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Product Add</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -1936,7 +1936,7 @@ export function ProductTypeAdd () {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm ml-2"> ProductType Add</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11"> ProductType Add</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -1951,7 +1951,7 @@ export function ProductTypeAdd () {
           <Select  value={formDataProductType.ProductTower} onValueChange={(value) =>
     setFormDataProductType((prev) => ({ ...prev, ProductTower: value }))
   }>
-                      <SelectTrigger className="col-span-3 w-full">
+                      <SelectTrigger className="w-full col-span-3">
                         <SelectValue placeholder="Product Tower"/>
                       </SelectTrigger>
                       <SelectContent >
@@ -1969,7 +1969,7 @@ export function ProductTypeAdd () {
   onValueChange={(value) =>
     setFormDataProductType((prev) => ({ ...prev, ProductGroup: value }))
   }>
-                      <SelectTrigger className="col-span-3 w-full">
+                      <SelectTrigger className="w-full col-span-3">
                         <SelectValue placeholder="Product Group"/>
                       </SelectTrigger>
                       <SelectContent >
@@ -2097,7 +2097,7 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
   value={productTower}
   onValueChange={(value) => setProductTower(value)}
 >
-  <SelectTrigger className="col-span-3 w-full">
+  <SelectTrigger className="w-full col-span-3">
     <SelectValue placeholder="Product Tower" />
   </SelectTrigger>
   <SelectContent>
@@ -2114,7 +2114,7 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
   value={productGroup}
   onValueChange={(value) => setProductGroup(value)}
 >
-  <SelectTrigger className="col-span-3 w-full">
+  <SelectTrigger className="w-full col-span-3">
     <SelectValue placeholder="Product Tower" />
   </SelectTrigger>
   <SelectContent>
@@ -2288,7 +2288,7 @@ export function WarrantyServiceAdd () {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm ml-2"> Warranty Service Add</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11"> Warranty Service Add</Button>
       </DialogTrigger>
       <DialogContent className="h-[500px] overflow-y-auto">
         <DialogHeader>
@@ -3246,7 +3246,7 @@ export function UserAdd({ onAdd }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm ml-2">Tambah User</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Tambah User</Button>
       </DialogTrigger>
 
       <DialogContent className="h-[550px] overflow-y-auto">
@@ -3280,7 +3280,7 @@ export function UserAdd({ onAdd }) {
             <Label>Foto Profil</Label>
             <Input type="file" accept="image/*" onChange={handleFileChange} />
             {previewPhoto && (
-              <img src={previewPhoto} alt="Preview" className="mt-2 h-24 w-24 rounded-md object-cover" />
+              <img src={previewPhoto} alt="Preview" className="object-cover w-24 h-24 mt-2 rounded-md" />
             )}
           </div> */}
         </div>
@@ -3470,7 +3470,7 @@ export function UserEdit({ IDUser, onUpdate }) {
             <Label>Profile Photo</Label>
             <Input type="file" accept="image/*" onChange={handleFileChange} />
             {previewPhoto && (
-              <img src={previewPhoto} alt="Preview" className="mt-2 h-24 w-24 rounded-md object-cover" />
+              <img src={previewPhoto} alt="Preview" className="object-cover w-24 h-24 mt-2 rounded-md" />
             )}
           </div> */}
         </div>
@@ -3642,7 +3642,7 @@ export function PartAdd () {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm ml-2">Part Add</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Part Add</Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -4018,7 +4018,7 @@ export function ResourceAdd () {
  return (
    <Dialog>
      <DialogTrigger asChild>
-       <Button variant="outline" className="h-11 rounded-sm ml-2"> Resource Add</Button>
+       <Button variant="outline" className="ml-2 rounded-sm h-11"> Resource Add</Button>
      </DialogTrigger>
      <DialogContent className="h-[300px] overflow-y-auto">
        <DialogHeader>
@@ -4667,9 +4667,9 @@ export function BtnModalsServiceCatalog({
               <DialogDescription className={'bg-red-200 p-3 font-bold '}>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
               <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
             </DialogHeader>
-            <div className="flex gap-4 my-2 justify-between p-2">
+            <div className="flex justify-between gap-4 p-2 my-2">
               <DialogTitle>Step 1: Select From List of Service Options</DialogTitle>
-              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+              <div className="grid grid-cols-2 p-2 bg-gray-300 gap-x-10">
                 
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
@@ -4745,16 +4745,16 @@ export function BtnModalsServiceCatalog({
               <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
               <DialogDescription>Select parts required for the repair.</DialogDescription>
             </DialogHeader>
-            <div className="flex justify-between items-start p-2">
-              <div className="bg-gray-300 grid grid-cols-2 gap-x-2 p-2 flex-1">
+            <div className="flex items-start justify-between p-2">
+              <div className="grid flex-1 grid-cols-2 p-2 bg-gray-300 gap-x-2">
                 <p>Service OfferID</p><p>: {selectedWarrantyServices[0].Service_offerID}</p>
                 <p>Service Description</p><p>: {selectedWarrantyServices[0].Service_description}</p>
               </div>
-              <div className="flex items-center space-x-2 gap-2 flex-1 self-center justify-center ">
+              <div className="flex items-center self-center justify-center flex-1 gap-2 space-x-2 ">
                 <Label htmlFor="orderability">Orderability</Label>
                 <Switch id="orderability" />
               </div>
-              <div className="bg-gray-300 grid grid-cols-2 gap-x-2 p-2 flex-1">
+              <div className="grid flex-1 grid-cols-2 p-2 bg-gray-300 gap-x-2">
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
@@ -4914,8 +4914,8 @@ export function BtnModalsServiceCatalog({
               <DialogTitle className={'text-blue-600 text-2xl indent-5'}>Service Catalog</DialogTitle>
               <DialogDescription>SELECT PARTS REQUIRED FOR THE REPAIR.</DialogDescription>
             </DialogHeader>
-            <div className="flex gap-4 my-2 justify-end p-2">
-              <div className="bg-gray-300 grid grid-cols-2 gap-x-10 p-2">
+            <div className="flex justify-end gap-4 p-2 my-2">
+              <div className="grid grid-cols-2 p-2 bg-gray-300 gap-x-10">
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
@@ -5119,7 +5119,7 @@ export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm ml-2">Add Part</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Add Part</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -5159,7 +5159,7 @@ export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen
           <Label>Total*</Label>
           <Input type="number" id="Total" value={formData.Total} onChange={handleChange} />
 
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-4">
+          <div className="grid grid-cols-2 mt-4 gap-x-4 gap-y-2">
             <div><input type="checkbox" id="CSR_Flag" checked={formData.CSR_Flag} onChange={handleChange} /> <label htmlFor="CSR_Flag">CSR</label></div>
             <div><input type="checkbox" id="ROHS_Flag" checked={formData.ROHS_Flag} onChange={handleChange} /> <label htmlFor="ROHS_Flag">ROHS</label></div>
             <div><input type="checkbox" id="Returnable_Flag" checked={formData.Returnable_Flag} onChange={handleChange} /> <label htmlFor="Returnable_Flag">Returnable</label></div>
@@ -5371,7 +5371,7 @@ export function BtnModalsPartAdd({
           <DialogTitle className={'text-blue-600 text-2xl '}>Add Part</DialogTitle>
         </DialogHeader>
           <div className="flex items-center justify-between sm:max-w-full">
-            <span className="flex gap-2 items-center">
+            <span className="flex items-center gap-2">
               <DialogDescription className={'whitespace-nowrap'}>Part Number</DialogDescription>
               <Input 
                 className={'ring-1 min-w-[10em] ring-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500'}
@@ -5387,7 +5387,7 @@ export function BtnModalsPartAdd({
                 <p>Currency</p><p className="whitespace-nowrap">: </p>
             </div>
           </div>
-          <div className="overflow-x-auto max-w-full">
+          <div className="max-w-full overflow-x-auto">
             <Table className={''}>
               <TableHeader>
                 <TableRow>
@@ -5539,11 +5539,11 @@ export function BtnModalsResourceAccountAdd({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:min-w-[50vw] sm:min-h-[fit-content] flex flex-col justify-center">
         <DialogHeader>
-          <DialogTitle className="text-blue-600 text-2xl">Add Resource Account</DialogTitle>
+          <DialogTitle className="text-2xl text-blue-600">Add Resource Account</DialogTitle>
         </DialogHeader>
 
         <div className="flex items-center justify-between">
-          <span className="flex gap-2 items-center">
+          <span className="flex items-center gap-2">
             <DialogDescription className="whitespace-nowrap">Name</DialogDescription>
             <Input
               className="ring-1 min-w-[10em] ring-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -5556,7 +5556,7 @@ export function BtnModalsResourceAccountAdd({
           </span>
         </div>
 
-        <div className="overflow-x-auto max-w-full mt-4">
+        <div className="max-w-full mt-4 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -5587,7 +5587,7 @@ export function BtnModalsResourceAccountAdd({
           </Table>
         </div>
 
-        <DialogFooter className="sm:justify-start mt-4">
+        <DialogFooter className="mt-4 sm:justify-start">
           <Button
             variant="search"
             onClick={() => {
@@ -5712,7 +5712,7 @@ export function ResourceAccountAdd() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm ml-2">Add Resource Account</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Add Resource Account</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -5731,7 +5731,7 @@ export function ResourceAccountAdd() {
             id="ResourceId"
             value={formData.ResourceId || ""}
             onChange={handleInputChange}
-            className="w-full border rounded px-3 py-2"
+            className="w-full px-3 py-2 border rounded"
           >
             <option value="">-- Select Resource --</option>
             {resources.map((resource) => (
@@ -5847,7 +5847,7 @@ export function ResourceAccountEdit({ ResourceAccountId, onUpdate, resources }) 
           <select
             value={resourceId || ""}
             onChange={(e) => setResourceId(e.target.value)}
-            className="w-full border rounded px-3 py-2"
+            className="w-full px-3 py-2 border rounded"
           >
             <option value="">-- Select Resource (optional) --</option>
             {resources.map((res) => (
@@ -5985,7 +5985,7 @@ export function SubkTechnicianAdd() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm ml-2">Add Subk Technician</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Add Subk Technician</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -6235,7 +6235,7 @@ export function SymptomCodeAdd({ onUpdate }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm mb-4">Add Symptom Code</Button>
+        <Button variant="outline" className="mb-4 rounded-sm h-11">Add Symptom Code</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -6511,7 +6511,7 @@ export function BookingsAdd({ onUpdate }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm mb-4">Add Booking</Button>
+        <Button variant="outline" className="mb-4 rounded-sm h-11">Add Booking</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -6524,7 +6524,7 @@ export function BookingsAdd({ onUpdate }) {
             id="WOID"
             value={formData.WOID}
             onChange={handleInputChange}
-            className="w-full border p-2 rounded"
+            className="w-full p-2 border rounded"
           >
             <option value="">-- Select WOID --</option>
             {workorders.map((wo) => (
@@ -6567,7 +6567,7 @@ export function BookingsAdd({ onUpdate }) {
             id="CreatedBy"
             value={formData.CreatedBy}
             onChange={handleInputChange}
-            className="w-full border p-2 rounded"
+            className="w-full p-2 border rounded"
           >
             <option value="">-- Select User --</option>
             {users.map((user) => (
@@ -6890,7 +6890,7 @@ export function BookingDetailsAdd({ onUpdate }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm mb-4">Add Booking Detail</Button>
+        <Button variant="outline" className="mb-4 rounded-sm h-11">Add Booking Detail</Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl overflow-y-auto max-h-[90vh]">
         <DialogHeader>
@@ -6898,11 +6898,11 @@ export function BookingDetailsAdd({ onUpdate }) {
           <DialogDescription>Lengkapi data berikut sesuai kebutuhan.</DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Booking Info */}
           <div>
             <Label>Booking *</Label>
-            <select id="BookingId" value={formData.BookingId} onChange={handleInputChange} className="w-full border p-2 rounded">
+            <select id="BookingId" value={formData.BookingId} onChange={handleInputChange} className="w-full p-2 border rounded">
               <option value="">-- Select Booking --</option>
               {bookings.map((b) => <option key={b.BookingId} value={b.BookingId}>{b.BookingId}</option>)}
             </select>
@@ -6910,7 +6910,7 @@ export function BookingDetailsAdd({ onUpdate }) {
 
           <div>
             <Label>Resource</Label>
-            <select id="ResourceId" value={formData.ResourceId} onChange={handleInputChange} className="w-full border p-2 rounded">
+            <select id="ResourceId" value={formData.ResourceId} onChange={handleInputChange} className="w-full p-2 border rounded">
               <option value="">-- Select Resource --</option>
               {resources.map((r) => <option key={r.ResourceId} value={r.ResourceId}>{r.Name || r.ResourceId}</option>)}
             </select>
@@ -6918,7 +6918,7 @@ export function BookingDetailsAdd({ onUpdate }) {
 
           <div>
             <Label>Resource Account</Label>
-            <select id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} className="w-full border p-2 rounded">
+            <select id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} className="w-full p-2 border rounded">
               <option value="">-- Select Account --</option>
               {accounts.map((a) => <option key={a.ResourceAccountId} value={a.ResourceAccountId}>{a.Name || a.ResourceAccountId}</option>)}
             </select>
@@ -6926,7 +6926,7 @@ export function BookingDetailsAdd({ onUpdate }) {
 
           <div>
             <Label>Subk Technician</Label>
-            <select id="SubkTechnicianId" value={formData.SubkTechnicianId} onChange={handleInputChange} className="w-full border p-2 rounded">
+            <select id="SubkTechnicianId" value={formData.SubkTechnicianId} onChange={handleInputChange} className="w-full p-2 border rounded">
               <option value="">-- Select Technician --</option>
               {technicians.map((t) => <option key={t.SubkTechnicianId} value={t.SubkTechnicianId}>{t.Name || t.SubkTechnicianId}</option>)}
             </select>
@@ -6943,9 +6943,9 @@ export function BookingDetailsAdd({ onUpdate }) {
           </div>
 
           {/* Customer Time */}
-          <div className="md:col-span-2 border-t pt-2">
-            <p className="font-semibold mb-1">Customer Time</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="pt-2 border-t md:col-span-2">
+            <p className="mb-1 font-semibold">Customer Time</p>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div><Label>Start Time</Label><Input type="datetime-local" id="StartTimeCustomerTime" value={formData.StartTimeCustomerTime} onChange={handleInputChange} /></div>
               <div><Label>End Time</Label><Input type="datetime-local" id="EndTimeCustomerTime" value={formData.EndTimeCustomerTime} onChange={handleInputChange} /></div>
               <div><Label>Estimated Arrival</Label><Input type="datetime-local" id="EstimatedArrivalTimeCustomerTime" value={formData.EstimatedArrivalTimeCustomerTime} onChange={handleInputChange} /></div>
@@ -6954,9 +6954,9 @@ export function BookingDetailsAdd({ onUpdate }) {
           </div>
 
           {/* User Time */}
-          <div className="md:col-span-2 border-t pt-2">
-            <p className="font-semibold mb-1">User Time</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="pt-2 border-t md:col-span-2">
+            <p className="mb-1 font-semibold">User Time</p>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div><Label>Start Time</Label><Input type="datetime-local" id="StartTimeUserTime" value={formData.StartTimeUserTime} onChange={handleInputChange} /></div>
               <div><Label>End Time</Label><Input type="datetime-local" id="EndTimeUserTime" value={formData.EndTimeUserTime} onChange={handleInputChange} /></div>
               <div><Label>Estimated Arrival</Label><Input type="datetime-local" id="EstimatedArrivalTimeUserTime" value={formData.EstimatedArrivalTimeUserTime} onChange={handleInputChange} /></div>
@@ -7117,7 +7117,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
 
         {/* Customer Time Section */}
         <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">Customer Time</h3>
+          <h3 className="mb-2 text-lg font-semibold">Customer Time</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="StartTimeCustomerTime">Start Time</label>
@@ -7140,7 +7140,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
 
         {/* User Time Section */}
         <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">User Time</h3>
+          <h3 className="mb-2 text-lg font-semibold">User Time</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="StartTimeUserTime">Start Time</label>
@@ -7165,7 +7165,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 mt-6">
           <div>
             <label htmlFor="ChangedBy">Changed By (User ID)</label>
             <Input id="ChangedBy" type="number" value={form.ChangedBy} onChange={handleChange} />
@@ -7301,7 +7301,7 @@ export function OTCAdd() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm mb-4 ml-2">Add OTC Code</Button>
+        <Button variant="outline" className="mb-4 ml-2 rounded-sm h-11">Add OTC Code</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -7389,7 +7389,7 @@ export function CrsAdd() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm mb-4 ml-2">Add Case Resolution</Button>
+        <Button variant="outline" className="mb-4 ml-2 rounded-sm h-11">Add Case Resolution</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -7432,5 +7432,280 @@ export function CrsAdd() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+
+export function FailureAdd () {
+  const [formDataFailure, setFormDataFailure] = useState({
+   Name: '',	
+   Description: '',
+   })
+   
+   // Make Handler ProductType
+   const handlerInputFailure = (e) => {
+     const { id, value } = e.target
+     setFormDataFailure(prevState => ({
+       ...prevState,
+       [id]:value
+     }));
+   };
+
+   // Handler Submit
+   const handlerFailure = async () => {
+     const { 
+       FailureId, Name, Description
+     } = formDataFailure;
+   
+     if ( !Name ) {
+       Swal.fire({
+         title: "Incomplete Data",
+         text: "Please fill in all fields before submitting.",
+         icon: "warning",
+         timer: 1500,
+         timerProgressBar: true,
+         showConfirmButton: false,
+         allowEscapeKey: false,
+       });
+       return;
+     }  
+   
+     try {
+       const response = await ApiCustomer.post("/api/failure", formDataFailure);
+       console.log("Success:", response.data);
+   
+       Swal.fire({
+         icon: 'success',
+         title: 'Berhasil!',
+         text: 'Failure berhasil disimpan.',
+         timer: 1200,
+         timerProgressBar: true,
+         showConfirmButton: false,
+         allowEscapeKey: false,
+       }).then(() => {
+         window.location.reload();
+       });
+
+     } catch (err) {
+       console.error("Error saving Failure", err);
+   
+       Swal.fire({
+         title: "Error!",
+         text: "Failed to save Failure. Please try again.",
+         icon: "error",
+         timer: 1200,
+         timerProgressBar: true,
+         showConfirmButton: false,
+         allowEscapeKey: false,
+       });
+     }
+   };
+ return (
+   <Dialog>
+     <DialogTrigger asChild>
+       <Button variant="outline" className="ml-2 rounded-sm h-11"> Failure Add</Button>
+     </DialogTrigger>
+     <DialogContent className="h-[300px] overflow-y-auto">
+       <DialogHeader>
+         <DialogTitle>Add Failure Information</DialogTitle>
+         <DialogDescription>
+           Add the Failure Fields marked with * are required.
+         </DialogDescription>
+       </DialogHeader>
+       <div className="space-y-2">
+       <Label>Name</Label>
+       <Input type="text" id="Name" className="p-2" value={formDataFailure.Name} onChange={handlerInputFailure} />
+
+       <Label>Description</Label>
+       <Input type="text" id="Description" className="p-2" value={formDataFailure.Description} onChange={handlerInputFailure} />
+       </div>
+       <DialogFooter>
+         <Button onClick={handlerFailure}>Add</Button>
+       </DialogFooter>
+     </DialogContent>
+   </Dialog>
+ )
+};
+
+export function FailureEdit({ FailureId, onUpdate }) {
+  const [formData, setFormData] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
+
+  const defaultFormData = {
+    FailureId: "",
+    Name: "",
+    Description: ""
+  };
+
+  const fetchFailure = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/failure/${FailureId}`);
+      setFormData(res.data.data || defaultFormData);
+    } catch (e) {
+      console.error("Fetch failed", e);
+    }
+  };
+
+  const handleChange = (field) => (e) => {
+    const val = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    setFormData((prev) => ({ ...prev, [field]: val }));
+  };
+
+  const handleUpdate = async () => {
+    const { Name, Description } = formData;
+
+    if (!Name) {
+      return Swal.fire({
+        icon: "warning",
+        text: "Lengkapi semua field wajib.",
+        timer: 1200,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+    }
+
+    const updatedData = { Name, Description };
+
+    try {
+      await ApiCustomer.patch(`/api/failure/${FailureId}`, updatedData);
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Data diperbarui.",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        onUpdate();
+        setIsOpen(false);
+      });
+    } catch (e) {
+      console.error(e);
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Perbaruan gagal!",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (FailureId && isOpen) fetchFailure();
+    else if (!isOpen) setFormData(defaultFormData);
+  }, [isOpen]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="h-[300px] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Failure</DialogTitle>
+          <DialogDescription>Update data Failure. (*) wajib diisi.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {[{ id: "FailureId", label: "Failure Id", type: "text", required: true, readonly: true },
+            { id: "Name", label: "Name", type: "text", required: true },
+            { id: "Description", label: "Description", type: "text" }].map(({ id, label, type, required, readonly }) => (
+            <div key={id}>
+              <Label htmlFor={id}>
+                {label} {required && <span className="text-red-500">*</span>}
+              </Label>
+              <Input
+                type={type}
+                id={id}
+                value={formData[id] || ""}
+                onChange={handleChange(id)}
+                readOnly={readonly}
+              />
+            </div>
+          ))}
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={handleUpdate}>Simpan</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function FailureDelete({ FailureId, isModalOpen, setIsModalOpen, onUpdate }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Failure ini akan dihapus dan perubahan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/failure/${FailureId}`);
+  
+        if (response.status === 409 || response.data.success === false) {
+          // 🚨 Restriction triggered - Show alert message
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || "Failure ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Failure berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.reload(); // Memuat ulang halaman
+          if (onUpdate) {
+            onUpdate();
+          }
+        });
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          // 🚨 Handle 409 Conflict error from backend
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data.message || "Failure ini tidak bisa dihapus karena memiliki relasi.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus Failure. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
+    }
+  };
+  
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
   );
 }

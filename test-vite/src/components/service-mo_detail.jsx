@@ -69,7 +69,10 @@ export const ServiceMoDetail = () => {
     mainComponent: '',
     gratisFlag: false,
     failureId: null,
-    atpStatus: ''
+    serialNumber: '',
+    removedPartNumber: '',
+    removedSerialNumber: '',
+    removedPartDescription: '' 
   })
     
   const fetchMoLineItems = async () => {
@@ -104,8 +107,12 @@ export const ServiceMoDetail = () => {
         offeredPartDescription: data.OfferedPartDescription || '',
         mainComponent: data.MainComponent || '',
         gratisFlag: data.GratisFlag || false,
-        // failureId: data.FailureId || null,
-        atpStatus: data.ATPStatus || ''
+        failureId: data.FailureId || null,
+        atpStatus: data.ATPStatus || '',
+        serialNumber: data.SerialNumber || '',
+        removedPartNumber: data.RemovedPartNumber || '',
+        removedSerialNumber: data.RemovedSerialNumber || '',
+        removedPartDescription: data.RemovedPartDescription || ''
       });
   
     } catch (err) {
@@ -150,8 +157,7 @@ export const ServiceMoDetail = () => {
           This material order line item is <strong>read-only</strong> because it is <strong>Closed</strong>.
         </div>
       )}
-      <TabsServiceMOLineItems MOLineDetails={MO}/
-      >
+      <TabsServiceMOLineItems MOLineDetails={MODetailInput} />
     <Card className="mt-2 rounded-none">
 
       <CardContent className={'p-0'}>
@@ -359,9 +365,6 @@ export const ServiceMoDetail = () => {
                   <span className="ml-51.5">{MODetailInput.atpStatus}</span>
                 </div>
                 
-                <div className="flex font-bold">
-                  <Button onClick={handleUpdate}>Save</Button>
-                </div>
               </CardContent>
             </Card>
 
@@ -401,7 +404,14 @@ export const ServiceMoDetail = () => {
 
                 <div className="flex font-bold">
                   <span className="ml-7">Serial Number </span>
-                  <span className="ml-42">...</span>
+                  {/* <span className="ml-42">...</span> */}
+                  <input 
+                  type="text" 
+                  className="ml-42"
+                  name="serialNumber"
+                  value={MODetailInput.serialNumber}
+                  onChange={handleChange}
+                  placeholder="---" />
                 </div>
 
                 <div className="flex font-bold">
@@ -428,19 +438,37 @@ export const ServiceMoDetail = () => {
                 <div className="flex font-bold">
                   <span className="ml-7">Removed Part Number
                   </span>
-                  <span className="ml-43">...</span>
+                  {/* <span className="ml-43">...</span> */}                  
+                  <input type="text" 
+                  className="ml-43"
+                  name="removedPartNumber"
+                  value={MODetailInput.removedPartNumber}
+                  onChange={handleChange}
+                  placeholder="---" />
                 </div>
 
                 <div className="flex font-bold">
                   <span className="ml-7">Removed Serial Number
                   </span>
-                  <span className="ml-41">...</span>
+                  {/* <span className="ml-41">...</span> */}                  
+                  <input type="text" 
+                  className="ml-41"
+                  name="removedSerialNumber"
+                  value={MODetailInput.removedSerialNumber}
+                  onChange={handleChange}
+                  placeholder="---" />
                 </div>
 
                 <div className="flex font-bold">
                   <span className="ml-7">Removed Part Desc
                   </span>
-                  <span className="ml-50">...</span>
+                  {/* <span className="ml-50">...</span> */}
+                  <input type="text" 
+                  className="ml-50"
+                  name="removedPartDescription"
+                  value={MODetailInput.removedPartDescription}
+                  onChange={handleChange}
+                  placeholder="---" />
                 </div>
               </CardContent>
             </Card>

@@ -154,7 +154,11 @@ const data = {
         {
           title: "Case Resolution",
           url: "/master/CrsTable",
-        }, 
+        },
+        {
+          title: "Failure Code",
+          url: "/master/Failure",
+        },
       ],
     },
     {
