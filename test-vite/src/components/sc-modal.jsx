@@ -45,6 +45,9 @@ import {
    SelectTrigger,
    SelectValue,
   } from '@/components/ui/select'
+
+  import { Textarea } from "./ui/textarea";
+  
  import { SnInput } from "./sn-input";
 
 import { Pencil, Trash } from "lucide-react";

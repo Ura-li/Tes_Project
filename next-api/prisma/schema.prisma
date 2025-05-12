@@ -223,7 +223,7 @@ model materialorderlineitems {
   FunctionalEquivalence      String?                     @db.VarChar(100)
   MediaHandlingPart          String?                     @db.VarChar(100)
   PickPackInstructions       String?                     @db.Text
-  CollectionInstructions     CollectionInstructionType?  // Enum di bawah
+  CollectionInstructions     CollectionInstructionType?  @default(None)
   CustomerResponse           String?                     @db.Text
   RejectedReason             String?                     @db.Text
   OtherReason                String?                     @db.Text

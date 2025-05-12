@@ -47,6 +47,7 @@ export const ServiceMoDetail = () => {
   const [moLineItems, setMoLineItems] = useState([])
 
   const [MODetailInput, setMODetailInput] = useState({
+    MOID: '',
     moOrderName: '',
     salesOrderNumber: '',
     lineNumber: '',
@@ -84,6 +85,7 @@ export const ServiceMoDetail = () => {
   
       // Isi state MODetailInput berdasarkan data yang diambil
       setMODetailInput({
+        MOID: data.MOID,
         moOrderName: data
           ? `${data.MOID} - ${data.LineNumber}`
           : null,
@@ -157,7 +159,7 @@ export const ServiceMoDetail = () => {
           This material order line item is <strong>read-only</strong> because it is <strong>Closed</strong>.
         </div>
       )}
-      <TabsServiceMOLineItems MOLineDetails={MODetailInput} />
+      <TabsServiceMOLineItems MOLineDetails={MODetailInput} LineItemID={lineItemID}/>
     <Card className="mt-2 rounded-none">
 
       <CardContent className={'p-0'}>
@@ -266,7 +268,7 @@ export const ServiceMoDetail = () => {
                     onChange={handleChange}
                   >
                     <option value="None">None</option>
-                    <option value="PickUp">Pick Up</option>
+                    <option value="Pickup">Pick Up</option>
                     <option value="DropOff">Drop Off</option>
                     <option value="ThirdParty">Third Party</option>
                   </select>
