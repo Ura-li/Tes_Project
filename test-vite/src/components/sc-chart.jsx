@@ -1,7 +1,7 @@
 "use client"
 import {useState, useMemo, useEffect, } from "react"
 import { Archive, AreaChartIcon, BarChart3, TrendingUp } from "lucide-react"
-import { Label, Pie, PieChart, Bar, BarChart, Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import { Label, Pie, PieChart, Bar, BarChart, Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import {
   Card,
@@ -21,27 +21,31 @@ import ApiCustomer from "@/api"
 
 
 const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-  { month: "July", desktop: 214, mobile: 140 },
-  { month: "August", desktop: 114, mobile: 140 },
-  { month: "September", desktop: 214, mobile: 140 },
-  { month: "October", desktop: 134, mobile: 140 },
-  { month: "November", desktop: 164, mobile: 140 },
-  { month: "December", desktop: 144, mobile: 140 },
+  { month: "January", open: 186, closed: 80 },
+  { month: "February", open: 305, closed: 200 },
+  { month: "March", open: 237, closed: 120 },
+  { month: "April", open: 73, closed: 190 },
+  { month: "May", open: 209, closed: 130 },
+  { month: "June", open: 214, closed: 140 },
+  { month: "July", open: 214, closed: 140 },
+  { month: "August", open: 114, closed: 140 },
+  { month: "September", open: 214, closed: 140 },
+  { month: "October", open: 134, closed: 140 },
+  { month: "November", open: 164, closed: 140 },
+  { month: "December", open: 144, closed: 140 },
 ]
 
 const chartConfig = {
-  desktop: {
+  open: {
     label: "open",
     color: "oklch(0.65 0.1352 218.54)",
   },
-  mobile: {
+  closed: {
     label: "closed",
+    color: "oklch(0.65 0.1845 292.66)",
+  },
+  inActive: {
+    label: "inActive",
     color: "oklch(0.65 0.1845 292.66)",
   },
 } 
@@ -59,7 +63,7 @@ export function ChartArea({data}) {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <AreaChart
+          <AreaChart 
             accessibilityLayer
             data={data}
             margin={{
@@ -75,6 +79,7 @@ export function ChartArea({data}) {
               tickMargin={8}
               tickFormatter={(value) => value.slice(0, 3)}
             />
+            <YAxis domain={[0, 3]} hide />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent indicator="dot" />}
@@ -82,17 +87,25 @@ export function ChartArea({data}) {
             <Area
               dataKey="closed"
               type="natural"
-              fill="var(--color-mobile)"
+              fill="var(--chart-close)"
               fillOpacity={0.4}
-              stroke="var(--color-mobile)"
+              stroke="var(--chart-close)"
               stackId="a"
             />
             <Area
               dataKey="open"
               type="natural"
-              fill="var(--color-desktop)"
+              fill="var(--chart-open)"
               fillOpacity={0.4}
-              stroke="var(--color-desktop)"
+              stroke="var(--chart-open)"
+              stackId="a"
+            />
+            <Area
+              dataKey="inActive"
+              type="natural"
+              fill="var(--chart-inactive)"
+              fillOpacity={0.4}
+              stroke="var(--chart-inactive)"
               stackId="a"
             />
           </AreaChart>
@@ -139,8 +152,9 @@ console.log("tes",chartData);
               cursor={false}
               content={<ChartTooltipContent indicator="dashed" />}
             />
-            <Bar dataKey="open" fill="var(--color-desktop)" radius={4} />
-            <Bar dataKey="closed" fill="var(--color-mobile)" radius={4} />
+            <Bar dataKey="open" fill="var(--chart-open)" radius={4} />
+            <Bar dataKey="closed" fill="var(--chart-close)" radius={4} />
+            <Bar dataKey="inActive" fill="var(--chart-inactive)" radius={4} />
           </BarChart>
         </ChartContainer>
       </CardContent>
@@ -177,9 +191,9 @@ export function ChartPie() {
   },[]);
   
   const chartData2 = [
-    { browser: "Close", visitors: caseData.open, fill: "oklch(0.7 0.1722 30.07)" },
-    { browser: "Open", visitors: caseData.closed, fill: "oklch(0.7 0.1524 133.84)" },
-    // { browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
+    { browser: "Close", visitors: caseData.closed, fill: "var(--chart-close)" },
+    { browser: "Open", visitors: caseData.open, fill: "var(--chart-open)" },
+    { browser: "InActive", visitors: caseData.inActive, fill: "var(--chart-inactive)" },
     // { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
     // { browser: "other", visitors: 190, fill: "var(--color-other)" },
   ]
@@ -196,10 +210,10 @@ export function ChartPie() {
       label: "Safari",
       color: "hsl(var(--chart-2))",
     },
-    // firefox: {
-    //   label: "Firefox",
-    //   color: "hsl(var(--chart-3))",
-    // },
+    firefox: {
+      label: "Firefox",
+      color: "hsl(var(--chart-3))",
+    },
     // edge: {
     //   label: "Edge",
     //   color: "hsl(var(--chart-4))",
