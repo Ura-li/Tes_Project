@@ -421,8 +421,8 @@ export function DialogCompanyBtn({
       }`}
     >
       <TableCell className={'font-medium whitespace-break-spaces'}>{company.Company}</TableCell>
-      <TableCell>{company.AddressLine1}</TableCell>
-      <TableCell>{company.City}</TableCell>
+      <TableCell className={'whitespace-break-spaces'}>{company.AddressLine1}</TableCell>
+      <TableCell className={'whitespace-break-spaces'}>{company.City}</TableCell>
       <TableCell>{company.StateProvince}</TableCell>
       <TableCell>{company.Country}</TableCell>
       <TableCell>{company.ZipPostalCode}</TableCell>

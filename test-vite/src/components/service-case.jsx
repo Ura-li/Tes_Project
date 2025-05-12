@@ -315,7 +315,7 @@ export const TabsService = ({
       label: "Save & Close",
       onClick: () => saveAndCloseCase(),
     },
-    { icon: RotateCw, label: "Refresh", onClick: () => alert("not now") },
+    { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
     { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
     { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
@@ -816,7 +816,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
       label: "Save & Close",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
     },
-    { icon: StepBack, label: "Cancl", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Cancel", onClick: () => alert("not now") },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
     { icon: RotateCw, label: "Assign", onClick: () => alert("not now") },
     {
