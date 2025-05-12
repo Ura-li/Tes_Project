@@ -46,7 +46,7 @@ import {
    SelectValue,
   } from '@/components/ui/select'
  import { SnInput } from "./sn-input";
-
+import { Textarea } from "./ui/textarea";
 import { Pencil, Trash } from "lucide-react";
 //import API
 import ApiCustomer from "@/api";
@@ -206,7 +206,7 @@ export function BtnModalContact({
   //set modal state 
 
   console.log("Company Data in Modal Contact : ",companyData)
-  const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);
+  // const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);`
   
   const isControlled = externalOpen !== undefined;
   const [internalOpen, setInternalOpen] = useState(false);
@@ -326,7 +326,9 @@ export function BtnModalContact({
       }
   
       // ✅ Tutup modal form input dulu
-      setIsModalContactSearchInput(false);
+      if (!isControlled) {
+  setInternalOpen(false);
+}
   
       // ✅ Tunggu sebentar biar modal benar-benar hilang (hindari konflik z-index)
       setTimeout(async () => {
