@@ -90,6 +90,7 @@ export const Case = () => {
   return (
     <TabsService 
       caseDetails={caseDetails} 
+      setCaseDetails={setCaseDetails}
       caseNote={caseNote}
       caseNoteFormData={caseNoteFormData}
       setCaseNoteFormData={setCaseNoteFormData}

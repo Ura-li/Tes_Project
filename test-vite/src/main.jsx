@@ -38,7 +38,7 @@ import { ResourceAccountTable } from './master_table';
 import { GateKeepingRouting } from './components/GateKeepingRouting';
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  <StrictMode> 
     <BrowserRouter>
       {/* <ModalContextProvider> */}
         <Routes>
@@ -85,5 +85,5 @@ createRoot(document.getElementById('root')).render(
         </Routes>
       {/* </ModalContextProvider> */}
   </BrowserRouter>
-  </StrictMode>,
+  </StrictMode>, 
 )

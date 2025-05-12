@@ -187,6 +187,7 @@ const Search_case = () => {
 
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
+  const [citiesContact, setCitiesContact] = useState([]);
 
   // const [formDataSiteAccount, setFormDataSiteAccount] = useState({
   //   Province: "",
@@ -393,6 +394,7 @@ const Search_case = () => {
         .catch(console.error);
     }
   }, [formDataSiteAccount.StateProvince]);
+  
 
   const handleClearAllAcconunt = () => {
     setFormDataSiteAccount({
@@ -508,6 +510,15 @@ const Search_case = () => {
     });
   }
 
+  useEffect(() => {
+    const selectedProvince = provinces.find((p) => p.name === formDataContact.StateProvince);
+    if (selectedProvince) {
+      fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${selectedProvince.id}.json`)
+        .then((res) => res.json())
+        .then(setCitiesContact)
+        .catch(console.error);
+    }
+  }, [formDataContact.StateProvince]);
   const handlerContactSubmit = async () => {
   console.log(formDataContact);
 
@@ -1170,15 +1181,26 @@ const Search_case = () => {
                     <Label htmlFor="PreferredLanguage">
                       Preferred Language
                     </Label>
-                    <SelectBar1
+                    <SelectBar
                       id="Salutation"
                       value={formDataContact.Salutation}
                       onChange={handlerInputContactChange}
+                      placeholder="Select Salutation"
+                      options={[
+                        { id: "Mr. ", name: "Mr." },
+                        { id: "Mrs. ", name: "Mrs." },
+                      ]}
                     />
-                    <SelectBar2
+                    <SelectBar
                       id="PreferredLanguage"
                       value={formDataContact.PreferredLanguage}
                       onChange={handlerInputContactChange}
+                      placeholder="Select Preferred Language"
+                      options={[
+                        { id: "English", name: "English" },
+                        { id: "Spanish", name: "Spanish" },
+                        { id: "Bahasa Indonesia", name: "Bahasa Indonesia" },
+                      ]}
                     />
                   </div>
                   <div className="space-y-0.5">
@@ -1331,13 +1353,13 @@ const Search_case = () => {
                       
                     <span className='text-red-500'>*</span>
                     </Label>
-                    <Input
+                    <SelectBar
                       id="City"
                       type="text"
                       className="border-b-black p-1"
                       value={formDataContact.City}
                       onChange={handlerInputContactChange}
-                      options={cities}
+                      options={citiesContact}
                       placeholder="Select a City"
                     />
                   </div>
@@ -1346,7 +1368,7 @@ const Search_case = () => {
                       
                     <span className='text-red-500'>*</span>
                     </Label>
-                    <Input
+                    <SelectBar
                       id="StateProvince"
                       type="text"
                       className="border-b-black p-1"

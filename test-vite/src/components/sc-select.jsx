@@ -1,4 +1,4 @@
-import React from 'react'
+// import {useState, useEffect, useMemo} from 'react'
 
 import {
     Select,
@@ -9,26 +9,119 @@ import {
     SelectTrigger,
     SelectValue,
   } from "@/components/ui/select"
+import { Archive, X } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import React, { useEffect, useRef, useState } from "react";
+
+export const SearchCommandBlock = ({
+  options = [],
+  value,
+  onChange,
+  placeholder = "Search...",
+  renderLabel = (opt) => opt.label || opt,
+  getValue = (opt) => opt.value || opt,
+}) => {
+  const [open, setOpen] = useState(false);
+  const [positionAbove, setPositionAbove] = useState(false);
+  const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const selectedOption = options.find((opt) => getValue(opt) === value);
+
+useEffect(() => {
+    if (!open || !inputRef.current) return;
+
+    const inputRect = inputRef.current.getBoundingClientRect();
+    const dropdownHeight = 240; // max height (same as tailwind: max-h-60)
+    const spaceBelow = window.innerHeight - inputRect.bottom;
+    const spaceAbove = inputRect.top;
+
+    if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+      setPositionAbove(true);
+    } else {
+      setPositionAbove(false);
+    }
+  }, [open]);
+
+  const handleBlur = (e) => {
+  setTimeout(() => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(document.activeElement)
+    ) {
+      setOpen(false);
+    }
+  }, 150);
+};
+
+  return (
+    <div className="relative w-full">
+      {selectedOption ? (
+        <div className="flex items-center justify-start px-3 py-2 border rounded-md gap-2">
+          <Archive color="blue"></Archive>
+          <span className="text-md text-blue-500 font-black">{renderLabel(selectedOption)}</span>
+          <button
+            onClick={() => onChange(null)}
+            className="ml-2  hover:text-red-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <Command className="w-full">
+          <CommandInput
+          ref={inputRef}
+            placeholder={placeholder}
+            onFocus={() => setOpen(true)}
+            onBlur={handleBlur}
+          />
+          {open && (
+            <CommandList 
+            ref={dropdownRef}
+            className={`absolute z-50 w-full border rounded-md bg-white shadow-lg max-h-60 overflow-y-auto ${
+              positionAbove ? "bottom-full mb-2" : "top-full mt-2"
+            }`}
+            >
+              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandGroup>
+                {options.map((opt) => (
+                  <CommandItem
+                    key={getValue(opt)}
+                    onSelect={() => {
+                      onChange(getValue(opt));
+                      setOpen(false);
+                    }}
+                  >
+          <Archive></Archive>
+                    {renderLabel(opt)}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          )}
+        </Command>
+      )}
+    </div>
+  );
+};
    
   export function SelectBar({ id, onChange, value, options, placeholder }) {
-    console.log("SelectBar value:", value);
-    const handleValueChange = (selectedValue) => {
-      // Avoid looping by only firing if value actually changes
-      if (selectedValue !== value) {
-        onChange({ target: { id, value: selectedValue } });
-      }
-    };
-
     return (
-      <Select value={value} onValueChange={handleValueChange}>
+      <Select value={value} onValueChange={(val) => onChange({ target: { id, value: val } })}>
         <SelectTrigger className="w-full border-black">
-          <SelectValue placeholder={placeholder} />
+          <SelectValue placeholder={placeholder || "Select an option"} />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
+            {options.map((opt) => (
+              <SelectItem key={opt.id} value={opt.name}>
+                {opt.name}
               </SelectItem>
             ))}
           </SelectGroup>
@@ -36,6 +129,7 @@ import {
       </Select>
     );
   }
+
 
 
 
@@ -82,9 +176,12 @@ import {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
+            {/* { id: "Depot Repair", name: "Depot Repair" },
+                { id: "Onsite", name: "Onsite" },
+                { id: "Bench", name: "Bench" }, */}
             <SelectItem value="Depot Repair">Depot Repair</SelectItem>
-            <SelectItem value="Item2">Item 2</SelectItem>
-            <SelectItem value="Item3">Item 3</SelectItem>
+            <SelectItem value="Onsite">Onsite</SelectItem>
+            <SelectItem value="Bench">Bench</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>

@@ -16,7 +16,8 @@
     "jsonwebtoken": "^9.0.2",
     "next": "^15.3.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "xlsx":  "npm:@e965/xlsx@0.20.3"
   },
   "devDependencies": {
     "prisma": "^6.4.1"
