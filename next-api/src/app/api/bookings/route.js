@@ -125,15 +125,15 @@ export async function POST(request) {
       // 3. Update SystemStatus pada workorder
       await tx.workorder.update({
         where: { WOID: woid },
-        data: { SystemStatus: 'OPEN_COMPLETED' }, // enum value
+        data: { SystemStatus: 'OPEN_SCHEDULED' }, // enum value
       });
 
-      const workOrderupdate = await tx.workorder.update({
-        where: { WOID: woid },
-        data: {
-            WorkOrderStatus: "OPEN_SCHEDULED"
-        }
-      })
+      // const workOrderupdate = await tx.workorder.update({
+      //   where: { WOID: woid },
+      //   data: {
+      //       WorkOrderStatus: "OPEN_SCHEDULED"
+      //   }
+      // })
 
       return { BookingId: booking.BookingId };
     });
