@@ -484,7 +484,7 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
   </>
 );
 
-export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
+export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
   const navigate = useNavigate();
   const WOID = workOrders.WOID;
   const handleSave = async () => {
@@ -504,8 +504,12 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
        * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
        */
 
-      //SLA
+      // const resGeneralWO = await ApiCustomer.patch(`/api/work-order/`)
       const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
+        //WO GENERAL
+        ShipmentCountry: WOGeneral.ShipmentCountry || undefined,
+
+        //SLA
         SLAJeopardy: SLA.slaJeopardy || undefined,
         DueDateCustomer: SLA.dueDateCustomer || undefined,
         CoverageWindow: SLA.coverageWindow || undefined,
@@ -2381,7 +2385,12 @@ const [endDate, setEndDate] = useState(null);
               </CardHeader>
               <CardContent className="grid items-center grid-cols-4 gap-10">
                 <CaseField label="Shipment Country">
-                  <Input variant="invisible" placeholder="---" />
+                    <SearchCommandBlock 
+                      variant="invisible" 
+                      value={workOrders[0]?.ShipmentCountry ||"---"}
+                      readOnly
+                      options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"] }
+                    />
                 </CaseField>
                 <CaseField label="Exception Order">
                   <Input variant="invisible" placeholder="---" />
