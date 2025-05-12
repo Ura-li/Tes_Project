@@ -1,7 +1,7 @@
 "use client"
 import {useState, useMemo, useEffect, } from "react"
 import { Archive, AreaChartIcon, BarChart3, TrendingUp } from "lucide-react"
-import { Label, Pie, PieChart, Bar, BarChart, Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Label, Pie, PieChart, Bar, BarChart, Area, AreaChart, CartesianGrid, XAxis, YAxis, } from "recharts"
 
 import {
   Card,
@@ -69,6 +69,7 @@ export function ChartArea({data}) {
             margin={{
               left: 12,
               right: 12,
+              // bottom:12,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -76,8 +77,9 @@ export function ChartArea({data}) {
               dataKey="month"
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
+              tickMargin={18}
               tickFormatter={(value) => value.slice(0, 3)}
+              height={'50'}
             />
             <YAxis domain={[0, 3]} hide />
             <ChartTooltip
@@ -108,6 +110,8 @@ export function ChartArea({data}) {
               stroke="var(--chart-inactive)"
               stackId="a"
             />
+          <ChartLegend ></ChartLegend>
+
           </AreaChart>
         </ChartContainer>
       </CardContent>
@@ -155,6 +159,7 @@ console.log("tes",chartData);
             <Bar dataKey="open" fill="var(--chart-open)" radius={4} />
             <Bar dataKey="closed" fill="var(--chart-close)" radius={4} />
             <Bar dataKey="inActive" fill="var(--chart-inactive)" radius={4} />
+          <ChartLegend ></ChartLegend>
           </BarChart>
         </ChartContainer>
       </CardContent>
@@ -236,7 +241,7 @@ export function ChartPie() {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig2}
-          className="mx-auto aspect-square max-h-[205px]"
+          className=""
         >
           <PieChart>
             <ChartTooltip
