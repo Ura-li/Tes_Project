@@ -35,6 +35,7 @@ import { cn } from "./lib/utils";
 
 import { ExportExcel } from "./components/Export-Excel";
 
+import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectValue } from "./components/ui/select";
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -363,12 +364,15 @@ export const Case_table = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [caseData, setCaseData] = useState([]);
-  const [openClose, setOpenClose] = useState(true)
-
+  const [openClose, setOpenClose] = useState('Open')
+  const state = ['Open','Close','InActive']
+  console.log("casestate",openClose);
   const fetchCaseDataTable = async () => {
-    const newState = !openClose;
-    setOpenClose(newState);
-    const url = openClose ? "/api/case-information?CaseStatus=Open" : "/api/case-information?CaseStatus=Close";
+    const baseurl = `/api/case-information`;
+    const url =
+      openClose === 'All'
+      ? baseurl
+      : `/api/case-information?CaseStatus=${openClose}`;
     Swal.fire({
       title: "Memuat Data Case....",
       text: "Mohon Tunggu Sebentar",
@@ -410,7 +414,7 @@ export const Case_table = () => {
   // 🔹 Load data when component mounts
   useEffect(() => {
     fetchCaseDataTable();
-  }, []);
+  }, [openClose]);
 
   // Filter data berdasarkan pencarian
   const filteredCaseTable = caseData.filter((item) =>
@@ -450,7 +454,22 @@ export const Case_table = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-       <Button variant={'ghost'} className={' self-end'} onClick={fetchCaseDataTable}>{openClose ? "Toggle Open Case Status" : "Toggle Close Case Status"}</Button>
+      <div className="flex items-center gap-3">
+        <Label htmlFor='status' className={''}>Toggle Status Of Case :</Label>
+        <Select  defaultValue='Open' value={openClose} onValueChange={setOpenClose}>
+          <SelectTrigger id='status'>
+            <SelectValue>{openClose}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value='Open'>Open Case Status</SelectItem>
+              <SelectItem value='Close'>Close Case Status</SelectItem>
+              <SelectItem value='InActive'>InActive Case Status</SelectItem>
+              <SelectItem value='All'>ALL Case Status</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
       {/* 🔹 Loading & Error Messages */}
       {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -498,7 +517,7 @@ export const Case_table = () => {
                 <td className="border p-2">{caseItem.CreatedName}</td>
                 <td className="border p-2">{caseItem.Owner}</td>
                 <td className="border p-2">{caseItem.WorkGroup}</td>
-                <td className={cn("bg-emerald-300",caseItem.CaseStatus === "Close" && "bg-amber-300" )}>{caseItem.CaseStatus}</td>
+                <td className={cn("bg-emerald-300",caseItem.CaseStatus === "Close" ? "bg-red-300" : caseItem.CaseStatus === "InActive" ? "bg-sky-300" : "" )}>{caseItem.CaseStatus}</td>
               </tr>
             ))}
           </tbody>

@@ -38,6 +38,9 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --chart-open: oklch(0.7 0.1524 133.84);
+  --chart-close: oklch(0.7 0.1722 30.07);
+  --chart-inactive: oklch(0.7 0.1302 224.89);
 }
 
 .dark {
