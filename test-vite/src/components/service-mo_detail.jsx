@@ -150,7 +150,7 @@ export const ServiceMoDetail = () => {
           This material order line item is <strong>read-only</strong> because it is <strong>Closed</strong>.
         </div>
       )}
-      <TabsServiceMOLineItems MOLineDetails={MO}/
+      <TabsServiceMOLineItems MOLineDetails={moLineItems.MOID}/
       >
     <Card className="mt-2 rounded-none">
 
