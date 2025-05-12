@@ -77,63 +77,16 @@ import Swal from "sweetalert2";
 
 import { BtnModalsServiceCatalog } from './sc-modal'
 import DatePicker from './date-picker'
-import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "@/components/ui/command"
 
 
-export const SearchCommandBlock = ({
-  options = [],
-  value,
-  onChange,
-  placeholder = "Search...",
-  renderLabel = (opt) => opt.label || opt,
-  getValue = (opt) => opt.value || opt,
-}) => {
-  
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="relative w-full">
-      <Command className="w-full">
-        <CommandInput
-          placeholder="Type a command or search..."
-          onFocus={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 150)} // delay to allow click
-        />
-        {open && (
-          <CommandList className="absolute z-50 mt-10 w-full border rounded-md bg-white shadow-lg max-h-60 overflow-y-auto">
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup>
-              {options.map((opt) => (
-                <CommandItem
-                  key={getValue(opt)}
-                  onSelect={() => {
-                    onChange(getValue(opt));
-                    setOpen(false);
-                  }}
-                >
-                  {renderLabel(opt)}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        )}
-      </Command>
-    </div>
-  );
-}
+import { SearchCommandBlock } from "./sc-select";
+
+
 
 
 export const TabsService = ({ 
-  caseDetails, 
+  caseDetails,
+  setCaseDetails, 
   caseNote,
   caseNoteFormData,
   setCaseNoteFormData
@@ -177,6 +130,9 @@ export const TabsService = ({
     customerRequestedCloseDate: "",
   });
 
+  const handleCaseDetails = (field) => (value) => {
+    setCaseDetails((prev) => ({ ...prev, [field]: value }));
+  }
   
 
   const handleCaseNoteChange = (key, value) => {
@@ -482,6 +438,7 @@ export const TabsService = ({
             setFormGtc={setGtcForm}
             onChangeGtc={handleGtcChange}
             onChange={handleCaseNoteChange}
+            handleCaseDetails={handleCaseDetails}
             caseNotes={caseNotes}
             setCaseNotes={setCaseNotes}
             selectedSymptom={selectedSymptom}
@@ -973,6 +930,7 @@ export const ServiceCase = ({
   onChange,
   caseNotes,
   setCaseNotes,
+  handleCaseDetails,
   selectedSymptom,
   setSelectedSymptom,
   formGtc,
@@ -1182,6 +1140,54 @@ export const ServiceCase = ({
       console.error("Failed to fetch OTC Code:", err);
     }
   }
+
+  const [caseTipe, setCaseTipe] = useState([
+    {
+      CaseType : "Administrative"
+    },
+    {
+      CaseType : "ASP/Reseller/GS1"
+    },
+    {
+      CaseType : "Call to Repair"
+    },
+    {
+      CaseType : "Complex T&M"
+    },
+    {
+      CaseType : "Depot Repair"
+    },
+    {
+      CaseType : "Electronic"
+    },
+    {
+      CaseType : "HW Delivery"
+    },
+    {
+      CaseType : "IMACD"
+    },
+    {
+      CaseType : "Internal Service"
+    },
+    {
+      CaseType : "Internal Support"
+    },
+    {
+      CaseType : "Proactive"
+    },
+    {
+      CaseType : "Remote Services"
+    },
+    {
+      CaseType : "Services (VAS)"
+    },
+    {
+      CaseType : "SW Delivery"
+    },
+    {
+      CaseType : "T&M"
+    },
+  ])
 
   const fetchCsr = async () => {
   try {
@@ -1433,7 +1439,7 @@ const [endDate, setEndDate] = useState(null);
             <Card className="flex-row">
               <CardContent className="grid gap-10 items-center grid-cols-6 p-3 ">
                 <CaseField label="Case ID" icon>
-                  <Input variant="invisible" value={caseDetails.CaseID} />
+                  <Input variant="invisible" value={caseDetails.CaseID} readOnly/>
                 </CaseField>
                 <CaseField label="Case Subject" span={3}>
                   <Input variant="invisible" value={caseDetails.CaseSubject} />
@@ -1768,32 +1774,32 @@ const [endDate, setEndDate] = useState(null);
                 </CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6 items-center">
-                <CaseField label="Case Entitlement" icon>
+              <CardContent className="grid gap-10 grid-cols-9 items-center">
+                <CaseField label="Case Entitlement" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Start Date" icon>
+                <CaseField label="Start Date" icon span={2}>
                   {" "}
                   <DatePicker
                     value={startDate}
                     onChange={setstartDate}
-                    readOnly
+                    // readOnly
                   ></DatePicker>{" "}
                 </CaseField>
-                <CaseField label="OTC Code" icon>
+                <CaseField label="OTC Code" icon span={2}>
                   <SearchCommandBlock
                     options={otcCode} 
                     value={entitlementStatus.OTCCode}
                     onChange={(value) => handleEntitlementStatus("OTCCode")(value)}
-                    placeholder="Select OTC Code"
+                    placeholder="---"
                     renderLabel={(opt) => `${opt.OTCCode} - ${opt.Description}`}
                     getValue={(opt) => opt.OTCCode}
                   />  
                 </CaseField>
-                <CaseField label="Entitlement Status" icon>
+                <CaseField label="Entitlement Status" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="End Date" icon>
+                <CaseField label="End Date" icon span={2}>
                   {" "}
                   <DatePicker
                     value={endDate}
@@ -1801,16 +1807,16 @@ const [endDate, setEndDate] = useState(null);
                     readOnly
                   ></DatePicker>
                 </CaseField>
-                <CaseField label="Entitlement Override" icon>
+                <CaseField label="Entitlement Override" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Selected Entitlement Offer" icon>
+                <CaseField label="Selected Entitlement Offer" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Days Left" icon>
+                <CaseField label="Days Left" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Authorizing Employee" icon>
+                <CaseField label="Authorizing Employee" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
               </CardContent>
