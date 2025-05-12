@@ -427,9 +427,9 @@ export function ServiceBooking ({BookingId , woid}) {
           </TabsList>
         </CardHeader>
 
-        <TabsContent value="book_info" className="columns-3 p-0 m-0 gap-2 space-y-2 ">
-          <Card className="break-inside-avoid h-full  ">
-            <CardContent className="h-full grid gap-x-10 gap-y-4 grid-cols-3 items-center">
+        <TabsContent value="book_info" className="gap-2 p-0 m-0 space-y-2 columns-3 ">
+          <Card className="h-full break-inside-avoid ">
+            <CardContent className="grid items-center h-full grid-cols-3 gap-x-10 gap-y-4">
               <CaseField label={"Name"} icon span={2}>
                 <Input
                   variant={"invisible"}
@@ -452,11 +452,11 @@ export function ServiceBooking ({BookingId , woid}) {
                   }}
                 />
                 {searchResultsResource.length > 0 && (
-                  <ul className="absolute bg-white border mt-1 w-full max-h-60 overflow-y-auto shadow-lg rounded z-10 transition-all duration-200">
+                  <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg max-h-60">
                     {searchResultsResource.map((res) => (
                       <li
                         key={res.ResourceId}
-                        className="p-2 hover:bg-gray-200 cursor-pointer"
+                        className="p-2 cursor-pointer hover:bg-gray-200"
                         onClick={() => {
                           setResourceName(res.Name);
                           setResourceId(res.ResourceId);
@@ -475,7 +475,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   </ul>
                 )}
               </CaseField>
-              <div className="ring-1 col-span-3 grid grid-cols-3 p-3">
+              <div className="grid grid-cols-3 col-span-3 p-3 ring-1">
                 <CaseField label={"Account"} icon span={2}>
                   <Input
                     variant={"invisible"}
@@ -486,11 +486,11 @@ export function ServiceBooking ({BookingId , woid}) {
                     }}
                   />
                   {searchResultsAccount.length > 0 && (
-                    <ul className="absolute bg-white border mt-1 w-full z-10">
+                    <ul className="absolute z-10 w-full mt-1 bg-white border">
                       {searchResultsAccount.map((acc) => (
                         <li
                           key={acc.id}
-                          className="p-2 hover:bg-gray-200 cursor-pointer"
+                          className="p-2 cursor-pointer hover:bg-gray-200"
                           onClick={() => {
                             setAccountName(acc.Name);
                             setAccountId(acc.ResourceAccountId);
@@ -518,11 +518,11 @@ export function ServiceBooking ({BookingId , woid}) {
                   }}
                 />
                 {searchResultsSubkTechnician.length > 0 && (
-                  <ul className="absolute bg-white border mt-1 w-full z-10">
+                  <ul className="absolute z-10 w-full mt-1 bg-white border">
                     {searchResultsSubkTechnician.map((tech) => (
                       <li
                         key={tech.SubkTechnicianId}
-                        className="p-2 hover:bg-gray-200 cursor-pointer"
+                        className="p-2 cursor-pointer hover:bg-gray-200"
                         onClick={() => {
                           setSubkTechnicianName(tech.Name);
                           setSubkTechnicianId(tech.SubkTechnicianId);
@@ -542,11 +542,11 @@ export function ServiceBooking ({BookingId , woid}) {
                   onChange={(e) => setSubkTechnicianId(e.target.value)}
                 />
                 {searchResultsSubkTechnicianLearner.length > 0 && (
-                  <ul className="absolute bg-white border mt-1 w-full z-10">
+                  <ul className="absolute z-10 w-full mt-1 bg-white border">
                     {searchResultsSubkTechnicianLearner.map((learn) => (
                       <li
                         key={learn.id}
-                        className="p-2 hover:bg-gray-200 cursor-pointer"
+                        className="p-2 cursor-pointer hover:bg-gray-200"
                         onClick={() => {
                           setSubkTechnicianLearnerName(learn.name);
                           setSubkTechnicianLearnerId(learn.id);
@@ -569,7 +569,7 @@ export function ServiceBooking ({BookingId , woid}) {
               <CaseField label={"Work Order"} icon span={2}>
                 <Input variant={"invisible"} value={workOrderNumber} readOnly />
               </CaseField>
-              <div className="ring-1 col-span-3 grid grid-cols-3 p-3 items-center">
+              <div className="grid items-center grid-cols-3 col-span-3 p-3 ring-1">
                 <CaseField
                   label={"Requested Date Time (costumer)"}
                   icon
@@ -657,12 +657,12 @@ export function ServiceBooking ({BookingId , woid}) {
 
           <Card className="break-inside-avoid h-fit ">
             <CardHeader>
-              <CardTitle className=" text-lg">
+              <CardTitle className="text-lg ">
                 Booking Dates in User Time
               </CardTitle>
               <hr />
             </CardHeader>
-            <CardContent className="grid gap-6 grid-cols-3">
+            <CardContent className="grid grid-cols-3 gap-6">
               <CaseField label={"Start Time"} span={2}>
                 <DatePicker
                   value={
@@ -720,7 +720,7 @@ export function ServiceBooking ({BookingId , woid}) {
 
           <Card className="break-inside-avoid h-fit ">
             <CardHeader>
-              <CardTitle className=" text-lg">Timestamp</CardTitle>
+              <CardTitle className="text-lg ">Timestamp</CardTitle>
               <hr />
             </CardHeader>
            
@@ -728,7 +728,7 @@ export function ServiceBooking ({BookingId , woid}) {
 
           <Card className="break-inside-avoid h-fit ">
             <CardHeader>
-              <CardTitle className=" text-lg">SLA Jeopardy</CardTitle>
+              <CardTitle className="text-lg ">SLA Jeopardy</CardTitle>
               <hr />
             </CardHeader>
             <CardContent className="grid grid-cols-3 gap-6">
@@ -752,12 +752,12 @@ export function ServiceBooking ({BookingId , woid}) {
 
           <Card className="break-inside-avoid h-fit ">
             <CardHeader>
-              <CardTitle className=" text-lg">
+              <CardTitle className="text-lg ">
                 Booking Dates in Customer Time Zone
               </CardTitle>
               <hr />
             </CardHeader>
-            <CardContent className="grid gap-6 grid-cols-3 items-center">
+            <CardContent className="grid items-center grid-cols-3 gap-6">
               <CaseField label={'Start Time (Customer)'} span={2}>
                 <DatePicker 
                   value={startTimeCustomerTime ? new Date(startTimeCustomerTime) : ""}
@@ -787,10 +787,10 @@ export function ServiceBooking ({BookingId , woid}) {
 
           <Card className="break-inside-avoid h-fit ">
             <CardHeader>
-              <CardTitle className=" text-lg">Total Duration</CardTitle>
+              <CardTitle className="text-lg ">Total Duration</CardTitle>
               <hr />
             </CardHeader>
-            <CardContent className="grid gap-5 grid-cols-3 items-center ">
+            <CardContent className="grid items-center grid-cols-3 gap-5 ">
               <CaseField label={'Total Duration'} span={2}>
                 <Input
                     type="number"
@@ -818,7 +818,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   }
                 />
               </CaseField>
-              {/* <div className="font-bold flex">
+              {/* <div className="flex font-bold">
                 <span>Total Billable Duration</span>
                 <input
                   type="number"
@@ -829,7 +829,7 @@ export function ServiceBooking ({BookingId , woid}) {
                 />
               </div>
 
-              <div className="font-bold flex">
+              <div className="flex font-bold">
                 <span>Total Duration in Progress</span>
                 <input
                   type="number"
@@ -840,7 +840,7 @@ export function ServiceBooking ({BookingId , woid}) {
                 />
               </div>
 
-              <div className="font-bold flex">
+              <div className="flex font-bold">
                 <span>Total Break Duration</span>
                 <input
                   type="number"
@@ -855,10 +855,10 @@ export function ServiceBooking ({BookingId , woid}) {
         </TabsContent>
 
         <TabsContent value="field_service">
-          <Card className="flex-col  ">
+          <Card className="flex-col ">
             <CardContent className="grid gap-5.5">
-              <div className="font-bold flex">
-                <Lock className="size-5 mr-2"></Lock>
+              <div className="flex font-bold">
+                <Lock className="mr-2 size-5"></Lock>
                 <span>Field Service</span>
                 <span className="ml-40">...</span>
               </div>
@@ -869,8 +869,8 @@ export function ServiceBooking ({BookingId , woid}) {
         <TabsContent value="timeline">
           <Card className="flex-col mt-7 w-[500px]">
             <CardContent className="grid gap-5.5">
-              <div className="font-bold flex">
-                <Lock className="size-5 mr-2"></Lock>
+              <div className="flex font-bold">
+                <Lock className="mr-2 size-5"></Lock>
                 <span>Timeline</span>
                 <span className="ml-40">...</span>
               </div>
@@ -883,14 +883,50 @@ export function ServiceBooking ({BookingId , woid}) {
   );
 }
 
+// Fungsi pengecekan format dan isi dari RequestedDateTimeCustomer
+const CheckRequestedDateTimeCustomer = (rawDateTime) => {
+  try {
+    if (!rawDateTime) {
+      alert("Gagal membuat booking: RequestedDateTimeCustomer belum diisi.");
+      return false;
+    }
 
-export function NewBookableResourceBooking({ WOID, CreatedBy}) {
+    const formatted = formatDateForInput(rawDateTime);
+
+    // Validasi format ISO: yyyy-mm-ddThh:mm
+    const isValidFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(formatted);
+    if (!isValidFormat) {
+      alert("Gagal membuat booking: Format RequestedDateTimeCustomer tidak valid.");
+      return false;
+    }
+
+    // Validasi waktu nyata (bukan Invalid Date)
+    const dateObj = new Date(rawDateTime);
+    if (isNaN(dateObj.getTime())) {
+      alert("Gagal membuat booking: Nilai RequestedDateTimeCustomer tidak valid.");
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error saat validasi tanggal:', error);
+    alert("Terjadi kesalahan saat validasi RequestedDateTimeCustomer.");
+    return false;
+  }
+};
+
+
+export function NewBookableResourceBooking({ WOID, CreatedBy, RequestedDateTimeCustomer}) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false)
 
   const handleCreateBooking = async () => {
     try {
       setLoading(true);
+      
+      const isValid = CheckRequestedDateTimeCustomer(RequestedDateTimeCustomer);
+      if (!isValid) return;
+      
       const data = {
         WOID: WOID,
         CreatedBy: CreatedBy
