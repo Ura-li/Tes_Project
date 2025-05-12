@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+  # SQL Server service
+  sql_server:
+    # Docker Image for MSSQL
+    image: mcr.microsoft.com/mssql/server
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=doni@donimobil
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+# Named volumes section
+volumes:
+  # SQL Server data volume
+  sql_data:
+    # Define the volume to persist SQL Server data

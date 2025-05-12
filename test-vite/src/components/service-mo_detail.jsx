@@ -68,6 +68,7 @@ export const ServiceMoDetail = () => {
     offeredPartDescription: '',
     mainComponent: '',
     gratisFlag: false,
+    failureId: null,
     atpStatus: ''
   })
     
@@ -103,6 +104,7 @@ export const ServiceMoDetail = () => {
         offeredPartDescription: data.OfferedPartDescription || '',
         mainComponent: data.MainComponent || '',
         gratisFlag: data.GratisFlag || false,
+        // failureId: data.FailureId || null,
         atpStatus: data.ATPStatus || ''
       });
   
@@ -148,7 +150,7 @@ export const ServiceMoDetail = () => {
           This material order line item is <strong>read-only</strong> because it is <strong>Closed</strong>.
         </div>
       )}
-      <TabsServiceMOLineItems MOLineDetails={moLineItems}/>
+      <TabsServiceMOLineItems MOLineDetails={MODetailInput}/>
     <Card className="mt-2 rounded-none h-[160px]">
       <CardHeader>
         <CardTitle className="text-xl ">{moLineItems.MOID} - {moLineItems.LineItemID}</CardTitle>

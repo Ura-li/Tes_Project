@@ -227,7 +227,7 @@ export function ServiceBooking ({BookingId , woid}) {
   }, []);
 
   if (!bookingData) {
-    return <div>Loadinsg...</div>;
+    return <div>Loading...</div>;
   }
 
   const handleUpdate = async () => {

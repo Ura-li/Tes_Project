@@ -303,13 +303,11 @@ export const ServiceMaterial = () => {
                   <Lock className="mr-2 size-5" />
                   <span>Sales Order Number (MO?)</span>
                   <span className="ml-[208px]">{materialOrderInformation.salesOrderNumber }</span>
-                </div>
-
-                
+                </div>                
 
                 <div className="flex font-bold">
                   <span className="ml-7">Resource Name</span>
-                  <span className="ml-40">{materialOrders.workorder?.bookings?.[0].bookingDetails?.[0].ResourceId}</span>
+                  <span className="ml-40">{materialOrders.workorder?.bookings?.[0].bookingDetails?.[0].ResourceId || ""}</span>
                 </div>
 
                 <div className="flex font-bold">

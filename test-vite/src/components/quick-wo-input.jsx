@@ -287,7 +287,7 @@ export function QuickWOInput ({
         latitude: "---",
       })
 
-      setAddressID(siteAccount.SiteAccountID || "---" );
+      setAddressID(siteAccount.SiteAccountID || contact.SiteAccountID || "---" );
       // setCompanyName(address.CompanyName || "---");
       // setContactFirstName(address.ContactFirstName || "---");
       // setContactLastName(address.ContactLastName || "---");
