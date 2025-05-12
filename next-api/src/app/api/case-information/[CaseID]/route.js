@@ -37,6 +37,8 @@ export async function GET(request, { params }) {
                     }
                 }
             }, 
+            global_trade_check: true,
+            caseresolution: true,
         }
     });
 
@@ -67,7 +69,7 @@ export async function GET(request, { params }) {
 
 // update data
 export async function PATCH(request, { params }) {
-    const { CaseID } = params;
+    const { CaseID } = await params;
     const caseID = CaseID;
     const { 
         SiteAccountID,
@@ -83,8 +85,10 @@ export async function PATCH(request, { params }) {
         CaseClosedDate,
         CaseNote,
         SymptomCode,
-        CaseResolution
-    } = await request.json();
+        CaseResolution,
+        OTCCode,
+        id_csr,
+    } = await request.json();   
 
     //update data
     const case_information = await prisma.caseinformation.update({
@@ -105,7 +109,9 @@ export async function PATCH(request, { params }) {
             CaseClosedDate: CaseClosedDate,
             CaseNote: CaseNote,
             SymptomCode: SymptomCode,
-            CaseResolution: CaseResolution
+            CaseResolution: CaseResolution,
+            OTCCode: OTCCode,
+            id_csr: id_csr,
         }
     })
 

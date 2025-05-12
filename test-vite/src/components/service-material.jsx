@@ -38,52 +38,20 @@ import Swal from "sweetalert2";
 import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
+import { CaseField } from "./quick-wo-input";
+import DatePicker from "./date-picker";
+import { Case } from "@/Case";
 
-function formatDateForInput(dateString) {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
 
 export const ServiceMaterial = () => {
   const { moid } = useParams();
-
-  const [materialOrderInformation, setMaterialOrderInformation] = useState({
-    MOID: '',
-    orderNumber: '',
-    serviceOfferID: '',
-    serviceDescription: '',
-    orderType: '',
-    shippingPriority: '', // Enum: LOW | MEDIUM | HIGH | CRITICAL
-    readyForClosureDate: '',
-    caseID: '',
-    contact: null, // Bisa objek: { firstName, lastName, email, ... }
-    deliveryRequestedDateCustomerTime: '',
-    collectionRequestedDate: '',
-    promoCode: '',
-    customerInducedDamage: false,
-    accidentalDamageProtection: false,
-    defectiveMediaRetention: false,
-    notificationNumber: '',
-    salesOrderNumber: '',
-    resourceName: '', 
-    resourceId: null,
-    workOrder: '', // Bisa objek berisi info workorder
-    parentMO: '', // Jika parent material order ada
-    isBCPOrder: false,
-    materialOrderType: '',
-    eotOrderNumber: '',
-  });
   
-
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
-
+  
+  const [deliveryRequiredDate, setDeliveryRequiredDate] = useState(null);
+  const [collectionRequestedDate, setCollectionRequestedDate] = useState(null);
+  const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
   const fetchMaterialOrder = async () => {
     try {
       const res = await ApiCustomer.get(`/api/material-order/${moid}`);
@@ -166,40 +134,197 @@ export const ServiceMaterial = () => {
         </div>
       )}
       <TabsServiceMO materialOrders={materialOrders}/>
-    <Card className="mt-2 rounded-none h-[160px]">
-      <CardHeader>
-        <CardTitle className="text-xl ">{materialOrders.MOID} for {materialOrders.WOID}</CardTitle>
-        <CardTitle className="text-sm">Material Order . Information</CardTitle>
-      </CardHeader>
+    <Card className="mt-2 rounded-none">
 
-      <CardContent>
-        <Tabs>
-          <TabsList className="bg-white w-[760px]">
-            <TabsTrigger variant={'underline'} value="mo_information" className="cursor-pointer">
-              MO Information
-            </TabsTrigger>
-            <TabsTrigger variant={'underline'}
-              value="mo_items"
-              className="cursor-pointer white">
-            MO Items & Message
-            </TabsTrigger>
-            <TabsTrigger variant={'underline'} value="entitlement_sla" className="cursor-pointer">
-            Entitlement & SLA
-            </TabsTrigger>
-            <TabsTrigger variant={'underline'} value="billing_quotation" className="cursor-pointer">
-            Billing & Quotation
-            </TabsTrigger>
-            <TabsTrigger variant={'underline'} value="notes_attaechment" className="cursor-pointer">
-            Notes & Attachment
-            </TabsTrigger>
-            <SelectBarRelated></SelectBarRelated>
-          </TabsList>
+      <CardContent className="p-0">
+        <Tabs defaultValue="mo_information">
+          <Card className="flex flex-col gap-3 p-4 ">
+            <CardTitle className="text-xl ">{materialOrders.MOID} for {materialOrders.WOID}</CardTitle>
+            <CardTitle className="text-sm">Material Order . Information</CardTitle>
+            <TabsList className="bg-white ">
+              <TabsTrigger variant={'underline'} value="mo_information" className="cursor-pointer">
+                MO Information
+              </TabsTrigger>
+              <TabsTrigger variant={'underline'}
+                value="mo_items"
+                className="cursor-pointer white">
+              MO Items & Message
+              </TabsTrigger>
+              <TabsTrigger variant={'underline'} value="entitlement_sla" className="cursor-pointer">
+              Entitlement & SLA
+              </TabsTrigger>
+              <TabsTrigger variant={'underline'} value="billing_quotation" className="cursor-pointer">
+              Billing & Quotation
+              </TabsTrigger>
+              <TabsTrigger variant={'underline'} value="notes_attaechment" className="cursor-pointer">
+              Notes & Attachment
+              </TabsTrigger>
+              <SelectBarRelated></SelectBarRelated>
+            </TabsList>
+          </Card>
 
           <TabsContent value="mo_information">
-            <Card className="rounded-md mt-7">
-              <span className="ml-5 text-xl font-bold">Order Information</span>
-              <CardContent className="grid grid-flow-col gap-5 grid-rows-8 h-115">
-                <div className="flex font-bold">
+            <Card className="rounded-md ">
+                <CardHeader>
+                  <CardTitle className="text-lg ">Order Information</CardTitle>
+                  <hr />
+                </CardHeader>
+              <CardContent className="grid items-center grid-cols-6 gap-5">
+                <CaseField label={'Order Number'} icon>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={materialOrders.MOID}
+                    />
+                </CaseField>
+                <CaseField label={'Case ID'} icon>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={materialOrders.workorder?.CaseID}
+                    />
+                </CaseField>
+                <CaseField label={'Notification Number'} icon>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={"---"}
+                    />
+                </CaseField>
+                <CaseField label={'Service Offer ID'} icon>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={"---"}
+                    />
+                </CaseField>
+                <CaseField label={'Contact'} icon>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={`${materialOrders.workorder?.caseinformation?.contact_information?.Salutation} ${materialOrders.workorder?.caseinformation?.contact_information?.FirstName} ${materialOrders.workorder?.caseinformation?.contact_information?.LastName}`}
+                    />
+                </CaseField>
+                <CaseField label={'Sales Order Number'} icon>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={"---"}
+                    />
+                </CaseField>
+                <CaseField label={'Service Description'} icon>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={"---"}
+                    />
+                </CaseField>
+                <CaseField label={'Delivery Required Date (Customer Time)'}>
+                  <DatePicker value={deliveryRequiredDate} onChange={setDeliveryRequiredDate}/>
+                </CaseField>
+                <CaseField label={'Resource Name'} >
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={materialOrders.workorder?.bookings?.[0].bookingDetails?.[0].ResourceId}
+                    />
+                </CaseField>
+                <CaseField label={'Order Type'} icon>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={materialOrders.OrderType}
+                    />
+                </CaseField>
+                <CaseField label={'Collection Requested Date'} icon>
+                  <DatePicker value={collectionRequestedDate} onChange={setCollectionRequestedDate}/>
+                </CaseField>
+                <CaseField label={'Work Order'} icon>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={materialOrders.WOID}
+                    />
+                </CaseField>
+                <CaseField label={'Shipping Priority'}>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={materialOrders.ShippingPriority}
+                    />
+                </CaseField>
+                <CaseField label={'Promo Code'}>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={"---"}
+                    />
+                </CaseField>
+                <CaseField label={'Parent MO'}>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={"---"}
+                    />
+                </CaseField>
+                <CaseField label={'Ready For Closure Date'} icon>
+                    <DatePicker value={ReadyForClosureDate} onChange={setReadyForClosureDate}/>
+                </CaseField>
+                <CaseField label={'Customer Induced Damage'} icon>
+                  <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={materialOrders.ReadyForClosureDate}
+                    />
+                </CaseField>
+                <CaseField label={'BCP Order'} icon>
+                  <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={"---"}
+                    />
+                </CaseField>
+                <CaseField className={'col-start-3'} label={'Accidental Damage Proctection'} icon>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={"---"}
+                    />
+                </CaseField>
+                <CaseField label={'Material Order Type'}>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={"---"}
+                    />
+                </CaseField>
+                <CaseField className={'col-start-3'} label={'Detective Media Retention'} icon>
+                    <Input
+                      variant={"invisible"}
+                      type="text"
+                      className="col-span-4"
+                      value={"---"}
+                    />
+                </CaseField>
+
+                {/* <div className="flex font-bold">
                   <Lock className="mr-2 size-5"></Lock>
                   <span>Order Number</span>
                   <span className="ml-40">{materialOrders.MOID}</span>
@@ -338,12 +463,11 @@ export const ServiceMaterial = () => {
                   </span>
                 </div>
 
-                <div className="flex font-bold">
-                  <span className="text-blue-500 ml-7">EOT Order Number</span>
-                  <span className="ml-[136px]">
-                    {materialOrderInformation.eotOrderNumber }
-                  </span>
-                </div>              
+                  <div className="flex font-bold">
+                    
+                    <span className="ml-7">EOT Order Number</span>
+                    <span className="ml-34">...</span>
+                  </div> */}
               </CardContent>
             </Card>
           </TabsContent>

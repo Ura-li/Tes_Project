@@ -147,6 +147,14 @@ const data = {
           title: "Resource",
           url: "/master/Resource_table",
         }, 
+        {
+          title: "OTC Code",
+          url: "/master/OTC_Code",
+        }, 
+        {
+          title: "Case Resolution",
+          url: "/master/CrsTable",
+        }, 
       ],
     },
     {
@@ -257,7 +265,7 @@ export function AppSidebar({
 }) {
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className={'bg-cyan-700'}>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>

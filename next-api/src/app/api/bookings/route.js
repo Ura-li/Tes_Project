@@ -128,6 +128,13 @@ export async function POST(request) {
         data: { SystemStatus: 'OPEN_COMPLETED' }, // enum value
       });
 
+      const workOrderupdate = await tx.workorder.update({
+        where: { WOID: woid },
+        data: {
+            WorkOrderStatus: "OPEN_SCHEDULED"
+        }
+      })
+
       return { BookingId: booking.BookingId };
     });
 

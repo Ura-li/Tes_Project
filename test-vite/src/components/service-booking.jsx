@@ -151,13 +151,15 @@ export function ServiceBooking ({BookingId , woid}) {
   useEffect(() => {
     async function fetchBooking() {
       if (bookingid == ""){
-        // try {
-        //   const addData = await ApiCustomer.post(`/api/bookings`)
-        //   console.log("ADDING BOOKING")
-        // } catch (error) {
-          
-        // }
-        return console.log('error')
+         Swal.fire({
+      title: 'Memuat data booking...',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
       };
       try {
         const response = await ApiCustomer.get(`/api/bookings/${bookingid}`);
@@ -218,6 +220,13 @@ export function ServiceBooking ({BookingId , woid}) {
         // setBookingData(updatedBookingData);
       } catch (error) {
         console.error("Failed to fetch booking data:", error);
+        Swal.fire({
+        icon: 'error',
+        title: 'Gagal memuat data',
+        text: error.message || 'Terjadi kesalahan saat mengambil data.',
+      });
+      }finally {
+        Swal.close();
       }
     }
     
@@ -227,7 +236,15 @@ export function ServiceBooking ({BookingId , woid}) {
   }, []);
 
   if (!bookingData) {
-    return <div>Loading...</div>;
+     Swal.fire({
+      title: 'Memuat data booking...',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
   }
 
   const handleUpdate = async () => {
@@ -266,7 +283,7 @@ export function ServiceBooking ({BookingId , woid}) {
 
       Swal.fire({
         title: 'Success',
-        icon: "Success",
+        icon: "success",
         text: "Booking telas berhasil di simpan",
       }).then(() => {
         window.location.href = `/work/${bookingData.WOID}`
@@ -595,13 +612,6 @@ export function ServiceBooking ({BookingId , woid}) {
                 span={2}
                 childClass={" justify-center place-content-center flex"}
               >
-                {/* <Input
-                  className={"w-4 place-content-center"}
-                  type="checkbox"
-                  variant={"invisible"}
-                  checked={doNotDisturb}
-                  onChange={(e) => setDoNotDisturb(e.target.checked)}
-                /> */}
                 <Select
                   className=""
                   value={doNotDisturb ? 'yes' : 'no'}
@@ -656,7 +666,7 @@ export function ServiceBooking ({BookingId , woid}) {
               <CaseField label={"Start Time"} span={2}>
                 <DatePicker
                   value={
-                    startTimeUserTime ? new Date(startTimeCustomerTime) : ""
+                    startTimeUserTime ? new Date(startTimeUserTime) : ""
                   }
                   onChange={
                     setStartTimeUserTime
@@ -705,85 +715,6 @@ export function ServiceBooking ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              {/* <div className="flex font-bold">
-                <span className="ml-3">Start Time</span>
-                <input
-                  type="datetime-local"
-                  value={
-                    startTimeUserTime ? startTimeUserTime.slice(0, 16) : ""
-                  }
-                  onChange={(e) => {
-                    const dateTimeStartUser = e.target.value;
-                    const isoDateTimeStartUser = new Date(
-                      dateTimeStartUser
-                    ).toISOString();
-                    setStartTimeUserTime(isoDateTimeStartUser);
-                  }}
-                />
-              </div>
-
-              <div className="flex font-bold">
-                <span className="ml-3">End Time</span>
-                <input
-                  type="datetime-local"
-                  value={endTimeUserTime ? endTimeUserTime.slice(0, 16) : ""}
-                  onChange={(e) => {
-                    const dateTimeEndUser = e.target.value;
-                    const isoDateTimeEndUser = new Date(
-                      dateTimeEndUser
-                    ).toISOString();
-                    setEndTimeUserTime(isoDateTimeEndUser);
-                  }}
-                />
-              </div>
-
-              <div className="flex font-bold">
-                <span className="ml-3">Duration</span>
-                <input
-                  type="number"
-                  className="ml-43"
-                  value={durationInMinutesUserTime}
-                  onChange={(e) => setDurationInMinutesUserTime(e.target.value)}
-                />
-              </div>
-
-              <div className="flex font-bold">
-                <span className="ml-3">Estimated Arrival Time</span>
-                <input
-                  type="datetime-local"
-                  value={
-                    estimatedArrivalTimeUserTime
-                      ? estimatedArrivalTimeUserTime.slice(0, 16)
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const dateTimeEstimatedUser = e.target.value;
-                    const isoDateTimeEstmatedUser = new Date(
-                      dateTimeEstimatedUser
-                    ).toISOString();
-                    setEstimatedArrivalTimeUserTime(isoDateTimeEstmatedUser);
-                  }}
-                />
-              </div>
-
-              <div className="flex font-bold">
-                <span className="ml-3">Actual Arrival Time</span>
-                <input
-                  type="datetime-local"
-                  value={
-                    actualArrivalTimeUserTime
-                      ? actualArrivalTimeUserTime.slice(0, 16)
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const dateTimeActualUser = e.target.value;
-                    const isoDateTimeActualUser = new Date(
-                      dateTimeActualUser
-                    ).toISOString();
-                    setActualArrivalTimeUserTime(isoDateTimeActualUser);
-                  }}
-                />
-              </div> */}
             </CardContent>
           </Card>
 
@@ -792,31 +723,7 @@ export function ServiceBooking ({BookingId , woid}) {
               <CardTitle className="text-lg ">Timestamp</CardTitle>
               <hr />
             </CardHeader>
-            {/* <CardContent className="grid gap-4.5 grid-flow-col grid-rows-4">
-                <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px]">Name</TableHead>
-                  <TableHead>Order Refere</TableHead>
-                  <TableHead>Case ID</TableHead>
-                  <TableHead>Service Status</TableHead>
-                  <TableHead>Site</TableHead>
-                  <TableHead>Submit</TableHead>
-                  <TableHead>Date and Time</TableHead>
-                  <TableHead>EMEA</TableHead>
-                  <TableHead>Custom Owner</TableHead>
-                  <TableHead>Created By</TableHead>
-                  <TableHead>Created On</TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">No data available</TableCell>
-                  </TableRow>
-              </TableBody>
-            </Table>
-              </CardContent> */}
+           
           </Card>
 
           <Card className="break-inside-avoid h-fit ">
@@ -832,15 +739,6 @@ export function ServiceBooking ({BookingId , woid}) {
                   onChange={(e) => setScheduleJeopardy(e.target.value)}
                 />
               </CaseField>
-              {/* <div className="flex font-bold">
-                <span>Schedule Jeopardy</span>
-                <input
-                  type="text"
-                  value={scheduleJeopardy}
-                  onChange={(e) => setScheduleJeopardy(e.target.value)}
-                />
-              </div> */}
-
               <CaseField label={'Schedule Jeopardy Time'} span={2}>
                 <DatePicker value={
                     scheduleJeopardyTime
@@ -849,24 +747,6 @@ export function ServiceBooking ({BookingId , woid}) {
                   }
                   onChange={setScheduleJeopardyTime}></DatePicker>
               </CaseField> 
-              {/* <div className="flex font-bold">
-                <span>ScheduleJeopardyTim</span>
-                <input
-                  type="datetime-local"
-                  value={
-                    scheduleJeopardyTime
-                      ? scheduleJeopardyTime.slice(0, 16)
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const dateTimeScheduleJeopardyTime = e.target.value;
-                    const isoDateTimeScheduleJeopardyTime = new Date(
-                      dateTimeScheduleJeopardyTime
-                    ).toISOString();
-                    setScheduleJeopardyTime(isoDateTimeScheduleJeopardyTime);
-                  }}
-                />
-              </div> */}
             </CardContent>
           </Card>
 
@@ -902,85 +782,6 @@ export function ServiceBooking ({BookingId , woid}) {
                   onChange={setActualArrivalTimeCustomerTime}
                 />
               </CaseField>
-              {/* <div className="flex font-bold">
-                <span>Start Time (Customer)</span>
-                <input
-                  type="datetime-local"
-                  value={
-                    startTimeCustomerTime
-                      ? startTimeCustomerTime.slice(0, 16)
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const dateTimeStartCustomer = e.target.value;
-                    const isoDateTimeStartCustomer = new Date(
-                      dateTimeStartCustomer
-                    ).toISOString();
-                    setStartTimeCustomerTime(isoDateTimeStartCustomer);
-                  }}
-                />
-                <CalendarDays />
-              </div> */}
-{/* 
-              <div className="flex font-bold">
-                <span>End Time (Customer)</span>
-                <input
-                  type="datetime-local"
-                  value={
-                    endTimeCustomerTime ? endTimeCustomerTime.slice(0, 16) : ""
-                  }
-                  onChange={(e) => {
-                    const dateTimeEndCustomer = e.target.value;
-                    const isoDateTimeEndCustomer = new Date(
-                      dateTimeEndCustomer
-                    ).toISOString();
-                    setEndTimeCustomerTime(isoDateTimeEndCustomer);
-                  }}
-                />
-                <CalendarDays />
-              </div> */}
-
-              {/* <div className="flex font-bold">
-                <span>Estimated Arrival Time (Customer)</span>
-                <input
-                  type="datetime-local"
-                  value={
-                    estimatedArrivalTimeCustomerTime
-                      ? estimatedArrivalTimeCustomerTime.slice(0, 16)
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const dateTimeEstimatedCustomer = e.target.value;
-                    const isoDateTimeEstmatedCustomer = new Date(
-                      dateTimeEstimatedCustomer
-                    ).toISOString();
-                    setEstimatedArrivalTimeCustomerTime(
-                      isoDateTimeEstmatedCustomer
-                    );
-                  }}
-                />
-                <CalendarDays />
-              </div> */}
-{/* 
-              <div className="flex font-bold">
-                <span>Actual Arrival Time (Customer)</span>
-                <input
-                  type="datetime-local"
-                  value={
-                    actualArrivalTimeCustomerTime
-                      ? actualArrivalTimeCustomerTime.slice(0, 16)
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const dateTimeActualCustomer = e.target.value;
-                    const isoDateTimeActualCustomer = new Date(
-                      dateTimeActualCustomer
-                    ).toISOString();
-                    setActualArrivalTimeCustomerTime(isoDateTimeActualCustomer);
-                  }}
-                />
-                <CalendarDays />
-              </div> */}
             </CardContent>
           </Card>
 

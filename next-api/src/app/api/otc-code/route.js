@@ -8,30 +8,20 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const search = searchParams.get("search") || "";
 
-        const siteAccountID = searchParams.get("SiteAccountID") ? parseInt(searchParams.get("SiteAccountID")) : null;
-        const contactID = searchParams.get("ContactID") ? parseInt(searchParams.get("ContactID")) : null;
-
         const page = parseInt(searchParams.get("page")) || 1;
-        const limit = parseInt(searchParams.get("limit")) || 100;
+        const limit = parseInt(searchParams.get("limit")) || 10;
 
         console.log("Query Params:", { search, page, limit });
 
         let whereCondition = {}
-        if (siteAccountID !== null) {
-            whereCondition.SiteAccountID = siteAccountID;
-        }
-        if (contactID !== null) {
-            whereCondition.ContactID = contactID;
-        }
-          // If `search` is provided, add OR conditions but ensure SiteAccountID/ContactID are required if present
+        
           if (search) {
             whereCondition.AND = [
                 whereCondition, // Keep SiteAccountID & ContactID constraints
                 {
                     OR: [
-                        { SerialNumber: { contains: search } },
-                        { ProductNumber: { contains: search } },
-                        { product_information: { ProductName: { contains: search } } }
+                        { OTCCode: { contains: search } },
+                        { Description: { contains: search } },
                     ]
                 }
             ];
@@ -40,7 +30,7 @@ export async function GET(request) {
         console.log("Final WHERE Condition:", JSON.stringify(whereCondition));
 
         // Hitung jumlah data total
-        const totalCount = await prisma.asset_information.count({
+        const totalCount = await prisma.OTCCodeTable.count({
             where: whereCondition
         });
 
@@ -50,23 +40,17 @@ export async function GET(request) {
         const skip = (page - 1) * limit;
 
         // Ambil data dengan filter & pagination
-        const asset_information = await prisma.asset_information.findMany({
+        const OTCCodeData = await prisma.OTCCodeTable.findMany({
             where: whereCondition,
             skip: skip,
             take: limit,
-            orderBy: { product_information: { ProductName: "asc" } },
-            include:
-            {
-                site_account: true,
-                contact_information:true,
-                product_information:true
-            }
+            orderBy: { OTCCode: "asc" }
         });
 
         return NextResponse.json({
             success: true,
-            message: "List Data Assets Information",
-            data: asset_information,
+            message: "List Data OTC CODE",
+            data: OTCCodeData,
             totalPages: Math.ceil(totalCount / limit),
             currentPage: page
         },
@@ -97,30 +81,24 @@ export async function GET(request) {
 export async function POST(request) {
     //get all request
     const { 
-        SerialNumber,
-        ProductNumber,
-        SiteAccountID,
-        ProductTypeID,
-        ContactID
+        OTCCode,
+        Description
     } = await request.json();
 
     console.log()
     //create data 
-    const asset_information = await prisma.asset_information.create({
+    const otcCodeData = await prisma.OTCCodeTable.create({
         data:{
-            SerialNumber: SerialNumber,
-            ProductNumber: ProductNumber,
-            ProductTypeID: ProductTypeID,
-            SiteAccountID: SiteAccountID,
-            ContactID: ContactID
+            OTCCode: OTCCode,
+            Description: Description
         },
     });
 
     return NextResponse.json(
         {
             success: true,
-            message: "Asset Information Created Successfully!",
-            data: asset_information,
+            message: "OTC Code Data Created Successfully!",
+            data: otcCodeData,
         },
         { 
             status: 201

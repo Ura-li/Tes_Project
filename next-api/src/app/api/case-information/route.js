@@ -14,8 +14,18 @@ export async function GET(request) {
     //prisma query filter
     const filters = {};
     if(CaseStatus){
-        filters.CaseStatus = { contains: CaseStatus }
+        filters.CaseStatus = CaseStatus ;
     }
+    const openCount = await prisma.caseinformation.count({
+      where: {
+        CaseStatus: 'Open'
+      }
+    });
+    const closedCount = await prisma.caseinformation.count({
+      where: {
+        CaseStatus: 'Close'
+      }
+    });
     //get all data
     const case_information = await prisma.caseinformation.findMany({
         where: Object.keys(filters).length > 0 ? filters : undefined,
@@ -63,7 +73,8 @@ export async function GET(request) {
                     }
                   }
                 }
-            }
+            },
+            createdByUser : true
         }
     });
 
@@ -83,10 +94,16 @@ export async function GET(request) {
                     SerialNumber: caseData.asset_information?.SerialNumber || "No Serial",
                     ProductNumber: caseData.asset_information?.ProductNumber || "No Product Number",
                     ProductName: caseData.asset_information?.product_information?.ProductName || "No Product Name",
-                    CreatedName: "Miku21", // Replace with the database owned
-                    Owner: "Miku21", // Replace with the database owned
-                    WorkGroup: "Miku21" // Replace with the database owned
+                    CreatedName: caseData.User?.Name, // Replace with the database owned
+                    Owner: caseData.User?.Name, // Replace with the database owned
+                    WorkGroup: "Miku21" , // Replace with the database owned
+                    CaseStatus: caseData.CaseStatus,
+                    
                 })),
+            value:{ 
+                open: openCount,
+                closed: closedCount
+            }
         },
         {
             status:200,
@@ -112,10 +129,12 @@ export async function POST(request) {
         SymptomCode,
         CaseResolution,
         CreatedBy,
+        ProblemDescription,
+        CaseNoteProduct,
     } = await request.json();
 
     const CaseID = await generateID("C-", "caseinformation", "CaseID")
-    console.log("Generated ID:", CaseID, typeof CaseID);
+    console.log("Generated ID:", CaseNoteProduct);
     //validation
     if (!AssetID && !ContactID ) {
         return NextResponse.json(
@@ -146,6 +165,8 @@ export async function POST(request) {
             SymptomCode: SymptomCode,
             CaseResolution: CaseResolution,
             CreatedBy: parseInt(CreatedBy),
+            ProblemDescription: ProblemDescription,
+            CaseProductNote : CaseNoteProduct
         },
     });
 

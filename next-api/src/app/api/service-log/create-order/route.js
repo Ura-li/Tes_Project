@@ -69,6 +69,14 @@ export async function POST(request) {
             });
         }
 
+        // 5. Change Case Status to InActive
+        const caseUpdate = await prisma.caseinformation.update({
+            where: { CaseID: CaseID },
+            data: {
+                CaseStatus: "InActive"
+            }
+        });
+
         return NextResponse.json({ 
             success: true, 
             message: "Order created successfully", 

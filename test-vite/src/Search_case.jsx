@@ -185,44 +185,41 @@ const Search_case = () => {
 
   const [activeModal, setActiveModal] = useState(null)
 
+  const [provinces, setProvinces] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  // const [formDataSiteAccount, setFormDataSiteAccount] = useState({
+  //   Province: "",
+  //   City: "",
+  //   Country: "",
+  //   ZipPostalCode: ""
+  // });
+
   const handleSearchClick = () => {
+    Swal.fire({
+      title: 'Memuat data...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading(); // Tampilkan loading
+      }
+    });
     let queryParams = [];
     console.log("BeforeChange" + activeTab);
-
     // this for switching tab
     if (search.SerialNumber !== "") {
       setIsModalAssetOpen(true);     
       setActiveTab("ci");
-      setTimeout(() => {
-        Swal.fire({
-          title: 'Memuat data asset...',
-          text: 'Mohon tunggu sebentar',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading(); // Tampilkan loading
-          }
-        });
-        setTimeout(() => {
-          Swal.close();  
-        }, 500);  
-      }, 300);
     } else if (search.Company !== "") {
       setIsModalCompanyOpen(true);
       setActiveTab("ci");
-      setTimeout(() => {
-        Swal.fire({
-          title: 'Memuat data company...',
-          text: 'Mohon tunggu sebentar',
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          didOpen: () => {
-            Swal.showLoading(); // Tampilkan loading
-          }
-        });
-        setTimeout(() => {
-          Swal.close(); 
-        }, 500); 
-      }, 300); 
+      
+      // setTimeout(() => {
+      //   setTimeout(() => {
+      //     
+      //   }, 500); 
+      // }, 300); 
     }
     
     
@@ -247,14 +244,18 @@ const Search_case = () => {
     if (search.Email || search.Phone) {
       setActiveTab("ci");
       //set state to true 
+     
       setSearchByEmailPhoneForGlobalSearch(true);
       fetchDataContacts(queryString);
       fetchDataSiteAccounts(queryString);
+      
     }
   };
   useEffect(() => {
     console.log("Contacts Searched trhough Phone:", contacts);
+    Swal.close()
   }, [contacts]); // This runs every time activeTab changes
+  
 
 
 
@@ -270,18 +271,26 @@ const Search_case = () => {
 
   const fetchDataContacts = async (query = '') => {
     //fetch data from API with Axios
-    await ApiCustomer.get(`/api/contact-information${query}`).then(
-      (response) => {
-        setContacts(response.data.data);
-      }
-    );
+    try{
+      await ApiCustomer.get(`/api/contact-information${query}`).then(
+        (response) => {
+          setContacts(response.data.data);
+        }
+      );
+    }catch(e){
+      Swal.fire("Error : ",e)
+    }
   };
 
   const fetchDataSiteAccounts = async (query = '') => {
     //fetch data from API with Axios
-    await ApiCustomer.get(`/api/site_account${query}`).then((response) => {
-      setSiteAccounts(response.data.data);
-    });
+    try{
+      await ApiCustomer.get(`/api/site_account${query}`).then((response) => {
+        setSiteAccounts(response.data.data);
+      });
+    }catch(e){
+      Swal.fire("Error : ",e)
+    }
   };
 
   //run hook useEffect
@@ -357,6 +366,7 @@ const Search_case = () => {
     Country: "",
     ZipPostalCode: "",
   });
+  
 
   //make handler
   const handlerInputSiteAccountChange = (e) => {
@@ -366,6 +376,23 @@ const Search_case = () => {
       [id]: value,
     }));
   };
+
+  useEffect(() => {
+    fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json")
+      .then((res) => res.json())
+      .then(setProvinces)
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    const selectedProvince = provinces.find((p) => p.name === formDataSiteAccount.StateProvince);
+    if (selectedProvince) {
+      fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${selectedProvince.id}.json`)
+        .then((res) => res.json())
+        .then(setCities)
+        .catch(console.error);
+    }
+  }, [formDataSiteAccount.StateProvince]);
 
   const handleClearAllAcconunt = () => {
     setFormDataSiteAccount({
@@ -577,7 +604,7 @@ const Search_case = () => {
         icon: "warning",
         confirmButtonText: "OK"
       });
-      return;
+      // return;
     }
   
     const siteAccountID = selectedSiteAccounts
@@ -587,6 +614,8 @@ const Search_case = () => {
     // Ambil data form yang diisi
     const caseSubject = document.getElementById("CaseSubject").value;
     const kciFlag = document.getElementById("KCI_Flag").checked;
+    const problemDesc = document.getElementById("ProblemDesc").value;
+    const CaseNoteProduct = document.getElementById("CaseNote").value;
   
     // Validasi isi form jika perlu (contoh: CaseSubject wajib diisi)
     if (!caseSubject.trim()) {
@@ -596,7 +625,7 @@ const Search_case = () => {
         icon: "warning",
         confirmButtonText: "OK"
       });
-      return;
+      // return;
     }
   
     try {
@@ -621,7 +650,10 @@ const Search_case = () => {
         SymptomCode: null,
         CaseResolution: null,
         CreatedBy: data.user.id,
+        ProblemDescription : problemDesc,
+        CaseNoteProduct: CaseNoteProduct
       };
+      console.log("Create Case Data : ", newCase)
   
       const res = await ApiCustomer.post("/api/case-information", newCase);
   
@@ -653,13 +685,6 @@ const Search_case = () => {
   // const selectedCompanyForCase = companies ? companies[0] : null;
 
   const [selectedCompanyForCase, setSelectedCompanyForCase] = useState(null);
-
-  /**
-   * TODO :
-   * Make the select is automatic when it's related
-   * right now is not automated, so i skiped this part
-   * but this is still used rn
-   */
   const handleSelectedAssetForCaseRelated = (asset) => {
     setSelectedAssetForCase(asset);
 
@@ -695,23 +720,6 @@ const Search_case = () => {
     console.log(search);
   };
 
-  // const initialSearchState = {
-  //   Email: "",
-  //   SerialNumber: "",
-  //   Country: "",
-  //   Company: "",
-  //   ZipPostalCode: "",
-  //   City: "",
-  //   Phone: "",
-  //   AssetTag: "",
-  //   ContractID: "",
-  //   TransactionType: "",
-  //   TransactiontID: "",
-  //   Opsi: "",
-  // };
-  
-  // const [initial, setInitialsearch] = useState(initialSearchState);
-  
 
   const handleClearAll = () => {
     updateFormFieldsInSearch({
@@ -734,7 +742,7 @@ const Search_case = () => {
   
 
   return (
-    <div className="flex flex-1 p-2 pt-0">
+    <div className="flex flex-1 p-0 pt-0">
       <SidebarProvider className=" overflow-auto min-h-[full]">
         <div className="flex flex-1 rounded-xl md:min-h-min">
           <Tabs
@@ -743,7 +751,7 @@ const Search_case = () => {
             value={activeTab}
             onValueChange={setActiveTab}
           >
-            <TabsList className="drop-shadow-xl bg-sky-700 w-full h-15 flex justify-between">
+            <TabsList className="drop-shadow-xl bg-sky-700 w-full h-15 flex justify-between rounded-none">
               <div className="w-2xs p-2 text-white ">
                 <TabsTrigger value="search" className="cursor-pointer">
                   Search
@@ -810,7 +818,15 @@ const Search_case = () => {
                       id="Country"
                       value={search.Country || ""}
                       onChange={handleInputChange}
-                    ></SelectBar>
+                      options={[
+                        { id: "id", name: "Indonesia" },
+                        { id: "my", name: "Malaysia" },
+                        { id: "sg", name: "Singapura" },
+                        { id: "uk", name: "Inggris" },
+                        { id: "cn", name: "Cina" }
+                      ]}
+                      placeholder="Select a Country"
+                    />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="Company">Company</Label>
@@ -1067,22 +1083,22 @@ const Search_case = () => {
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="City">City</Label>
-                    <Input
+                    <SelectBar
                       id="City"
-                      type="text"
-                      className="border-b-black p-1"
-                      onChange={handlerInputSiteAccountChange}
                       value={formDataSiteAccount.City}
+                      onChange={handlerInputSiteAccountChange}
+                      options={cities}
+                      placeholder="Select a City"
                     />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="StateProvince">State/Province</Label>
-                    <Input
+                    <SelectBar
                       id="StateProvince"
-                      type="text"
-                      className="border-b-black p-1"
-                      onChange={handlerInputSiteAccountChange}
                       value={formDataSiteAccount.StateProvince}
+                      onChange={handlerInputSiteAccountChange}
+                      options={provinces}
+                      placeholder="Select a Province"
                     />
                   </div>
                   <div className="space-y-0.5 flex flex-col">
@@ -1091,6 +1107,14 @@ const Search_case = () => {
                       id="Country"
                       value={formDataSiteAccount.Country}
                       onChange={handlerInputSiteAccountChange}
+                      options={[
+                        { id: "id", name: "Indonesia" },
+                        { id: "my", name: "Malaysia" },
+                        { id: "sg", name: "Singapura" },
+                        { id: "uk", name: "Inggris" },
+                        { id: "cn", name: "Cina" }
+                      ]}
+                      placeholder="Select a Country"
                     />
                   </div>
                   <div className="space-y-0.5">
@@ -1313,6 +1337,8 @@ const Search_case = () => {
                       className="border-b-black p-1"
                       value={formDataContact.City}
                       onChange={handlerInputContactChange}
+                      options={cities}
+                      placeholder="Select a City"
                     />
                   </div>
                   <div className="space-y-0.5">
@@ -1326,6 +1352,8 @@ const Search_case = () => {
                       className="border-b-black p-1"
                       value={formDataContact.StateProvince}
                       onChange={handlerInputContactChange}
+                      options={provinces}
+                      placeholder="Select a Province"
                     />
                   </div>
                   <div className="space-y-0.5 flex flex-col">
@@ -1337,6 +1365,14 @@ const Search_case = () => {
                       id="Country"
                       value={formDataContact.Country}
                       onChange={handlerInputContactChange}
+                      options={[
+                        { id: "id", name: "Indonesia" },
+                        { id: "my", name: "Malaysia" },
+                        { id: "sg", name: "Singapura" },
+                        { id: "uk", name: "Inggris" },
+                        { id: "cn", name: "Cina" }
+                      ]}
+                      placeholder="Select a Country"
                     />
                   </div>
                   <div className="space-y-0.5">

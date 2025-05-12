@@ -90,6 +90,7 @@ export function DialogCloseButton({
       try {
         const response = await ApiCustomer.get("/api/asset-information");
         setAssets(response.data.data);
+        Swal.close();
       } catch (error) {
         console.error("Error fetching assets:", error);
       }
@@ -261,6 +262,7 @@ export function DialogCompanyBtn({
           try{
             const response = await ApiCustomer.get("/api/site_account")
             setSiteAccounts(response.data.data);
+            Swal.close();
           }catch (err) {
             console.error("error fetching ",err)
           }
@@ -278,11 +280,15 @@ export function DialogCompanyBtn({
       const [filteredSiteAccount, setFilteredSiteAccount] = useState([]);
           // ✅ Wait for `siteAccounts` to be updated before filtering
       useEffect(() => {
-        if (siteAccounts.length > 0 && search.Company?.trim()) {  
+        if (siteAccounts.length > 0 && search.Company?.trim()) { 
+          console.log("Company searched : ", search) 
           const lowerSearch = search.Company.toLowerCase().trim();
+          console.log("Lower Company searched : ", lowerSearch) 
+          console.log("SIte Accounr Company searched : ", siteAccounts) 
           const filteredResults = siteAccounts.filter(company =>
             company.Company?.toLowerCase().includes(lowerSearch)
           );
+          console.log("Filter Company searched : ", filteredResults) 
 
           
           if (filteredResults.length > 0) {
@@ -364,6 +370,7 @@ export function DialogCompanyBtn({
           // console.log("Company Selected:", selectedSiteAccounts);
         }
       }
+      
       useEffect(() => {
         console.log("Company Selected (Updated):", selectedSiteAccounts);
       }, [selectedSiteAccounts]); // Runs when `selectedSiteAccounts` updates

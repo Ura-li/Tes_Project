@@ -150,32 +150,31 @@ export const ServiceMoDetail = () => {
           This material order line item is <strong>read-only</strong> because it is <strong>Closed</strong>.
         </div>
       )}
-      <TabsServiceMOLineItems MOLineDetails={MODetailInput}/>
-    <Card className="mt-2 rounded-none h-[160px]">
-      <CardHeader>
-        <CardTitle className="text-xl ">{moLineItems.MOID} - {moLineItems.LineItemID}</CardTitle>
-        <CardTitle className="text-sm">Material Order Line Item . Information</CardTitle>
-      </CardHeader>
+      <TabsServiceMOLineItems MOLineDetails={MO}/
+      >
+    <Card className="mt-2 rounded-none">
 
-      <CardContent>
+      <CardContent className={'p-0'}>
         <Tabs>
-          <TabsList className="bg-white w-[440px] gap-2">
-            <TabsTrigger value="mo_details" className="cursor-pointer">
-            MO Details
-            </TabsTrigger>
-            <TabsTrigger
-              value="mo_failure"
-              className="cursor-pointer white">
-             Failure & Return Details
-            </TabsTrigger>
-            <TabsTrigger value="mo_attachments" className="cursor-pointer">
-            Attachments
-            </TabsTrigger>
-            <SelectBarRelated></SelectBarRelated>
-          </TabsList>
+            <Card className={'p-2'}>
+              <CardTitle className="text-xl ">{moLineItems.MOID} - {moLineItems.LineItemID}</CardTitle>
+              <CardTitle className="text-sm">Material Order Line Item . Information</CardTitle>
+              <TabsList className="gap-2 bg-white">
+                <TabsTrigger variant={'underline'} value="mo_details" className="cursor-pointer">
+                  MO Details
+                </TabsTrigger>
+                <TabsTrigger variant={'underline'} value="mo_failure" className="cursor-pointer white">
+                  Failure & Return Details
+                </TabsTrigger>
+                <TabsTrigger variant={'underline'} value="mo_attachments" className="cursor-pointer">
+                  Attachments
+                </TabsTrigger>
+                <SelectBarRelated></SelectBarRelated>
+              </TabsList>
+            </Card>
 
-          <TabsContent value="mo_details">
-            <Card className="rounded-md mt-7">
+          <TabsContent value="mo_details" className={'p-2 flex flex-col gap-2'}>
+            <Card className="rounded-md ">
               <span className="ml-5 text-xl font-bold">MO Order Details</span>
               <CardContent className="grid grid-flow-col gap-5 grid-rows-8 ">
                 <div className="flex font-bold">
@@ -366,7 +365,7 @@ export const ServiceMoDetail = () => {
               </CardContent>
             </Card>
 
-            <Card className="rounded-md mt-7">
+            <Card className="rounded-md ">
               <span className="ml-5 text-xl font-bold">Outbound to Customer</span>
               <CardContent className="grid h-10 grid-flow-col grid-rows-2 gap-5">
                 <div className="flex font-bold">
@@ -379,7 +378,7 @@ export const ServiceMoDetail = () => {
           </TabsContent>
 
           <TabsContent value="mo_failure">
-          <Card className="rounded-md mt-7">
+          <Card className="rounded-md ">
               <span className="ml-5 text-xl font-bold">Failure & Usage Details
               </span>
               <CardContent className="grid grid-flow-col grid-rows-5 gap-5 h-70">
@@ -446,7 +445,7 @@ export const ServiceMoDetail = () => {
               </CardContent>
             </Card>
 
-            <Card className="rounded-md mt-7"> 
+            <Card className="rounded-md "> 
               <span className="ml-5 text-xl font-bold">Part Return Details</span>
               <CardContent className="grid grid-flow-col grid-rows-5 gap-5 h-80">
                 <div className="flex font-bold">
