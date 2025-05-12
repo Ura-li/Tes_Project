@@ -59,10 +59,9 @@ export async function POST(request) {
       DurationInMinutesUserTime,
       EstimatedArrivalTimeUserTime,
       ActualArrivalTimeUserTime,
-      ChangedBy
     } = body;
 
-    if (!BookingId || !Name || !Status || ChangedBy == null) {
+    if (!BookingId || !Name || !Status) {
       return NextResponse.json({
         success: false,
         message: "BookingId, Name, Status, dan ChangedBy wajib diisi."

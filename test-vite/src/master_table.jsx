@@ -25,8 +25,9 @@ import { SymptomCodeAdd, SymptomCodeEdit, SymptomCodeDelete } from "@/components
 import { BookingsAdd, BookingsEdit, BookingsDelete } from "@/components/sc-modal";
 import { BookingDetailsAdd, BookingDetailsEdit, BookingDetailsDelete } from "@/components/sc-modal";
 import { RepairClassCodeAdd, RepairClassCodeEdit, RepairClassCodeDelete } from "@/components/sc-modal";
-import { OTCAdd } from "@/components/sc-modal";
-import { CrsAdd } from "@/components/sc-modal";
+import { ServiceCatalogAdd, ServiceCatalogEdit, ServiceCatalogDelete } from "@/components/sc-modal";
+import { OTCAdd, OTCEdit, OTCDelete} from "@/components/sc-modal";
+import { CrsAdd, CrsEdit, CrsDelete } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { Label } from "@/components/ui/label"
@@ -2230,7 +2231,8 @@ const fetchResources = async () => {
   }
 };
   const fetchResourceAccounts = async () => {
-    
+    setLoading(true);
+    setError(null);
     Swal.fire({
       title: "Memuat Data Resource Account...",
       text: "Mohon tunggu sebentar...",
@@ -2241,8 +2243,7 @@ const fetchResources = async () => {
       },
     });  
 
-    setLoading(true);
-    setError(null);
+    
     try {
       const response = await ApiCustomer.get("/api/resource-account");
       if (response.data.success) {
@@ -2635,7 +2636,7 @@ export const SymptomCodeTable = () => {
 export const BookingsTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [bookingData, setBookingData] = useState([]);
@@ -2870,6 +2871,9 @@ export const BookingDetailsTable = () => {
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
               <th className="border p-2">Booking Detail ID</th>
               <th className="border p-2">Booking ID</th>
+              <th className="border p-2">Resource ID</th>
+              <th className="border p-2">Resource Account ID</th>
+              <th className="border p-2">Subk Technician ID</th>
               <th className="border p-2">Name</th>
               <th className="border p-2">Status</th>
               <th className="border p-2">Customer Time</th>
@@ -2888,6 +2892,9 @@ export const BookingDetailsTable = () => {
                   {item.BookingDetailId}
                 </td>
                 <td className="border p-2">{item.BookingId}</td>
+                <td className="border p-2">{item.ResourceId}</td>
+                <td className="border p-2">{item.ResorceAccountId}</td>
+                <td className="border p-2">{item.SubkTechnicianId}</td>
                 <td className="border p-2">{item.Name}</td>
                 <td className="border p-2">{item.Status}</td>
 
@@ -3113,11 +3120,11 @@ export const ServiceCatalogTable = () => {
   const itemsPerPage = 5;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [data, setData] = useState([]);
+  const [serviceCatalogData, setServiceCatalogData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const fetchData = async () => {
+  const fetchServiceCatalog = async () => {
     Swal.fire({
       title: "Memuat Data Service Catalog...",
       text: "Mohon tunggu sebentar...",
@@ -3132,12 +3139,12 @@ export const ServiceCatalogTable = () => {
     try {
       const response = await ApiCustomer.get("/api/service-log");
       if (response.data.success) {
-        setData(response.data.data);
+        setServiceCatalogData(response.data.data);
       } else {
-        setError("Failed to fetch Service Catalog");
+        setError("Failed to fetch service catalog data");
       }
     } catch (err) {
-      console.error("Error fetching Service Catalog data:", err);
+      console.error("Error fetching service catalog data:", err);
       setError("Error fetching data");
     } finally {
       setLoading(false);
@@ -3146,10 +3153,10 @@ export const ServiceCatalogTable = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    fetchServiceCatalog();
   }, []);
 
-  const filteredData = data.filter((item) =>
+  const filteredData = serviceCatalogData.filter((item) =>
     Object.values(item).some((value) =>
       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -3164,7 +3171,6 @@ export const ServiceCatalogTable = () => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Service Catalog Table</h2>
-
       <input
         type="text"
         placeholder="Search..."
@@ -3173,7 +3179,8 @@ export const ServiceCatalogTable = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      <RepairClassCodeAdd onUpdate={fetchData} />
+      {/* Add Component (Optional) */}
+      <ServiceCatalogAdd onUpdate={fetchServiceCatalog} />
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -3183,46 +3190,37 @@ export const ServiceCatalogTable = () => {
           <thead>
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
               <th className="border p-2">Service Catalog ID</th>
-              <th className="border p-2">Serial Number</th>
-              <th className="border p-2">Service Offer</th>
+              <th className="border p-2">Asset ID</th>
+              <th className="border p-2">Service Offer ID</th>
               <th className="border p-2">Part Number</th>
+              <th className="border p-2">Warranty Status</th>
               <th className="border p-2">Currency</th>
               <th className="border p-2">Price</th>
               <th className="border p-2">Tax</th>
               <th className="border p-2">Total</th>
-              <th className="border p-2">Created On</th>
               <th className="border p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.Code} className="hover:bg-gray-100 text-center text-sm">
-                <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                  onClick={() => navigate(`/repair-class-code/${item.Code}`)}
+              <tr key={item.ServiceCatalogID} className="hover:bg-gray-100 text-center text-sm">
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                    onClick={() => navigate(`/service-log/${item.ServiceCatalogID}`)}
                 >
-                  {item.Code}
+                  {item.ServiceCatalogID}
                 </td>
-                <td className="border p-2">{item.Description}</td>
-                <td className="border p-2">{item.Definition}</td>
-                <td className="border p-2">{item.PaymentEligibility}</td>
-                <td className="border p-2">
-                  {item.CreatedOn
-                    ? new Date(item.CreatedOn).toLocaleDateString("id-ID", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : "-"}
-                </td>
+                <td className="border p-2">{item.AssetID}</td>
+                <td className="border p-2">{item.Service_offerID}</td>
+                <td className="border p-2">{item.PartNumber || "-"}</td>
+                <td className="border p-2">{item.WarrantyStatus || "-"}</td>
+                <td className="border p-2">{item.Currency || "-"}</td>
+                <td className="border p-2">{item.Price ? parseFloat(item.Price).toFixed(2) : "-"}</td>
+                <td className="border p-2">{item.Tax ? parseFloat(item.Tax).toFixed(2) : "-"}</td>
+                <td className="border p-2">{item.Total ? parseFloat(item.Total).toFixed(2) : "-"}</td>
                 <td className="border p-2 flex justify-center gap-2">
-                  <RepairClassCodeEdit Code={item.Code} onUpdate={fetchData} />
-                  <RepairClassCodeDelete
-                    Code={item.Code}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchData}
-                  />
+                  {/* Optional Edit/Delete Components */}
+                  <ServiceCatalogEdit ServiceCatalogID={item.ServiceCatalogID} onUpdate={fetchServiceCatalog} />
+                  <ServiceCatalogDelete ServiceCatalogID={item.ServiceCatalogID} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onUpdate={fetchServiceCatalog} />
                 </td>
               </tr>
             ))}
@@ -3284,10 +3282,10 @@ export const OTCCodeTable = () => {
       if (response.data.success) {
         setOTCCodeData(response.data.data);
       } else {
-        setError("Failed to fetch booking data");
+        setError("Failed to fetch OTC Code data");
       }
     } catch (err) {
-      console.error("Error fetching booking data:", err);
+      console.error("Error fetching OTC Code Table:", err);
       setError("Error fetching data");
     } finally {
       setLoading(false);
@@ -3314,7 +3312,7 @@ export const OTCCodeTable = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Bookings Table</h2>
+      <h2 className="text-xl font-bold mb-4">OTC Codes Table</h2>
       <input
         type="text"
         placeholder="Search..."
@@ -3339,7 +3337,7 @@ export const OTCCodeTable = () => {
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.BookingId} className="hover:bg-gray-100 text-center">
+              <tr key={item.OTCCode} className="hover:bg-gray-100 text-center">
                 <td
                   className="border p-2 text-blue-500 cursor-pointer hover:underline"
                   // onClick={() => navigate(`/bookings/${item.BookingId}`)}
@@ -3354,15 +3352,15 @@ export const OTCCodeTable = () => {
                     day: "numeric",
                   })}
                 </td>
-                {/* <td className="border p-2 flex space-x-2 justify-center">
-                  <BookingsEdit BookingId={item.BookingId} onUpdate={fetchBookingData} />
-                  <BookingsDelete
-                    BookingId={item.BookingId}
+                <td className="border p-2 flex space-x-2 justify-center">
+                  <OTCEdit OTCCode={item.OTCCode} onUpdate={fetchOTCCode} />
+                  <OTCDelete
+                    OTCCode={item.OTCCode}
                     isModalOpen={isModalOpen}
                     setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchBookingData}
+                    onUpdate={fetchOTCCode}
                   />
-                </td> */}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -3432,6 +3430,7 @@ export const CrsTable = () => {
       Swal.close();
     }
   };
+
 
   useEffect(() => {
     fetchCrs();
@@ -3505,11 +3504,7 @@ export const CrsTable = () => {
                 </td>
                 <td className="border p-2">{item.caseReadyForClosure}</td>
                 <td className="border p-2">
-                  {new Date(item.readyForCloseDays).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  {item.readyForCloseDays}
                 </td>
                  <td className="border p-2">
                   {new Date(item.readyForClosureDate).toLocaleDateString("id-ID", {
@@ -3532,15 +3527,15 @@ export const CrsTable = () => {
                     day: "numeric",
                   })}
                 </td>
-                {/* <td className="border p-2 flex space-x-2 justify-center">
-                  <BookingsEdit BookingId={item.BookingId} onUpdate={fetchBookingData} />
-                  <BookingsDelete
-                    BookingId={item.BookingId}
+                <td className="border p-2 flex space-x-2 justify-center">
+                  <CrsEdit id_csr={item.id_csr} onUpdate={fetchCrs} />
+                  <CrsDelete
+                    id_csr={item.id_csr}
                     isModalOpen={isModalOpen}
                     setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchBookingData}
+                    onUpdate={fetchCrs}
                   />
-                </td> */}
+                </td>
               </tr>
             ))}
           </tbody>
