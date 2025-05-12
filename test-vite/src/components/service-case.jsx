@@ -109,7 +109,7 @@ export const SearchCommandBlock = ({
           onBlur={() => setTimeout(() => setOpen(false), 150)} // delay to allow click
         />
         {open && (
-          <CommandList className="absolute z-50 mt-10 w-full border rounded-md bg-white shadow-lg max-h-60 overflow-y-auto">
+          <CommandList className="absolute z-50 w-full mt-10 overflow-y-auto bg-white border rounded-md shadow-lg max-h-60">
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
               {options.map((opt) => (
@@ -439,7 +439,7 @@ export const TabsService = ({
   };
   return (
     <>
-      <div className="border-1 flex items-center ">
+      <div className="flex items-center border-1 ">
         {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -447,20 +447,20 @@ export const TabsService = ({
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
-            <btn.icon className="h-4 w-4" />
+            <btn.icon className="w-4 h-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
 
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
                 <DropdownMenuItem key={index}>
-                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  <btn.icon className="inline-block w-4 h-4 mr-2" />
                   {btn.label}
                 </DropdownMenuItem>
               ))}
@@ -516,7 +516,7 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
       )}
     >
       {icon && (
-        <Lock className="absolute left-0 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
       )}
       {label}
     </CardTitle>
@@ -681,7 +681,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
   };
   return (
     <>
-      <div className="border-1 flex items-center ">
+      <div className="flex items-center border-1 ">
         {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -689,20 +689,20 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
-            <btn.icon className="h-4 w-4" />
+            <btn.icon className="w-4 h-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
 
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
                 <DropdownMenuItem key={index}>
-                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  <btn.icon className="inline-block w-4 h-4 mr-2" />
                   {btn.label}
                 </DropdownMenuItem>
               ))}
@@ -799,7 +799,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
   };
   return (
     <>
-      <div className="border-1 flex items-center ">
+      <div className="flex items-center border-1 ">
         {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -807,20 +807,20 @@ export const TabsServiceMO = ({ materialOrders }) => {
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
-            <btn.icon className="h-4 w-4" />
+            <btn.icon className="w-4 h-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
 
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
                 <DropdownMenuItem key={index}>
-                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  <btn.icon className="inline-block w-4 h-4 mr-2" />
                   {btn.label}
                 </DropdownMenuItem>
               ))}
@@ -877,6 +877,54 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
 
+  const saveMOLI = async () => {
+    try {
+      Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we update the line item.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      
+      const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${lineItemID}`, {
+        Description: MODetailInput.description,
+        PickPackInstructions: MODetailInput.pickPackInstructions,
+        CollectionInstructions: MODetailInput.collectionInstructions,
+        CustomerResponse: MODetailInput.customerResponse,
+        RejectedReason: MODetailInput.rejectedReason,
+        OtherReason: MODetailInput.otherReason,
+        FailureId: MODetailInput.failureId,
+      });
+      if (res.data.success) {
+        // Success alert
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          navigate(`/material-order/${MOLineDetails.MOID}`)
+        })
+      } else {
+        // Error from API
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: res.data.message
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to update!',
+        text: error.message || 'Something went wrong.'
+      });
+    }
+  }
+
   const saveAndCloseMaterialLineItemsOrder = async () => {
     try {
       Swal.fire({
@@ -922,7 +970,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
   };
   return (
     <>
-      <div className="border-1 flex items-center ">
+      <div className="flex items-center border-1 ">
         {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -930,20 +978,20 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
-            <btn.icon className="h-4 w-4" />
+            <btn.icon className="w-4 h-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
 
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
                 <DropdownMenuItem key={index}>
-                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  <btn.icon className="inline-block w-4 h-4 mr-2" />
                   {btn.label}
                 </DropdownMenuItem>
               ))}
@@ -1309,25 +1357,25 @@ const [endDate, setEndDate] = useState(null);
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-2">
+        <div className="p-4 my-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
           This Case is <strong>read-only</strong> because it is{" "}
           <strong>Closed</strong>.
         </div>
       )}
-      <Card className="mt-2 rounded-none p-0 border-0">
+      <Card className="p-0 mt-2 border-0 rounded-none">
         <Tabs defaultValue="case_info">
-          <CardHeader className="flex flex-col gap-3 border-2 w-full p-2 sticky">
+          <CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2">
             <div className="flex justify-between">
               <CardTitle className="text-xl ">
                 {caseDetails.CaseID}
-                <span className="text-sm flex items-center">
+                <span className="flex items-center text-sm">
                   Case .
                   <Select
                     onValueChange={setSelected}
                     defaultValue="case"
                     className="shadow-xl"
                   >
-                    <SelectTrigger className="shadow-none border-none">
+                    <SelectTrigger className="border-none shadow-none">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1343,15 +1391,15 @@ const [endDate, setEndDate] = useState(null);
                 </span>
               </CardTitle>
               <CardTitle className="flex">
-                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
                   <h1 className="text-blue-500">{ownerUserData.Name}</h1>
                   <p className="text-sm font-light ">Owner</p>
                 </div>
-                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
                   <h1 className="text-blue-500">---</h1>
                   <p className="text-sm font-light ">Queue</p>
                 </div>
-                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
                   <h1 className="text-blue-500">
                     {dataFetchCustomerData.MainAccount?.Salutation}{" "}
                     {dataFetchCustomerData.MainAccount?.FirstName}{" "}
@@ -1359,9 +1407,9 @@ const [endDate, setEndDate] = useState(null);
                   </h1>
                   <p className="text-sm font-light ">Contact</p>
                 </div>
-                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
                   <Select onValueChange={setSelected} defaultValue="first">
-                    <SelectTrigger className="shadow-none border-none text-blue-500 p-0">
+                    <SelectTrigger className="p-0 text-blue-500 border-none shadow-none">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="p-0">
@@ -1394,7 +1442,7 @@ const [endDate, setEndDate] = useState(null);
                   </TabsTrigger>
                 )
               )}
-              {/* <TabsTrigger variant="underline" value="case_info" className=" ">Case Information</TabsTrigger>
+              {/* <TabsTrigger variant="underline" value="case_info" className="">Case Information</TabsTrigger>
               <TabsTrigger variant="underline" value="customer,add,entitement" className="">Customer, Asset & Entitement</TabsTrigger>
               <TabsTrigger variant="underline" value="ci_notes" className="">Notes & Information</TabsTrigger>
               <TabsTrigger variant="underline" value="ci_activitas" className="">Activities</TabsTrigger>
@@ -1406,7 +1454,7 @@ const [endDate, setEndDate] = useState(null);
               <SelectBarRelated></SelectBarRelated> */}
               {open && (
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+                  <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
                     ...
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -1431,7 +1479,7 @@ const [endDate, setEndDate] = useState(null);
 
           <TabsContent value="case_info" className={"p-2"}>
             <Card className="flex-row">
-              <CardContent className="grid gap-10 items-center grid-cols-6 p-3 ">
+              <CardContent className="grid items-center grid-cols-6 gap-10 p-3 ">
                 <CaseField label="Case ID" icon>
                   <Input variant="invisible" value={caseDetails.CaseID} />
                 </CaseField>
@@ -1514,13 +1562,13 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
             </Card>
 
-            <Card className="mt-5 flex-col">
+            <Card className="flex-col mt-5">
               <CardHeader>
-                <CardTitle className=" text-lg">Global Trade Check</CardTitle>
+                <CardTitle className="text-lg ">Global Trade Check</CardTitle>
                 <hr />
               </CardHeader>
               
-              <CardContent className="grid gap-10  grid-cols-6 p-3 ">
+              <CardContent className="grid grid-cols-6 gap-10 p-3 ">
                 <CaseField label="Global Trade Status">
                   <Select value={formGtc.global_trade_status} onValueChange={onChangeGtc("global_trade_status")} defaultValue="--Select--">
                     <SelectTrigger className="w-[180px]">
@@ -1602,10 +1650,10 @@ const [endDate, setEndDate] = useState(null);
           >
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Customer Information</CardTitle>
+                <CardTitle className="text-lg ">Customer Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6 items-center">
+              <CardContent className="grid items-center grid-cols-6 gap-10">
                 <CaseField label="Customer Account" icon>
                   <Input
                     variant="invisible"
@@ -1685,10 +1733,10 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Asset Information</CardTitle>
+                <CardTitle className="text-lg ">Asset Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6 items-center">
+              <CardContent className="grid items-center grid-cols-6 gap-10">
                 <CaseField label="Assets" icon>
                   {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
                 </CaseField>
@@ -1720,7 +1768,7 @@ const [endDate, setEndDate] = useState(null);
                 <CaseField label="MV Product Description" icon>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <div className="p-5 gap-2 ring-1 col-span-2 grid grid-cols-2 items-center">
+                <div className="grid items-center grid-cols-2 col-span-2 gap-2 p-5 ring-1">
                   <CaseField label="Device Properties" icon>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
@@ -1730,10 +1778,10 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">SLA Information</CardTitle>
+                <CardTitle className="text-lg ">SLA Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6 items-center">
+              <CardContent className="grid items-center grid-cols-6 gap-10">
                 <CaseField label="Latest Start Date (Cust Time)" icon>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
@@ -1763,12 +1811,12 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">
+                <CardTitle className="text-lg ">
                   Entitlement Information
                 </CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6 items-center">
+              <CardContent className="grid items-center grid-cols-6 gap-10">
                 <CaseField label="Case Entitlement" icon>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
@@ -1818,15 +1866,15 @@ const [endDate, setEndDate] = useState(null);
           </TabsContent>
 
           <TabsContent value="ci_notes" className={"p-2 flex flex-col gap-4"}>
-            <Card className="flex-col p-2  ">
+            <Card className="flex-col p-2 ">
               <CardHeader>
-                <CardTitle className=" text-lg">
+                <CardTitle className="text-lg ">
                   Customer Issue Description & System Information
                 </CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="flex gap-x-5 p-4">
-                <div className="flex-1 grid grid-row-7 grid-cols-6 items-center gap-y-7">
+              <CardContent className="flex p-4 gap-x-5">
+                <div className="grid items-center flex-1 grid-cols-6 grid-row-7 gap-y-7">
                   <div className="row-span-4 col-span-full">
                     <textarea 
                       className="border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none"
@@ -1858,7 +1906,7 @@ const [endDate, setEndDate] = useState(null);
                   </CaseField>
                 </div>
 
-                <div className="flex-1 grid-flow-row gap-y-7 grid grid-cols-6">
+                <div className="grid flex-1 grid-flow-row grid-cols-6 gap-y-7">
                   <CaseField
                     label="Program/Category"
                     className={"col-span-3"}
@@ -1908,13 +1956,13 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
             </Card>
 
-            <Card className="flex-col p-2  ">
+            <Card className="flex-col p-2 ">
               <CardHeader>
-                <CardTitle className=" text-lg">Case Notes</CardTitle>
+                <CardTitle className="text-lg ">Case Notes</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="flex gap-4">
-                <div className="grid grid-cols-6 gap-y-7 flex-1">
+                <div className="grid flex-1 grid-cols-6 gap-y-7">
                   <CaseField label="Log Type" className={"col-span-2"} span={4}>
                     <Select onValueChange={(val) => onChange("LogType", val)}>
                       <SelectTrigger
@@ -1984,7 +2032,7 @@ const [endDate, setEndDate] = useState(null);
                       onChange={(e) => onChange("Note", e.target.value)}
                     /> */}
 
-                  {/* <div className='font-bold flex'>
+                  {/* <div className='flex font-bold'>
                     <span>Log Type</span>
                       <Select onValueChange={(val) => onChange("LogType", val)}>
                         <SelectTrigger>
@@ -1997,17 +2045,17 @@ const [endDate, setEndDate] = useState(null);
                       </Select>
                   </div>
 
-                  <div className='font-bold flex'>
+                  <div className='flex font-bold'>
                     <span>Action Type</span>
                     <span className=''>...</span>
                   </div>
 
-                  <div className='font-bold flex'>
+                  <div className='flex font-bold'>
                     <span>Template </span>
                     <span className=''>...</span>
                   </div>
 
-                  <div className='font-bold flex'>
+                  <div className='flex font-bold'>
                     <span>Visible Externally</span>
                     <span className=''>
                     <Select onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
@@ -2022,14 +2070,14 @@ const [endDate, setEndDate] = useState(null);
                     </span>
                   </div>
 
-                  <div className='font-bold flex '>
+                  <div className='flex font-bold '>
                     <span>Number of Minutes Spent</span>
                     <span className=''>...</span>
                   </div>
 
                   <div className='flex'>
                     <span className='font-bold'>Notes</span>
-                    <textarea className=' w-80 h-40 resize-none p-2 border-2 border-black ' value={formData?.Note || ''} onChange={(e) => onChange("Note", e.target.value)}></textarea>
+                    <textarea className='h-40 p-2 border-2 border-black resize-none w-80' value={formData?.Note || ''} onChange={(e) => onChange("Note", e.target.value)}></textarea>
                   </div> */}
                 </div>
 
@@ -2045,15 +2093,15 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
             </Card>
 
-            <Card className=" flex-col">
+            <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">
+                <CardTitle className="text-lg ">
                   Symptom Description / CardTitle
                 </CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="flex gap-6">
-                <div className="grid grid-cols-5 gap-y-7 gap-x-2 flex-1">
+                <div className="grid flex-1 grid-cols-5 gap-y-7 gap-x-2">
                   <CaseField
                     label="Keyword Search"
                     className={"col-span-2"}
@@ -2074,11 +2122,11 @@ const [endDate, setEndDate] = useState(null);
                   </CaseField>
 
                   {symptomSuggestions.length > 0 && (
-                    <ul className="bg-white border  max-h-40 overflow-y-auto absolute z-10">
+                    <ul className="absolute z-10 overflow-y-auto bg-white border max-h-40">
                       {symptomSuggestions.map((sym) => (
                         <li
                           key={sym.SymptomCodeID}
-                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          className="p-2 cursor-pointer hover:bg-gray-100"
                           onClick={() => {
                             setSelectedSymptom(sym);
                             setSymptomSearchTerm(sym.SymptomCode);
@@ -2113,21 +2161,21 @@ const [endDate, setEndDate] = useState(null);
                     {selectedSymptom?.SymptomCode}
                   </CaseField>
 
-                  {/* <div className='font-bold flex'>
+                  {/* <div className='flex font-bold'>
                     <span>Top Category</span>
                     <span className=''>...{selectedSymptom?.TopCategory}</span>
                   </div>
-                  <div className='font-bold flex'>
+                  <div className='flex font-bold'>
                     <span>Sub Category</span>
                     <span className=''>...{selectedSymptom?.SubCategory}</span>
                   </div>
-                  <div className='font-bold flex'>
+                  <div className='flex font-bold'>
                     <span>Spesific Symptom</span>
                     <span className=''>...{selectedSymptom?.SymptomCode}</span>
                   </div> */}
                 </div>
 
-                <div className="font-bold flex flex-1">
+                <div className="flex flex-1 font-bold">
                   <Table className="pverflow-auto">
                     <TableCaption className="caption-top">
                       {/* Optional caption content here */}
@@ -2142,12 +2190,12 @@ const [endDate, setEndDate] = useState(null);
                       </TableRow>
                       <TableRow>
                         <TableHead className="">
-                          <div className="flex items-center  gap-1">
+                          <div className="flex items-center gap-1">
                             QA Level 1 <ArrowUp /> <ChevronDown />
                           </div>
                         </TableHead>
                         <TableHead className="">
-                          <div className="flex items-center  gap-1">
+                          <div className="flex items-center gap-1">
                             QA Level 2 <ArrowUp /> <ChevronDown />
                           </div>
                         </TableHead>
@@ -2165,13 +2213,13 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
             </Card>
 
-            <Card className="mt-5 flex-col">
+            <Card className="flex-col mt-5">
               <CardHeader>
-                <CardTitle className=" text-lg">Case Resolution</CardTitle>
+                <CardTitle className="text-lg ">Case Resolution</CardTitle>
                 <hr />
               </CardHeader>
 
-              <CardContent className="grid gap-5 grid-cols-7 p-3 ">
+              <CardContent className="grid grid-cols-7 gap-5 p-3 ">
                 <CaseField label="Case Resolution Code">
                 <Input
                   variant='invisible'
@@ -2245,12 +2293,12 @@ const [endDate, setEndDate] = useState(null);
 
            <TabsContent value="ci_wo">
                       <div className="flex gap-4">
-                        <Card className="flex-1/3  rounded-md">
+                        <Card className="rounded-md flex-1/3">
                           <CardHeader>
-                            <CardTitle className=" text-lg">Case Information</CardTitle>
+                            <CardTitle className="text-lg ">Case Information</CardTitle>
                             <hr />
                           </CardHeader>
-                          <CardContent className="grid gap-5 grid-cols-2">
+                          <CardContent className="grid grid-cols-2 gap-5">
                           <CaseField label="Case Subject" span={1}>
                           {caseDetails.CaseSubject}
                           </CaseField>
@@ -2299,7 +2347,7 @@ const [endDate, setEndDate] = useState(null);
                             </CaseField>
                           </CardContent>
                         </Card>
-                        <div className="flex-3 flex flex-col gap-4">
+                        <div className="flex flex-col gap-4 flex-3">
                           <Card className="rounded-md">
                             <CardHeader>
                               <CardTitle className="text-lg">Case Notes History</CardTitle>
@@ -2322,10 +2370,10 @@ const [endDate, setEndDate] = useState(null);
           <TabsContent value="ci_orders" className={"p-2 flex flex-col gap-4"}>
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Shipment Information</CardTitle>
+                <CardTitle className="text-lg ">Shipment Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-4 items-center">
+              <CardContent className="grid items-center grid-cols-4 gap-10">
                 <CaseField label="Shipment Country">
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
@@ -2352,11 +2400,11 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Work Order</CardTitle>
+                <CardTitle className="text-lg ">Work Order</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className=" flex flex-col gap-5 p-3">
-                <div className="grid gap-5 grid-cols-4">
+              <CardContent className="flex flex-col gap-5 p-3 ">
+                <div className="grid grid-cols-4 gap-5">
                   <CaseField label="Incident Type" span={3}>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
@@ -2389,7 +2437,7 @@ const [endDate, setEndDate] = useState(null);
                     {workOrders.map((work) => (
                       <TableRow
                         key={work.WOID}
-                        className="hover:bg-gray-300 cursor-pointer"
+                        className="cursor-pointer hover:bg-gray-300"
                       >
                         <TableCell
                           className="font-medium "
@@ -2429,7 +2477,7 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Parts Order</CardTitle>
+                <CardTitle className="text-lg ">Parts Order</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-5">
@@ -2473,7 +2521,7 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Service Order</CardTitle>
+                <CardTitle className="text-lg ">Service Order</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-5">
@@ -2507,7 +2555,7 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Material Order</CardTitle>
+                <CardTitle className="text-lg ">Material Order</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-5">

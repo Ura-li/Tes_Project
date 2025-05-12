@@ -90,24 +90,23 @@ export async function POST(request) {
       );
     }
 
-    // Buat booking dan bookingDetails dalam transaksi
     const result = await prisma.$transaction(async (tx) => {
+      // 1. Buat booking
       const booking = await tx.bookings.create({
         data: {
           WOID: woid,
           BookingStatus: 'Schedule',
           CreatedBy: createdBy,
-        }
+        },
       });
 
+      // 2. Buat detail booking
       const bookingDetail = await tx.bookingDetails.create({
         data: {
           BookingId: booking.BookingId,
           ChangedBy: createdBy,
           Name: "",
           Status: "Schedule",
-
-          // Waktu dan relasi diisi default/null (bisa dipatch nanti)
           StartTimeCustomerTime: null,
           EndTimeCustomerTime: null,
           EstimatedArrivalTimeCustomerTime: null,
@@ -117,14 +116,14 @@ export async function POST(request) {
           DurationInMinutesUserTime: 0,
           EstimatedArrivalTimeUserTime: null,
           ActualArrivalTimeUserTime: null,
-
           ResourceId: null,
           ResourceAccountId: null,
           SubkTechnicianId: null,
-        }
+        },
       });
 
-      const workOrderupdate = await tx.workorder.update({
+      // 3. Update SystemStatus pada workorder
+      await tx.workorder.update({
         where: { WOID: woid },
         data: {
             SystemStatus: "OPEN_SCHEDULED"
