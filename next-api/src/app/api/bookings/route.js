@@ -127,7 +127,7 @@ export async function POST(request) {
       const workOrderupdate = await tx.workorder.update({
         where: { WOID: woid },
         data: {
-            WorkOrderStatus: "OPEN_SCHEDULED"
+            SystemStatus: "OPEN_SCHEDULED"
         }
       })
 

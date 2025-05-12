@@ -11,24 +11,16 @@ import {
   } from "@/components/ui/select"
    
   export function SelectBar({ id, onChange, value, options, placeholder }) {
-    console.log("SelectBar value:", value);
-    const handleValueChange = (selectedValue) => {
-      // Avoid looping by only firing if value actually changes
-      if (selectedValue !== value) {
-        onChange({ target: { id, value: selectedValue } });
-      }
-    };
-
     return (
-      <Select value={value} onValueChange={handleValueChange}>
+      <Select value={value} onValueChange={(val) => onChange({ target: { id, value: val } })}>
         <SelectTrigger className="w-full border-black">
-          <SelectValue placeholder={placeholder} />
+          <SelectValue placeholder={placeholder || "Select an option"} />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
+            {options.map((opt) => (
+              <SelectItem key={opt.id} value={opt.name}>
+                {opt.name}
               </SelectItem>
             ))}
           </SelectGroup>
@@ -36,6 +28,7 @@ import {
       </Select>
     );
   }
+
 
 
 
@@ -82,9 +75,12 @@ import {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
+            {/* { id: "Depot Repair", name: "Depot Repair" },
+                { id: "Onsite", name: "Onsite" },
+                { id: "Bench", name: "Bench" }, */}
             <SelectItem value="Depot Repair">Depot Repair</SelectItem>
-            <SelectItem value="Item2">Item 2</SelectItem>
-            <SelectItem value="Item3">Item 3</SelectItem>
+            <SelectItem value="Onsite">Onsite</SelectItem>
+            <SelectItem value="Bench">Bench</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>

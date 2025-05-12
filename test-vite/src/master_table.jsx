@@ -32,6 +32,9 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "./components/ui/button";
 import { cn } from "./lib/utils";
+
+import { ExportExcel } from "./components/Export-Excel";
+
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -361,36 +364,6 @@ export const Case_table = () => {
   const [error, setError] = useState(null);
   const [caseData, setCaseData] = useState([]);
   const [openClose, setOpenClose] = useState(true)
-  // const [casetable, setCaseTable] = useState([
-  //   {
-  //     CaseID: "51337",
-  //     CreatedOn: "2025-03-20",
-  //     CaseSubject: "ID/NBD/...",
-  //     CustomerAccount: "Bank Indonesia",
-  //     Primary: "Achnesia",
-  //     HW: "PIL001",
-  //     SerialNumber: "4CE310C...",
-  //     ProductNumber: "4NF92AV",
-  //     ProductName: "HP Z2 SE...",
-  //     CreatedName: "Muhammad Arif",
-  //     Owner: "Risa Martiana",
-  //     WorkGroup: "IDY_SB Ja...",
-  //   },
-  //   {
-  //     CaseID: "67890",
-  //     CreatedOn: "2025-03-19",
-  //     CaseSubject: "ID/NBD/...",
-  //     CustomerAccount: "PT.JAVA ABADI",
-  //     Primary: "Irma khainur",
-  //     HW: "P5U00",
-  //     SerialNumber: "1CZ9200",
-  //     ProductNumber: "4HF92AV",
-  //     ProductName: "HP ProDesk...",
-  //     CreatedName: "Kamisyah...",
-  //     Owner: "Kamisyah Ind...",
-  //     WorkGroup: "IDY_SB Ja...",
-  //   },
-  // ]);
 
   const fetchCaseDataTable = async () => {
     const newState = !openClose;
@@ -407,6 +380,7 @@ export const Case_table = () => {
     });
 
     setError(null);
+    
 
     try {
       const response = await ApiCustomer.get(url);
@@ -457,8 +431,17 @@ export const Case_table = () => {
   //navigate
   const navigate = useNavigate();
 
+
+
   return (
     <div className="p-4 flex flex-col gap-2">
+      {/* <button
+        onClick={handleDownload}
+        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        Download Excel
+      </button> */}
+      <ExportExcel caseData={caseData}/>
       <h2 className="text-xl font-bold mb-4">ID Daily Aging Cases Javag FY</h2>
       <input
         type="text"

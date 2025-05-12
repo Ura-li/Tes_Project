@@ -187,13 +187,30 @@ export function QuickWOInput ({
     console.log("Site Account Information : ",siteAccountInformation)
   }, [caseInformation?.SiteAccountID])
 
+  const [mainAccount, setMainAccount] = useState({
+    MainAccount: null,
+    SiteAccount: null,
+    Type: ""
+  });
   // Fetch data awal
   useEffect(() => {
     if (!WOID) return;
     (async () => {
       const wo = workOrderData; 
-      const siteAccount = caseInformation.site_account;
+      
       const contact = caseInformation.contact_information; 
+      setMainAccount({
+        MainAccount: contact,
+      });
+
+      const siteAccount = caseInformation.site_account;
+      // Build the mainAccount object locally
+      const newMainAccount = {
+        MainAccount: contact,
+        SiteAccount: siteAccount || null,
+        Type: siteAccount ? "SiteAccount" : "Individual",
+      };
+
       setGeneral({
         incomingChannel: wo.IncomingChannel || "...",
         workOrderNumber: wo.WorkOrderNumber || "...",
@@ -267,27 +284,31 @@ export function QuickWOInput ({
       // setBusinessSegment("---");
       // setLongitude("---");
       // setLatitude( "---");
-      setServiceDeliveryAddress({
-        companyName: siteAccount.Company || "---",
-        contactFirstName: contact.FirstName || "---",
-        contactLastName: contact.LastName || "---",
-        phoneNumber: siteAccount.PrimaryPhone || contact.Phone || "---",
-        email: siteAccount.Email || contact.Email || "---",
-        addressLine1: siteAccount.AddressLine1 || contact.AddressLine1  || "---",
-        addressLine2: siteAccount.AddressLine2 || contact.AddressLine2  || "---",
-        addressLine3: "---",
-        city: siteAccount.City || contact.City || "---",
-        stateOrProvince: siteAccount.StateProvince || contact.StateProvince || "---",
-        countryOrRegion: siteAccount.Country || contact.Country || "---",
-        postalCode: siteAccount.ZipPostalCode || contact.ZipPostalCode || "---",
-        timezone: "---",
-        serviceTerritory:  "---",
-        businessSegment: "---",
-        longitude:  "---",
-        latitude: "---",
-      })
+      setMainAccount(newMainAccount);
+      console.log("Main Account : ",mainAccount);
 
-      setAddressID(siteAccount.SiteAccountID || "---" );
+    // Now you can safely use newMainAccount
+      setServiceDeliveryAddress({
+        companyName: siteAccount?.Company || "---",
+        contactFirstName: contact?.FirstName || "---",
+        contactLastName: contact?.LastName || "---",
+        phoneNumber: siteAccount?.PrimaryPhone || contact?.Phone || "---",
+        email: siteAccount?.Email || contact?.Email || "---",
+        addressLine1: siteAccount?.AddressLine1 || contact?.AddressLine1 || "---",
+        addressLine2: siteAccount?.AddressLine2 || contact?.AddressLine2 || "---",
+        addressLine3: "---",
+        city: siteAccount?.City || contact?.City || "---",
+        stateOrProvince: siteAccount?.StateProvince || contact?.StateProvince || "---",
+        countryOrRegion: siteAccount?.Country || contact?.Country || "---",
+        postalCode: siteAccount?.ZipPostalCode || contact?.ZipPostalCode || "---",
+        timezone: "---",
+        serviceTerritory: "---",
+        businessSegment: "---",
+        longitude: "---",
+        latitude: "---",
+      });
+
+      setAddressID(siteAccount?.SiteAccountID || "---");
       // setCompanyName(address.CompanyName || "---");
       // setContactFirstName(address.ContactFirstName || "---");
       // setContactLastName(address.ContactLastName || "---");
@@ -393,7 +414,7 @@ export function QuickWOInput ({
                 <CaseField label="Choose Address" className={''}  >Site Account address</CaseField>
                 <CaseField label="Address Line1" className={''}  > <Input variant={'invisible'} className=" " value={ServiceDeliveryAddress.addressLine1} readOnly/> </CaseField>
                 <CaseField label="Postal Code" className={''}  > <Input variant={'invisible'}  className="" value={ServiceDeliveryAddress.postalCode} readOnly/> </CaseField>
-                <CaseField label="Company Name" className={''}  > <Input variant={'invisible'} className="" value={siteAccountInformation.Company} readOnly/> </CaseField>
+                <CaseField label="Company Name" className={''}  > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.companyName} readOnly/> </CaseField>
                 <CaseField label="Address Line2" className={''}  > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.addressLine2} readOnly/> </CaseField>
                 <CaseField label="Timezone" className={''} icon > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.timezone} readOnly/> </CaseField>
                 <CaseField label="Contact First Name" className={''}  > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.contactFirstName} onChange={e => setContactFirstName(e.target.value)} /> </CaseField>

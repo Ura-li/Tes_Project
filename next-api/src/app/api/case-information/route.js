@@ -3,10 +3,13 @@ import { NextResponse } from "next/server";
 import prisma  from "../../../../prisma/client";
 
 import { generateID } from "@/utils/generateID";
+import * as XLSX from 'xlsx';
 
 export async function GET(request) {
     //get search parameter
     const { searchParams } = new URL(request.url);
+    
+    const exportExcel = searchParams.get("export") === "excel";
 
     //extract query parameter
     const CaseStatus = searchParams.get("CaseStatus")
@@ -74,41 +77,46 @@ export async function GET(request) {
                   }
                 }
             },
-            createdByUser : true
+            createdByUser : true,
+            global_trade_check : true,
+            caseresolution: true,
+            otcCodeTable: true,
+            casenotes_caseinformation_CaseNoteTocasenotes: true
         }
     });
 
-
-    return NextResponse.json(
-        {
-            success: true,
-            message: "List Data Case",
-            data: case_information.map(caseData => ({
-                    CaseID: caseData.CaseID,
-                    // CreatedOn: caseData.CreatedOn,
-                    CreatedOn: caseData.CreatedOn.toLocaleString('id-ID'),
-                    CaseSubject: caseData.CaseSubject,
-                    CustomerAccount: caseData.contact_information?.site_account?.Company || "No Company",
-                    Primary: `${caseData.contact_information?.FirstName || ""} ${caseData.contact_information?.LastName || ""}`.trim(),
-                    HW: "N/A", //wtf is this
-                    SerialNumber: caseData.asset_information?.SerialNumber || "No Serial",
-                    ProductNumber: caseData.asset_information?.ProductNumber || "No Product Number",
-                    ProductName: caseData.asset_information?.product_information?.ProductName || "No Product Name",
-                    CreatedName: caseData.User?.Name, // Replace with the database owned
-                    Owner: caseData.User?.Name, // Replace with the database owned
-                    WorkGroup: "Miku21" , // Replace with the database owned
-                    CaseStatus: caseData.CaseStatus,
-                    
-                })),
-            value:{ 
-                open: openCount,
-                closed: closedCount
+    
+        return NextResponse.json(
+            {
+                success: true,
+                message: "List Data Case",
+                data: case_information.map(caseData => ({
+                        CaseID: caseData.CaseID,
+                        // CreatedOn: caseData.CreatedOn,
+                        CreatedOn: caseData.CreatedOn.toLocaleString('id-ID'),
+                        CaseSubject: caseData.CaseSubject,
+                        CustomerAccount: caseData.contact_information?.site_account?.Company || "No Company",
+                        Primary: `${caseData.contact_information?.FirstName || ""} ${caseData.contact_information?.LastName || ""}`.trim(),
+                        HW: "N/A", //wtf is this
+                        SerialNumber: caseData.asset_information?.SerialNumber || "No Serial",
+                        ProductNumber: caseData.asset_information?.ProductNumber || "No Product Number",
+                        ProductName: caseData.asset_information?.product_information?.ProductName || "No Product Name",
+                        CreatedName: caseData.User?.Name, // Replace with the database owned
+                        Owner: caseData.User?.Name, // Replace with the database owned
+                        WorkGroup: "Miku21" , // Replace with the database owned
+                        CaseStatus: caseData.CaseStatus,
+                        caseinformation: caseData
+                    })),
+                value:{ 
+                    open: openCount,
+                    closed: closedCount
+                }
+            },
+            {
+                status:200,
             }
-        },
-        {
-            status:200,
-        }
-    );
+        );
+    
 }
 
 export async function POST(request) {
