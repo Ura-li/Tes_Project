@@ -187,13 +187,30 @@ export function QuickWOInput ({
     console.log("Site Account Information : ",siteAccountInformation)
   }, [caseInformation?.SiteAccountID])
 
+  const [mainAccount, setMainAccount] = useState({
+    MainAccount: null,
+    SiteAccount: null,
+    Type: ""
+  });
   // Fetch data awal
   useEffect(() => {
     if (!WOID) return;
     (async () => {
       const wo = workOrderData; 
-      const siteAccount = caseInformation.site_account;
+      
       const contact = caseInformation.contact_information; 
+      setMainAccount({
+        MainAccount: contact,
+      });
+
+      const siteAccount = caseInformation.site_account;
+      // Build the mainAccount object locally
+      const newMainAccount = {
+        MainAccount: contact,
+        SiteAccount: siteAccount || null,
+        Type: siteAccount ? "SiteAccount" : "Individual",
+      };
+
       setGeneral({
         incomingChannel: wo.IncomingChannel || "...",
         workOrderNumber: wo.WorkOrderNumber || "...",
@@ -267,27 +284,31 @@ export function QuickWOInput ({
       // setBusinessSegment("---");
       // setLongitude("---");
       // setLatitude( "---");
-      setServiceDeliveryAddress({
-        companyName: siteAccount.Company || "---",
-        contactFirstName: contact.FirstName || "---",
-        contactLastName: contact.LastName || "---",
-        phoneNumber: siteAccount.PrimaryPhone || contact.Phone || "---",
-        email: siteAccount.Email || contact.Email || "---",
-        addressLine1: siteAccount.AddressLine1 || contact.AddressLine1  || "---",
-        addressLine2: siteAccount.AddressLine2 || contact.AddressLine2  || "---",
-        addressLine3: "---",
-        city: siteAccount.City || contact.City || "---",
-        stateOrProvince: siteAccount.StateProvince || contact.StateProvince || "---",
-        countryOrRegion: siteAccount.Country || contact.Country || "---",
-        postalCode: siteAccount.ZipPostalCode || contact.ZipPostalCode || "---",
-        timezone: "---",
-        serviceTerritory:  "---",
-        businessSegment: "---",
-        longitude:  "---",
-        latitude: "---",
-      })
+      setMainAccount(newMainAccount);
+      console.log("Main Account : ",mainAccount);
 
-      setAddressID(siteAccount.SiteAccountID || "---" );
+    // Now you can safely use newMainAccount
+      setServiceDeliveryAddress({
+        companyName: siteAccount?.Company || "---",
+        contactFirstName: contact?.FirstName || "---",
+        contactLastName: contact?.LastName || "---",
+        phoneNumber: siteAccount?.PrimaryPhone || contact?.Phone || "---",
+        email: siteAccount?.Email || contact?.Email || "---",
+        addressLine1: siteAccount?.AddressLine1 || contact?.AddressLine1 || "---",
+        addressLine2: siteAccount?.AddressLine2 || contact?.AddressLine2 || "---",
+        addressLine3: "---",
+        city: siteAccount?.City || contact?.City || "---",
+        stateOrProvince: siteAccount?.StateProvince || contact?.StateProvince || "---",
+        countryOrRegion: siteAccount?.Country || contact?.Country || "---",
+        postalCode: siteAccount?.ZipPostalCode || contact?.ZipPostalCode || "---",
+        timezone: "---",
+        serviceTerritory: "---",
+        businessSegment: "---",
+        longitude: "---",
+        latitude: "---",
+      });
+
+      setAddressID(siteAccount?.SiteAccountID || "---");
       // setCompanyName(address.CompanyName || "---");
       // setContactFirstName(address.ContactFirstName || "---");
       // setContactLastName(address.ContactLastName || "---");
@@ -327,13 +348,13 @@ export function QuickWOInput ({
   //     RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer,
   //   });
 
-  //   // Simpan Service Delivery Address
-  //   // await ApiCustomer.patch(`/api/workorder/${WOID}/service-address`, {
-  //   //   ContactFirstName: ServiceDeliveryAddress.contactFirstName,
-  //   //   PhoneNumber: ServiceDeliveryAddress.phoneNumber,
-  //   //   Email: ServiceDeliveryAddress.email,
-  //   //   City: ServiceDeliveryAddress.city,
-  //   // });
+  // //   // Simpan Service Delivery Address
+  // //   // await ApiCustomer.patch(`/api/workorder/${WOID}/service-address`, {
+  // //   //   ContactFirstName: ServiceDeliveryAddress.contactFirstName,
+  // //   //   PhoneNumber: ServiceDeliveryAddress.phoneNumber,
+  // //   //   Email: ServiceDeliveryAddress.email,
+  // //   //   City: ServiceDeliveryAddress.city,
+  // //   // });
   // };
 
   return (
@@ -342,13 +363,13 @@ export function QuickWOInput ({
           <TabsContent value="Quick_WO_Input">
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=' text-lg'>General</CardTitle>
+                <CardTitle className='text-lg '>General</CardTitle>
                 <hr />
               </CardHeader>
 
             <CardContent className="flex gap-5">
-              <div className="grid grid-cols-6 gap-5 flex-1">
-                <div className="border-1 col-span-6 grid grid-cols-6 p-4">
+              <div className="grid flex-1 grid-cols-6 gap-5">
+                <div className="grid grid-cols-6 col-span-6 p-4 border-1">
                   <CaseField label="Incoming Channel" className={'col-span-2'} icon span={4}>
                     <Input variant={'invisible'} className="" 
                     value={general.incomingChannel} onChange={handleChangeGeneral('incomingChannel')} readOnly/> </CaseField>
@@ -370,7 +391,7 @@ export function QuickWOInput ({
                     value={general.partnerStatus} readOnly/> </CaseField>
               </div>
 
-              <div className="grid grid-cols-6 items-start justify-start flex-1 content-start gap-5">
+              <div className="grid items-start content-start justify-start flex-1 grid-cols-6 gap-5">
                 <CaseField label="Work Order Description" className={'col-span-2'} icon span={4}>
                    <Input variant={'invisible'} className="" value={general.workOrderDescription} readOnly /> </CaseField>
                 <CaseField label="Work Order Instruction" className={'col-span-2'} icon span={4}>
@@ -386,14 +407,14 @@ export function QuickWOInput ({
             */}
             <Card className="flex-col mt-7">  
               <CardHeader>
-                <CardTitle className=' text-lg'>Service Delivery Address</CardTitle>
+                <CardTitle className='text-lg '>Service Delivery Address</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-5 grid-cols-6">
+              <CardContent className="grid grid-cols-6 gap-5">
                 <CaseField label="Choose Address" className={''}  >Site Account address</CaseField>
-                <CaseField label="Address Line1" className={''}  > <Input variant={'invisible'} className=" " value={ServiceDeliveryAddress.addressLine1} readOnly/> </CaseField>
+                <CaseField label="Address Line1" className={''}  > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.addressLine1} readOnly/> </CaseField>
                 <CaseField label="Postal Code" className={''}  > <Input variant={'invisible'}  className="" value={ServiceDeliveryAddress.postalCode} readOnly/> </CaseField>
-                <CaseField label="Company Name" className={''}  > <Input variant={'invisible'} className="" value={siteAccountInformation.Company} readOnly/> </CaseField>
+                <CaseField label="Company Name" className={''}  > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.companyName} readOnly/> </CaseField>
                 <CaseField label="Address Line2" className={''}  > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.addressLine2} readOnly/> </CaseField>
                 <CaseField label="Timezone" className={''} icon > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.timezone} readOnly/> </CaseField>
                 <CaseField label="Contact First Name" className={''}  > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.contactFirstName} onChange={e => setContactFirstName(e.target.value)} /> </CaseField>
@@ -413,10 +434,10 @@ export function QuickWOInput ({
 
             <Card className="flex-col mt-7 ">
               <CardHeader>
-                <CardTitle className=' text-lg'>SLA in Customer Time Zone</CardTitle>
+                <CardTitle className='text-lg '>SLA in Customer Time Zone</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-5 auto-rows-auto grid-cols-6 place-content-between">
+              <CardContent className="grid grid-cols-6 gap-5 auto-rows-auto place-content-between">
                 <CaseField label="SLA Jeopardy" className={''} icon > <Input className="" value={SLA.slaJeopardy} readOnly/> </CaseField>
                 <CaseField label="Requested Date Time (Customer)" className={''}>
                   <DatePicker

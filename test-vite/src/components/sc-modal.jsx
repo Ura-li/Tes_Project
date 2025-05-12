@@ -120,7 +120,17 @@ export function BtnModal({
 
           <div className="flex flex-col">
             <Label htmlFor="CaseType">Case Type</Label>
-            <SelectBar3 value={caseType} onChange={setCaseType} />
+            <SelectBar3
+              value={caseType} 
+              onChange={setCaseType} 
+              id="CaseType"
+              placeholder="Select CaseType"
+              options={[
+                { id: "Depot Repair", name: "Depot Repair" },
+                { id: "Onsite", name: "Onsite" },
+                { id: "Bench", name: "Bench" },
+              ]}
+            />
           </div>
         </div>
 
@@ -165,7 +175,7 @@ export function BtnModal({
             <Input placeholder="Note" />
             <Input placeholder="CT / SN code" />
           </div>
-          <p className="text-sm text-gray-500 mt-1">Total accessories: 1</p>
+          <p className="text-sm text-gray-500 mt-1">Total accessories:</p>
         </div>
         <DialogFooter>
           <Button type="submit" onClick={(e) => {
@@ -206,7 +216,7 @@ export function BtnModalContact({
   //set modal state 
 
   console.log("Company Data in Modal Contact : ",companyData)
-  // const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);`
+  // const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);
   
   const isControlled = externalOpen !== undefined;
   const [internalOpen, setInternalOpen] = useState(false);
@@ -325,10 +335,10 @@ export function BtnModalContact({
         responseMessage = 'Kontak berhasil ditambahkan!';
       }
   
-      // ✅ Tutup modal form input dulu
-      if (!isControlled) {
-  setInternalOpen(false);
-}
+      // 1✅ Tutup modal form input dulu
+     if (!isControlled) {
+      setInternalOpen(false);
+     }
   
       // ✅ Tunggu sebentar biar modal benar-benar hilang (hindari konflik z-index)
       setTimeout(async () => {
@@ -440,8 +450,8 @@ export function BtnModalContact({
               onChange={handlerInputContactChange} 
               placeholder="Select Salutation"
               options={[
-                { value: "Mr. ", label: "Mr." },
-                { value: "Mrs. ", label: "Mrs." },
+                { id: "Mr. ", name: "Mr." },
+                { id: "Mrs. ", name: "Mrs." },
               ]}
             />
           </div>
@@ -453,9 +463,9 @@ export function BtnModalContact({
               onChange={handlerInputContactChange} 
               placeholder="Select Preferred Language"
               options={[
-                { value: "English", label: "English" },
-                { value: "Spanish", label: "Spanish" },
-                { value: "Bahasa Indonesia", label: "Bahasa Indonesia" },
+                { id: "English", name: "English" },
+                { id: "Spanish", name: "Spanish" },
+                { id: "Bahasa Indonesia", name: "Bahasa Indonesia" },
               ]}
             />
           </div>
