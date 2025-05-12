@@ -195,7 +195,6 @@ export const TabsService = ({
     const response = await ApiCustomer.post("/api/case-information/case-notes", {
       LogType: caseNoteFormData.LogType,
       ActionType: caseNoteFormData.ActionType,
-      Template: caseNoteFormData.Template,
       VisibleExternally: caseNoteFormData.VisibleExternally,
       Note: modifiedNote,
       CaseID: caseDetails.CaseID
@@ -210,12 +209,13 @@ export const TabsService = ({
     let dataUpdated = {
       CaseNote: response.data.data.NoteID
     };
+    
     if (selectedSymptom) {
       dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
     }
     await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated);
 
-    savedModules.push("Catatan");
+    savedModules.push("Note");
   }
   break;
 
@@ -447,6 +447,7 @@ export const TabsService = ({
           <ServiceCase
             caseDetails={caseDetails}
             formData={caseNoteFormData}
+            setCaseNoteFormData={setCaseNoteFormData}
             formGtc={gtcForm}
             setFormGtc={setGtcForm}
             onChangeGtc={handleGtcChange}
@@ -988,6 +989,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
 export const ServiceCase = ({
   caseDetails,
   formData,
+  setCaseNoteFormData,
   onChange,
   caseNotes,
   setCaseNotes,
@@ -1286,13 +1288,14 @@ export const ServiceCase = ({
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
       if (noteDetail) {
-        setCaseNotes({
+        setCaseNoteFormData((prev) => ({
+          ...prev,
           NotesDisplay: noteDetail.Note,
           ActionType: noteDetail.ActionType,
           CreatedOn: noteDetail.CreatedOn,
           LogType: noteDetail.LogType,
           VisibleExternally: noteDetail.VisibleExternally,
-        });
+        }));
       }
     };
     loadNote();
@@ -2045,7 +2048,7 @@ const [endDate, setEndDate] = useState(null);
               <CardContent className="flex gap-4">
                 <div className="grid flex-1 grid-cols-6 gap-y-7">
                   <CaseField label="Log Type" className={"col-span-2"} span={4}>
-                    <Select  value={caseNotes?.LogType}  onValueChange={(val) => onChange("LogType", val)}>
+                    <Select  value={formData?.LogType}  onValueChange={(val) => onChange("LogType", val)}>
                       <SelectTrigger
                         className={"w-[100%] hover:shadow-lg border-b-0"}
                       >
@@ -2063,8 +2066,8 @@ const [endDate, setEndDate] = useState(null);
                     className={"col-span-2"}
                     span={4}
                   >
-                    <SearchCommandBlock
-                      value={caseNotes?.ActionType}
+                      <SearchCommandBlock
+                      value={formData?.ActionType}
                       onChange={(val) => onChange("ActionType", val)}
                       placeholder="--Select--"
                       options={[
@@ -2088,10 +2091,10 @@ const [endDate, setEndDate] = useState(null);
                   >
                     <SelectYN
                       value={
-                        caseNotes?.VisibleExternally === undefined ||
-                        caseNotes?.VisibleExternally === null
+                        formData?.VisibleExternally === undefined ||
+                        formData?.VisibleExternally === null
                           ? ""
-                          : caseNotes?.VisibleExternally
+                          : formData?.VisibleExternally
                           ? "Yes"
                           : "No"
                       }
@@ -2180,7 +2183,7 @@ const [endDate, setEndDate] = useState(null);
                   <textarea
                     className="w-[100%] h-[100%] resize-none p-2 ring-1 ring-gray-500"
                     readOnly
-                    value={caseNotes?.NotesDisplay}
+                    value={formData?.NotesDisplay}
                   >
 
                     {console.log(caseNotes)}
