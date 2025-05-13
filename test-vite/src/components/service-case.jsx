@@ -821,6 +821,8 @@ export const TabsServiceMO = ({ materialOrders }) => {
 
 export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
   const navigate = useNavigate();
+  console.log(MOLineDetails);
+
   const buttons = [
     {
       icon: ArrowLeftFromLine,
@@ -1216,6 +1218,9 @@ export const ServiceCase = ({
       CaseType : "ASP/Reseller/GS1"
     },
     {
+      CaseType : "Bench"
+    },
+    {
       CaseType : "Call to Repair"
     },
     {
@@ -1238,6 +1243,9 @@ export const ServiceCase = ({
     },
     {
       CaseType : "Internal Support"
+    },
+    {
+      CaseType : "Onsite"
     },
     {
       CaseType : "Proactive"
