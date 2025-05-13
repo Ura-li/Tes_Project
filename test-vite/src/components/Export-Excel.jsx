@@ -13,10 +13,10 @@ export const ExportExcel = ({ caseData }) => {
     const fetchCases = async () => {
       const res = await ApiCustomer.get("/api/case-information");
       const json = res.data
-      console.log(json);
+      console.log("JSON DATA FETCH CASE EXCEL : ",json);
       const transformed = json.data.map((c) => ({
         CaseID: c.caseinformation.CaseID,
-        site_account: c.caseinformation.site_account?.Company ?? null,
+        site_account: c.caseinformation.contact_information?.site_account?.Company ?? null,
         contact_information: `${
           c.caseinformation.contact_information?.FirstName ?? ""
         } ${c.caseinformation.contact_information?.LastName ?? ""}`,
@@ -24,8 +24,10 @@ export const ExportExcel = ({ caseData }) => {
           c.caseinformation.asset_information?.product_information
             ?.ProductName ?? ""
         } - ${c.caseinformation.asset_information?.SerialNumber ?? ""}`,
-        id_gtc: c.caseinformation.id_gtc,
-        id_csr: c.caseinformation.id_csr,
+        global_trade_status: c.caseinformation.global_trade_check?.global_trade_status,
+        gt_override_reason: c.caseinformation.global_trade_check?.gt_override_reason,
+        gt_details: c.caseinformation.global_trade_check?.gt_details,
+        CaseResolution: c.caseinformation.caseresolution?.caseResolutionCode,
         CaseSubject: c.caseinformation.CaseSubject,
         CaseType: c.caseinformation.CaseType,
         KCI_Flag: c.caseinformation.KCI_Flag,
@@ -35,24 +37,17 @@ export const ExportExcel = ({ caseData }) => {
         CustomerSeverity: c.caseinformation.CustomerSeverity,
         CreatedOn: c.caseinformation.CreatedOn,
         CaseClosedDate: c.caseinformation.CaseClosedDate,
-        CaseNote: c.caseinformation.CaseNote,
         SymptomCode: c.caseinformation.SymptomCode,
         CaseResolution: c.caseinformation.CaseResolution,
-        CreatedBy: c.caseinformation.CreatedBy,
-        Owner: c.caseinformation.Owner,
-        WorkGround: c.caseinformation.WorkGround,
         casenotes_caseinformation_CaseNoteTocasenotes: c.caseinformation.casenotes_caseinformation_CaseNoteTocasenotes?.Note,
         symptom_codes: null,
-        workorder: null,
+        workorder: c.caseinformation.workorder[0]?.WOID,
         createdByUser: `${c.caseinformation.createdByUser?.Name ?? ""} (${
           c.caseinformation.createdByUser?.Email ?? ""
         })`,
-        ServiceCatalogID: c.caseinformation.ServiceCatalogID,
         servicecatalog: null,
-        global_trade_check: null,
         caseresolution: null,
         OTCCode:  `${ c.caseinformation.otcCodeTable?.OTCCode ?? ""} - ${c.caseinformation.otcCodeTable?.Description ?? ""}`,
-        otcCodeTable: null,
         ProblemDescription: c.caseinformation.ProblemDescription,
         CaseProductNote: c.caseinformation.CaseProductNote,
       }));

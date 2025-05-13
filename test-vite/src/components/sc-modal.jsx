@@ -49,8 +49,9 @@ import {
   import { Textarea } from "./ui/textarea";
   
  import { SnInput } from "./sn-input";
-
+import { Textarea } from "./ui/textarea";
 import { Pencil, Trash } from "lucide-react";
+import { Textarea } from "./ui/textarea";
 //import API
 import ApiCustomer from "@/api";
 import axios from "axios";

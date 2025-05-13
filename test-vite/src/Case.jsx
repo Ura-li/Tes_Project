@@ -56,8 +56,8 @@ export const Case = () => {
           noteID = existingNote.NoteID;
         } else {
           const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`, {
-            LogType: "NotesLog",
-            ActionType: "Initial",
+            LogType: "",
+            ActionType: "",
             Template: "",
             VisibleExternally: false,
             MinutesSpent: 0,
