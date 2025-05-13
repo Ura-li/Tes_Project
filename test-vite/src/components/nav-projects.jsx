@@ -17,9 +17,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { NotebookText } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Archive } from "lucide-react";
 import { LayoutDashboard } from "lucide-react";
+import { useState } from "react";
 
 
 export function NavProjects({
@@ -27,14 +28,23 @@ export function NavProjects({
 }) {
   const { isMobile } = useSidebar()
 
+  const location = useLocation();  // Get current route
+
+  // Helper to check if the current item is active based on URL
+  const isActive = (url) => {
+    return location.pathname === url;
+  };
+
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+    <SidebarGroup >
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <Link to={item.url}>
+          <SidebarMenuItem key={item.name}
+            // className={activeitem === item.name ? "bg-gray-300" : "bg-sky-300"}
+          >
+            <SidebarMenuButton asChild tooltip={item.title}    isActive={isActive(item.url)} >
+              <Link to={item.url} >
                 <item.icon />
                 <span>{item.name}</span>
               </Link>
@@ -84,11 +94,11 @@ export function NavRecent({
   const { isMobile } = useSidebar()
 
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+    <SidebarGroup >
       <SidebarMenu>
         {recent.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild tooltip={item.title}> 
               <Link to={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
@@ -139,11 +149,11 @@ export function NavPinned({
   const { isMobile } = useSidebar()
 
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+    <SidebarGroup >
       <SidebarMenu>
         {pinned.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild tooltip={item.title}>
               <Link to={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
@@ -194,11 +204,11 @@ export function NavMywork({
   const { isMobile } = useSidebar()
 
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+    <SidebarGroup >
       <SidebarMenu>
         {mywork.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild tooltip={item.title}>
               <Link to={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
@@ -206,7 +216,7 @@ export function NavMywork({
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuAction showOnHover>
+                <SidebarMenuAction showOnHover >
                   <MoreHorizontal />
                   {/* <span className="sr-only">More</span> */}
                 </SidebarMenuAction>
