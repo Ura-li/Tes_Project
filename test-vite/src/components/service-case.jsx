@@ -916,7 +916,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
         },
       });
       const res = await ApiCustomer.patch(
-        `/api/material-order/material-order-line-items/${MOLineDetails.LineItemID}`,
+        `/api/material-order/material-order-line-items/${LineItemID}`,
         {
           Status: "Closed",
         }
