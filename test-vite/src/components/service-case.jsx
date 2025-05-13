@@ -118,7 +118,7 @@ export const TabsService = ({
     screening_id: "",
     gt_active_listening: "",
     gt_al_comments: "",
-  });
+    });
 
    const [csrForm, setCsrForm] = useState({
     caseResolutionCode: "",
@@ -1533,7 +1533,18 @@ const [endDate, setEndDate] = useState(null);
                 <CaseField label="Case Status">
                   {caseDetails.CaseStatus}
                 </CaseField>
-                <CaseField label="Case Type">{caseDetails.CaseType}</CaseField>
+                <CaseField label="Case Type">
+                  <SearchCommandBlock
+                    value={caseDetails?.CaseType}
+                    onChange={handleCaseDetails("CaseType")}
+                    placeholder="--Select--"
+                    options={[
+                    "Depot Repair",
+                    "Onsite",
+                    "Bench",
+                    ]}
+                    />
+                </CaseField>
                 <CaseField label="KCI For Case?">
                   {caseDetails.KCI_Flag ? "Yes" : "No"}
                 </CaseField>
@@ -1802,7 +1813,7 @@ const [endDate, setEndDate] = useState(null);
                         ? dataFetchCustomerData?.SiteAccount?.Country
                         : dataFetchCustomerData?.MainAccount?.Country
                     }
-                  />
+                  />                  
                 </CaseField>
                 <CaseField label="Parent Company Non-Latin">
                   <Input variant="invisible" placeholder="---" />
@@ -1823,7 +1834,10 @@ const [endDate, setEndDate] = useState(null);
                   {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
                 </CaseField>
                 <CaseField label="Product Number" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  {
+                    dataFetchAssetInformation?.AssetInformation
+                      ?.product_information?.ProductNumber
+                  } 
                 </CaseField>
                 <CaseField label="Asset Location">
                   <Input variant="invisible" placeholder="---" />
