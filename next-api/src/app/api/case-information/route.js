@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import prisma  from "../../../../prisma/client";
 
 import { generateID } from "@/utils/generateID";
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx';
 
 export async function GET(request) {
   //get search parameter
