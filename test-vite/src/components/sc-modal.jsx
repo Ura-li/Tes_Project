@@ -7347,14 +7347,6 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
             </select>
           </div>
           <div>
-            <label htmlFor="Name">Name</label>
-            <Input id="Name" value={form.Name} onChange={handleChange} />
-          </div>
-          <div>
-            <label htmlFor="Status">Status</label>
-            <Input id="Status" value={form.Status} onChange={handleChange} />
-          </div>
-          <div>
             <label htmlFor="ResourceId">Resource ID</label>
             <select id="ResourceId" value={form.ResourceId} onChange={handleChange} className="w-full border p-2 rounded">
               <option value="">-- Select Resource --</option>
@@ -7374,6 +7366,14 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
               <option value="">-- Select Technician --</option>
               {technicians.map((t) => <option key={t.SubkTechnicianId} value={t.SubkTechnicianId}>{t.Name || t.SubkTechnicianId}</option>)}
             </select>
+          </div>
+          <div>
+            <label htmlFor="Name">Name</label>
+            <Input id="Name" value={form.Name} onChange={handleChange} />
+          </div>
+          <div>
+            <label htmlFor="Status">Status</label>
+            <Input id="Status" value={form.Status} onChange={handleChange} />
           </div>
         </div>
 
@@ -8392,71 +8392,142 @@ export function OTCEdit({ OTCCode, onUpdate }) {
   );
 }
 
-export function OTCDelete({ OTCCode, onUpdate }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+// export function OTCDelete({ OTCCode, onUpdate }) {
+//   const [isModalOpen, setIsModalOpen] = useState(false);
 
+//   const handleDelete = async () => {
+//     try {
+//       const response = await ApiCustomer.delete(`/api/otc-code/${OTCCode}`);
+
+//       if (response.status === 409 || response.data.success === false) {
+//         Swal.fire({
+//           icon: "error",
+//           title: "Cannot Delete",
+//           text: response.data.message || "This OTCCode cannot be deleted due to relational restrictions.",
+//           timer: 1400,
+//           showConfirmButton: false,
+//           timerProgressBar: true,
+//         });
+//         return;
+//       }
+
+//       Swal.fire({
+//         icon: "success",
+//         title: "Deleted",
+//         text: "OTCCode has been deleted successfully.",
+//         timer: 1100,
+//         showConfirmButton: false,
+//         timerProgressBar: true,
+//       });
+
+//       setIsModalOpen(false);
+//       onUpdate?.(); // Refresh list
+//     } catch (error) {
+//       Swal.fire({
+//         icon: "error",
+//         title: "Failed",
+//         text: error?.response?.data?.message || "Failed to delete OTCCode.",
+//         timer: 1400,
+//         showConfirmButton: false,
+//         timerProgressBar: true,
+//       });
+//     }
+//   };
+
+//   return (
+//     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+//       <DialogTrigger asChild>
+//         <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
+//           <Trash />
+//         </Button>
+//       </DialogTrigger>
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogTitle>Delete OTCCode</DialogTitle>
+//           <DialogDescription>Are you sure you want to delete this OTCCode? This action cannot be undone.</DialogDescription>
+//         </DialogHeader>
+//         <p>This will permanently remove the OTCCode record from the system.</p>
+//         <DialogFooter>
+//           <Button variant="destructive" onClick={handleDelete}>
+//             Delete
+//           </Button>
+//         </DialogFooter>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }
+
+export function OTCDelete({ OTCCode, isModalOpen, setIsModalOpen, onUpdate }) {
   const handleDelete = async () => {
-    try {
-      const response = await ApiCustomer.delete(`/api/otc-code/${OTCCode}`);
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "OTCCode ini akan dihapus dan tidak dapat dikembalikan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
 
-      if (response.status === 409 || response.data.success === false) {
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/otc-code/${OTCCode}`);
+
+        if (response.status === 409 || response.data?.success === false) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data?.message || "OTCCode ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+
         Swal.fire({
-          icon: "error",
-          title: "Cannot Delete",
-          text: response.data.message || "This OTCCode cannot be deleted due to relational restrictions.",
-          timer: 1400,
-          showConfirmButton: false,
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'OTCCode berhasil dihapus.',
+          timer: 1500,
           timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          setIsModalOpen(false);
+          if (onUpdate) {
+            onUpdate();
+          }
+          window.location.reload();
         });
-        return;
+      } catch (error) {
+        if (error.response?.status === 409) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data?.message || "OTCCode tidak dapat dihapus karena memiliki relasi.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus OTCCode. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
       }
-
-      Swal.fire({
-        icon: "success",
-        title: "Deleted",
-        text: "OTCCode has been deleted successfully.",
-        timer: 1100,
-        showConfirmButton: false,
-        timerProgressBar: true,
-      });
-
-      setIsModalOpen(false);
-      onUpdate?.(); // Refresh list
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed",
-        text: error?.response?.data?.message || "Failed to delete OTCCode.",
-        timer: 1400,
-        showConfirmButton: false,
-        timerProgressBar: true,
-      });
     }
   };
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
-          <Trash />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete OTCCode</DialogTitle>
-          <DialogDescription>Are you sure you want to delete this OTCCode? This action cannot be undone.</DialogDescription>
-        </DialogHeader>
-        <p>This will permanently remove the OTCCode record from the system.</p>
-        <DialogFooter>
-          <Button variant="destructive" onClick={handleDelete}>
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
   );
 }
-
 
 export function CrsAdd() {
   const [formData, setFormData] = useState({
@@ -8568,7 +8639,6 @@ export function CrsAdd() {
     </Dialog>
   );
 }
-
 
 export function CrsEdit({ id_csr, onUpdate }) {
   const [formData, setFormData] = useState({
@@ -8711,32 +8781,72 @@ export function CrsEdit({ id_csr, onUpdate }) {
 }
 
 export function CrsDelete({ id_csr, onDelete }) {
-  const [open, setOpen] = useState(false);
-
   const handleDelete = async () => {
-    try {
-      await ApiCustomer.delete(`/api/caseResolution/${id_csr}`);
-      Swal.fire({
-        icon: "success",
-        title: "Berhasil!",
-        text: "Case Resolution berhasil dihapus.",
-        timer: 1200,
-        timerProgressBar: true,
-        showConfirmButton: false,
-        allowEscapeKey: false
-      }).then(() => {
-       window.location.reload();
-      });
-    } catch (error) {
-      console.error("Error deleting:", error);
-      Swal.fire("Error", "Gagal menghapus data", "error");
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Case Resolution ini akan dihapus dan tidak dapat dikembalikan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/caseResolution/${id_csr}`);
+
+        if (response.status === 409 || response.data?.success === false) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data?.message || "Data memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Case Resolution berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.reload();
+          if (onDelete) {
+            onDelete();
+          }
+        });
+      } catch (error) {
+        if (error.response?.status === 409) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data?.message || "Data memiliki relasi dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
     }
   };
 
   return (
-        <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
-          <Trash />
-        </Button>
-
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
   );
 }
