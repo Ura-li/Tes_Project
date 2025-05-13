@@ -109,6 +109,9 @@ export async function PATCH(request, {params}) {
           } = body;
         console.log(body);
 
+        
+        const parsedFailureId = parseInt(FailureId);
+
         // Update data
         const updatedMOLineItems = await prisma.materialorderlineitems.update({
             where: { 
@@ -126,7 +129,7 @@ export async function PATCH(request, {params}) {
                 CustomerResponse,
                 RejectedReason,
                 OtherReason,
-                FailureId,
+                FailureId: parsedFailureId,
                 SerialNumber,
                 RemovedPartNumber,
                 RemovedSerialNumber,

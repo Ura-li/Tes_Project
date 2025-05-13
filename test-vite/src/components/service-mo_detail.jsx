@@ -35,7 +35,11 @@ import { Link } from "react-router";
 import Swal from "sweetalert2";
 
 import { useParams } from "react-router";
+// import Select from 'react-select';
+import debounce from 'lodash.debounce';
 import ApiCustomer from "@/api";
+
+import { CaseField } from "./quick-wo-input";
 
 import { TabsServiceMOLineItems } from "./service-case";
 import { Description } from "@radix-ui/react-dialog";
@@ -70,6 +74,7 @@ export const ServiceMoDetail = () => {
     mainComponent: '',
     gratisFlag: false,
     failureId: null,
+    failureName: '',
     serialNumber: '',
     removedPartNumber: '',
     removedSerialNumber: '',
@@ -110,6 +115,7 @@ export const ServiceMoDetail = () => {
         mainComponent: data.MainComponent || '',
         gratisFlag: data.GratisFlag || false,
         failureId: data.FailureId || null,
+        failureName: data.Failure?.Name || '',
         atpStatus: data.ATPStatus || '',
         serialNumber: data.SerialNumber || '',
         removedPartNumber: data.RemovedPartNumber || '',
@@ -132,23 +138,6 @@ export const ServiceMoDetail = () => {
       ...prev,
       [name]: value,
     }));
-  };
-  
-  const handleUpdate = async () => {
-    try {
-      await ApiCustomer.patch(`/api/material-order/material-order-line-items/${lineItemID}`, {
-        Description: MODetailInput.description,
-        PickPackInstructions: MODetailInput.pickPackInstructions,
-        CollectionInstructions: MODetailInput.collectionInstructions,
-        CustomerResponse: MODetailInput.customerResponse,
-        RejectedReason: MODetailInput.rejectedReason,
-        OtherReason: MODetailInput.otherReason,
-      });
-  
-      console.log("Material Order Line Item updated successfully.");
-    } catch (error) {
-      console.error("Error updating Material Order Line Item:", error);
-    }
   };
   
   
@@ -394,10 +383,13 @@ export const ServiceMoDetail = () => {
                   <span className="ml-40">...</span>
                 </div>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Failure Code</span>
-                  <span className="ml-46">...</span>
-                </div>
+                {/* <div className="flex font-bold"> */}
+                  {/* <span className="ml-46">...</span> */}
+                  <FailureSelect
+                    failureId={MODetailInput.failureId}
+                    setMODetailInput={setMODetailInput}
+                  />
+                {/* </div> */}
 
                 <div className="flex font-bold">
                   <span className="ml-7">Additional Failure Code</span>
@@ -556,5 +548,103 @@ export const ServiceMoDetail = () => {
     </Card>
     
     </>
+  );
+};
+
+const FailureSelect = ({ failureId, setMODetailInput }) => {
+  const [inputValue, setInputValue] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isFocused, setIsFocused] = useState(false); // Track if input is focused
+
+  useEffect(() => {    
+    // Fetch default options once
+    ApiCustomer.get('/api/failure/options').then((res) => {
+      const defaultOptions = res.data.map(f => ({
+        value: f.FailureId.toString(),
+        label: `${f.Name} — ${f.Description ?? ''}`
+      }));
+      setSearchResults(defaultOptions);
+    });
+  if (failureId) {
+    // Ambil data failure berdasarkan ID yang sudah ada
+    ApiCustomer.get(`/api/failure/${failureId}`).then((res) => {
+      const f = res.data.data;
+      const label = `${f.Name} — ${f.Description ?? ''}`;
+      setInputValue(label);
+    }).catch(() => {
+      setInputValue(''); // Kosongkan jika tidak ditemukan
+    });
+  }
+}, [failureId]);
+
+
+  const fetchFailures = debounce((query) => {
+    if (query.length < 2) return;
+    ApiCustomer.get(`/api/failure/options?q=${query}`).then((res) => {
+      const limited = res.data.slice(0, 3).map(f => ({
+        value: f.FailureId.toString(),
+        label: `${f.Name} — ${f.Description ?? ''}`
+      }));
+      setSearchResults(limited);
+    });
+  }, 300);
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setInputValue(value);
+    fetchFailures(value);
+  };
+
+  const handleSelect = (selected) => {
+    setInputValue(selected.label);
+    setSearchResults([]);
+    setMODetailInput((prev) => ({
+      ...prev,
+      failureId: selected.value,
+      failureName: selected.label,
+    }));
+  };
+
+  // Handle focus and blur events
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => setIsFocused(false), 150); // Delay to allow click on dropdown
+  };
+
+  return (
+    <CaseField label={"Failure Code"} span={2}>
+      <div className="relative w-full">
+        <Input
+          variant={"invisible"}
+          value={inputValue}
+          onChange={handleInputChange}
+          placeholder="Search Failure..."
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+        />
+
+        {/* Show dropdown only if results exist and input is focused */}
+        {isFocused && (
+          <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg max-h-60">
+            {searchResults.length > 0 ? (
+              searchResults.map((opt) => (
+                <li
+                  key={opt.value}
+                  className="p-3 cursor-pointer hover:bg-gray-200"
+                  onMouseDown={() => handleSelect(opt)} // Use onMouseDown to prevent blur before click
+                >
+                  {opt.label}
+                </li>
+              ))
+            ) : (
+              <li className="p-3 text-gray-500">No results found</li>
+            )}
+          </ul>
+        )}
+      </div>
+    </CaseField>
   );
 };

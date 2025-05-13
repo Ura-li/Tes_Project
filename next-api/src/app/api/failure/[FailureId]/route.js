@@ -28,6 +28,8 @@ export async function GET(request, { params }) {
       success: true,
       data: failure,
     });
+
+    console.log(failure);
   } catch (error) {
     console.error("🔥 ERROR:", error);
     return NextResponse.json({
