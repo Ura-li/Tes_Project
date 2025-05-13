@@ -1530,8 +1530,26 @@ const [endDate, setEndDate] = useState(null);
                 <CaseField label="Email Status">
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Case Status">
-                  {caseDetails.CaseStatus}
+                <CaseField label="Case Status">                 
+                  <SearchCommandBlock
+                    value= {caseDetails?.CaseStatus}
+                    onChange={handleCaseDetails("CaseStatus")}
+                    placeholder="--Select--"
+                    options={[
+                      "New",
+                      "Active",
+                      "Monitor",
+                      "Pending Customer Action",
+                      "Open",
+                      "Quote Requested",
+                      "Pending Follow Up",
+                      "Pending Order",
+                      "Escalated",
+                      "Closed",
+                      "Quote Approved",
+                      "Pending Quote",
+                    ]}
+                    />
                 </CaseField>
                 <CaseField label="Case Type">
                   <SearchCommandBlock
