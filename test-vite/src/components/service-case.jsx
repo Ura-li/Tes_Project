@@ -819,7 +819,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
   );
 };
 
-export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
+export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
   const navigate = useNavigate();
   console.log(MOLineDetails);
 
@@ -830,7 +830,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
       onClick: () => navigate(`/material-order/${MOLineDetails.MOID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
     {
       icon: FileSymlink,
       label: "Save & Close",
@@ -864,15 +864,18 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
           Swal.showLoading();
         }
       });
-      
-      const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${lineItemID}`, {
-        Description: MODetailInput.description,
-        PickPackInstructions: MODetailInput.pickPackInstructions,
-        CollectionInstructions: MODetailInput.collectionInstructions,
-        CustomerResponse: MODetailInput.customerResponse,
-        RejectedReason: MODetailInput.rejectedReason,
-        OtherReason: MODetailInput.otherReason,
-        FailureId: MODetailInput.failureId,
+      const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${LineItemID}`, {
+        Description: MOLineDetails.description,
+        PickPackInstructions: MOLineDetails.pickPackInstructions,
+        CollectionInstructions: MOLineDetails.collectionInstructions || "None",
+        CustomerResponse: MOLineDetails.customerResponse,
+        RejectedReason: MOLineDetails.rejectedReason,
+        OtherReason: MOLineDetails.otherReason,
+        FailureId: MOLineDetails.failureId,
+        SerialNumber: MOLineDetails.serialNumber,
+        RemovedPartNumber: MOLineDetails.removedPartNumber,
+        RemovedSerialNumber: MOLineDetails.removedSerialNumber,
+        RemovedPartDescription: MOLineDetails.removedPartDescription,
       });
       if (res.data.success) {
         // Success alert
@@ -883,7 +886,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
           timer: 2000,
           showConfirmButton: false
         }).then(() => {
-          navigate(`/material-order/${MOLineDetails.MOID}`)
+          navigate(`/mo_detail/${LineItemID}`)
         })
       } else {
         // Error from API
@@ -1910,7 +1913,7 @@ const [endDate, setEndDate] = useState(null);
                 </CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-9 items-center">
+              <CardContent className="grid items-center grid-cols-9 gap-10">
                 <CaseField label="Case Entitlement" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
