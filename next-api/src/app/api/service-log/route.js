@@ -121,7 +121,7 @@ export async function POST(request) {
             success: true,
             message: "Service Catalog Created Successfully!",
             data: newServiceCatalog
-        }, { status: 200 });
+        }, { status: 201 });
 
     } catch (error) {
         return NextResponse.json({
