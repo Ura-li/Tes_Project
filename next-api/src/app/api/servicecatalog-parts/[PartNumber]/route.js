@@ -3,7 +3,8 @@ import prisma from "../../../../../prisma/client";
 
 // GET Part by PartNumber
 export async function GET(request, { params }) {
-    const partNumber = decodeURIComponent(params.PartNumber);
+    const { PartNumber } = await params
+    const partNumber = decodeURIComponent(PartNumber)
 
     if (!partNumber) {
         return NextResponse.json(

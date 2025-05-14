@@ -69,8 +69,6 @@ export async function PATCH(request, { params }) {
         DurationInMinutesUserTime: body.DurationInMinutesUserTime,
         EstimatedArrivalTimeUserTime: body.EstimatedArrivalTimeUserTime ? new Date(body.EstimatedArrivalTimeUserTime) : null,
         ActualArrivalTimeUserTime: body.ActualArrivalTimeUserTime ? new Date(body.ActualArrivalTimeUserTime) : null,
-
-        ChangedBy: body.ChangedBy,
       },
     });
 
