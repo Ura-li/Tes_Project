@@ -18,7 +18,7 @@ import {
   SquareTerminal,
   Table,
 } from "lucide-react"
-
+import { Building, Briefcase, Phone, Folder, Box, Tag, ShieldCheck, ShoppingCart, Wrench, User, HardHat, Heart, Calendar, ClipboardCheck, Hammer, Server, Barcode, CheckCircle } from 'lucide-react';
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavRecent } from "@/components/nav-projects"
@@ -38,6 +38,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 import { getUserFromToken } from "@/lib/utils/auth"
+import { Separator } from "./ui/separator"
+import { Hpicon } from "./Hpicon";
 
 // This is sample data.
 const data = {
@@ -54,8 +56,8 @@ const data = {
       plan: "Enterprise",
     },
     {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
+      name: "PT Javag",
+      logo: Hpicon,
       plan: "Startup",
     },
     {
@@ -74,26 +76,32 @@ const data = {
         {
           title: "Company",
           url: "/master/Company_table",
+          icon: Building
         },
         {
           title: "Assets",
           url: "/master/Assets_table",
+          icon: Briefcase
         },
         {
           title: "Contact",
           url: "/master/Contact_table",
+          icon: Phone
         },
         {
           title: "Case",
           url: "/master/Case_table",
+          icon: Folder
         },
         {
           title: "Product",
           url: "/master/Product_table",
+          icon: Box
         },
         {
           title: "Product Type",
           url: "/master/ProductType_table ",
+          icon: Tag
         },
         // {
         //   title: "Service Catalog Type",
@@ -106,46 +114,57 @@ const data = {
         {
           title: "Warranty Service",
           url: "/master/WarrantyService_table",
+          icon: ShieldCheck
         },    
         {
           title: "Material Order",
           url: "/master/Mo_table",
+          icon: ShoppingCart
         },  
         {
           title: "Work Order",
           url: "/master/Wo_table",
+          icon: Wrench
         },
         {
           title: "Resource Account",
           url: "/master/ResourceAccount",
+          icon: User
         },
         {
           title: "Subk Technician",
           url: "/master/SubkTechnician",
+          icon: HardHat
         },
         {
           title: "Symptom Codes",
           url: "/master/symptom_codes",
+          icon: Heart
         },
         {
           title: "Bookings",
           url: "/master/Bookings",
+          icon: Calendar
         },
         {
           title: "Booking Details",
           url: "/master/BookingDetails",
+          icon: ClipboardCheck
         },
         {
           title: "User",
           url: "/master/User_table",
+          icon: User
         },  
         {
           title: "Parts",
           url: "/master/Part_table",
+          icon: Hammer
         },  
         {
           title: "Resource",
           url: "/master/Resource_table",
+          icon: Server
         }, 
         {
           title: "Repair Class Code",
@@ -158,10 +177,12 @@ const data = {
         {
           title: "OTC Code",
           url: "/master/OTC_Code",
+          icon: Barcode
         }, 
         {
           title: "Case Resolution",
           url: "/master/CrsTable",
+          icon: CheckCircle
         }, 
       ],
     },
@@ -238,34 +259,56 @@ const data = {
   projects: [
     {
       name: "Home",
+      title: "Home",
       url: "/",
       icon: Home,
     },
-  ],
-
-  recent: [
-    {
+     {
       name: "Recent",
+      title: "Recent",
       url: "#",
       icon: PieChart,
-    }
-  ],
-
-  mywork: [
+    },
     {
       name: "My work",
+      title: "My Work",
       url: "/search_case",
       icon: Table,
-    }
-  ],
-
-  pinned: [
+    },
     {
       name: "Pinned",
+      title: "Pinned",
       url: "#",
       icon: Pin
-    }
+    },
   ],
+
+  // recent: [
+  //   {
+  //     name: "Recent",
+  //     title: "Recent",
+  //     url: "#",
+  //     icon: PieChart,
+  //   }
+  // ],
+
+  // mywork: [
+  //   {
+  //     name: "My work",
+  //     title: "My Work",
+  //     url: "/search_case",
+  //     icon: Table,
+  //   }
+  // ],
+
+  // pinned: [
+  //   {
+  //     name: "Pinned",
+  //     title: "Pinned",
+  //     url: "#",
+  //     icon: Pin
+  //   }
+  // ],
 }
 
 export function AppSidebar({
@@ -278,9 +321,10 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavProjects projects={data.projects} />
-        <NavRecent recent={data.recent}/>
+        <Separator className={'border-2'}></Separator>
+        {/* <NavRecent recent={data.recent}/>
         <NavPinned pinned={data.pinned}/>
-        <NavMywork mywork={data.mywork}/>
+        <NavMywork mywork={data.mywork}/> */}
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>

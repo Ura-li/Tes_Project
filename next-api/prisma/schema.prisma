@@ -191,21 +191,68 @@ model materialorder {
   @@index([OwnerID])
 }
 
+// model materialorderlineitems {
+//   LineItemID           Int                         @id @default(autoincrement())
+//   MOID                 String?                     @db.VarChar(13)
+//   LineNumber           Int?
+//   PartNumber           String?                     @db.VarChar(100)
+//   Description          String?                     @db.Text
+//   ATPStatus            String?                     @db.VarChar(50)
+//   Price                Decimal?                    @db.Decimal(10, 2)
+//   Quantity             Int?
+//   Status               MaterialOrderLineItemStatus @default(New)
+//   materialorder        materialorder?              @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
+//   servicecatalog_parts servicecatalog_parts?       @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
+
+//   @@index([MOID], map: "MOID")
+//   @@index([PartNumber], map: "PartNumber")
+// }
+
 model materialorderlineitems {
-  LineItemID           Int                         @id @default(autoincrement())
-  MOID                 String?                     @db.VarChar(13)
-  LineNumber           Int?
-  PartNumber           String?                     @db.VarChar(100)
-  Description          String?                     @db.Text
-  ATPStatus            String?                     @db.VarChar(50)
+  LineItemID                 Int                         @id @default(autoincrement())
+  MOID                       String?                     @db.VarChar(13)
+  LineNumber                 Int?
+  PartNumber                 String?                     @db.VarChar(100)
+  Description                String?                     @db.Text
+  ATPStatus                  String?                     @db.VarChar(50)
+  Quantity                   Int?
+  Status                     MaterialOrderLineItemStatus @default(New)
   Price                Decimal?                    @db.Decimal(10, 2)
-  Quantity             Int?
-  Status               MaterialOrderLineItemStatus @default(New)
-  materialorder        materialorder?              @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
-  servicecatalog_parts servicecatalog_parts?       @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
+
+  // Revisi Tambahan
+  // FunctionalEquivalence      String?                     @db.VarChar(100)
+  // MediaHandlingPart          String?                     @db.VarChar(100)
+  // PickPackInstructions       String?                     @db.Text
+  // CollectionInstructions     CollectionInstructionType?  // Enum di bawah
+  // CustomerResponse           String?                     @db.Text
+  // RejectedReason             String?                     @db.Text
+  // OtherReason                String?                     @db.Text
+  // PartAuthorizationReason    String?                     @db.Text
+  // PartAuthorizationDetail    String?                     @db.Text
+  // OriginalPartNumber         String?                     @db.VarChar(100)
+  // OfferedPartNumber          String?                     @db.VarChar(100)
+  // OfferedPartDescription     String?                     @db.Text
+  // MainComponent              String?                     @db.VarChar(100)
+
+  
+  // Foreign key ke Failure
+  FailureId                  Int? 
+  failure                    Failure?                    @relation(fields: [FailureId], references: [FailureId], onDelete: SetNull)
+
+  materialorder              materialorder?              @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
+  servicecatalog_parts       servicecatalog_parts?       @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
 
   @@index([MOID], map: "MOID")
   @@index([PartNumber], map: "PartNumber")
+}
+
+model Failure {
+  FailureId   Int                       @id @default(autoincrement())
+  Name        String
+  Description String?
+
+  materialorderlineitems materialorderlineitems[]
+
 }
 
 model product_information {
@@ -456,7 +503,7 @@ model workorder {
   DueDateCustomer             DateTime?        @db.DateTime(0)
   CoverageWindow              String?          @db.VarChar(100)
   Response                    String?          @db.VarChar(100)
-  //OTCCode                     String?          @db.VarChar(50)
+  // OTCCode                     String?          @db.VarChar(50)
   RequestedDateTimeCustomer   DateTime?        @db.DateTime(0)
   GuaranteedFixTimeCustomer   DateTime?        @db.DateTime(0)
   EarlyStartDateTimeCustomer  DateTime?        @db.DateTime(0)
@@ -615,4 +662,11 @@ enum ShippingPriority {
   MEDIUM
   HIGH
   CRITICAL
+}
+
+enum CollectionInstructionType {
+  None
+  Pickup
+  DropOff
+  ThirdParty
 }

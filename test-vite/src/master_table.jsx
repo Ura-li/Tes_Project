@@ -34,6 +34,10 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "./components/ui/button";
 import { cn } from "./lib/utils";
+
+import { ExportExcel } from "./components/Export-Excel";
+
+import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectValue } from "./components/ui/select";
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -362,42 +366,15 @@ export const Case_table = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [caseData, setCaseData] = useState([]);
-  const [openClose, setOpenClose] = useState(true)
-  // const [casetable, setCaseTable] = useState([
-  //   {
-  //     CaseID: "51337",
-  //     CreatedOn: "2025-03-20",
-  //     CaseSubject: "ID/NBD/...",
-  //     CustomerAccount: "Bank Indonesia",
-  //     Primary: "Achnesia",
-  //     HW: "PIL001",
-  //     SerialNumber: "4CE310C...",
-  //     ProductNumber: "4NF92AV",
-  //     ProductName: "HP Z2 SE...",
-  //     CreatedName: "Muhammad Arif",
-  //     Owner: "Risa Martiana",
-  //     WorkGroup: "IDY_SB Ja...",
-  //   },
-  //   {
-  //     CaseID: "67890",
-  //     CreatedOn: "2025-03-19",
-  //     CaseSubject: "ID/NBD/...",
-  //     CustomerAccount: "PT.JAVA ABADI",
-  //     Primary: "Irma khainur",
-  //     HW: "P5U00",
-  //     SerialNumber: "1CZ9200",
-  //     ProductNumber: "4HF92AV",
-  //     ProductName: "HP ProDesk...",
-  //     CreatedName: "Kamisyah...",
-  //     Owner: "Kamisyah Ind...",
-  //     WorkGroup: "IDY_SB Ja...",
-  //   },
-  // ]);
-
+  const [openClose, setOpenClose] = useState('Open')
+  const state = ['Open','Close','InActive']
+  console.log("casestate",openClose);
   const fetchCaseDataTable = async () => {
-    const newState = !openClose;
-    setOpenClose(newState);
-    const url = openClose ? "/api/case-information?CaseStatus=Open" : "/api/case-information?CaseStatus=Close";
+    const baseurl = `/api/case-information`;
+    const url =
+      openClose === 'All'
+      ? baseurl
+      : `/api/case-information?CaseStatus=${openClose}`;
     Swal.fire({
       title: "Memuat Data Case....",
       text: "Mohon Tunggu Sebentar",
@@ -409,6 +386,7 @@ export const Case_table = () => {
     });
 
     setError(null);
+    
 
     try {
       const response = await ApiCustomer.get(url);
@@ -438,7 +416,7 @@ export const Case_table = () => {
   // 🔹 Load data when component mounts
   useEffect(() => {
     fetchCaseDataTable();
-  }, []);
+  }, [openClose]);
 
   // Filter data berdasarkan pencarian
   const filteredCaseTable = caseData.filter((item) =>
@@ -459,8 +437,17 @@ export const Case_table = () => {
   //navigate
   const navigate = useNavigate();
 
+
+
   return (
     <div className="p-4 flex flex-col gap-2">
+      {/* <button
+        onClick={handleDownload}
+        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        Download Excel
+      </button> */}
+      <ExportExcel caseData={caseData}/>
       <h2 className="text-xl font-bold mb-4">ID Daily Aging Cases Javag FY</h2>
       <input
         type="text"
@@ -469,7 +456,22 @@ export const Case_table = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-       <Button variant={'ghost'} className={' self-end'} onClick={fetchCaseDataTable}>{openClose ? "Toggle Open Case Status" : "Toggle Close Case Status"}</Button>
+      <div className="flex items-center gap-3">
+        <Label htmlFor='status' className={''}>Toggle Status Of Case :</Label>
+        <Select  defaultValue='Open' value={openClose} onValueChange={setOpenClose}>
+          <SelectTrigger id='status'>
+            <SelectValue>{openClose}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value='Open'>Open Case Status</SelectItem>
+              <SelectItem value='Close'>Close Case Status</SelectItem>
+              <SelectItem value='InActive'>InActive Case Status</SelectItem>
+              <SelectItem value='All'>ALL Case Status</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
       {/* 🔹 Loading & Error Messages */}
       {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -517,7 +519,7 @@ export const Case_table = () => {
                 <td className="border p-2">{caseItem.CreatedName}</td>
                 <td className="border p-2">{caseItem.Owner}</td>
                 <td className="border p-2">{caseItem.WorkGroup}</td>
-                <td className={cn("bg-emerald-300",caseItem.CaseStatus === "Close" && "bg-amber-300" )}>{caseItem.CaseStatus}</td>
+                <td className={cn("bg-emerald-300",caseItem.CaseStatus === "Close" ? "bg-red-300" : caseItem.CaseStatus === "InActive" ? "bg-sky-300" : "" )}>{caseItem.CaseStatus}</td>
               </tr>
             ))}
           </tbody>
@@ -2887,7 +2889,7 @@ export const BookingDetailsTable = () => {
             {currentData.map((item) => (
               <tr key={item.BookingDetailId} className="hover:bg-gray-100 text-center text-sm">
                 <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                  onClick={() => navigate(`/booking-details/${item.BookingDetailId}`)}
+                  onClick={() => navigate(`/bookings/${item.BookingDetailId}`)}
                 >
                   {item.BookingDetailId}
                 </td>
