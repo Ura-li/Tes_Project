@@ -6,7 +6,8 @@ const parseBool = (value) => value === "true" || value === true;
 
 // GET Part by PartNumber
 export async function GET(_, { params }) {
-  const partNumber = decodeURIComponent(params?.PartNumber || "");
+  const {PARTNUMBER} = await params
+  const partNumber = decodeURIComponent(PARTNUMBER);
 
   if (!partNumber) {
     return NextResponse.json(
@@ -42,7 +43,8 @@ export async function GET(_, { params }) {
 
 
 export async function PATCH(request, { params }) {
-  const partNumber = decodeURIComponent(params?.PartNumber || "");
+  const {PARTNUMBER} = await params
+  const partNumber = decodeURIComponent(PARTNUMBER);
   const body = await request.json();
 
   const {

@@ -1958,6 +1958,43 @@ const [endDate, setEndDate] = useState(null);
                   </CaseField>
                 </div>
               </CardContent>
+              {/* TABEL ACCESSORY */}
+  <div className="px-6 pb-6">
+    <h3 className="text-md font-semibold mb-2">Accessory</h3>
+    <div className="overflow-x-auto">
+      <table className="min-w-full border text-sm text-left">
+        <thead className="bg-gray-100 text-gray-700">
+          <tr>
+            <th className="border px-4 py-2">Accessories ID</th>
+            <th className="border px-4 py-2">Case ID</th>
+            <th className="border px-4 py-2">Accessories</th>
+            <th className="border px-4 py-2">Note</th>
+            <th className="border px-4 py-2">CT_SNCode</th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* {console.log(caseDetails)} */}
+          {caseDetails.accessory?.map((item, index) => (
+            <tr key={index} className="hover:bg-gray-50">
+              <td className="border px-4 py-2">{item.id}</td>
+              <td className="border px-4 py-2">{item.CaseID}</td>
+              <td className="border px-4 py-2">{item.Accessories}</td>
+              <td className="border px-4 py-2">{item.Note || "---"}</td>
+              <td className="border px-4 py-2">{item.CT_SNCode || "---"}</td>
+            </tr>
+          ))}
+          {(!dataFetchAssetInformation?.accessories ||
+            dataFetchAssetInformation.accessories.length === 0) && (
+            <tr>
+              <td className="border px-4 py-2 text-center" colSpan={5}>
+                No accessories found.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
             </Card>
 
             <Card className="flex-col ">
@@ -2293,6 +2330,45 @@ const [endDate, setEndDate] = useState(null);
                 </div>
               </CardContent>
             </Card>
+            
+            <Card className="flex-col mt-6">
+          <CardHeader>
+            <CardTitle className="text-lg">Action Log</CardTitle>
+            <hr />
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[60px]">No</TableHead>
+                  <TableHead>Change By</TableHead>
+                  <TableHead>Old Status</TableHead>
+                  <TableHead>New Status</TableHead>
+                  <TableHead>Change At</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {/* {actionLogs?.length > 0 ? (
+                  actionLogs.map((log, index) => (
+                    <TableRow key={log.id || index}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{log.changedBy}</TableCell>
+                      <TableCell>{log.oldStatus}</TableCell>
+                      <TableCell>{log.newStatus}</TableCell>
+                      <TableCell>{new Date(log.changedAt).toLocaleString()}</TableCell>
+                    </TableRow>
+                  ))
+                ) : ( */}
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center italic">
+                      No action logs available.
+                    </TableCell>
+                  </TableRow>
+                {/* )} */}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
             <Card className="flex-col ">
               <CardHeader>
