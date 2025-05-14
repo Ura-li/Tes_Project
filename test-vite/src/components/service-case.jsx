@@ -1726,34 +1726,43 @@ const [endDate, setEndDate] = useState(null);
                   </CaseField>
                 </div>
               </CardContent>
-                {/* Accessory Table */}
-                <div className="px-6 pb-6">
-                  <h2 className="text-md font-semibold mb-2">Accessory</h2>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm border">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th className="px-4 py-2 border">No</th>
-                          <th className="px-4 py-2 border">Accessory Name</th>
-                          <th className="px-4 py-2 border">Note</th>
-                          <th className="px-4 py-2 border">CT / SN Code</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {/* {(dataFetchAssetInformation?.AssetInformation?.accessories ?? []).map(
-                          (item: any, index: number) => (
-                            <tr key={index} className="text-center">
-                              <td className="px-4 py-2 border">{index + 1}</td>
-                              <td className="px-4 py-2 border">{item.AccessoryName}</td>
-                              <td className="px-4 py-2 border">{item.Note}</td>
-                              <td className="px-4 py-2 border">{item.CTorSNCode}</td>
-                            </tr>
-                          )
-                        )} */}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+              {/* TABEL ACCESSORY */}
+  <div className="px-6 pb-6">
+    <h3 className="text-md font-semibold mb-2">Accessory</h3>
+    <div className="overflow-x-auto">
+      <table className="min-w-full border text-sm text-left">
+        <thead className="bg-gray-100 text-gray-700">
+          <tr>
+            <th className="border px-4 py-2">Accessories ID</th>
+            <th className="border px-4 py-2">Case ID</th>
+            <th className="border px-4 py-2">Accessories</th>
+            <th className="border px-4 py-2">Note</th>
+            <th className="border px-4 py-2">CT_SNCode</th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* {console.log(caseDetails)} */}
+          {caseDetails.accessory?.map((item, index) => (
+            <tr key={index} className="hover:bg-gray-50">
+              <td className="border px-4 py-2">{item.id}</td>
+              <td className="border px-4 py-2">{item.CaseID}</td>
+              <td className="border px-4 py-2">{item.Accessories}</td>
+              <td className="border px-4 py-2">{item.Note || "---"}</td>
+              <td className="border px-4 py-2">{item.CT_SNCode || "---"}</td>
+            </tr>
+          ))}
+          {(!dataFetchAssetInformation?.accessories ||
+            dataFetchAssetInformation.accessories.length === 0) && (
+            <tr>
+              <td className="border px-4 py-2 text-center" colSpan={5}>
+                No accessories found.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
             </Card>
 
             <Card className="flex-col ">
