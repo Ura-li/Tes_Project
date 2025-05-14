@@ -37,14 +37,14 @@ const spanMap = {
   5: "col-span-5",
   6: "col-span-6",
 };
-export const CaseField = ({ label, children, icon = false, span = 1, className, childClass }) => {
+export const CaseField = ({ label, children, icon = false, span = 1, className, childClass, star }) => {
   // Determine which icon to use
   const IconComponent = icon === true ? Lock : icon || null;
   const readOnly = icon === "lock";
   return (
     <>
       <CardTitle className={twMerge(
-        `font-medium grid grid-cols-[1.25rem_auto] items-center gap-2 ${className}`
+        `font-medium flex  items-center gap-4 ${className}`
       )}>
         {IconComponent ? (
           <IconComponent className="size-4" />
@@ -52,6 +52,7 @@ export const CaseField = ({ label, children, icon = false, span = 1, className, 
           <div className="w-5" />
         )}
         {label}
+        {star ? <span className="text-red-400">*</span> : ""}
       </CardTitle>
       <CardTitle className={twMerge(spanMap[span],childClass)}>
         {children}
@@ -439,7 +440,7 @@ export function QuickWOInput ({
               </CardHeader>
               <CardContent className="grid grid-cols-6 gap-5 auto-rows-auto place-content-between">
                 <CaseField label="SLA Jeopardy" className={''} icon > <Input className="" value={SLA.slaJeopardy} readOnly/> </CaseField>
-                <CaseField label="Requested Date Time (Customer)" className={''}>
+                <CaseField star label="Requested Date Time (Customer)">
                   <DatePicker
                     value={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}
                     onChange={handleSLAChange("requestedDateTimeCustomer")}

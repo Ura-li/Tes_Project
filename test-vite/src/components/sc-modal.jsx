@@ -115,13 +115,13 @@ export function BtnModal({
       <form className="space-y-5">
         {/* Subject & Type */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="flex flex-col">
-            <Label htmlFor="CaseSubject">Case Subject</Label>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="CaseSubject">Case Subject<Label className="text-red-600">*</Label></Label>
             <Input id="CaseSubject" className="p-2 border" placeholder="Enter subject" />
           </div>
 
-          <div className="flex flex-col">
-            <Label htmlFor="CaseType">Case Type</Label>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="CaseType">Case Type<Label className="text-red-600">*</Label></Label>
             <SelectBar3
               value={caseType} 
               onChange={setCaseType} 

@@ -477,11 +477,11 @@ const spanMap = {
   6: "col-span-6",
 };
 
-export const CaseField = ({ label, children, icon, span = 1, className }) => (
+export const CaseField = ({ label, children, icon, span = 1, className, star }) => (
   <>
     <CardTitle
       className={twMerge(
-        `relative font-medium flex items-center`,
+        `relative font-medium flex items-center gap-2`,
         icon ? "pl-6" : "",
         className
       )}
@@ -490,8 +490,8 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
         <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
       )}
       {label}
+      {star ? <span className="text-red-400">*</span> : ""}
     </CardTitle>
-
     <div className={twMerge(spanMap[span], "")}>
       {children}
     </div>
@@ -2130,8 +2130,9 @@ const [endDate, setEndDate] = useState(null);
 
                   <CaseField
                     label="Notes"
-                    className={"col-span-2 self-start"}
+                    className={"col-span-2 self-start bg-red"}
                     span={4}
+                    star
                   >
                     <textarea
                       className="h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500"
@@ -2220,6 +2221,7 @@ const [endDate, setEndDate] = useState(null);
                     label="Keyword Search"
                     className={"col-span-2"}
                     span={3}
+                    star
                   >
                     <Input
                       placeholder="..."
@@ -2334,7 +2336,7 @@ const [endDate, setEndDate] = useState(null);
               </CardHeader>
 
               <CardContent className="grid grid-cols-7 gap-5 p-3 ">
-                <CaseField label="Case Resolution Code">
+                <CaseField label="Case Resolution Code" star>
                   {/* <Input
                   variant='invisible'
                   value={csrForm.caseResolutionCode}

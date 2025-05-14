@@ -885,7 +885,7 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <Label htmlFor="ContractID">Contrack Id</Label>
+                    <Label htmlFor="ContractID">Contract Id</Label>
                     <Input 
                       id="ContractID" 
                       value={search.ContractID || ""}
@@ -1022,14 +1022,14 @@ const Search_case = () => {
                       Clear All
                     </Button>
                     <Button className="bg-white text-gray-400  self-end ">
-                      <Copy></Copy>Same in Account Adress{" "}
+                      <Copy></Copy>Same in Account Address{" "}
                     </Button>
                   </CardTitle>
                 </CardHeader>
 
                 <CardContent className="grid gap-5 grid-cols-4">
                   <div className="space-y-0.5">
-                    <Label htmlFor="Company">Company</Label>
+                    <Label htmlFor="Company">Company<Label className="text-red-600">*</Label></Label>
                     <Input
                       id="Company"
                       className="border-b-black p-1"
@@ -1038,7 +1038,7 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <Label htmlFor="Email">Email</Label>
+                    <Label htmlFor="Email">Email<Label className="text-red-600">*</Label></Label>
                     <Input
                       id="Email"
                       type="email"
@@ -1048,7 +1048,7 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <Label htmlFor="PrimaryPhone">Primary Phone</Label>
+                    <Label htmlFor="PrimaryPhone">Primary Phone<Label className="text-red-600">*</Label></Label>
                     <Input
                       id="PrimaryPhone"
                       type="text"
@@ -1073,7 +1073,7 @@ const Search_case = () => {
                 </CardHeader>
                 <CardContent className="grid gap-5 grid-cols-3">
                   <div className="space-y-0.5">
-                    <Label htmlFor="AddressLine1">Addres Line 1</Label>
+                    <Label htmlFor="AddressLine1">Addres Line 1<Label className="text-red-600">*</Label></Label>
                     <Input
                       id="AddressLine1"
                       type="email"
@@ -1093,7 +1093,7 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="City">City</Label>
+                    <Label htmlFor="City">City<Label className="text-red-600">*</Label></Label>
                     <SelectBar
                       id="City"
                       value={formDataSiteAccount.City}
@@ -1103,7 +1103,7 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <Label htmlFor="StateProvince">State/Province</Label>
+                    <Label htmlFor="StateProvince">State/Province<Label className="text-red-600">*</Label></Label>
                     <SelectBar
                       id="StateProvince"
                       value={formDataSiteAccount.StateProvince}
@@ -1113,7 +1113,7 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5 flex flex-col">
-                    <Label htmlFor="current">Country</Label>
+                    <Label htmlFor="current">Country<Label className="text-red-600">*</Label></Label>
                     <SelectBar
                       id="Country"
                       value={formDataSiteAccount.Country}
@@ -1129,7 +1129,7 @@ const Search_case = () => {
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <Label htmlFor="ZipPostalCode">Zip/Postal Code</Label>
+                    <Label htmlFor="ZipPostalCode">Zip/Postal Code<Label className="text-red-600">*</Label></Label>
                     <Input
                       id="ZipPostalCode"
                       type="text"

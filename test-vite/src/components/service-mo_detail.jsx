@@ -402,7 +402,7 @@ export const ServiceMoDetail = () => {
                 </div>
 
                 <div className="flex font-bold">
-                  <span className="ml-7">Serial Number </span>
+                  <span className="ml-7">Serial Number <span className="text-red-400">*</span></span>
                   {/* <span className="ml-42">...</span> */}
                   <input 
                   type="text" 
@@ -435,7 +435,7 @@ export const ServiceMoDetail = () => {
                 </div>
 
                 <div className="flex font-bold">
-                  <span className="ml-7">Removed Part Number
+                  <span className="ml-7">Removed Part Number <span className="text-red-400">*</span>
                   </span>
                   {/* <span className="ml-43">...</span> */}                  
                   <input type="text" 
@@ -447,7 +447,7 @@ export const ServiceMoDetail = () => {
                 </div>
 
                 <div className="flex font-bold">
-                  <span className="ml-7">Removed Serial Number
+                  <span className="ml-7">Removed Serial Number <span className="text-red-400">*</span>
                   </span>
                   {/* <span className="ml-41">...</span> */}                  
                   <input type="text" 
@@ -459,7 +459,7 @@ export const ServiceMoDetail = () => {
                 </div>
 
                 <div className="flex font-bold">
-                  <span className="ml-7">Removed Part Desc
+                  <span className="ml-7">Removed Part Desc <span className="text-red-400">*</span>
                   </span>
                   {/* <span className="ml-50">...</span> */}
                   <input type="text" 
@@ -621,7 +621,7 @@ const FailureSelect = ({ failureId, setMODetailInput }) => {
   };
 
   return (
-    <CaseField label={"Failure Code"} span={2}>
+    <CaseField label={"Failure Code"} span={2} star>
       <div className="relative w-full">
         <Input
           variant={"invisible"}
