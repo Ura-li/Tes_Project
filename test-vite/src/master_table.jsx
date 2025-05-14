@@ -2885,9 +2885,9 @@ export const BookingDetailsTable = () => {
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.BookingDetailId} className="text-sm text-center hover:bg-gray-100">
-                <td className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/booking-details/${item.BookingDetailId}`)}
+              <tr key={item.BookingDetailId} className="hover:bg-gray-100 text-center text-sm">
+                <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() => navigate(`/bookings/${item.BookingDetailId}`)}
                 >
                   {item.BookingDetailId}
                 </td>

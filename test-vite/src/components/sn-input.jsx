@@ -123,6 +123,18 @@ export const SnInput = ({
       return;
     };
 
+    Swal.fire({
+    title: 'Menyimpan...',
+    text: 'Mohon tunggu sebentar',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+    customClass: {
+      popup: 'z-[9999]',
+    },
+  });
+
     try {
       await ApiCustomer.post("/api/product-information", {
         ProductNumber: formData.ProductNumber,

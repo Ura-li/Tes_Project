@@ -36,7 +36,6 @@ import {
 import Swal from "sweetalert2";
 import { TabsServiceWO } from "./service-case";
 import { KeyRound } from "lucide-react";
-
 import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
@@ -67,6 +66,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+
 export const ServiceWork = () => {
   const user = getUserFromToken();
   const { woid } = useParams();
@@ -266,7 +266,7 @@ export const ServiceWork = () => {
     };
 
     if (woid) fetchAllData();
-  }, [woid]);
+   }, [woid]);
 
   useEffect(() => {
     console.log("Data Fetch Customer Data in WO : ", dataFetchCustomerData);
@@ -307,7 +307,7 @@ export const ServiceWork = () => {
     useState(null);
   const [dueDate, setDuedate] = useState(null);
   // const [dueDateCustomer, setDueDateCustomer] = useState(null);
-const [first, setFirst] = useState(null);
+ const [first, setFirst] = useState(null);
 
   const [followUpRequired, setFollowUpRequired] = useState(false);
   const [followUpCompleted, setFollowUpCompleted] = useState(false);
