@@ -4609,6 +4609,13 @@ export function BtnModalsServiceCatalog({
   //createorder
   const createOrder = async () => {
     try {
+      Swal.fire({
+        title: "Creating Order...",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading()
+      });
+
       const data = {
         user: getUserFromToken()
       }
@@ -4621,6 +4628,8 @@ export function BtnModalsServiceCatalog({
         OwnerID: data.user.id,
       });
   
+      Swal.close(); 
+      
       await Swal.fire({
         title: "Success!",
         text: "Order added successfully!",

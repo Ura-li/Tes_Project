@@ -33,7 +33,6 @@ import {
 } from "@/components/ui/table"; 
 import { Link } from "react-router";
 import Swal from "sweetalert2";
-
 import { useParams } from "react-router";
 import ApiCustomer from "@/api";
 
@@ -41,7 +40,7 @@ import { TabsServiceMOLineItems } from "./service-case";
 import { Description } from "@radix-ui/react-dialog";
 
 export const ServiceMoDetail = () => {
-
+  
   const { lineItemID } = useParams();
 
   const [moLineItems, setMoLineItems] = useState([])
@@ -73,45 +72,56 @@ export const ServiceMoDetail = () => {
   })
     
   const fetchMoLineItems = async () => {
-    try {
-      const res = await ApiCustomer.get(`/api/material-order/material-order-line-items/${lineItemID}`);
-      const data = res.data.data;
-  
-      setMoLineItems(data);
-  
-      // Isi state MODetailInput berdasarkan data yang diambil
-      setMODetailInput({
-        moOrderName: data
-          ? `${data.MOID} - ${data.LineNumber}`
-          : null,
-        salesOrderNumber: data.SalesOrderNumber || '',
-        lineNumber: data.LineNumber?.toString() || '',
-        partNumber: data.PartNumber || '',
-        description: data.Description || '',
-        rohs: data.servicecatalog_parts?.ROHS_Flag || false,
-        returnabilityFlag: data.servicecatalog_parts?.Returnable_Flag || false,
-        functionalEquivalence: data.FunctionalEquivalence || '',
-        mediaHandlingPart: data.MediaHandlingPart || '',
-        pickPackInstructions: data.PickPackInstructions || '',
-        collectionInstructions: data.CollectionInstructions || '',
-        customerResponse: data.CustomerResponse || '',
-        rejectedReason: data.RejectedReason || '',
-        otherReason: data.OtherReason || '',
-        partAuthorizationReason: data.PartAuthorizationReason || '',
-        partAuthorizationDetail: data.PartAuthorizationDetail || '',
-        originalPartNumber: data.OriginalPartNumber || '',
-        offeredPartNumber: data.OfferedPartNumber || '',
-        offeredPartDescription: data.OfferedPartDescription || '',
-        mainComponent: data.MainComponent || '',
-        gratisFlag: data.GratisFlag || false,
-        // failureId: data.FailureId || null,
-        atpStatus: data.ATPStatus || ''
-      });
-  
-    } catch (err) {
-      console.error("Failed to fetch Material Line Items orders:", err);
-    }
-  };
+  try {
+    // Tampilkan loading SweetAlert
+    Swal.fire({
+      title: 'Loading...',
+      text: 'Please wait a moment',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading(),
+      customClass: {
+        popup: 'z-[9999]',
+      }
+    });
+
+    const res = await ApiCustomer.get(`/api/material-order/material-order-line-items/${lineItemID}`);
+    const data = res.data.data;
+
+    setMoLineItems(data);
+
+    setMODetailInput({
+      moOrderName: data ? `${data.MOID} - ${data.LineNumber}` : null,
+      salesOrderNumber: data.SalesOrderNumber || '',
+      lineNumber: data.LineNumber?.toString() || '',
+      partNumber: data.PartNumber || '',
+      description: data.Description || '',
+      rohs: data.servicecatalog_parts?.ROHS_Flag || false,
+      returnabilityFlag: data.servicecatalog_parts?.Returnable_Flag || false,
+      functionalEquivalence: data.FunctionalEquivalence || '',
+      mediaHandlingPart: data.MediaHandlingPart || '',
+      pickPackInstructions: data.PickPackInstructions || '',
+      collectionInstructions: data.CollectionInstructions || '',
+      customerResponse: data.CustomerResponse || '',
+      rejectedReason: data.RejectedReason || '',
+      otherReason: data.OtherReason || '',
+      partAuthorizationReason: data.PartAuthorizationReason || '',
+      partAuthorizationDetail: data.PartAuthorizationDetail || '',
+      originalPartNumber: data.OriginalPartNumber || '',
+      offeredPartNumber: data.OfferedPartNumber || '',
+      offeredPartDescription: data.OfferedPartDescription || '',
+      mainComponent: data.MainComponent || '',
+      gratisFlag: data.GratisFlag || false,
+      atpStatus: data.ATPStatus || ''
+    });
+
+  } catch (err) {
+    console.error("Failed to fetch Material Line Items orders:", err);
+    Swal.fire('Error', 'Failed to fetch Material Line Items', 'error');
+  } finally {
+    Swal.close(); // Tutup alert
+  }
+};
   
   useEffect(() => {
     fetchMoLineItems()
@@ -524,7 +534,6 @@ export const ServiceMoDetail = () => {
         </Tabs>
       </CardContent>
     </Card>
-    
     </>
   );
 };
