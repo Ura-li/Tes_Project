@@ -28,6 +28,9 @@ import { RepairClassCodeAdd, RepairClassCodeEdit, RepairClassCodeDelete } from "
 import { ServiceCatalogAdd, ServiceCatalogEdit, ServiceCatalogDelete } from "@/components/sc-modal";
 import { OTCAdd, OTCEdit, OTCDelete} from "@/components/sc-modal";
 import { CrsAdd, CrsEdit, CrsDelete } from "@/components/sc-modal";
+import { FailureAdd, 
+  FailureEdit, 
+  FailureDelete } from "@/components/sc-modal";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { Label } from "@/components/ui/label"
@@ -84,13 +87,13 @@ export const Contact_table = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Contact Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Contact Table</h2>
 
       {/* Input Pencarian */}
       <input
         type="text"
         placeholder="Search contacts..."
-        className="mb-4 p-2 border border-gray-300 rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border border-gray-300 rounded"
         value={searchTerm}
         onChange={(e) => {
           setSearchTerm(e.target.value);
@@ -104,29 +107,29 @@ export const Contact_table = () => {
       <div className="overflow-x-scroll ">
         <table className="border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">No</th>
-              <th className="border p-2">Contact ID</th>
-              <th className="border p-2">Company</th>
-              <th className="border p-2">Salutation</th>
-              <th className="border p-2">First Name</th>
-              <th className="border p-2">Last Name</th>
-              <th className="border p-2">Email</th>
-              <th className="border p-2">Preferred Language</th>
-              <th className="border p-2">Phone</th>
-              <th className="border p-2">Mobile</th>
-              <th className="border p-2">Work Phone</th>
-              <th className="border p-2">Work Extension</th>
-              <th className="border p-2">Other Phone</th>
-              <th className="border p-2">Other Extension</th>
-              <th className="border p-2">Fax</th>
-              <th className="border p-2">Address Line 1</th>
-              <th className="border p-2">Address Line 2</th>
-              <th className="border p-2">City</th>
-              <th className="border p-2">State/Province</th>
-              <th className="border p-2">Country</th>
-              <th className="border p-2">Zip/Postal Code</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">No</th>
+              <th className="p-2 border">Contact ID</th>
+              <th className="p-2 border">Company</th>
+              <th className="p-2 border">Salutation</th>
+              <th className="p-2 border">First Name</th>
+              <th className="p-2 border">Last Name</th>
+              <th className="p-2 border">Email</th>
+              <th className="p-2 border">Preferred Language</th>
+              <th className="p-2 border">Phone</th>
+              <th className="p-2 border">Mobile</th>
+              <th className="p-2 border">Work Phone</th>
+              <th className="p-2 border">Work Extension</th>
+              <th className="p-2 border">Other Phone</th>
+              <th className="p-2 border">Other Extension</th>
+              <th className="p-2 border">Fax</th>
+              <th className="p-2 border">Address Line 1</th>
+              <th className="p-2 border">Address Line 2</th>
+              <th className="p-2 border">City</th>
+              <th className="p-2 border">State/Province</th>
+              <th className="p-2 border">Country</th>
+              <th className="p-2 border">Zip/Postal Code</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -134,32 +137,32 @@ export const Contact_table = () => {
               contacts.map((contact, index) => (
                 <tr
                   key={contact.ContactID}
-                  className="hover:bg-gray-100 text-center"
+                  className="text-center hover:bg-gray-100"
                 >
-                  <td className="border p-2 text-center">
+                  <td className="p-2 text-center border">
                     {(currentPage - 1) * itemsPerPage + index + 1}
                   </td>
-                  <td className="border p-2">{contact.ContactID}</td>
-                  <td className="border p-2">{contact.Company}</td>
-                  <td className="border p-2">{contact.Salutation}</td>
-                  <td className="border p-2">{contact.FirstName}</td>
-                  <td className="border p-2">{contact.LastName}</td>
-                  <td className="border p-2">{contact.Email}</td>
-                  <td className="border p-2">{contact.PreferredLanguage}</td>
-                  <td className="border p-2">{contact.Phone}</td>
-                  <td className="border p-2">{contact.Mobile}</td>
-                  <td className="border p-2">{contact.WorkPhone}</td>
-                  <td className="border p-2">{contact.WorkExtension}</td>
-                  <td className="border p-2">{contact.OtherPhone}</td>
-                  <td className="border p-2">{contact.OtherExtension}</td>
-                  <td className="border p-2">{contact.Fax}</td>
-                  <td className="border p-2">{contact.AddressLine1}</td>
-                  <td className="border p-2">{contact.AddressLine2}</td>
-                  <td className="border p-2">{contact.City}</td>
-                  <td className="border p-2">{contact.StateProvince}</td>
-                  <td className="border p-2">{contact.Country}</td>
-                  <td className="border p-2">{contact.ZipPostalCode}</td>
-                  <td className="border p-2 flex space-x-2">
+                  <td className="p-2 border">{contact.ContactID}</td>
+                  <td className="p-2 border">{contact.Company}</td>
+                  <td className="p-2 border">{contact.Salutation}</td>
+                  <td className="p-2 border">{contact.FirstName}</td>
+                  <td className="p-2 border">{contact.LastName}</td>
+                  <td className="p-2 border">{contact.Email}</td>
+                  <td className="p-2 border">{contact.PreferredLanguage}</td>
+                  <td className="p-2 border">{contact.Phone}</td>
+                  <td className="p-2 border">{contact.Mobile}</td>
+                  <td className="p-2 border">{contact.WorkPhone}</td>
+                  <td className="p-2 border">{contact.WorkExtension}</td>
+                  <td className="p-2 border">{contact.OtherPhone}</td>
+                  <td className="p-2 border">{contact.OtherExtension}</td>
+                  <td className="p-2 border">{contact.Fax}</td>
+                  <td className="p-2 border">{contact.AddressLine1}</td>
+                  <td className="p-2 border">{contact.AddressLine2}</td>
+                  <td className="p-2 border">{contact.City}</td>
+                  <td className="p-2 border">{contact.StateProvince}</td>
+                  <td className="p-2 border">{contact.Country}</td>
+                  <td className="p-2 border">{contact.ZipPostalCode}</td>
+                  <td className="flex p-2 space-x-2 border">
                     <ContactEdit
                       contactID={contact.ContactID}
                       onUpdate={fetchContacts}
@@ -170,7 +173,7 @@ export const Contact_table = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center p-4">
+                <td colSpan="7" className="p-4 text-center">
                   No data found.
                 </td>
               </tr>
@@ -181,7 +184,7 @@ export const Contact_table = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-4 space-x-2">
+        <div className="flex items-center justify-center mt-4 space-x-2">
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -261,13 +264,13 @@ export const Company_table = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Company Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Company Table</h2>
 
       {/* Input Pencarian */}
       <input
         type="text"
         placeholder="Search companies..."
-        className="mb-4 p-2 border border-gray-300 rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border border-gray-300 rounded"
         value={searchTerm}
         onChange={(e) => {
           setSearchTerm(e.target.value);
@@ -283,30 +286,30 @@ export const Company_table = () => {
         <table className="min-w-full border border-gray-300">
           <thead>
             <tr className="bg-gray-200">
-              <th className="border p-2">No</th>
-              <th className="border p-2">Company</th>
-              <th className="border p-2">Email</th>
-              <th className="border p-2">Primary Phone</th>
-              <th className="border p-2">Whatsapp Number</th>
-              <th className="border p-2">City</th>
-              <th className="border p-2">Country</th>
-              <th className="border p-2">Actions</th>
+              <th className="p-2 border">No</th>
+              <th className="p-2 border">Company</th>
+              <th className="p-2 border">Email</th>
+              <th className="p-2 border">Primary Phone</th>
+              <th className="p-2 border">Whatsapp Number</th>
+              <th className="p-2 border">City</th>
+              <th className="p-2 border">Country</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {companies.length > 0 ? (
               companies.map((company, index) => (
                 <tr key={company.SiteAccountID} className="hover:bg-gray-100">
-                  <td className="border p-2 text-center">
+                  <td className="p-2 text-center border">
                     {(currentPage - 1) * itemsPerPage + index + 1}
                   </td>
-                  <td className="border p-2">{company.Company}</td>
-                  <td className="border p-2">{company.Email}</td>
-                  <td className="border p-2">{company.PrimaryPhone}</td>
-                  <td className="border p-2">{company.WhatsappNo}</td>
-                  <td className="border p-2">{company.City}</td>
-                  <td className="border p-2">{company.Country}</td>
-                  <td className="border p-2 flex space-x-2">
+                  <td className="p-2 border">{company.Company}</td>
+                  <td className="p-2 border">{company.Email}</td>
+                  <td className="p-2 border">{company.PrimaryPhone}</td>
+                  <td className="p-2 border">{company.WhatsappNo}</td>
+                  <td className="p-2 border">{company.City}</td>
+                  <td className="p-2 border">{company.Country}</td>
+                  <td className="flex p-2 space-x-2 border">
                     <CompanyEdit
                       siteAccountId={company.SiteAccountID}
                       onUpdate={fetchCompanies}
@@ -322,7 +325,7 @@ export const Company_table = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center p-4">
+                <td colSpan="7" className="p-4 text-center">
                   No data found.
                 </td>
               </tr>
@@ -333,7 +336,7 @@ export const Company_table = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-4 space-x-2">
+        <div className="flex items-center justify-center mt-4 space-x-2">
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -440,19 +443,19 @@ export const Case_table = () => {
 
 
   return (
-    <div className="p-4 flex flex-col gap-2">
+    <div className="flex flex-col gap-2 p-4">
       {/* <button
         onClick={handleDownload}
-        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+        className="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700"
       >
         Download Excel
       </button> */}
       <ExportExcel caseData={caseData}/>
-      <h2 className="text-xl font-bold mb-4">ID Daily Aging Cases Javag FY</h2>
+      <h2 className="mb-4 text-xl font-bold">ID Daily Aging Cases Javag FY</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -480,57 +483,57 @@ export const Case_table = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">Case ID</th>
-              <th className="border p-2">Created On</th>
-              <th className="border p-2">Case Subject</th>
-              <th className="border p-2">Customer Account</th>
-              <th className="border p-2">Primary</th>
-              <th className="border p-2">HW</th>
-              <th className="border p-2">Serial Number</th>
-              <th className="border p-2">Product Number</th>
-              <th className="border p-2">Product Name</th>
-              <th className="border p-2">Created Name</th>
-              <th className="border p-2">Owner</th>
-              <th className="border p-2">WorkGroup</th>
-              <th className="border p-2">Case Status</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">Case ID</th>
+              <th className="p-2 border">Created On</th>
+              <th className="p-2 border">Case Subject</th>
+              <th className="p-2 border">Customer Account</th>
+              <th className="p-2 border">Primary</th>
+              <th className="p-2 border">HW</th>
+              <th className="p-2 border">Serial Number</th>
+              <th className="p-2 border">Product Number</th>
+              <th className="p-2 border">Product Name</th>
+              <th className="p-2 border">Created Name</th>
+              <th className="p-2 border">Owner</th>
+              <th className="p-2 border">WorkGroup</th>
+              <th className="p-2 border">Case Status</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((caseItem) => (
               <tr
                 key={caseItem.CaseID}
-                className="hover:bg-gray-100 text-center"
+                className="text-center hover:bg-gray-100"
               >
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() => navigate(`/case/${caseItem.CaseID}`)}
                 >
                   {caseItem.CaseID}
                 </td>
-                <td className="border p-2">{caseItem.CreatedOn}</td>
-                <td className="border p-2">{caseItem.CaseSubject}</td>
-                <td className="border p-2">{caseItem.CustomerAccount}</td>
-                <td className="border p-2">{caseItem.Primary}</td>
-                <td className="border p-2">{caseItem.HW}</td>
-                <td className="border p-2">{caseItem.SerialNumber}</td>
-                <td className="border p-2">{caseItem.ProductNumber}</td>
-                <td className="border p-2">{caseItem.ProductName}</td>
-                <td className="border p-2">{caseItem.CreatedName}</td>
-                <td className="border p-2">{caseItem.Owner}</td>
-                <td className="border p-2">{caseItem.WorkGroup}</td>
+                <td className="p-2 border">{caseItem.CreatedOn}</td>
+                <td className="p-2 border">{caseItem.CaseSubject}</td>
+                <td className="p-2 border">{caseItem.CustomerAccount}</td>
+                <td className="p-2 border">{caseItem.Primary}</td>
+                <td className="p-2 border">{caseItem.HW}</td>
+                <td className="p-2 border">{caseItem.SerialNumber}</td>
+                <td className="p-2 border">{caseItem.ProductNumber}</td>
+                <td className="p-2 border">{caseItem.ProductName}</td>
+                <td className="p-2 border">{caseItem.CreatedName}</td>
+                <td className="p-2 border">{caseItem.Owner}</td>
+                <td className="p-2 border">{caseItem.WorkGroup}</td>
                 <td className={cn("bg-emerald-300",caseItem.CaseStatus === "Close" ? "bg-red-300" : caseItem.CaseStatus === "InActive" ? "bg-sky-300" : "" )}>{caseItem.CaseStatus}</td>
               </tr>
             ))}
           </tbody>
         </table>
         {filteredCaseTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No cases found.</p>
+          <p className="mt-4 text-center text-gray-500">No cases found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -609,14 +612,14 @@ export const Assets_table = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Asset Information Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Asset Information Table</h2>
       <div className="space-x-2">
         {/* <BtnModalAsset /> */}
         {/* Input Pencarian */}
         <input
           type="text"
           placeholder="Search asset... "
-          className="mb-4 p-2 border border-gray-300 rounded w-1/3"
+          className="w-1/3 p-2 mb-4 border border-gray-300 rounded"
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
@@ -632,36 +635,36 @@ export const Assets_table = () => {
         <table className="min-w-full border border-gray-300">
           <thead>
             <tr className="bg-gray-200">
-              <th className="border p-2">No</th>
-              <th className="border p-2">Asset ID</th>
-              <th className="border p-2">Serial Number</th>
-              <th className="border p-2">Product Name</th>
-              <th className="border p-2">Product Number</th>
-              <th className="border p-2">Product Line</th>
-              <th className="border p-2">Site Account ID</th>
-              <th className="border p-2">Contact ID</th>
-              <th className="border p-2">Actions</th>
+              <th className="p-2 border">No</th>
+              <th className="p-2 border">Asset ID</th>
+              <th className="p-2 border">Serial Number</th>
+              <th className="p-2 border">Product Name</th>
+              <th className="p-2 border">Product Number</th>
+              <th className="p-2 border">Product Line</th>
+              <th className="p-2 border">Site Account ID</th>
+              <th className="p-2 border">Contact ID</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {assets.length > 0 ? (
               assets.map((asset, index) => (
                 <tr key={asset.AssetID} className="hover:bg-gray-100">
-                  <td className="border p-2 text-center">
+                  <td className="p-2 text-center border">
                     {(currentPage - 1) * itemsPerPage + index + 1}
                   </td>
-                  <td className="border p-2">{asset.AssetID}</td>
-                  <td className="border p-2">{asset.SerialNumber}</td>
-                  <td className="border p-2">
+                  <td className="p-2 border">{asset.AssetID}</td>
+                  <td className="p-2 border">{asset.SerialNumber}</td>
+                  <td className="p-2 border">
                     {asset.product_information?.ProductName}
                   </td>
-                  <td className="border p-2">{asset.ProductNumber}</td>
-                  <td className="border p-2">
+                  <td className="p-2 border">{asset.ProductNumber}</td>
+                  <td className="p-2 border">
                     {asset.product_information?.ProductLine}
                   </td>
-                  <td className="border p-2">{asset.SiteAccountID}</td>
-                  <td className="border p-2">{asset.ContactID}</td>
-                  <td className="border p-2 flex space-x-2">
+                  <td className="p-2 border">{asset.SiteAccountID}</td>
+                  <td className="p-2 border">{asset.ContactID}</td>
+                  <td className="flex p-2 space-x-2 border">
                     <AssetEdit assetId={asset.AssetID} onUpdate={fetchAssets} />
                     <AssetDelete assetId={asset.AssetID} />
                   </td>
@@ -669,7 +672,7 @@ export const Assets_table = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center p-4">
+                <td colSpan="7" className="p-4 text-center">
                   No data found.
                 </td>
               </tr>
@@ -679,7 +682,7 @@ export const Assets_table = () => {
       </div>
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-4 space-x-2">
+        <div className="flex items-center justify-center mt-4 space-x-2">
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -763,13 +766,13 @@ export const Product_table = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Product Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Product Table</h2>
 
       {/* Input Pencarian */}
       <input
         type="text"
         placeholder="Search product..."
-        className="mb-4 p-2 border border-gray-300 rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border border-gray-300 rounded"
         value={searchTerm}
         onChange={(e) => {
           setSearchTerm(e.target.value);
@@ -786,38 +789,38 @@ export const Product_table = () => {
         <table className="min-w-full border border-gray-300">
           <thead>
             <tr className="bg-gray-200">
-              <th className="border p-2">No</th>
-              <th className="border p-2">Product Number</th>
-              <th className="border p-2">Product Line</th>
-              <th className="border p-2">Product Name</th>
-              <th className="border p-2">Product Type</th>
-              <th className="border p-2">Product Group</th>
-              <th className="border p-2">Product Tower</th>
-              <th className="border p-2">Vendor</th>
-              <th className="border p-2">Actions</th>
+              <th className="p-2 border">No</th>
+              <th className="p-2 border">Product Number</th>
+              <th className="p-2 border">Product Line</th>
+              <th className="p-2 border">Product Name</th>
+              <th className="p-2 border">Product Type</th>
+              <th className="p-2 border">Product Group</th>
+              <th className="p-2 border">Product Tower</th>
+              <th className="p-2 border">Vendor</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {products.length > 0 ? (
               products.map((product, index) => (
                 <tr key={product.ProductNumber} className="hover:bg-gray-100">
-                  <td className="border p-2 text-center">
+                  <td className="p-2 text-center border">
                     {(currentPage - 1) * itemsPerPage + index + 1}
                   </td>
-                  <td className="border p-2">{product.ProductNumber}</td>
-                  <td className="border p-2">{product.ProductLine}</td>
-                  <td className="border p-2">{product.ProductName}</td>
-                  <td className="border p-2">
+                  <td className="p-2 border">{product.ProductNumber}</td>
+                  <td className="p-2 border">{product.ProductLine}</td>
+                  <td className="p-2 border">{product.ProductName}</td>
+                  <td className="p-2 border">
                     {product.product_type?.ProductType}
                   </td>
-                  <td className="border p-2">
+                  <td className="p-2 border">
                     {product.product_type?.ProductGroup}
                   </td>
-                  <td className="border p-2">
+                  <td className="p-2 border">
                     {product.product_type?.ProductTower}
                   </td>
-                  <td className="border p-2">-</td>
-                  <td className="border p-2 flex space-x-2">
+                  <td className="p-2 border">-</td>
+                  <td className="flex p-2 space-x-2 border">
                     <ProductEdit
                       ProductNumber={product.ProductNumber}
                       onUpdate={fetchProducts}
@@ -833,7 +836,7 @@ export const Product_table = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center p-4">
+                <td colSpan="7" className="p-4 text-center">
                   No data found.
                 </td>
               </tr>
@@ -844,7 +847,7 @@ export const Product_table = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-4 space-x-2">
+        <div className="flex items-center justify-center mt-4 space-x-2">
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -951,11 +954,11 @@ export const ProductType_table = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">ProductType Table</h2>
+      <h2 className="mb-4 text-xl font-bold">ProductType Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -968,32 +971,32 @@ export const ProductType_table = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">ProductType ID</th>
-              <th className="border p-2">Product Tower</th>
-              <th className="border p-2">Product Group</th>
-              <th className="border p-2">Product Type</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">ProductType ID</th>
+              <th className="p-2 border">Product Tower</th>
+              <th className="p-2 border">Product Group</th>
+              <th className="p-2 border">Product Type</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((ProductTypeItem) => (
               <tr
                 key={ProductTypeItem.ProductTypeID}
-                className="hover:bg-gray-100 text-center"
+                className="text-center hover:bg-gray-100"
               >
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() =>
                     navigate(`/case/${ProductTypeItem.ProductTypeID}`)
                   }
                 >
                   {ProductTypeItem.ProductTypeID}
                 </td>
-                <td className="border p-2">{ProductTypeItem.ProductTower}</td>
-                <td className="border p-2">{ProductTypeItem.ProductGroup}</td>
-                <td className="border p-2">{ProductTypeItem.ProductType}</td>
-                <td className="border p-2 flex space-x-2">
+                <td className="p-2 border">{ProductTypeItem.ProductTower}</td>
+                <td className="p-2 border">{ProductTypeItem.ProductGroup}</td>
+                <td className="p-2 border">{ProductTypeItem.ProductType}</td>
+                <td className="flex p-2 space-x-2 border">
                   <ProductTypeEdit
                     ProductTypeID={ProductTypeItem.ProductTypeID}
                     onUpdate={fetchProductTypeDataTable}
@@ -1010,12 +1013,12 @@ export const ProductType_table = () => {
           </tbody>
         </table>
         {filteredProductTypeTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No data found.</p>
+          <p className="mt-4 text-center text-gray-500">No data found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -1123,11 +1126,11 @@ export const WarrantyService_table = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Warranty Service Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Warranty Service Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -1141,44 +1144,44 @@ export const WarrantyService_table = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">Service offerID</th>
-              <th className="border p-2">Service description</th>
-              <th className="border p-2">Csutomer Tat</th>
-              <th className="border p-2">Price</th>
-              <th className="border p-2">Shipping Fee</th>
-              <th className="border p-2">Quantity</th>
-              <th className="border p-2">Tax</th>
-              <th className="border p-2">Total</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">Service offerID</th>
+              <th className="p-2 border">Service description</th>
+              <th className="p-2 border">Csutomer Tat</th>
+              <th className="p-2 border">Price</th>
+              <th className="p-2 border">Shipping Fee</th>
+              <th className="p-2 border">Quantity</th>
+              <th className="p-2 border">Tax</th>
+              <th className="p-2 border">Total</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((WarrantyServiceItem) => (
               <tr
                 key={WarrantyServiceItem.Service_offerID}
-                className="hover:bg-gray-100 text-center"
+                className="text-center hover:bg-gray-100"
               >
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() =>
                     navigate(`/case/${WarrantyServiceItem.Service_offerID}`)
                   }
                 >
                   {WarrantyServiceItem.Service_offerID}
                 </td>
-                <td className="border p-2">
+                <td className="p-2 border">
                   {WarrantyServiceItem.Service_description}
                 </td>
-                <td className="border p-2">{WarrantyServiceItem.CTat_RTime}</td>
-                <td className="border p-2">{WarrantyServiceItem.Price}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{WarrantyServiceItem.CTat_RTime}</td>
+                <td className="p-2 border">{WarrantyServiceItem.Price}</td>
+                <td className="p-2 border">
                   {WarrantyServiceItem.Shipping_Fee}
                 </td>
-                <td className="border p-2">{WarrantyServiceItem.qty_ws}</td>
-                <td className="border p-2">{WarrantyServiceItem.Tax}</td>
-                <td className="border p-2">{WarrantyServiceItem.Total}</td>
-                <td className="border p-2 flex space-x-2">
+                <td className="p-2 border">{WarrantyServiceItem.qty_ws}</td>
+                <td className="p-2 border">{WarrantyServiceItem.Tax}</td>
+                <td className="p-2 border">{WarrantyServiceItem.Total}</td>
+                <td className="flex p-2 space-x-2 border">
                   <WarrantyServiceEdit
                     Service_offerID={WarrantyServiceItem.Service_offerID}
                     onUpdate={fetchWarrantyServiceDataTable}
@@ -1195,12 +1198,12 @@ export const WarrantyService_table = () => {
           </tbody>
         </table>
         {filteredWarrantyServiceTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No data found.</p>
+          <p className="mt-4 text-center text-gray-500">No data found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -1308,11 +1311,11 @@ export const Mo_table = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Material Order Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Material Order Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -1323,28 +1326,28 @@ export const Mo_table = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">MO ID</th>
-              <th className="border p-2">WOID</th>
-              <th className="border p-2">Order Number</th>
-              <th className="border p-2">Order Status</th>
-              <th className="border p-2">Order Type</th>
-              <th className="border p-2">Created On</th>
-              <th className="border p-2">Sales Order Number</th>
-              <th className="border p-2">RMANumber</th>
-              <th className="border p-2">Ready For Closure Date</th>
-              <th className="border p-2">Owner</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">MO ID</th>
+              <th className="p-2 border">WOID</th>
+              <th className="p-2 border">Order Number</th>
+              <th className="p-2 border">Order Status</th>
+              <th className="p-2 border">Order Type</th>
+              <th className="p-2 border">Created On</th>
+              <th className="p-2 border">Sales Order Number</th>
+              <th className="p-2 border">RMANumber</th>
+              <th className="p-2 border">Ready For Closure Date</th>
+              <th className="p-2 border">Owner</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((MaterialOrderItem) => (
               <tr
                 key={MaterialOrderItem.MOID}
-                className="hover:bg-gray-100 text-center"
+                className="text-center hover:bg-gray-100"
               >
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() =>
                     navigate(`/material-order/${MaterialOrderItem.MOID}`)
                   }
@@ -1352,24 +1355,24 @@ export const Mo_table = () => {
                   {MaterialOrderItem.MOID}
                 </td>
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() => navigate(`/work/${MaterialOrderItem.WOID}`)}
                 >
                   {MaterialOrderItem.WOID}
                 </td>
-                <td className="border p-2">{MaterialOrderItem.OrderNumber}</td>
-                <td className="border p-2">{MaterialOrderItem.OrderStatus}</td>
-                <td className="border p-2">{MaterialOrderItem.OrderType}</td>
-                <td className="border p-2">{MaterialOrderItem.CreatedOn}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{MaterialOrderItem.OrderNumber}</td>
+                <td className="p-2 border">{MaterialOrderItem.OrderStatus}</td>
+                <td className="p-2 border">{MaterialOrderItem.OrderType}</td>
+                <td className="p-2 border">{MaterialOrderItem.CreatedOn}</td>
+                <td className="p-2 border">
                   {MaterialOrderItem.SalesOrderNumber}
                 </td>
-                <td className="border p-2">{MaterialOrderItem.RMANumber}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{MaterialOrderItem.RMANumber}</td>
+                <td className="p-2 border">
                   {MaterialOrderItem.ReadyForClosureDate}
                 </td>
-                <td className="border p-2">{MaterialOrderItem.Owner}</td>
-                <td className="border p-2 flex space-x-2">
+                <td className="p-2 border">{MaterialOrderItem.Owner}</td>
+                <td className="flex p-2 space-x-2 border">
                   {/* <WarrantyServiceEdit Service_offerID={WarrantyServiceItem.Service_offerID} onUpdate={fetchWarrantyServiceDataTable}></WarrantyServiceEdit>
                    */}
 
@@ -1390,12 +1393,12 @@ export const Mo_table = () => {
           </tbody>
         </table>
         {filteredMaterialOrderTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No data found.</p>
+          <p className="mt-4 text-center text-gray-500">No data found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -1500,11 +1503,11 @@ export const Wo_table = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Work Order Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Work Order Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -1515,105 +1518,105 @@ export const Wo_table = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">WOID</th>
-              <th className="border p-2">Case ID</th>
-              <th className="border p-2">Work Order Type</th>
-              <th className="border p-2">Priority</th>
-              <th className="border p-2">System Status</th>
-              <th className="border p-2">Sub Status</th>
-              <th className="border p-2">Preferred Day</th>
-              <th className="border p-2">Preferred Time</th>
-              <th className="border p-2">Shipment Country</th>
-              <th className="border p-2">Shipment State</th>
-              <th className="border p-2">Created On</th>
-              <th className="border p-2">Owner</th>
-              <th className="border p-2">SLAJeopardy</th>
-              <th className="border p-2">DueDate Customer</th>
-              <th className="border p-2">Coverage Window</th>
-              <th className="border p-2">Response</th>
-              <th className="border p-2">OTCCode</th>
-              <th className="border p-2">Requested DateTime Customer</th>
-              <th className="border p-2">Guaranteed FixTime Customer</th>
-              <th className="border p-2">Early Start DateTime Customer</th>
-              <th className="border p-2">Latest Start DateTime Customer</th>
-              <th className="border p-2">SLAReschedule</th>
-              <th className="border p-2">Active Schedule Date</th>
-              <th className="border p-2">SLA Error Description</th>
-              <th className="border p-2">Case Priority Index</th>
-              <th className="border p-2">Partner Status</th>
-              <th className="border p-2">WorkOrder Description</th>
-              <th className="border p-2">PartnerNotes</th>
-              <th className="border p-2">Incoming Channel</th>
-              <th className="border p-2">material order</th>
-              <th className="border p-2">Case Information</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">WOID</th>
+              <th className="p-2 border">Case ID</th>
+              <th className="p-2 border">Work Order Type</th>
+              <th className="p-2 border">Priority</th>
+              <th className="p-2 border">System Status</th>
+              <th className="p-2 border">Sub Status</th>
+              <th className="p-2 border">Preferred Day</th>
+              <th className="p-2 border">Preferred Time</th>
+              <th className="p-2 border">Shipment Country</th>
+              <th className="p-2 border">Shipment State</th>
+              <th className="p-2 border">Created On</th>
+              <th className="p-2 border">Owner</th>
+              <th className="p-2 border">SLAJeopardy</th>
+              <th className="p-2 border">DueDate Customer</th>
+              <th className="p-2 border">Coverage Window</th>
+              <th className="p-2 border">Response</th>
+              <th className="p-2 border">OTCCode</th>
+              <th className="p-2 border">Requested DateTime Customer</th>
+              <th className="p-2 border">Guaranteed FixTime Customer</th>
+              <th className="p-2 border">Early Start DateTime Customer</th>
+              <th className="p-2 border">Latest Start DateTime Customer</th>
+              <th className="p-2 border">SLAReschedule</th>
+              <th className="p-2 border">Active Schedule Date</th>
+              <th className="p-2 border">SLA Error Description</th>
+              <th className="p-2 border">Case Priority Index</th>
+              <th className="p-2 border">Partner Status</th>
+              <th className="p-2 border">WorkOrder Description</th>
+              <th className="p-2 border">PartnerNotes</th>
+              <th className="p-2 border">Incoming Channel</th>
+              <th className="p-2 border">material order</th>
+              <th className="p-2 border">Case Information</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((WorkOrderItem) => (
               <tr
                 key={WorkOrderItem.WOID}
-                className="hover:bg-gray-100 text-center"
+                className="text-center hover:bg-gray-100"
               >
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() => navigate(`/work/${WorkOrderItem.WOID}`)}
                 >
                   {WorkOrderItem.WOID}
                 </td>
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() => navigate(`/case/${WorkOrderItem.CaseID}`)}
                 >
                   {WorkOrderItem.CaseID}
                 </td>
-                <td className="border p-2">{WorkOrderItem.WorkOrderType}</td>
-                <td className="border p-2">{WorkOrderItem.Priority}</td>
-                <td className="border p-2">{WorkOrderItem.SystemStatus}</td>
-                <td className="border p-2">{WorkOrderItem.SubStatus}</td>
-                <td className="border p-2">{WorkOrderItem.PreferredDay}</td>
-                <td className="border p-2">{WorkOrderItem.PreferredTime}</td>
-                <td className="border p-2">{WorkOrderItem.ShipmentCountry}</td>
-                <td className="border p-2">{WorkOrderItem.ShipmentState}</td>
-                <td className="border p-2">{WorkOrderItem.CreatedOn}</td>
-                <td className="border p-2">{WorkOrderItem.Owner}</td>
-                <td className="border p-2">{WorkOrderItem.SLAJeopardy}</td>
-                <td className="border p-2">{WorkOrderItem.DueDateCustomer}</td>
-                <td className="border p-2">{WorkOrderItem.CoverageWindow}</td>
-                <td className="border p-2">{WorkOrderItem.Response}</td>
-                <td className="border p-2">{WorkOrderItem.OTCCode}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{WorkOrderItem.WorkOrderType}</td>
+                <td className="p-2 border">{WorkOrderItem.Priority}</td>
+                <td className="p-2 border">{WorkOrderItem.SystemStatus}</td>
+                <td className="p-2 border">{WorkOrderItem.SubStatus}</td>
+                <td className="p-2 border">{WorkOrderItem.PreferredDay}</td>
+                <td className="p-2 border">{WorkOrderItem.PreferredTime}</td>
+                <td className="p-2 border">{WorkOrderItem.ShipmentCountry}</td>
+                <td className="p-2 border">{WorkOrderItem.ShipmentState}</td>
+                <td className="p-2 border">{WorkOrderItem.CreatedOn}</td>
+                <td className="p-2 border">{WorkOrderItem.Owner}</td>
+                <td className="p-2 border">{WorkOrderItem.SLAJeopardy}</td>
+                <td className="p-2 border">{WorkOrderItem.DueDateCustomer}</td>
+                <td className="p-2 border">{WorkOrderItem.CoverageWindow}</td>
+                <td className="p-2 border">{WorkOrderItem.Response}</td>
+                <td className="p-2 border">{WorkOrderItem.OTCCode}</td>
+                <td className="p-2 border">
                   {WorkOrderItem.RequestedDateTimeCustomer}
                 </td>
-                <td className="border p-2">
+                <td className="p-2 border">
                   {WorkOrderItem.GuaranteedFixTimeCustomer}
                 </td>
-                <td className="border p-2">
+                <td className="p-2 border">
                   {WorkOrderItem.EarlyStartDateTimeCustomer}
                 </td>
-                <td className="border p-2">
+                <td className="p-2 border">
                   {WorkOrderItem.LatestStartDateTimeCustomer}
                 </td>
-                <td className="border p-2">{WorkOrderItem.SLAReschedule}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{WorkOrderItem.SLAReschedule}</td>
+                <td className="p-2 border">
                   {WorkOrderItem.ActiveScheduleDate}
                 </td>
-                <td className="border p-2">
+                <td className="p-2 border">
                   {WorkOrderItem.SLAErrorDescription}
                 </td>
-                <td className="border p-2">
+                <td className="p-2 border">
                   {WorkOrderItem.CasePriorityIndex}
                 </td>
-                <td className="border p-2">{WorkOrderItem.PartnerStatus}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{WorkOrderItem.PartnerStatus}</td>
+                <td className="p-2 border">
                   {WorkOrderItem.WorkOrderDescription}
                 </td>
-                <td className="border p-2">{WorkOrderItem.PartnerNotes}</td>
-                <td className="border p-2">{WorkOrderItem.IncomingChannel}</td>
-                <td className="border p-2">{WorkOrderItem.MaterialOrder}</td>
-                <td className="border p-2">{WorkOrderItem.CaseInformation}</td>
-                <td className="border p-2 flex space-x-2">
+                <td className="p-2 border">{WorkOrderItem.PartnerNotes}</td>
+                <td className="p-2 border">{WorkOrderItem.IncomingChannel}</td>
+                <td className="p-2 border">{WorkOrderItem.MaterialOrder}</td>
+                <td className="p-2 border">{WorkOrderItem.CaseInformation}</td>
+                <td className="flex p-2 space-x-2 border">
                   <WorkOrderEdit
                     WOID={WorkOrderItem.WOID}
                     onUpdate={fetchWorkOrderDataTable}
@@ -1630,12 +1633,12 @@ export const Wo_table = () => {
           </tbody>
         </table>
         {filteredWorkOrderTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No data found.</p>
+          <p className="mt-4 text-center text-gray-500">No data found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -1740,11 +1743,11 @@ export const User_table = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">User Table</h2>
+      <h2 className="mb-4 text-xl font-bold">User Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -1756,37 +1759,37 @@ export const User_table = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">ID User</th>
-              <th className="border p-2">Email</th>
-              <th className="border p-2">Username</th>
-              <th className="border p-2">Password</th>
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Role</th>
-              <th className="border p-2">Profil Photo</th>
-              <th className="border p-2">CreatedAt</th>
-              <th className="border p-2">UpdateAt</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">ID User</th>
+              <th className="p-2 border">Email</th>
+              <th className="p-2 border">Username</th>
+              <th className="p-2 border">Password</th>
+              <th className="p-2 border">Name</th>
+              <th className="p-2 border">Role</th>
+              <th className="p-2 border">Profil Photo</th>
+              <th className="p-2 border">CreatedAt</th>
+              <th className="p-2 border">UpdateAt</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((UserItem) => (
               <tr
                 key={UserItem.IDUser}
-                className="hover:bg-gray-100 text-center"
+                className="text-center hover:bg-gray-100"
               >
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline">
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
                   {UserItem.IDUser}
                 </td>
-                <td className="border p-2">{UserItem.Email}</td>
-                <td className="border p-2">{UserItem.Username}</td>
-                <td className="border p-2">{UserItem.Password}</td>
-                <td className="border p-2">{UserItem.Name}</td>
-                <td className="border p-2">{UserItem.Role}</td>
-                <td className="border p-2">{UserItem.ProfilPhoto}</td>
-                <td className="border p-2">{UserItem.CreatedAt}</td>
-                <td className="border p-2">{UserItem.UpdatedAt}</td>
-                <td className="border p-2 flex space-x-2">
+                <td className="p-2 border">{UserItem.Email}</td>
+                <td className="p-2 border">{UserItem.Username}</td>
+                <td className="p-2 border">{UserItem.Password}</td>
+                <td className="p-2 border">{UserItem.Name}</td>
+                <td className="p-2 border">{UserItem.Role}</td>
+                <td className="p-2 border">{UserItem.ProfilPhoto}</td>
+                <td className="p-2 border">{UserItem.CreatedAt}</td>
+                <td className="p-2 border">{UserItem.UpdatedAt}</td>
+                <td className="flex p-2 space-x-2 border">
                   <UserEdit
                     IDUser={UserItem.IDUser}
                     onUpdate={fetchUserDataTable}
@@ -1803,12 +1806,12 @@ export const User_table = () => {
           </tbody>
         </table>
         {filteredUserTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No data found.</p>
+          <p className="mt-4 text-center text-gray-500">No data found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -1913,11 +1916,11 @@ export const Part_table = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Part Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Part Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -1928,91 +1931,91 @@ export const Part_table = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">PartNumber</th>
-              <th className="border p-2"> Keyword </th>
-              <th className="border p-2">PartDescription </th>
-              <th className="border p-2">Orderability</th>
-              <th className="border p-2">RestrictionReason</th>
-              <th className="border p-2">CSR_Flag</th>
-              <th className="border p-2"> ROHS Flag </th>
-              <th className="border p-2">Returnable Flag</th>
-              <th className="border p-2">HardRoll Flag</th>
-              <th className="border p-2">DangerousGoods Flag</th>
-              <th className="border p-2">LithiumBattery Flag</th>
-              <th className="border p-2">Oversize Flag </th>
-              <th className="border p-2">Heavy Flag </th>
-              <th className="border p-2">Price </th>
-              <th className="border p-2">FreightPrice </th>
-              <th className="border p-2">Tax</th>
-              <th className="border p-2">Total</th>
-              <th className="border p-2">Shipping_Fee</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">PartNumber</th>
+              <th className="p-2 border"> Keyword </th>
+              <th className="p-2 border">PartDescription </th>
+              <th className="p-2 border">Orderability</th>
+              <th className="p-2 border">RestrictionReason</th>
+              <th className="p-2 border">CSR_Flag</th>
+              <th className="p-2 border"> ROHS Flag </th>
+              <th className="p-2 border">Returnable Flag</th>
+              <th className="p-2 border">HardRoll Flag</th>
+              <th className="p-2 border">DangerousGoods Flag</th>
+              <th className="p-2 border">LithiumBattery Flag</th>
+              <th className="p-2 border">Oversize Flag </th>
+              <th className="p-2 border">Heavy Flag </th>
+              <th className="p-2 border">Price </th>
+              <th className="p-2 border">FreightPrice </th>
+              <th className="p-2 border">Tax</th>
+              <th className="p-2 border">Total</th>
+              <th className="p-2 border">Shipping_Fee</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((PartItem) => (
               <tr
                 key={PartItem.PartNumber}
-                className="hover:bg-gray-100 text-center"
+                className="text-center hover:bg-gray-100"
               >
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline">
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
                   {PartItem.PartNumber}
                 </td>
-                <td className="border p-2">{PartItem.Keyword}</td>
-                <td className="border p-2">{PartItem.PartDescription}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{PartItem.Keyword}</td>
+                <td className="p-2 border">{PartItem.PartDescription}</td>
+                <td className="p-2 border">
   <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Orderability ? "bg-green-500" : "bg-red-500"}`}>
     {PartItem.Orderability ? "Yes" : "No"}
   </span>
 </td>
-                <td className="border p-2">{PartItem.RestrictionReason}</td>
-                 <td className="border p-2">
+                <td className="p-2 border">{PartItem.RestrictionReason}</td>
+                 <td className="p-2 border">
   <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.CSR_Flag ? "bg-green-500" : "bg-red-500"}`}>
     {PartItem.CSR_Flag ? "Yes" : "No"}
   </span>
 </td>
-                <td className="border p-2">
+                <td className="p-2 border">
   <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.ROHS_Flag ? "bg-green-500" : "bg-red-500"}`}>
     {PartItem.ROHS_Flag ? "Yes" : "No"}
   </span>
 </td>
-<td className="border p-2">
+<td className="p-2 border">
   <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Returnable_Flag ? "bg-green-500" : "bg-red-500"}`}>
     {PartItem.Returnable_Flag ? "Yes" : "No"}
   </span>
 </td>
-<td className="border p-2">
+<td className="p-2 border">
   <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.HardRoll_Flag ? "bg-green-500" : "bg-red-500"}`}>
     {PartItem.HardRoll_Flag ? "Yes" : "No"}
   </span>
 </td>
-<td className="border p-2">
+<td className="p-2 border">
   <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.DangerousGoods_Flag ? "bg-green-500" : "bg-red-500"}`}>
     {PartItem.DangerousGoods_Flag ? "Yes" : "No"}
   </span>
 </td>
-<td className="border p-2">
+<td className="p-2 border">
   <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.LithiumBattery_Flag ? "bg-green-500" : "bg-red-500"}`}>
     {PartItem.LithiumBattery_Flag ? "Yes" : "No"}
   </span>
 </td>
-<td className="border p-2">
+<td className="p-2 border">
   <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Oversize_Flag ? "bg-green-500" : "bg-red-500"}`}>
     {PartItem.Oversize_Flag ? "Yes" : "No"}
   </span>
 </td>
-<td className="border p-2">
+<td className="p-2 border">
   <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Heavy_Flag ? "bg-green-500" : "bg-red-500"}`}>
     {PartItem.Heavy_Flag ? "Yes" : "No"}
   </span>
 </td>
- <td className="border p-2">{PartItem.Price}</td>
-                <td className="border p-2">{PartItem.FreightPrice}</td>
-                <td className="border p-2">{PartItem.Tax}</td>
-                <td className="border p-2">{PartItem.Total}</td>
-                <td className="border p-2">{PartItem.Shipping_Fee}</td>
-                <td className="border p-2 flex space-x-2">
+ <td className="p-2 border">{PartItem.Price}</td>
+                <td className="p-2 border">{PartItem.FreightPrice}</td>
+                <td className="p-2 border">{PartItem.Tax}</td>
+                <td className="p-2 border">{PartItem.Total}</td>
+                <td className="p-2 border">{PartItem.Shipping_Fee}</td>
+                <td className="flex p-2 space-x-2 border">
                 <PartEdit PartNumber={PartItem.PartNumber} onUpdate={fetchPartDataTable}></PartEdit>
                 <PartDelete
                   PartNumber={PartItem.PartNumber}
@@ -2026,12 +2029,12 @@ export const Part_table = () => {
           </tbody>
         </table>
         {filteredPartTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No data found.</p>
+          <p className="mt-4 text-center text-gray-500">No data found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -2136,11 +2139,11 @@ export const Resource_table = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Resource Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Resource Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -2152,23 +2155,23 @@ export const Resource_table = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">Resource ID</th>
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">Resource ID</th>
+              <th className="p-2 border">Name</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((ResourceItem) => (
               <tr
                 key={ResourceItem.ResourceId}
-                className="hover:bg-gray-100 text-center"
+                className="text-center hover:bg-gray-100"
               >
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline">
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
                   {ResourceItem.ResourceId}
                 </td>
-                <td className="border p-2">{ResourceItem.Name}</td>
-                <td className="border p-2 flex space-x-2">
+                <td className="p-2 border">{ResourceItem.Name}</td>
+                <td className="flex p-2 space-x-2 border">
                 <ResourceEdit ResourceId={ResourceItem.ResourceId} onUpdate={fetchResourceDataTable}></ResourceEdit>
                 <ResourceDelete
                   ResourceId={ResourceItem.ResourceId}
@@ -2182,12 +2185,12 @@ export const Resource_table = () => {
           </tbody>
         </table>
         {filteredResourceTable.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No data found.</p>
+          <p className="mt-4 text-center text-gray-500">No data found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -2210,7 +2213,7 @@ export const Resource_table = () => {
       </div>
     </div>
   );
-};  
+};
 
 export const ResourceAccountTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -2283,11 +2286,11 @@ const fetchResources = async () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Resource Accounts</h2>
+      <h2 className="mb-4 text-xl font-bold">Resource Accounts</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -2300,27 +2303,27 @@ const fetchResources = async () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">Resource Account ID</th>
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Resource ID</th>
-              {/* <th className="border p-2">SUbk Technicians</th>
-              <th className="border p-2">Booking Details</th> */}
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">Resource Account ID</th>
+              <th className="p-2 border">Name</th>
+              <th className="p-2 border">Resource ID</th>
+              {/* <th className="p-2 border">SUbk Technicians</th>
+              <th className="p-2 border">Booking Details</th> */}
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((account) => (
-              <tr key={account.ResourceAccountId} className="hover:bg-gray-100 text-center">
+              <tr key={account.ResourceAccountId} className="text-center hover:bg-gray-100">
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() => navigate(`/resource-account/${account.ResourceAccountId}`)}
                 >
                   {account.ResourceAccountId}
                 </td>
-                <td className="border p-2">{account.Name}</td>
-                <td className="border p-2">{account.ResourceId || "-"}</td>
-                <td className="border p-2 flex space-x-2 justify-center">
+                <td className="p-2 border">{account.Name}</td>
+                <td className="p-2 border">{account.ResourceId || "-"}</td>
+                <td className="flex justify-center p-2 space-x-2 border">
                   <ResourceAccountEdit
                     ResourceAccountId={account.ResourceAccountId}
                     resources={resources}
@@ -2338,12 +2341,12 @@ const fetchResources = async () => {
           </tbody>
         </table>
         {filteredAccounts.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No accounts found.</p>
+          <p className="mt-4 text-center text-gray-500">No accounts found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -2421,11 +2424,11 @@ export const SubkTechnician_table = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Subk Technician Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Subk Technician Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -2438,23 +2441,23 @@ export const SubkTechnician_table = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">Subk Technician ID</th>
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Resource Account ID</th>
-              {/* <th className="border p-2">Booking Details</th> */}
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">Subk Technician ID</th>
+              <th className="p-2 border">Name</th>
+              <th className="p-2 border">Resource Account ID</th>
+              {/* <th className="p-2 border">Booking Details</th> */}
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.SubkTechnicianId} className="hover:bg-gray-100 text-center">
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/subk-technician/${item.SubkTechnicianId}`)}>
+              <tr key={item.SubkTechnicianId} className="text-center hover:bg-gray-100">
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline" onClick={() => navigate(`/subk-technician/${item.SubkTechnicianId}`)}>
                   {item.SubkTechnicianId}
                 </td>
-                <td className="border p-2">{item.Name}</td>
-                <td className="border p-2">{item.resourceAccount?.Name || "N/A"}</td>
-                <td className="border p-2 flex space-x-2 justify-center">
+                <td className="p-2 border">{item.Name}</td>
+                <td className="p-2 border">{item.resourceAccount?.Name || "N/A"}</td>
+                <td className="flex justify-center p-2 space-x-2 border">
                   <SubkTechnicianEdit SubkTechnicianId={item.SubkTechnicianId} onUpdate={fetchSubkTechnicianData} />
                   <SubkTechnicianDelete
                     SubkTechnicianId={item.SubkTechnicianId}
@@ -2468,12 +2471,12 @@ export const SubkTechnician_table = () => {
           </tbody>
         </table>
         {filteredData.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No entries found.</p>
+          <p className="mt-4 text-center text-gray-500">No entries found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -2551,11 +2554,11 @@ export const SymptomCodeTable = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Symptom Code Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Symptom Code Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -2568,34 +2571,34 @@ export const SymptomCodeTable = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">Symptom Code ID</th>
-              <th className="border p-2">Symptom Code</th>
-              <th className="border p-2">Top Category</th>
-              <th className="border p-2">Sub Category</th>
-              <th className="border p-2">Quality Codes</th>
-              <th className="border p-2">Created On</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">Symptom Code ID</th>
+              <th className="p-2 border">Symptom Code</th>
+              <th className="p-2 border">Top Category</th>
+              <th className="p-2 border">Sub Category</th>
+              <th className="p-2 border">Quality Codes</th>
+              <th className="p-2 border">Created On</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.SymptomCodeID} className="hover:bg-gray-100 text-center">
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline" onClick={() => navigate(`/symptom-code/${item.SymptomCodeID}`)}>
+              <tr key={item.SymptomCodeID} className="text-center hover:bg-gray-100">
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline" onClick={() => navigate(`/symptom-code/${item.SymptomCodeID}`)}>
                   {item.SymptomCodeID}
                 </td>
-                <td className="border p-2">{item.SymptomCode}</td>
-                <td className="border p-2">{item.TopCategory}</td>
-                <td className="border p-2">{item.SubCategory}</td>
-                <td className="border p-2">{item.QualityCodes || "N/A"}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{item.SymptomCode}</td>
+                <td className="p-2 border">{item.TopCategory}</td>
+                <td className="p-2 border">{item.SubCategory}</td>
+                <td className="p-2 border">{item.QualityCodes || "N/A"}</td>
+                <td className="p-2 border">
                   {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                   })}
                 </td>
-                <td className="border p-2 flex space-x-2 justify-center">
+                <td className="flex justify-center p-2 space-x-2 border">
                   <SymptomCodeEdit SymptomCodeID={item.SymptomCodeID} onUpdate={fetchSymptomCodeData} />
                   <SymptomCodeDelete
                     SymptomCodeID={item.SymptomCodeID}
@@ -2609,12 +2612,12 @@ export const SymptomCodeTable = () => {
           </tbody>
         </table>
         {filteredData.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No entries found.</p>
+          <p className="mt-4 text-center text-gray-500">No entries found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -2692,11 +2695,11 @@ export const BookingsTable = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Bookings Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Bookings Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -2709,53 +2712,53 @@ export const BookingsTable = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">Booking ID</th>
-              <th className="border p-2">WOID</th>
-              <th className="border p-2">Status</th>
-              <th className="border p-2">Schedule Jeopardy</th>
-              <th className="border p-2">Jeopardy Time</th>
-              <th className="border p-2">Do Not Disturb</th>
-              <th className="border p-2">CE Schedule Change</th>
-              <th className="border p-2">Durations (min)</th>
-              <th className="border p-2">Created By</th>
-              <th className="border p-2">Created At</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">Booking ID</th>
+              <th className="p-2 border">WOID</th>
+              <th className="p-2 border">Status</th>
+              <th className="p-2 border">Schedule Jeopardy</th>
+              <th className="p-2 border">Jeopardy Time</th>
+              <th className="p-2 border">Do Not Disturb</th>
+              <th className="p-2 border">CE Schedule Change</th>
+              <th className="p-2 border">Durations (min)</th>
+              <th className="p-2 border">Created By</th>
+              <th className="p-2 border">Created At</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.BookingId} className="hover:bg-gray-100 text-center">
+              <tr key={item.BookingId} className="text-center hover:bg-gray-100">
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() => navigate(`/bookings/${item.BookingId}`)}
                 >
                   {item.BookingId}
                 </td>
-                <td className="border p-2">{item.WOID}</td>
-                <td className="border p-2">{item.BookingStatus || "-"}</td>
-                <td className="border p-2">{item.ScheduleJeopardy ? "Yes" : "No"}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{item.WOID}</td>
+                <td className="p-2 border">{item.BookingStatus || "-"}</td>
+                <td className="p-2 border">{item.ScheduleJeopardy ? "Yes" : "No"}</td>
+                <td className="p-2 border">
                   {item.ScheduleJeopardyTime
                     ? new Date(item.ScheduleJeopardyTime).toLocaleString("id-ID")
                     : "-"}
                 </td>
-                <td className="border p-2">{item.DoNotDisturb ? "Yes" : "No"}</td>
-                <td className="border p-2">{item.CeScheduleChange ? "Yes" : "No"}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{item.DoNotDisturb ? "Yes" : "No"}</td>
+                <td className="p-2 border">{item.CeScheduleChange ? "Yes" : "No"}</td>
+                <td className="p-2 border">
                   Total Billable: {item.TotalBillableDurationInMinutes || 0} <br/> 
                   Total In Progress: {item.TotalInProgressDurationInMinutes || 0}  <br/>
                   Total Break: {item.TotalBreakDurationInMinutes || 0}
                 </td>
-                <td className="border p-2">{item.CreatedBy}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{item.CreatedBy}</td>
+                <td className="p-2 border">
                   {new Date(item.CreatedAt).toLocaleDateString("id-ID", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                   })}
                 </td>
-                <td className="border p-2 flex space-x-2 justify-center">
+                <td className="flex justify-center p-2 space-x-2 border">
                   <BookingsEdit BookingId={item.BookingId} onUpdate={fetchBookingData} />
                   <BookingsDelete
                     BookingId={item.BookingId}
@@ -2769,12 +2772,12 @@ export const BookingsTable = () => {
           </tbody>
         </table>
         {filteredData.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No entries found.</p>
+          <p className="mt-4 text-center text-gray-500">No entries found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -2853,11 +2856,11 @@ export const BookingDetailsTable = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Booking Details Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Booking Details Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -2900,14 +2903,14 @@ export const BookingDetailsTable = () => {
                 <td className="border p-2">{item.Name}</td>
                 <td className="border p-2">{item.Status}</td>
 
-                <td className="border p-2 text-left">
+                <td className="p-2 text-left border">
                   <div>Start: {item.StartTimeCustomerTime ? new Date(item.StartTimeCustomerTime).toLocaleString() : "-"}</div>
                   <div>End: {item.EndTimeCustomerTime ? new Date(item.EndTimeCustomerTime).toLocaleString() : "-"}</div>
                   <div>Est. Arrival: {item.EstimatedArrivalTimeCustomerTime ? new Date(item.EstimatedArrivalTimeCustomerTime).toLocaleString() : "-"}</div>
                   <div>Actual Arrival: {item.ActualArrivalTimeCustomerTime ? new Date(item.ActualArrivalTimeCustomerTime).toLocaleString() : "-"}</div>
                 </td>
 
-                <td className="border p-2 text-left">
+                <td className="p-2 text-left border">
                   <div>Start: {item.StartTimeUserTime ? new Date(item.StartTimeUserTime).toLocaleString() : "-"}</div>
                   <div>End: {item.EndTimeUserTime ? new Date(item.EndTimeUserTime).toLocaleString() : "-"}</div>
                   <div>Duration: {item.DurationInMinutesUserTime || 0} min</div>
@@ -2915,15 +2918,15 @@ export const BookingDetailsTable = () => {
                   <div>Actual Arrival: {item.ActualArrivalTimeUserTime ? new Date(item.ActualArrivalTimeUserTime).toLocaleString() : "-"}</div>
                 </td>
 
-                <td className="border p-2">{item.ChangedBy}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{item.ChangedBy}</td>
+                <td className="p-2 border">
                   {new Date(item.ChangedAt).toLocaleDateString("id-ID", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                   })}
                 </td>
-                <td className="border p-2 flex justify-center gap-2">
+                <td className="flex justify-center gap-2 p-2 border">
                   <BookingDetailsEdit
                     BookingDetailId={item.BookingDetailId}
                     onUpdate={fetchBookingDetails}
@@ -2941,12 +2944,12 @@ export const BookingDetailsTable = () => {
         </table>
 
         {filteredData.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No entries found.</p>
+          <p className="mt-4 text-center text-gray-500">No entries found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -3318,7 +3321,7 @@ export const OTCCodeTable = () => {
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -3330,24 +3333,24 @@ export const OTCCodeTable = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">OTC Code</th>
-              <th className="border p-2">Description</th>
-              <th className="border p-2">Created At</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">OTC Code</th>
+              <th className="p-2 border">Description</th>
+              <th className="p-2 border">Created At</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
               <tr key={item.OTCCode} className="hover:bg-gray-100 text-center">
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   // onClick={() => navigate(`/bookings/${item.BookingId}`)}
                 >
                   {item.OTCCode}
                 </td>
-                <td className="border p-2">{item.Description}</td>
-                <td className="border p-2">
+                <td className="p-2 border">{item.Description}</td>
+                <td className="p-2 border">
                   {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
                     year: "numeric",
                     month: "short",
@@ -3368,12 +3371,12 @@ export const OTCCodeTable = () => {
           </tbody>
         </table>
         {filteredData.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No entries found.</p>
+          <p className="mt-4 text-center text-gray-500">No entries found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -3454,11 +3457,11 @@ export const CrsTable = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Case Resolution Table</h2>
+      <h2 className="mb-4 text-xl font-bold">Case Resolution Table</h2>
       <input
         type="text"
         placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
+        className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -3471,58 +3474,62 @@ export const CrsTable = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              <th className="border p-2">ID Csr</th>
-              <th className="border p-2">Case Resolution Code</th>
-              <th className="border p-2">Auto Close</th>
-              <th className="border p-2">Case Ready For Closure</th>
-              <th className="border p-2">Ready For Close Days</th>
-              <th className="border p-2">Ready For Closure Date</th>
-              <th className="border p-2">Pending Customer Action</th>
-              <th className="border p-2">Customer Requested CloseDate</th>
-              <th className="border p-2">Actions</th>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">ID Csr</th>
+              <th className="p-2 border">Case Resolution Code</th>
+              <th className="p-2 border">Auto Close</th>
+              <th className="p-2 border">Case Ready For Closure</th>
+              <th className="p-2 border">Ready For Close Days</th>
+              <th className="p-2 border">Ready For Closure Date</th>
+              <th className="p-2 border">Pending Customer Action</th>
+              <th className="p-2 border">Customer Requested CloseDate</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.id_csr} className="hover:bg-gray-100 text-center">
+              <tr key={item.id_csr} className="text-center hover:bg-gray-100">
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() => navigate(`/case-resolution/${item.id_csr}`)}
                 > 
                   {item.id_csr}
                 </td> 
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   // onClick={() => navigate(`/bookings/${item.BookingId}`)}
                 >
                   {item.caseResolutionCode}
                 </td>
                 <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   // onClick={() => navigate(`/bookings/${item.BookingId}`)}
                 >
                   {item.autoClose}
                 </td>
-                <td className="border p-2">{item.caseReadyForClosure}</td>
-                <td className="border p-2">
-                  {item.readyForCloseDays}
+                <td className="p-2 border">{item.caseReadyForClosure}</td>
+                <td className="p-2 border">
+                  {new Date(item.readyForCloseDays).toLocaleDateString("id-ID", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
                 </td>
-                 <td className="border p-2">
+                 <td className="p-2 border">
                   {new Date(item.readyForClosureDate).toLocaleDateString("id-ID", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                   })}
                 </td>
-                 <td className="border p-2">
+                 <td className="p-2 border">
                   {new Date(item.pendingCustomerAction).toLocaleDateString("id-ID", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                   })}
                 </td>
-                <td className="border p-2">
+                <td className="p-2 border">
                   {new Date(item.customerRequestedCloseDate).toLocaleDateString("id-ID", {
                     year: "numeric",
                     month: "short",
@@ -3543,12 +3550,12 @@ export const CrsTable = () => {
           </tbody>
         </table>
         {filteredData.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No entries found.</p>
+          <p className="mt-4 text-center text-gray-500">No entries found.</p>
         )}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex items-center justify-center mt-4 space-x-2">
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -3562,6 +3569,164 @@ export const CrsTable = () => {
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const FailureTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [FailureData, setFailureData] = useState([]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchFailureDataTable = async () => {
+    setLoading(true);
+    setError(null);
+
+    Swal.fire({
+      title: "Memuat Data Failure...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      const response = await ApiCustomer.get("/api/failure");
+      if (response.data.success) {
+        setFailureData(response.data.data);
+        Swal.close();
+      } else {
+        setError("Failed to fetch Failure data");
+        Swal.close();
+        Swal.fire({
+          title: "Error!",
+          text: "Gagal mengambil data Failure.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching Failure data:", err);
+      setError("Error fetching data");
+      Swal.close();
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data Failure.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔹 Load data when component mounts
+  useEffect(() => {
+    fetchFailureDataTable();
+  }, []);
+
+  // Filter data berdasarkan pencarian
+  const filteredFailureTable = FailureData.filter((item) =>
+    Object.values(item).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Hitung total halaman
+  const totalPages = Math.ceil(filteredFailureTable.length / itemsPerPage);
+
+  // Ambil data sesuai halaman saat ini
+  const currentData = filteredFailureTable.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  //navigate
+  const navigate = useNavigate();
+
+  return (
+    <div className="p-4">
+      <h2 className="mb-4 text-xl font-bold">Failure Table</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="w-1/3 p-2 mb-4 border rounded"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      <FailureAdd/>  
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 shadow-lg">
+          <thead>
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-2 border">Failure ID</th>
+              <th className="p-2 border">Name</th>
+              <th className="p-2 border">Description</th>
+              <th className="p-2 border">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map((FailureItem) => (
+              <tr
+                key={FailureItem.FailureId}
+                className="text-center hover:bg-gray-100"
+              >
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
+                  {FailureItem.FailureId}
+                </td>
+                <td className="p-2 border">{FailureItem.Name}</td>
+                <td className="p-2 border">{FailureItem.Description}</td>
+                <td className="flex p-2 space-x-2 border">
+                <FailureEdit FailureId={FailureItem.FailureId} onUpdate={fetchFailureDataTable}></FailureEdit>
+                <FailureDelete
+                  FailureId={FailureItem.FailureId}
+                  isModalOpen={isModalOpen}
+                  setIsModalOpen={setIsModalOpen}
+                  onUpdate={fetchFailureDataTable}                
+                />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredFailureTable.length === 0 && (
+          <p className="mt-4 text-center text-gray-500">No data found.</p>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-center mt-4 space-x-2">
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="p-2 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
           disabled={currentPage === totalPages}
         >
           Next

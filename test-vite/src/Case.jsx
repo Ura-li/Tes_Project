@@ -12,7 +12,7 @@ import { Skeleton } from './components/ui/skeleton';
 
 export const Case = () => {
   const { caseId } = useParams();
-  const [caseDetails, setCaseDetails] = useState (null);
+  const [caseDetails, setCaseDetails] = useState(null);
   const [caseNote, setCaseNote] = useState(null);
   const [caseNoteFormData, setCaseNoteFormData] = useState({
     LogType: '',

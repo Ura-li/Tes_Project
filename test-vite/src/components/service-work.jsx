@@ -37,6 +37,7 @@ import Swal from "sweetalert2";
 import { TabsServiceWO } from "./service-case";
 import { KeyRound } from "lucide-react";
 import { useParams } from "react-router";
+
 import ApiCustomer from "@/api";
 
 import { CaseField, QuickWOInput } from "./quick-wo-input";
@@ -54,7 +55,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-
+import { SearchCommandBlock } from "./sc-select";
 import {
   Command,
   CommandEmpty,
@@ -117,6 +118,23 @@ export const ServiceWork = () => {
     slaErrorDescription: "",
     casePriorityIndex: "",
   });
+
+  const [WOGeneral, setWOGeneral] = useState({
+    IncomingChannel: "",
+    WorkOrderNumber: "",
+    WorkOrderType: "",
+    Priority: "",
+    SystemStatus: "",
+    SubStatus: "",
+    BookableResourceBooking: "",
+    ServiceOfferID: "",
+    ServiceDescription: "",
+    PatnerCaseID: "",
+    PatnerStatus: "",
+    RecommendedResource:"",
+    ShipmentCountry: '',
+    ShipmentState: ""
+  })
   const handleSLAChange = (field) => (value) => {
     console.log("Changed:", field, value); 
     setSLA((prev) => ({
@@ -124,6 +142,14 @@ export const ServiceWork = () => {
       [field]: value,
     }));
   };
+
+  const handleWOGeneral = (field) => (value) =>{
+    console.log("Changed:", field, value); 
+    setWOGeneral((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+  }
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -201,6 +227,23 @@ export const ServiceWork = () => {
             slaErrorDescription: resWO.data.data.SLAErrorDescription || "",
             casePriorityIndex: resWO.data.data.CasePriorityIndex ?? "", // use ?? to allow 0
           }));
+          setWOGeneral((prev) => ({
+            ...prev,
+            IncomingChannel: "",
+            WorkOrderNumber: woid,
+            WorkOrderType: workOrderData.WorkOrderType,
+            Priority: workOrderData.Priority,
+            SystemStatus: workOrderData.SystemStatus,
+            SubStatus: workOrderData.SubStatus,
+            BookableResourceBooking: resBooking.data.data.BookingDetails?.ResourceId,
+            ServiceOfferID: resCI.data.data.servicecatalog?.warranty_services?.Service_offerID,
+            ServiceDescription: resCI.data.data.servicecatalog?.warranty_services?.Service_description,
+            PatnerCaseID: "",
+            PatnerStatus: "",
+            RecommendedResource:"",
+            ShipmentCountry: workOrderData.ShipmentCountry,
+            ShipmentState: workOrderData.ShipmentState
+          }))
 
           console.log("Res WO : ", resWO.data.data);
           console.log("Res MO : ", resMO.data.data);
@@ -208,6 +251,7 @@ export const ServiceWork = () => {
           console.log("Res Booking : ", resBooking.data.data);
           console.log("Res Owner : ", resOwner.data.data);
           console.log("Res Main Account : ", resMainAccount);
+          console.log("res wo general : ",WOGeneral)
         }
 
         Swal.close();
@@ -281,7 +325,12 @@ export const ServiceWork = () => {
         </div>
       )}
       {workOrders?.WOID && caseInformation?.CaseID && (
-        <TabsServiceWO workOrders={workOrders} SLA={SLA} setSLA={setSLA} />
+        <TabsServiceWO 
+          workOrders={workOrders} 
+          SLA={SLA} 
+          setSLA={setSLA} 
+          WOGeneral={WOGeneral}
+        />
       )}
       <Card className="p-0 mt-2 border-0 rounded-none">
         <Tabs defaultValue="Quick_WO_Input" className="">
@@ -428,7 +477,7 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={workOrders.WOID || "---"}
+                      value={WOGeneral.WorkOrderNumber || "---"}
                       readOnly
                     />
                   </CaseField>
@@ -444,7 +493,7 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={"---"}
+                      value={WOGeneral.WorkOrderType || "---"}
                       readOnly
                     />
                   </CaseField>
@@ -469,16 +518,18 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={workOrders.SystemStatus || "---"}
+                      value={WOGeneral.SystemStatus || "---"}
                       readOnly
                     />
                   </CaseField>
                   <CaseField label="Shipment Country" icon>
-                    <Input
+                    <SearchCommandBlock
                       variant={"invisible"}
                       className=""
-                      value={"---"}
-                      readOnly
+                      value={WOGeneral.ShipmentCountry || "---"}
+                      placeholder="---"
+                      onChange={handleWOGeneral("ShipmentCountry")}
+                      options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"] }
                     />
                   </CaseField>
                   <CaseField label="Sub-Status" icon={KeyRound}>
@@ -501,7 +552,7 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={"---"}
+                      value={WOGeneral.BookableResourceBooking || "---"}
                       readOnly
                     />
                   </CaseField>

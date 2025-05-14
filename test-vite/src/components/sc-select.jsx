@@ -171,7 +171,7 @@ useEffect(() => {
   export function SelectBar3({ value, onChange }) {
     return (
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-[200px] border-b-black">
+        <SelectTrigger className="w-[200px] border-b-black ring-1 ring-gray-400 rounded-lg">
           <SelectValue/>
         </SelectTrigger>
         <SelectContent>

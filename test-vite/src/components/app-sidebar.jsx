@@ -182,8 +182,12 @@ const data = {
         {
           title: "Case Resolution",
           url: "/master/CrsTable",
-          icon: CheckCircle
-        }, 
+          icon: CheckCircle,
+        },
+        {
+          title: "Failure Code",
+          url: "/master/Failure",
+        },
       ],
     },
     {

@@ -33,19 +33,25 @@ import {
 } from "@/components/ui/table"; 
 import { Link } from "react-router";
 import Swal from "sweetalert2";
+
 import { useParams } from "react-router";
+// import Select from 'react-select';
+import debounce from 'lodash.debounce';
 import ApiCustomer from "@/api";
+
+import { CaseField } from "./quick-wo-input";
 
 import { TabsServiceMOLineItems } from "./service-case";
 import { Description } from "@radix-ui/react-dialog";
 
 export const ServiceMoDetail = () => {
-  
+
   const { lineItemID } = useParams();
 
   const [moLineItems, setMoLineItems] = useState([])
 
   const [MODetailInput, setMODetailInput] = useState({
+    MOID: '',
     moOrderName: '',
     salesOrderNumber: '',
     lineNumber: '',
@@ -68,11 +74,15 @@ export const ServiceMoDetail = () => {
     mainComponent: '',
     gratisFlag: false,
     failureId: null,
-    atpStatus: ''
+    failureName: '',
+    serialNumber: '',
+    removedPartNumber: '',
+    removedSerialNumber: '',
+    removedPartDescription: '' 
   })
     
   const fetchMoLineItems = async () => {
-  try {
+    try {
     // Tampilkan loading SweetAlert
     Swal.fire({
       title: 'Loading...',
@@ -85,43 +95,54 @@ export const ServiceMoDetail = () => {
       }
     });
 
-    const res = await ApiCustomer.get(`/api/material-order/material-order-line-items/${lineItemID}`);
-    const data = res.data.data;
-
-    setMoLineItems(data);
-
-    setMODetailInput({
-      moOrderName: data ? `${data.MOID} - ${data.LineNumber}` : null,
-      salesOrderNumber: data.SalesOrderNumber || '',
-      lineNumber: data.LineNumber?.toString() || '',
-      partNumber: data.PartNumber || '',
-      description: data.Description || '',
-      rohs: data.servicecatalog_parts?.ROHS_Flag || false,
-      returnabilityFlag: data.servicecatalog_parts?.Returnable_Flag || false,
-      functionalEquivalence: data.FunctionalEquivalence || '',
-      mediaHandlingPart: data.MediaHandlingPart || '',
-      pickPackInstructions: data.PickPackInstructions || '',
-      collectionInstructions: data.CollectionInstructions || '',
-      customerResponse: data.CustomerResponse || '',
-      rejectedReason: data.RejectedReason || '',
-      otherReason: data.OtherReason || '',
-      partAuthorizationReason: data.PartAuthorizationReason || '',
-      partAuthorizationDetail: data.PartAuthorizationDetail || '',
-      originalPartNumber: data.OriginalPartNumber || '',
-      offeredPartNumber: data.OfferedPartNumber || '',
-      offeredPartDescription: data.OfferedPartDescription || '',
-      mainComponent: data.MainComponent || '',
-      gratisFlag: data.GratisFlag || false,
-      atpStatus: data.ATPStatus || ''
-    });
-
-  } catch (err) {
-    console.error("Failed to fetch Material Line Items orders:", err);
+      const res = await ApiCustomer.get(`/api/material-order/material-order-line-items/${lineItemID}`);
+      const data = res.data.data;
+  
+      setMoLineItems(data);
+      console.log( data)
+  
+      // Isi state MODetailInput berdasarkan data yang diambil
+      setMODetailInput({
+        MOID: data.MOID,
+        moOrderName: data
+          ? `${data.MOID} - ${data.LineNumber}`
+          : null,
+        salesOrderNumber: data.SalesOrderNumber || '',
+        lineNumber: data.LineNumber?.toString() || '',
+        partNumber: data.PartNumber || '',
+        description: data.Description || '',
+        rohs: data.servicecatalog_parts?.ROHS_Flag || false,
+        returnabilityFlag: data.servicecatalog_parts?.Returnable_Flag || false,
+        functionalEquivalence: data.FunctionalEquivalence || '',
+        mediaHandlingPart: data.MediaHandlingPart || '',
+        pickPackInstructions: data.PickPackInstructions || '',
+        collectionInstructions: data.CollectionInstructions || '',
+        customerResponse: data.CustomerResponse || '',
+        rejectedReason: data.RejectedReason || '',
+        otherReason: data.OtherReason || '',
+        partAuthorizationReason: data.PartAuthorizationReason || '',
+        partAuthorizationDetail: data.PartAuthorizationDetail || '',
+        originalPartNumber: data.OriginalPartNumber || '',
+        offeredPartNumber: data.OfferedPartNumber || '',
+        offeredPartDescription: data.OfferedPartDescription || '',
+        mainComponent: data.MainComponent || '',
+        gratisFlag: data.GratisFlag || false,
+        failureId: data.FailureId || null,
+        failureName: data.Failure?.Name || '',
+        atpStatus: data.ATPStatus || '',
+        serialNumber: data.SerialNumber || '',
+        removedPartNumber: data.RemovedPartNumber || '',
+        removedSerialNumber: data.RemovedSerialNumber || '',
+        removedPartDescription: data.RemovedPartDescription || ''
+      });
+  
+    } catch (err) {
+      console.error("Failed to fetch Material Line Items orders:", err);
     Swal.fire('Error', 'Failed to fetch Material Line Items', 'error');
   } finally {
     Swal.close(); // Tutup alert
-  }
-};
+    }
+  };
   
   useEffect(() => {
     fetchMoLineItems()
@@ -160,8 +181,11 @@ export const ServiceMoDetail = () => {
           This material order line item is <strong>read-only</strong> because it is <strong>Closed</strong>.
         </div>
       )}
-      <TabsServiceMOLineItems MOLineDetails={moLineItems.MOID}/
-      >
+      {moLineItems.MOID ? (
+        // <TabsServiceMOLineItems MOLineDetails={moLineItems}/>
+        <TabsServiceMOLineItems MOLineDetails={MODetailInput} LineItemID={lineItemID}/>
+      ) : ''}
+      {/* {console.log(moLineItems)} */}
     <Card className="mt-2 rounded-none">
 
       <CardContent className={'p-0'}>
@@ -270,7 +294,7 @@ export const ServiceMoDetail = () => {
                     onChange={handleChange}
                   >
                     <option value="None">None</option>
-                    <option value="PickUp">Pick Up</option>
+                    <option value="Pickup">Pick Up</option>
                     <option value="DropOff">Drop Off</option>
                     <option value="ThirdParty">Third Party</option>
                   </select>
@@ -369,9 +393,6 @@ export const ServiceMoDetail = () => {
                   <span className="ml-51.5">{MODetailInput.atpStatus}</span>
                 </div>
                 
-                <div className="flex font-bold">
-                  <Button onClick={handleUpdate}>Save</Button>
-                </div>
               </CardContent>
             </Card>
 
@@ -399,10 +420,13 @@ export const ServiceMoDetail = () => {
                   <span className="ml-40">...</span>
                 </div>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Failure Code</span>
-                  <span className="ml-46">...</span>
-                </div>
+                {/* <div className="flex font-bold"> */}
+                  {/* <span className="ml-46">...</span> */}
+                  <FailureSelect
+                    failureId={MODetailInput.failureId}
+                    setMODetailInput={setMODetailInput}
+                  />
+                {/* </div> */}
 
                 <div className="flex font-bold">
                   <span className="ml-7">Additional Failure Code</span>
@@ -410,8 +434,15 @@ export const ServiceMoDetail = () => {
                 </div>
 
                 <div className="flex font-bold">
-                  <span className="ml-7">Serial Number </span>
-                  <span className="ml-42">...</span>
+                  <span className="ml-7">Serial Number <span className="text-red-400">*</span></span>
+                  {/* <span className="ml-42">...</span> */}
+                  <input 
+                  type="text" 
+                  className="ml-42"
+                  name="serialNumber"
+                  value={MODetailInput.serialNumber}
+                  onChange={handleChange}
+                  placeholder="---" />
                 </div>
 
                 <div className="flex font-bold">
@@ -436,21 +467,39 @@ export const ServiceMoDetail = () => {
                 </div>
 
                 <div className="flex font-bold">
-                  <span className="ml-7">Removed Part Number
+                  <span className="ml-7">Removed Part Number <span className="text-red-400">*</span>
                   </span>
-                  <span className="ml-43">...</span>
+                  {/* <span className="ml-43">...</span> */}                  
+                  <input type="text" 
+                  className="ml-43"
+                  name="removedPartNumber"
+                  value={MODetailInput.removedPartNumber}
+                  onChange={handleChange}
+                  placeholder="---" />
                 </div>
 
                 <div className="flex font-bold">
-                  <span className="ml-7">Removed Serial Number
+                  <span className="ml-7">Removed Serial Number <span className="text-red-400">*</span>
                   </span>
-                  <span className="ml-41">...</span>
+                  {/* <span className="ml-41">...</span> */}                  
+                  <input type="text" 
+                  className="ml-41"
+                  name="removedSerialNumber"
+                  value={MODetailInput.removedSerialNumber}
+                  onChange={handleChange}
+                  placeholder="---" />
                 </div>
 
                 <div className="flex font-bold">
-                  <span className="ml-7">Removed Part Desc
+                  <span className="ml-7">Removed Part Desc <span className="text-red-400">*</span>
                   </span>
-                  <span className="ml-50">...</span>
+                  {/* <span className="ml-50">...</span> */}
+                  <input type="text" 
+                  className="ml-50"
+                  name="removedPartDescription"
+                  value={MODetailInput.removedPartDescription}
+                  onChange={handleChange}
+                  placeholder="---" />
                 </div>
               </CardContent>
             </Card>
@@ -534,6 +583,106 @@ export const ServiceMoDetail = () => {
         </Tabs>
       </CardContent>
     </Card>
+    
     </>
+  );
+  
+};
+
+const FailureSelect = ({ failureId, setMODetailInput }) => {
+  const [inputValue, setInputValue] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isFocused, setIsFocused] = useState(false); // Track if input is focused
+
+  useEffect(() => {    
+    // Fetch default options once
+    ApiCustomer.get('/api/failure/options').then((res) => {
+      const defaultOptions = res.data.map(f => ({
+        value: f.FailureId.toString(),
+        label: `${f.Name} — ${f.Description ?? ''}`
+      }));
+      setSearchResults(defaultOptions);
+    });
+  if (failureId) {
+    // Ambil data failure berdasarkan ID yang sudah ada
+    ApiCustomer.get(`/api/failure/${failureId}`).then((res) => {
+      const f = res.data.data;
+      const label = `${f.Name} — ${f.Description ?? ''}`;
+      setInputValue(label);
+    }).catch(() => {
+      setInputValue(''); // Kosongkan jika tidak ditemukan
+    });
+  }
+}, [failureId]);
+
+
+  const fetchFailures = debounce((query) => {
+    if (query.length < 2) return;
+    ApiCustomer.get(`/api/failure/options?q=${query}`).then((res) => {
+      const limited = res.data.slice(0, 3).map(f => ({
+        value: f.FailureId.toString(),
+        label: `${f.Name} — ${f.Description ?? ''}`
+      }));
+      setSearchResults(limited);
+    });
+  }, 300);
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setInputValue(value);
+    fetchFailures(value);
+  };
+
+  const handleSelect = (selected) => {
+    setInputValue(selected.label);
+    setSearchResults([]);
+    setMODetailInput((prev) => ({
+      ...prev,
+      failureId: selected.value,
+      failureName: selected.label,
+    }));
+  };
+
+  // Handle focus and blur events
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => setIsFocused(false), 150); // Delay to allow click on dropdown
+  };
+
+  return (
+    <CaseField label={"Failure Code"} span={2} star>
+      <div className="relative w-full">
+        <Input
+          variant={"invisible"}
+          value={inputValue}
+          onChange={handleInputChange}
+          placeholder="Search Failure..."
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+        />
+
+        {/* Show dropdown only if results exist and input is focused */}
+        {isFocused && (
+          <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg max-h-60">
+            {searchResults.length > 0 ? (
+              searchResults.map((opt) => (
+                <li
+                  key={opt.value}
+                  className="p-3 cursor-pointer hover:bg-gray-200"
+                  onMouseDown={() => handleSelect(opt)} // Use onMouseDown to prevent blur before click
+                >
+                  {opt.label}
+                </li>
+              ))
+            ) : (
+              <li className="p-3 text-gray-500">No results found</li>
+            )}
+          </ul>
+        )}
+      </div>
+    </CaseField>
   );
 };

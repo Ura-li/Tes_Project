@@ -295,8 +295,8 @@ export const TabsService = ({
                   allowEscapeKey: false,
                 });
               }
-            }
-            break;
+          }
+          break;
       }
     }
 
@@ -417,6 +417,7 @@ export const TabsService = ({
         `/api/case-information/${caseDetails.CaseID}`,
         {
           CaseStatus: "Close",
+          CaseClosedDate: new Date().toISOString(), 
         }
       );
       if (res.data.success) {
@@ -522,11 +523,11 @@ const spanMap = {
   6: "col-span-6",
 };
 
-export const CaseField = ({ label, children, icon, span = 1, className }) => (
+export const CaseField = ({ label, children, icon, span = 1, className, star }) => (
   <>
     <CardTitle
       className={twMerge(
-        `relative font-medium flex items-center`,
+        `relative font-medium flex items-center gap-2`,
         icon ? "pl-6" : "",
         className
       )}
@@ -535,6 +536,7 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
         <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
       )}
       {label}
+      {star ? <span className="text-red-400">*</span> : ""}
     </CardTitle>
 
     <CardTitle className={twMerge(spanMap[span], "")}>
@@ -543,7 +545,7 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
   </>
 );
 
-export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
+export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
   const navigate = useNavigate();
   const WOID = workOrders.WOID;
   const handleSave = async () => {
@@ -563,8 +565,12 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
        * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
        */
 
-      //SLA
+      // const resGeneralWO = await ApiCustomer.patch(`/api/work-order/`)
       const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
+        //WO GENERAL
+        ShipmentCountry: WOGeneral.ShipmentCountry || undefined,
+
+        //SLA
         SLAJeopardy: SLA.slaJeopardy || undefined,
         DueDateCustomer: SLA.dueDateCustomer || undefined,
         CoverageWindow: SLA.coverageWindow || undefined,
@@ -860,8 +866,10 @@ export const TabsServiceMO = ({ materialOrders }) => {
   );
 };
 
-export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
+export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
   const navigate = useNavigate();
+  console.log(MOLineDetails);
+
   const buttons = [
     {
       icon: ArrowLeftFromLine,
@@ -869,7 +877,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
       onClick: () => navigate(`/material-order/${MOLineDetails.MOID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
     {
       icon: FileSymlink,
       label: "Save & Close",
@@ -903,15 +911,18 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
           Swal.showLoading();
         }
       });
-      
-      const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${lineItemID}`, {
-        Description: MODetailInput.description,
-        PickPackInstructions: MODetailInput.pickPackInstructions,
-        CollectionInstructions: MODetailInput.collectionInstructions,
-        CustomerResponse: MODetailInput.customerResponse,
-        RejectedReason: MODetailInput.rejectedReason,
-        OtherReason: MODetailInput.otherReason,
-        FailureId: MODetailInput.failureId,
+      const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${LineItemID}`, {
+        Description: MOLineDetails.description,
+        PickPackInstructions: MOLineDetails.pickPackInstructions,
+        CollectionInstructions: MOLineDetails.collectionInstructions || "None",
+        CustomerResponse: MOLineDetails.customerResponse,
+        RejectedReason: MOLineDetails.rejectedReason,
+        OtherReason: MOLineDetails.otherReason,
+        FailureId: MOLineDetails.failureId,
+        SerialNumber: MOLineDetails.serialNumber,
+        RemovedPartNumber: MOLineDetails.removedPartNumber,
+        RemovedSerialNumber: MOLineDetails.removedSerialNumber,
+        RemovedPartDescription: MOLineDetails.removedPartDescription,
       });
       if (res.data.success) {
         // Success alert
@@ -922,7 +933,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
           timer: 2000,
           showConfirmButton: false
         }).then(() => {
-          navigate(`/material-order/${MOLineDetails.MOID}`)
+          navigate(`/mo_detail/${LineItemID}`)
         })
       } else {
         // Error from API
@@ -952,7 +963,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
         },
       });
       const res = await ApiCustomer.patch(
-        `/api/material-order/material-order-line-items/${MOLineDetails.LineItemID}`,
+        `/api/material-order/material-order-line-items/${LineItemID}`,
         {
           Status: "Closed",
         }
@@ -1260,6 +1271,9 @@ export const ServiceCase = ({
       CaseType : "ASP/Reseller/GS1"
     },
     {
+      CaseType : "Bench"
+    },
+    {
       CaseType : "Call to Repair"
     },
     {
@@ -1282,6 +1296,9 @@ export const ServiceCase = ({
     },
     {
       CaseType : "Internal Support"
+    },
+    {
+      CaseType : "Onsite"
     },
     {
       CaseType : "Proactive"
@@ -1610,7 +1627,7 @@ const [endDate, setEndDate] = useState(null);
                 <CaseField label="Email Status">
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Case Status">                 
+                <CaseField label="Case Status">
       <SearchCommandBlock
   value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
   onChange={(label) => {
@@ -2037,7 +2054,7 @@ const [endDate, setEndDate] = useState(null);
                 </CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-9 items-center">
+              <CardContent className="grid items-center grid-cols-9 gap-10">
                 <CaseField label="Case Entitlement" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
@@ -2254,8 +2271,9 @@ const [endDate, setEndDate] = useState(null);
 
                   <CaseField
                     label="Notes"
-                    className={"col-span-2 self-start"}
+                    className={"col-span-2 self-start bg-red"}
                     span={4}
+                    star
                   >
                     <textarea
                       className="h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500"
@@ -2383,6 +2401,7 @@ const [endDate, setEndDate] = useState(null);
                     label="Keyword Search"
                     className={"col-span-2"}
                     span={3}
+                    star
                   >
                     <Input
                       placeholder="..."
@@ -2497,7 +2516,7 @@ const [endDate, setEndDate] = useState(null);
               </CardHeader>
 
               <CardContent className="grid grid-cols-7 gap-5 p-3 ">
-                <CaseField label="Case Resolution Code">
+                <CaseField label="Case Resolution Code" star>
                   {/* <Input
                   variant='invisible'
                   value={csrForm.caseResolutionCode}
@@ -2665,7 +2684,12 @@ const [endDate, setEndDate] = useState(null);
               </CardHeader>
               <CardContent className="grid items-center grid-cols-4 gap-10">
                 <CaseField label="Shipment Country">
-                  <Input variant="invisible" placeholder="---" />
+                    <SearchCommandBlock 
+                      variant="invisible" 
+                      value={workOrders[0]?.ShipmentCountry ||"---"}
+                      readOnly
+                      options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"] }
+                    />
                 </CaseField>
                 <CaseField label="Exception Order">
                   <Input variant="invisible" placeholder="---" />
@@ -2915,3 +2939,4 @@ const [endDate, setEndDate] = useState(null);
     </>
   );
 };
+  
