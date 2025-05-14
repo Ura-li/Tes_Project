@@ -110,6 +110,11 @@ export const TabsService = ({
   //   Note: "",
   // });
 
+  const [caseForm, setCaseForm] = useState({
+    CaseType: "",
+    CaseStatus: "",
+  });
+
   const [gtcForm, setGtcForm] = useState({
     global_trade_status: "",
     embargoed_country: "",
@@ -134,6 +139,9 @@ export const TabsService = ({
     setCaseDetails((prev) => ({ ...prev, [field]: value }));
   }
   
+  const handleCaseChange = (field) => (value) => {
+    setCaseForm((prev) => ({ ...prev, [field]: value }));
+  }
 
   const handleCaseNoteChange = (key, value) => {
     setCaseNoteFormData((prev) => {
@@ -172,11 +180,12 @@ export const TabsService = ({
     const role = user?.role || "Unknown"; 
 
     const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
+    const caseFilled = caseForm.CaseType && caseForm.CaseType.trim() !== "" ;
     const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
     const entitlementEdited = entitlementStatus !== undefined;
     const csrEdited = csrForm && Object.keys(csrForm).length > 0;
 
-    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited;
+    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseFilled;
 
     if (!hasIntentToSave) {
       alert("Tidak ada data yang disimpan.");
@@ -185,7 +194,7 @@ export const TabsService = ({
 
     let savedModules = [];
 
-    for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR']) {
+    for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE']) {
       switch (target) {
 
        case 'NOTE':
@@ -257,6 +266,37 @@ export const TabsService = ({
             savedModules.push("CSR");
           }
           break;
+
+          case 'CASE':
+         if (caseFilled) {
+              try {
+                await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, {
+                  ...caseForm,
+                  CaseType: caseForm.CaseType || "",
+                  CaseStatus: caseForm.CaseStatus || "",
+                });
+                savedModules.push("Case");
+                swal.fire({
+                  icon: "success",
+                  title: "Berhasil Disimpan",
+                  text: "Data Case berhasil disimpan.",
+                  timer: 2000,
+                  showConfirmButton: false,
+                  allowOutsideClick: false,
+                  allowEscapeKey: false,
+                });
+              } catch (err) {
+                console.error("Gagal update case:", err);
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  text: "Gagal menyimpan data case.",
+                  allowOutsideClick: false,
+                  allowEscapeKey: false,
+                });
+              }
+            }
+            break;
       }
     }
 
@@ -267,7 +307,9 @@ export const TabsService = ({
         title: "Berhasil Disimpan",
         text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
         timer: 2500,
-        showConfirmButton: false
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
       });
       window.location.reload();
     }
@@ -450,6 +492,9 @@ export const TabsService = ({
             setCaseNoteFormData={setCaseNoteFormData}
             formGtc={gtcForm}
             setFormGtc={setGtcForm}
+            onChangeCase={handleCaseChange}
+            caseForm={caseForm}
+            setCaseForm={setCaseForm}
             onChangeGtc={handleGtcChange}
             onChange={handleCaseNoteChange}
             handleCaseDetails={handleCaseDetails}
@@ -1004,6 +1049,9 @@ export const ServiceCase = ({
   csrForm,
   setCsrForm,
   onChangeCsr,
+  caseForm,
+  onChangeCase,
+  setCaseForm,
 }) => {
   const { open } = useSidebar();
 
@@ -1277,6 +1325,37 @@ export const ServiceCase = ({
 };
 
 
+const statusEnumToLabel = {
+  New: "New",
+  Open: "Open",
+  InActive: "Inactive",
+  Close: "Closed",
+  Active: "Active",
+  Monitor: "Monitor",
+  Pending_Customer_Action: "Pending Customer Action",
+  Quote_Requested: "Quote Requested",
+  Pending_Follow_Up: "Pending Follow Up",
+  Pending_Order: "Pending Order",
+  Escalated: "Escalated",
+  Quote_Approved: "Quote Approved",
+  Pending_Quote: "Pending Quote"
+};
+
+const labelToStatusEnum = Object.fromEntries(
+  Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
+);
+
+
+const fetchCase = async () => {
+  try {
+    const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`);
+    setCaseForm(res.data.data);
+  } catch (err) {
+    console.error("Error fetching case:", err);
+    setCaseForm(caseForm); // fallback jika error
+  }
+};
+
   
   //notes handler
   useEffect(() => {
@@ -1302,6 +1381,7 @@ export const ServiceCase = ({
     fetchGtc(); 
     fetchOTCCode();
     fetchCsr();
+    fetchCase();
   }, []);
 
   useEffect(() => {
@@ -1530,13 +1610,21 @@ const [endDate, setEndDate] = useState(null);
                 <CaseField label="Email Status">
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Case Status">
-                  {caseDetails.CaseStatus}
+                <CaseField label="Case Status">                 
+      <SearchCommandBlock
+  value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
+  onChange={(label) => {
+    const enumValue = labelToStatusEnum[label];
+    onChangeCase("CaseStatus")(enumValue);
+  }}
+  placeholder="--Select--"
+  options={Object.values(statusEnumToLabel)}
+/>
                 </CaseField>
                 <CaseField label="Case Type">
                   <SearchCommandBlock
-                    value={caseDetails?.CaseType}
-                    onChange={handleCaseDetails("CaseType")}
+                    value={caseForm?.CaseType}
+                    onChange={onChangeCase("CaseType")}
                     placeholder="--Select--"
                     options={[
                     "Depot Repair",
@@ -2827,4 +2915,3 @@ const [endDate, setEndDate] = useState(null);
     </>
   );
 };
-  
