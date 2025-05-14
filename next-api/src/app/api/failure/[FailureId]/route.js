@@ -3,7 +3,7 @@ import prisma from "../../../../../prisma/client";
 
 // ========== GET: Ambil failure berdasarkan ID ==========
 export async function GET(request, { params }) {
-  const { FailureId } = params;
+  const { FailureId } = await params;
 
   if (!FailureId) {
     return NextResponse.json({
