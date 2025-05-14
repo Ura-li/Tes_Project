@@ -177,8 +177,8 @@ export function ServiceBooking ({BookingId , woid}) {
         
         setBookingStatus(data?.BookingStatus || "");
         setWorkOrderNumber(data?.workorder?.WorkOrderNumber || "");
-        setRequestedDateTimeCustomer(formatDateForInput(data?.workorder?.RequestedDateTimeCustomer || ""));
-        setGuaranteedFixTimeCustomer(formatDateForInput(data?.workorder?.GuaranteedFixTimeCustomer || ""));
+        setRequestedDateTimeCustomer(new Date(data?.workorder?.RequestedDateTimeCustomer || ""));
+        setGuaranteedFixTimeCustomer(new Date(data?.workorder?.GuaranteedFixTimeCustomer || ""));
         
         setDoNotDisturb(data?.DoNotDisturb || false);
         setCeScheduleChange(data?.CeScheduleChange || false);
@@ -442,7 +442,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   }
                 />
               </CaseField>
-              <CaseField label={"Resource"} span={2}>
+              <CaseField label={"Resource"} span={2} star>
                 <Input
                   variant={"invisible"}
                   value={resourceName}
@@ -508,7 +508,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   )}
                 </CaseField>
               </div>
-              <CaseField label={"Subk Technician Name"} span={2}>
+              <CaseField label={"Subk Technician Name"} span={2} star>
                 <Input
                   variant={"invisible"}
                   value={subkTechnicianName}
@@ -559,7 +559,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   </ul>
                 )}
               </CaseField>
-              <CaseField label={"Booking Status"} span={2}>
+              <CaseField label={"Booking Status"} span={2} star>
                 <Input
                   variant={"invisible"}
                   value={bookingStatus}
@@ -569,27 +569,37 @@ export function ServiceBooking ({BookingId , woid}) {
               <CaseField label={"Work Order"} icon span={2}>
                 <Input variant={"invisible"} value={workOrderNumber} readOnly />
               </CaseField>
-              <div className="grid items-center grid-cols-3 col-span-3 p-3 ring-1">
+              <div className="grid items-center grid-cols-3 col-span-3 p-3 ring-1 gap-2">
                 <CaseField
                   label={"Requested Date Time (costumer)"}
                   icon
                   span={2}
                 >
-                  <Input
+                  <DatePicker
+                    value={requestedDateTimeCustomer}
+                    onChange={
+                      setRequestedDateTimeCustomer
+                    }
+                    />
+                  {/* <Input
                     variant={"invisible"}
                     value={requestedDateTimeCustomer}
                     onChange={(e) =>
                       setRequestedDateTimeCustomer(e.target.value)
                     }
                     readOnly
-                  />
+                  /> */}
                 </CaseField>
                 <CaseField
                   label={"Guaranteed Fix Time (costumer)"}
                   icon
                   span={2}
                 >
-                  <Input
+                  <DatePicker
+                    value={guaranteedFixTimeCustomer}
+                    onChange={setGuaranteedFixTimeCustomer}
+                    />
+                  {/* <Input
                     variant={"invisible"}
                     value={
                       guaranteedFixTimeCustomer
@@ -604,7 +614,7 @@ export function ServiceBooking ({BookingId , woid}) {
                       setGuaranteedFixTimeCustomer(isoDateTimeGuaranteed);
                     }}
                     readOnly
-                  />
+                  /> */}
                 </CaseField>
               </div>
               <CaseField
@@ -663,7 +673,7 @@ export function ServiceBooking ({BookingId , woid}) {
               <hr />
             </CardHeader>
             <CardContent className="grid grid-cols-3 gap-6">
-              <CaseField label={"Start Time"} span={2}>
+              <CaseField label={"Start Time"} span={2} star>
                 <DatePicker
                   value={
                     startTimeUserTime ? new Date(startTimeUserTime) : ""
@@ -673,7 +683,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"End Time"} span={2}>
+              <CaseField label={"End Time"} span={2} star>
                 <DatePicker
                   
                   value={endTimeUserTime ? new Date(endTimeUserTime) : ""}
@@ -682,14 +692,14 @@ export function ServiceBooking ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"Duration"} span={2}>
+              <CaseField label={"Duration"} span={2} star>
                 <Input
                   type="number"
                   value={durationInMinutesUserTime}
                   onChange={(e) => setDurationInMinutesUserTime(e.target.value)}
                 />
               </CaseField>
-              <CaseField label={"Estimated Arrival Time"} span={2}>
+              <CaseField label={"Estimated Arrival Time"} span={2} star>
                 <DatePicker
                   
                   value={
@@ -702,7 +712,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"Actual Arrival Time"} span={2}>
+              <CaseField label={"Actual Arrival Time"} span={2} star>
                 <DatePicker
                   
                   value={
@@ -758,25 +768,25 @@ export function ServiceBooking ({BookingId , woid}) {
               <hr />
             </CardHeader>
             <CardContent className="grid items-center grid-cols-3 gap-6">
-              <CaseField label={'Start Time (Customer)'} span={2}>
+              <CaseField label={'Start Time (Customer)'} span={2} star>
                 <DatePicker 
                   value={startTimeCustomerTime ? new Date(startTimeCustomerTime) : ""}
                   onChange={setStartTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'End TIme (Customer)'} span={2}>
+              <CaseField label={'End TIme (Customer)'} span={2} star>
                 <DatePicker 
                   value={endTimeCustomerTime ? new Date(endTimeCustomerTime) : ""}
                   onChange={setEndTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'Estimated Arrival Time (Customer)'} span={2}>
+              <CaseField label={'Estimated Arrival Time (Customer)'} span={2} star>
                 <DatePicker 
                   value={estimatedArrivalTimeCustomerTime ? new Date(estimatedArrivalTimeCustomerTime) : ""}
                   onChange={setEstimatedArrivalTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'Actual Arrival Time (Customer)'} span={2}>
+              <CaseField label={'Actual Arrival Time (Customer)'} span={2} star>
                 <DatePicker 
                   value={actualArrivalTimeCustomerTime ? new Date(actualArrivalTimeCustomerTime) : ""}
                   onChange={setActualArrivalTimeCustomerTime}
@@ -952,7 +962,7 @@ export function NewBookableResourceBooking({ WOID, CreatedBy, RequestedDateTimeC
         <Button variant="outline" className="text-blue-600 hover:text-blue-800">
           <PlusCircle className="mr-2" />
           Tambah Booking Baru
-        </Button>
+        </Button><Label className="text-red-400">*</Label>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
