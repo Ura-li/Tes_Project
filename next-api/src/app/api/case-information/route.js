@@ -88,6 +88,7 @@ export async function GET(request) {
       otcCodeTable: true,
       casenotes_caseinformation_CaseNoteTocasenotes: true,
       workorder: true,
+      accessory: true
     },
   });
 
@@ -150,6 +151,7 @@ export async function POST(request) {
         CreatedBy,
         ProblemDescription,
         CaseNoteProduct,
+        accessories,
     } = await request.json();
 
     const CaseID = await generateID("C-", "caseinformation", "CaseID")
@@ -168,24 +170,31 @@ export async function POST(request) {
     //create data 
     const case_information = await prisma.caseinformation.create({
         data:{
-            CaseID: CaseID,
-            SiteAccountID: SiteAccountID,
-            ContactID: ContactID,
-            AssetID: AssetID,
-            CaseSubject: CaseSubject,
-            CaseType: CaseType,
-            KCI_Flag: KCI_Flag,
-            IncomingChannel: IncomingChannel,
-            CaseStatus: CaseStatus,
-            CasePriority: CasePriority,
-            CustomerSeverity: CustomerSeverity,
-            CaseClosedDate: CaseClosedDate,
-            CaseNote: CaseNote,
-            SymptomCode: SymptomCode,
-            CaseResolution: CaseResolution,
-            CreatedBy: parseInt(CreatedBy),
-            ProblemDescription: ProblemDescription,
-            CaseProductNote : CaseNoteProduct
+          CaseID: CaseID,
+          SiteAccountID: SiteAccountID,
+          ContactID: ContactID,
+          AssetID: AssetID,
+          CaseSubject: CaseSubject,
+          CaseType: CaseType,
+          KCI_Flag: KCI_Flag,
+          IncomingChannel: IncomingChannel,
+          CaseStatus: CaseStatus,
+          CasePriority: CasePriority,
+          CustomerSeverity: CustomerSeverity,
+          CaseClosedDate: CaseClosedDate,
+          CaseNote: CaseNote,
+          SymptomCode: SymptomCode,
+          CaseResolution: CaseResolution,
+          CreatedBy: parseInt(CreatedBy),
+          ProblemDescription: ProblemDescription,
+          CaseProductNote : CaseNoteProduct,
+          accessory: {
+            create: accessories.map((acc) => ({
+              Accessories: acc.name,
+              Note: acc.note,
+              CT_SNCode: acc.code,
+            })),
+          },
         },
     });
 

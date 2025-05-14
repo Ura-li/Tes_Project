@@ -89,12 +89,24 @@ export function BtnModal({
   selectedAssetForCase,
   selectedContactForCase,
   caseType,
-  setCaseType
+  setCaseType,
+  accessories,
+  setAccessories
 }) {
   
   
   // console.log("This is  the data",selectedAssetForCase.AssetID);
 
+  const handleAccessoryChange = (index, field, value) => {
+      const newAccessories = [...accessories];
+      newAccessories[index][field] = value;
+      setAccessories(newAccessories);
+    };
+  
+    const addAccessory = (e) => {
+      // e.prevent.default()
+      setAccessories([...accessories, { name: "", note: "", code: "" }]);
+    };
   return (
     <Dialog>
     <DialogTrigger asChild>
@@ -170,15 +182,15 @@ export function BtnModal({
         </div>
 
         {/* Accessories */}
-        <div className="flex flex-col">
-          <Label>Accessories</Label>
-          <div className="grid grid-cols-1 gap-2 mt-2 md:grid-cols-3">
-            <Input placeholder="Accessory name" />
-            <Input placeholder="Note" />
-            <Input placeholder="CT / SN code" />
+        {accessories.map((acc, index) => (
+          <div key={index} className="grid grid-cols-1 gap-2 mt-2 md:grid-cols-3">
+            <Input placeholder="Accessory name" value={acc.name} onChange={(e) => handleAccessoryChange(index, "name", e.target.value)} />
+            <Input placeholder="Note" value={acc.note} onChange={(e) => handleAccessoryChange(index, "note", e.target.value)} />
+            <Input placeholder="CT / SN code" value={acc.code} onChange={(e) => handleAccessoryChange(index, "code", e.target.value)} />
           </div>
-          <p className="mt-1 text-sm text-gray-500">Total accessories:</p>
-        </div>
+        ))}
+        <Button variant="outline" type="button" onClick={addAccessory}>+ Add Accessory</Button>
+
         <DialogFooter>
           <Button type="submit" onClick={(e) => {
             e.preventDefault(); // Prevents form submission

@@ -375,6 +375,7 @@ export const TabsService = ({
         `/api/case-information/${caseDetails.CaseID}`,
         {
           CaseStatus: "Close",
+          CaseClosedDate: new Date().toISOString(), 
         }
       );
       if (res.data.success) {

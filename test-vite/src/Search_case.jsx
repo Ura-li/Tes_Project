@@ -606,6 +606,13 @@ const Search_case = () => {
 
   const navigate = useNavigate(); // ✅ Get the navigate function
 
+  //accessories
+  const [accessories, setAccessories] = useState([
+    { name: "", note: "", code: "" }
+  ]);
+
+  
+
   const handleCreateCase = async () => {
     // Cek apakah asset & contact sudah dipilih (dari data lama pun boleh)
     if (!selectedAssetForCase || !selectedContactForCase) {
@@ -662,7 +669,8 @@ const Search_case = () => {
         CaseResolution: null,
         CreatedBy: data.user.id,
         ProblemDescription : problemDesc,
-        CaseNoteProduct: CaseNoteProduct
+        CaseNoteProduct: CaseNoteProduct,
+        accessories
       };
       console.log("Create Case Data : ", newCase)
   
@@ -787,6 +795,8 @@ const Search_case = () => {
                   selectedContactForCase={selectedContactForCase}
                   caseType={caseType}
                   setCaseType={setCaseType}
+                  accessories={accessories}
+                  setAccessories={setAccessories}
                 ></BtnModal>
                 <SidebarTrigger
                   className="-ml-1 scale-125 mr-1"
