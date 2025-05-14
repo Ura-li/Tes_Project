@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
 
     const csrInfo = await prisma.caseresolution.findUnique({
       where: {
-        id_csr: csrId,
+        id_csr: parseInt(csrId),
       },
     });
 
@@ -94,6 +94,34 @@ export async function PATCH(request, { params }) {
         error: e.message,
       },
       { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request, { params }) {
+  const caseResolutionId = parseInt(params.id_csr);
+
+  try {
+    const deleted = await prisma.caseresolution.delete({
+      where: { id_csr: caseResolutionId },
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Case resolution berhasil di Hapus",
+        data: deleted,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Gagal Menghapus Data.",
+        error: error.message,
+      },
+      { status: 404 }
     );
   }
 }

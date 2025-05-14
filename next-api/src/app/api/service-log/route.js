@@ -71,20 +71,21 @@ export async function GET(request) {
 export async function POST(request) {
     try {
         // Ambil data dari request
-        const {
-            ServiceCatalogID,
-            AssetID, 
-            Service_offerID,
-            PartNumber,
-            WarrantyStatus,
-            Currency,
-            Price,
-            Tax,
-            Total
-        } = await request.json();
+   const data = await request.json();
+
+    const {
+      AssetID,
+      Service_offerID,
+      PartNumber,
+      WarrantyStatus,
+      Currency,
+      Price,
+      Tax,
+      Total
+    } = data;
         
         // Validasi sederhana
-        if (!data.ServiceCatalogID || !data.AssetID || !data.Service_offerID) {
+        if ( !data.AssetID || !data.Service_offerID) {
             return NextResponse.json({
                 success: false,
                 message: "Data required are missing"
@@ -105,7 +106,6 @@ export async function POST(request) {
         // Simpan ke database
         const newServiceCatalog = await prisma.servicecatalog.create({
             data: {
-                ServiceCatalogID: ServiceCatalogID,
                 AssetID: AssetID, 
                 Service_offerID: Service_offerID,
                 PartNumber: PartNumber || "",

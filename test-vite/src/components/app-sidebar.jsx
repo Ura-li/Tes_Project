@@ -167,6 +167,14 @@ const data = {
           icon: Server
         }, 
         {
+          title: "Repair Class Code",
+          url: "/master/repairClassCode",
+        }, 
+        {
+          title: "Service Catalog",
+          url: "/master/ServiceCatalog",
+        },
+        {
           title: "OTC Code",
           url: "/master/OTC_Code",
           icon: Barcode

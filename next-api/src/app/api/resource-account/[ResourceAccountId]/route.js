@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 // GET: Fetch single ResourceAccount by ID
 export async function GET(request, { params }) {
-  const { ResourceAccountId } = params;
+  const { ResourceAccountId } = await params;
 
   try {
     const resourceAccount = await prisma.resourceAccount.findUnique({

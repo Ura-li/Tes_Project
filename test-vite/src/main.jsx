@@ -24,6 +24,8 @@ import
   BookingsTable,
   BookingDetailsTable,
   Resource_table,
+  RepairClassCodeTable,
+  ServiceCatalogTable,
   OTCCodeTable,
   CrsTable
  } from './master_table';
@@ -73,7 +75,9 @@ createRoot(document.getElementById('root')).render(
             <Route path='master/BookingDetails' element={<BookingDetailsTable/>}/>
             <Route path='/master/User_table' element={<User_table/>}/>
             <Route path='/master/Part_table' element={<Part_table/>}/>
-            <Route path='/master/Resource_table' element={<Resource_table/>}/>
+            <Route path='/master/Resource_table' element={<Resource_table/>} />
+            <Route path='/master/repairClassCode' element={<RepairClassCodeTable/>} />
+            <Route path='/master/ServiceCatalog' element={<ServiceCatalogTable/>} />
             <Route path='/master/OTC_Code' element={<OTCCodeTable/>}/>
             <Route path='/master/CrsTable' element={<CrsTable/>}/>
             {/* </Route> */}
