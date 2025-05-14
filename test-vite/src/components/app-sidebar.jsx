@@ -39,6 +39,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 import { getUserFromToken } from "@/lib/utils/auth"
 import { Separator } from "./ui/separator"
+import { Hpicon } from "./Hpicon";
 
 // This is sample data.
 const data = {
@@ -55,8 +56,8 @@ const data = {
       plan: "Enterprise",
     },
     {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
+      name: "PT Javag",
+      logo: Hpicon,
       plan: "Startup",
     },
     {

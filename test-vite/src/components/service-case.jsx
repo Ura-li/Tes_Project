@@ -492,9 +492,9 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
       {label}
     </CardTitle>
 
-    <div className={twMerge(spanMap[span], "")}>
+    <CardTitle className={twMerge(spanMap[span], "")}>
       {children}
-    </div>
+    </CardTitle>
   </>
 );
 
@@ -1607,7 +1607,7 @@ const [endDate, setEndDate] = useState(null);
                 <hr />
               </CardHeader>
               
-              <CardContent className="grid gap-10  grid-cols-6 p-3 ">
+              <CardContent className="grid gap-10  grid-cols-6 p-3 items-center">
                 <CaseField label="Global Trade Status">
                   {/* <Select value={formGtc.global_trade_status} onValueChange={onChangeGtc("global_trade_status")} defaultValue="--Select--">
                     <SelectTrigger className="w-[180px]">
@@ -2564,10 +2564,10 @@ const [endDate, setEndDate] = useState(null);
                       <TableRow
                         key={work.WOID}
                         className="cursor-pointer hover:bg-gray-300"
+                        onClick={handleClick}
                       >
                         <TableCell
                           className="font-medium "
-                          onClick={handleClick}
                         >
                           {/* <Link to={`/work/${work.WOID}`}> */}
                           {work.WOID}
