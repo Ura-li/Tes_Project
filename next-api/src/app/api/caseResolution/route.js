@@ -87,12 +87,12 @@ export async function POST(request) {
     } = await request.json();
 
     // Validasi input
-    if (!caseResolutionCode || !autoClose || !caseReadyForClosure) {
-      return NextResponse.json(
-        { success: false, message: "Semua field wajib diisi." },
-        { status: 400 }
-      );
-    }
+    // if (!caseResolutionCode || !autoClose || !caseReadyForClosure) {
+    //   return NextResponse.json(
+    //     { success: false, message: "Semua field wajib diisi." },
+    //     { status: 400 }
+    //   );
+    // }
 
     // Menyimpan data baru ke database
     const newCaseResolution = await prisma.caseresolution.create({

@@ -83,6 +83,18 @@ export const ServiceMoDetail = () => {
     
   const fetchMoLineItems = async () => {
     try {
+    // Tampilkan loading SweetAlert
+    Swal.fire({
+      title: 'Loading...',
+      text: 'Please wait a moment',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading(),
+      customClass: {
+        popup: 'z-[9999]',
+      }
+    });
+
       const res = await ApiCustomer.get(`/api/material-order/material-order-line-items/${lineItemID}`);
       const data = res.data.data;
   
@@ -126,6 +138,9 @@ export const ServiceMoDetail = () => {
   
     } catch (err) {
       console.error("Failed to fetch Material Line Items orders:", err);
+    Swal.fire('Error', 'Failed to fetch Material Line Items', 'error');
+  } finally {
+    Swal.close(); // Tutup alert
     }
   };
   
@@ -139,6 +154,23 @@ export const ServiceMoDetail = () => {
       ...prev,
       [name]: value,
     }));
+  };
+  
+  const handleUpdate = async () => {
+    try {
+      await ApiCustomer.patch(`/api/material-order/material-order-line-items/${lineItemID}`, {
+        Description: MODetailInput.description,
+        PickPackInstructions: MODetailInput.pickPackInstructions,
+        CollectionInstructions: MODetailInput.collectionInstructions,
+        CustomerResponse: MODetailInput.customerResponse,
+        RejectedReason: MODetailInput.rejectedReason,
+        OtherReason: MODetailInput.otherReason,
+      });
+  
+      console.log("Material Order Line Item updated successfully.");
+    } catch (error) {
+      console.error("Error updating Material Order Line Item:", error);
+    }
   };
   
   
