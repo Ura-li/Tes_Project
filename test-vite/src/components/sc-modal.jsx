@@ -4680,7 +4680,7 @@ export function BtnModalsServiceCatalog({
     switch (currentStep) {
       case 1:
         return (
-          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit] flex flex-col justify-center gap-0 p-0 bg-white [&>button]:hidden" >
+          <DialogContent className="sm:max-w-[fit] sm:max-h-[100vh] flex flex-col justify-center gap-0 p-0 bg-white [&>button]:hidden" >
             <DialogHeader>
               <div className="flex items-end justify-end ">
                 <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
@@ -4758,7 +4758,7 @@ export function BtnModalsServiceCatalog({
           );
         });
         return (
-          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit] flex flex-col  gap-0 p-0 bg-white [&>button]:hidden scale-95">
+          <DialogContent className="sm:max-w-[fit] sm:max-h-[fit] flex flex-col  gap-0 p-0 bg-white [&>button]:hidden ">
             <DialogHeader className={'gap-0'}>
               <div className="flex items-end justify-end">
                 <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
@@ -4792,126 +4792,129 @@ export function BtnModalsServiceCatalog({
 
             <Tabs
             defaultValue="parts"
+            className={'h-[50vh] '}
             >
               <TabsList className={'py-5 px-0 bg-white'}>
                 <TabsTrigger variant={'fullsize'} value="parts" className={'cursor-pointer '}>Parts</TabsTrigger>
                 <TabsTrigger variant={'fullsize'} value="snr" className={'cursor-pointer  text-blue-500'}>SNR</TabsTrigger>
               </TabsList>
-              <TabsContent value="parts">
-              <Table>
-              <TableHeader>
-                <TableRow className={'bg-gray-300'}>
-                  <TableHead className={'font-black text-black'}>Select</TableHead>
-                  <TableHead className={'font-black text-black p-2'}>
-                    Parts #
-                    <span className="flex items-center">
-                      <Input 
-                        className={'bg-white'}
-                        value={partNumberSearch}
-                        onChange={(e) => setPartNumberSearch(e.target.value)}
-                      />
-                      <XIcon className="cursor-pointer" onClick={() => setPartNumberSearch("")}/>
-                    </span>
-                    </TableHead>
-                  <TableHead className={'font-black text-black'}>
-                    Keyword
-                    <span className="flex items-center">
-                      <Input 
-                        className={'bg-white'}
-                        value={keywordSearch}
-                        onChange={(e) => setKeywordSearch(e.target.value)}
-                      />
-                      <XIcon className="cursor-pointer" onClick={() => setKeywordSearch("")}/>
-                    </span>
-                    </TableHead>
-                  <TableHead className={'font-black text-black'}>
-                    Part Description
-                    <span className="flex items-center">
-                      <Input 
-                        className={'bg-white'}
-                        value={descriptionSearch}
-                        onChange={(e) => setDescriptionSearch(e.target.value)}
-                      />
-                      <XIcon className="cursor-pointer" onClick={() => setDescriptionSearch("")}/>
-                    </span>
-                  </TableHead>
-                  <TableHead className={'font-black text-black'}>Orderability</TableHead>
-                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Restriction Reason</TableHead>
-                  <TableHead className={'font-black text-black'}>CRS</TableHead>
-                  <TableHead className={'font-black text-black'}>ROHS</TableHead>
-                  <TableHead className={'font-black text-black'}>Retrunable</TableHead>
-                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Hard roll</TableHead>
-                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Dangerous Goods</TableHead>
-                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Lithium Battery</TableHead>
-                  <TableHead className={'font-black text-black'}>Oversize</TableHead>
-                  <TableHead className={'font-black text-black'}>Heavy</TableHead>
-                  <TableHead className={'font-black text-black'}>Price</TableHead>
-                  <TableHead className={'font-black text-black whitespace-break-spaces'}>Friegh Price</TableHead>
-                  <TableHead className={'font-black text-black'}>Tax</TableHead>
-                  <TableHead className={'font-black text-black'}>Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPartCatalog.map((part, index) => {
-                  const isChecked = selectedPartCatalog.some((item) => item.PartNumber === part.PartNumber)
-                  return (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <Checkbox 
-                          checked={isChecked}
-                          onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
-                        />
-                      </TableCell>
-                      <TableCell>{part.PartNumber}</TableCell>
-                      <TableCell>{part.Keyword}</TableCell>
-                      <TableCell>{part.PartDescription}</TableCell>
-                      <TableCell>{part.Orderability ? 'Yes' : 'No'}</TableCell>
-                      <TableCell>{part.ResistrictionReason}</TableCell>
-                      <TableCell>{part.Csr ? 'Y' : 'N'}</TableCell>
-                      <TableCell>{part.Rohs}</TableCell>
-                      <TableCell>{part.Returnable_Flag ? 'true' : 'false'}</TableCell>
-                      <TableCell>{part.Hardrolls}</TableCell>
-                      <TableCell>{part.Dangerousgoods ? 'true' : 'false'}</TableCell>
-                      <TableCell>{part.Lithiumbattry ? 'true' : 'false'}</TableCell>
-                      <TableCell>{part.Oversize ? 'true' : 'false'}</TableCell>
-                      <TableCell>{part.Heavy ? 'true' : 'false'}</TableCell>
-                      <TableCell>{part.Price}</TableCell>
-                      <TableCell>{part.Freightprice}</TableCell>
-                      <TableCell>{part.Tax}</TableCell>
-                      <TableCell>{part.Total}</TableCell>
+              <TabsContent value="parts"
+                className={'overflow-y-auto'}
+              > 
+                <Table>
+                  <TableHeader>
+                    <TableRow className={'bg-gray-300'}>
+                      <TableHead className={'font-black text-black'}>Select</TableHead>
+                      <TableHead className={'font-black text-black p-2'}>
+                        Parts #
+                        <span className="flex items-center">
+                          <Input
+                            className={'bg-white'}
+                            value={partNumberSearch}
+                            onChange={(e) => setPartNumberSearch(e.target.value)}
+                          />
+                          <XIcon className="cursor-pointer" onClick={() => setPartNumberSearch("")} />
+                        </span>
+                      </TableHead>
+                      <TableHead className={'font-black text-black'}>
+                        Keyword
+                        <span className="flex items-center">
+                          <Input
+                            className={'bg-white'}
+                            value={keywordSearch}
+                            onChange={(e) => setKeywordSearch(e.target.value)}
+                          />
+                          <XIcon className="cursor-pointer" onClick={() => setKeywordSearch("")} />
+                        </span>
+                      </TableHead>
+                      <TableHead className={'font-black text-black'}>
+                        Part Description
+                        <span className="flex items-center">
+                          <Input
+                            className={'bg-white'}
+                            value={descriptionSearch}
+                            onChange={(e) => setDescriptionSearch(e.target.value)}
+                          />
+                          <XIcon className="cursor-pointer" onClick={() => setDescriptionSearch("")} />
+                        </span>
+                      </TableHead>
+                      <TableHead className={'font-black text-black'}>Orderability</TableHead>
+                      <TableHead className={'font-black text-black whitespace-break-spaces'}>Restriction Reason</TableHead>
+                      <TableHead className={'font-black text-black'}>CRS</TableHead>
+                      <TableHead className={'font-black text-black'}>ROHS</TableHead>
+                      <TableHead className={'font-black text-black'}>Retrunable</TableHead>
+                      <TableHead className={'font-black text-black whitespace-break-spaces'}>Hard roll</TableHead>
+                      <TableHead className={'font-black text-black whitespace-break-spaces'}>Dangerous Goods</TableHead>
+                      <TableHead className={'font-black text-black whitespace-break-spaces'}>Lithium Battery</TableHead>
+                      <TableHead className={'font-black text-black'}>Oversize</TableHead>
+                      <TableHead className={'font-black text-black'}>Heavy</TableHead>
+                      <TableHead className={'font-black text-black'}>Price</TableHead>
+                      <TableHead className={'font-black text-black whitespace-break-spaces'}>Friegh Price</TableHead>
+                      <TableHead className={'font-black text-black'}>Tax</TableHead>
+                      <TableHead className={'font-black text-black'}>Total</TableHead>
                     </TableRow>
-                  )
-                })}
-                <TableRow>
-                    <TableCell colSpan={'100%'}>
-                      <Pagination className={'flex justify-start'}>
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious href="#" />
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">1</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#" isActive>
-                              2
-                            </PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">3</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationNext href="#" />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
-                    </TableCell>
-                  </TableRow>
-              </TableBody>
-            </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPartCatalog.map((part, index) => {
+                      const isChecked = selectedPartCatalog.some((item) => item.PartNumber === part.PartNumber)
+                      return (
+                        <TableRow key={index}>
+                          <TableCell>
+                            <Checkbox
+                              checked={isChecked}
+                              onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
+                            />
+                          </TableCell>
+                          <TableCell>{part.PartNumber}</TableCell>
+                          <TableCell>{part.Keyword}</TableCell>
+                          <TableCell>{part.PartDescription}</TableCell>
+                          <TableCell>{part.Orderability ? 'Yes' : 'No'}</TableCell>
+                          <TableCell>{part.ResistrictionReason}</TableCell>
+                          <TableCell>{part.Csr ? 'Y' : 'N'}</TableCell>
+                          <TableCell>{part.Rohs}</TableCell>
+                          <TableCell>{part.Returnable_Flag ? 'true' : 'false'}</TableCell>
+                          <TableCell>{part.Hardrolls}</TableCell>
+                          <TableCell>{part.Dangerousgoods ? 'true' : 'false'}</TableCell>
+                          <TableCell>{part.Lithiumbattry ? 'true' : 'false'}</TableCell>
+                          <TableCell>{part.Oversize ? 'true' : 'false'}</TableCell>
+                          <TableCell>{part.Heavy ? 'true' : 'false'}</TableCell>
+                          <TableCell>{part.Price}</TableCell>
+                          <TableCell>{part.Freightprice}</TableCell>
+                          <TableCell>{part.Tax}</TableCell>
+                          <TableCell>{part.Total}</TableCell>
+                        </TableRow>
+                      )
+                    })}
+                    <TableRow>
+                      <TableCell colSpan={'100%'}>
+                        <Pagination className={'flex justify-start'}>
+                          <PaginationContent>
+                            <PaginationItem>
+                              <PaginationPrevious href="#" />
+                            </PaginationItem>
+                            <PaginationItem>
+                              <PaginationLink href="#">1</PaginationLink>
+                            </PaginationItem>
+                            <PaginationItem>
+                              <PaginationLink href="#" isActive>
+                                2
+                              </PaginationLink>
+                            </PaginationItem>
+                            <PaginationItem>
+                              <PaginationLink href="#">3</PaginationLink>
+                            </PaginationItem>
+                            <PaginationItem>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                            <PaginationItem>
+                              <PaginationNext href="#" />
+                            </PaginationItem>
+                          </PaginationContent>
+                        </Pagination>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </TabsContent>
               <TabsContent value="snr">
                 <p>tes</p>
@@ -4927,7 +4930,7 @@ export function BtnModalsServiceCatalog({
   
       case 3:
         return (
-          <DialogContent className="sm:max-w-[fit] sm:min-h-[fit] p-0 bg-white [&>button]:hidden ">
+          <DialogContent className="sm:max-w-[fit] sm:max-h-[full] p-0 bg-white [&>button]:hidden ">
             <DialogHeader>
               <div className="flex items-end justify-end">
                 <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
@@ -4949,86 +4952,88 @@ export function BtnModalsServiceCatalog({
                 <p>Currency</p><p>: </p>
               </div>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow className={'bg-blue-400'}>
-                  <TableHead className={'font-bold text-black'}>Service OfferID</TableHead>
-                  <TableHead className={'font-bold text-black'}>Description</TableHead>
-                  <TableHead className={'font-bold text-black'}>Unit Price</TableHead>
-                  <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
-                  <TableHead className={'font-bold text-black'}>Qty</TableHead>
-                  <TableHead className={'font-bold text-black'}>Tax</TableHead>
-                  <TableHead className={'font-bold text-black'}>Price</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {selectedWarrantyServices.map((service, index) => {
-                  return (
-                    <TableRow key={index}>
-                      <TableCell>{service.Service_offerID}</TableCell>
-                      <TableCell>{service.Service_description}</TableCell>
-                      <TableCell>{service.CTat_RTime}</TableCell>
-                      <TableCell>{service.Shipping_Fee}</TableCell>
-                      {/* <TableCell>{service.Price}</TableCell> */}
-                      <TableCell>1</TableCell>
-                      <TableCell>{service.Tax}</TableCell>
-                      <TableCell>{service.Price}</TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-              <TableHeader>
-                <TableRow className={'bg-blue-400'}>
-                  <TableHead className={'font-bold text-black'}>Part #</TableHead>
-                  <TableHead className={'font-bold text-black'}>Description</TableHead>
-                  <TableHead className={'font-bold text-black'}>Unit Price</TableHead>
-                  <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
-                  <TableHead className={'font-bold text-black'}>Qty</TableHead>
-                  <TableHead className={'font-bold text-black'}>Tax</TableHead>
-                  <TableHead className={'font-bold text-black'}>Price</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {selectedPartCatalog.map((part, index) => {
-                  const isChecked = selectedPartCatalog.some((item) => item.PartNumber === part.PartNumber)
-                  return (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <Checkbox 
-                          checked={isChecked}
-                          onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
+            <div className="overflow-auto max-h-[30dvh]">
+              <Table>
+                <TableHeader>
+                  <TableRow className={'bg-blue-400'}>
+                    <TableHead className={'font-bold text-black'}>Service OfferID</TableHead>
+                    <TableHead className={'font-bold text-black'}>Description</TableHead>
+                    <TableHead className={'font-bold text-black'}>Unit Price</TableHead>
+                    <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
+                    <TableHead className={'font-bold text-black'}>Qty</TableHead>
+                    <TableHead className={'font-bold text-black'}>Tax</TableHead>
+                    <TableHead className={'font-bold text-black'}>Price</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {selectedWarrantyServices.map((service, index) => {
+                    return (
+                      <TableRow key={index}>
+                        <TableCell>{service.Service_offerID}</TableCell>
+                        <TableCell>{service.Service_description}</TableCell>
+                        <TableCell>{service.CTat_RTime}</TableCell>
+                        <TableCell>{service.Shipping_Fee}</TableCell>
+                        {/* <TableCell>{service.Price}</TableCell> */}
+                        <TableCell>1</TableCell>
+                        <TableCell>{service.Tax}</TableCell>
+                        <TableCell>{service.Price}</TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+                <TableHeader>
+                  <TableRow className={'bg-blue-400'}>
+                    <TableHead className={'font-bold text-black'}>Part #</TableHead>
+                    <TableHead className={'font-bold text-black'}>Description</TableHead>
+                    <TableHead className={'font-bold text-black'}>Unit Price</TableHead>
+                    <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
+                    <TableHead className={'font-bold text-black'}>Qty</TableHead>
+                    <TableHead className={'font-bold text-black'}>Tax</TableHead>
+                    <TableHead className={'font-bold text-black'}>Price</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {selectedPartCatalog.map((part, index) => {
+                    const isChecked = selectedPartCatalog.some((item) => item.PartNumber === part.PartNumber)
+                    return (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <Checkbox
+                            checked={isChecked}
+                            onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
+                          />
+                        </TableCell>
+                        <TableCell>{part.PartNumber}</TableCell>
+                        <TableCell>{part.PartDescription}</TableCell>
+                        <TableCell>{part.Shipping_Fee}</TableCell>
+                        <TableCell>
+                        <Input
+                          placeholder="QTY"
+                          type="number"
+                          value={part.qty || ''}
+                          onChange={(e) => handleQtyChangePartsCatalog(part.PartNumber, e.target.value)}
+                          className="w-16"
                         />
-                      </TableCell>
-                      <TableCell>{part.PartNumber}</TableCell>
-                      <TableCell>{part.PartDescription}</TableCell>
-                      <TableCell>{part.Shipping_Fee}</TableCell>
-                      <TableCell>
-                      <Input
-                        placeholder="QTY"
-                        type="number"
-                        value={part.qty || ''}
-                        onChange={(e) => handleQtyChangePartsCatalog(part.PartNumber, e.target.value)}
-                        className="w-16"
-                      />
-                      </TableCell>
-                      <TableCell>{part.Tax}</TableCell>
-                      <TableCell>{part.Total}</TableCell>
-                    </TableRow>
-                  )
-                })}
-                <TableRow>
-                  <TableCell colSpan={4}></TableCell>
-                  <TableCell colSpan={2}>Sub Total</TableCell>
-                  <TableCell>{subTotalConfirmServices}</TableCell>
-                </TableRow>
-                <TableRow className={'bg-blue-400'}>
-                  <TableCell colSpan={4}></TableCell>
-                  <TableCell>Total</TableCell>
-                  <TableCell>--</TableCell>
-                  <TableCell>--</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+                        </TableCell>
+                        <TableCell>{part.Tax}</TableCell>
+                        <TableCell>{part.Total}</TableCell>
+                      </TableRow>
+                    )
+                  })}
+                  <TableRow>
+                    <TableCell colSpan={4}></TableCell>
+                    <TableCell colSpan={2}>Sub Total</TableCell>
+                    <TableCell>{subTotalConfirmServices}</TableCell>
+                  </TableRow>
+                  <TableRow className={'bg-blue-400'}>
+                    <TableCell colSpan={4}></TableCell>
+                    <TableCell>Total</TableCell>
+                    <TableCell>--</TableCell>
+                    <TableCell>--</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
             
   
             <DialogFooter className={' sm:justify-start p-2 items-center gap-10'}>
