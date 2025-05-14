@@ -1726,6 +1726,34 @@ const [endDate, setEndDate] = useState(null);
                   </CaseField>
                 </div>
               </CardContent>
+                {/* Accessory Table */}
+                <div className="px-6 pb-6">
+                  <h2 className="text-md font-semibold mb-2">Accessory</h2>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm border">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-4 py-2 border">No</th>
+                          <th className="px-4 py-2 border">Accessory Name</th>
+                          <th className="px-4 py-2 border">Note</th>
+                          <th className="px-4 py-2 border">CT / SN Code</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {/* {(dataFetchAssetInformation?.AssetInformation?.accessories ?? []).map(
+                          (item: any, index: number) => (
+                            <tr key={index} className="text-center">
+                              <td className="px-4 py-2 border">{index + 1}</td>
+                              <td className="px-4 py-2 border">{item.AccessoryName}</td>
+                              <td className="px-4 py-2 border">{item.Note}</td>
+                              <td className="px-4 py-2 border">{item.CTorSNCode}</td>
+                            </tr>
+                          )
+                        )} */}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
             </Card>
 
             <Card className="flex-col ">
