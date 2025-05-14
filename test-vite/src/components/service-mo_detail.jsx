@@ -87,6 +87,7 @@ export const ServiceMoDetail = () => {
       const data = res.data.data;
   
       setMoLineItems(data);
+      console.log( data)
   
       // Isi state MODetailInput berdasarkan data yang diambil
       setMODetailInput({
@@ -148,7 +149,11 @@ export const ServiceMoDetail = () => {
           This material order line item is <strong>read-only</strong> because it is <strong>Closed</strong>.
         </div>
       )}
-      <TabsServiceMOLineItems MOLineDetails={MODetailInput} LineItemID={lineItemID}/>
+      {moLineItems.MOID ? (
+        // <TabsServiceMOLineItems MOLineDetails={moLineItems}/>
+        <TabsServiceMOLineItems MOLineDetails={MODetailInput} LineItemID={lineItemID}/>
+      ) : ''}
+      {/* {console.log(moLineItems)} */}
     <Card className="mt-2 rounded-none">
 
       <CardContent className={'p-0'}>
@@ -549,6 +554,7 @@ export const ServiceMoDetail = () => {
     
     </>
   );
+  
 };
 
 const FailureSelect = ({ failureId, setMODetailInput }) => {
