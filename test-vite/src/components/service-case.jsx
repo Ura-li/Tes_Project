@@ -81,7 +81,8 @@ import DatePicker from './date-picker'
 
 import { SearchCommandBlock } from "./sc-select";
 
-
+import { pdf } from '@react-pdf/renderer';
+import ServiceRequestPDF from './service-request-form'; // adjust path if needed
 
 
 export const TabsService = ({ 
@@ -276,7 +277,7 @@ export const TabsService = ({
                   CaseStatus: caseForm.CaseStatus || "",
                 });
                 savedModules.push("Case");
-                swal.fire({
+                Swal.fire({
                   icon: "success",
                   title: "Berhasil Disimpan",
                   text: "Data Case berhasil disimpan.",
@@ -372,6 +373,17 @@ export const TabsService = ({
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
+    { icon: StepBack, label: "SRF", onClick: async () => {
+      // console.log("Case Details ; ",caseDetails);
+      const blob = await pdf(<ServiceRequestPDF nama="NURHIT" caseDetails={caseDetails}  />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Service_Request_Form.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, },
     { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
     { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
     { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder") },
@@ -382,6 +394,7 @@ export const TabsService = ({
     { icon: UserPen, label: "Assign", onClick: () => alert("not now") },
     { icon: StepBack, label: "Add to Queue", onClick: () => alert("not now") },
   ];
+  console.log("TES CASE DETAILS VALUE",caseDetails);
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
   const [serviceCatalogType, setServiceCatalogType] = useState("null");
