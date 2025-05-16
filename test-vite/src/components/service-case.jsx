@@ -81,7 +81,8 @@ import DatePicker from './date-picker'
 
 import { SearchCommandBlock } from "./sc-select";
 
-
+import { pdf } from '@react-pdf/renderer';
+import ServiceRequestPDF from './service-request-form'; // adjust path if needed
 
 
 export const TabsService = ({ 
@@ -389,6 +390,17 @@ export const TabsService = ({
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
+    { icon: StepBack, label: "SRF", onClick: async () => {
+      // console.log("Case Details ; ",caseDetails);
+      const blob = await pdf(<ServiceRequestPDF nama="NURHIT" caseDetails={caseDetails}  />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Service_Request_Form.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, },
     { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
     { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
     { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder") },
@@ -399,6 +411,7 @@ export const TabsService = ({
     { icon: UserPen, label: "Assign", onClick: () => alert("not now") },
     { icon: StepBack, label: "Add to Queue", onClick: () => alert("not now") },
   ];
+  console.log("TES CASE DETAILS VALUE",caseDetails);
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
   const [serviceCatalogType, setServiceCatalogType] = useState("null");
@@ -935,7 +948,6 @@ export const TabsServiceMO = ({ materialOrders }) => {
 
 export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems }) => {
   const navigate = useNavigate();
-  console.log("MOLIne",moLineItems);
 
   const buttons = [
     {
@@ -1079,6 +1091,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
       });
     }
   };
+
   return (
     <>
       <div className="flex items-center border-1 ">
@@ -1093,7 +1106,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
-
+    {console.log(MOLineDetails)}
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
@@ -1725,15 +1738,15 @@ const [endDate, setEndDate] = useState(null);
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Case Status">
-      <SearchCommandBlock
-  value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
-  onChange={(label) => {
-    const enumValue = labelToStatusEnum[label];
-    onChangeCase("CaseStatus")(enumValue);
-  }}
-  placeholder="--Select--"
-  options={Object.values(statusEnumToLabel)}
-/>
+                <SearchCommandBlock
+                  value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
+                  onChange={(label) => {
+                    const enumValue = labelToStatusEnum[label];
+                    onChangeCase("CaseStatus")(enumValue);
+                  }}
+                  placeholder="--Select--"
+                  options={Object.values(statusEnumToLabel)}
+                />
                 </CaseField>
                 <CaseField label="Case Type">
                   <SearchCommandBlock

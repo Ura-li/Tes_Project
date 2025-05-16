@@ -4516,20 +4516,30 @@ export function BtnModalsServiceCatalog({
   const [selected, setSelected] = useState("DepotRepair"); 
 
   //handles Warranty Service
-  const [selectedWarrantyServices, setSelectedWarrantyServices] = useState([]);
-  const handlerWarrantyServices = (service, checked) => {
-    if (checked) {
-      setSelectedWarrantyServices((prev) => [...prev, service])
-    }else{
-      setSelectedWarrantyServices((prev) => 
-        prev.filter((item) => item.Service_offerID !==service.Service_offerID)
-      )
-    }
-  }
+  // const [selectedWarrantyServices, setSelectedWarrantyServices] = useState([]);
+  // const handlerWarrantyServices = (service, checked) => {
+  //   if (checked) {
+  //     setSelectedWarrantyServices((prev) => [...prev, service])
+  //   }else{
+  //     setSelectedWarrantyServices((prev) => 
+  //       prev.filter((item) => item.Service_offerID !==service.Service_offerID)
+  //     )
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   console.log("Selected Services:", selectedWarrantyServices);
+  // }, [selectedWarrantyServices]);
+  
+  const [selectedWarrantyServices, setSelectedWarrantyServices] = useState(null);
+
+    const handlerWarrantyService = (service) => {
+      setSelectedWarrantyServices(service);
+    };
 
   useEffect(() => {
-    console.log("Selected Services:", selected);
-  }, [selected]);
+    console.log("Selected Services:", selectedWarrantyServices);
+  }, [selectedWarrantyServices]);
   
 
 
@@ -4568,6 +4578,8 @@ export function BtnModalsServiceCatalog({
       )
     }
   }
+
+
   
   useEffect(() => {
     console.log("Selected Parts:", selectedPartCatalog);
@@ -4606,9 +4618,8 @@ export function BtnModalsServiceCatalog({
   const [TotalTaxConfirmServices, setTotalTaxConfirmServices] = useState(0)
   const [totalConfirmServices, setTotalConfirmServices] = useState(0)
   const handlerPriceConfirmServices = () =>{
-    let serviceTotal = selectedWarrantyServices.reduce((acc, service) => {
-      return acc + (parseFloat(service.Price) || 0);
-    }, 0);
+    let serviceTotal = selectedWarrantyServices ? (parseFloat(selectedWarrantyServices.Price) || 0) : 0;
+
   
     let partsTotal = selectedPartCatalog.reduce((acc, part) => {
       return acc + (parseFloat(part.Total) || 0);
@@ -4623,7 +4634,12 @@ export function BtnModalsServiceCatalog({
   //createorder
   const createOrder = async () => {
     try {
-  
+       Swal.fire({
+        title: "Creating Order...",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading()
+      });
       const data = {
         user: getUserFromToken()
       }
@@ -4663,6 +4679,10 @@ export function BtnModalsServiceCatalog({
         logDescription: `New Material Order : ${res.data.MOID}`
       })
   
+      
+      Swal.close(); 
+      
+       // Close loading after success
       await Swal.fire({
         title: "Success!",
         text: "Order added successfully!",
@@ -4748,7 +4768,7 @@ export function BtnModalsServiceCatalog({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {warrantyOffer.map((service, index) => {
+                {/* {warrantyOffer.map((service, index) => {
                   const isChecked = selectedWarrantyServices.some((item) => item.Service_offerID === service.Service_offerID)
                   return (
                     <TableRow key={index}>
@@ -4766,13 +4786,42 @@ export function BtnModalsServiceCatalog({
                       <TableCell>{service.Total}</TableCell>
                     </TableRow>
                   )
-                })}
+                })} */}
+                {warrantyOffer.map((service, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                    <RadioGroup 
+                      value={selectedWarrantyServices?.Service_offerID}
+                      onValueChange={(value) => {
+                        const service = warrantyOffer.find((item) => item.Service_offerID === value);
+                        handlerWarrantyService(service);
+                      }}
+                    >
+                      <RadioGroupItem value={service.Service_offerID} id={`service-${index}`} />
+                      </RadioGroup>
+                    </TableCell>
+                    <TableCell>{service.Service_offerID}</TableCell>
+                    <TableCell>{service.Service_description}</TableCell>
+                    <TableCell>{service.CTat_RTime}</TableCell>
+                    <TableCell>{service.Price}</TableCell>
+                    <TableCell>{service.Tax}</TableCell>
+                    <TableCell>{service.Total}</TableCell>
+                  </TableRow>
+                ))}
+
               </TableBody>
             </Table>
   
             <DialogFooter className={'p-4'}>
-              <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button variant={'search'} onClick={() => setCurrentStep(2)} disabled={selectedWarrantyServices.length === 0} className={selectedWarrantyServices.length === 0 ? "opacity-50 cursor-not-allowed" : ""}>Next</Button>
+             <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button 
+              variant={'search'} 
+              onClick={() => setCurrentStep(2)} 
+              disabled={!selectedWarrantyServices}
+              className={!selectedWarrantyServices ? "opacity-50 cursor-not-allowed" : ""}
+            >
+              Next
+            </Button>
             </DialogFooter>
           </DialogContent>
         );
@@ -4801,8 +4850,8 @@ export function BtnModalsServiceCatalog({
             </DialogHeader>
             <div className="flex items-start justify-between p-2">
               <div className="grid flex-1 grid-cols-2 p-2 bg-gray-300 gap-x-2">
-                <p>Service OfferID</p><p>: {selectedWarrantyServices[0].Service_offerID}</p>
-                <p>Service Description</p><p>: {selectedWarrantyServices[0].Service_description}</p>
+                <p>Service OfferID</p><p>: {selectedWarrantyServices.Service_offerID}</p>
+                <p>Service Description</p><p>: {selectedWarrantyServices.Service_description}</p>
               </div>
               <div className="flex items-center self-center justify-center flex-1 gap-2 space-x-2 ">
                 <Label htmlFor="orderability">Orderability</Label>
@@ -4994,20 +5043,20 @@ export function BtnModalsServiceCatalog({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {selectedWarrantyServices.map((service, index) => {
-                    return (
-                      <TableRow key={index}>
-                        <TableCell>{service.Service_offerID}</TableCell>
-                        <TableCell>{service.Service_description}</TableCell>
-                        <TableCell>{service.CTat_RTime}</TableCell>
-                        <TableCell>{service.Shipping_Fee}</TableCell>
+                  {/* {selectedWarrantyServices.map((service, index) => {
+                    return ( */}
+                      <TableRow>
+                        <TableCell>{selectedWarrantyServices.Service_offerID}</TableCell>
+                        <TableCell>{selectedWarrantyServices.Service_description}</TableCell>
+                        <TableCell>{selectedWarrantyServices.CTat_RTime}</TableCell>
+                        <TableCell>{selectedWarrantyServices.Shipping_Fee}</TableCell>
                         {/* <TableCell>{service.Price}</TableCell> */}
                         <TableCell>1</TableCell>
-                        <TableCell>{service.Tax}</TableCell>
-                        <TableCell>{service.Price}</TableCell>
+                        <TableCell>{selectedWarrantyServices.Tax}</TableCell>
+                        <TableCell>{selectedWarrantyServices.Price}</TableCell>
                       </TableRow>
-                    )
-                  })}
+                    {/* )
+                  })} */}
                 </TableBody>
                 <TableHeader>
                   <TableRow className={'bg-blue-400'}>

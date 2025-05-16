@@ -896,33 +896,71 @@ export function ServiceBooking ({BookingId , woid}) {
 }
 
 // Fungsi pengecekan format dan isi dari RequestedDateTimeCustomer
-const CheckRequestedDateTimeCustomer = (rawDateTime) => {
+const CheckRequestedDateTimeCustomer = async (rawDateTime) => {
   try {
-    if (!rawDateTime) {
-      alert("Gagal membuat booking: RequestedDateTimeCustomer belum diisi.");
+    // 💡 Tambahan keamanan sebelum lanjut
+    if (!rawDateTime || typeof rawDateTime !== 'string' || rawDateTime.trim() === "") {
+      await Swal.fire({
+        icon: 'warning',
+        title: "Gagal membuat booking",
+        text: "RequestedDateTimeCustomer belum diisi.",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+      });
+      window.location.reload();
       return false;
     }
 
     const formatted = formatDateForInput(rawDateTime);
+    console.log('Formatted:', formatted); // 👈 Debug output
 
-    // Validasi format ISO: yyyy-mm-ddThh:mm
     const isValidFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(formatted);
     if (!isValidFormat) {
-      alert("Gagal membuat booking: Format RequestedDateTimeCustomer tidak valid.");
+      await Swal.fire({
+        icon: 'warning',
+        title: "Gagal membuat booking",
+        text: "Format RequestedDateTimeCustomer tidak valid.",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+      });
+      window.location.reload();
       return false;
     }
 
-    // Validasi waktu nyata (bukan Invalid Date)
     const dateObj = new Date(rawDateTime);
     if (isNaN(dateObj.getTime())) {
-      alert("Gagal membuat booking: Nilai RequestedDateTimeCustomer tidak valid.");
+      await Swal.fire({
+        icon: 'warning',
+        title: "Gagal membuat booking",
+        text: "Nilai RequestedDateTimeCustomer tidak valid.",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+      });
+      window.location.reload();
       return false;
     }
 
     return true;
   } catch (error) {
     console.error('Error saat validasi tanggal:', error);
-    alert("Terjadi kesalahan saat validasi RequestedDateTimeCustomer.");
+    await Swal.fire({
+      icon: 'error',
+      title: "Terjadi kesalahan",
+      text: "Kesalahan saat validasi RequestedDateTimeCustomer.",
+      showConfirmButton: false,
+      allowEscapeKey: false,
+      allowOutsideClick: false,
+    });
+    window.location.reload();
     return false;
   }
 };
@@ -936,8 +974,10 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
     try {
       setLoading(true);
       
-      const isValid = CheckRequestedDateTimeCustomer(RequestedDateTimeCustomer);
+      const isValid = await CheckRequestedDateTimeCustomer(RequestedDateTimeCustomer);
+      console.log("Validasi result:", isValid);
       if (!isValid) return;
+
       
       const data = {
         WOID: WOID,
