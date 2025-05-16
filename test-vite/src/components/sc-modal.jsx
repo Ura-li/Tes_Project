@@ -4537,10 +4537,10 @@ export function BtnModalsServiceCatalog({
       setSelectedWarrantyServices(service);
     };
 
-    useEffect(() => {
-      console.log("Selected Service:", selectedWarrantyServices);
-    }, [selectedWarrantyServices]);
-
+  useEffect(() => {
+    console.log("Selected Services:", selectedWarrantyServices);
+  }, [selectedWarrantyServices]);
+  
 
 
   //part
@@ -4651,6 +4651,34 @@ export function BtnModalsServiceCatalog({
         IncidentType: selected,
         OwnerID: data.user.id,
       });
+      console.log(res)
+      const updateLogCase = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseDetails.CaseID}`,
+        model: "Case",
+        dataOld: caseDetails.CaseStatus,
+        dataNew: "InActive",
+        changedBy: data.user.id,
+        logDescription: `Edit: change status from ${caseDetails.CaseStatus} to InActive`
+      })
+      const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseDetails.CaseID}`,
+        ReferenceId: `${res.data.WOID}`,
+        model: "Work",
+        dataOld: "OPEN_UNSCHEDULED",
+        dataNew: "OPEN_UNSCHEDULED",
+        changedBy: data.user.id,
+        logDescription: `New Work Order : ${res.data.WOID}`
+      })
+      const updateMaterialLog = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseDetails.CaseID}`,
+        ReferenceId: `${res.data.MOID}`,
+        model: "Material Order",
+        dataOld: "New",
+        dataNew: "New",
+        changedBy: data.user.id,
+        logDescription: `New Material Order : ${res.data.MOID}`
+      })
+  
       
       Swal.close(); 
       
@@ -5092,7 +5120,8 @@ export function BtnModalsServiceCatalog({
               <Button variant={'search'} className="" onClick={createOrder}>Create Order</Button>
               
               <Label htmlFor="incident" className={'font-bold '}>Incident Type</Label>
-              <Select onChange={setSelected} defaultValue="DepotRepair">
+              
+              <Select value={selected} onValueChange={setSelected} defaultValue="DepotRepair">
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -9017,23 +9046,23 @@ export function CrsEdit({ id_csr, onUpdate }) {
         const response = await ApiCustomer.get(`/api/caseResolution/${id_csr}`);
         const data = response.data.data;
 
-              const formatDateForInput = (dateString) => {
-        if (!dateString) return "";
-        const date = new Date(dateString);
-        const offset = date.getTimezoneOffset();
-        const localDate = new Date(date.getTime() - offset * 60 * 1000);
-        return localDate.toISOString().slice(0, 16); // ambil 'YYYY-MM-DDTHH:MM'
-      };
+        const formatDateForInput = (dateString) => {
+          if (!dateString) return "";
+          const date = new Date(dateString);
+          const offset = date.getTimezoneOffset();
+          const localDate = new Date(date.getTime() - offset * 60 * 1000);
+          return localDate.toISOString().slice(0, 16); // ambil 'YYYY-MM-DDTHH:MM'
+        };
 
-            setFormData({
-        caseResolutionCode: data.caseResolutionCode,
-        autoClose: data.autoClose,
-        caseReadyForClosure: data.caseReadyForClosure,
-        readyForCloseDays: data.readyForCloseDays,
-        readyForClosureDate: formatDateForInput(data.readyForClosureDate),
-        pendingCustomerAction: formatDateForInput(data.pendingCustomerAction),
-        customerRequestedCloseDate: formatDateForInput(data.customerRequestedCloseDate),
-      });
+        setFormData({
+          caseResolutionCode: data.caseResolutionCode,
+          autoClose: data.autoClose,
+          caseReadyForClosure: data.caseReadyForClosure,
+          readyForCloseDays: data.readyForCloseDays,
+          readyForClosureDate: formatDateForInput(data.readyForClosureDate),
+          pendingCustomerAction: formatDateForInput(data.pendingCustomerAction),
+          customerRequestedCloseDate: formatDateForInput(data.customerRequestedCloseDate),
+        });
       } catch (error) {
         console.error("Error fetching Case Resolution:", error);
         Swal.fire({
