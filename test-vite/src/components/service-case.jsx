@@ -868,7 +868,6 @@ export const TabsServiceMO = ({ materialOrders }) => {
 
 export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
   const navigate = useNavigate();
-  console.log(MOLineDetails);
 
   const buttons = [
     {
@@ -995,6 +994,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
       });
     }
   };
+
   return (
     <>
       <div className="flex items-center border-1 ">
@@ -1009,7 +1009,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
-
+    {console.log(MOLineDetails)}
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
@@ -1628,15 +1628,15 @@ const [endDate, setEndDate] = useState(null);
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Case Status">
-      <SearchCommandBlock
-  value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
-  onChange={(label) => {
-    const enumValue = labelToStatusEnum[label];
-    onChangeCase("CaseStatus")(enumValue);
-  }}
-  placeholder="--Select--"
-  options={Object.values(statusEnumToLabel)}
-/>
+                <SearchCommandBlock
+                  value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
+                  onChange={(label) => {
+                    const enumValue = labelToStatusEnum[label];
+                    onChangeCase("CaseStatus")(enumValue);
+                  }}
+                  placeholder="--Select--"
+                  options={Object.values(statusEnumToLabel)}
+                />
                 </CaseField>
                 <CaseField label="Case Type">
                   <SearchCommandBlock
