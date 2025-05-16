@@ -62,7 +62,8 @@ model caseinformation {
   otcCodeTable                                  OTCCodeTable?        @relation(fields: [OTCCode], references: [OTCCode])
   ProblemDescription                            String?              @db.VarChar(255)
   CaseProductNote                               String?              @db.Text
-
+  accessory accessory[]
+  
   @@index([AssetID], map: "AssetID")
   @@index([CaseNote], map: "CaseNote")
   @@index([ContactID], map: "ContactID")
@@ -82,14 +83,16 @@ model OTCCodeTable {
   cases caseinformation[]
 }
 
-// model actiontypecasenotes {
-//   ActionID   Int        @id @default(autoincrement())
-//   ActionType String     @db.VarChar(100)
-//   ActionFor  String     @db.VarChar(50)
-//   CreatedOn  DateTime?  @default(now()) @db.DateTime(0)
+model accessory {
+  id            Int            @id @default(autoincrement())
+  CaseID        String         // FK to caseinformation
+  Accessories   String
+  Note          String?
+  CT_SNCode     String?
+  case          caseinformation @relation(fields: [CaseID], references: [CaseID], onDelete: Cascade)
 
-//   casenotes  casenotes[] @relation("ActionTypeToCasenotes")
-// }
+  @@index([CaseID])
+}
 
 model casenotes {
   NoteID     Int     @id @default(autoincrement())
@@ -110,6 +113,17 @@ model casenotes {
 
   @@index([CaseID], map: "CaseID")
 }
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  model     String   @db.VarChar(100)
+  operation String   @db.VarChar(10) // create, update, delete
+  userId    Int?
+  dataOld   Json?
+  dataNew   Json?
+  timestamp DateTime @default(now())
+}
+
 
 model contact_information {
   ContactID         Int                 @id @default(autoincrement())
@@ -192,20 +206,55 @@ model materialorder {
 }
 
 model materialorderlineitems {
-  LineItemID           Int                         @id @default(autoincrement())
-  MOID                 String?                     @db.VarChar(13)
-  LineNumber           Int?
-  PartNumber           String?                     @db.VarChar(100)
-  Description          String?                     @db.Text
-  ATPStatus            String?                     @db.VarChar(50)
+  LineItemID                 Int                         @id @default(autoincrement())
+  MOID                       String?                     @db.VarChar(13)
+  LineNumber                 Int?
+  PartNumber                 String?                     @db.VarChar(100)
+  Description                String?                     @db.Text
+  ATPStatus                  String?                     @db.VarChar(50)
+  Quantity                   Int?
+  Status                     MaterialOrderLineItemStatus @default(New)
   Price                Decimal?                    @db.Decimal(10, 2)
-  Quantity             Int?
-  Status               MaterialOrderLineItemStatus @default(New)
-  materialorder        materialorder?              @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
-  servicecatalog_parts servicecatalog_parts?       @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
+
+  // Revisi Tambahan
+  FunctionalEquivalence      String?                     @db.VarChar(100)
+  MediaHandlingPart          String?                     @db.VarChar(100)
+  PickPackInstructions       String?                     @db.Text
+  CollectionInstructions     CollectionInstructionType?  @default(None)
+  CustomerResponse           String?                     @db.Text
+  RejectedReason             String?                     @db.Text
+  OtherReason                String?                     @db.Text
+  PartAuthorizationReason    String?                     @db.Text
+  PartAuthorizationDetail    String?                     @db.Text
+  OriginalPartNumber         String?                     @db.VarChar(100)
+  OfferedPartNumber          String?                     @db.VarChar(100)
+  OfferedPartDescription     String?                     @db.Text
+  MainComponent              String?                     @db.VarChar(100)
+  
+  SerialNumber               String?                     @db.VarChar(100)
+  RemovedPartNumber          String?                     @db.VarChar(100)
+  RemovedSerialNumber        String?                     @db.VarChar(100)
+  RemovedPartDescription     String?                     @db.Text
+
+  
+  // Foreign key ke Failure
+  FailureId                  Int? 
+  failure                    Failure?                    @relation(fields: [FailureId], references: [FailureId], onDelete: SetNull)
+
+  materialorder              materialorder?              @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
+  servicecatalog_parts       servicecatalog_parts?       @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
 
   @@index([MOID], map: "MOID")
   @@index([PartNumber], map: "PartNumber")
+}
+
+model Failure {
+  FailureId   Int                       @id @default(autoincrement())
+  Name        String
+  Description String?
+
+  materialorderlineitems materialorderlineitems[]
+
 }
 
 model product_information {
@@ -456,7 +505,7 @@ model workorder {
   DueDateCustomer             DateTime?        @db.DateTime(0)
   CoverageWindow              String?          @db.VarChar(100)
   Response                    String?          @db.VarChar(100)
-  //OTCCode                     String?          @db.VarChar(50)
+  // OTCCode                     String?          @db.VarChar(50)
   RequestedDateTimeCustomer   DateTime?        @db.DateTime(0)
   GuaranteedFixTimeCustomer   DateTime?        @db.DateTime(0)
   EarlyStartDateTimeCustomer  DateTime?        @db.DateTime(0)
@@ -608,6 +657,16 @@ enum CaseStatus {
   Open
   InActive
   Close
+  Active
+  Monitor
+  Pending_Customer_Action
+  Quote_Requested
+  Pending_Follow_Up
+  Pending_Order
+  Escalated
+  Quote_Approved
+  Pending_Quote
+
 }
 
 enum ShippingPriority {
@@ -615,4 +674,11 @@ enum ShippingPriority {
   MEDIUM
   HIGH
   CRITICAL
+}
+
+enum CollectionInstructionType {
+  None
+  Pickup
+  DropOff
+  ThirdParty
 }
