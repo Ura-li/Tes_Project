@@ -205,23 +205,6 @@ model materialorder {
   @@index([OwnerID])
 }
 
-// model materialorderlineitems {
-//   LineItemID           Int                         @id @default(autoincrement())
-//   MOID                 String?                     @db.VarChar(13)
-//   LineNumber           Int?
-//   PartNumber           String?                     @db.VarChar(100)
-//   Description          String?                     @db.Text
-//   ATPStatus            String?                     @db.VarChar(50)
-//   Price                Decimal?                    @db.Decimal(10, 2)
-//   Quantity             Int?
-//   Status               MaterialOrderLineItemStatus @default(New)
-//   materialorder        materialorder?              @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
-//   servicecatalog_parts servicecatalog_parts?       @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
-
-//   @@index([MOID], map: "MOID")
-//   @@index([PartNumber], map: "PartNumber")
-// }
-
 model materialorderlineitems {
   LineItemID                 Int                         @id @default(autoincrement())
   MOID                       String?                     @db.VarChar(13)
@@ -234,19 +217,24 @@ model materialorderlineitems {
   Price                Decimal?                    @db.Decimal(10, 2)
 
   // Revisi Tambahan
-  // FunctionalEquivalence      String?                     @db.VarChar(100)
-  // MediaHandlingPart          String?                     @db.VarChar(100)
-  // PickPackInstructions       String?                     @db.Text
-  // CollectionInstructions     CollectionInstructionType?  // Enum di bawah
-  // CustomerResponse           String?                     @db.Text
-  // RejectedReason             String?                     @db.Text
-  // OtherReason                String?                     @db.Text
-  // PartAuthorizationReason    String?                     @db.Text
-  // PartAuthorizationDetail    String?                     @db.Text
-  // OriginalPartNumber         String?                     @db.VarChar(100)
-  // OfferedPartNumber          String?                     @db.VarChar(100)
-  // OfferedPartDescription     String?                     @db.Text
-  // MainComponent              String?                     @db.VarChar(100)
+  FunctionalEquivalence      String?                     @db.VarChar(100)
+  MediaHandlingPart          String?                     @db.VarChar(100)
+  PickPackInstructions       String?                     @db.Text
+  CollectionInstructions     CollectionInstructionType?  @default(None)
+  CustomerResponse           String?                     @db.Text
+  RejectedReason             String?                     @db.Text
+  OtherReason                String?                     @db.Text
+  PartAuthorizationReason    String?                     @db.Text
+  PartAuthorizationDetail    String?                     @db.Text
+  OriginalPartNumber         String?                     @db.VarChar(100)
+  OfferedPartNumber          String?                     @db.VarChar(100)
+  OfferedPartDescription     String?                     @db.Text
+  MainComponent              String?                     @db.VarChar(100)
+  
+  SerialNumber               String?                     @db.VarChar(100)
+  RemovedPartNumber          String?                     @db.VarChar(100)
+  RemovedSerialNumber        String?                     @db.VarChar(100)
+  RemovedPartDescription     String?                     @db.Text
 
   
   // Foreign key ke Failure
@@ -666,6 +654,7 @@ enum WorkOrderStatus {
 }
 
 enum CaseStatus {
+  New
   Open
   InActive
   Close

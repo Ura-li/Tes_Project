@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import prisma from "../../../../../../prisma/client";
-
+import prisma, { setUserIdProvider } from "../../../../../../prisma/client";
+import { getTokenUserId } from "@/app/middleware/auth";
 export async function GET(request, {params}) {
     //get params id
     const url = new URL(request.url)
@@ -49,6 +49,7 @@ export async function GET(request, {params}) {
 
 
 export async function  PATCH(request, { params }) {
+    setUserIdProvider(() => getTokenUserId(request))
     const noteID = parseInt(params.noteID);
     const { Note, append = false, ...rest } = await request.json();
 

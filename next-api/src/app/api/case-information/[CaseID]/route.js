@@ -20,7 +20,15 @@ export async function GET(request, { params }) {
             CaseID: caseID,
         },
         include: { 
-            asset_information: true, 
+            asset_information: {
+                include:{
+                    product_information: {
+                        include: {
+                            product_type: true
+                        }
+                    }
+                }
+            } ,
             contact_information: true, 
             site_account: true,
             servicecatalog: {
@@ -39,7 +47,7 @@ export async function GET(request, { params }) {
             }, 
             global_trade_check: true,
             caseresolution: true,
-            accessory: true
+            accessory: true,
         }
     });
 

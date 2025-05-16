@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectBarRelated } from "./sc-select";
+import { SearchCommandBlock, SelectBarRelated } from "./sc-select";
 import { ArrowDownNarrowWideIcon, Car, Lock, Plus, RotateCw, Search } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import {
@@ -35,7 +35,11 @@ import { Link } from "react-router";
 import Swal from "sweetalert2";
 
 import { useParams } from "react-router";
+// import Select from 'react-select';
+import debounce from 'lodash.debounce';
 import ApiCustomer from "@/api";
+
+import { CaseField } from "./quick-wo-input";
 
 import { TabsServiceMOLineItems } from "./service-case";
 import { Description } from "@radix-ui/react-dialog";
@@ -47,6 +51,7 @@ export const ServiceMoDetail = () => {
   const [moLineItems, setMoLineItems] = useState([])
 
   const [MODetailInput, setMODetailInput] = useState({
+    MOID: '',
     moOrderName: '',
     salesOrderNumber: '',
     lineNumber: '',
@@ -69,18 +74,36 @@ export const ServiceMoDetail = () => {
     mainComponent: '',
     gratisFlag: false,
     failureId: null,
-    atpStatus: ''
+    failureName: '',
+    serialNumber: '',
+    removedPartNumber: '',
+    removedSerialNumber: '',
+    removedPartDescription: '' 
   })
     
   const fetchMoLineItems = async () => {
     try {
+    // Tampilkan loading SweetAlert
+    Swal.fire({
+      title: 'Loading...',
+      text: 'Please wait a moment',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading(),
+      customClass: {
+        popup: 'z-[9999]',
+      }
+    });
+
       const res = await ApiCustomer.get(`/api/material-order/material-order-line-items/${lineItemID}`);
       const data = res.data.data;
   
       setMoLineItems(data);
+      console.log(data)
   
       // Isi state MODetailInput berdasarkan data yang diambil
       setMODetailInput({
+        MOID: data.MOID,
         moOrderName: data
           ? `${data.MOID} - ${data.LineNumber}`
           : null,
@@ -104,12 +127,20 @@ export const ServiceMoDetail = () => {
         offeredPartDescription: data.OfferedPartDescription || '',
         mainComponent: data.MainComponent || '',
         gratisFlag: data.GratisFlag || false,
-        // failureId: data.FailureId || null,
-        atpStatus: data.ATPStatus || ''
+        failureId: data.FailureId || null,
+        failureName: data.Failure?.Name || '',
+        atpStatus: data.ATPStatus || '',
+        serialNumber: data.SerialNumber || '',
+        removedPartNumber: data.RemovedPartNumber || '',
+        removedSerialNumber: data.RemovedSerialNumber || '',
+        removedPartDescription: data.RemovedPartDescription || ''
       });
   
     } catch (err) {
       console.error("Failed to fetch Material Line Items orders:", err);
+    Swal.fire('Error', 'Failed to fetch Material Line Items', 'error');
+  } finally {
+    Swal.close(); // Tutup alert
     }
   };
   
@@ -150,8 +181,11 @@ export const ServiceMoDetail = () => {
           This material order line item is <strong>read-only</strong> because it is <strong>Closed</strong>.
         </div>
       )}
-      <TabsServiceMOLineItems MOLineDetails={moLineItems.MOID}/
-      >
+      {moLineItems.MOID ? (
+        // <TabsServiceMOLineItems MOLineDetails={moLineItems}/>
+        <TabsServiceMOLineItems MOLineDetails={MODetailInput} LineItemID={lineItemID}/>
+      ) : ''}
+      {/* {console.log(moLineItems)} */}
     <Card className="mt-2 rounded-none">
 
       <CardContent className={'p-0'}>
@@ -260,7 +294,7 @@ export const ServiceMoDetail = () => {
                     onChange={handleChange}
                   >
                     <option value="None">None</option>
-                    <option value="PickUp">Pick Up</option>
+                    <option value="Pickup">Pick Up</option>
                     <option value="DropOff">Drop Off</option>
                     <option value="ThirdParty">Third Party</option>
                   </select>
@@ -359,9 +393,6 @@ export const ServiceMoDetail = () => {
                   <span className="ml-51.5">{MODetailInput.atpStatus}</span>
                 </div>
                 
-                <div className="flex font-bold">
-                  <Button onClick={handleUpdate}>Save</Button>
-                </div>
               </CardContent>
             </Card>
 
@@ -377,128 +408,131 @@ export const ServiceMoDetail = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="mo_failure">
-          <Card className="rounded-md ">
-              <span className="ml-5 text-xl font-bold">Failure & Usage Details
-              </span>
-              <CardContent className="grid grid-flow-col grid-rows-5 gap-5 h-70">
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Failure Analysis
-                  </span>
-                  <span className="ml-40">...</span>
-                </div>
+          <TabsContent value="mo_failure" className={"p-1 flex flex-col gap-4"}>
+            <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className="text-lg">Failure & Usage Details</CardTitle>
+                <hr/>
+              </CardHeader>
+              <CardContent className="grid items-center grid-cols-6 gap-10">
+              
+                <CaseField label="Failure Analysis" icon>
+                  <Input variant="invisible" placeholder="---"/>
+                </CaseField>
+                {/* <div className="flex font-bold"> */}
+                  {/* <span className="ml-46">...</span> */}
+                  <FailureSelect
+                    failureId={MODetailInput.failureId}
+                    setMODetailInput={setMODetailInput}
+                  />
+                {/* </div> */}
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Failure Code</span>
-                  <span className="ml-46">...</span>
-                </div>
+                <CaseField label="Additional Failure Code" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Additional Failure Code</span>
-                  <span className="ml-25">...</span>
-                </div>
+                <CaseField label="Serial Number" icon>
+                  <Input
+                    variant="invisible"
+                    name="serialNumber"
+                    value={MODetailInput.serialNumber}
+                    onChange={handleChange}
+                    placeholder="---" 
+                    />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Serial Number </span>
-                  <span className="ml-42">...</span>
-                </div>
+               
+                <CaseField label="Part Usage Code" icon>
+                    <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Part Usage Code
-                  </span>
-                  <span className="ml-38">...</span>
-                </div>
+                <CaseField label="Part Consumption" icon>
+                    <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Part Consumption
-                  </span>
-                  <span className="ml-51">...</span>
-                </div>
+                <CaseField label="Part Order Consumption Comment" icon>
+                    <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Part Order Consumption Comment
-                  </span>
-                  <span className="ml-20">...</span>
-                </div>
+                <CaseField label="Removed Part Number " icon>
+                    <Input 
+                    variant="invisible" 
+                    name="removedPartNumber"
+                    value={MODetailInput.removedPartNumber}
+                    onChange={handleChange}
+                    placeholder="---"
+                    />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Removed Part Number
-                  </span>
-                  <span className="ml-43">...</span>
-                </div>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Removed Serial Number
-                  </span>
-                  <span className="ml-41">...</span>
-                </div>
+                <CaseField label="Removed Serial Number " icon>
+                    <Input 
+                    variant="invisible" 
+                    name="removedSerialNumber"
+                    value={MODetailInput.removedSerialNumber}
+                    onChange={handleChange}
+                    placeholder="---"
+                    />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Removed Part Desc
-                  </span>
-                  <span className="ml-50">...</span>
-                </div>
+
+                
+                <CaseField label="Removed Part Desc" icon>
+                    <Input 
+                    variant="invisible" 
+                    name="removedPartDescription"
+                    value={MODetailInput.removedPartDescription}
+                    onChange={handleChange}
+                    placeholder="---"
+                    />
+                </CaseField>
+
               </CardContent>
             </Card>
 
             <Card className="rounded-md "> 
-              <span className="ml-5 text-xl font-bold">Part Return Details</span>
-              <CardContent className="grid grid-flow-col grid-rows-5 gap-5 h-80">
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Returnable Code</span>
-                  <span className="ml-40">...</span>
-                </div>
+              <CardHeader>
+                <CardTitle className="text-lg">Part Return Details</CardTitle>
+              </CardHeader>
+              <CardContent className="grid items-center grid-cols-6 gap-10">
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Return Type Code Identifier</span>
-                  <span className="ml-20">...</span>
-                </div>
+                <CaseField label="Returnable Code" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                <Lock className="mr-2 size-5"></Lock>
-                  <span>Return_Instructions</span>
-                  <span className="ml-35">...</span>
-                </div>
+                <CaseField label="Return Type Code Identifier" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Return Tracking Number</span>
-                  <span className="ml-25">...</span>
-                </div>
+                 <CaseField label="Return Instructions" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">Return Override Flag</span>
-                  <span className="ml-32">...</span>
-                </div>
+                 <CaseField label="Return Tracking Number" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Return Ovveride Reason</span>
-                  <span className="ml-30">...</span>
-                </div>
+                  <CaseField label="Return Override Flag" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <span className="ml-7">RMA</span>
-                  <span className="ml-66">...</span>
-                </div>
+                 <CaseField label="Return Ovveride Reason" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>RMA Identifier</span>
-                  <span className="ml-48">...</span>
-                </div>
 
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Return Deadline</span>
-                  <span className="ml-45.5">...</span>
-                </div>
+                <CaseField label="RMA" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+
+                
+                <CaseField label="RMA Identifier" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+
+                <CaseField label="Return Deadline" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
               </CardContent>
             </Card>
           </TabsContent>
@@ -521,10 +555,119 @@ export const ServiceMoDetail = () => {
             </Card>
 
           </TabsContent>
+
         </Tabs>
       </CardContent>
     </Card>
     
     </>
+  );
+  
+};
+
+const FailureSelect = ({ failureId, setMODetailInput }) => {
+  const [inputValue, setInputValue] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isFocused, setIsFocused] = useState(false); // Track if input is focused
+
+  useEffect(() => {    
+    // Fetch default options once
+    ApiCustomer.get('/api/failure/options').then((res) => {
+      const defaultOptions = res.data.map(f => ({
+        value: f.FailureId.toString(),
+        label: `${f.Name} — ${f.Description ?? ''}`
+      }));
+      setSearchResults(defaultOptions);
+    });
+  if (failureId) {
+    // Ambil data failure berdasarkan ID yang sudah ada
+    ApiCustomer.get(`/api/failure/${failureId}`).then((res) => {
+      const f = res.data.data;
+      const label = `${f.Name} — ${f.Description ?? ''}`;
+      setInputValue(f.FailureId);
+    }).catch(() => {
+      setInputValue(''); // Kosongkan jika tidak ditemukan
+    });
+  }
+}, [failureId]);
+
+
+  const fetchFailures = debounce((query) => {
+      if (!query || query.length < 2) return;
+    ApiCustomer.get(`/api/failure/options?q=${query}`).then((res) => {
+      const limited = res.data.slice(0, 3).map(f => ({
+        value: f.FailureId.toString(),
+        label: `${f.Name} — ${f.Description ?? ''}`
+      }));
+      setSearchResults(limited);
+    });
+  }, 300);
+
+  const handleInputChange = (value) => {
+    setInputValue(value);
+    fetchFailures(value);
+    setMODetailInput((prev) => ({
+      ...prev,
+      failureId: value,
+    }));
+  };
+  
+
+  const handleSelect = (selected) => {
+    setInputValue(selected.label);
+    setSearchResults([
+      selected,
+      ...searchResults.filter((opt) => opt.value !== selected.value),
+
+    ]);
+    setMODetailInput((prev) => ({
+      ...prev,
+      failureId: selected.value,
+      failureName: selected.label,
+    }));
+    console.log("selected.value",selected.value)
+  };
+
+  // Handle focus and blur events
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => setIsFocused(false), 150); // Delay to allow click on dropdown
+  };
+
+  return (
+    <CaseField label={"Failure Code"} star>
+      <div className="relative w-full">
+     
+        <SearchCommandBlock
+          name="failureId"
+          value={String(inputValue) }
+          onChange={handleInputChange}    
+          placeholder="Search Failure..."
+          options={searchResults}
+        />
+
+        {/* Show dropdown only if results exist and input is focused */}
+        {isFocused && (
+          <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg ">
+            {searchResults.length > 0 ? (
+              searchResults.map((opt) => (
+                <li
+                  key={opt.value}
+                  className="p-3 cursor-pointer hover:bg-gray-200"
+                  onMouseDown={() => handleSelect(opt)} // Use onMouseDown to prevent blur before click
+                >
+                  {opt.label}
+                </li>
+              ))
+            ) : (
+              <li className="p-3 text-gray-500">No results found</li>
+            )}
+          </ul>
+        )}
+      </div>
+    </CaseField>
   );
 };

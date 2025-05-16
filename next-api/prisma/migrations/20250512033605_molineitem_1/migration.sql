@@ -1,0 +1,18 @@
+-- AlterTable
+ALTER TABLE `materialorderlineitems` ADD COLUMN `CollectionInstructions` ENUM('None', 'Pickup', 'DropOff', 'ThirdParty') NULL,
+    ADD COLUMN `CustomerResponse` TEXT NULL,
+    ADD COLUMN `FunctionalEquivalence` VARCHAR(100) NULL,
+    ADD COLUMN `MainComponent` VARCHAR(100) NULL,
+    ADD COLUMN `MediaHandlingPart` VARCHAR(100) NULL,
+    ADD COLUMN `OfferedPartDescription` TEXT NULL,
+    ADD COLUMN `OfferedPartNumber` VARCHAR(100) NULL,
+    ADD COLUMN `OriginalPartNumber` VARCHAR(100) NULL,
+    ADD COLUMN `OtherReason` TEXT NULL,
+    ADD COLUMN `PartAuthorizationDetail` TEXT NULL,
+    ADD COLUMN `PartAuthorizationReason` TEXT NULL,
+    ADD COLUMN `PickPackInstructions` TEXT NULL,
+    ADD COLUMN `RejectedReason` TEXT NULL,
+    ADD COLUMN `RemovedPartDescription` TEXT NULL,
+    ADD COLUMN `RemovedPartNumber` VARCHAR(100) NULL,
+    ADD COLUMN `RemovedSerialNumber` VARCHAR(100) NULL,
+    ADD COLUMN `SerialNumber` VARCHAR(100) NULL;

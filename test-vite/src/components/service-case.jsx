@@ -81,7 +81,8 @@ import DatePicker from './date-picker'
 
 import { SearchCommandBlock } from "./sc-select";
 
-
+import { pdf } from '@react-pdf/renderer';
+import ServiceRequestPDF from './service-request-form'; // adjust path if needed
 
 
 export const TabsService = ({ 
@@ -110,6 +111,11 @@ export const TabsService = ({
   //   Note: "",
   // });
 
+  const [caseForm, setCaseForm] = useState({
+    CaseType: "",
+    CaseStatus: "",
+  });
+
   const [gtcForm, setGtcForm] = useState({
     global_trade_status: "",
     embargoed_country: "",
@@ -134,6 +140,9 @@ export const TabsService = ({
     setCaseDetails((prev) => ({ ...prev, [field]: value }));
   }
   
+  const handleCaseChange = (field) => (value) => {
+    setCaseForm((prev) => ({ ...prev, [field]: value }));
+  }
 
   const handleCaseNoteChange = (key, value) => {
     setCaseNoteFormData((prev) => {
@@ -172,11 +181,12 @@ export const TabsService = ({
     const role = user?.role || "Unknown"; 
 
     const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
+    const caseFilled = caseForm.CaseType && caseForm.CaseType.trim() !== "" ;
     const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
     const entitlementEdited = entitlementStatus !== undefined;
     const csrEdited = csrForm && Object.keys(csrForm).length > 0;
 
-    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited;
+    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseFilled;
 
     if (!hasIntentToSave) {
       alert("Tidak ada data yang disimpan.");
@@ -185,7 +195,7 @@ export const TabsService = ({
 
     let savedModules = [];
 
-    for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR']) {
+    for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE']) {
       switch (target) {
 
        case 'NOTE':
@@ -257,6 +267,37 @@ export const TabsService = ({
             savedModules.push("CSR");
           }
           break;
+
+          case 'CASE':
+         if (caseFilled) {
+              try {
+                await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, {
+                  ...caseForm,
+                  CaseType: caseForm.CaseType || "",
+                  CaseStatus: caseForm.CaseStatus || "",
+                });
+                savedModules.push("Case");
+                Swal.fire({
+                  icon: "success",
+                  title: "Berhasil Disimpan",
+                  text: "Data Case berhasil disimpan.",
+                  timer: 2000,
+                  showConfirmButton: false,
+                  allowOutsideClick: false,
+                  allowEscapeKey: false,
+                });
+              } catch (err) {
+                console.error("Gagal update case:", err);
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  text: "Gagal menyimpan data case.",
+                  allowOutsideClick: false,
+                  allowEscapeKey: false,
+                });
+              }
+          }
+          break;
       }
     }
 
@@ -267,7 +308,9 @@ export const TabsService = ({
         title: "Berhasil Disimpan",
         text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
         timer: 2500,
-        showConfirmButton: false
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
       });
       window.location.reload();
     }
@@ -330,6 +373,17 @@ export const TabsService = ({
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
+    { icon: StepBack, label: "SRF", onClick: async () => {
+      // console.log("Case Details ; ",caseDetails);
+      const blob = await pdf(<ServiceRequestPDF nama="NURHIT" caseDetails={caseDetails}  />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Service_Request_Form.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, },
     { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
     { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
     { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder") },
@@ -340,6 +394,7 @@ export const TabsService = ({
     { icon: UserPen, label: "Assign", onClick: () => alert("not now") },
     { icon: StepBack, label: "Add to Queue", onClick: () => alert("not now") },
   ];
+  console.log("TES CASE DETAILS VALUE",caseDetails);
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
   const [serviceCatalogType, setServiceCatalogType] = useState("null");
@@ -375,6 +430,7 @@ export const TabsService = ({
         `/api/case-information/${caseDetails.CaseID}`,
         {
           CaseStatus: "Close",
+          CaseClosedDate: new Date().toISOString(), 
         }
       );
       if (res.data.success) {
@@ -450,6 +506,9 @@ export const TabsService = ({
             setCaseNoteFormData={setCaseNoteFormData}
             formGtc={gtcForm}
             setFormGtc={setGtcForm}
+            onChangeCase={handleCaseChange}
+            caseForm={caseForm}
+            setCaseForm={setCaseForm}
             onChangeGtc={handleGtcChange}
             onChange={handleCaseNoteChange}
             handleCaseDetails={handleCaseDetails}
@@ -477,11 +536,11 @@ const spanMap = {
   6: "col-span-6",
 };
 
-export const CaseField = ({ label, children, icon, span = 1, className }) => (
+export const CaseField = ({ label, children, icon, span = 1, className, star }) => (
   <>
     <CardTitle
       className={twMerge(
-        `relative font-medium flex items-center`,
+        `relative font-medium flex items-center gap-2`,
         icon ? "pl-6" : "",
         className
       )}
@@ -490,6 +549,7 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
         <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
       )}
       {label}
+      {star ? <span className="text-red-400">*</span> : ""}
     </CardTitle>
 
     <CardTitle className={twMerge(spanMap[span], "")}>
@@ -498,7 +558,7 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
   </>
 );
 
-export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
+export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
   const navigate = useNavigate();
   const WOID = workOrders.WOID;
   const handleSave = async () => {
@@ -518,8 +578,12 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
        * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
        */
 
-      //SLA
+      // const resGeneralWO = await ApiCustomer.patch(`/api/work-order/`)
       const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
+        //WO GENERAL
+        ShipmentCountry: WOGeneral.ShipmentCountry || undefined,
+
+        //SLA
         SLAJeopardy: SLA.slaJeopardy || undefined,
         DueDateCustomer: SLA.dueDateCustomer || undefined,
         CoverageWindow: SLA.coverageWindow || undefined,
@@ -815,8 +879,9 @@ export const TabsServiceMO = ({ materialOrders }) => {
   );
 };
 
-export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
+export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
   const navigate = useNavigate();
+
   const buttons = [
     {
       icon: ArrowLeftFromLine,
@@ -824,7 +889,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
       onClick: () => navigate(`/material-order/${MOLineDetails.MOID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
     {
       icon: FileSymlink,
       label: "Save & Close",
@@ -858,15 +923,18 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
           Swal.showLoading();
         }
       });
-      
-      const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${lineItemID}`, {
-        Description: MODetailInput.description,
-        PickPackInstructions: MODetailInput.pickPackInstructions,
-        CollectionInstructions: MODetailInput.collectionInstructions,
-        CustomerResponse: MODetailInput.customerResponse,
-        RejectedReason: MODetailInput.rejectedReason,
-        OtherReason: MODetailInput.otherReason,
-        FailureId: MODetailInput.failureId,
+      const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${LineItemID}`, {
+        Description: MOLineDetails.description,
+        PickPackInstructions: MOLineDetails.pickPackInstructions,
+        CollectionInstructions: MOLineDetails.collectionInstructions || "None",
+        CustomerResponse: MOLineDetails.customerResponse,
+        RejectedReason: MOLineDetails.rejectedReason,
+        OtherReason: MOLineDetails.otherReason,
+        FailureId: MOLineDetails.failureId,
+        SerialNumber: MOLineDetails.serialNumber,
+        RemovedPartNumber: MOLineDetails.removedPartNumber,
+        RemovedSerialNumber: MOLineDetails.removedSerialNumber,
+        RemovedPartDescription: MOLineDetails.removedPartDescription,
       });
       if (res.data.success) {
         // Success alert
@@ -877,7 +945,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
           timer: 2000,
           showConfirmButton: false
         }).then(() => {
-          navigate(`/material-order/${MOLineDetails.MOID}`)
+          navigate(`/mo_detail/${LineItemID}`)
         })
       } else {
         // Error from API
@@ -907,7 +975,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
         },
       });
       const res = await ApiCustomer.patch(
-        `/api/material-order/material-order-line-items/${MOLineDetails.LineItemID}`,
+        `/api/material-order/material-order-line-items/${LineItemID}`,
         {
           Status: "Closed",
         }
@@ -939,6 +1007,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
       });
     }
   };
+
   return (
     <>
       <div className="flex items-center border-1 ">
@@ -953,7 +1022,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
-
+    {console.log(MOLineDetails)}
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
@@ -1004,6 +1073,9 @@ export const ServiceCase = ({
   csrForm,
   setCsrForm,
   onChangeCsr,
+  caseForm,
+  onChangeCase,
+  setCaseForm,
 }) => {
   const { open } = useSidebar();
 
@@ -1212,6 +1284,9 @@ export const ServiceCase = ({
       CaseType : "ASP/Reseller/GS1"
     },
     {
+      CaseType : "Bench"
+    },
+    {
       CaseType : "Call to Repair"
     },
     {
@@ -1234,6 +1309,9 @@ export const ServiceCase = ({
     },
     {
       CaseType : "Internal Support"
+    },
+    {
+      CaseType : "Onsite"
     },
     {
       CaseType : "Proactive"
@@ -1277,6 +1355,37 @@ export const ServiceCase = ({
 };
 
 
+const statusEnumToLabel = {
+  New: "New",
+  Open: "Open",
+  InActive: "Inactive",
+  Close: "Closed",
+  Active: "Active",
+  Monitor: "Monitor",
+  Pending_Customer_Action: "Pending Customer Action",
+  Quote_Requested: "Quote Requested",
+  Pending_Follow_Up: "Pending Follow Up",
+  Pending_Order: "Pending Order",
+  Escalated: "Escalated",
+  Quote_Approved: "Quote Approved",
+  Pending_Quote: "Pending Quote"
+};
+
+const labelToStatusEnum = Object.fromEntries(
+  Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
+);
+
+
+const fetchCase = async () => {
+  try {
+    const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`);
+    setCaseForm(res.data.data);
+  } catch (err) {
+    console.error("Error fetching case:", err);
+    setCaseForm(caseForm); // fallback jika error
+  }
+};
+
   
   //notes handler
   useEffect(() => {
@@ -1302,6 +1411,7 @@ export const ServiceCase = ({
     fetchGtc(); 
     fetchOTCCode();
     fetchCsr();
+    fetchCase();
   }, []);
 
   useEffect(() => {
@@ -1531,12 +1641,20 @@ const [endDate, setEndDate] = useState(null);
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Case Status">
-                  {caseDetails.CaseStatus}
+                <SearchCommandBlock
+                  value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
+                  onChange={(label) => {
+                    const enumValue = labelToStatusEnum[label];
+                    onChangeCase("CaseStatus")(enumValue);
+                  }}
+                  placeholder="--Select--"
+                  options={Object.values(statusEnumToLabel)}
+                />
                 </CaseField>
                 <CaseField label="Case Type">
                   <SearchCommandBlock
-                    value={caseDetails?.CaseType}
-                    onChange={handleCaseDetails("CaseType")}
+                    value={caseForm?.CaseType}
+                    onChange={onChangeCase("CaseType")}
                     placeholder="--Select--"
                     options={[
                     "Depot Repair",
@@ -1949,7 +2067,7 @@ const [endDate, setEndDate] = useState(null);
                 </CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-9 items-center">
+              <CardContent className="grid items-center grid-cols-9 gap-10">
                 <CaseField label="Case Entitlement" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
@@ -2166,8 +2284,9 @@ const [endDate, setEndDate] = useState(null);
 
                   <CaseField
                     label="Notes"
-                    className={"col-span-2 self-start"}
+                    className={"col-span-2 self-start bg-red"}
                     span={4}
+                    star
                   >
                     <textarea
                       className="h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500"
@@ -2295,6 +2414,7 @@ const [endDate, setEndDate] = useState(null);
                     label="Keyword Search"
                     className={"col-span-2"}
                     span={3}
+                    star
                   >
                     <Input
                       placeholder="..."
@@ -2409,7 +2529,7 @@ const [endDate, setEndDate] = useState(null);
               </CardHeader>
 
               <CardContent className="grid grid-cols-7 gap-5 p-3 ">
-                <CaseField label="Case Resolution Code">
+                <CaseField label="Case Resolution Code" star>
                   {/* <Input
                   variant='invisible'
                   value={csrForm.caseResolutionCode}
@@ -2577,7 +2697,12 @@ const [endDate, setEndDate] = useState(null);
               </CardHeader>
               <CardContent className="grid items-center grid-cols-4 gap-10">
                 <CaseField label="Shipment Country">
-                  <Input variant="invisible" placeholder="---" />
+                    <SearchCommandBlock 
+                      variant="invisible" 
+                      value={workOrders[0]?.ShipmentCountry ||"---"}
+                      readOnly
+                      options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"] }
+                    />
                 </CaseField>
                 <CaseField label="Exception Order">
                   <Input variant="invisible" placeholder="---" />

@@ -177,8 +177,8 @@ export function ServiceBooking ({BookingId , woid}) {
         
         setBookingStatus(data?.BookingStatus || "");
         setWorkOrderNumber(data?.workorder?.WorkOrderNumber || "");
-        setRequestedDateTimeCustomer(formatDateForInput(data?.workorder?.RequestedDateTimeCustomer || ""));
-        setGuaranteedFixTimeCustomer(formatDateForInput(data?.workorder?.GuaranteedFixTimeCustomer || ""));
+        setRequestedDateTimeCustomer(new Date(data?.workorder?.RequestedDateTimeCustomer || ""));
+        setGuaranteedFixTimeCustomer(new Date(data?.workorder?.GuaranteedFixTimeCustomer || ""));
         
         setDoNotDisturb(data?.DoNotDisturb || false);
         setCeScheduleChange(data?.CeScheduleChange || false);
@@ -442,7 +442,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   }
                 />
               </CaseField>
-              <CaseField label={"Resource"} span={2}>
+              <CaseField label={"Resource"} span={2} star>
                 <Input
                   variant={"invisible"}
                   value={resourceName}
@@ -508,7 +508,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   )}
                 </CaseField>
               </div>
-              <CaseField label={"Subk Technician Name"} span={2}>
+              <CaseField label={"Subk Technician Name"} span={2} star>
                 <Input
                   variant={"invisible"}
                   value={subkTechnicianName}
@@ -559,7 +559,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   </ul>
                 )}
               </CaseField>
-              <CaseField label={"Booking Status"} span={2}>
+              <CaseField label={"Booking Status"} span={2} star>
                 <Input
                   variant={"invisible"}
                   value={bookingStatus}
@@ -569,27 +569,37 @@ export function ServiceBooking ({BookingId , woid}) {
               <CaseField label={"Work Order"} icon span={2}>
                 <Input variant={"invisible"} value={workOrderNumber} readOnly />
               </CaseField>
-              <div className="grid items-center grid-cols-3 col-span-3 p-3 ring-1">
+              <div className="grid items-center grid-cols-3 col-span-3 p-3 ring-1 gap-2">
                 <CaseField
                   label={"Requested Date Time (costumer)"}
                   icon
                   span={2}
                 >
-                  <Input
+                  <DatePicker
+                    value={requestedDateTimeCustomer}
+                    onChange={
+                      setRequestedDateTimeCustomer
+                    }
+                    />
+                  {/* <Input
                     variant={"invisible"}
                     value={requestedDateTimeCustomer}
                     onChange={(e) =>
                       setRequestedDateTimeCustomer(e.target.value)
                     }
                     readOnly
-                  />
+                  /> */}
                 </CaseField>
                 <CaseField
                   label={"Guaranteed Fix Time (costumer)"}
                   icon
                   span={2}
                 >
-                  <Input
+                  <DatePicker
+                    value={guaranteedFixTimeCustomer}
+                    onChange={setGuaranteedFixTimeCustomer}
+                    />
+                  {/* <Input
                     variant={"invisible"}
                     value={
                       guaranteedFixTimeCustomer
@@ -604,7 +614,7 @@ export function ServiceBooking ({BookingId , woid}) {
                       setGuaranteedFixTimeCustomer(isoDateTimeGuaranteed);
                     }}
                     readOnly
-                  />
+                  /> */}
                 </CaseField>
               </div>
               <CaseField
@@ -663,7 +673,7 @@ export function ServiceBooking ({BookingId , woid}) {
               <hr />
             </CardHeader>
             <CardContent className="grid grid-cols-3 gap-6">
-              <CaseField label={"Start Time"} span={2}>
+              <CaseField label={"Start Time"} span={2} star>
                 <DatePicker
                   value={
                     startTimeUserTime ? new Date(startTimeUserTime) : ""
@@ -673,7 +683,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"End Time"} span={2}>
+              <CaseField label={"End Time"} span={2} star>
                 <DatePicker
                   
                   value={endTimeUserTime ? new Date(endTimeUserTime) : ""}
@@ -682,14 +692,14 @@ export function ServiceBooking ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"Duration"} span={2}>
+              <CaseField label={"Duration"} span={2} star>
                 <Input
                   type="number"
                   value={durationInMinutesUserTime}
                   onChange={(e) => setDurationInMinutesUserTime(e.target.value)}
                 />
               </CaseField>
-              <CaseField label={"Estimated Arrival Time"} span={2}>
+              <CaseField label={"Estimated Arrival Time"} span={2} star>
                 <DatePicker
                   
                   value={
@@ -702,7 +712,7 @@ export function ServiceBooking ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"Actual Arrival Time"} span={2}>
+              <CaseField label={"Actual Arrival Time"} span={2} star>
                 <DatePicker
                   
                   value={
@@ -758,25 +768,25 @@ export function ServiceBooking ({BookingId , woid}) {
               <hr />
             </CardHeader>
             <CardContent className="grid items-center grid-cols-3 gap-6">
-              <CaseField label={'Start Time (Customer)'} span={2}>
+              <CaseField label={'Start Time (Customer)'} span={2} star>
                 <DatePicker 
                   value={startTimeCustomerTime ? new Date(startTimeCustomerTime) : ""}
                   onChange={setStartTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'End TIme (Customer)'} span={2}>
+              <CaseField label={'End TIme (Customer)'} span={2} star>
                 <DatePicker 
                   value={endTimeCustomerTime ? new Date(endTimeCustomerTime) : ""}
                   onChange={setEndTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'Estimated Arrival Time (Customer)'} span={2}>
+              <CaseField label={'Estimated Arrival Time (Customer)'} span={2} star>
                 <DatePicker 
                   value={estimatedArrivalTimeCustomerTime ? new Date(estimatedArrivalTimeCustomerTime) : ""}
                   onChange={setEstimatedArrivalTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'Actual Arrival Time (Customer)'} span={2}>
+              <CaseField label={'Actual Arrival Time (Customer)'} span={2} star>
                 <DatePicker 
                   value={actualArrivalTimeCustomerTime ? new Date(actualArrivalTimeCustomerTime) : ""}
                   onChange={setActualArrivalTimeCustomerTime}
@@ -884,33 +894,71 @@ export function ServiceBooking ({BookingId , woid}) {
 }
 
 // Fungsi pengecekan format dan isi dari RequestedDateTimeCustomer
-const CheckRequestedDateTimeCustomer = (rawDateTime) => {
+const CheckRequestedDateTimeCustomer = async (rawDateTime) => {
   try {
-    if (!rawDateTime) {
-      alert("Gagal membuat booking: RequestedDateTimeCustomer belum diisi.");
+    // 💡 Tambahan keamanan sebelum lanjut
+    if (!rawDateTime || typeof rawDateTime !== 'string' || rawDateTime.trim() === "") {
+      await Swal.fire({
+        icon: 'warning',
+        title: "Gagal membuat booking",
+        text: "RequestedDateTimeCustomer belum diisi.",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+      });
+      window.location.reload();
       return false;
     }
 
     const formatted = formatDateForInput(rawDateTime);
+    console.log('Formatted:', formatted); // 👈 Debug output
 
-    // Validasi format ISO: yyyy-mm-ddThh:mm
     const isValidFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(formatted);
     if (!isValidFormat) {
-      alert("Gagal membuat booking: Format RequestedDateTimeCustomer tidak valid.");
+      await Swal.fire({
+        icon: 'warning',
+        title: "Gagal membuat booking",
+        text: "Format RequestedDateTimeCustomer tidak valid.",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+      });
+      window.location.reload();
       return false;
     }
 
-    // Validasi waktu nyata (bukan Invalid Date)
     const dateObj = new Date(rawDateTime);
     if (isNaN(dateObj.getTime())) {
-      alert("Gagal membuat booking: Nilai RequestedDateTimeCustomer tidak valid.");
+      await Swal.fire({
+        icon: 'warning',
+        title: "Gagal membuat booking",
+        text: "Nilai RequestedDateTimeCustomer tidak valid.",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+      });
+      window.location.reload();
       return false;
     }
 
     return true;
   } catch (error) {
     console.error('Error saat validasi tanggal:', error);
-    alert("Terjadi kesalahan saat validasi RequestedDateTimeCustomer.");
+    await Swal.fire({
+      icon: 'error',
+      title: "Terjadi kesalahan",
+      text: "Kesalahan saat validasi RequestedDateTimeCustomer.",
+      showConfirmButton: false,
+      allowEscapeKey: false,
+      allowOutsideClick: false,
+    });
+    window.location.reload();
     return false;
   }
 };
@@ -924,15 +972,18 @@ export function NewBookableResourceBooking({ WOID, CreatedBy, RequestedDateTimeC
     try {
       setLoading(true);
       
-      const isValid = CheckRequestedDateTimeCustomer(RequestedDateTimeCustomer);
+      const isValid = await CheckRequestedDateTimeCustomer(RequestedDateTimeCustomer);
+      console.log("Validasi result:", isValid);
       if (!isValid) return;
+
       
       const data = {
         WOID: WOID,
         CreatedBy: CreatedBy
       }
       const response = await ApiCustomer.post('/api/bookings', data);
-
+    
+      
       if (response.status === 201) {
         const { BookingId } = response.data;
         // Lanjut ke navigasi sambil bawa BookingId
@@ -954,6 +1005,7 @@ export function NewBookableResourceBooking({ WOID, CreatedBy, RequestedDateTimeC
           Tambah Booking Baru
         </Button>
       </DialogTrigger>
+        <Label className="text-red-400">*</Label>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Booking</DialogTitle>

@@ -27,7 +27,8 @@ import
   RepairClassCodeTable,
   ServiceCatalogTable,
   OTCCodeTable,
-  CrsTable
+  CrsTable,
+  FailureTable
  } from './master_table';
 import { Bookings } from './bookings';
 import { User_table } from './master_table';
@@ -37,7 +38,8 @@ import { Labor } from './labor';
 import { ResourceAccountTable } from './master_table';
 
 import { GateKeepingRouting } from './components/GateKeepingRouting';
-
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
 createRoot(document.getElementById('root')).render(
   <StrictMode> 
     <BrowserRouter>
@@ -80,6 +82,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/ServiceCatalog' element={<ServiceCatalogTable/>} />
             <Route path='/master/OTC_Code' element={<OTCCodeTable/>}/>
             <Route path='/master/CrsTable' element={<CrsTable/>}/>
+            <Route path='/master/Failure' element={<FailureTable/>}/>
             {/* </Route> */}
           </Route>
             {/* </Route> */}
