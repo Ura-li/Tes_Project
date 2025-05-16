@@ -1,35 +1,55 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../../prisma/client";
 
-export async function GET(request, {params }) {
-    const {LineItemID } = await params
-    const lineItemID = LineItemID
-    if (!lineItemID) {
+export async function GET(request, { params }) {
+    const { LineItemID } = params;
+
+
+    // Ambil query param `lineNumber` dari request.url
+    // const { searchParams } = new URL(request.url);
+    // const lineNumber = searchParams.get("lineNumber");
+
+    const parsedLineItemID = parseInt(LineItemID);
+    // const parsedLineNumber = parseInt(lineNumber);
+
+    console.log("LineItemID: ".LineItemID);
+    // console.log(parsedLineNumber);
+
+    if (isNaN(parsedLineItemID)) {
         return NextResponse.json({
             success: false,
-            message: "Invalid Material Order ID"
+            message: "Invalid Line Item ID or Line Number"
         }, { status: 400 });
     }
-    try{
-        const materialLineItems = await prisma.materialorderlineitems.findUnique({
-            where: {LineItemID: parseInt(lineItemID) }
-        })
-        if (!materialLineItems) {
+
+    try {
+        const materialLineItem = await prisma.materialorderlineitems.findUnique({
+            where: {
+                LineItemID: parsedLineItemID,
+                // LineNumber: parsedLineNumber
+            },
+            include: {
+                servicecatalog_parts: true,
+                materialorder: true,
+            },
+        });
+
+        if (!materialLineItem) {
             return NextResponse.json({
                 success: false,
                 message: "Detail Data Material Order Not Found!",
                 data: null
             }, { status: 404 });
         }
-    
+
         return NextResponse.json({
             success: true,
             message: "Detail Data Material Order",
-            data: materialLineItems
+            data: materialLineItem
         }, { status: 200 });
-    }catch(err){
-        console.error("🔥 ERROR in GET API:", err);
 
+    } catch (err) {
+        console.error("🔥 ERROR in GET API:", err);
         return NextResponse.json({
             success: false,
             message: "Failed to fetch data",
@@ -40,18 +60,30 @@ export async function GET(request, {params }) {
 
 export async function PATCH(request, {params}) {
     const {LineItemID } = await params
-    const lineItemID = LineItemID
-    if (!lineItemID) {
+    
+    // const { searchParams } = new URL(request.url);
+    // const lineNumber = searchParams.get("lineNumber");
+
+    const parsedLineItemID = parseInt(LineItemID);
+    // const parsedLineNumber = parseInt(lineNumber);
+    
+    if (isNaN(parsedLineItemID)) {
         return NextResponse.json({
             success: false,
-            message: "Invalid Material Order ID"
+            message: "Invalid Line Item ID or Line Number"
         }, { status: 400 });
     }
+
+    console.log(parsedLineItemID)
+    // console.log(parsedLineNumber)
+
     try {
         const body = await request.json();
         // Cek apakah AssetID ada
-        const existingMOLineItems = await prisma.materialorderlineitems.findUnique({
-            where: { LineItemID: parseInt(lineItemID) }
+        const existingMOLineItems = await prisma.materialorderlineitems.findFirst({
+            where: { 
+                LineItemID: parsedLineItemID,
+            }
         });
         
         
@@ -61,18 +93,39 @@ export async function PATCH(request, {params}) {
                 message: "Line Items not found!"
             }, { status: 404 });
         }
-        
-        const { PartNumber, Description, ATPStatus, Price, Quantity, Status } = body;
+        const {
+            PartNumber,
+            Description,
+            ATPStatus,
+            Price,
+            Quantity,
+            Status,
+            PickPackInstructions,
+            CollectionInstructions,
+            CustomerResponse,
+            RejectedReason,
+            OtherReason
+          } = body;
+        console.log(body);
+
         // Update data
         const updatedMOLineItems = await prisma.materialorderlineitems.update({
-            where: { LineItemID: parseInt(lineItemID) },
+            where: { 
+                LineItemID: parsedLineItemID,
+                // LineNumber: parsedLineNumber 
+            },
             data: {
                 PartNumber,
                 Description,
                 ATPStatus,
                 Price,
                 Quantity,
-                Status
+                Status,
+                PickPackInstructions,
+                CollectionInstructions,
+                CustomerResponse,
+                RejectedReason,
+                OtherReason
             }
         });
 

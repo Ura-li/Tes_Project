@@ -77,63 +77,16 @@ import Swal from "sweetalert2";
 
 import { BtnModalsServiceCatalog } from './sc-modal'
 import DatePicker from './date-picker'
-import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "@/components/ui/command"
 
 
-export const SearchCommandBlock = ({
-  options = [],
-  value,
-  onChange,
-  placeholder = "Search...",
-  renderLabel = (opt) => opt.label || opt,
-  getValue = (opt) => opt.value || opt,
-}) => {
-  
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="relative w-full">
-      <Command className="w-full">
-        <CommandInput
-          placeholder="Type a command or search..."
-          onFocus={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 150)} // delay to allow click
-        />
-        {open && (
-          <CommandList className="absolute z-50 mt-10 w-full border rounded-md bg-white shadow-lg max-h-60 overflow-y-auto">
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup>
-              {options.map((opt) => (
-                <CommandItem
-                  key={getValue(opt)}
-                  onSelect={() => {
-                    onChange(getValue(opt));
-                    setOpen(false);
-                  }}
-                >
-                  {renderLabel(opt)}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        )}
-      </Command>
-    </div>
-  );
-}
+import { SearchCommandBlock } from "./sc-select";
+
+
 
 
 export const TabsService = ({ 
-  caseDetails, 
+  caseDetails,
+  setCaseDetails, 
   caseNote,
   caseNoteFormData,
   setCaseNoteFormData
@@ -165,7 +118,7 @@ export const TabsService = ({
     screening_id: "",
     gt_active_listening: "",
     gt_al_comments: "",
-  });
+    });
 
    const [csrForm, setCsrForm] = useState({
     caseResolutionCode: "",
@@ -177,6 +130,9 @@ export const TabsService = ({
     customerRequestedCloseDate: "",
   });
 
+  const handleCaseDetails = (field) => (value) => {
+    setCaseDetails((prev) => ({ ...prev, [field]: value }));
+  }
   
 
   const handleCaseNoteChange = (key, value) => {
@@ -199,128 +155,138 @@ export const TabsService = ({
     setCsrForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = async () => {
-    console.log("📝 Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
-  
-    try {
-      Swal.fire({
-        title: 'Saving Case...',
-        text: 'Mohon tunggu sebentar',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
-      const user = getUserFromToken();
-      const timestamp = new Date().toLocaleString();
-      const author = user?.name || user?.email || "Unknown User";
-      const role = user?.role || "Unknown";
-      const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
-      const gtcFilled = gtcForm && Object.values(gtcForm).some(val => val !== null && val !== "");
-      const custEntitlementandSLA = entitlementStatus
-      const csrFilled = csrForm && Object.values(csrForm).some(val => val !== null && val !== "");
-  
-      let noteResponse = null;
-      let gtcResponse = null;
-      let entitlementResponse = null;
-      let csrResponse = null;
-  
-      if (!noteFilled && !gtcFilled && !entitlementResponse && !csrFilled) {
-        alert("Tidak ada data yang disimpan. Mohon isi catatan atau data GTC terlebih dahulu.");
-        return;
-      }
-      if (noteFilled) {
-        const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
-        const response = await ApiCustomer.post("/api/case-information/case-notes", {
-          ...caseNoteFormData,
-          Note: modifiedNote,
-          CaseID: caseDetails.CaseID
-        });
-        console.log("Saved successfully:", response.data);
-        
-        const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
-        setCaseNotes({
-          NotesDisplay: NotedDisplay
-        })
-        console.log("Case Notes Infor after save : ",caseNotes)
-        console.log("Case Notes Display Infor after save : ",response)
+ const handleSave = async () => {
+  console.log("📝 Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
 
-        let dataUpdated = {
-          CaseNote: response.data.data.NoteID
-        };
-        //symptom code
-        if(selectedSymptom) {
-          dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
-        }
-        await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated)
-      }
-      if (gtcFilled) {
-        const response = await ApiCustomer.patch("/api/case-information/global-trade-check", {
-          ...gtcForm,
-          screening_id: gtcForm.screening_id || "",
-          CaseID: caseDetails.CaseID,
-        });
+  try {
+    Swal.fire({
+      title: 'Saving Case...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
 
-        gtcResponse = response.data;
-        console.log("✅ GTC saved:", gtcResponse);
-      }
-      if(custEntitlementandSLA){
-        const response = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, custEntitlementandSLA)
-        entitlementResponse = response.data
-        console.log("✅ Entitlement saved:", entitlementResponse);
-      }  
-     if (csrFilled) {
-      if (caseDetails.id_csr) {
-        const response = await ApiCustomer.patch(`/api/caseResolution/${caseDetails.id_csr}`, {
-          ...csrForm,
-          caseResolutionCode: csrForm.caseResolutionCode || "",
-        });
-       csrResponse = response.data;
-       console.log("✅ CSR saved:", csrResponse);
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "CSR updated successfully!",
-          timer: 2000,
-          showConfirmButton: false,
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-        }).then(() => {
-          window.location.reload();
-        });
-      }else{
-        const response = await ApiCustomer.post("/api/caseResolution", {
-          ...csrForm,
-          caseResolutionCode: csrForm.caseResolutionCode || "",
-        });
-        const UpdatedCase = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, {
-          id_csr: response.data.data.id_csr
-        });
-        console.log("Updated Case ID CSR : ", UpdatedCase)
-          Swal.fire({
-            icon: "success",
-            title: "Success",
-            text: "CSR updated successfully!",
-            timer: 2000,
-            showConfirmButton: false,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-          }).then(() => {
-            window.location.reload();
-          });
-      }}
-      
-    } catch (error) {
-      console.error("❌ Save failed:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.message || "Something went wrong.",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      }).then(() => {
-        Swal.close();
-      })
+    const user = getUserFromToken();
+    const timestamp = new Date().toLocaleString();
+    const author = user?.name || user?.email || "Unknown User";
+    const role = user?.role || "Unknown"; 
+
+    const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
+    const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
+    const entitlementEdited = entitlementStatus !== undefined;
+    const csrEdited = csrForm && Object.keys(csrForm).length > 0;
+
+    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited;
+
+    if (!hasIntentToSave) {
+      alert("Tidak ada data yang disimpan.");
+      return;
     }
-  };
+
+    let savedModules = [];
+
+    for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR']) {
+      switch (target) {
+
+       case 'NOTE':
+  if (noteFilled) {
+    const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
+
+    const response = await ApiCustomer.post("/api/case-information/case-notes", {
+      LogType: caseNoteFormData.LogType,
+      ActionType: caseNoteFormData.ActionType,
+      VisibleExternally: caseNoteFormData.VisibleExternally,
+      Note: modifiedNote,
+      CaseID: caseDetails.CaseID
+    });
+
+    const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
+    setCaseNotes({ NotesDisplay: NotedDisplay, 
+          ActionType: caseNoteFormData.ActionType,
+          LogType: caseNoteFormData.LogType,
+          VisibleExternally: caseNoteFormData.VisibleExternally,});
+
+    let dataUpdated = {
+      CaseNote: response.data.data.NoteID
+    };
+    
+    if (selectedSymptom) {
+      dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
+    }
+    await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated);
+
+    savedModules.push("Note");
+  }
+  break;
+
+        case 'GTC':
+          if (gtcEdited) {
+            await ApiCustomer.patch("/api/case-information/global-trade-check", {
+              ...gtcForm,
+              screening_id: gtcForm.screening_id || "",
+              CaseID: caseDetails.CaseID,
+            });
+            savedModules.push("GTC");
+          }
+          break;
+
+        case 'ENTITLEMENT':
+          if (entitlementEdited) {
+            await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, entitlementStatus);
+            savedModules.push("Entitlement");
+          }
+          break;
+
+        case 'CSR':
+          if (csrEdited) {
+            let response;
+            if (caseDetails.id_csr) {
+              response = await ApiCustomer.patch(`/api/caseResolution/${caseDetails.id_csr}`, {
+                ...csrForm,
+                caseResolutionCode: csrForm.caseResolutionCode || "",
+              });
+            } else {
+              response = await ApiCustomer.post("/api/caseResolution", {
+                ...csrForm,
+                caseResolutionCode: csrForm.caseResolutionCode || "",
+              });
+              await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, {
+                id_csr: response.data.data.id_csr
+              });
+            }
+            savedModules.push("CSR");
+          }
+          break;
+      }
+    }
+
+    // Satu alert saja jika banyak data berhasil disimpan
+    if (savedModules.length > 0) {
+      await Swal.fire({
+        icon: "success",
+        title: "Berhasil Disimpan",
+        text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
+        timer: 2500,
+        showConfirmButton: false
+      });
+      window.location.reload();
+    }
+
+  } catch (error) {
+    console.error("❌ Save failed:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error.message || "Something went wrong.",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+    }).then(() => {
+      Swal.close();
+    });
+  }
+};
+
+
   
 
   useEffect(() => {
@@ -329,7 +295,10 @@ export const TabsService = ({
       if(noteDetail ){
         const NotedDisplay = `@Created On : ${noteDetail.CreatedOn}\n${noteDetail.Note}`;
         setCaseNotes({
-          NotesDisplay: NotedDisplay
+          NotesDisplay: NotedDisplay,
+          ActionType: noteDetail.ActionType,
+          LogType: noteDetail.LogType,
+          VisibleExternally: noteDetail.VisibleExternally,
         })
       } 
       // const symptomCodeDetail = await fetchSymptomCodes();
@@ -359,7 +328,7 @@ export const TabsService = ({
       label: "Save & Close",
       onClick: () => saveAndCloseCase(),
     },
-    { icon: RotateCw, label: "Refresh", onClick: () => alert("not now") },
+    { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
     { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
     { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
@@ -439,7 +408,7 @@ export const TabsService = ({
   };
   return (
     <>
-      <div className="border-1 flex items-center ">
+      <div className="flex items-center border-1 ">
         {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -447,20 +416,20 @@ export const TabsService = ({
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
-            <btn.icon className="h-4 w-4" />
+            <btn.icon className="w-4 h-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
 
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
                 <DropdownMenuItem key={index}>
-                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  <btn.icon className="inline-block w-4 h-4 mr-2" />
                   {btn.label}
                 </DropdownMenuItem>
               ))}
@@ -478,10 +447,12 @@ export const TabsService = ({
           <ServiceCase
             caseDetails={caseDetails}
             formData={caseNoteFormData}
+            setCaseNoteFormData={setCaseNoteFormData}
             formGtc={gtcForm}
             setFormGtc={setGtcForm}
             onChangeGtc={handleGtcChange}
             onChange={handleCaseNoteChange}
+            handleCaseDetails={handleCaseDetails}
             caseNotes={caseNotes}
             setCaseNotes={setCaseNotes}
             selectedSymptom={selectedSymptom}
@@ -516,14 +487,14 @@ export const CaseField = ({ label, children, icon, span = 1, className }) => (
       )}
     >
       {icon && (
-        <Lock className="absolute left-0 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
       )}
       {label}
     </CardTitle>
 
-    <div className={twMerge(spanMap[span], "")}>
+    <CardTitle className={twMerge(spanMap[span], "")}>
       {children}
-    </div>
+    </CardTitle>
   </>
 );
 
@@ -609,7 +580,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
     { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
     { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Refresh", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Process", onClick: () => alert("not now") },
     { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
     { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
@@ -681,7 +652,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
   };
   return (
     <>
-      <div className="border-1 flex items-center ">
+      <div className="flex items-center border-1 ">
         {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -689,20 +660,20 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA }) => {
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
-            <btn.icon className="h-4 w-4" />
+            <btn.icon className="w-4 h-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
 
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
                 <DropdownMenuItem key={index}>
-                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  <btn.icon className="inline-block w-4 h-4 mr-2" />
                   {btn.label}
                 </DropdownMenuItem>
               ))}
@@ -799,7 +770,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
   };
   return (
     <>
-      <div className="border-1 flex items-center ">
+      <div className="flex items-center border-1 ">
         {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -807,20 +778,20 @@ export const TabsServiceMO = ({ materialOrders }) => {
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
-            <btn.icon className="h-4 w-4" />
+            <btn.icon className="w-4 h-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
 
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
                 <DropdownMenuItem key={index}>
-                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  <btn.icon className="inline-block w-4 h-4 mr-2" />
                   {btn.label}
                 </DropdownMenuItem>
               ))}
@@ -859,7 +830,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
       label: "Save & Close",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
     },
-    { icon: StepBack, label: "Cancl", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Cancel", onClick: () => alert("not now") },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
     { icon: RotateCw, label: "Assign", onClick: () => alert("not now") },
     {
@@ -876,6 +847,54 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
+
+  const saveMOLI = async () => {
+    try {
+      Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we update the line item.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      
+      const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${lineItemID}`, {
+        Description: MODetailInput.description,
+        PickPackInstructions: MODetailInput.pickPackInstructions,
+        CollectionInstructions: MODetailInput.collectionInstructions,
+        CustomerResponse: MODetailInput.customerResponse,
+        RejectedReason: MODetailInput.rejectedReason,
+        OtherReason: MODetailInput.otherReason,
+        FailureId: MODetailInput.failureId,
+      });
+      if (res.data.success) {
+        // Success alert
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          navigate(`/material-order/${MOLineDetails.MOID}`)
+        })
+      } else {
+        // Error from API
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: res.data.message
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to update!',
+        text: error.message || 'Something went wrong.'
+      });
+    }
+  }
 
   const saveAndCloseMaterialLineItemsOrder = async () => {
     try {
@@ -922,7 +941,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
   };
   return (
     <>
-      <div className="border-1 flex items-center ">
+      <div className="flex items-center border-1 ">
         {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -930,20 +949,20 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
-            <btn.icon className="h-4 w-4" />
+            <btn.icon className="w-4 h-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
 
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
                 <DropdownMenuItem key={index}>
-                  <btn.icon className="h-4 w-4 inline-block mr-2" />
+                  <btn.icon className="inline-block w-4 h-4 mr-2" />
                   {btn.label}
                 </DropdownMenuItem>
               ))}
@@ -970,9 +989,11 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
 export const ServiceCase = ({
   caseDetails,
   formData,
+  setCaseNoteFormData,
   onChange,
   caseNotes,
   setCaseNotes,
+  handleCaseDetails,
   selectedSymptom,
   setSelectedSymptom,
   formGtc,
@@ -1104,7 +1125,7 @@ export const ServiceCase = ({
           `/api/case-information/case-notes`,
           {
             LogType: "NotesLog",
-            ActionType: 1,
+            ActionType: "",
             Template: "",
             VisibleExternally: false,
             MinutesSpent: 0,
@@ -1183,6 +1204,54 @@ export const ServiceCase = ({
     }
   }
 
+  const [caseTipe, setCaseTipe] = useState([
+    {
+      CaseType : "Administrative"
+    },
+    {
+      CaseType : "ASP/Reseller/GS1"
+    },
+    {
+      CaseType : "Call to Repair"
+    },
+    {
+      CaseType : "Complex T&M"
+    },
+    {
+      CaseType : "Depot Repair"
+    },
+    {
+      CaseType : "Electronic"
+    },
+    {
+      CaseType : "HW Delivery"
+    },
+    {
+      CaseType : "IMACD"
+    },
+    {
+      CaseType : "Internal Service"
+    },
+    {
+      CaseType : "Internal Support"
+    },
+    {
+      CaseType : "Proactive"
+    },
+    {
+      CaseType : "Remote Services"
+    },
+    {
+      CaseType : "Services (VAS)"
+    },
+    {
+      CaseType : "SW Delivery"
+    },
+    {
+      CaseType : "T&M"
+    },
+  ])
+
   const fetchCsr = async () => {
   try {
     const csrData = caseDetails.caseresolution;
@@ -1219,10 +1288,14 @@ export const ServiceCase = ({
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
       if (noteDetail) {
-        setCaseNotes({
+        setCaseNoteFormData((prev) => ({
+          ...prev,
           NotesDisplay: noteDetail.Note,
+          ActionType: noteDetail.ActionType,
           CreatedOn: noteDetail.CreatedOn,
-        });
+          LogType: noteDetail.LogType,
+          VisibleExternally: noteDetail.VisibleExternally,
+        }));
       }
     };
     loadNote();
@@ -1309,25 +1382,25 @@ const [endDate, setEndDate] = useState(null);
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-2">
+        <div className="p-4 my-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
           This Case is <strong>read-only</strong> because it is{" "}
           <strong>Closed</strong>.
         </div>
       )}
-      <Card className="mt-2 rounded-none p-0 border-0">
+      <Card className="p-0 mt-2 border-0 rounded-none">
         <Tabs defaultValue="case_info">
-          <CardHeader className="flex flex-col gap-3 border-2 w-full p-2 sticky">
+          <CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2">
             <div className="flex justify-between">
               <CardTitle className="text-xl ">
                 {caseDetails.CaseID}
-                <span className="text-sm flex items-center">
+                <span className="flex items-center text-sm">
                   Case .
                   <Select
                     onValueChange={setSelected}
                     defaultValue="case"
                     className="shadow-xl"
                   >
-                    <SelectTrigger className="shadow-none border-none">
+                    <SelectTrigger className="border-none shadow-none">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1343,15 +1416,15 @@ const [endDate, setEndDate] = useState(null);
                 </span>
               </CardTitle>
               <CardTitle className="flex">
-                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
                   <h1 className="text-blue-500">{ownerUserData.Name}</h1>
                   <p className="text-sm font-light ">Owner</p>
                 </div>
-                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
                   <h1 className="text-blue-500">---</h1>
                   <p className="text-sm font-light ">Queue</p>
                 </div>
-                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
                   <h1 className="text-blue-500">
                     {dataFetchCustomerData.MainAccount?.Salutation}{" "}
                     {dataFetchCustomerData.MainAccount?.FirstName}{" "}
@@ -1359,9 +1432,9 @@ const [endDate, setEndDate] = useState(null);
                   </h1>
                   <p className="text-sm font-light ">Contact</p>
                 </div>
-                <div className="px-2 flex flex-col item-center justify-center border-r-2">
+                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
                   <Select onValueChange={setSelected} defaultValue="first">
-                    <SelectTrigger className="shadow-none border-none text-blue-500 p-0">
+                    <SelectTrigger className="p-0 text-blue-500 border-none shadow-none">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="p-0">
@@ -1394,7 +1467,7 @@ const [endDate, setEndDate] = useState(null);
                   </TabsTrigger>
                 )
               )}
-              {/* <TabsTrigger variant="underline" value="case_info" className=" ">Case Information</TabsTrigger>
+              {/* <TabsTrigger variant="underline" value="case_info" className="">Case Information</TabsTrigger>
               <TabsTrigger variant="underline" value="customer,add,entitement" className="">Customer, Asset & Entitement</TabsTrigger>
               <TabsTrigger variant="underline" value="ci_notes" className="">Notes & Information</TabsTrigger>
               <TabsTrigger variant="underline" value="ci_activitas" className="">Activities</TabsTrigger>
@@ -1406,7 +1479,7 @@ const [endDate, setEndDate] = useState(null);
               <SelectBarRelated></SelectBarRelated> */}
               {open && (
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
+                  <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
                     ...
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -1431,9 +1504,13 @@ const [endDate, setEndDate] = useState(null);
 
           <TabsContent value="case_info" className={"p-2"}>
             <Card className="flex-row">
-              <CardContent className="grid gap-10 items-center grid-cols-6 p-3 ">
+              <CardContent className="grid items-center grid-cols-6 gap-10 p-3 ">
                 <CaseField label="Case ID" icon>
-                  <Input variant="invisible" value={caseDetails.CaseID} />
+                  <Input
+                    variant="invisible"
+                    value={caseDetails.CaseID}
+                    readOnly
+                  />
                 </CaseField>
                 <CaseField label="Case Subject" span={3}>
                   <Input variant="invisible" value={caseDetails.CaseSubject} />
@@ -1455,9 +1532,19 @@ const [endDate, setEndDate] = useState(null);
                 </CaseField>
                 <CaseField label="Case Status">
                   {caseDetails.CaseStatus}
-                  
                 </CaseField>
-                <CaseField label="Case Type">{caseDetails.CaseType}</CaseField>
+                <CaseField label="Case Type">
+                  <SearchCommandBlock
+                    value={caseDetails?.CaseType}
+                    onChange={handleCaseDetails("CaseType")}
+                    placeholder="--Select--"
+                    options={[
+                    "Depot Repair",
+                    "Onsite",
+                    "Bench",
+                    ]}
+                    />
+                </CaseField>
                 <CaseField label="KCI For Case?">
                   {caseDetails.KCI_Flag ? "Yes" : "No"}
                 </CaseField>
@@ -1514,15 +1601,15 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
             </Card>
 
-            <Card className="mt-5 flex-col">
+            <Card className="flex-col mt-5">
               <CardHeader>
-                <CardTitle className=" text-lg">Global Trade Check</CardTitle>
+                <CardTitle className="text-lg ">Global Trade Check</CardTitle>
                 <hr />
               </CardHeader>
               
-              <CardContent className="grid gap-10  grid-cols-6 p-3 ">
+              <CardContent className="grid gap-10  grid-cols-6 p-3 items-center">
                 <CaseField label="Global Trade Status">
-                  <Select value={formGtc.global_trade_status} onValueChange={onChangeGtc("global_trade_status")} defaultValue="--Select--">
+                  {/* <Select value={formGtc.global_trade_status} onValueChange={onChangeGtc("global_trade_status")} defaultValue="--Select--">
                     <SelectTrigger className="w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
@@ -1533,11 +1620,23 @@ const [endDate, setEndDate] = useState(null);
                       ))}
                       </SelectGroup>
                     </SelectContent>
-                  </Select>
+                  </Select> */}
+                  <SearchCommandBlock
+                    value={formGtc.global_trade_status}
+                    onChange={onChangeGtc("global_trade_status")}
+                    placeholder="--Select--"
+                    options={[
+                      "Pass",
+                      "Fail",
+                      "Not Done",
+                      "Not Needed",
+                      "Failed Confirmed",
+                    ]}
+                  />
                 </CaseField>
 
                 <CaseField label="GT Override Reason">
-                <Select  value={formGtc.gt_override_reason} onValueChange={onChangeGtc("gt_override_reason")} defaultValue="--select--">
+                  {/* <Select  value={formGtc.gt_override_reason} onValueChange={onChangeGtc("gt_override_reason")} defaultValue="--select--">
                     <SelectTrigger className="w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
@@ -1558,10 +1657,26 @@ const [endDate, setEndDate] = useState(null);
                   ))}
                       </SelectGroup>
                     </SelectContent>
-                  </Select>
+                  </Select> */}
+                  <SearchCommandBlock
+                    value={formGtc.gt_override_reason}
+                    onChange={onChangeGtc("gt_override_reason")}
+                    placeholder="--Select--"
+                    options={[
+                      "Military Keyword False Match",
+                      "Embargo False Match",
+                      "RPL False Match",
+                      "Active Contract",
+                      "United States Government",
+                      "Global Trade Authorization",
+                      "RPL Manual Screening Passed",
+                      "Fail Confirmed by GT",
+                      "Other",
+                    ]}
+                  />
                 </CaseField>
                 <CaseField label="GT Active Listening">
-                <Select    value={formGtc.gt_active_listening} onValueChange={onChangeGtc("gt_active_listening")} defaultValue="--select--">
+                  {/* <Select    value={formGtc.gt_active_listening} onValueChange={onChangeGtc("gt_active_listening")} defaultValue="--select--">
                     <SelectTrigger className="w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
@@ -1572,40 +1687,66 @@ const [endDate, setEndDate] = useState(null);
                   ))}
                       </SelectGroup>
                     </SelectContent>
-                  </Select>
+                  </Select> */}
+                  <SearchCommandBlock
+                    value={formGtc.gt_active_listening}
+                    onChange={onChangeGtc("gt_active_listening")}
+                    placeholder="--Select--"
+                    options={["Pass", "Fail"]}
+                  />
                 </CaseField>
                 <CaseField label="Embargoed Country" icon>
-                  <Input variant="invisible" placeholder="---"    value={formGtc.embargoed_country}
-            onChange={(e) => onChangeGtc("embargoed_country")(e.target.value)} />
+                  <Input
+                    variant="invisible"
+                    placeholder="---"
+                    value={formGtc.embargoed_country}
+                    onChange={(e) =>
+                      onChangeGtc("embargoed_country")(e.target.value)
+                    }
+                  />
                 </CaseField>
                 <CaseField label="GT Details">
-                  <Input variant="invisible"   placeholder="---"
-            value={formGtc.gt_details}
-            onChange={(e) => onChangeGtc("gt_details")(e.target.value)} />
+                  <Input
+                    variant="invisible"
+                    placeholder="---"
+                    value={formGtc.gt_details}
+                    onChange={(e) => onChangeGtc("gt_details")(e.target.value)}
+                  />
                 </CaseField>
                 <CaseField label="GT All Comments">
-                  <Input variant="invisible"  placeholder="---"
-            value={formGtc.gt_al_comments}
-            onChange={(e) => onChangeGtc("gt_al_comments")(e.target.value)}/>
+                  <Input
+                    variant="invisible"
+                    placeholder="---"
+                    value={formGtc.gt_al_comments}
+                    onChange={(e) =>
+                      onChangeGtc("gt_al_comments")(e.target.value)
+                    }
+                  />
                 </CaseField>
                 <CaseField className={"col-start-3"} label="Screening ID">
-                  <Input variant="invisible"         placeholder="---"
-              value={formGtc.screening_id}
-              onChange={(e) => onChangeGtc("screening_id")(e.target.value)}/>
+                  <Input
+                    variant="invisible"
+                    placeholder="---"
+                    value={formGtc.screening_id}
+                    onChange={(e) =>
+                      onChangeGtc("screening_id")(e.target.value)
+                    }
+                  />
                 </CaseField>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="customer,add,entitement"
+          <TabsContent
+            value="customer,add,entitement"
             className={"p-1 flex flex-col gap-4"}
           >
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Customer Information</CardTitle>
+                <CardTitle className="text-lg ">Customer Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6 items-center">
+              <CardContent className="grid items-center grid-cols-6 gap-10">
                 <CaseField label="Customer Account" icon>
                   <Input
                     variant="invisible"
@@ -1672,7 +1813,7 @@ const [endDate, setEndDate] = useState(null);
                         ? dataFetchCustomerData?.SiteAccount?.Country
                         : dataFetchCustomerData?.MainAccount?.Country
                     }
-                  />
+                  />                  
                 </CaseField>
                 <CaseField label="Parent Company Non-Latin">
                   <Input variant="invisible" placeholder="---" />
@@ -1685,15 +1826,18 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Asset Information</CardTitle>
+                <CardTitle className="text-lg ">Asset Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6 items-center">
+              <CardContent className="grid items-center grid-cols-6 gap-10">
                 <CaseField label="Assets" icon>
                   {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
                 </CaseField>
                 <CaseField label="Product Number" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  {
+                    dataFetchAssetInformation?.AssetInformation
+                      ?.product_information?.ProductNumber
+                  } 
                 </CaseField>
                 <CaseField label="Asset Location">
                   <Input variant="invisible" placeholder="---" />
@@ -1720,7 +1864,7 @@ const [endDate, setEndDate] = useState(null);
                 <CaseField label="MV Product Description" icon>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <div className="p-5 gap-2 ring-1 col-span-2 grid grid-cols-2 items-center">
+                <div className="grid items-center grid-cols-2 col-span-2 gap-2 p-5 ring-1">
                   <CaseField label="Device Properties" icon>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
@@ -1767,10 +1911,10 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">SLA Information</CardTitle>
+                <CardTitle className="text-lg ">SLA Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6 items-center">
+              <CardContent className="grid items-center grid-cols-6 gap-10">
                 <CaseField label="Latest Start Date (Cust Time)" icon>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
@@ -1800,37 +1944,39 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">
+                <CardTitle className="text-lg ">
                   Entitlement Information
                 </CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-6 items-center">
-                <CaseField label="Case Entitlement" icon>
+              <CardContent className="grid gap-10 grid-cols-9 items-center">
+                <CaseField label="Case Entitlement" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Start Date" icon>
+                <CaseField label="Start Date" icon span={2}>
                   {" "}
                   <DatePicker
                     value={startDate}
                     onChange={setstartDate}
-                    readOnly
+                    // readOnly
                   ></DatePicker>{" "}
                 </CaseField>
-                <CaseField label="OTC Code" icon>
+                <CaseField label="OTC Code" icon span={2}>
                   <SearchCommandBlock
-                    options={otcCode} 
+                    options={otcCode}
                     value={entitlementStatus.OTCCode}
-                    onChange={(value) => handleEntitlementStatus("OTCCode")(value)}
-                    placeholder="Select OTC Code"
+                    onChange={(value) =>
+                      handleEntitlementStatus("OTCCode")(value)
+                    }
+                    placeholder="---"
                     renderLabel={(opt) => `${opt.OTCCode} - ${opt.Description}`}
                     getValue={(opt) => opt.OTCCode}
-                  />  
+                  />
                 </CaseField>
-                <CaseField label="Entitlement Status" icon>
+                <CaseField label="Entitlement Status" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="End Date" icon>
+                <CaseField label="End Date" icon span={2}>
                   {" "}
                   <DatePicker
                     value={endDate}
@@ -1838,16 +1984,16 @@ const [endDate, setEndDate] = useState(null);
                     readOnly
                   ></DatePicker>
                 </CaseField>
-                <CaseField label="Entitlement Override" icon>
+                <CaseField label="Entitlement Override" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Selected Entitlement Offer" icon>
+                <CaseField label="Selected Entitlement Offer" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Days Left" icon>
+                <CaseField label="Days Left" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Authorizing Employee" icon>
+                <CaseField label="Authorizing Employee" icon span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
               </CardContent>
@@ -1855,17 +2001,17 @@ const [endDate, setEndDate] = useState(null);
           </TabsContent>
 
           <TabsContent value="ci_notes" className={"p-2 flex flex-col gap-4"}>
-            <Card className="flex-col p-2  ">
+            <Card className="flex-col p-2 ">
               <CardHeader>
-                <CardTitle className=" text-lg">
+                <CardTitle className="text-lg ">
                   Customer Issue Description & System Information
                 </CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="flex gap-x-5 p-4">
-                <div className="flex-1 grid grid-row-7 grid-cols-6 items-center gap-y-7">
+              <CardContent className="flex p-4 gap-x-5">
+                <div className="grid items-center flex-1 grid-cols-6 grid-row-7 gap-y-7">
                   <div className="row-span-4 col-span-full">
-                    <textarea 
+                    <textarea
                       className="border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none"
                       readOnly
                       value={caseDetails?.CaseProductNote}
@@ -1895,7 +2041,7 @@ const [endDate, setEndDate] = useState(null);
                   </CaseField>
                 </div>
 
-                <div className="flex-1 grid-flow-row gap-y-7 grid grid-cols-6">
+                <div className="grid flex-1 grid-flow-row grid-cols-6 gap-y-7">
                   <CaseField
                     label="Program/Category"
                     className={"col-span-3"}
@@ -1945,15 +2091,15 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
             </Card>
 
-            <Card className="flex-col p-2  ">
+            <Card className="flex-col p-2 ">
               <CardHeader>
-                <CardTitle className=" text-lg">Case Notes</CardTitle>
+                <CardTitle className="text-lg ">Case Notes</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="flex gap-4">
-                <div className="grid grid-cols-6 gap-y-7 flex-1">
+                <div className="grid flex-1 grid-cols-6 gap-y-7">
                   <CaseField label="Log Type" className={"col-span-2"} span={4}>
-                    <Select onValueChange={(val) => onChange("LogType", val)}>
+                    <Select  value={formData?.LogType}  onValueChange={(val) => onChange("LogType", val)}>
                       <SelectTrigger
                         className={"w-[100%] hover:shadow-lg border-b-0"}
                       >
@@ -1971,7 +2117,18 @@ const [endDate, setEndDate] = useState(null);
                     className={"col-span-2"}
                     span={4}
                   >
-                    <Input variant="invisible" placeholder="---" />
+                      <SearchCommandBlock
+                      value={formData?.ActionType}
+                      onChange={(val) => onChange("ActionType", val)}
+                      placeholder="--Select--"
+                      options={[
+                        "Inbound Customer call",
+                        "Action Plan",
+                        "Administrative task",
+                        "CE/Partner Assist",
+                        "Customer Email",
+                      ]}
+                    />
                   </CaseField>
 
                   <CaseField label="Template" className={"col-span-2"} span={4}>
@@ -1981,8 +2138,10 @@ const [endDate, setEndDate] = useState(null);
                   <CaseField
                     label="Visible Externally"
                     className={"col-span-2"}
-                    span={4}>                  
-                    <SelectYN  value={
+                    span={4}
+                  >
+                    <SelectYN
+                      value={
                         formData?.VisibleExternally === undefined ||
                         formData?.VisibleExternally === null
                           ? ""
@@ -1992,7 +2151,8 @@ const [endDate, setEndDate] = useState(null);
                       }
                       onValueChange={(val) =>
                         onChange("VisibleExternally", val === "Yes")
-                      }></SelectYN>
+                      }
+                    ></SelectYN>
                   </CaseField>
 
                   <CaseField
@@ -2021,7 +2181,7 @@ const [endDate, setEndDate] = useState(null);
                       onChange={(e) => onChange("Note", e.target.value)}
                     /> */}
 
-                  {/* <div className='font-bold flex'>
+                  {/* <div className='flex font-bold'>
                     <span>Log Type</span>
                       <Select onValueChange={(val) => onChange("LogType", val)}>
                         <SelectTrigger>
@@ -2034,17 +2194,17 @@ const [endDate, setEndDate] = useState(null);
                       </Select>
                   </div>
 
-                  <div className='font-bold flex'>
+                  <div className='flex font-bold'>
                     <span>Action Type</span>
                     <span className=''>...</span>
                   </div>
 
-                  <div className='font-bold flex'>
+                  <div className='flex font-bold'>
                     <span>Template </span>
                     <span className=''>...</span>
                   </div>
 
-                  <div className='font-bold flex'>
+                  <div className='flex font-bold'>
                     <span>Visible Externally</span>
                     <span className=''>
                     <Select onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
@@ -2059,14 +2219,14 @@ const [endDate, setEndDate] = useState(null);
                     </span>
                   </div>
 
-                  <div className='font-bold flex '>
+                  <div className='flex font-bold '>
                     <span>Number of Minutes Spent</span>
                     <span className=''>...</span>
                   </div>
 
                   <div className='flex'>
                     <span className='font-bold'>Notes</span>
-                    <textarea className=' w-80 h-40 resize-none p-2 border-2 border-black ' value={formData?.Note || ''} onChange={(e) => onChange("Note", e.target.value)}></textarea>
+                    <textarea className='h-40 p-2 border-2 border-black resize-none w-80' value={formData?.Note || ''} onChange={(e) => onChange("Note", e.target.value)}></textarea>
                   </div> */}
                 </div>
 
@@ -2074,9 +2234,10 @@ const [endDate, setEndDate] = useState(null);
                   <textarea
                     className="w-[100%] h-[100%] resize-none p-2 ring-1 ring-gray-500"
                     readOnly
-                    value={caseNotes?.NotesDisplay}
+                    value={formData?.NotesDisplay}
                   >
-                    {" "}
+
+                    {console.log(caseNotes)}
                   </textarea>
                 </div>
               </CardContent>
@@ -2121,15 +2282,15 @@ const [endDate, setEndDate] = useState(null);
           </CardContent>
         </Card>
 
-            <Card className=" flex-col">
+            <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">
+                <CardTitle className="text-lg ">
                   Symptom Description / CardTitle
                 </CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="flex gap-6">
-                <div className="grid grid-cols-5 gap-y-7 gap-x-2 flex-1">
+                <div className="grid flex-1 grid-cols-5 gap-y-7 gap-x-2">
                   <CaseField
                     label="Keyword Search"
                     className={"col-span-2"}
@@ -2150,11 +2311,11 @@ const [endDate, setEndDate] = useState(null);
                   </CaseField>
 
                   {symptomSuggestions.length > 0 && (
-                    <ul className="bg-white border  max-h-40 overflow-y-auto absolute z-10">
+                    <ul className="absolute z-10 overflow-y-auto bg-white border max-h-40">
                       {symptomSuggestions.map((sym) => (
                         <li
                           key={sym.SymptomCodeID}
-                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          className="p-2 cursor-pointer hover:bg-gray-100"
                           onClick={() => {
                             setSelectedSymptom(sym);
                             setSymptomSearchTerm(sym.SymptomCode);
@@ -2189,21 +2350,21 @@ const [endDate, setEndDate] = useState(null);
                     {selectedSymptom?.SymptomCode}
                   </CaseField>
 
-                  {/* <div className='font-bold flex'>
+                  {/* <div className='flex font-bold'>
                     <span>Top Category</span>
                     <span className=''>...{selectedSymptom?.TopCategory}</span>
                   </div>
-                  <div className='font-bold flex'>
+                  <div className='flex font-bold'>
                     <span>Sub Category</span>
                     <span className=''>...{selectedSymptom?.SubCategory}</span>
                   </div>
-                  <div className='font-bold flex'>
+                  <div className='flex font-bold'>
                     <span>Spesific Symptom</span>
                     <span className=''>...{selectedSymptom?.SymptomCode}</span>
                   </div> */}
                 </div>
 
-                <div className="font-bold flex flex-1">
+                <div className="flex flex-1 font-bold">
                   <Table className="pverflow-auto">
                     <TableCaption className="caption-top">
                       {/* Optional caption content here */}
@@ -2218,12 +2379,12 @@ const [endDate, setEndDate] = useState(null);
                       </TableRow>
                       <TableRow>
                         <TableHead className="">
-                          <div className="flex items-center  gap-1">
+                          <div className="flex items-center gap-1">
                             QA Level 1 <ArrowUp /> <ChevronDown />
                           </div>
                         </TableHead>
                         <TableHead className="">
-                          <div className="flex items-center  gap-1">
+                          <div className="flex items-center gap-1">
                             QA Level 2 <ArrowUp /> <ChevronDown />
                           </div>
                         </TableHead>
@@ -2241,54 +2402,68 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
             </Card>
 
-            <Card className="mt-5 flex-col">
+            <Card className="flex-col mt-5">
               <CardHeader>
-                <CardTitle className=" text-lg">Case Resolution</CardTitle>
+                <CardTitle className="text-lg ">Case Resolution</CardTitle>
                 <hr />
               </CardHeader>
 
-              <CardContent className="grid gap-5 grid-cols-7 p-3 ">
+              <CardContent className="grid grid-cols-7 gap-5 p-3 ">
                 <CaseField label="Case Resolution Code">
-                <Input
+                  {/* <Input
                   variant='invisible'
                   value={csrForm.caseResolutionCode}
                   onChange={(e) => onChangeCsr("caseResolutionCode")(e.target.value)}
-                />
-      
+                /> */}
+                  <SearchCommandBlock
+                    value={csrForm.caseResolutionCode}
+                    onChange={onChangeCsr("caseResolutionCode")}
+                    placeholder="--Select--"
+                    options={[
+                      "Offsite Solution",
+                      "Cancel per Customer/No Contact",
+                      "Case Voided",
+                      "Cloud Recovery Download",
+                      "Customer Satisfaction",
+                    ]}
+                  />
                 </CaseField>
                 <CaseField label="Case Ready for Closure" icon>
-                 <SelectYN
-                  value={csrForm.caseReadyForClosure}
-                  onValueChange={(val) => onChangeCsr("caseReadyForClosure")(val)}
-                />
-
+                  <SelectYN
+                    value={csrForm.caseReadyForClosure}
+                    onValueChange={(val) =>
+                      onChangeCsr("caseReadyForClosure")(val)
+                    }
+                  />
                 </CaseField>
 
                 <CaseField label="Pending Customer Action" icon span={2}>
-                 <DatePicker
-  value={csrForm.pendingCustomerAction}
-  onChange={onChangeCsr("pendingCustomerAction")}
-/>
+                  <DatePicker
+                    value={csrForm.pendingCustomerAction}
+                    onChange={onChangeCsr("pendingCustomerAction")}
+                  />
                 </CaseField>
-              <CaseField label="Auto Close">
-              <SelectYN
-                value={csrForm.autoClose}
-                onValueChange={(val) => onChangeCsr("autoClose")(val)}
-              />
-            </CaseField>
+                <CaseField label="Auto Close">
+                  <SelectYN
+                    value={csrForm.autoClose}
+                    onValueChange={(val) => onChangeCsr("autoClose")(val)}
+                  />
+                </CaseField>
                 <CaseField label="Ready for Close Days" icon>
                   <Input
-                  type="number"
-                  variant='invisible'
-                  value={csrForm.readyForCloseDays}
-                  onChange={(e) => onChangeCsr("readyForCloseDays")(e.target.value)}
-                />
+                    type="number"
+                    variant="invisible"
+                    value={csrForm.readyForCloseDays}
+                    onChange={(e) =>
+                      onChangeCsr("readyForCloseDays")(e.target.value)
+                    }
+                  />
                 </CaseField>
                 <CaseField label="Customer Requested Close Date" icon span={2}>
-                <DatePicker
-  value={csrForm.customerRequestedCloseDate}
-  onChange={onChangeCsr("customerRequestedCloseDate")}
-/>
+                  <DatePicker
+                    value={csrForm.customerRequestedCloseDate}
+                    onChange={onChangeCsr("customerRequestedCloseDate")}
+                  />
                 </CaseField>
                 <CaseField
                   className={"col-start-3"}
@@ -2296,11 +2471,10 @@ const [endDate, setEndDate] = useState(null);
                   icon
                   span={2}
                 >
-                <DatePicker
-  value={csrForm.readyForClosureDate}
-  onChange={onChangeCsr("readyForClosureDate")}
-/>
-
+                  <DatePicker
+                    value={csrForm.readyForClosureDate}
+                    onChange={onChangeCsr("readyForClosureDate")}
+                  />
                 </CaseField>
               </CardContent>
             </Card>
@@ -2398,10 +2572,10 @@ const [endDate, setEndDate] = useState(null);
           <TabsContent value="ci_orders" className={"p-2 flex flex-col gap-4"}>
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Shipment Information</CardTitle>
+                <CardTitle className="text-lg ">Shipment Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid gap-10 grid-cols-4 items-center">
+              <CardContent className="grid items-center grid-cols-4 gap-10">
                 <CaseField label="Shipment Country">
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
@@ -2428,11 +2602,11 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Work Order</CardTitle>
+                <CardTitle className="text-lg ">Work Order</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className=" flex flex-col gap-5 p-3">
-                <div className="grid gap-5 grid-cols-4">
+              <CardContent className="flex flex-col gap-5 p-3 ">
+                <div className="grid grid-cols-4 gap-5">
                   <CaseField label="Incident Type" span={3}>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
@@ -2465,11 +2639,11 @@ const [endDate, setEndDate] = useState(null);
                     {workOrders.map((work) => (
                       <TableRow
                         key={work.WOID}
-                        className="hover:bg-gray-300 cursor-pointer"
+                        className="cursor-pointer hover:bg-gray-300"
+                        onClick={handleClick}
                       >
                         <TableCell
                           className="font-medium "
-                          onClick={handleClick}
                         >
                           {/* <Link to={`/work/${work.WOID}`}> */}
                           {work.WOID}
@@ -2505,7 +2679,7 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Parts Order</CardTitle>
+                <CardTitle className="text-lg ">Parts Order</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-5">
@@ -2539,7 +2713,7 @@ const [endDate, setEndDate] = useState(null);
                     ))} */}
                     <TableRow>
                       <TableCell className="font-medium">
-                          No data available  
+                        No data available
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -2549,7 +2723,7 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Service Order</CardTitle>
+                <CardTitle className="text-lg ">Service Order</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-5">
@@ -2583,7 +2757,7 @@ const [endDate, setEndDate] = useState(null);
 
             <Card className="flex-col ">
               <CardHeader>
-                <CardTitle className=" text-lg">Material Order</CardTitle>
+                <CardTitle className="text-lg ">Material Order</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid gap-5">
@@ -2653,3 +2827,4 @@ const [endDate, setEndDate] = useState(null);
     </>
   );
 };
+  

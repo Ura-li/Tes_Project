@@ -175,12 +175,12 @@ const App = () => {
             </Breadcrumb> */}
             <Breadcrumbs/>
           </div>
-            <div className="flex  p-2 items-center gap-2">
+            <div className="flex  p-2 items-center gap-2 self-center">
               <Search></Search>
               <GlobalSearchBar />
               {/* <Input placeholder="Search" className="w-110 mr-45 border-b-black border border-b-2" ></Input> */}
             </div>
-            <SheetBar></SheetBar>
+            {/* <SheetBar></SheetBar> */}
         </header>
         {/* <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="grid auto-rows-min gap-4 md:grid-cols-3">
