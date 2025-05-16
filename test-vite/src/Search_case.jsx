@@ -651,6 +651,12 @@ const Search_case = () => {
         user: getUserFromToken()
       }
       console.log("Data From New Create Case : ", data)
+
+      // Filter out empty accessories
+      const filteredAccessories = accessories.filter(acc => 
+        acc.name.trim() || acc.note.trim() || acc.code.trim()
+      );
+
       const newCase = {
         AssetID: selectedAssetForCase.AssetID,
         ContactID: selectedContactForCase.ContactID,
@@ -670,11 +676,21 @@ const Search_case = () => {
         CreatedBy: data.user.id,
         ProblemDescription : problemDesc,
         CaseNoteProduct: CaseNoteProduct,
-        accessories
+        ...(filteredAccessories.length > 0 && { accessories: filteredAccessories })
       };
       console.log("Create Case Data : ", newCase)
-  
+      
       const res = await ApiCustomer.post("/api/case-information", newCase);
+      const caseid = res.data.data.CaseID 
+      const updateLog = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseid}`,
+        ReferenceId: `${caseid}`,
+        model: "Case",
+        dataOld: "New",
+        dataNew: res.data.data.CaseStatus,
+        changedBy: data.user.id,
+        logDescription: `New Case : ${caseid}`
+      })
   
       // SweetAlert sukses + redirect
       Swal.fire({

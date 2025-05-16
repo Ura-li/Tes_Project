@@ -183,7 +183,7 @@ export const ServiceMoDetail = () => {
       )}
       {moLineItems.MOID ? (
         // <TabsServiceMOLineItems MOLineDetails={moLineItems}/>
-        <TabsServiceMOLineItems MOLineDetails={MODetailInput} LineItemID={lineItemID}/>
+        <TabsServiceMOLineItems MOLineDetails={MODetailInput} LineItemID={lineItemID} moLineItems={moLineItems}/>
       ) : ''}
       {/* {console.log(moLineItems)} */}
     <Card className="mt-2 rounded-none">
