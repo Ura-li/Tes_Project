@@ -257,7 +257,7 @@ export const ServiceWork = () => {
           Swal.fire({
             icon: "warning",
             title: "Warning",
-            text: "The Work kOrder does not have Response Time Value, nor a Repair Time Value and therefore the system cannot perform the SLA Calculation\nPlease Create Booking First.",
+            text: "The Work Order does not have Response Time Value, nor a Repair Time Value and therefore the system cannot perform the SLA Calculation\nPlease Create Booking First.",
           });
         }else{
 
