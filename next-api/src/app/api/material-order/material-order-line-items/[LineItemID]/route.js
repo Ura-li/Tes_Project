@@ -30,7 +30,11 @@ export async function GET(request, { params }) {
             },
             include: {
                 servicecatalog_parts: true,
-                materialorder: true,
+                materialorder: {
+                    include: {
+                        workorder: true
+                    }
+                },
             },
         });
 
