@@ -114,6 +114,7 @@ export const TabsService = ({
   const [caseForm, setCaseForm] = useState({
     CaseType: "",
     CaseStatus: "",
+    CaseSubject: "",
   });
 
   const [gtcForm, setGtcForm] = useState({
@@ -329,7 +330,20 @@ export const TabsService = ({
   }
 };
 
+const openPopup = () => {
+  console.log("TeSPOP");
+  const popup = window.open(
+    '/auditwindows',
+    'Popup Title',
+    'width=600,height=400'
+  );
 
+  if (popup) {
+    popup.focus();
+  } else {
+    alert('Popup blocked by browser. Please allow popups for this site.');
+  }
+};
   
 
   useEffect(() => {
@@ -375,7 +389,7 @@ export const TabsService = ({
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
     { icon: StepBack, label: "SRF", onClick: async () => {
       // console.log("Case Details ; ",caseDetails);
-      const blob = await pdf(<ServiceRequestPDF nama="NURHIT" caseDetails={caseDetails}  />).toBlob();
+      const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails}  />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -393,6 +407,7 @@ export const TabsService = ({
     { icon: StepBack, label: "Queue Details", onClick: () => alert("not now") },
     { icon: UserPen, label: "Assign", onClick: () => alert("not now") },
     { icon: StepBack, label: "Add to Queue", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Audit", onClick: () => openPopup() },
   ];
   console.log("TES CASE DETAILS VALUE",caseDetails);
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
@@ -484,7 +499,7 @@ export const TabsService = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
-                <DropdownMenuItem key={index}>
+                <DropdownMenuItem key={index} onClick={btn.onClick}>
                   <btn.icon className="inline-block w-4 h-4 mr-2" />
                   {btn.label}
                 </DropdownMenuItem>
@@ -1875,32 +1890,35 @@ const [endDate, setEndDate] = useState(null);
                           " " +
                           dataFetchCustomerData?.MainAccount?.LastName
                     }
+                    readOnly
                   />
                 </CaseField>
                 <CaseField label="Primary Contact" icon>
                   <Input
                     variant="invisible"
                     value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
+                    readOnly
                   />
                 </CaseField>
                 <CaseField label="Submitted By">
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---"  />
                 </CaseField>
                 <CaseField label="Is Partner" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
                 <CaseField label=" Primary Email" icon>
                   <Input
                     variant="invisible"
                     value={dataFetchCustomerData.MainAccount?.Email}
                     placeholder="---"
+                    readOnly
                   />
                 </CaseField>
                 <CaseField label="Partner & Customer" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---"  readOnly/>
                 </CaseField>
                 <CaseField label="HIPAA" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
                 <CaseField label="Phone" icon>
                   {" "}
@@ -1909,7 +1927,7 @@ const [endDate, setEndDate] = useState(null);
                     : dataFetchCustomerData?.MainAccount?.Phone}
                 </CaseField>
                 <CaseField label="Region" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
                 <CaseField label="PIN">
                   <Input variant="invisible" placeholder="---" />
@@ -1921,7 +1939,7 @@ const [endDate, setEndDate] = useState(null);
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Customer Time Zone" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
                 <CaseField label="Country" icon>
                   <Input
@@ -1931,6 +1949,7 @@ const [endDate, setEndDate] = useState(null);
                         ? dataFetchCustomerData?.SiteAccount?.Country
                         : dataFetchCustomerData?.MainAccount?.Country
                     }
+                    readOnly
                   />                  
                 </CaseField>
                 <CaseField label="Parent Company Non-Latin">
@@ -2013,8 +2032,8 @@ const [endDate, setEndDate] = useState(null);
               <td className="border px-4 py-2">{item.CT_SNCode || "---"}</td>
             </tr>
           ))}
-          {(!dataFetchAssetInformation?.accessories ||
-            dataFetchAssetInformation.accessories.length === 0) && (
+          {(!caseDetails?.accessory ||
+            caseDetails.accessory.length === 0) && (
             <tr>
               <td className="border px-4 py-2 text-center" colSpan={5}>
                 No accessories found.
@@ -2076,7 +2095,7 @@ const [endDate, setEndDate] = useState(null);
                   <DatePicker
                     value={startDate}
                     onChange={setstartDate}
-                    // readOnly
+                    readOnly
                   ></DatePicker>{" "}
                 </CaseField>
                 <CaseField label="OTC Code" icon span={2}>

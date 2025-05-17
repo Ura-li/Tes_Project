@@ -1158,7 +1158,7 @@ export const ServiceWork = () => {
                   </CardHeader>
                   <CardContent className="flex flex-col items-end justify-end p-0 ">
                     <div className="flex gap-2">
-                      <Button variant={"ghost"}>
+                      <Button variant={"ghost"} onClick={() => navigate('/labor')}>
                         <span className="flex items-center gap-3">
                           <Plus className=" size-5" /> New Labor Types
                         </span>
