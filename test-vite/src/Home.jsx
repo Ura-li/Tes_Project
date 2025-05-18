@@ -5,11 +5,16 @@ import { FindCase } from './components/sc-modal'
 import { useNavigate } from 'react-router'
 export const Home = () => {
     const navigate = useNavigate();
+    const token = localStorage.getItem('token');
+
+
     return (
         <div className="bg-[url(/bg-1.jpg)] h-[fit] flex flex-col bg-center bg-no-repeat bg-cover">
             <header className='flex justify-end absolute p-2 w-full'>
                 <nav>
-                    <Button className={'text-xl p-2 text-white underline'} variant={'ghost'} onClick={() => navigate('/lorem')}>Patner Login</Button>
+                    {token ? <Button className={'text-xl p-2 text-white underline'} variant={'ghost'} onClick={() => navigate('/app')}>Dashboard</Button>
+                   : <Button className={'text-xl p-2 text-white underline'} variant={'ghost'} onClick={() => navigate('/lorem')}>Patner Login</Button>        
+                }
                 </nav>
             </header>
             <main className='flex w-[50%] '>

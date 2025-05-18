@@ -40,6 +40,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { getUserFromToken } from "@/lib/utils/auth"
 import { Separator } from "./ui/separator"
 import { Hpicon } from "./Hpicon";
+import { Javagicon } from "./Javagicon";
 
 // This is sample data.
 const data = {
@@ -51,20 +52,20 @@ const data = {
   user: getUserFromToken(),
   teams: [
     {
-      name: "HP Company",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
       name: "PT Javag",
-      logo: Hpicon,
-      plan: "Startup",
+      logo: Javagicon,
+      plan: "Service Center",
     },
     {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
+      name: "HP Company",
+      logo: Hpicon,
+      plan: "Main Company",
     },
+    // {
+    //   name: "Evil Corp.",
+    //   logo: Command,
+    //   plan: "Free",
+    // },
   ],
   navMain: [
     {
@@ -75,118 +76,118 @@ const data = {
       items: [
         {
           title: "Company",
-          url: "/master/Company_table",
+          url: "/app/master/Company_table",
           icon: Building
         },
         {
           title: "Assets",
-          url: "/master/Assets_table",
+          url: "/app/master/Assets_table",
           icon: Briefcase
         },
         {
           title: "Contact",
-          url: "/master/Contact_table",
+          url: "/app/master/Contact_table",
           icon: Phone
         },
         {
           title: "Case",
-          url: "/master/Case_table",
+          url: "/app/master/Case_table",
           icon: Folder
         },
         {
           title: "Product",
-          url: "/master/Product_table",
+          url: "/app/master/Product_table",
           icon: Box
         },
         {
           title: "Product Type",
-          url: "/master/ProductType_table ",
+          url: "/app/master/ProductType_table ",
           icon: Tag
         },
         // {
         //   title: "Service Catalog Type",
-        //   url: "/master/ServiceCatalogPartsTable ",
+        //   url: "/app/master/ServiceCatalogPartsTable ",
         // },
         // {
         //   title: "Global Trade Check",
-        //   url: "/master/MaterialOrder ",
+        //   url: "/app/master/MaterialOrder ",
         // },              
         {
           title: "Warranty Service",
-          url: "/master/WarrantyService_table",
+          url: "/app/master/WarrantyService_table",
           icon: ShieldCheck
         },    
         {
           title: "Material Order",
-          url: "/master/Mo_table",
+          url: "/app/master/Mo_table",
           icon: ShoppingCart
         },  
         {
           title: "Work Order",
-          url: "/master/Wo_table",
+          url: "/app/master/Wo_table",
           icon: Wrench
         },
         {
           title: "Resource Account",
-          url: "/master/ResourceAccount",
+          url: "/app/master/ResourceAccount",
           icon: User
         },
         {
           title: "Subk Technician",
-          url: "/master/SubkTechnician",
+          url: "/app/master/SubkTechnician",
           icon: HardHat
         },
         {
           title: "Symptom Codes",
-          url: "/master/symptom_codes",
+          url: "/app/master/symptom_codes",
           icon: Heart
         },
         {
           title: "Bookings",
-          url: "/master/Bookings",
+          url: "/app/master/Bookings",
           icon: Calendar
         },
         {
           title: "Booking Details",
-          url: "/master/BookingDetails",
+          url: "/app/master/BookingDetails",
           icon: ClipboardCheck
         },
         {
           title: "User",
-          url: "/master/User_table",
+          url: "/app/master/User_table",
           icon: User
         },  
         {
           title: "Parts",
-          url: "/master/Part_table",
+          url: "/app/master/Part_table",
           icon: Hammer
         },  
         {
           title: "Resource",
-          url: "/master/Resource_table",
+          url: "/app/master/Resource_table",
           icon: Server
         }, 
         {
           title: "Repair Class Code",
-          url: "/master/repairClassCode",
+          url: "/app/master/repairClassCode",
         }, 
         {
           title: "Service Catalog",
-          url: "/master/ServiceCatalog",
+          url: "/app/master/ServiceCatalog",
         },
         {
           title: "OTC Code",
-          url: "/master/OTC_Code",
+          url: "/app/master/OTC_Code",
           icon: Barcode
         }, 
         {
           title: "Case Resolution",
-          url: "/master/CrsTable",
+          url: "/app/master/CrsTable",
           icon: CheckCircle,
         },
         {
           title: "Failure Code",
-          url: "/master/Failure",
+          url: "/app/master/Failure",
         },
       ],
     },
@@ -264,7 +265,7 @@ const data = {
     {
       name: "Home",
       title: "Home",
-      url: "/",
+      url: "/app",
       icon: Home,
     },
      {
@@ -276,7 +277,7 @@ const data = {
     {
       name: "My work",
       title: "My Work",
-      url: "/search_case",
+      url: "/app/search_case",
       icon: Table,
     },
     {

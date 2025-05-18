@@ -809,7 +809,7 @@ export function NewBookableResourceBooking({ WOID, CreatedBy }) {
       if (response.status === 201) {
         const { BookingId } = response.data;
         // Lanjut ke navigasi sambil bawa BookingId
-        navigate('/bookings', { state: { BookingId } });
+        navigate('/app/bookings', { state: { BookingId } });
       }
     } catch (error) {
       console.error('Gagal membuat booking:', error);

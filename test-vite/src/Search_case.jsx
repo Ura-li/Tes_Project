@@ -700,7 +700,7 @@ const Search_case = () => {
         showConfirmButton: false,
         timer: 2000,
       }).then(() => {
-        navigate(`/case/${res.data.data.CaseID}`);
+        navigate(`/app/case/${res.data.data.CaseID}`);
       });
   
     } catch (error) {

@@ -512,7 +512,7 @@ export const Case_table = () => {
               >
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/case/${caseItem.CaseID}`)}
+                  onClick={() => navigate(`/app/case/${caseItem.CaseID}`)}
                 >
                   {caseItem.CaseID}
                 </td>
@@ -993,7 +993,7 @@ export const ProductType_table = () => {
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() =>
-                    navigate(`/case/${ProductTypeItem.ProductTypeID}`)
+                    navigate(`/app/case/${ProductTypeItem.ProductTypeID}`)
                   }
                 >
                   {ProductTypeItem.ProductTypeID}
@@ -1170,7 +1170,7 @@ export const WarrantyService_table = () => {
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() =>
-                    navigate(`/case/${WarrantyServiceItem.Service_offerID}`)
+                    navigate(`/app/case/${WarrantyServiceItem.Service_offerID}`)
                   }
                 >
                   {WarrantyServiceItem.Service_offerID}
@@ -1354,14 +1354,14 @@ export const Mo_table = () => {
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() =>
-                    navigate(`/material-order/${MaterialOrderItem.MOID}`)
+                    navigate(`/app/material-order/${MaterialOrderItem.MOID}`)
                   }
                 >
                   {MaterialOrderItem.MOID}
                 </td>
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/work/${MaterialOrderItem.WOID}`)}
+                  onClick={() => navigate(`/app/work/${MaterialOrderItem.WOID}`)}
                 >
                   {MaterialOrderItem.WOID}
                 </td>
@@ -1566,13 +1566,13 @@ export const Wo_table = () => {
               >
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/work/${WorkOrderItem.WOID}`)}
+                  onClick={() => navigate(`/app/work/${WorkOrderItem.WOID}`)}
                 >
                   {WorkOrderItem.WOID}
                 </td>
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/case/${WorkOrderItem.CaseID}`)}
+                  onClick={() => navigate(`/app/case/${WorkOrderItem.CaseID}`)}
                 >
                   {WorkOrderItem.CaseID}
                 </td>
@@ -2322,7 +2322,7 @@ const fetchResources = async () => {
               <tr key={account.ResourceAccountId} className="text-center hover:bg-gray-100">
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/resource-account/${account.ResourceAccountId}`)}
+                  onClick={() => navigate(`/app/resource-account/${account.ResourceAccountId}`)}
                 >
                   {account.ResourceAccountId}
                 </td>
@@ -2457,7 +2457,7 @@ export const SubkTechnician_table = () => {
           <tbody>
             {currentData.map((item) => (
               <tr key={item.SubkTechnicianId} className="text-center hover:bg-gray-100">
-                <td className="p-2 text-blue-500 border cursor-pointer hover:underline" onClick={() => navigate(`/subk-technician/${item.SubkTechnicianId}`)}>
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline" onClick={() => navigate(`/app/subk-technician/${item.SubkTechnicianId}`)}>
                   {item.SubkTechnicianId}
                 </td>
                 <td className="p-2 border">{item.Name}</td>
@@ -2589,7 +2589,7 @@ export const SymptomCodeTable = () => {
           <tbody>
             {currentData.map((item) => (
               <tr key={item.SymptomCodeID} className="text-center hover:bg-gray-100">
-                <td className="p-2 text-blue-500 border cursor-pointer hover:underline" onClick={() => navigate(`/symptom-code/${item.SymptomCodeID}`)}>
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline" onClick={() => navigate(`/app/symptom-code/${item.SymptomCodeID}`)}>
                   {item.SymptomCodeID}
                 </td>
                 <td className="p-2 border">{item.SymptomCode}</td>
@@ -2736,7 +2736,7 @@ export const BookingsTable = () => {
               <tr key={item.BookingId} className="text-center hover:bg-gray-100">
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/bookings/${item.BookingId}`)}
+                  onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
                 >
                   {item.BookingId}
                 </td>
@@ -2897,7 +2897,7 @@ export const BookingDetailsTable = () => {
             {currentData.map((item) => (
               <tr key={item.BookingDetailId} className="hover:bg-gray-100 text-center text-sm">
                 <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                  onClick={() => navigate(`/bookings/${item.BookingDetailId}`)}
+                  onClick={() => navigate(`/app/bookings/${item.BookingDetailId}`)}
                 >
                   {item.BookingDetailId}
                 </td>
@@ -3065,7 +3065,7 @@ export const RepairClassCodeTable = () => {
               <tr key={item.Code} className="hover:bg-gray-100 text-center text-sm">
                 <td
                   className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                  onClick={() => navigate(`/repair-class-code/${item.Code}`)}
+                  onClick={() => navigate(`/app/repair-class-code/${item.Code}`)}
                 >
                   {item.Code}
                 </td>
@@ -3215,7 +3215,7 @@ export const ServiceCatalogTable = () => {
             {currentData.map((item) => (
               <tr key={item.ServiceCatalogID} className="hover:bg-gray-100 text-center text-sm">
                 <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                    onClick={() => navigate(`/service-log/${item.ServiceCatalogID}`)}
+                    onClick={() => navigate(`/app/service-log/${item.ServiceCatalogID}`)}
                 >
                   {item.ServiceCatalogID}
                 </td>
@@ -3350,7 +3350,7 @@ export const OTCCodeTable = () => {
               <tr key={item.OTCCode} className="hover:bg-gray-100 text-center">
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  // onClick={() => navigate(`/bookings/${item.BookingId}`)}
+                  // onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
                 >
                   {item.OTCCode}
                 </td>
@@ -3496,19 +3496,19 @@ export const CrsTable = () => {
               <tr key={item.id_csr} className="text-center hover:bg-gray-100">
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/case-resolution/${item.id_csr}`)}
+                  onClick={() => navigate(`/app/case-resolution/${item.id_csr}`)}
                 > 
                   {item.id_csr}
                 </td> 
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  // onClick={() => navigate(`/bookings/${item.BookingId}`)}
+                  // onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
                 >
                   {item.caseResolutionCode}
                 </td>
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  // onClick={() => navigate(`/bookings/${item.BookingId}`)}
+                  // onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
                 >
                   {item.autoClose}
                 </td>

@@ -1038,7 +1038,7 @@ export const ServiceWork = () => {
                         <TableRow
                           key={booking.BookingId || index}
                           onClick={() =>
-                            navigate(`/bookings/${booking.BookingId}`)
+                            navigate(`/app/bookings/${booking.BookingId}`)
                           }
                         >
                           <TableCell>
@@ -1167,7 +1167,7 @@ export const ServiceWork = () => {
                   </CardHeader>
                   <CardContent className="flex flex-col items-end justify-end p-0 ">
                     <div className="flex gap-2">
-                      <Button variant={"ghost"} onClick={() => navigate('/labor')}>
+                      <Button variant={"ghost"} onClick={() => navigate('/app/labor')}>
                         <span className="flex items-center gap-3">
                           <Plus className=" size-5" /> New Labor Types
                         </span>

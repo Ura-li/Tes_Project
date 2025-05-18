@@ -393,7 +393,7 @@ const openPopup = () => {
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/master/Case_table`),
+      onClick: () => navigate(`/app/app/master/Case_table`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => handleSave() },
@@ -501,7 +501,7 @@ const openPopup = () => {
           allowOutsideClick: false,
           allowEscapeKey: false,
         }).then(() => {
-          navigate(`/master/Case_table`);
+          navigate(`/app/master/Case_table`);
         });
       } else {
         // Error from API
@@ -689,7 +689,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/case/${workOrders.CaseID}`),
+      onClick: () => navigate(`/app/case/${workOrders.CaseID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => handleSave() },
@@ -766,7 +766,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-          navigate(`/case/${workOrders.CaseID}`);
+          navigate(`/app/case/${workOrders.CaseID}`);
         });
       } else {
         // Error from API
@@ -837,7 +837,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/work/${materialOrders.WOID}`),
+      onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
@@ -896,7 +896,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-          navigate(`/work/${materialOrders.WOID}`);
+          navigate(`/app/work/${materialOrders.WOID}`);
         });
       } else {
         // Error from API
@@ -968,7 +968,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/material-order/${MOLineDetails.MOID}`),
+      onClick: () => navigate(`/app/material-order/${MOLineDetails.MOID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
@@ -1027,7 +1027,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
             timer: 2000,
             showConfirmButton: false
           }).then(() => {
-            navigate(`/mo_detail/${LineItemID}`);
+            navigate(`/app/mo_detail/${LineItemID}`);
           });
         }
         return true; // Indicate success
@@ -1088,7 +1088,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-          navigate(`/material-order/${MOLineDetails.MOID}`);
+          navigate(`/app/material-order/${MOLineDetails.MOID}`);
         });
       } else {
         // Error from API
@@ -1568,7 +1568,7 @@ const fetchActionLog = async () => {
     // await fetchCustomerData();
     {
       workOrders.map((work) => {
-        navigate(`/work/${work.WOID}`, {
+        navigate(`/app/work/${work.WOID}`, {
           // state: { ownerUserData, dataFetchCustomerData }
         });
       });

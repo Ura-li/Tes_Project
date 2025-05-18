@@ -202,7 +202,9 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
 
           <Text style={styles.label}>PIC name</Text>
           <Text style={[styles.value]}>
-            :    {(caseDetails?.contact_information?.FirstName  + " " + caseDetails?.contact_information?.LastName) ?? 'N/A'}
+            : {caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
+              ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
+              : 'N/A'}
           </Text>
 
           <Text style={styles.label}>PIC email</Text>
@@ -354,7 +356,9 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
         <View style={{ flexDirection: 'column', alignItems: 'center' }}>
           <Text style={[styles.textSmall, { marginBottom: 30 }]}>Received By</Text>
           <Text style={styles.textSmall}>--------------------------------------------</Text>
-          <Text style={styles.textSmall}>{(caseDetails?.contact_information?.FirstName +" "+ caseDetails?.contact_information?.LastName) ?? 'Customer'}</Text>
+          <Text style={styles.textSmall}>{caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
+              ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
+              : 'N/A'}</Text>
         </View>
       </View>
 

@@ -48,47 +48,47 @@ createRoot(document.getElementById('root')).render(
       {/* <ModalContextProvider> */}
         <Routes>
           {/* <Route path='/' element={<App />}> */}
-          <Route path='/' element={<GateKeepingRouting />}>
+          <Route path='/app' element={<GateKeepingRouting />}>
             <Route index element={<Landing />} />
-            <Route path='/search_case' element={<Search_case />} />
-            <Route path='/case/:caseId' element={<Case />} />
-            <Route path='/work/:woid' element={<Work />}/>
-            <Route path='/material-order/:moid' element={<MaterialOrder />}/>
-            <Route path='/mo_detail/:lineItemID' element={<MoDetail />} />
-            <Route path='/bookings' element={<Bookings />} />
-            <Route path='/bookings/:bookingid' element={<Bookings />} />
-            <Route path='/labor' element={<Labor />} />
+            <Route path='/app/search_case' element={<Search_case />} />
+            <Route path='/app/case/:caseId' element={<Case />} />
+            <Route path='/app/work/:woid' element={<Work />}/>
+            <Route path='/app/material-order/:moid' element={<MaterialOrder />}/>
+            <Route path='/app/mo_detail/:lineItemID' element={<MoDetail />} />
+            <Route path='/app/bookings' element={<Bookings />} />
+            <Route path='/app/bookings/:bookingid' element={<Bookings />} />
+            <Route path='/app/labor' element={<Labor />} />
             
-            {/* <Route path='/master' element> */}
-            <Route path='/master/Company_table' element={<Company_table />} />
-            <Route path='/master/Assets_table' element={<Assets_table />} />
-            <Route path='/master/Contact_table' element={<Contact_table />} />
-            <Route path='/master/Case_table' element={<Case_table />} />
-            <Route path='/master/Product_table' element={<Product_table/>}/>
-            <Route path='/master/ProductType_table' element={<ProductType_table/>}/>
-            {/* <Route path='/master/ServiceCatalogPartsTable' element={<ServiceCatalogPartsTable/>}/> */}
-            {/* <Route path='/master/GlobalTradeCheckTable' element={<GlobalTradeCheckTable/>}/> */}
-            <Route path='/master/WarrantyService_table' element={<WarrantyService_table/>}/>
-            <Route path='/master/Mo_table' element={<Mo_table/>}/>
-            <Route path='/master/Wo_table' element={<Wo_table/>}/>
+            {/* <Route path='/app/master' element> */}
+            <Route path='/app/master/Company_table' element={<Company_table />} />
+            <Route path='/app/master/Assets_table' element={<Assets_table />} />
+            <Route path='/app/master/Contact_table' element={<Contact_table />} />
+            <Route path='/app/master/Case_table' element={<Case_table />} />
+            <Route path='/app/master/Product_table' element={<Product_table/>}/>
+            <Route path='/app/master/ProductType_table' element={<ProductType_table/>}/>
+            {/* <Route path='/app/master/ServiceCatalogPartsTable' element={<ServiceCatalogPartsTable/>}/> */}
+            {/* <Route path='/app/master/GlobalTradeCheckTable' element={<GlobalTradeCheckTable/>}/> */}
+            <Route path='/app/master/WarrantyService_table' element={<WarrantyService_table/>}/>
+            <Route path='/app/master/Mo_table' element={<Mo_table/>}/>
+            <Route path='/app/master/Wo_table' element={<Wo_table/>}/>
             {/* <Route path='master/Resource' element={<ResourceTable/>}/> */}
-            <Route path='/master/ResourceAccount' element={<ResourceAccountTable/>}/>
-            <Route path='/master/SubkTechnician' element={<SubkTechnician_table/>}/>
-            <Route path='/master/symptom_codes' element={<SymptomCodeTable/>}/>
-            <Route path='/master/Bookings' element={<BookingsTable/>}/>
-            <Route path='/master/BookingDetails' element={<BookingDetailsTable/>}/>
-            <Route path='/master/User_table' element={<User_table/>}/>
-            <Route path='/master/Part_table' element={<Part_table/>}/>
-            <Route path='/master/Resource_table' element={<Resource_table/>} />
-            <Route path='/master/repairClassCode' element={<RepairClassCodeTable/>} />
-            <Route path='/master/ServiceCatalog' element={<ServiceCatalogTable/>} />
-            <Route path='/master/OTC_Code' element={<OTCCodeTable/>}/>
-            <Route path='/master/CrsTable' element={<CrsTable/>}/>
-            <Route path='/master/Failure' element={<FailureTable/>}/>
+            <Route path='/app/master/ResourceAccount' element={<ResourceAccountTable/>}/>
+            <Route path='/app/master/SubkTechnician' element={<SubkTechnician_table/>}/>
+            <Route path='/app/master/symptom_codes' element={<SymptomCodeTable/>}/>
+            <Route path='/app/master/Bookings' element={<BookingsTable/>}/>
+            <Route path='/app/master/BookingDetails' element={<BookingDetailsTable/>}/>
+            <Route path='/app/master/User_table' element={<User_table/>}/>
+            <Route path='/app/master/Part_table' element={<Part_table/>}/>
+            <Route path='/app/master/Resource_table' element={<Resource_table/>} />
+            <Route path='/app/master/repairClassCode' element={<RepairClassCodeTable/>} />
+            <Route path='/app/master/ServiceCatalog' element={<ServiceCatalogTable/>} />
+            <Route path='/app/master/OTC_Code' element={<OTCCodeTable/>}/>
+            <Route path='/app/master/CrsTable' element={<CrsTable/>}/>
+            <Route path='/app/master/Failure' element={<FailureTable/>}/>
             {/* </Route> */}
           </Route>
             {/* </Route> */}
-          <Route path='/home' element={<Home/>}/>
+          <Route path='/' element={<Home/>}/>
           <Route path='/auditwindows' element={<Auditwindows />} />
           <Route path="/lorem" element={<Lorem />}/>
         </Routes>
