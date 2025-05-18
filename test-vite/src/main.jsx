@@ -40,6 +40,7 @@ import { ResourceAccountTable } from './master_table';
 import { GateKeepingRouting } from './components/GateKeepingRouting';
 import { Buffer } from 'buffer';
 import { Auditwindows } from './components/audit-windows';
+import { Home } from './Home';
 window.Buffer = Buffer;
 createRoot(document.getElementById('root')).render(
   <StrictMode> 
@@ -53,7 +54,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='/case/:caseId' element={<Case />} />
             <Route path='/work/:woid' element={<Work />}/>
             <Route path='/material-order/:moid' element={<MaterialOrder />}/>
-            <Route path="/mo_detail/:lineItemID" element={<MoDetail />} />
+            <Route path='/mo_detail/:lineItemID' element={<MoDetail />} />
             <Route path='/bookings' element={<Bookings />} />
             <Route path='/bookings/:bookingid' element={<Bookings />} />
             <Route path='/labor' element={<Labor />} />
@@ -71,11 +72,11 @@ createRoot(document.getElementById('root')).render(
             <Route path='/master/Mo_table' element={<Mo_table/>}/>
             <Route path='/master/Wo_table' element={<Wo_table/>}/>
             {/* <Route path='master/Resource' element={<ResourceTable/>}/> */}
-            <Route path='master/ResourceAccount' element={<ResourceAccountTable/>}/>
-            <Route path='master/SubkTechnician' element={<SubkTechnician_table/>}/>
-            <Route path='master/symptom_codes' element={<SymptomCodeTable/>}/>
-            <Route path='master/Bookings' element={<BookingsTable/>}/>
-            <Route path='master/BookingDetails' element={<BookingDetailsTable/>}/>
+            <Route path='/master/ResourceAccount' element={<ResourceAccountTable/>}/>
+            <Route path='/master/SubkTechnician' element={<SubkTechnician_table/>}/>
+            <Route path='/master/symptom_codes' element={<SymptomCodeTable/>}/>
+            <Route path='/master/Bookings' element={<BookingsTable/>}/>
+            <Route path='/master/BookingDetails' element={<BookingDetailsTable/>}/>
             <Route path='/master/User_table' element={<User_table/>}/>
             <Route path='/master/Part_table' element={<Part_table/>}/>
             <Route path='/master/Resource_table' element={<Resource_table/>} />
@@ -87,6 +88,7 @@ createRoot(document.getElementById('root')).render(
             {/* </Route> */}
           </Route>
             {/* </Route> */}
+          <Route path='/home' element={<Home/>}/>
           <Route path='/auditwindows' element={<Auditwindows />} />
           <Route path="/lorem" element={<Lorem />}/>
         </Routes>

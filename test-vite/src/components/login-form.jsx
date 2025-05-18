@@ -124,7 +124,7 @@ export function LoginForm({
             <img
               src="/hp.png"
               alt="Image"
-              className="p-10 mt-15" />
+              className="p-10 mt-5" />
           </div>
         </CardContent>
       </Card>

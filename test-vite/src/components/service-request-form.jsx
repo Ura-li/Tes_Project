@@ -190,7 +190,9 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
 
           <Text style={styles.label}>Name</Text>
           <Text style={[styles.value]}>
-            :    {(caseDetails?.contact_information?.FirstName +" "+ caseDetails?.contact_information?.LastName) ?? 'N/A'}
+            : {caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
+              ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
+              : 'N/A'}
           </Text>
 
           <Text style={styles.label}>Email</Text>
@@ -319,7 +321,9 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
 
       <View style={{}}>
         <Text style={[styles.bold, styles.textSmall]}>Informasi Untuk Pelanggan :</Text>
-        <Text style={[styles.bold, styles.textSmall]}>Saya {(caseDetails?.contact_information?.FirstName +" "+ caseDetails?.contact_information?.LastName) ?? 'Customer'} yang bertanda tangan di bawah ini menyetujui bahwa:</Text>
+        <Text style={[styles.bold, styles.textSmall]}>Saya {caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
+          ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
+          : 'Customer'} yang bertanda tangan di bawah ini menyetujui bahwa:</Text>
         <Text style={[styles.bold, styles.textSmall]}>
           Data yang tersimpan dalam peralatan dapat terhapus selama proses perbaikan peralatan berlangsung. Pada saat dilakukan system atau
           operating system recovery, setting peralatan akan berubah mengikuti setting awal dari pabrik.
