@@ -114,6 +114,7 @@ export const TabsService = ({
   const [caseForm, setCaseForm] = useState({
     CaseType: "",
     CaseStatus: "",
+    CaseSubject: "",
   });
 
   const [gtcForm, setGtcForm] = useState({
@@ -337,7 +338,20 @@ export const TabsService = ({
   }
 };
 
+const openPopup = () => {
+  console.log("TeSPOP");
+  const popup = window.open(
+    '/auditwindows',
+    'Popup Title',
+    'width=600,height=400'
+  );
 
+  if (popup) {
+    popup.focus();
+  } else {
+    alert('Popup blocked by browser. Please allow popups for this site.');
+  }
+};
   
 
   useEffect(() => {
@@ -370,7 +384,7 @@ export const TabsService = ({
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/master/Case_table`),
+      onClick: () => navigate(`/app/app/master/Case_table`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => handleSave() },
@@ -383,7 +397,7 @@ export const TabsService = ({
     { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
     { icon: StepBack, label: "SRF", onClick: async () => {
       // console.log("Case Details ; ",caseDetails);
-      const blob = await pdf(<ServiceRequestPDF nama="NURHIT" caseDetails={caseDetails}  />).toBlob();
+      const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails}  />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -401,6 +415,7 @@ export const TabsService = ({
     { icon: StepBack, label: "Queue Details", onClick: () => alert("not now") },
     { icon: UserPen, label: "Assign", onClick: () => alert("not now") },
     { icon: StepBack, label: "Add to Queue", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Audit", onClick: () => openPopup() },
   ];
   console.log("TES CASE DETAILS VALUE",caseDetails);
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
@@ -477,7 +492,7 @@ export const TabsService = ({
           allowOutsideClick: false,
           allowEscapeKey: false,
         }).then(() => {
-          navigate(`/master/Case_table`);
+          navigate(`/app/master/Case_table`);
         });
       } else {
         // Error from API
@@ -517,7 +532,7 @@ export const TabsService = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
-                <DropdownMenuItem key={index}>
+                <DropdownMenuItem key={index} onClick={btn.onClick}>
                   <btn.icon className="inline-block w-4 h-4 mr-2" />
                   {btn.label}
                 </DropdownMenuItem>
@@ -665,7 +680,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/case/${workOrders.CaseID}`),
+      onClick: () => navigate(`/app/case/${workOrders.CaseID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => handleSave() },
@@ -742,7 +757,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-          navigate(`/case/${workOrders.CaseID}`);
+          navigate(`/app/case/${workOrders.CaseID}`);
         });
       } else {
         // Error from API
@@ -813,7 +828,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/work/${materialOrders.WOID}`),
+      onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
@@ -872,7 +887,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-          navigate(`/work/${materialOrders.WOID}`);
+          navigate(`/app/work/${materialOrders.WOID}`);
         });
       } else {
         // Error from API
@@ -944,7 +959,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/material-order/${MOLineDetails.MOID}`),
+      onClick: () => navigate(`/app/material-order/${MOLineDetails.MOID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
@@ -1003,7 +1018,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
             timer: 2000,
             showConfirmButton: false
           }).then(() => {
-            navigate(`/mo_detail/${LineItemID}`);
+            navigate(`/app/mo_detail/${LineItemID}`);
           });
         }
         return true; // Indicate success
@@ -1064,7 +1079,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-          navigate(`/material-order/${MOLineDetails.MOID}`);
+          navigate(`/app/material-order/${MOLineDetails.MOID}`);
         });
       } else {
         // Error from API
@@ -1544,7 +1559,7 @@ const fetchActionLog = async () => {
     // await fetchCustomerData();
     {
       workOrders.map((work) => {
-        navigate(`/work/${work.WOID}`, {
+        navigate(`/app/work/${work.WOID}`, {
           // state: { ownerUserData, dataFetchCustomerData }
         });
       });
@@ -1963,32 +1978,35 @@ const [endDate, setEndDate] = useState(null);
                           " " +
                           dataFetchCustomerData?.MainAccount?.LastName
                     }
+                    readOnly
                   />
                 </CaseField>
                 <CaseField label="Primary Contact" icon>
                   <Input
                     variant="invisible"
                     value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
+                    readOnly
                   />
                 </CaseField>
                 <CaseField label="Submitted By">
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---"  />
                 </CaseField>
                 <CaseField label="Is Partner" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
                 <CaseField label=" Primary Email" icon>
                   <Input
                     variant="invisible"
                     value={dataFetchCustomerData.MainAccount?.Email}
                     placeholder="---"
+                    readOnly
                   />
                 </CaseField>
                 <CaseField label="Partner & Customer" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---"  readOnly/>
                 </CaseField>
                 <CaseField label="HIPAA" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
                 <CaseField label="Phone" icon>
                   {" "}
@@ -1997,7 +2015,7 @@ const [endDate, setEndDate] = useState(null);
                     : dataFetchCustomerData?.MainAccount?.Phone}
                 </CaseField>
                 <CaseField label="Region" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
                 <CaseField label="PIN">
                   <Input variant="invisible" placeholder="---" />
@@ -2009,7 +2027,7 @@ const [endDate, setEndDate] = useState(null);
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Customer Time Zone" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
                 <CaseField label="Country" icon>
                   <Input
@@ -2019,6 +2037,7 @@ const [endDate, setEndDate] = useState(null);
                         ? dataFetchCustomerData?.SiteAccount?.Country
                         : dataFetchCustomerData?.MainAccount?.Country
                     }
+                    readOnly
                   />                  
                 </CaseField>
                 <CaseField label="Parent Company Non-Latin">
@@ -2101,7 +2120,7 @@ const [endDate, setEndDate] = useState(null);
               <td className="border px-4 py-2">{item.CT_SNCode || "---"}</td>
             </tr>
           ))}
-          {(!caseDetails.accessory ||
+          {(!caseDetails?.accessory ||
             caseDetails.accessory.length === 0) && (
             <tr>
               <td className="border px-4 py-2 text-center" colSpan={5}>
@@ -2164,7 +2183,7 @@ const [endDate, setEndDate] = useState(null);
                   <DatePicker
                     value={startDate}
                     onChange={setstartDate}
-                    // readOnly
+                    readOnly
                   ></DatePicker>{" "}
                 </CaseField>
                 {console.log(entitlementStatus)}

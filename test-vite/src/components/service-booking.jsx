@@ -1007,7 +1007,7 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
       if (response.status === 201) {
         const { BookingId } = response.data;
         // Lanjut ke navigasi sambil bawa BookingId
-        navigate(`/bookings/${BookingId}`);
+        navigate(`/app/bookings/${BookingId}`);
       }
     } catch (error) {
       console.error('Gagal membuat booking:', error);

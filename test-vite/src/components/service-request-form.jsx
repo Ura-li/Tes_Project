@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     rowGap: 2,
   },
   label: {
-    width: '40%', // 1 of 4 columns
+    width: '30%', // 1 of 4 columns
     fontSize: 9,
   },
   label2: {
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
   },
   value: {
-    width: '60%', // col-span-3
+    width: '70%', // col-span-3
     fontSize: 9,
   },
   value2: {
@@ -154,7 +154,7 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
       <View style={{ display: 'flex', flexDirection: 'row' }}>
         <View style={styles.leftSection}>
           <Text style={styles.label}>Case Type</Text>
-          <Text style={[styles.value]}>: {caseDetails?.CaseType ?? 'N/A'}</Text>
+          <Text style={[styles.value]}>:    {caseDetails?.CaseType ?? 'N/A'}</Text>
 
           <Text style={styles.label}>Warranty Status</Text>
           <Text style={[styles.value]}>: {caseDetails?.otcCodeTable?.Description ?? 'N/A'}
@@ -167,76 +167,80 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
           </Text>
 
           <Text style={styles.label}>Problem Desc</Text>
-          <Text style={[styles.value]}>: {caseDetails?.ProblemDescription ?? 'N/A'}</Text>
+          <Text style={[styles.value]}>:    {caseDetails?.ProblemDescription ?? 'N/A'}</Text>
 
           <Text style={styles.label}>Note</Text>
           <Text style={[styles.value]}>: {caseDetails?.CaseProductNote ?? 'N/A'}</Text>
         </View>
 
         <View style={styles.rightSection}>
-          <Text style={[styles.textSmall, styles.bold]}>5000000081</Text>
+          <Text style={[styles.textSmall, styles.bold]}>{caseDetails?.CaseID ?? 'N/A'}</Text>
           <Image src="/random_qr.png" style={styles.qrCode} />
         </View>
       </View>
 
       {/* Customer Section */}
       <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Customer</Text>
-      <View style={{ display: 'flex', flexDirection: 'row' }}>
+      <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
         <View style={styles.leftSection}>
           <Text style={styles.label}>Company</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.site_account?.Company ?? 'N/A'}
+            :    {caseDetails?.site_account?.Company ?? 'N/A'}
           </Text>
 
           <Text style={styles.label}>Name</Text>
           <Text style={[styles.value]}>
-            : {(caseDetails?.contact_information?.FirstName +" "+ caseDetails?.contact_information?.LastName) ?? 'N/A'}
+            : {caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
+              ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
+              : 'N/A'}
           </Text>
 
           <Text style={styles.label}>Email</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.site_account ? caseDetails?.site_account?.Email  ?? 'N/A' : caseDetails?.contact_information?.Email  ?? 'N/A' }
+            :    {caseDetails?.site_account ? caseDetails?.site_account?.Email  ?? 'N/A' : caseDetails?.contact_information?.Email  ?? 'N/A' }
           </Text>
 
           <Text style={styles.label}>PIC name</Text>
           <Text style={[styles.value]}>
-            : {(caseDetails?.contact_information?.FirstName  + " " + caseDetails?.contact_information?.LastName) ?? 'N/A'}
+            : {caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
+              ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
+              : 'N/A'}
           </Text>
 
           <Text style={styles.label}>PIC email</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.contact_information?.Email ?? 'N/A'}
+            :    {caseDetails?.contact_information?.Email ?? 'N/A'}
           </Text>
 
           <Text style={styles.label}>Address</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.site_account ? caseDetails?.site_account?.AddressLine1  ?? 'N/A' : caseDetails?.contact_information?.AddressLine1  ?? 'N/A' }
+            :    {caseDetails?.site_account ? caseDetails?.site_account?.AddressLine1  ?? 'N/A' : caseDetails?.contact_information?.AddressLine1  ?? 'N/A' }
           </Text>
         </View>
         <View style={styles.rightSection2}>
           <Text style={styles.label}>Phone no</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.site_account ? caseDetails?.site_account?.PrimaryPhone  ?? 'N/A' : caseDetails?.contact_information?.Phone  ?? 'N/A' }
+            :    {caseDetails?.site_account ? caseDetails?.site_account?.PrimaryPhone  ?? 'N/A' : caseDetails?.contact_information?.Phone  ?? 'N/A' }
           </Text>
 
           <Text style={styles.label}>Mobile no</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.site_account ? caseDetails?.site_account?.WhatsappNo  ?? 'N/A' : caseDetails?.contact_information?.Mobile  ?? 'N/A' }
+            :    {caseDetails?.site_account ? caseDetails?.site_account?.WhatsappNo  ?? 'N/A' : caseDetails?.contact_information?.Mobile  ?? 'N/A' }
           </Text>
 
           <Text style={styles.label}>Fax no</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.contact_information?.Fax ?? 'N/A'}
+            :    {caseDetails?.contact_information?.Fax ?? 'N/A'}
           </Text>
 
           <Text style={styles.label}>PIC phone no.</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.contact_information?.Phone ?? 'N/A'}
+            :    {caseDetails?.contact_information?.Phone ?? 'N/A'}
           </Text>
 
           <Text style={styles.label}>PIC mobile no.</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.contact_information?.Mobile ?? 'N/A'}
+            :    {caseDetails?.contact_information?.Mobile ?? 'N/A'}
           </Text>
 
         </View>
@@ -244,38 +248,38 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
 
       {/* Product Section */}
       <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text>
-      <View style={{ display: 'flex', flexDirection: 'row' }}>
+      <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
         <View style={styles.leftSection}>
           <Text style={styles.label}>Serial no</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.asset_information?.SerialNumber ?? 'N/A'}
+            :    {caseDetails?.asset_information?.SerialNumber ?? 'N/A'}
           </Text>
 
           <Text style={styles.label}>Product no</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.asset_information?.ProductNumber ?? 'N/A'}
+            :    {caseDetails?.asset_information?.ProductNumber ?? 'N/A'}
           </Text>
 
           <Text style={styles.label}>Product name</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.asset_information?.product_information?.ProductName ?? 'N/A'}
+            :    {caseDetails?.asset_information?.product_information?.ProductName ?? 'N/A'}
           </Text>
         </View>
 
         <View style={styles.rightSection2}>
           <Text style={styles.label}>Product tower</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.asset_information?.product_information?.product_type?.ProductTower ?? 'N/A'}
+            :    {caseDetails?.asset_information?.product_information?.product_type?.ProductTower ?? 'N/A'}
           </Text>
 
           <Text style={styles.label}>Product group</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.asset_information?.product_information?.product_type?.ProductGroup ?? 'N/A'}
+            :    {caseDetails?.asset_information?.product_information?.product_type?.ProductGroup ?? 'N/A'}
           </Text>
 
           <Text style={styles.label}>Product type</Text>
           <Text style={[styles.value]}>
-            : {caseDetails?.asset_information?.product_information?.product_type?.ProductType ?? 'N/A'}
+            :    {caseDetails?.asset_information?.product_information?.product_type?.ProductType ?? 'N/A'}
           </Text>
         </View>
       </View>
@@ -319,7 +323,9 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
 
       <View style={{}}>
         <Text style={[styles.bold, styles.textSmall]}>Informasi Untuk Pelanggan :</Text>
-        <Text style={[styles.bold, styles.textSmall]}>Saya {(caseDetails?.contact_information?.FirstName +" "+ caseDetails?.contact_information?.LastName) ?? 'Customer'} yang bertanda tangan di bawah ini menyetujui bahwa:</Text>
+        <Text style={[styles.bold, styles.textSmall]}>Saya {caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
+          ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
+          : 'Customer'} yang bertanda tangan di bawah ini menyetujui bahwa:</Text>
         <Text style={[styles.bold, styles.textSmall]}>
           Data yang tersimpan dalam peralatan dapat terhapus selama proses perbaikan peralatan berlangsung. Pada saat dilakukan system atau
           operating system recovery, setting peralatan akan berubah mengikuti setting awal dari pabrik.
@@ -350,7 +356,9 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
         <View style={{ flexDirection: 'column', alignItems: 'center' }}>
           <Text style={[styles.textSmall, { marginBottom: 30 }]}>Received By</Text>
           <Text style={styles.textSmall}>--------------------------------------------</Text>
-          <Text style={styles.textSmall}>{(caseDetails?.contact_information?.FirstName +" "+ caseDetails?.contact_information?.LastName) ?? 'Customer'}</Text>
+          <Text style={styles.textSmall}>{caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
+              ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
+              : 'N/A'}</Text>
         </View>
       </View>
 
@@ -359,7 +367,7 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
         <Link style={styles.link} src="https://hp.care/digital-ID">https://hp.care/digital-ID</Link> or scan the QR code above.
       </Text>
 
-      <Text style={styles.textSmall}>• Apabila pelayanan kami kurang memuaskan untuk case 5000000081, silahkan sampaikan melalui email ke <Link style={styles.link} src="mailto:escalation.id@hp.com">escalation.id@hp.com</Link></Text>
+      <Text style={styles.textSmall}>• Apabila pelayanan kami kurang memuaskan untuk case {caseDetails?.CaseID ?? 'N/A'}, silahkan sampaikan melalui email ke <Link style={styles.link} src="mailto:escalation.id@hp.com">escalation.id@hp.com</Link></Text>
 
       <Text style={[styles.textSmall, { marginBottom: 20 }]}>• Apabila dikemudian hari membutuhkan bantuan teknis, silahkan klik{' '}
         <Link style={styles.link} src="https://hp.care/digital-ID">https://hp.care/digital-ID</Link>

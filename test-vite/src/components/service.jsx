@@ -805,7 +805,7 @@ export const ServiceWork = () => {
                         <TableRow
                           key={booking.BookingId || index}
                           onClick={() =>
-                            navigate(`/bookings/${booking.BookingId}`)
+                            navigate(`/app/bookings/${booking.BookingId}`)
                           }
                         >
                           <TableCell>
