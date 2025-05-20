@@ -287,15 +287,6 @@ export const TabsService = ({
                     logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${oldStatus} to ${newStatus}`,
                   });
                 }
-                Swal.fire({
-                  icon: "success",
-                  title: "Berhasil Disimpan",
-                  text: "Data Case berhasil disimpan.",
-                  timer: 2000,
-                  showConfirmButton: false,
-                  allowOutsideClick: false,
-                  allowEscapeKey: false,
-                });
               } catch (err) {
                 console.error("Gagal update case:", err);
                 Swal.fire({

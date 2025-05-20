@@ -336,6 +336,16 @@ export function BtnModalContact({
   const handlerContactSubmit = async () => {
     console.log("formDataContact", formDataContact);
     try {
+        Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we save your data.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
       let responseMessage = '';
   
       if (formDataContact.ContactID) {
@@ -1498,14 +1508,14 @@ export function ContactEdit({ contactID, onUpdate }) {
           <Pencil />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent >
         <DialogHeader>
           <DialogTitle>Edit Contact Information</DialogTitle>
           <DialogDescription>
             Update the details of the contact. Fields marked with * are required.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
+        <div classname="h-[500px]">
           <Input value={salutation} onChange={(e) => setSalutation(e.target.value)} placeholder="Salutation" />
           <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name *" />
           <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name *" />

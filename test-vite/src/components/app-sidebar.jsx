@@ -39,7 +39,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 import { getUserFromToken } from "@/lib/utils/auth"
 import { Separator } from "./ui/separator"
-import { Hpicon } from "./Hpicon";
+import { Hpicon, Javagicon } from "./icon";
 
 // This is sample data.
 const data = {
@@ -51,19 +51,19 @@ const data = {
   user: getUserFromToken(),
   teams: [
     {
-      name: "HP Company",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
       name: "PT Javag",
-      logo: Hpicon,
+      logo: Javagicon,
       plan: "Startup",
     },
     {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
+      name: "Hp Company",
+      logo: Hpicon,
+      plan: "Enterprise",
+    },
+    {
+      name: "Uknown",
+      logo: GalleryVerticalEnd,
+      plan: "Enterprise",
     },
   ],
   navMain: [

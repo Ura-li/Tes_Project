@@ -250,6 +250,14 @@ export function ServiceBooking ({BookingId , woid}) {
   }
 
   const handleUpdate = async () => {
+    Swal.fire({
+    title: 'Saving...',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
     const updatedBookingData = {
       ...bookingData, // keep all original fields
       ResourceId: resourceId,
@@ -286,7 +294,7 @@ export function ServiceBooking ({BookingId , woid}) {
       Swal.fire({
         title: 'Success',
         icon: "success",
-        text: "Booking telas berhasil di simpan",
+        text: "Booking telah berhasil di simpan",
       }).then(() => {
         window.location.href = `/work/${bookingData.WOID}`
       })
@@ -899,7 +907,9 @@ export function ServiceBooking ({BookingId , woid}) {
 const CheckRequestedDateTimeCustomer = async (rawDateTime) => {
   try {
     // 💡 Tambahan keamanan sebelum lanjut
-    if (!rawDateTime || typeof rawDateTime !== 'string' || rawDateTime.trim() === "") {
+    if (!rawDateTime || 
+      !(rawDateTime instanceof Date) || 
+      isNaN(rawDateTime.getTime())) {
       await Swal.fire({
         icon: 'warning',
         title: "Gagal membuat booking",
@@ -910,7 +920,7 @@ const CheckRequestedDateTimeCustomer = async (rawDateTime) => {
         allowEscapeKey: false,
         allowOutsideClick: false,
       });
-      window.location.reload();
+      // window.location.reload();
       return false;
     }
 
