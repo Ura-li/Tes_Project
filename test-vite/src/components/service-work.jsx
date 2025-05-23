@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from "react";
+import React, { use, useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router";
 import {
@@ -152,14 +152,19 @@ export const ServiceWork = () => {
     }))
   }
 
+  const hasFetched = useRef(false); 
+
   useEffect(() => {
-    const fetchAllData = async () => {
-      Swal.fire({
-        title: "Please wait...",
-        text: "Loading Work Order Details...",
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-      });
+  if (!woid || hasFetched.current) return;
+  hasFetched.current = true;
+
+  const fetchAllData = async () => {
+    Swal.fire({
+      title: "Please wait...",
+      text: "Loading Work Order Details...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
 
       try {
         const resWO = await ApiCustomer.get(`/api/work-order/${woid}`);
@@ -170,113 +175,105 @@ export const ServiceWork = () => {
         const resMO = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
         setMaterialOrders(resMO.data.data);
 
-        if (workOrderData?.CaseID) {
-          const resCI = await ApiCustomer.get(
-            `/api/case-information/${workOrderData.CaseID}`
-          );
-          setCaseInformation(resCI.data.data);
+      if (workOrderData?.CaseID) {
+        const resCI = await ApiCustomer.get(
+          `/api/case-information/${workOrderData.CaseID}`
+        );
+        setCaseInformation(resCI.data.data);
 
-          const resBooking = await ApiCustomer.get(
-            `/api/bookings?WOID=${woid}`
-          );
-          // console.log("Res Booking : ",resBooking.data.data)
+        const resBooking = await ApiCustomer.get(
+          `/api/bookings?WOID=${woid}`
+        );
+        const resOwner = await ApiCustomer.get(
+          `/api/user/${workOrderData.OwnerID}`
+        );
 
-          const resOwner = await ApiCustomer.get(
-            `/api/user/${workOrderData.OwnerID}`
-          );
-
-          // console.log("Case Detail : ", caseDetails);
-          const resMainAccount = resCI.data.data.contact_information;
-          setDataFetchCustomerData({
-            MainAccount: resMainAccount,
-          });
-          if (caseInformation.SiteAccountID !== null) {
-            const resSiteAccount = resCI.data.data.site_account;
-            setDataFetchCustomerData((prev) => ({
-              ...prev,
-              SiteAccount: resSiteAccount,
-              Type: "SiteAccount",
-            }));
-          } else {
-            setDataFetchCustomerData((prev) => ({
-              ...prev,
-              type: "Individual", // fallback if no site account
-            }));
-          }
-
-          // const res = await ApiCustomer.get(`/api/`)
-
-          setOwnerWorkOrder(resOwner.data.data);
-          setBookings(resBooking.data.data);
-
-          setSLA((prev) => ({
-            ...prev,
-            requestedDateTimeCustomer:
-              resWO.data.data.RequestedDateTimeCustomer || "",
-            slaJeopardy: resWO.data.data.SLAJeopardy || "",
-            dueDateCustomer: resWO.data.data.DueDateCustomer || "",
-            coverageWindow: resWO.data.data.CoverageWindow || "",
-            response: resWO.data.data.Response || "",
-            otcCode: resWO.data.data.OTCCode || "",
-            guaranteedFixTimeCustomer:
-              resWO.data.data.GuaranteedFixTimeCustomer || "",
-            earlyStartDateTimeCustomer:
-              resWO.data.data.EarlyStartDateTimeCustomer || "",
-            latestStartDateTimeCustomer:
-              resWO.data.data.LatestStartDateTimeCustomer || "",
-            slaReschedule: resWO.data.data.SLAReschedule || "",
-            activeScheduleDate: resWO.data.data.ActiveScheduleDate || "",
-            slaErrorDescription: resWO.data.data.SLAErrorDescription || "",
-            casePriorityIndex: resWO.data.data.CasePriorityIndex ?? "", // use ?? to allow 0
-          }));
-          setWOGeneral((prev) => ({
-            ...prev,
-            IncomingChannel: "",
-            WorkOrderNumber: woid,
-            WorkOrderType: workOrderData.WorkOrderType,
-            Priority: workOrderData.Priority,
-            SystemStatus: workOrderData.SystemStatus,
-            SubStatus: workOrderData.SubStatus,
-            BookableResourceBooking: resBooking.data.data.BookingDetails?.ResourceId,
-            ServiceOfferID: resCI.data.data.servicecatalog?.warranty_services?.Service_offerID,
-            ServiceDescription: resCI.data.data.servicecatalog?.warranty_services?.Service_description,
-            PatnerCaseID: "",
-            PatnerStatus: "",
-            RecommendedResource:"",
-            ShipmentCountry: workOrderData.ShipmentCountry,
-            ShipmentState: workOrderData.ShipmentState
-          }))
-
-          console.log("Res WO : ", resWO.data.data);
-          console.log("Res MO : ", resMO.data.data);
-          console.log("Res CI : ", resCI.data.data);
-          console.log("Res Booking : ", resBooking.data.data);
-          console.log("Res Owner : ", resOwner.data.data);
-          console.log("Res Main Account : ", resMainAccount);
-          console.log("res wo general : ",WOGeneral)
-        }
-        if(resWO.data.data.RequestedDateTimeCustomer == null){
-          Swal.fire({
-            icon: "warning",
-            title: "Warning",
-            text: "The Work Order does not have Response Time Value, nor a Repair Time Value and therefore the system cannot perform the SLA Calculation\nPlease Create Booking First.",
-          });
-        }else{
-
-          Swal.close();
-        }
-      } catch (err) {
-        console.error("Fetch error:", err);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Something went wrong while loading data!",
+        const resMainAccount = resCI.data.data.contact_information;
+        setDataFetchCustomerData({
+          MainAccount: resMainAccount,
         });
-      }
-    };
 
-    if (woid) fetchAllData();
-   }, [woid]);
+        if (resCI.data.data.site_account) {
+          setDataFetchCustomerData((prev) => ({
+            ...prev,
+            SiteAccount: resCI.data.data.site_account,
+            Type: "SiteAccount",
+          }));
+        } else {
+          setDataFetchCustomerData((prev) => ({
+            ...prev,
+            type: "Individual",
+          }));
+        }
+
+        setOwnerWorkOrder(resOwner.data.data);
+        setBookings(resBooking.data.data);
+
+        setSLA((prev) => ({
+          ...prev,
+          requestedDateTimeCustomer:
+            resWO.data.data.RequestedDateTimeCustomer || "",
+          slaJeopardy: resWO.data.data.SLAJeopardy || "",
+          dueDateCustomer: resWO.data.data.DueDateCustomer || "",
+          coverageWindow: resWO.data.data.CoverageWindow || "",
+          response: resWO.data.data.Response || "",
+          otcCode: resWO.data.data.OTCCode || "",
+          guaranteedFixTimeCustomer:
+            resWO.data.data.GuaranteedFixTimeCustomer || "",
+          earlyStartDateTimeCustomer:
+            resWO.data.data.EarlyStartDateTimeCustomer || "",
+          latestStartDateTimeCustomer:
+            resWO.data.data.LatestStartDateTimeCustomer || "",
+          slaReschedule: resWO.data.data.SLAReschedule || "",
+          activeScheduleDate: resWO.data.data.ActiveScheduleDate || "",
+          slaErrorDescription: resWO.data.data.SLAErrorDescription || "",
+          casePriorityIndex: resWO.data.data.CasePriorityIndex ?? "",
+        }));
+
+        setWOGeneral((prev) => ({
+          ...prev,
+          IncomingChannel: "",
+          WorkOrderNumber: woid,
+          WorkOrderType: workOrderData.WorkOrderType,
+          Priority: workOrderData.Priority,
+          SystemStatus: workOrderData.SystemStatus,
+          SubStatus: workOrderData.SubStatus,
+          BookableResourceBooking:
+            resBooking.data.data.BookingDetails?.ResourceId,
+          ServiceOfferID:
+            resCI.data.data.servicecatalog?.warranty_services?.Service_offerID,
+          ServiceDescription:
+            resCI.data.data.servicecatalog?.warranty_services
+              ?.Service_description,
+          PatnerCaseID: "",
+          PatnerStatus: "",
+          RecommendedResource: "",
+          ShipmentCountry: workOrderData.ShipmentCountry,
+          ShipmentState: workOrderData.ShipmentState,
+        }));
+      }
+
+      if (resWO.data.data.RequestedDateTimeCustomer == null) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "The Work Order does not have Response Time Value, nor a Repair Time Value and therefore the system cannot perform the SLA Calculation\nPlease Create Booking First.",
+        });
+      } else {
+        Swal.close();
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong while loading data!",
+      });
+    }
+  };
+
+  fetchAllData();
+}, [woid]);
 
   useEffect(() => {
     console.log("Data Fetch Customer Data in WO : ", dataFetchCustomerData);

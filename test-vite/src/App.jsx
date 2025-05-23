@@ -30,6 +30,7 @@ import ApiCustomer from './api'
 
 import {Outlet} from "react-router"
 import debounce from 'lodash.debounce';
+
 export function Breadcrumbs() {
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);

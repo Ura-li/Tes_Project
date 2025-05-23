@@ -431,6 +431,15 @@ const Search_case = () => {
   
 
     try {
+      Swal.fire({
+         title: 'Saving...',
+         allowOutsideClick: false,
+         allowEscapeKey: false,
+         didOpen: () => {
+           Swal.showLoading();
+         }
+       });
+
       const response = await ApiCustomer.post(
         "/api/site_account",
         formDataSiteAccount
@@ -534,12 +543,20 @@ const Search_case = () => {
     Swal.fire({
       icon: 'warning',
       title: 'Perhatian!',
-      text: 'Harap isi semua field yang diperlukan (Nama Depan, Nama Belakang, dan Email).',
+      text: 'Harap isi semua field yang diperlukan (Nama Depan, Nama Belakang, Email, Phone, Alamat, Kota).',
     });
     return; // 🚫 Jangan lanjut kirim data
   }
 
   try {
+      Swal.fire({
+         title: 'Saving...',
+         allowOutsideClick: false,
+         allowEscapeKey: false,
+         didOpen: () => {
+           Swal.showLoading();
+         }
+       });
     const response = await ApiCustomer.post(
       "/api/contact-information",
       formDataContact
@@ -647,6 +664,13 @@ const Search_case = () => {
     }
   
     try {
+      Swal.fire({
+        title: 'Saving.....',
+        text: 'Please wait while we save your data.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
+      })
       const data = {
         user: getUserFromToken()
       }

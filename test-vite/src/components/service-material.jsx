@@ -285,7 +285,7 @@ export const ServiceMaterial = () => {
                       variant={"invisible"}
                       type="text"
                       className="col-span-4"
-                      value={materialOrders.workorder?.bookings?.[0].bookingDetails?.[0].ResourceId}
+                      value={materialOrders.workorder?.bookings?.[0]?.bookingDetails?.[0]?.ResourceId}
                     />
                 </CaseField>
                 <CaseField label={'Order Type'} icon>

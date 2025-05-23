@@ -139,8 +139,8 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
 (
   <Document>
     <Page style={styles.container}>
-      <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', marginBottom: 4 }}>
-        <Image src="/hp.png" style={styles.logo} />
+      <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', marginBottom: 4, padding: 3  }}>
+        <Image src="/hp.png" style={[styles.logo,{padding: 2  }]} />
         <View>
           <Text style={styles.sectionHeader}>PT.JAVA ABADI GEMILANG</Text>
           <Text style={styles.textSmall}>Prudential Centre Kota Casablanka Lt. 5 Unit C- E, Jl. Casablanca</Text>
@@ -157,20 +157,20 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
           <Text style={[styles.value]}>:    {caseDetails?.CaseType ?? 'N/A'}</Text>
 
           <Text style={styles.label}>Warranty Status</Text>
-          <Text style={[styles.value]}>:    {caseDetails?.WarrantyStatus ?? 'N/A'}
+          <Text style={[styles.value]}>: {caseDetails?.otcCodeTable?.Description ?? 'N/A'}
             
           </Text>
 
           <Text style={styles.label}>Received Date</Text>
           <Text style={[styles.value]}>
-            :    {caseDetails?.CaseClosedDate ? new Date(caseDetails.CaseClosedDate).toLocaleDateString() : 'N/A'}
+            : {caseDetails?.CreatedOn ? new Date(caseDetails.CreatedOn).toLocaleDateString() : 'N/A'}
           </Text>
 
           <Text style={styles.label}>Problem Desc</Text>
           <Text style={[styles.value]}>:    {caseDetails?.ProblemDescription ?? 'N/A'}</Text>
 
           <Text style={styles.label}>Note</Text>
-          <Text style={[styles.value]}>:    {caseDetails?.CaseNote ?? 'N/A'}</Text>
+          <Text style={[styles.value]}>: {caseDetails?.CaseProductNote ?? 'N/A'}</Text>
         </View>
 
         <View style={styles.rightSection}>

@@ -42,8 +42,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 import { getUserFromToken } from "@/lib/utils/auth"
 import { Separator } from "./ui/separator"
-import { Hpicon } from "./Hpicon";
-import { Javagicon } from "./Javagicon";
+import { Hpicon, Javagicon } from "./icon";
 import { useDraft } from "./DraftContext";
 
 
