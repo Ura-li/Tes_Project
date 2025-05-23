@@ -33,7 +33,7 @@ export function InfoCase({
             <SidebarMenuItem
             key={item.title}
             className="group/collapsible">
-                <SidebarMenuButton tooltip={item.title} onClick={() => onModalClick(item.key)}>
+                <SidebarMenuButton tooltip={item.title} onClick={() => onModalClick(item.key)} disabled>
                     
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
@@ -51,7 +51,7 @@ export function InfoCase({
             className="group/collapsible">
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
+                <SidebarMenuButton tooltip={item.title} disabled>
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
                   <ChevronRight

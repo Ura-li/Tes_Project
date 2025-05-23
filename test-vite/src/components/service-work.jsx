@@ -66,11 +66,12 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import { useDraft } from "./DraftContext";
 
 export const ServiceWork = () => {
   const user = getUserFromToken();
   const { woid } = useParams();
-
+  const { updateDraft } = useDraft();
   const [workOrders, setWorkOrders] = useState([]);
   const fetchWorkOrders = async () => {
     try {
@@ -165,13 +166,14 @@ export const ServiceWork = () => {
       didOpen: () => Swal.showLoading(),
     });
 
-    try {
-      const resWO = await ApiCustomer.get(`/api/work-order/${woid}`);
-      const workOrderData = resWO.data.data;
-      setWorkOrders(workOrderData);
-
-      const resMO = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
-      setMaterialOrders(resMO.data.data);
+      try {
+        const resWO = await ApiCustomer.get(`/api/work-order/${woid}`);
+        const workOrderData = resWO.data.data;
+        setWorkOrders(workOrderData);
+        // console.log('Value of workorder data',workOrderData)
+        updateDraft('woid',workOrderData.WOID)
+        const resMO = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
+        setMaterialOrders(resMO.data.data);
 
       if (workOrderData?.CaseID) {
         const resCI = await ApiCustomer.get(

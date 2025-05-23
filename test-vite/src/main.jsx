@@ -41,11 +41,13 @@ import { GateKeepingRouting } from './components/GateKeepingRouting';
 import { Buffer } from 'buffer';
 import { Auditwindows } from './components/audit-windows';
 import { Home } from './Home';
+import { DraftProvider } from './components/DraftContext';
 window.Buffer = Buffer;
 createRoot(document.getElementById('root')).render(
   <StrictMode> 
     <BrowserRouter>
       {/* <ModalContextProvider> */}
+      <DraftProvider>
         <Routes>
           {/* <Route path='/' element={<App />}> */}
           <Route path='/app' element={<GateKeepingRouting />}>
@@ -92,6 +94,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='/auditwindows' element={<Auditwindows />} />
           <Route path="/lorem" element={<Lorem />}/>
         </Routes>
+        </DraftProvider>
       {/* </ModalContextProvider> */}
   </BrowserRouter>
   </StrictMode>, 
