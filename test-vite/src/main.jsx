@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import App from './App';
 import Landing from './landing';
 import Lorem from './Lorem';
-import Search_case from './search_case';
+import Search_case from './Search_case';
 import { Case } from './Case';
 import { Work } from './work';
 import { MaterialOrder, MoDetail } from './material_order';
