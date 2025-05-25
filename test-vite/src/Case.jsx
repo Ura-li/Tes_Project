@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { 
-  ServiceCase,
-  TabsService
- } from './components/service-case'
 import { useParams } from 'react-router'
 import ApiCustomer from './api'
 import Swal from 'sweetalert2';
-import { Skeleton } from './components/ui/skeleton';
-
-
-
+import { Skeleton } from './components/ui/skeleton'
+import { TabsService } from './components/service-case'
+import { useDraft } from './components/DraftContext';
 export const Case = () => {
-  const { caseId } = useParams();
+  const { caseId } = useParams(); // Get caseId from URL params
+  const { updateDraft } = useDraft(); // Access updateDraft from context
   const [caseDetails, setCaseDetails] = useState(null);
   const [caseNote, setCaseNote] = useState(null);
   const [caseNoteFormData, setCaseNoteFormData] = useState({
@@ -23,69 +19,71 @@ export const Case = () => {
     Note: ''
   });
 
-  useEffect(() => {
-    const loadCaseData = async () => {
-      Swal.fire({
-        title: 'Memuat Case Detail...',
-        text: 'Mohon tunggu sebentar',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: () => Swal.showLoading(),
-        customClass: {
-          popup: 'z-[9999]',
-        }
-      });
+useEffect(() => {
+  // Update draft when the user visits the case page
+  updateDraft('caseId', caseId); // Save the visited caseId to drafts
 
-      try {
-        const response = await ApiCustomer.get(`/api/case-information/${caseId}`);
-        setCaseDetails(response.data.data);
-        console.log("Case Details:", response.data.data);
-
-        const res = await ApiCustomer.get(`/api/case-information/case-notes`);
-        const notes = res.data.data;
-        const existingNote = notes.find(note => note.CaseID === caseId);
-
-        let noteID;
-        if (existingNote) {
-          noteID = existingNote.NoteID;
-        } else {
-          const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`, {
-            LogType: "",
-            ActionType: "",
-            Template: "",
-            VisibleExternally: false,
-            MinutesSpent: 0,
-            Note: "",
-            CaseID: caseId
-          });
-          noteID = createResponse.data.data.NoteID;
-        }
-
-        const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`);
-        setCaseNote(detailRes.data.data);
-
-        // ✅ Delay sedikit agar UI sempat render dulu
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-      } catch (error) {
-        console.error("Gagal memuat data:", error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Gagal memuat data',
-          text: 'Terjadi kesalahan saat mengambil data kasus atau catatan.',
-          timer: 2000,
-          timerProgressBar: true,
-          showConfirmButton: false
-        });
-      } finally {
-        Swal.close();
+  const loadCaseData = async () => {
+    Swal.fire({
+      title: 'Memuat Case Detail...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading(),
+      customClass: {
+        popup: 'z-[9999]',
       }
-    };
+    });
 
-    loadCaseData();
-  }, [caseId]);
+    try {
+      const response = await ApiCustomer.get(`/api/case-information/${caseId}`);
+      setCaseDetails(response.data.data);
+      console.log("Case Details:", response.data.data);
 
-  // ✅ Skeleton Loader dari shadcn/ui
+      const res = await ApiCustomer.get(`/api/case-information/case-notes`);
+      const notes = res.data.data;
+      const existingNote = notes.find(note => note.CaseID === caseId);
+
+      let noteID;
+      if (existingNote) {
+        noteID = existingNote.NoteID;
+      } else {
+        const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`, {
+          LogType: "",
+          ActionType: "",
+          Template: "",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: "",
+          CaseID: caseId
+        });
+        noteID = createResponse.data.data.NoteID;
+      }
+
+      const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`);
+      setCaseNote(detailRes.data.data);
+
+      // ✅ Delay sedikit agar UI sempat render dulu
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+    } catch (error) {
+      console.error("Gagal memuat data:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal memuat data',
+        text: 'Terjadi kesalahan saat mengambil data kasus atau catatan.',
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false
+      });
+    } finally {
+      Swal.close();
+    }
+  };
+
+  loadCaseData();
+}, [caseId]); // Only include caseId here, no need for updateDraft
+
   if (!caseDetails) {
     return (
       <div className="p-6 space-y-6">

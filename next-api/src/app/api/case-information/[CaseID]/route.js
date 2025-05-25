@@ -48,6 +48,8 @@ export async function GET(request, { params }) {
             global_trade_check: true,
             caseresolution: true,
             accessory: true,
+            otcCodeTable: true,
+            // casenotes_casenotes_CaseIDTocaseinformation: true,
         }
     });
 

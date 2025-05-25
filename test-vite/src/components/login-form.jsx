@@ -41,7 +41,7 @@ export function LoginForm({
       timer: 1500, 
       showConfirmButton: false
       }).then((result) => {
-        window.location.href = '/';
+        window.location.href = '/app';
       });
     } catch (error) {
       console.error('Login failed:', error);

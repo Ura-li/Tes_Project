@@ -41,28 +41,27 @@ import ApiCustomer from "@/api";
 import { CaseField } from "./quick-wo-input";
 import DatePicker from "./date-picker";
 import { Case } from "@/Case";
-
+import { useDraft } from "./DraftContext";
 
 export const ServiceMaterial = () => {
-  const { moid } = useParams();
-  
+    const { moid } = useParams();
+  const { updateDraft } = useDraft(); // Access updateDraft from the DraftContext
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
-
-  const [materialOrderInformation ,setMaterialOrderInformation] = useState({
+  const [materialOrderInformation, setMaterialOrderInformation] = useState({
     MOID: '',
     orderNumber: '',
     serviceOfferID: '',
     serviceDescription: '',
     orderType: '',
     shippingPriority: '',
-    readyForClosureDate:  '',
+    readyForClosureDate: '',
     caseID: '',
     contact: null,
     deliveryRequestedDateCustomerTime: '',
     collectionRequestedDate: '',
     promoCode: '',
-    customerInducedDamage:  false,
+    customerInducedDamage: false,
     accidentalDamageProtection: false,
     defectiveMediaRetention: false,
     notificationNumber: '',
@@ -75,23 +74,28 @@ export const ServiceMaterial = () => {
     materialOrderType: '',
     eotOrderNumber: '',
   });
+  const [deliveryRequiredDate, setDeliveryRequiredDate] = useState(null);
+  const [collectionRequestedDate, setCollectionRequestedDate] = useState(null);
+  const [readyForClosureDate, setReadyForClosureDate] = useState(null);
+  const [error, setError] = useState(null);
+
   const formatDateForInput = (dateString) => {
-    if (!dateString) return "";
+    if (!dateString) return '';
     const date = new Date(dateString);
     const offset = date.getTimezoneOffset();
     const localDate = new Date(date.getTime() - offset * 60 * 1000);
-    return localDate.toISOString().slice(0, 16); // ambil 'YYYY-MM-DDTHH:MM'
+    return localDate.toISOString().slice(0, 16); // Get 'YYYY-MM-DDTHH:MM'
   };
-  const [deliveryRequiredDate, setDeliveryRequiredDate] = useState(null);
-  const [collectionRequestedDate, setCollectionRequestedDate] = useState(null);
-  const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
+
+  // Fetch Material Order
   const fetchMaterialOrder = async () => {
     try {
       const res = await ApiCustomer.get(`/api/material-order/${moid}`);
       const data = res.data.data;
-  
+
       setMaterialOrders(data);
-  
+
+      // Save the material order information to the state
       setMaterialOrderInformation({
         MOID: data.MOID || '',
         orderNumber: data.MOID || '',
@@ -120,44 +124,58 @@ export const ServiceMaterial = () => {
         materialOrderType: data.MaterialOrderType || '',
         eotOrderNumber: data.EOTOrderNumber || '',
       });
-  
+
       console.log('Fetched Material Order:', data);
+
+      // Update the draft with the fetched material order details
+      updateDraft('moid', data.MOID); // Save the entire material order to the draft
+
     } catch (err) {
       console.error('Failed to fetch material orders:', err);
+      setError("Failed to fetch material order data");
     }
   };
-  
-  
+
+  // Fetch Material Line Orders
   const fetchMaterialLineOrdersInMODetail = async () => {
-    try{
-      const res = await ApiCustomer.get(`/api/material-order/material-order-line-items?MOID=${moid}`)
-      setMaterialLineOrders(res.data.data)
-    }catch(err){
+    try {
+      const res = await ApiCustomer.get(`/api/material-order/material-order-line-items?MOID=${moid}`);
+      setMaterialLineOrders(res.data.data);
+    } catch (err) {
       console.error("Failed to fetch material line orders:", err);
+      setError("Failed to fetch material line orders");
     }
-  }
+  };
 
   useEffect(() => {
-    // Menampilkan SweetAlert2 loading indicator sebelum memulai fetch
+    // Display SweetAlert2 loading indicator before starting fetch
     Swal.fire({
       title: 'Memuat Data...',
       text: 'Mohon tunggu sebentar...',
       allowOutsideClick: false,
       didOpen: () => {
-        Swal.showLoading(); // Menampilkan indikator loading
+        Swal.showLoading(); // Show loading spinner
       }
     });
 
-    // Menjalankan kedua fungsi fetching data secara bersamaan
+    // Run both fetch functions in parallel
     Promise.all([fetchMaterialOrder(), fetchMaterialLineOrdersInMODetail()])
       .then(() => {
-        Swal.close(); // Menutup SweetAlert2 setelah data berhasil diambil
+        Swal.close(); // Close SweetAlert2 once data is fetched successfully
       })
       .catch((err) => {
-        Swal.close(); // Menutup SweetAlert2 jika ada error
-        setError("Error fetching data");
+        Swal.close(); // Close SweetAlert2 if there's an error
       });
-  }, []); 
+  }, [moid]); // Make sure to include moid as a dependency to refetch on change
+
+  // If error state is set, display error message to user
+  if (error) {
+    return (
+      <div className="error-message">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -267,7 +285,7 @@ export const ServiceMaterial = () => {
                       variant={"invisible"}
                       type="text"
                       className="col-span-4"
-                      value={materialOrders.workorder?.bookings?.[0].bookingDetails?.[0].ResourceId}
+                      value={materialOrders.workorder?.bookings?.[0]?.bookingDetails?.[0]?.ResourceId}
                     />
                 </CaseField>
                 <CaseField label={'Order Type'} icon>
@@ -314,7 +332,7 @@ export const ServiceMaterial = () => {
                     />
                 </CaseField>
                 <CaseField label={'Ready For Closure Date'} icon>
-                    <DatePicker value={ReadyForClosureDate} onChange={setReadyForClosureDate}/>
+                    <DatePicker value={readyForClosureDate} onChange={setReadyForClosureDate}/>
                 </CaseField>
                 <CaseField label={'Customer Induced Damage'} icon>
                   <Input
