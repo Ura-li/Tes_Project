@@ -16,28 +16,29 @@ export async function GET(request) {
 
         console.log("Query Params:", { search, page, limit });
 
-        let whereCondition = {}
+        const baseConditions = [];
         if (siteAccountID !== null) {
-            whereCondition.SiteAccountID = siteAccountID;
+            baseConditions.push({ SiteAccountID: siteAccountID });
         }
         if (contactID !== null) {
-            whereCondition.ContactID = contactID;
+            baseConditions.push({ ContactID: contactID });
         }
           // If `search` is provided, add OR conditions but ensure SiteAccountID/ContactID are required if present
-          if (search) {
-            whereCondition.AND = [
-                whereCondition, // Keep SiteAccountID & ContactID constraints
-                {
-                    OR: [
-                        { SerialNumber: { contains: search } },
-                        { ProductNumber: { contains: search } },
-                        { product_information: { ProductName: { contains: search } } }
-                    ]
-                }
-            ];
+         // Add search filters if present
+        if (search) {
+            baseConditions.push({
+                OR: [
+                    { SerialNumber: { contains: search } },
+                    { ProductNumber: { contains: search } },
+                    { product_information: { ProductName: { contains: search } } },
+                ],
+            });
         }
 
-        console.log("Final WHERE Condition:", JSON.stringify(whereCondition));
+        const whereCondition = baseConditions.length > 0 ? { AND: baseConditions } : {};
+
+        console.log("Final WHERE Condition:", whereCondition);
+        // console.log("Final WHERE Condition:", whereCondition);
 
         // Hitung jumlah data total
         const totalCount = await prisma.asset_information.count({
