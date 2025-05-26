@@ -1,7 +1,7 @@
   "use client"
 
   import { ChevronRight } from "lucide-react";
-
+  
   import {
     Collapsible,
     CollapsibleContent,
@@ -17,6 +17,7 @@
     SidebarMenuSubButton,
     SidebarMenuSubItem,
   } from "@/components/ui/sidebar"
+import { Link } from "react-router";
 
   export function NavMain({
     items,
@@ -46,10 +47,10 @@
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton asChild>
-                          <a href={subItem.url}>
+                          <Link to={subItem.url}>
                           {subItem.icon && <subItem.icon />}
                             <span>{subItem.title}</span>
-                          </a>
+                          </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     ))}
