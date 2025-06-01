@@ -1619,10 +1619,10 @@ const [endDate, setEndDate] = useState(null);
                     <SelectContent>
                       <SelectGroup>
                         <SelectItem value="case">Case</SelectItem>
-                        <SelectItem value="??">??</SelectItem>
+                        {/* <SelectItem value="??">??</SelectItem>
                         <SelectItem value="!!">!!</SelectItem>
                         <SelectItem value="**">**</SelectItem>
-                        <SelectItem value="&&">&&</SelectItem>
+                        <SelectItem value="&&">&&</SelectItem> */}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -1655,10 +1655,10 @@ const [endDate, setEndDate] = useState(null);
                         <SelectItem value="first" className="p-0">
                           {dataFetchCustomerData.SiteAccount?.Company}
                         </SelectItem>
-                        <SelectItem value="??">??</SelectItem>
+                        {/* <SelectItem value="??">??</SelectItem>
                         <SelectItem value="!!">!!</SelectItem>
                         <SelectItem value="**">**</SelectItem>
-                        <SelectItem value="&&">&&</SelectItem>
+                        <SelectItem value="&&">&&</SelectItem> */}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
