@@ -254,7 +254,7 @@ useEffect(() => {
           </SelectGroup>
         </SelectContent>
       </Select>
-    )
+    ) 
   }
 
   export function SelectBarRelated() {

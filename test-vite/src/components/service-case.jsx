@@ -386,7 +386,7 @@ const openPopup = () => {
       label: "",
       onClick: () => navigate(`/app/app/master/Case_table`),
     },
-    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "",},
     { icon: Save, label: "Save", onClick: () => handleSave() },
     {
       icon: FileSymlink,
@@ -394,7 +394,7 @@ const openPopup = () => {
       onClick: () => saveAndCloseCase(),
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
-    { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Complaint",},
     { icon: StepBack, label: "SRF", onClick: async () => {
       // console.log("Case Details ; ",caseDetails);
       const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails}  />).toBlob();
@@ -409,12 +409,12 @@ const openPopup = () => {
     { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
     { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
     { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder") },
-    { icon: StepBack, label: "Sales Offer", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Close Case", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Queue Details", onClick: () => alert("not now") },
-    { icon: UserPen, label: "Assign", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Add to Queue", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Sales Offer",},
+    { icon: StepBack, label: "Close Case", },
+    { icon: StepBack, label: "Pick", },
+    { icon: StepBack, label: "Queue Details", },
+    { icon: UserPen, label: "Assign" },
+    { icon: StepBack, label: "Add to Queue", },
     { icon: StepBack, label: "Audit", onClick: () => openPopup() },
   ];
   console.log("TES CASE DETAILS VALUE",caseDetails);
@@ -830,23 +830,23 @@ export const TabsServiceMO = ({ materialOrders }) => {
       label: "",
       onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
     },
-    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "", },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
     {
       icon: FileSymlink,
       label: "Save & Close",
       onClick: () => saveAndCloseMaterialOrder(),
     },
-    { icon: RotateCw, label: "ATP", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Cancel Order", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Add Parts", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Place Order", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Tax", onClick: () => alert("not now") },
-    { icon: StepBack, label: "CustID Search", onClick: () => alert("not now") },
-    { icon: UserPen, label: "PUDO Search", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+    { icon: RotateCw, label: "ATP", },
+    { icon: StepBack, label: "Cancel Order", },
+    { icon: StepBack, label: "Add To Queue", },
+    { icon: StepBack, label: "Add Parts", },
+    { icon: StepBack, label: "Pick", },
+    { icon: StepBack, label: "Place Order", },
+    { icon: StepBack, label: "Tax", },
+    { icon: StepBack, label: "CustID Search", },
+    { icon: UserPen, label: "PUDO Search", },
+    { icon: StepBack, label: "Audit", },
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
@@ -961,25 +961,25 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
       label: "",
       onClick: () => navigate(`/app/material-order/${MOLineDetails.MOID}`),
     },
-    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "", },
     { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
     {
       icon: FileSymlink,
       label: "Save & Close",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
     },
-    { icon: StepBack, label: "Cancel", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
-    { icon: RotateCw, label: "Assign", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Cancel", },
+    { icon: StepBack, label: "Audit", },
+    { icon: RotateCw, label: "Assign", },
     {
       icon: StepBack,
       label: "Word Templates",
       onClick: () => alert("not now"),
     },
-    { icon: StepBack, label: "Run Report", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Process", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Run Report", },
+    { icon: StepBack, label: "Geo Code", },
+    { icon: StepBack, label: "Process", },
+    { icon: StepBack, label: "Reset RDT", },
     // { icon: UserPen, label:  "Add To Queue", onClick: () => alert("not now") },
     // { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
   ];
@@ -1191,12 +1191,12 @@ export const ServiceCase = ({
     { value: "case_info", label: "Case Information" },
     { value: "customer,add,entitement", label: "Customer, Asset & Entitement" },
     { value: "ci_notes", label: "Notes & Information" },
-    { value: "ci_activitas", label: "Activities" },
-    { value: "ci_actions", label: "Customer Interactions" },
+    { value: "ci_activitas", label: "Activities", disable: true },
+    { value: "ci_actions", label: "Customer Interactions", disable: true},
     { value: "ci_wo", label: "Work Order Validation" },
     { value: "ci_orders", label: "Orders" },
-    { value: "ci_salles", label: "Sales Offer" },
-    { value: "ci_knowledge", label: "Knowledge & Attachments" },
+    { value: "ci_salles", label: "Sales Offer", disable: true },
+    { value: "ci_knowledge", label: "Knowledge & Attachments", },
     { component: <SelectBarRelated /> },
   ];
 
@@ -1675,6 +1675,8 @@ const [endDate, setEndDate] = useState(null);
                     key={index}
                     variant="underline"
                     value={tab.value}
+                    disabled={tab.disable}
+                   
                   >
                     {tab.label}
                   </TabsTrigger>
