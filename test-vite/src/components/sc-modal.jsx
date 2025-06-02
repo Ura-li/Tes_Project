@@ -990,12 +990,13 @@ export function AssetEdit ({ assetId, onUpdate }) {
     if (!assetId) return; // Cegah fetch jika assetId tidak ada
     try {
       const response = await ApiCustomer.get(`/api/asset-information/${assetId}`);
+      console.log("Response fetch asset: ", response.data);
       const data = response.data.data;
       setAsset(data);
       setSerialNumber(data?.SerialNumber || "");
-      setProductName(data?.ProductName || "");
+      setProductName(data?.product_information?.ProductName || "");
       setProductNumber(data?.ProductNumber || "");
-      setProductLine(data?.ProductLine || "");
+      setProductLine(data?.product_information?.ProductLine || "");
     } catch (error) {
       console.error("Error fetching asset information:", error);
     }
@@ -1242,6 +1243,15 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
     }
   
     try {
+      Swal.fire({
+        title: 'Updating company information...',
+        text: 'Mohon tunggu sebentar',
+        didOpen: () => {
+          Swal.showLoading();
+        },
+        showConfirmButton: false,
+        allowOutsideClick: false,
+      })
       await ApiCustomer.patch(`/api/site_account/${siteAccountId}`, {
         Company: companyName,
         Email: email,
@@ -9268,7 +9278,7 @@ const handleInputChange = (e) => {
     }));
   };
 
-const [caseData, setCaseData] = useState([])
+const [caseData, setCaseData] = useState({})
 console.log(caseData);
     const findcase = async () => {
     const baseurl = `/api/case-information/${findingCase.Caseid}`;
@@ -9287,7 +9297,8 @@ console.log(caseData);
 
     try {
       const response = await ApiCustomer.get(baseurl);
-      console.log("TJEdata",response.data.data.contact_information.Mobile);
+      console.log("TJEdata",response.data.data.site_account.Company);
+      console.log("DAta",response.data.data);
       if (response.data.success && response.data.data.contact_information.Mobile === findingCase.Phoneno) {
         setCaseData(response.data.data);
         setOpenInfo(true);
@@ -9370,14 +9381,14 @@ console.log(caseData);
             <CardTitle className={'p-2 bg-gray-100'}>Out Warranty</CardTitle>
 
             <CardTitle className={'p-2 bg-gray-100'}>Customer company 	</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>{caseData.Company || 'N/A'}</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.site_account?.Company || 'N/A'}</CardTitle>
 
             <CardTitle className={'p-2 bg-gray-100'}>Customer name 	    </CardTitle>
             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.contact_information?.FirstName || caseData?.contact_information?.LastName
               ? `${caseData?.contact_information?.FirstName || ''} ${caseData?.contact_information?.LastName || ''}`.trim()
               : 'N/A'}	</CardTitle>
             <CardTitle className={'p-2 bg-gray-100'}>Received date 	 </CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseClosedDate ? new Date(caseData.CaseClosedDate).toLocaleDateString() : 'N/A'}</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CreatedOn ? new Date(caseData.CreatedOn).toLocaleDateString() : 'N/A'}</CardTitle>
 
             <CardTitle className={'text-2xl col-span-2 whitespace-nowrap'}>Product Information</CardTitle>
             <CardTitle className={'p-2 bg-gray-100'}>Serial no. 	 	</CardTitle>
