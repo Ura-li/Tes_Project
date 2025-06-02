@@ -63,15 +63,19 @@ function TabsTrigger({
   className,
   variant,
   size,
+  disabled,
   ...props
 }) {
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        tabsVariants({variant,size,className}),
+        tabsVariants({variant, size, className}),
+        disabled && "cursor-not-allowed opacity-50"
       )}
-      {...props} />
+      disabled={disabled}
+      {...props}
+    />
   );
 }
 

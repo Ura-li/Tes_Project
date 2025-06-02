@@ -1836,7 +1836,6 @@ export const User_table = () => {
               <th className="p-2 border">ID User</th>
               <th className="p-2 border">Email</th>
               <th className="p-2 border">Username</th>
-              <th className="p-2 border">Password</th>
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Role</th>
               <th className="p-2 border">Profil Photo</th>
@@ -1856,7 +1855,6 @@ export const User_table = () => {
                 </td>
                 <td className="p-2 border">{UserItem.Email}</td>
                 <td className="p-2 border">{UserItem.Username}</td>
-                <td className="p-2 border">{UserItem.Password}</td>
                 <td className="p-2 border">{UserItem.Name}</td>
                 <td className="p-2 border">{UserItem.Role}</td>
                 <td className="p-2 border">{UserItem.ProfilPhoto}</td>

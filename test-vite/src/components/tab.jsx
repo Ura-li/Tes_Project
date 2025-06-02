@@ -1021,7 +1021,7 @@ export const ServiceCase = ({
     { value: "case_info", label: "Case Information" },
     { value: "customer,add,entitement", label: "Customer, Asset & Entitement" },
     { value: "ci_notes", label: "Notes & Information" },
-    { value: "ci_activitas", label: "Activities" },
+    { value: "ci_activitas", label: "Activities", disabled: true},
     { value: "ci_actions", label: "Customer Interactions" },
     { value: "ci_wo", label: "Work Order Validation" },
     { value: "ci_orders", label: "Orders" },
@@ -1331,6 +1331,7 @@ export const ServiceCase = ({
                     key={index}
                     variant="underline"
                     value={tab.value}
+                    disabled={tab.disabled}
                   >
                     {tab.label}
                   </TabsTrigger>
@@ -2129,8 +2130,8 @@ export const ServiceCase = ({
             </Card>
           </TabsContent>
 
-          <TabsContent value="ci_actions">
-            <Card className="mt-7">
+          <TabsContent value="ci_actions" >
+            <Card className="mt-7 tex">
               <CardHeader>Hello Word</CardHeader>
             </Card>
           </TabsContent>

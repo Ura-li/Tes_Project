@@ -204,10 +204,10 @@ export const ServiceMaterial = () => {
               <TabsTrigger variant={'underline'} value="entitlement_sla" className="cursor-pointer">
               Entitlement & SLA
               </TabsTrigger>
-              <TabsTrigger variant={'underline'} value="billing_quotation" className="cursor-pointer">
+              <TabsTrigger variant={'underline'} value="billing_quotation" className="cursor-pointer" disabled>
               Billing & Quotation
               </TabsTrigger>
-              <TabsTrigger variant={'underline'} value="notes_attaechment" className="cursor-pointer">
+              <TabsTrigger variant={'underline'} value="notes_attaechment" className="cursor-pointer" disabled>
               Notes & Attachment
               </TabsTrigger>
               <SelectBarRelated></SelectBarRelated>

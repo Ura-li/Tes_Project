@@ -22,6 +22,7 @@ export function LoginForm({
       Swal.fire({
       title: 'Logging in...',
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       }
@@ -39,7 +40,8 @@ export function LoginForm({
       icon: "success",
       allowOutsideClick: false,
       timer: 1500, 
-      showConfirmButton: false
+      showConfirmButton: false,
+      allowEscapeKey: false,
       }).then((result) => {
         window.location.href = '/app';
       });
