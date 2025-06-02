@@ -419,6 +419,7 @@ export const ServiceWork = () => {
                 variant="underline"
                 value="wo_details"
                 className="cursor-pointer white"
+                disabled
               >
                 WO Details
               </TabsTrigger>
@@ -433,6 +434,7 @@ export const ServiceWork = () => {
                 variant="underline"
                 value="wo_Notes_Timeline"
                 className="cursor-pointer"
+                disabled
               >
                 WO Notes/Timeline
               </TabsTrigger>
