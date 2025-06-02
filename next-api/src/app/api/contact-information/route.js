@@ -19,59 +19,49 @@ export async function GET(request) {
         console.log("Query Params:", { search, page, limit, siteAccountID });
 
          // Initialize filters
-         let whereCondition = {};
+        const andConditions = [];
+
+        // If searching within a company
+        if (siteAccountID) {
+            andConditions.push({SiteAccountID: parseInt(siteAccountID)})
+        }
 
          // Search by Email (must be in the selected country)
          if (email) {
-             whereCondition.AND = [
-                 { Email: { contains: email } },
-                //  country ? { Country: { contains: country } } : {}
-             ];
+            const emailCond = { Email: { contains: email }}
+            if(country){
+                andConditions.push({ AND: [emailCond, {Country: { contains: country}}]})
+            } else{
+                andConditions.push(emailCond);
+            }
          }
  
          // Search by Phone (match phone in any country)
          if (phone) {
-             whereCondition.OR = [
-                 { Phone: { contains: phone } },
-                 { Mobile: { contains: phone } },
-                 { OtherPhone: { contains: phone } }
-             ];
-         }
- 
-         // If both Email and Phone exist, apply the combined filter
-         if (email && phone) {
-             whereCondition = {
-                 AND: [
-                     { OR: whereCondition.OR }, // Match phone
-                     { Email: { contains: email } }, // Match email
-                    //  country ? { Country: { contains: country } } : {}
+             andConditions.push({
+                 OR: [
+                     { Phone: { contains: phone } },
+                     { Mobile: { contains: phone } },
+                     { OtherPhone: { contains: phone } }
                  ]
-             };
+            })
+         }
+
+         if(search){
+            andConditions.push({
+                OR: [
+                    { FirstName: { contains: search } },
+                    { LastName: { contains: search } },
+                    { Email: { contains: search } },
+                    { City: { contains: search } }
+                ]
+            })
          }
  
-         // If searching within a company
-         if (siteAccountID) {
-             whereCondition.SiteAccountID = parseInt(siteAccountID);
-         }
+         
  
-         console.log("Final Where Condition:", whereCondition);
-         // ✅ Ensure optional filtering
-         // const filters = {
-         //     ...(siteAccountID ? { SiteAccountID: parseInt(siteAccountID, 10) } : {}),
-         //     ...(search
-         //         ? { OR: [
-         //             { FirstName: { contains: search } },
-         //             { LastName: { contains: search } },
-         //             { Email: { contains: search } },
-         //             { Phone: { contains: search } },
-         //             { Country: { contains: search } },
-         //             { City: { contains: search } },
-         //             { StateProvince: { contains: search } },
-         //             { ZipPostalCode: { contains: search } },
-         //             { site_account: { Company: { contains: search } } }
-         //         ]}
-         //         : {})
-         // };
+        const whereCondition = andConditions.length > 0 ? { AND: andConditions } : {};
+        console.log("Final Where Condition:", JSON.stringify(whereCondition, null, 2));
  
          // Get total count
          const totalCount = await prisma.contact_information.count({ where: whereCondition });
