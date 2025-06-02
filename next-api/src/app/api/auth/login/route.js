@@ -12,7 +12,7 @@ export async function GET(request) {
             success: true, 
             message: "Login successful",
             data: {
-                message: "Login Berhasil"
+                message: "Login Berhasil , Selamat datang -.Perid"
             }
         })
 }

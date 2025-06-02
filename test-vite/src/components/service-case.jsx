@@ -384,7 +384,7 @@ const openPopup = () => {
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/app/app/master/Case_table`),
+      onClick: () => navigate(`/app/master/Case_table`),
     },
     { icon: SquareArrowOutUpRight, label: "",},
     { icon: Save, label: "Save", onClick: () => handleSave() },
