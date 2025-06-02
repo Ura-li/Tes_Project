@@ -397,6 +397,7 @@ export const Case_table = () => {
       const response = await ApiCustomer.get(url);
 
       if (response.data.success) {
+        console.log(response.data.data)
         setCaseData(response.data.data);
       } else {
         setError("Failed to fetch case data");
