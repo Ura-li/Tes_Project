@@ -551,7 +551,7 @@ export const ServiceMaterial = () => {
                     {materialLineOrders.map((lineitem) => (
                       <TableRow key={lineitem.LineItemID}>
                         <TableCell className="font-medium">
-                        <Link to={`/mo_detail/${lineitem.LineItemID}`}>
+                        <Link to={`/app/mo_detail/${lineitem.LineItemID}`}>
                           {lineitem.MOID} - {lineitem.LineNumber}
                           </Link>
                           </TableCell>
