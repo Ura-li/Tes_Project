@@ -2,38 +2,26 @@ import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { BtnModalContact } from "./sc-modal";
 import { BtnModalAsset } from "./sc-modal";
-import { ChevronDown } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
-import { ContactRound, User,Search, Laptop } from "lucide-react";
-import { Button } from "./ui/button";
-
+import { User,Search, Laptop } from "lucide-react";
 
 import ApiCustomer from "@/api";
 
 import { useModal } from "@/components/modal-context";
-
-
-
-
-
 
 export function TableCompany({ 
     selectedAsset = [],
@@ -59,12 +47,11 @@ export function TableCompany({
     companyBasedOnContactsSearch
   }) {
 
-    // const { setActiveModal, setModalData } = useModal();
 
 
     useEffect(() => {
       console.log("Updated selectedContact 123:", selectedContact);
-    }, [selectedContact]); // ✅ Logs the updated value when `selectedAsset` changes
+    }, [selectedContact]); //  Logs the updated value when `selectedAsset` changes
 
     const [checkedCompanies, setCheckedCompanies] = useState({});
     const [relatedData, setRelatedData] = useState({}); // Stores related contacts/assets
@@ -77,15 +64,12 @@ export function TableCompany({
   if (ifEmptyQuerySearch && searchByEmailPhoneForGlobalSearch !== true) return <p className="text-center mt-10">No Record Found</p>;
 
 
-  // console.log("Received asset in TableCompany:", selectedAsset);
-
   //modify any setSelected type for searchByEmailPhoneForGlobalSearch
 
 
   //refactor any Data to Arry for accepting table
-  // const companyData = selectedCompany || selectedAsset?.site_account || [];
   
-  console.log("Final company in TableCompany:", companyBasedOnContactsSearch); // ✅ Debugging log
+  console.log("Final company in TableCompany:", companyBasedOnContactsSearch); //  Debugging log
   const companyData = Array.isArray(selectedCompany) && selectedCompany.length > 0
   ? selectedCompany[0] // Take the first company from array
   : selectedCompany && Object.keys(selectedCompany).length > 0
@@ -114,7 +98,7 @@ export function TableCompany({
     const contacts = selectedContact 
     ? (Array.isArray(selectedContact) 
         ? selectedContact 
-        : [selectedContact]) // ✅ Wrap object in an array if necessary
+        : [selectedContact]) //  Wrap object in an array if necessary
     .map((contact) => ({
         ContactID: contact.ContactID,
         SiteAccountID: contact.SiteAccountID,
@@ -129,8 +113,8 @@ export function TableCompany({
     : [];
 
 
-  console.log("Final contact in TableCompany:", selectedContact); // ✅ Debugging log
-  console.log("Final contact in TableCompany:", contactsBasedOnContactsSearch); // ✅ Debugging log
+  console.log("Final contact in TableCompany:", selectedContact); //  Debugging log
+  console.log("Final contact in TableCompany:", contactsBasedOnContactsSearch); //  Debugging log
   
   // const contactData = contacts.length > 0 ? contacts[0] : contactsBasedOnContactsSearch.length > 0 ? contactsBasedOnContactsSearch : [];
   const contactData = Array.isArray(contacts) && contacts.length > 0
@@ -231,10 +215,6 @@ export function TableCompany({
   : [];
 
 
-
-  
-  // const [se, setSelectedAsset] = useState([]);
-
   //handle checkbox
   const handleCheckBoxCompanyChange = async (company, newCheckedState) => {
 
@@ -255,7 +235,7 @@ export function TableCompany({
         }else{
           response = await ApiCustomer(`/api/site_account/check-company-affiliations?siteAccountId=${company.key}`);
         }
-        const result = response.data; // ✅ Ensure correct data extraction
+        const result = response.data; //  Ensure correct data extraction
   
         if (result.success) {
           setRelatedData((prev) => ({
@@ -263,7 +243,7 @@ export function TableCompany({
             [company.key]: result.data,
           }));
   
-          // ✅ Ensure correct state updates
+          //  Ensure correct state updates
           console.log("Fetched Checking:", result.data);
           if (result.data.assets.length > 0) {
             setSelectedAsset(result.data.assets);
@@ -276,14 +256,9 @@ export function TableCompany({
           } else {
             setSelectedContact([]);
           }
-          // if (result.data.company.length > 0) {
-          //   setSelectedContact(result.data.company);
-          // } else {
-          //   setSelectedContact([]);
-          // }
   
           console.log(`Company ${company.company} has contact:`, result.data.contacts.length > 0);
-          // console.log(result.data.contacts);
+ 
         }
       } catch (err) {
         console.error("Error fetching company affiliations:", err);
@@ -303,22 +278,19 @@ export function TableCompany({
       console.log("Asset in ApiCustomer Asset For Case Related : ", assetRelated);
   
       if (assetRelated.contactID !== null) {
-        setSelectedContact(assetRelated.contact_information); // 🔥 Auto-select related contact
-        setSelectedContactForCase(assetRelated.contact_information ); // 🔥 Auto-select related contact
+        setSelectedContact(assetRelated.contact_information); //  Auto-select related contact
+        setSelectedContactForCase(assetRelated.contact_information ); //  Auto-select related contact
       }
     }catch (error){
       console.error("Error fetching asset details:", error);
     }
-  
-    // if (assetRelated.site_account !== null) {
-    //   setSelectedSiteAccounts(assetRelated.site_account); // 🔥 Auto-select related company
-    // }
+ 
   };
 
   
   // useEffect(() => {
   //   console.log("Checked Companies : ",checkedCompanies);
-  // }, [checkedCompanies]); // ✅ Run only when `companies` updates
+  // }, [checkedCompanies]); //  Run only when `companies` updates
   
   console.log("selectedAsset:", selectedAsset);
   console.log("selectedCompany:", selectedCompany);
@@ -330,7 +302,7 @@ export function TableCompany({
   // Ensure checkbox is checked if a company or at least one contact exists
   
   const isChecked = checkedCompanies[companies?.[0]?.key] ?? (contacts.length > 0);
-  //checkedCompanies[company.key] || false
+  // checkedCompanies[company.key] || false
   // const isChecked = checkedCompanies[company.key] ?? false;
   
 
@@ -378,18 +350,6 @@ export function TableCompany({
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
               </div>
-              {/* <Button variant="outline" className="bg-white mt-0.5"
-  onClick={() => {
-    setModalData({
-      selectedCompany,
-      selectedContact,
-      setSelectedContact,
-    });
-    setActiveModal("contact");
-  }}
->
-  New Contact
-</Button> */}
               <BtnModalContact 
                 className="" 
                 selectedCompany={selectedCompany.length !== 0 ? selectedCompany : company.key} 
@@ -446,13 +406,7 @@ export function TableCompany({
                   <Search className="absolute right-1"/><Input className="bg-white ring-2 border-0 rounded-2xl pr-10"/>
                 </span>
               </div>
-              {/* <Button
-              onClick={() => setActiveModal("asset")}
-              className={`mt-0.5 ${(!selectedContactForCase && company.type !== 'individual') ? "bg-white cursor-not-allowed" : "bg-blue-500"}`} 
-              disabled={!selectedContactForCase && company.type !== 'individual'}
-              >
-                New Asset
-              </Button> */}
+          
               <BtnModalAsset 
                 typeSearch={company.type}
                 contactID={selectedContact.ContactID || (company.type=='individual' ? company.key : null)}
@@ -479,7 +433,7 @@ export function TableCompany({
                 {assets.length > 0 ? assets.map((asset) => (
                   <TableRow 
                     key={asset.AssetID}
-                    onClick={() => handleSelectedAssetForCaseRelated(asset)} // ✅ Set selected asset
+                    onClick={() => handleSelectedAssetForCaseRelated(asset)} //  Set selected asset
                     className={`cursor-pointer hover:bg-gray-200 ${
                       selectedAssetForCase?.AssetID === asset.AssetID ? "bg-blue-300" : ""
                     }`}
@@ -509,7 +463,6 @@ export function TableCompany({
 }
 
 export function TableContact({ selectedAsset = [] }) {
-  // console.log("Received asset in TableCompany:", selectedAsset);
   const contacts = selectedAsset?.contact_information ? [
     {
       contactID: selectedAsset?.contact_information?.ContactID,

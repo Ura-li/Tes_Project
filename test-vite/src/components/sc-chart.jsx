@@ -219,14 +219,7 @@ export function ChartPie() {
       label: "Firefox",
       color: "hsl(var(--chart-3))",
     },
-    // edge: {
-    //   label: "Edge",
-    //   color: "hsl(var(--chart-4))",
-    // },
-    // other: {
-    //   label: "Other",
-    //   color: "hsl(var(--chart-5))",
-    // },
+   
   } 
   const totalVisitors = useMemo(() => {
     return chartData2.reduce((acc, curr) => acc + curr.visitors, 0)

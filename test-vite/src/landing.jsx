@@ -4,24 +4,7 @@ import { Case_table } from "./master_table";
 import ApiCustomer from "@/api"
 import { parse } from "date-fns";
 import { Week } from "react-day-picker";
-// import { Button } from "@/components/ui/button";
-// import { AppSidebar } from "@/components/app-sidebar";
-// import {
-//   Breadcrumb,
-//   BreadcrumbItem,
-//   BreadcrumbLink,
-//   BreadcrumbList,
-//   BreadcrumbPage,
-//   BreadcrumbSeparator,
-// } from "@/components/ui/breadcrumb";
-// import { Separator } from "@/components/ui/separator";
-// import {
-//   SidebarInset,
-//   SidebarProvider,
-//   SidebarTrigger,
-// } from "@/components/ui/sidebar";
 
-// import { Link } from "react-router";
 
 export default function Landing() {
 const [caseData, setCaseData] = useState([]);

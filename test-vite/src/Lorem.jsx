@@ -1,5 +1,4 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route } from "react-router";
 import { LoginForm } from './components/login-form';
 const Lorem = () => {
   return (

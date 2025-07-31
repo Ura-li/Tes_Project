@@ -5,7 +5,6 @@ import {
     SelectContent,
     SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
   } from "@/components/ui/select"
@@ -176,9 +175,6 @@ useEffect(() => {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {/* { id: "Depot Repair", name: "Depot Repair" },
-                { id: "Onsite", name: "Onsite" },
-                { id: "Bench", name: "Bench" }, */}
             <SelectItem value="Depot Repair">Depot Repair</SelectItem>
             <SelectItem value="Onsite">Onsite</SelectItem>
             <SelectItem value="Bench">Bench</SelectItem>

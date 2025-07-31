@@ -70,22 +70,7 @@ import DatePicker from "./date-picker";
 
 import ApiCustomer from "@/api";
 
-// const workorder = [
-//   {
-//     workordernumber: "WO-027816939",
-//     caseid: "54165182991",
-//     serviceaccount: "Icon Plus",
-//     substatus: "Waiting",
-//     systemstatus: "Open",
-//     priority: "WO Priority",
-//     workorder: "In-Country",
-//     primaryincident: "Depot Repair",
-//     duedate: "21/03/2025 00.53",
-//     orion: "-",
-//     owner : "Jokowi",
-//     created: "Widodo",
-//   },
-// ]
+
 
 const partsorder = [
   {
@@ -129,12 +114,12 @@ export const TabsService = ({ caseDetails }) => {
   const handleCaseNoteChange = (key, value) => {
     setCaseNoteFormData((prev) => {
       const updated = { ...prev, [key]: value };
-      console.log("🔄 Updated Form:", updated); // ✅ Log on every change
+      console.log(" Updated Form:", updated); // Log on every change
       return updated;
     });
   };
   const saveCaseNote = async () => {
-    console.log("📝 Form Data to Submit:", caseNoteFormData); // ✅ Log the form data
+    console.log(" Form Data to Submit:", caseNoteFormData); // Log the form data
     try {
       const response = await ApiCustomer.post(
         "/api/case-information/case-notes",
@@ -222,7 +207,7 @@ export const TabsService = ({ caseDetails }) => {
       );
       const noteDetail = detailRes.data.data;
 
-      console.log("✅ Case Note Detail:", noteDetail);
+      console.log(" Case Note Detail:", noteDetail);
       return noteDetail;
     } catch (err) {
       console.error("Error in fetchCaseNotes:", err);
@@ -314,7 +299,7 @@ export const TabsService = ({ caseDetails }) => {
     });
 
     if (!confirmResult.isConfirmed) {
-      return; // User canceled
+      return; 
     }
     try {
       Swal.fire({
@@ -332,7 +317,7 @@ export const TabsService = ({ caseDetails }) => {
         }
       );
       if (res.data.success) {
-        // Success alert
+     
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -343,7 +328,7 @@ export const TabsService = ({ caseDetails }) => {
           navigate(`/app/master/Case_table`);
         });
       } else {
-        // Error from API
+       
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -370,11 +355,9 @@ export const TabsService = ({ caseDetails }) => {
           Swal.showLoading();
         },
       });
-
-      // Tunggu sebentar sebelum reload agar user bisa melihat loading
       setTimeout(() => {
         location.reload();
-      }, 1500); // 1.5 detik delay
+      }, 1500); 
     } catch (err) {
       console.error("Error in refresh:", err);
     }
@@ -512,7 +495,6 @@ export const TabsServiceWO = ({ workOrders }) => {
         }
       );
       if (res.data.success) {
-        // Success alert
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -523,7 +505,6 @@ export const TabsServiceWO = ({ workOrders }) => {
           navigate(`/app/case/${workOrders.CaseID}`);
         });
       } else {
-        // Error from API
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -550,11 +531,9 @@ export const TabsServiceWO = ({ workOrders }) => {
           Swal.showLoading();
         },
       });
-
-      // Tunggu sebentar sebelum reload agar user bisa melihat loading
       setTimeout(() => {
         location.reload();
-      }, 1500); // 1.5 detik delay
+      }, 1500); 
     } catch (err) {
       console.error("Error in refresh:", err);
     }
@@ -651,7 +630,6 @@ export const TabsServiceMO = ({ materialOrders }) => {
         }
       );
       if (res.data.success) {
-        // Success alert
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -662,7 +640,6 @@ export const TabsServiceMO = ({ materialOrders }) => {
           navigate(`/app/work/${materialOrders.WOID}`);
         });
       } else {
-        // Error from API
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -775,7 +752,6 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
         }
       );
       if (res.data.success) {
-        // Success alert
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -786,7 +762,6 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
           navigate(`/app/material-order/${MOLineDetails.MOID}`);
         });
       } else {
-        // Error from API
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -1049,7 +1024,6 @@ export const ServiceCase = ({
   });
   const fetchCustomerData = async () => {
     try {
-      // console.log("Case Detail : ", caseDetails);
       const resMainAccount = await ApiCustomer.get(
         `/api/contact-information/${caseDetails.ContactID}`
       );
@@ -1097,7 +1071,6 @@ export const ServiceCase = ({
   //notes handler
   const fetchCaseNotes = async () => {
     try {
-      // console.log("Case Details : ", caseDetails)
       const res = await ApiCustomer.get(`/api/case-information/case-notes`);
       const notes = res.data.data;
 
@@ -1131,7 +1104,7 @@ export const ServiceCase = ({
       );
       const noteDetail = detailRes.data.data;
 
-      console.log("✅ Case Note Detail:", noteDetail);
+      console.log("Case Note Detail:", noteDetail);
       return noteDetail;
     } catch (err) {
       console.error("Error in fetchCaseNotes:", err);
@@ -1157,7 +1130,7 @@ export const ServiceCase = ({
 
   //data for upper style
   const [ownerUserData, setOwnerUserData] = useState([]);
-  // const []
+  
   const fetchOwnerUserData = async () => {
     try {
       const response = await ApiCustomer.get(
@@ -1174,9 +1147,6 @@ export const ServiceCase = ({
     console.log("Fetch Data User ", ownerUserData);
   }, [ownerUserData]);
 
-  // useEffect(() =>{
-  //   console.log("Data Asset Info : ",dataFetchAssetInformation)
-  // }, dataFetchAssetInformation)
 
   const fetchSymptomCodes = async (term) => {
     try {
@@ -1208,7 +1178,6 @@ export const ServiceCase = ({
         `/api/work-order?CaseID=${caseDetails.CaseID}`
       );
       setWorkOrders(res.data.data); // adjust based on API response shape
-      // console.log("Fetch Work Order: ",res)
     } catch (err) {
       console.error("Failed to fetch work orders:", err);
     }
@@ -1337,16 +1306,6 @@ export const ServiceCase = ({
                   </TabsTrigger>
                 )
               )}
-              {/* <TabsTrigger variant="underline" value="case_info" className=" ">Case Information</TabsTrigger>
-              <TabsTrigger variant="underline" value="customer,add,entitement" className="">Customer, Asset & Entitement</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_notes" className="">Notes & Information</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_activitas" className="">Activities</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_actions" className="">Costumer Interactions</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_wo" className="">Work Order Validation</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_orders" className="">Orders</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_salles" className="">Sales Offer</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_knowledge" className="">Knowledge & Attachments</TabsTrigger>
-              <SelectBarRelated></SelectBarRelated> */}
               {open && (
                 <DropdownMenu>
                   <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
@@ -1432,7 +1391,6 @@ export const ServiceCase = ({
                 </CaseField>
                 <CaseField label="Case Closed Date" icon span={3}>
                   <span className="flex gap-[5em]">
-                    {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
                     <DatePicker
                       variant="icon"
                       value={caseClosedDate}
@@ -1859,59 +1817,6 @@ export const ServiceCase = ({
                       onChange={(e) => onChange("Note", e.target.value)}
                     />
                   </CaseField>
-                  {/* <textarea
-                      className='h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500'
-                      value={formData?.Note || ''}
-                      onChange={(e) => onChange("Note", e.target.value)}
-                    /> */}
-
-                  {/* <div className='font-bold flex'>
-                    <span>Log Type</span>
-                      <Select onValueChange={(val) => onChange("LogType", val)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Log Type"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="NotesLog">Notes Log</SelectItem>
-                          <SelectItem value="PhoneLog">Phone Log</SelectItem>
-                        </SelectContent>
-                      </Select>
-                  </div>
-
-                  <div className='font-bold flex'>
-                    <span>Action Type</span>
-                    <span className=''>...</span>
-                  </div>
-
-                  <div className='font-bold flex'>
-                    <span>Template </span>
-                    <span className=''>...</span>
-                  </div>
-
-                  <div className='font-bold flex'>
-                    <span>Visible Externally</span>
-                    <span className=''>
-                    <Select onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="---"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1">Yes</SelectItem>
-                          <SelectItem value="0">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </span>
-                  </div>
-
-                  <div className='font-bold flex '>
-                    <span>Number of Minutes Spent</span>
-                    <span className=''>...</span>
-                  </div>
-
-                  <div className='flex'>
-                    <span className='font-bold'>Notes</span>
-                    <textarea className=' w-80 h-40 resize-none p-2 border-2 border-black ' value={formData?.Note || ''} onChange={(e) => onChange("Note", e.target.value)}></textarea>
-                  </div> */}
                 </div>
 
                 <div className="flex flex-1">
@@ -1954,22 +1859,6 @@ export const ServiceCase = ({
                     />
                   </CaseField>
 
-                  {/* <div className='font-bold flex'>
-                    <span>Keyword Search</span>
-                    <Input
-                    placeholder="..."
-                      type="search"
-                      className=""
-                      value={symptomSearchTerm}
-                      onChange={(e) => {
-                        const value = e.target.value
-                        setSymptomSearchTerm(value)
-                        if (value.length >= 2) fetchSymptomCodes(value)
-                          else setSymptomSuggestions([])
-                      }}
-                    />
-                  </div> */}
-
                   {symptomSuggestions.length > 0 && (
                     <ul className="bg-white border  max-h-40 overflow-y-auto absolute z-10">
                       {symptomSuggestions.map((sym) => (
@@ -2009,19 +1898,6 @@ export const ServiceCase = ({
                   >
                     {selectedSymptom?.SymptomCode}
                   </CaseField>
-
-                  {/* <div className='font-bold flex'>
-                    <span>Top Category</span>
-                    <span className=''>...{selectedSymptom?.TopCategory}</span>
-                  </div>
-                  <div className='font-bold flex'>
-                    <span>Sub Category</span>
-                    <span className=''>...{selectedSymptom?.SubCategory}</span>
-                  </div>
-                  <div className='font-bold flex'>
-                    <span>Spesific Symptom</span>
-                    <span className=''>...{selectedSymptom?.SymptomCode}</span>
-                  </div> */}
                 </div>
 
                 <div className="font-bold flex flex-1">
@@ -2126,7 +2002,6 @@ export const ServiceCase = ({
           <TabsContent value="ci_activitas">
             <Card className="mt-7">
               <CardHeader>Hello Word</CardHeader>
-              {/* <DatePicker icon={<Calendar>}></DatePicker> */}
             </Card>
           </TabsContent>
 
@@ -2302,9 +2177,7 @@ export const ServiceCase = ({
                           className="font-medium "
                           onClick={handleClick}
                         >
-                          {/* <Link to={`/work/${work.WOID}`}> */}
                           {work.WOID}
-                          {/* </Link> */}
                         </TableCell>
                         <TableCell>{work.CaseID}</TableCell>
                         {/* <TableCell>{work.serviceaccount}</TableCell>
@@ -2426,25 +2299,8 @@ export const ServiceCase = ({
                           </Link>
                         </TableCell>
                         <TableCell>{material.CaseID}</TableCell>
-                        {/* <TableCell>{work.serviceaccount}</TableCell>
-                        <TableCell>{work.substatus}</TableCell>
-                        <TableCell>{work.systemstatus}</TableCell>
-                        <TableCell>{work.priority}</TableCell>
-                        <TableCell>{work.workorder}</TableCell>
-                        <TableCell>{work.primaryincident}</TableCell>
-                        <TableCell>{work.duedate}</TableCell>
-                        <TableCell>{work.orion}</TableCell>
-                        <TableCell>{work.owner}</TableCell>
-                        <TableCell>{work.created}</TableCell> */}
                       </TableRow>
                     ))}
-                    {/* <TableRow>
-                      <TableCell className="font-medium">
-                        <Link to="/material_order">
-                        
-                        </Link>
-                      </TableCell>
-                    </TableRow> */}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -2473,161 +2329,3 @@ export const ServiceCase = ({
     </>
   );
 };
-
-// export const ServiceTab = () => {
-//   return (
-//     <div className='border-1 flex items-center'>
-//       <Button variant="link" className="rounded-none">
-//          <ArrowLeftFromLine></ArrowLeftFromLine>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none">
-//         <SquareArrowOutUpRight></SquareArrowOutUpRight>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none gap-1">
-//          <Save></Save>
-//          <span>Save</span>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none gap-1">
-//          <FileSymlink></FileSymlink>
-//          <span>Save & Close</span>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none gap-1">
-//         <RotateCw></RotateCw>
-//          <span>Refresh</span>
-//       </Button>
-
-//        <Button variant="link" className="rounded-none gap-1">
-//         <StepBack></StepBack>
-//          <span>Complaint</span>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none gap-1">
-//         <StepBack></StepBack>
-//          <span>CSR</span>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none gap-1">
-//         <StepBack></StepBack>
-//          <span>Service Order</span>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none gap-1">
-//         <StepBack></StepBack>
-//          <span>Work Order</span>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none gap-1">
-//         <StepBack></StepBack>
-//          <span>Sales Offer</span>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none gap-1">
-//         <StepBack></StepBack>
-//          <span>Close Case</span>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none gap-1">
-//         <StepBack></StepBack>
-//          <span>Pick</span>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none gap-1">
-//         <StepBack></StepBack>
-//          <span>Queue Details</span>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none gap-1">
-//         <UserPen></UserPen>
-//          <span>Assign</span>
-//       </Button>
-
-//       <Button variant="link" className="rounded-none gap-1">
-//         <StepBack></StepBack>
-//          <span>Add to Queue</span>
-//       </Button>
-//     </div>
-//   )
-// }
-
-// export const ServiceTabMo = () => {
-//     return (
-//       <div className='border-1 flex items-center'>
-//         <Button variant="link" className="rounded-none">
-//            <ArrowLeftFromLine></ArrowLeftFromLine>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none">
-//           <SquareArrowOutUpRight></SquareArrowOutUpRight>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none gap-1">
-//            <Save></Save>
-//            <span>Save</span>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none gap-1">
-//            <FileSymlink></FileSymlink>
-//            <span>Save & Close</span>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none gap-1">
-//           <RotateCw></RotateCw>
-//            <span>Refresh</span>
-//         </Button>
-
-//          <Button variant="link" className="rounded-none gap-1">
-//           <StepBack></StepBack>
-//            <span>Complaint</span>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none gap-1">
-//           <StepBack></StepBack>
-//            <span>CSR</span>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none gap-1">
-//           <StepBack></StepBack>
-//            <span>Service Order</span>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none gap-1">
-//           <StepBack></StepBack>
-//            <span>Work Order</span>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none gap-1">
-//           <StepBack></StepBack>
-//            <span>Sales Offer</span>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none gap-1">
-//           <StepBack></StepBack>
-//            <span>Close Case</span>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none gap-1">
-//           <StepBack></StepBack>
-//            <span>Pick</span>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none gap-1">
-//           <StepBack></StepBack>
-//            <span>Queue Details</span>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none gap-1">
-//           <UserPen></UserPen>
-//            <span>Assign</span>
-//         </Button>
-
-//         <Button variant="link" className="rounded-none gap-1">
-//           <StepBack></StepBack>
-//            <span>Add to Queue</span>
-//         </Button>
-//       </div>
-//     )
-// }

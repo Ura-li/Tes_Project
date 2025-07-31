@@ -51,7 +51,7 @@ export const SnInput = ({
   const handleChange = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
 
-    // ✅ Update the selected product type
+    //  Update the selected product type
     if (key === "ProductTypeID") {
       setSelectedProductType(value);
     }
@@ -71,7 +71,7 @@ export const SnInput = ({
         setProductResult([])
       }
     }else {
-      setProductResult([]); // ✅ Clear dropdown when search is empty
+      setProductResult([]); //  Clear dropdown when search is empty
     }
   }
 
@@ -150,10 +150,8 @@ export const SnInput = ({
         ContactID: formData.ContactID || null,
       });
   
-      // ✅ TUTUP FORM DULU
       setIsOpenModal(false);
   
-      // ✅ TAMPILKAN SWEET ALERT DENGAN TIMER OTOMATIS
       await Swal.fire({
         icon: 'success',
         title: 'Berhasil!',
@@ -166,7 +164,6 @@ export const SnInput = ({
         },
       });
   
-      // ✅ Setelah alert tertutup otomatis, lakukan refresh
       fetchUnownedAssets();
   
     } catch (err) {
@@ -236,8 +233,8 @@ export const SnInput = ({
                           key={product.ProductNumber} 
                           className="px-3 py-2 hover:bg-gray-100 cursor-pointer "
                           onClick={async () => {
-                              setCheckPNTerm(product.ProductTypeID); // ✅ Set input field
-                              setProductResult([]); // ✅ Hide dropdown
+                              setCheckPNTerm(product.ProductTypeID); 
+                              setProductResult([]);
                               console.log("Product Type Selected : ",product)
                               const productTower = product.product_type?.ProductTower || "";
                               const productGroup = product.product_type?.ProductGroup || "";
@@ -252,7 +249,6 @@ export const SnInput = ({
                               
                               setSelectedProductType(product.ProductTypeID || "");
                               console.log(selectedProductType)
-                              // document.getElementById("ProductType").value = product.product_type?.ProductType || "";
 
                               setFormData((prev) => ({
                                 ...prev,
@@ -262,7 +258,7 @@ export const SnInput = ({
                                 ProductType: product.product_type?.ProductType || "",
                                 ProductTower: product.product_type?.ProductTower || "",
                                 ProductGroup: product.product_type?.ProductGroup || "",
-                                ProductTypeID: product.ProductTypeID, // ✅ Ensure correct ProductTypeID is set
+                                ProductTypeID: product.ProductTypeID, //  Ensure correct ProductTypeID is set
                               }));
                           }}
                       >
@@ -275,7 +271,6 @@ export const SnInput = ({
           <Label htmlFor="ProductTower" className="text-right">
             Product tower
           </Label>
-          {/* <Input id="ProductTower"  onChange={handleChange}  className="col-span-3" /> */}
           <Select onValueChange={setSelectedProductTower} id="ProductTower" value={selectedProductTower}>
             <SelectTrigger className="col-span-3 w-full">
               <SelectValue placeholder="Product tower"/>
@@ -283,7 +278,6 @@ export const SnInput = ({
             <SelectContent >
               <SelectGroup>
                 <SelectLabel>Product tower</SelectLabel>
-                {/* <SelectItem value="">.</SelectItem> */}
                 <SelectItem value="PSG">PSG</SelectItem>
                 <SelectItem value="IPG">IPG</SelectItem>
               </SelectGroup>
@@ -295,7 +289,6 @@ export const SnInput = ({
           <Label htmlFor="ProductGroup" className="text-right">
             Product group
           </Label>
-          {/* <Input id="ProductGroup"  onChange={handleChange}  className="col-span-3" /> */}
           <Select onValueChange={setSelectedProductGroup} id="ProductGroup" value={selectedProductGroup}>
             <SelectTrigger className="col-span-3 w-full">
               <SelectValue placeholder="Product tower"/>
@@ -303,7 +296,6 @@ export const SnInput = ({
             <SelectContent >
               <SelectGroup>
                 <SelectLabel>Product group</SelectLabel>
-                {/* <SelectItem value="">.</SelectItem> */}
                 <SelectItem value="Commercial">Commercial</SelectItem>
                 <SelectItem value="Consumer">Consumer</SelectItem>
               </SelectGroup>
@@ -314,7 +306,6 @@ export const SnInput = ({
           <Label htmlFor="ProductType" className="text-right">
             Product type
           </Label>
-          {/* <Input id="ProductType"  onChange={handleChange}  className="col-span-3" /> */}
           <Select  disabled={!selectedProductTower || !selectedProductGroup} onValueChange={(value) => handleChange("ProductTypeID", value)} id="ProductType" value={selectedProductType}> 
             <SelectTrigger className="col-span-3 w-full">
               <SelectValue placeholder="Product tower"/>
