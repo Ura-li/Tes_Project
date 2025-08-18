@@ -252,7 +252,7 @@ export function ChartPie() {
               data={chartData2}
               dataKey="visitors"
               nameKey="browser"
-              innerRadius={60}
+              innerRadius={50}
               strokeWidth={5}
             >
               <Label

@@ -114,6 +114,7 @@ export const TabsService = ({
   const [caseForm, setCaseForm] = useState({
     CaseType: "",
     CaseStatus: "",
+    CaseSubject: "",
   });
 
   const [gtcForm, setGtcForm] = useState({
@@ -164,7 +165,7 @@ export const TabsService = ({
     setCsrForm((prev) => ({ ...prev, [field]: value }));
   };
 
- const handleSave = async () => {
+ const handleSave = async (redirect = true) => {
   console.log("📝 Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
 
   try {
@@ -194,7 +195,7 @@ export const TabsService = ({
     }
 
     let savedModules = [];
-
+    const dataToUpdate = {};
     for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE']) {
       switch (target) {
 
@@ -209,21 +210,17 @@ export const TabsService = ({
       Note: modifiedNote,
       CaseID: caseDetails.CaseID
     });
+      dataToUpdate.CaseNote = response.data.data.NoteID;
 
     const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
     setCaseNotes({ NotesDisplay: NotedDisplay, 
           ActionType: caseNoteFormData.ActionType,
           LogType: caseNoteFormData.LogType,
           VisibleExternally: caseNoteFormData.VisibleExternally,});
-
-    let dataUpdated = {
-      CaseNote: response.data.data.NoteID
-    };
     
-    if (selectedSymptom) {
-      dataUpdated.SymptomCode = selectedSymptom.SymptomCodeID;
+     if (selectedSymptom) {
+      dataToUpdate.SymptomCode = selectedSymptom.SymptomCodeID;
     }
-    await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataUpdated);
 
     savedModules.push("Note");
   }
@@ -242,7 +239,8 @@ export const TabsService = ({
 
         case 'ENTITLEMENT':
           if (entitlementEdited) {
-            await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, entitlementStatus);
+            console.log(entitlementStatus);
+            Object.assign(dataToUpdate, entitlementStatus); // includes OTCCo
             savedModules.push("Entitlement");
           }
           break;
@@ -260,9 +258,7 @@ export const TabsService = ({
                 ...csrForm,
                 caseResolutionCode: csrForm.caseResolutionCode || "",
               });
-              await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, {
-                id_csr: response.data.data.id_csr
-              });
+              dataToUpdate.id_csr = response.data.data.id_csr;
             }
             savedModules.push("CSR");
           }
@@ -271,21 +267,27 @@ export const TabsService = ({
           case 'CASE':
          if (caseFilled) {
               try {
-                await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, {
-                  ...caseForm,
+                const oldStatus = caseDetails.CaseStatus;
+                const newStatus = caseForm.CaseStatus;
+                 Object.assign(dataToUpdate, {
                   CaseType: caseForm.CaseType || "",
-                  CaseStatus: caseForm.CaseStatus || "",
+                  CaseStatus: newStatus || "",
                 });
                 savedModules.push("Case");
-                Swal.fire({
-                  icon: "success",
-                  title: "Berhasil Disimpan",
-                  text: "Data Case berhasil disimpan.",
-                  timer: 2000,
-                  showConfirmButton: false,
-                  allowOutsideClick: false,
-                  allowEscapeKey: false,
-                });
+                if (oldStatus !== newStatus) {
+                  const token = {
+                    user: getUserFromToken()
+                  }
+                  await ApiCustomer.post("/api/actionlog", {
+                    CaseId: `${caseDetails.CaseID}`,
+                    ReferenceId: ``,
+                    model: "Case",
+                    dataOld: oldStatus,
+                    dataNew: newStatus,
+                    changedBy: token.user.id,
+                    logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${oldStatus} to ${newStatus}`,
+                  });
+                }
               } catch (err) {
                 console.error("Gagal update case:", err);
                 Swal.fire({
@@ -299,20 +301,27 @@ export const TabsService = ({
           }
           break;
       }
+
+      if (Object.keys(dataToUpdate).length > 0) {
+        await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataToUpdate);
+      }
     }
 
     // Satu alert saja jika banyak data berhasil disimpan
     if (savedModules.length > 0) {
-      await Swal.fire({
-        icon: "success",
-        title: "Berhasil Disimpan",
-        text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
-        timer: 2500,
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      });
-      window.location.reload();
+      if(redirect){
+        await Swal.fire({
+          icon: "success",
+          title: "Berhasil Disimpan",
+          text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
+          timer: 2500,
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        });
+        window.location.reload();
+      }
+      return true
     }
 
   } catch (error) {
@@ -329,7 +338,20 @@ export const TabsService = ({
   }
 };
 
+const openPopup = () => {
+  console.log("TeSPOP");
+  const popup = window.open(
+    '/auditwindows',
+    'Popup Title',
+    'width=600,height=400'
+  );
 
+  if (popup) {
+    popup.focus();
+  } else {
+    alert('Popup blocked by browser. Please allow popups for this site.');
+  }
+};
   
 
   useEffect(() => {
@@ -362,9 +384,9 @@ export const TabsService = ({
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/master/Case_table`),
+      onClick: () => navigate(`/app/master/Case_table`),
     },
-    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "",},
     { icon: Save, label: "Save", onClick: () => handleSave() },
     {
       icon: FileSymlink,
@@ -372,10 +394,10 @@ export const TabsService = ({
       onClick: () => saveAndCloseCase(),
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
-    { icon: StepBack, label: "Complaint", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Complaint",},
     { icon: StepBack, label: "SRF", onClick: async () => {
       // console.log("Case Details ; ",caseDetails);
-      const blob = await pdf(<ServiceRequestPDF nama="NURHIT" caseDetails={caseDetails}  />).toBlob();
+      const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails}  />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -387,12 +409,13 @@ export const TabsService = ({
     { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
     { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
     { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder") },
-    { icon: StepBack, label: "Sales Offer", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Close Case", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Queue Details", onClick: () => alert("not now") },
-    { icon: UserPen, label: "Assign", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Add to Queue", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Sales Offer",},
+    { icon: StepBack, label: "Close Case", },
+    { icon: StepBack, label: "Pick", },
+    { icon: StepBack, label: "Queue Details", },
+    { icon: UserPen, label: "Assign" },
+    { icon: StepBack, label: "Add to Queue", },
+    { icon: StepBack, label: "Audit", onClick: () => openPopup() },
   ];
   console.log("TES CASE DETAILS VALUE",caseDetails);
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
@@ -403,6 +426,16 @@ export const TabsService = ({
     setServiceCatalogType(type)
   };
   const saveAndCloseCase = async () => {
+
+    if (!csrForm.caseResolutionCode || csrForm.caseResolutionCode.trim() === "") {
+    Swal.fire({
+      icon: "warning",
+      title: "Missing Case Resolution",
+      text: "You must select a Case Resolution Code before closing the case.",
+    });
+    return;
+  }
+
     const confirmResult = await Swal.fire({
       title: "Confirm Save",
       text: "This will give the Case status as CLOSED. Are you sure you want to save changes?",
@@ -417,6 +450,7 @@ export const TabsService = ({
       return; // User canceled
     }
     try {
+      
       Swal.fire({
         title: "Saving...",
         text: "Please wait while we update the Case.",
@@ -426,6 +460,8 @@ export const TabsService = ({
           Swal.showLoading();
         },
       });
+      const success = await handleSave(false);
+      if (!success) return; // Stop if failed
       const res = await ApiCustomer.patch(
         `/api/case-information/${caseDetails.CaseID}`,
         {
@@ -435,6 +471,18 @@ export const TabsService = ({
       );
       if (res.data.success) {
         // Success alert
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${caseDetails.CaseID}`,
+          ReferenceId: ``,
+          model: "Case",
+          dataOld: caseDetails.CaseStatus,
+          dataNew: res.data.data.CaseStatus,
+          changedBy: token.user.id,
+          logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${caseDetails.CaseStatus} to ${res.data.data.CaseStatus}`
+        })
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -444,7 +492,7 @@ export const TabsService = ({
           allowOutsideClick: false,
           allowEscapeKey: false,
         }).then(() => {
-          navigate(`/master/Case_table`);
+          navigate(`/app/master/Case_table`);
         });
       } else {
         // Error from API
@@ -484,7 +532,7 @@ export const TabsService = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {hiddenButtons.map((btn, index) => (
-                <DropdownMenuItem key={index}>
+                <DropdownMenuItem key={index} onClick={btn.onClick}>
                   <btn.icon className="inline-block w-4 h-4 mr-2" />
                   {btn.label}
                 </DropdownMenuItem>
@@ -604,6 +652,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
 
       const result = response.data;
       console.log(response);
+      
 
       if (!result.success) {
         return Swal.fire({
@@ -631,7 +680,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/case/${workOrders.CaseID}`),
+      onClick: () => navigate(`/app/case/${workOrders.CaseID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => handleSave() },
@@ -689,6 +738,18 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
       );
       if (res.data.success) {
         // Success alert
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${workOrders.CaseID}`,
+          ReferenceId: `${workOrders.WOID}`,
+          model: "Work Orders",
+          dataOld: workOrders.SystemStatus,
+          dataNew: res.data.data.SystemStatus,
+          changedBy: token.user.id,
+          logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${workOrders.SystemStatus} to ${res.data.data.SystemStatus}`
+        })
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -696,7 +757,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-          navigate(`/case/${workOrders.CaseID}`);
+          navigate(`/app/case/${workOrders.CaseID}`);
         });
       } else {
         // Error from API
@@ -767,25 +828,25 @@ export const TabsServiceMO = ({ materialOrders }) => {
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/work/${materialOrders.WOID}`),
+      onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
     },
-    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "", },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
     {
       icon: FileSymlink,
       label: "Save & Close",
       onClick: () => saveAndCloseMaterialOrder(),
     },
-    { icon: RotateCw, label: "ATP", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Cancel Order", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Add Parts", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Place Order", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Tax", onClick: () => alert("not now") },
-    { icon: StepBack, label: "CustID Search", onClick: () => alert("not now") },
-    { icon: UserPen, label: "PUDO Search", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+    { icon: RotateCw, label: "ATP", },
+    { icon: StepBack, label: "Cancel Order", },
+    { icon: StepBack, label: "Add To Queue", },
+    { icon: StepBack, label: "Add Parts", },
+    { icon: StepBack, label: "Pick", },
+    { icon: StepBack, label: "Place Order", },
+    { icon: StepBack, label: "Tax", },
+    { icon: StepBack, label: "CustID Search", },
+    { icon: UserPen, label: "PUDO Search", },
+    { icon: StepBack, label: "Audit", },
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
@@ -807,6 +868,18 @@ export const TabsServiceMO = ({ materialOrders }) => {
       );
       if (res.data.success) {
         // Success alert
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${materialOrders.workorder?.CaseID}`,
+          ReferenceId: `${materialOrders.MOID}`,
+          model: "Material Orders",
+          dataOld: materialOrders.OrderStatus,
+          dataNew: res.data.data.OrderStatus,
+          changedBy: token.user.id,
+          logDescription: `Edit : Changed Material Order ${materialOrders.MOID} from ${materialOrders.OrderStatus} to ${res.data.data.OrderStatus}`
+        })
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -814,7 +887,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-          navigate(`/work/${materialOrders.WOID}`);
+          navigate(`/app/work/${materialOrders.WOID}`);
         });
       } else {
         // Error from API
@@ -879,41 +952,41 @@ export const TabsServiceMO = ({ materialOrders }) => {
   );
 };
 
-export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
+export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems }) => {
   const navigate = useNavigate();
 
   const buttons = [
     {
       icon: ArrowLeftFromLine,
       label: "",
-      onClick: () => navigate(`/material-order/${MOLineDetails.MOID}`),
+      onClick: () => navigate(`/app/material-order/${MOLineDetails.MOID}`),
     },
-    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "", },
     { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
     {
       icon: FileSymlink,
       label: "Save & Close",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
     },
-    { icon: StepBack, label: "Cancel", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
-    { icon: RotateCw, label: "Assign", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Cancel", },
+    { icon: StepBack, label: "Audit", },
+    { icon: RotateCw, label: "Assign", },
     {
       icon: StepBack,
       label: "Word Templates",
       onClick: () => alert("not now"),
     },
-    { icon: StepBack, label: "Run Report", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Process", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Run Report", },
+    { icon: StepBack, label: "Geo Code", },
+    { icon: StepBack, label: "Process", },
+    { icon: StepBack, label: "Reset RDT", },
     // { icon: UserPen, label:  "Add To Queue", onClick: () => alert("not now") },
     // { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
 
-  const saveMOLI = async () => {
+  const saveMOLI = async (LineItemID, shouldRedirect = true) => {
     try {
       Swal.fire({
         title: 'Saving...',
@@ -937,16 +1010,18 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
         RemovedPartDescription: MOLineDetails.removedPartDescription,
       });
       if (res.data.success) {
-        // Success alert
-        Swal.fire({
-          icon: 'success',
-          title: 'Updated!',
-          text: res.data.message,
-          timer: 2000,
-          showConfirmButton: false
-        }).then(() => {
-          navigate(`/mo_detail/${LineItemID}`)
-        })
+        if (shouldRedirect) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Updated!',
+            text: res.data.message,
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => {
+            navigate(`/app/mo_detail/${LineItemID}`);
+          });
+        }
+        return true; // Indicate success
       } else {
         // Error from API
         Swal.fire({
@@ -974,6 +1049,8 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
           Swal.showLoading();
         },
       });
+      const success = await saveMOLI(LineItemID, false);
+      if (!success) return; // Stop if saveMOLI failed
       const res = await ApiCustomer.patch(
         `/api/material-order/material-order-line-items/${LineItemID}`,
         {
@@ -981,6 +1058,19 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
         }
       );
       if (res.data.success) {
+        console.log("MATERIAL ORDeR IN CLOSED POSTED : ", moLineItems)
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${moLineItems.materialorder?.workorder?.CaseID}`,
+          ReferenceId: `${moLineItems.MOID}`,
+          model: "Material Order Line Item",
+          dataOld: moLineItems.Status,
+          dataNew: "Closed",
+          changedBy: token.user.id,
+          logDescription: `Edit : Change Material Order Line Item ${moLineItems.MOID} - ${moLineItems.LineItemID} Status from ${moLineItems.Status} to Closed`
+        })
         // Success alert
         Swal.fire({
           icon: "success",
@@ -989,7 +1079,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID }) => {
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-          navigate(`/material-order/${MOLineDetails.MOID}`);
+          navigate(`/app/material-order/${MOLineDetails.MOID}`);
         });
       } else {
         // Error from API
@@ -1101,12 +1191,12 @@ export const ServiceCase = ({
     { value: "case_info", label: "Case Information" },
     { value: "customer,add,entitement", label: "Customer, Asset & Entitement" },
     { value: "ci_notes", label: "Notes & Information" },
-    { value: "ci_activitas", label: "Activities" },
-    { value: "ci_actions", label: "Customer Interactions" },
+    { value: "ci_activitas", label: "Activities", disable: true },
+    { value: "ci_actions", label: "Customer Interactions", disable: true},
     { value: "ci_wo", label: "Work Order Validation" },
     { value: "ci_orders", label: "Orders" },
-    { value: "ci_salles", label: "Sales Offer" },
-    { value: "ci_knowledge", label: "Knowledge & Attachments" },
+    { value: "ci_salles", label: "Sales Offer", disable: true },
+    { value: "ci_knowledge", label: "Knowledge & Attachments", },
     { component: <SelectBarRelated /> },
   ];
 
@@ -1131,6 +1221,8 @@ export const ServiceCase = ({
   const [workOrders, setWorkOrders] = useState([]);
 
   const [materialOrders, setMaterialOrders] = useState([]);
+
+  const [actionLogs, setActionLogs] = useState([]);
 
   const fetchCustomerData = async () => {
     try {
@@ -1386,8 +1478,18 @@ const fetchCase = async () => {
   }
 };
 
+const fetchActionLog = async () => {
+  try {
+    const actionlog = await ApiCustomer.get(`/api/actionlog?caseId=${caseDetails.CaseID}`)
+    setActionLogs(actionlog.data.data)
+  } catch (error) {
+    console.error("Error fetching ActionLog:", err);
+  }
+}
+
+
   
-  //notes handler
+  //handler all case
   useEffect(() => {
     fetchCustomerData();
     fetchAssetInformation();
@@ -1412,6 +1514,7 @@ const fetchCase = async () => {
     fetchOTCCode();
     fetchCsr();
     fetchCase();
+    fetchActionLog();
   }, []);
 
   useEffect(() => {
@@ -1456,7 +1559,7 @@ const fetchCase = async () => {
     // await fetchCustomerData();
     {
       workOrders.map((work) => {
-        navigate(`/work/${work.WOID}`, {
+        navigate(`/app/work/${work.WOID}`, {
           // state: { ownerUserData, dataFetchCustomerData }
         });
       });
@@ -1516,10 +1619,10 @@ const [endDate, setEndDate] = useState(null);
                     <SelectContent>
                       <SelectGroup>
                         <SelectItem value="case">Case</SelectItem>
-                        <SelectItem value="??">??</SelectItem>
+                        {/* <SelectItem value="??">??</SelectItem>
                         <SelectItem value="!!">!!</SelectItem>
                         <SelectItem value="**">**</SelectItem>
-                        <SelectItem value="&&">&&</SelectItem>
+                        <SelectItem value="&&">&&</SelectItem> */}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -1552,10 +1655,10 @@ const [endDate, setEndDate] = useState(null);
                         <SelectItem value="first" className="p-0">
                           {dataFetchCustomerData.SiteAccount?.Company}
                         </SelectItem>
-                        <SelectItem value="??">??</SelectItem>
+                        {/* <SelectItem value="??">??</SelectItem>
                         <SelectItem value="!!">!!</SelectItem>
                         <SelectItem value="**">**</SelectItem>
-                        <SelectItem value="&&">&&</SelectItem>
+                        <SelectItem value="&&">&&</SelectItem> */}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -1572,6 +1675,8 @@ const [endDate, setEndDate] = useState(null);
                     key={index}
                     variant="underline"
                     value={tab.value}
+                    disabled={tab.disable}
+                   
                   >
                     {tab.label}
                   </TabsTrigger>
@@ -1875,32 +1980,35 @@ const [endDate, setEndDate] = useState(null);
                           " " +
                           dataFetchCustomerData?.MainAccount?.LastName
                     }
+                    readOnly
                   />
                 </CaseField>
                 <CaseField label="Primary Contact" icon>
                   <Input
                     variant="invisible"
                     value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
+                    readOnly
                   />
                 </CaseField>
                 <CaseField label="Submitted By">
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---"  />
                 </CaseField>
                 <CaseField label="Is Partner" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
                 <CaseField label=" Primary Email" icon>
                   <Input
                     variant="invisible"
                     value={dataFetchCustomerData.MainAccount?.Email}
                     placeholder="---"
+                    readOnly
                   />
                 </CaseField>
                 <CaseField label="Partner & Customer" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---"  readOnly/>
                 </CaseField>
                 <CaseField label="HIPAA" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
                 <CaseField label="Phone" icon>
                   {" "}
@@ -1909,7 +2017,7 @@ const [endDate, setEndDate] = useState(null);
                     : dataFetchCustomerData?.MainAccount?.Phone}
                 </CaseField>
                 <CaseField label="Region" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
                 <CaseField label="PIN">
                   <Input variant="invisible" placeholder="---" />
@@ -1921,7 +2029,7 @@ const [endDate, setEndDate] = useState(null);
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Customer Time Zone" icon>
-                  <Input variant="invisible" placeholder="---" />
+                  <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
                 <CaseField label="Country" icon>
                   <Input
@@ -1931,6 +2039,7 @@ const [endDate, setEndDate] = useState(null);
                         ? dataFetchCustomerData?.SiteAccount?.Country
                         : dataFetchCustomerData?.MainAccount?.Country
                     }
+                    readOnly
                   />                  
                 </CaseField>
                 <CaseField label="Parent Company Non-Latin">
@@ -2013,8 +2122,8 @@ const [endDate, setEndDate] = useState(null);
               <td className="border px-4 py-2">{item.CT_SNCode || "---"}</td>
             </tr>
           ))}
-          {(!dataFetchAssetInformation?.accessories ||
-            dataFetchAssetInformation.accessories.length === 0) && (
+          {(!caseDetails?.accessory ||
+            caseDetails.accessory.length === 0) && (
             <tr>
               <td className="border px-4 py-2 text-center" colSpan={5}>
                 No accessories found.
@@ -2076,9 +2185,10 @@ const [endDate, setEndDate] = useState(null);
                   <DatePicker
                     value={startDate}
                     onChange={setstartDate}
-                    // readOnly
+                    readOnly
                   ></DatePicker>{" "}
                 </CaseField>
+                {console.log(entitlementStatus)}
                 <CaseField label="OTC Code" icon span={2}>
                   <SearchCommandBlock
                     options={otcCode}
@@ -2356,7 +2466,7 @@ const [endDate, setEndDate] = useState(null);
                     value={formData?.NotesDisplay}
                   >
 
-                    {console.log(caseNotes)}
+                    
                   </textarea>
                 </div>
               </CardContent>
@@ -2372,30 +2482,34 @@ const [endDate, setEndDate] = useState(null);
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[60px]">No</TableHead>
+                  <TableHead>ReferenceId</TableHead>
                   <TableHead>Change By</TableHead>
                   <TableHead>Old Status</TableHead>
                   <TableHead>New Status</TableHead>
                   <TableHead>Change At</TableHead>
+                  <TableHead>Log Description</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {/* {actionLogs?.length > 0 ? (
+                {actionLogs?.length > 0 ? (
                   actionLogs.map((log, index) => (
                     <TableRow key={log.id || index}>
                       <TableCell>{index + 1}</TableCell>
-                      <TableCell>{log.changedBy}</TableCell>
-                      <TableCell>{log.oldStatus}</TableCell>
-                      <TableCell>{log.newStatus}</TableCell>
-                      <TableCell>{new Date(log.changedAt).toLocaleString()}</TableCell>
+                      <TableCell>{log.ReferenceId}</TableCell>
+                      <TableCell>{log.changedByUser?.Name}</TableCell>
+                      <TableCell>{log.dataOld}</TableCell>
+                      <TableCell>{log.dataNew}</TableCell>
+                      <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
+                      <TableCell>{log.logDescription}</TableCell>
                     </TableRow>
                   ))
-                ) : ( */}
+                ) : (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center italic">
                       No action logs available.
                     </TableCell>
                   </TableRow>
-                {/* )} */}
+                )}
               </TableBody>
             </Table>
           </CardContent>

@@ -43,8 +43,9 @@ import { CaseField } from "./quick-wo-input";
 
 import { TabsServiceMOLineItems } from "./service-case";
 import { Description } from "@radix-ui/react-dialog";
-
+import { useDraft } from "./DraftContext";
 export const ServiceMoDetail = () => {
+  const { updateDraft } = useDraft(); // Access updateDraft from the DraftContext
 
   const { lineItemID } = useParams();
 
@@ -135,7 +136,7 @@ export const ServiceMoDetail = () => {
         removedSerialNumber: data.RemovedSerialNumber || '',
         removedPartDescription: data.RemovedPartDescription || ''
       });
-  
+      updateDraft('moliId',data.lineItemID)
     } catch (err) {
       console.error("Failed to fetch Material Line Items orders:", err);
     Swal.fire('Error', 'Failed to fetch Material Line Items', 'error');
@@ -183,7 +184,7 @@ export const ServiceMoDetail = () => {
       )}
       {moLineItems.MOID ? (
         // <TabsServiceMOLineItems MOLineDetails={moLineItems}/>
-        <TabsServiceMOLineItems MOLineDetails={MODetailInput} LineItemID={lineItemID}/>
+        <TabsServiceMOLineItems MOLineDetails={MODetailInput} LineItemID={lineItemID} moLineItems={moLineItems}/>
       ) : ''}
       {/* {console.log(moLineItems)} */}
     <Card className="mt-2 rounded-none">

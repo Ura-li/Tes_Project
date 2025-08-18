@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from "react";
+import React, { use, useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router";
 import {
@@ -66,11 +66,12 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import { useDraft } from "./DraftContext";
 
 export const ServiceWork = () => {
   const user = getUserFromToken();
   const { woid } = useParams();
-
+  const { updateDraft } = useDraft();
   const [workOrders, setWorkOrders] = useState([]);
   const fetchWorkOrders = async () => {
     try {
@@ -151,122 +152,128 @@ export const ServiceWork = () => {
     }))
   }
 
+  const hasFetched = useRef(false); 
+
   useEffect(() => {
-    const fetchAllData = async () => {
-      Swal.fire({
-        title: "Please wait...",
-        text: "Loading Work Order Details...",
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-      });
+  if (!woid || hasFetched.current) return;
+  hasFetched.current = true;
+
+  const fetchAllData = async () => {
+    Swal.fire({
+      title: "Please wait...",
+      text: "Loading Work Order Details...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
 
       try {
         const resWO = await ApiCustomer.get(`/api/work-order/${woid}`);
         const workOrderData = resWO.data.data;
         setWorkOrders(workOrderData);
-
+        // console.log('Value of workorder data',workOrderData)
+        updateDraft('woid',workOrderData.WOID)
         const resMO = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
         setMaterialOrders(resMO.data.data);
 
-        if (workOrderData?.CaseID) {
-          const resCI = await ApiCustomer.get(
-            `/api/case-information/${workOrderData.CaseID}`
-          );
-          setCaseInformation(resCI.data.data);
+      if (workOrderData?.CaseID) {
+        const resCI = await ApiCustomer.get(
+          `/api/case-information/${workOrderData.CaseID}`
+        );
+        setCaseInformation(resCI.data.data);
 
-          const resBooking = await ApiCustomer.get(
-            `/api/bookings?WOID=${woid}`
-          );
-          // console.log("Res Booking : ",resBooking.data.data)
+        const resBooking = await ApiCustomer.get(
+          `/api/bookings?WOID=${woid}`
+        );
+        const resOwner = await ApiCustomer.get(
+          `/api/user/${workOrderData.OwnerID}`
+        );
 
-          const resOwner = await ApiCustomer.get(
-            `/api/user/${workOrderData.OwnerID}`
-          );
+        const resMainAccount = resCI.data.data.contact_information;
+        setDataFetchCustomerData({
+          MainAccount: resMainAccount,
+        });
 
-          // console.log("Case Detail : ", caseDetails);
-          const resMainAccount = resCI.data.data.contact_information;
-          setDataFetchCustomerData({
-            MainAccount: resMainAccount,
-          });
-          if (caseInformation.SiteAccountID !== null) {
-            const resSiteAccount = resCI.data.data.site_account;
-            setDataFetchCustomerData((prev) => ({
-              ...prev,
-              SiteAccount: resSiteAccount,
-              Type: "SiteAccount",
-            }));
-          } else {
-            setDataFetchCustomerData((prev) => ({
-              ...prev,
-              type: "Individual", // fallback if no site account
-            }));
-          }
-
-          // const res = await ApiCustomer.get(`/api/`)
-
-          setOwnerWorkOrder(resOwner.data.data);
-          setBookings(resBooking.data.data);
-
-          setSLA((prev) => ({
+        if (resCI.data.data.site_account) {
+          setDataFetchCustomerData((prev) => ({
             ...prev,
-            requestedDateTimeCustomer:
-              resWO.data.data.RequestedDateTimeCustomer || "",
-            slaJeopardy: resWO.data.data.SLAJeopardy || "",
-            dueDateCustomer: resWO.data.data.DueDateCustomer || "",
-            coverageWindow: resWO.data.data.CoverageWindow || "",
-            response: resWO.data.data.Response || "",
-            otcCode: resWO.data.data.OTCCode || "",
-            guaranteedFixTimeCustomer:
-              resWO.data.data.GuaranteedFixTimeCustomer || "",
-            earlyStartDateTimeCustomer:
-              resWO.data.data.EarlyStartDateTimeCustomer || "",
-            latestStartDateTimeCustomer:
-              resWO.data.data.LatestStartDateTimeCustomer || "",
-            slaReschedule: resWO.data.data.SLAReschedule || "",
-            activeScheduleDate: resWO.data.data.ActiveScheduleDate || "",
-            slaErrorDescription: resWO.data.data.SLAErrorDescription || "",
-            casePriorityIndex: resWO.data.data.CasePriorityIndex ?? "", // use ?? to allow 0
+            SiteAccount: resCI.data.data.site_account,
+            Type: "SiteAccount",
           }));
-          setWOGeneral((prev) => ({
+        } else {
+          setDataFetchCustomerData((prev) => ({
             ...prev,
-            IncomingChannel: "",
-            WorkOrderNumber: woid,
-            WorkOrderType: workOrderData.WorkOrderType,
-            Priority: workOrderData.Priority,
-            SystemStatus: workOrderData.SystemStatus,
-            SubStatus: workOrderData.SubStatus,
-            BookableResourceBooking: resBooking.data.data.BookingDetails?.ResourceId,
-            ServiceOfferID: resCI.data.data.servicecatalog?.warranty_services?.Service_offerID,
-            ServiceDescription: resCI.data.data.servicecatalog?.warranty_services?.Service_description,
-            PatnerCaseID: "",
-            PatnerStatus: "",
-            RecommendedResource:"",
-            ShipmentCountry: workOrderData.ShipmentCountry,
-            ShipmentState: workOrderData.ShipmentState
-          }))
-
-          console.log("Res WO : ", resWO.data.data);
-          console.log("Res MO : ", resMO.data.data);
-          console.log("Res CI : ", resCI.data.data);
-          console.log("Res Booking : ", resBooking.data.data);
-          console.log("Res Owner : ", resOwner.data.data);
-          console.log("Res Main Account : ", resMainAccount);
-          console.log("res wo general : ",WOGeneral)
+            type: "Individual",
+          }));
         }
 
-        Swal.close();
-      } catch (err) {
-        console.error("Fetch error:", err);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Something went wrong while loading data!",
-        });
-      }
-    };
+        setOwnerWorkOrder(resOwner.data.data);
+        setBookings(resBooking.data.data);
 
-    if (woid) fetchAllData();
-   }, [woid]);
+        setSLA((prev) => ({
+          ...prev,
+          requestedDateTimeCustomer:
+            resWO.data.data.RequestedDateTimeCustomer || "",
+          slaJeopardy: resWO.data.data.SLAJeopardy || "",
+          dueDateCustomer: resWO.data.data.DueDateCustomer || "",
+          coverageWindow: resWO.data.data.CoverageWindow || "",
+          response: resWO.data.data.Response || "",
+          otcCode: resWO.data.data.OTCCode || "",
+          guaranteedFixTimeCustomer:
+            resWO.data.data.GuaranteedFixTimeCustomer || "",
+          earlyStartDateTimeCustomer:
+            resWO.data.data.EarlyStartDateTimeCustomer || "",
+          latestStartDateTimeCustomer:
+            resWO.data.data.LatestStartDateTimeCustomer || "",
+          slaReschedule: resWO.data.data.SLAReschedule || "",
+          activeScheduleDate: resWO.data.data.ActiveScheduleDate || "",
+          slaErrorDescription: resWO.data.data.SLAErrorDescription || "",
+          casePriorityIndex: resWO.data.data.CasePriorityIndex ?? "",
+        }));
+
+        setWOGeneral((prev) => ({
+          ...prev,
+          IncomingChannel: "",
+          WorkOrderNumber: woid,
+          WorkOrderType: workOrderData.WorkOrderType,
+          Priority: workOrderData.Priority,
+          SystemStatus: workOrderData.SystemStatus,
+          SubStatus: workOrderData.SubStatus,
+          BookableResourceBooking:
+            resBooking.data.data.BookingDetails?.ResourceId,
+          ServiceOfferID:
+            resCI.data.data.servicecatalog?.warranty_services?.Service_offerID,
+          ServiceDescription:
+            resCI.data.data.servicecatalog?.warranty_services
+              ?.Service_description,
+          PatnerCaseID: "",
+          PatnerStatus: "",
+          RecommendedResource: "",
+          ShipmentCountry: workOrderData.ShipmentCountry,
+          ShipmentState: workOrderData.ShipmentState,
+        }));
+      }
+
+      if (resWO.data.data.RequestedDateTimeCustomer == null) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning",
+          text: "The Work Order does not have Response Time Value, nor a Repair Time Value and therefore the system cannot perform the SLA Calculation\nPlease Create Booking First.",
+        });
+      } else {
+        Swal.close();
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong while loading data!",
+      });
+    }
+  };
+
+  fetchAllData();
+}, [woid]);
 
   useEffect(() => {
     console.log("Data Fetch Customer Data in WO : ", dataFetchCustomerData);
@@ -412,6 +419,7 @@ export const ServiceWork = () => {
                 variant="underline"
                 value="wo_details"
                 className="cursor-pointer white"
+                disabled
               >
                 WO Details
               </TabsTrigger>
@@ -426,6 +434,7 @@ export const ServiceWork = () => {
                 variant="underline"
                 value="wo_Notes_Timeline"
                 className="cursor-pointer"
+                disabled
               >
                 WO Notes/Timeline
               </TabsTrigger>
@@ -911,7 +920,7 @@ export const ServiceWork = () => {
                       ? materialOrders.map((material) => (
                           <TableRow key={material.MOID}>
                             <TableCell className="font-medium">
-                              <Link to={`/material-order/${material.MOID}`}>
+                              <Link to={`/app/material-order/${material.MOID}`}>
                                 {material.MOID} on {material.WOID}
                               </Link>
                             </TableCell>
@@ -1001,6 +1010,7 @@ export const ServiceWork = () => {
                     + New Bookable Resource
                   </Link> */}
                 <NewBookableResourceBooking
+                  CaseID={caseInformation?.CaseID}
                   WOID={workOrders.WOID}
                   CreatedBy={user.id}
                   RequestedDateTimeCustomer={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}
@@ -1029,7 +1039,7 @@ export const ServiceWork = () => {
                         <TableRow
                           key={booking.BookingId || index}
                           onClick={() =>
-                            navigate(`/bookings/${booking.BookingId}`)
+                            navigate(`/app/bookings/${booking.BookingId}`)
                           }
                         >
                           <TableCell>
@@ -1158,7 +1168,7 @@ export const ServiceWork = () => {
                   </CardHeader>
                   <CardContent className="flex flex-col items-end justify-end p-0 ">
                     <div className="flex gap-2">
-                      <Button variant={"ghost"}>
+                      <Button variant={"ghost"} onClick={() => navigate('/app/labor')}>
                         <span className="flex items-center gap-3">
                           <Plus className=" size-5" /> New Labor Types
                         </span>

@@ -22,6 +22,7 @@ export function LoginForm({
       Swal.fire({
       title: 'Logging in...',
       allowOutsideClick: false,
+      allowEscapeKey: false,
       didOpen: () => {
         Swal.showLoading();
       }
@@ -39,9 +40,10 @@ export function LoginForm({
       icon: "success",
       allowOutsideClick: false,
       timer: 1500, 
-      showConfirmButton: false
+      showConfirmButton: false,
+      allowEscapeKey: false,
       }).then((result) => {
-        window.location.href = '/';
+        window.location.href = '/app';
       });
     } catch (error) {
       console.error('Login failed:', error);
@@ -59,9 +61,9 @@ export function LoginForm({
           <form className="p-6 md:p-8" onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <h1 className="text-2xl font-bold">Welcome back Patner</h1>
                 <p className="text-muted-foreground text-balance">
-                  Login to your Acme Inc account
+                  Login to your Company Inc account
                 </p>
               </div>
               <div className="grid gap-3">
@@ -80,7 +82,7 @@ export function LoginForm({
               <Button type="submit" className="w-full">
                 Login
               </Button>
-              <div
+              {/* <div
                 className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center">
                 <span className=" text-muted-foreground relative z-10 px-2">
                   Or continue with
@@ -111,28 +113,28 @@ export function LoginForm({
                   </svg>
                   <span className="sr-only">Login with Meta</span>
                 </Button>
-              </div>
-              <div className="text-center text-sm">
+              </div> */}
+              {/* <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
                 <a href="#" className="underline underline-offset-4">
                   Sign up
                 </a>
-              </div>
+              </div> */}
             </div>
           </form>
           <div className="bg-muted relative hidden md:block">
             <img
               src="/hp.png"
               alt="Image"
-              className="p-10 mt-15" />
+              className="p-10 mt-5" />
           </div>
         </CardContent>
       </Card>
-      <div
+      {/* <div
         className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
-      </div>
+      </div> */}
     </div>
   );
 }

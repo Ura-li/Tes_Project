@@ -1,5 +1,5 @@
 import {useState, useEffect, useMemo} from "react";
-import { ChartArea,ChartBar, ChartPie } from "./components/sc-chart";
+import { ChartArea,ChartBar , ChartPie } from "./components/sc-chart";
 import { Case_table } from "./master_table";
 import ApiCustomer from "@/api"
 import { parse } from "date-fns";
@@ -98,6 +98,7 @@ useEffect(() => {
       <div className="grid auto-rows-min gap-4 md:grid-cols-3 p-3">
         <div className="aspect-video rounded-xl bg-muted/50" >
           <ChartArea data={monthlyChartData}></ChartArea>
+          {/* <ChartLine data={monthlyChartData}></ChartLine> */}
         </div>
         <div className="aspect-video rounded-xl bg-muted/50" > 
         <ChartBar accessibilityLayer data={weeklyChartData}></ChartBar>

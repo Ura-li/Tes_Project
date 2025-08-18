@@ -30,6 +30,7 @@ import ApiCustomer from './api'
 
 import {Outlet} from "react-router"
 import debounce from 'lodash.debounce';
+
 export function Breadcrumbs() {
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);
@@ -117,7 +118,7 @@ export function GlobalSearchBar() {
           <div>
             <strong>Cases</strong>
             {results.cases.map(c => (
-              <Link key={c.CaseID} to={`/case/${c.CaseID}`} className="block hover:underline">
+              <Link key={c.CaseID} to={`/app/case/${c.CaseID}`} className="block hover:underline">
                 {c.CaseID} - {c.site_account?.Company}
               </Link>
             ))}
@@ -125,7 +126,7 @@ export function GlobalSearchBar() {
           <div>
             <strong>Work Orders</strong>
             {results.workOrders.map(wo => (
-              <Link key={wo.WOID} to={`/work/${wo.WOID}`} className="block hover:underline">
+              <Link key={wo.WOID} to={`/app/work/${wo.WOID}`} className="block hover:underline">
                 {wo.WOID}
               </Link>
             ))}
@@ -133,7 +134,7 @@ export function GlobalSearchBar() {
           <div>
             <strong>Material Orders</strong>
             {results.materialOrders.map(mo => (
-              <Link key={mo.MOID} to={`/material_order/${mo.MOID}`} className="block hover:underline">
+              <Link key={mo.MOID} to={`/app/material_order/${mo.MOID}`} className="block hover:underline">
                 {mo.MOID}
               </Link>
             ))}

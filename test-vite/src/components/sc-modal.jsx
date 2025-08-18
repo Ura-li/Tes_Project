@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"
-import { Plus,PhoneCall, Copy, ExternalLink, XIcon } from "lucide-react";
+import { Plus,PhoneCall, Copy, ExternalLink, XIcon, ArchiveIcon } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { SelectBar3, SelectBarContact4, SelectYN } from "./sc-select";
 import { 
@@ -74,6 +74,10 @@ import {
 
 import { getUserFromToken } from "@/lib/utils/auth";
 import { Description } from "@radix-ui/react-alert-dialog";
+import { Card, CardContent, CardTitle } from "./ui/card";
+import { Separator } from "./ui/separator";
+import ServiceRequestPDF from "./service-request-form";
+import { pdf } from '@react-pdf/renderer';
 
 // const assets = [
 //   {
@@ -336,6 +340,16 @@ export function BtnModalContact({
   const handlerContactSubmit = async () => {
     console.log("formDataContact", formDataContact);
     try {
+        Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we save your data.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
       let responseMessage = '';
   
       if (formDataContact.ContactID) {
@@ -976,12 +990,13 @@ export function AssetEdit ({ assetId, onUpdate }) {
     if (!assetId) return; // Cegah fetch jika assetId tidak ada
     try {
       const response = await ApiCustomer.get(`/api/asset-information/${assetId}`);
+      console.log("Response fetch asset: ", response.data);
       const data = response.data.data;
       setAsset(data);
       setSerialNumber(data?.SerialNumber || "");
-      setProductName(data?.ProductName || "");
+      setProductName(data?.product_information?.ProductName || "");
       setProductNumber(data?.ProductNumber || "");
-      setProductLine(data?.ProductLine || "");
+      setProductLine(data?.product_information?.ProductLine || "");
     } catch (error) {
       console.error("Error fetching asset information:", error);
     }
@@ -1228,6 +1243,15 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
     }
   
     try {
+      Swal.fire({
+        title: 'Updating company information...',
+        text: 'Mohon tunggu sebentar',
+        didOpen: () => {
+          Swal.showLoading();
+        },
+        showConfirmButton: false,
+        allowOutsideClick: false,
+      })
       await ApiCustomer.patch(`/api/site_account/${siteAccountId}`, {
         Company: companyName,
         Email: email,
@@ -1498,14 +1522,14 @@ export function ContactEdit({ contactID, onUpdate }) {
           <Pencil />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent >
         <DialogHeader>
           <DialogTitle>Edit Contact Information</DialogTitle>
           <DialogDescription>
             Update the details of the contact. Fields marked with * are required.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
+        <div classname="h-[500px]">
           <Input value={salutation} onChange={(e) => setSalutation(e.target.value)} placeholder="Salutation" />
           <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name *" />
           <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name *" />
@@ -4537,10 +4561,10 @@ export function BtnModalsServiceCatalog({
       setSelectedWarrantyServices(service);
     };
 
-    useEffect(() => {
-      console.log("Selected Service:", selectedWarrantyServices);
-    }, [selectedWarrantyServices]);
-
+  useEffect(() => {
+    console.log("Selected Services:", selectedWarrantyServices);
+  }, [selectedWarrantyServices]);
+  
 
 
   //part
@@ -4651,6 +4675,34 @@ export function BtnModalsServiceCatalog({
         IncidentType: selected,
         OwnerID: data.user.id,
       });
+      console.log(res)
+      const updateLogCase = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseDetails.CaseID}`,
+        model: "Case",
+        dataOld: caseDetails.CaseStatus,
+        dataNew: "InActive",
+        changedBy: data.user.id,
+        logDescription: `Edit: change status from ${caseDetails.CaseStatus} to InActive`
+      })
+      const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseDetails.CaseID}`,
+        ReferenceId: `${res.data.WOID}`,
+        model: "Work",
+        dataOld: "OPEN_UNSCHEDULED",
+        dataNew: "OPEN_UNSCHEDULED",
+        changedBy: data.user.id,
+        logDescription: `New Work Order : ${res.data.WOID}`
+      })
+      const updateMaterialLog = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseDetails.CaseID}`,
+        ReferenceId: `${res.data.MOID}`,
+        model: "Material Order",
+        dataOld: "New",
+        dataNew: "New",
+        changedBy: data.user.id,
+        logDescription: `New Material Order : ${res.data.MOID}`
+      })
+  
       
       Swal.close(); 
       
@@ -5092,7 +5144,8 @@ export function BtnModalsServiceCatalog({
               <Button variant={'search'} className="" onClick={createOrder}>Create Order</Button>
               
               <Label htmlFor="incident" className={'font-bold '}>Incident Type</Label>
-              <Select onChange={setSelected} defaultValue="DepotRepair">
+              
+              <Select value={selected} onValueChange={setSelected} defaultValue="DepotRepair">
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -9017,23 +9070,23 @@ export function CrsEdit({ id_csr, onUpdate }) {
         const response = await ApiCustomer.get(`/api/caseResolution/${id_csr}`);
         const data = response.data.data;
 
-              const formatDateForInput = (dateString) => {
-        if (!dateString) return "";
-        const date = new Date(dateString);
-        const offset = date.getTimezoneOffset();
-        const localDate = new Date(date.getTime() - offset * 60 * 1000);
-        return localDate.toISOString().slice(0, 16); // ambil 'YYYY-MM-DDTHH:MM'
-      };
+        const formatDateForInput = (dateString) => {
+          if (!dateString) return "";
+          const date = new Date(dateString);
+          const offset = date.getTimezoneOffset();
+          const localDate = new Date(date.getTime() - offset * 60 * 1000);
+          return localDate.toISOString().slice(0, 16); // ambil 'YYYY-MM-DDTHH:MM'
+        };
 
-            setFormData({
-        caseResolutionCode: data.caseResolutionCode,
-        autoClose: data.autoClose,
-        caseReadyForClosure: data.caseReadyForClosure,
-        readyForCloseDays: data.readyForCloseDays,
-        readyForClosureDate: formatDateForInput(data.readyForClosureDate),
-        pendingCustomerAction: formatDateForInput(data.pendingCustomerAction),
-        customerRequestedCloseDate: formatDateForInput(data.customerRequestedCloseDate),
-      });
+        setFormData({
+          caseResolutionCode: data.caseResolutionCode,
+          autoClose: data.autoClose,
+          caseReadyForClosure: data.caseReadyForClosure,
+          readyForCloseDays: data.readyForCloseDays,
+          readyForClosureDate: formatDateForInput(data.readyForClosureDate),
+          pendingCustomerAction: formatDateForInput(data.pendingCustomerAction),
+          customerRequestedCloseDate: formatDateForInput(data.customerRequestedCloseDate),
+        });
       } catch (error) {
         console.error("Error fetching Case Resolution:", error);
         Swal.fire({
@@ -9204,3 +9257,151 @@ export function CrsDelete({ id_csr, onDelete }) {
       </Button>
     );
   }
+
+
+
+
+//! Home Page Modals
+
+export function FindCase({}){
+const [openInfo, setOpenInfo] = useState(false);
+const [findingCase, setFindingCase] = useState({
+  Caseid: '',
+  Phoneno: '',
+})
+
+const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFindingCase((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+const [caseData, setCaseData] = useState({})
+console.log(caseData);
+    const findcase = async () => {
+    const baseurl = `/api/case-information/${findingCase.Caseid}`;
+    Swal.fire({
+      title: "Memuat Data Case....",
+      text: "Mohon Tunggu Sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    // setError(null);
+    
+
+    try {
+      const response = await ApiCustomer.get(baseurl);
+      console.log("TJEdata",response.data.data.site_account.Company);
+      console.log("DAta",response.data.data);
+      if (response.data.success && response.data.data.contact_information.Mobile === findingCase.Phoneno) {
+        setCaseData(response.data.data);
+        setOpenInfo(true);
+      Swal.close(); // <-- Tambahkan Swal.close() setelah berhasil
+      } else {
+        // setError("Failed to fetch case data");
+        Swal.fire({
+        title: "Error!",
+        text: "Case Tidak Ditemukan",
+        icon: "error",
+        timer:2000,
+        timerProgressBar: true,
+        
+      });
+      }
+
+    } catch (err) {
+      console.error("Error fetching case data:", err);
+      setError("Error fetching data");
+
+      Swal.close(); // Tetap tutup loading jika error
+
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data Case.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+  return(
+    <>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant={'outline'} className={'text-white bg-green-600 hover:bg-emerald-700 hover:text-green-300'} >Search Case</Button>
+      </DialogTrigger>
+      <DialogContent className={'flex   max-w-screen min-w-[60%] h-[fit]'}>
+        <DialogHeader className={'flex flex-1 flex-col'}>
+          <DialogTitle className={'text-2xl'}>Search The Case</DialogTitle>
+          <DialogDescription>Input Case ID and Phone Number To search Case</DialogDescription>
+          <div className="flex gap-10">
+            <Label htmlFor='Caseid'> Case ID</Label>
+            <Input variant={'outline'} className={'flex-1/2'} id='Caseid'value={findingCase.Caseid} onChange={handleInputChange} placeholder={'example : C-0000'}/>
+          </div>
+          <div className="flex gap-10">
+            <Label htmlFor='Phoneno'> Phone Number</Label>
+            <Input variant={'outline'} className={'flex-1/2'} id='Phoneno' value={findingCase.Phoneno} onChange={handleInputChange} />
+          </div>
+          <Button variant={'search'} onClick={findcase}>Find Case</Button>
+          {openInfo? <Card>
+            <CardContent className={'flex flex-col justify-center items-center gap-4'}>
+              <CardTitle className={'flex items-center gap-6'} >Print Into PDF <ArchiveIcon/> </CardTitle>
+              <Button onClick={async() => {
+                      const blob = await pdf(<ServiceRequestPDF caseDetails={caseData}  />).toBlob();
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = 'Service_Request_Form.pdf';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+              }} > Download </Button>
+            </CardContent>
+          </Card> : ''}
+        </DialogHeader>
+           <DialogFooter className={'grid grid-cols-2 w-full flex-1'}>
+            <CardTitle className={'text-2xl col-span-2'}>Case Information</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>Case status </CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseStatus || 'N/A'}</CardTitle>
+
+            {/* <CardTitle className={'p-2 bg-gray-100'}>Bench Start Repair, Onsite Repair</CardTitle> */}
+
+            <CardTitle className={'p-2 bg-gray-100'}>Case ID 	</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseID || 'N/A'} </CardTitle>
+
+            <CardTitle className={'p-2 bg-gray-100'}>Reference case 	</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseSubject || 'N/A'} </CardTitle>
+
+            <CardTitle className={'p-2 bg-gray-100'}>Warranty status 	 	</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>Out Warranty</CardTitle>
+
+            <CardTitle className={'p-2 bg-gray-100'}>Customer company 	</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.site_account?.Company || 'N/A'}</CardTitle>
+
+            <CardTitle className={'p-2 bg-gray-100'}>Customer name 	    </CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.contact_information?.FirstName || caseData?.contact_information?.LastName
+              ? `${caseData?.contact_information?.FirstName || ''} ${caseData?.contact_information?.LastName || ''}`.trim()
+              : 'N/A'}	</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>Received date 	 </CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CreatedOn ? new Date(caseData.CreatedOn).toLocaleDateString() : 'N/A'}</CardTitle>
+
+            <CardTitle className={'text-2xl col-span-2 whitespace-nowrap'}>Product Information</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>Serial no. 	 	</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.SerialNumber ?? 'N/A'}</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>Product type 	 	</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.product_information?.product_type?.ProductType ?? 'N/A'}</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>Product no. 	 </CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.ProductNumber ?? 'N/A'}</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>Product name 	 	</CardTitle>
+            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.product_information?.ProductName ?? 'N/A'}</CardTitle>
+          </DialogFooter> 
+      </DialogContent>
+    </Dialog>
+    </>
+  )
+}

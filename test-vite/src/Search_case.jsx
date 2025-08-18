@@ -431,6 +431,15 @@ const Search_case = () => {
   
 
     try {
+      Swal.fire({
+         title: 'Saving...',
+         allowOutsideClick: false,
+         allowEscapeKey: false,
+         didOpen: () => {
+           Swal.showLoading();
+         }
+       });
+
       const response = await ApiCustomer.post(
         "/api/site_account",
         formDataSiteAccount
@@ -534,12 +543,20 @@ const Search_case = () => {
     Swal.fire({
       icon: 'warning',
       title: 'Perhatian!',
-      text: 'Harap isi semua field yang diperlukan (Nama Depan, Nama Belakang, dan Email).',
+      text: 'Harap isi semua field yang diperlukan (Nama Depan, Nama Belakang, Email, Phone, Alamat, Kota).',
     });
     return; // 🚫 Jangan lanjut kirim data
   }
 
   try {
+      Swal.fire({
+         title: 'Saving...',
+         allowOutsideClick: false,
+         allowEscapeKey: false,
+         didOpen: () => {
+           Swal.showLoading();
+         }
+       });
     const response = await ApiCustomer.post(
       "/api/contact-information",
       formDataContact
@@ -647,10 +664,23 @@ const Search_case = () => {
     }
   
     try {
+      Swal.fire({
+        title: 'Saving.....',
+        text: 'Please wait while we save your data.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
+      })
       const data = {
         user: getUserFromToken()
       }
       console.log("Data From New Create Case : ", data)
+
+      // Filter out empty accessories
+      const filteredAccessories = accessories.filter(acc => 
+        acc.name.trim() || acc.note.trim() || acc.code.trim()
+      );
+
       const newCase = {
         AssetID: selectedAssetForCase.AssetID,
         ContactID: selectedContactForCase.ContactID,
@@ -670,11 +700,21 @@ const Search_case = () => {
         CreatedBy: data.user.id,
         ProblemDescription : problemDesc,
         CaseNoteProduct: CaseNoteProduct,
-        accessories
+        ...(filteredAccessories.length > 0 && { accessories: filteredAccessories })
       };
       console.log("Create Case Data : ", newCase)
-  
+      
       const res = await ApiCustomer.post("/api/case-information", newCase);
+      const caseid = res.data.data.CaseID 
+      const updateLog = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseid}`,
+        ReferenceId: `${caseid}`,
+        model: "Case",
+        dataOld: "New",
+        dataNew: res.data.data.CaseStatus,
+        changedBy: data.user.id,
+        logDescription: `New Case : ${caseid}`
+      })
   
       // SweetAlert sukses + redirect
       Swal.fire({
@@ -684,7 +724,7 @@ const Search_case = () => {
         showConfirmButton: false,
         timer: 2000,
       }).then(() => {
-        navigate(`/case/${res.data.data.CaseID}`);
+        navigate(`/app/case/${res.data.data.CaseID}`);
       });
   
     } catch (error) {

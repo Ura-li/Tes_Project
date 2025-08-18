@@ -50,6 +50,8 @@ import { CaseField } from './quick-wo-input';
 import DatePicker from './date-picker';
 import { TabsBooking } from './tab';
 
+import { getUserFromToken } from "@/lib/utils/auth";
+
 const workorder = [
   {
     workordernumber: "WO-027816939",
@@ -248,6 +250,14 @@ export function ServiceBooking ({BookingId , woid}) {
   }
 
   const handleUpdate = async () => {
+    Swal.fire({
+    title: 'Saving...',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
     const updatedBookingData = {
       ...bookingData, // keep all original fields
       ResourceId: resourceId,
@@ -284,7 +294,7 @@ export function ServiceBooking ({BookingId , woid}) {
       Swal.fire({
         title: 'Success',
         icon: "success",
-        text: "Booking telas berhasil di simpan",
+        text: "Booking telah berhasil di simpan",
       }).then(() => {
         window.location.href = `/work/${bookingData.WOID}`
       })
@@ -897,7 +907,9 @@ export function ServiceBooking ({BookingId , woid}) {
 const CheckRequestedDateTimeCustomer = async (rawDateTime) => {
   try {
     // 💡 Tambahan keamanan sebelum lanjut
-    if (!rawDateTime || typeof rawDateTime !== 'string' || rawDateTime.trim() === "") {
+    if (!rawDateTime || 
+      !(rawDateTime instanceof Date) || 
+      isNaN(rawDateTime.getTime())) {
       await Swal.fire({
         icon: 'warning',
         title: "Gagal membuat booking",
@@ -908,7 +920,7 @@ const CheckRequestedDateTimeCustomer = async (rawDateTime) => {
         allowEscapeKey: false,
         allowOutsideClick: false,
       });
-      window.location.reload();
+      // window.location.reload();
       return false;
     }
 
@@ -964,7 +976,7 @@ const CheckRequestedDateTimeCustomer = async (rawDateTime) => {
 };
 
 
-export function NewBookableResourceBooking({ WOID, CreatedBy, RequestedDateTimeCustomer}) {
+export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedDateTimeCustomer}) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false)
 
@@ -979,15 +991,23 @@ export function NewBookableResourceBooking({ WOID, CreatedBy, RequestedDateTimeC
       
       const data = {
         WOID: WOID,
-        CreatedBy: CreatedBy
+        CreatedBy: CreatedBy,
+        user: getUserFromToken()
       }
       const response = await ApiCustomer.post('/api/bookings', data);
-    
-      
+      const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${CaseID}`,
+        ReferenceId: `${data.WOID}`,
+        model: "Work",
+        dataOld: "OPEN_UNSCHEDULED",
+        dataNew: "OPEN_SCHEDULED",
+        changedBy: data.user.id,
+        logDescription: `Edit : change status from OPEN_UNSCHEDULED to OPEN_SCHEDULED`
+      })
       if (response.status === 201) {
         const { BookingId } = response.data;
         // Lanjut ke navigasi sambil bawa BookingId
-        navigate(`/bookings/${BookingId}`);
+        navigate(`/app/bookings/${BookingId}`);
       }
     } catch (error) {
       console.error('Gagal membuat booking:', error);
@@ -1005,7 +1025,7 @@ export function NewBookableResourceBooking({ WOID, CreatedBy, RequestedDateTimeC
           Tambah Booking Baru
         </Button>
       </DialogTrigger>
-        <Label className="text-red-400">*</Label>
+      <Label className="text-red-400">*</Label>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Booking</DialogTitle>

@@ -46,11 +46,24 @@ import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectVa
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const itemsPerPage = 10;
+
+  //set debounce
+  useEffect(() => {
+    const handler = setTimeout(()=>{
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1)
+    }, 500)
+
+    return () =>{
+      clearTimeout(handler);
+    }
+  }, [searchTerm])
 
   // Fungsi untuk mengambil data dari API
   const fetchContacts = async () => {
@@ -70,7 +83,7 @@ export const Contact_table = () => {
 
     try {
       const response = await ApiCustomer.get(
-        `/api/contact-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`
+        `/api/contact-information?page=${currentPage}&limit=${itemsPerPage}&search=${debouncedSearchTerm}`
       );
       setContacts(response.data.data); // Menyimpan data kontak ke state
       setTotalPages(response.data.totalPages);
@@ -85,7 +98,7 @@ export const Contact_table = () => {
 
   useEffect(() => {
     fetchContacts();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, debouncedSearchTerm]);
 
   return (
     <div className="p-4">
@@ -215,8 +228,9 @@ export const Contact_table = () => {
 export const Company_table = () => {
   const [companies, setCompanies] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [filteredCompanies, setFilteredCompanies] = useState([]); 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const itemsPerPage = 10;
@@ -224,8 +238,22 @@ export const Company_table = () => {
   //set modal
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  useEffect(() => {
+    const handler = setTimeout(()=>{
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1)
+    }, 500)
+
+    return () =>{
+      clearTimeout(handler);
+    }
+  }, [searchTerm])
+
   // Fungsi untuk mengambil data dari API
   const fetchCompanies = async () => {
+    setError(null);
+    setLoading(true);
+
     Swal.fire({
       title: "Memuat Data Company...",
       text: "Mohon tunggu sebentar",
@@ -236,34 +264,48 @@ export const Company_table = () => {
       },
     });
 
-    setError(null);
-
     try {
       const response = await ApiCustomer.get(
-        `/api/site_account?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`
+        `/api/site_account`
       );
       setCompanies(response.data.data);
-      setTotalPages(response.data.totalPages);
 
       Swal.close();
     } catch (err) {
       console.error("Error fetching company data:", err);
       setError("Failed to fetch data");
 
-      Swal.close(); // Tetap tutup loading walaupun error
       Swal.fire({
         title: "Error!",
         text: "Gagal mengambil data perusahaan.",
         icon: "error",
         confirmButtonText: "OK",
       });
+    } finally {
+      Swal.close(); 
+      setLoading(false);
+
     }
   };
 
   useEffect(() => {
     fetchCompanies();
-  }, [currentPage, searchTerm]);
+  }, []);
 
+  useEffect(() =>{
+    const filtered = companies.filter((company) =>{
+      return Object.values(company).some((val)=> 
+        val?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    })
+    setFilteredCompanies(filtered)
+  }, [debouncedSearchTerm, companies])
+
+  const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
+  const currentData = filteredCompanies.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Company Table</h2>
@@ -299,8 +341,8 @@ export const Company_table = () => {
             </tr>
           </thead>
           <tbody>
-            {companies.length > 0 ? (
-              companies.map((company, index) => (
+            {filteredCompanies.length > 0 ? (
+              filteredCompanies.map((company, index) => (
                 <tr key={company.SiteAccountID} className="hover:bg-gray-100">
                   <td className="p-2 text-center border">
                     {(currentPage - 1) * itemsPerPage + index + 1}
@@ -366,6 +408,7 @@ export const Company_table = () => {
 
 export const Case_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Jumlah data per halaman
   const [loading, setLoading] = useState(false);
@@ -374,6 +417,19 @@ export const Case_table = () => {
   const [openClose, setOpenClose] = useState('Open')
   const state = ['Open','Close','InActive']
   console.log("casestate",openClose);
+
+  // ⏳ Debounce effect
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset page
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
   const fetchCaseDataTable = async () => {
     const baseurl = `/api/case-information`;
     const url =
@@ -397,6 +453,7 @@ export const Case_table = () => {
       const response = await ApiCustomer.get(url);
 
       if (response.data.success) {
+        console.log(response.data.data)
         setCaseData(response.data.data);
       } else {
         setError("Failed to fetch case data");
@@ -426,7 +483,7 @@ export const Case_table = () => {
   // Filter data berdasarkan pencarian
   const filteredCaseTable = caseData.filter((item) =>
     Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     )
   );
 
@@ -512,7 +569,7 @@ export const Case_table = () => {
               >
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/case/${caseItem.CaseID}`)}
+                  onClick={() => navigate(`/app/case/${caseItem.CaseID}`)}
                 >
                   {caseItem.CaseID}
                 </td>
@@ -565,6 +622,7 @@ export const Case_table = () => {
 
 export const Assets_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -573,8 +631,18 @@ export const Assets_table = () => {
   const [assets, setAssets] = useState([]);
 
   useEffect(() => {
+    const handler = setTimeout(()=>{
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1)
+    }, 500)
+
+    return () =>{
+      clearTimeout(handler);
+    }
+  }, [searchTerm])
+  useEffect(() => {
     fetchAssets();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, debouncedSearchTerm]);
 
   const fetchAssets = async () => {
     setLoading(true);
@@ -592,7 +660,7 @@ export const Assets_table = () => {
 
     try {
       const response = await ApiCustomer.get(
-        `/api/asset-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`
+        `/api/asset-information?page=${currentPage}&limit=${itemsPerPage}&search=${debouncedSearchTerm}`
       );
       setAssets(response.data.data);
       setTotalPages(response.data.totalPages);
@@ -993,7 +1061,7 @@ export const ProductType_table = () => {
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() =>
-                    navigate(`/case/${ProductTypeItem.ProductTypeID}`)
+                    navigate(`/app/case/${ProductTypeItem.ProductTypeID}`)
                   }
                 >
                   {ProductTypeItem.ProductTypeID}
@@ -1170,7 +1238,7 @@ export const WarrantyService_table = () => {
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() =>
-                    navigate(`/case/${WarrantyServiceItem.Service_offerID}`)
+                    navigate(`/app/case/${WarrantyServiceItem.Service_offerID}`)
                   }
                 >
                   {WarrantyServiceItem.Service_offerID}
@@ -1296,7 +1364,7 @@ export const Mo_table = () => {
   // Filter data berdasarkan pencarian
   const filteredMaterialOrderTable = MaterialOrderData.filter((item) =>
     Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
@@ -1354,14 +1422,14 @@ export const Mo_table = () => {
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() =>
-                    navigate(`/material-order/${MaterialOrderItem.MOID}`)
+                    navigate(`/app/material-order/${MaterialOrderItem.MOID}`)
                   }
                 >
                   {MaterialOrderItem.MOID}
                 </td>
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/work/${MaterialOrderItem.WOID}`)}
+                  onClick={() => navigate(`/app/work/${MaterialOrderItem.WOID}`)}
                 >
                   {MaterialOrderItem.WOID}
                 </td>
@@ -1490,7 +1558,7 @@ export const Wo_table = () => {
   // Filter data berdasarkan pencarian
   const filteredWorkOrderTable = WorkOrderData.filter((item) =>
     Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
@@ -1566,13 +1634,13 @@ export const Wo_table = () => {
               >
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/work/${WorkOrderItem.WOID}`)}
+                  onClick={() => navigate(`/app/work/${WorkOrderItem.WOID}`)}
                 >
                   {WorkOrderItem.WOID}
                 </td>
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/case/${WorkOrderItem.CaseID}`)}
+                  onClick={() => navigate(`/app/case/${WorkOrderItem.CaseID}`)}
                 >
                   {WorkOrderItem.CaseID}
                 </td>
@@ -1768,7 +1836,6 @@ export const User_table = () => {
               <th className="p-2 border">ID User</th>
               <th className="p-2 border">Email</th>
               <th className="p-2 border">Username</th>
-              <th className="p-2 border">Password</th>
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Role</th>
               <th className="p-2 border">Profil Photo</th>
@@ -1788,7 +1855,6 @@ export const User_table = () => {
                 </td>
                 <td className="p-2 border">{UserItem.Email}</td>
                 <td className="p-2 border">{UserItem.Username}</td>
-                <td className="p-2 border">{UserItem.Password}</td>
                 <td className="p-2 border">{UserItem.Name}</td>
                 <td className="p-2 border">{UserItem.Role}</td>
                 <td className="p-2 border">{UserItem.ProfilPhoto}</td>
@@ -2322,7 +2388,7 @@ const fetchResources = async () => {
               <tr key={account.ResourceAccountId} className="text-center hover:bg-gray-100">
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/resource-account/${account.ResourceAccountId}`)}
+                  onClick={() => navigate(`/app/resource-account/${account.ResourceAccountId}`)}
                 >
                   {account.ResourceAccountId}
                 </td>
@@ -2457,7 +2523,7 @@ export const SubkTechnician_table = () => {
           <tbody>
             {currentData.map((item) => (
               <tr key={item.SubkTechnicianId} className="text-center hover:bg-gray-100">
-                <td className="p-2 text-blue-500 border cursor-pointer hover:underline" onClick={() => navigate(`/subk-technician/${item.SubkTechnicianId}`)}>
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline" onClick={() => navigate(`/app/subk-technician/${item.SubkTechnicianId}`)}>
                   {item.SubkTechnicianId}
                 </td>
                 <td className="p-2 border">{item.Name}</td>
@@ -2589,7 +2655,7 @@ export const SymptomCodeTable = () => {
           <tbody>
             {currentData.map((item) => (
               <tr key={item.SymptomCodeID} className="text-center hover:bg-gray-100">
-                <td className="p-2 text-blue-500 border cursor-pointer hover:underline" onClick={() => navigate(`/symptom-code/${item.SymptomCodeID}`)}>
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline" onClick={() => navigate(`/app/symptom-code/${item.SymptomCodeID}`)}>
                   {item.SymptomCodeID}
                 </td>
                 <td className="p-2 border">{item.SymptomCode}</td>
@@ -2736,7 +2802,7 @@ export const BookingsTable = () => {
               <tr key={item.BookingId} className="text-center hover:bg-gray-100">
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/bookings/${item.BookingId}`)}
+                  onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
                 >
                   {item.BookingId}
                 </td>
@@ -2897,7 +2963,7 @@ export const BookingDetailsTable = () => {
             {currentData.map((item) => (
               <tr key={item.BookingDetailId} className="hover:bg-gray-100 text-center text-sm">
                 <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                  onClick={() => navigate(`/bookings/${item.BookingDetailId}`)}
+                  onClick={() => navigate(`/app/bookings/${item.BookingDetailId}`)}
                 >
                   {item.BookingDetailId}
                 </td>
@@ -3065,7 +3131,7 @@ export const RepairClassCodeTable = () => {
               <tr key={item.Code} className="hover:bg-gray-100 text-center text-sm">
                 <td
                   className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                  onClick={() => navigate(`/repair-class-code/${item.Code}`)}
+                  onClick={() => navigate(`/app/repair-class-code/${item.Code}`)}
                 >
                   {item.Code}
                 </td>
@@ -3215,7 +3281,7 @@ export const ServiceCatalogTable = () => {
             {currentData.map((item) => (
               <tr key={item.ServiceCatalogID} className="hover:bg-gray-100 text-center text-sm">
                 <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                    onClick={() => navigate(`/service-log/${item.ServiceCatalogID}`)}
+                    onClick={() => navigate(`/app/service-log/${item.ServiceCatalogID}`)}
                 >
                   {item.ServiceCatalogID}
                 </td>
@@ -3350,7 +3416,7 @@ export const OTCCodeTable = () => {
               <tr key={item.OTCCode} className="hover:bg-gray-100 text-center">
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  // onClick={() => navigate(`/bookings/${item.BookingId}`)}
+                  // onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
                 >
                   {item.OTCCode}
                 </td>
@@ -3496,19 +3562,19 @@ export const CrsTable = () => {
               <tr key={item.id_csr} className="text-center hover:bg-gray-100">
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/case-resolution/${item.id_csr}`)}
+                  onClick={() => navigate(`/app/case-resolution/${item.id_csr}`)}
                 > 
                   {item.id_csr}
                 </td> 
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  // onClick={() => navigate(`/bookings/${item.BookingId}`)}
+                  // onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
                 >
                   {item.caseResolutionCode}
                 </td>
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  // onClick={() => navigate(`/bookings/${item.BookingId}`)}
+                  // onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
                 >
                   {item.autoClose}
                 </td>

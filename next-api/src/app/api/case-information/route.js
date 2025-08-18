@@ -88,7 +88,7 @@ export async function GET(request) {
       otcCodeTable: true,
       casenotes_caseinformation_CaseNoteTocasenotes: true,
       workorder: true,
-      accessory: true
+      accessory: true,
     },
   });
 
@@ -113,9 +113,9 @@ export async function GET(request) {
         ProductName:
           caseData.asset_information?.product_information?.ProductName ||
           "No Product Name",
-        CreatedName: caseData.User?.Name, // Replace with the database owned
-        Owner: caseData.User?.Name, // Replace with the database owned
-        WorkGroup: "Miku21", // Replace with the database owned
+        CreatedName: caseData.createdByUser?.Name, // Replace with the database owned
+        Owner: caseData.createdByUser?.Name, // Replace with the database owned
+        WorkGroup: caseData.createdByUser?.Name, // Replace with the database owned
         CaseStatus: caseData.CaseStatus,
         caseinformation: caseData,
       })),
@@ -188,13 +188,15 @@ export async function POST(request) {
           CreatedBy: parseInt(CreatedBy),
           ProblemDescription: ProblemDescription,
           CaseProductNote : CaseNoteProduct,
-          accessory: {
-            create: accessories.map((acc) => ({
-              Accessories: acc.name,
-              Note: acc.note,
-              CT_SNCode: acc.code,
-            })),
-          },
+          ...(Array.isArray(accessories) && accessories.length > 0 && {
+            accessory: {
+              create: accessories.map((acc) => ({
+                Accessories: acc.name,
+                Note: acc.note,
+                CT_SNCode: acc.code,
+              })),
+            },
+          }),
         },
     });
 
