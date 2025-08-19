@@ -179,7 +179,6 @@ const App = () => {
             <div className="flex  p-2 items-center gap-2 self-center">
               <Search></Search>
               <GlobalSearchBar />
-              {/* <Input placeholder="Search" className="w-110 mr-45 border-b-black border border-b-2" ></Input> */}
             </div>
             {/* <SheetBar></SheetBar> */}
         </header>

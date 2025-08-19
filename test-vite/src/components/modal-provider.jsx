@@ -5,7 +5,6 @@ import {BtnModalAsset, BtnModalContact} from "@/components/sc-modal"
 export default function ModalProvider({ 
   activeModal, 
   setActiveModal,
-  selectedAssetForCase,
   selectedContactForCase,
  }) {
   const closeModal = () => setActiveModal(null)

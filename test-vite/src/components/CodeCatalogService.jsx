@@ -1,39 +1,22 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-// import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SelectBarRelated } from "./sc-select";
-import { Car, Lock, Plus } from "lucide-react";
-import { CalendarDays } from "lucide-react";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { KeyRound } from "lucide-react";
 
 
 export const CatalogService1 = () => {
@@ -468,7 +451,7 @@ export const TabsPart = () => {
 
             <div className="flex items-center gap-2">
               <span>Orderability:</span>
-              {/* <Switch checked /> */}
+              
             </div>
 
             <div className="overflow-x-auto">

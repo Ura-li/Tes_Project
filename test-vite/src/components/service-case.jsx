@@ -101,15 +101,6 @@ export const TabsService = ({
   const [entitlementStatus, setEntitlementStatus] = useState({
     OTCCode: ''
   })
-  //casenote
-  // const [caseNoteFormData, setCaseNoteFormData] = useState({
-  //   LogType: "",
-  //   ActionType: "",
-  //   Template: "",
-  //   VisibleExternally: null,
-  //   MinutesSpent: 0,
-  //   Note: "",
-  // });
 
   const [caseForm, setCaseForm] = useState({
     CaseType: "",
@@ -148,7 +139,7 @@ export const TabsService = ({
   const handleCaseNoteChange = (key, value) => {
     setCaseNoteFormData((prev) => {
       const updated = { ...prev, [key]: value };
-      console.log("🔄 Updated Form:", updated); // ✅ Log on every change
+      console.log(" Updated Form:", updated); // Log on every change
       return updated;
     });
   };
@@ -166,7 +157,7 @@ export const TabsService = ({
   };
 
  const handleSave = async (redirect = true) => {
-  console.log("📝 Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
+  console.log("Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
 
   try {
     Swal.fire({
@@ -307,7 +298,6 @@ export const TabsService = ({
       }
     }
 
-    // Satu alert saja jika banyak data berhasil disimpan
     if (savedModules.length > 0) {
       if(redirect){
         await Swal.fire({
@@ -325,7 +315,7 @@ export const TabsService = ({
     }
 
   } catch (error) {
-    console.error("❌ Save failed:", error);
+    console.error("Save failed:", error);
     Swal.fire({
       icon: "error",
       title: "Error",
@@ -366,14 +356,6 @@ const openPopup = () => {
           VisibleExternally: noteDetail.VisibleExternally,
         })
       } 
-      // const symptomCodeDetail = await fetchSymptomCodes();
-      // if(symptomCodeDetail){
-      //   setSelectedSymptom({
-      //     TopCategory: symptomCodeDetail.TopCategory,
-      //     SubCategory: symptomCodeDetail.SubCategory,
-      //     SymptomCode: symptomCodeDetail.SymptomCode,
-      //   })
-      // }
     }
     loadNote()
   }, [])
@@ -396,7 +378,6 @@ const openPopup = () => {
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Complaint",},
     { icon: StepBack, label: "SRF", onClick: async () => {
-      // console.log("Case Details ; ",caseDetails);
       const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails}  />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -447,7 +428,7 @@ const openPopup = () => {
     });
 
     if (!confirmResult.isConfirmed) {
-      return; // User canceled
+      return; 
     }
     try {
       
@@ -461,7 +442,7 @@ const openPopup = () => {
         },
       });
       const success = await handleSave(false);
-      if (!success) return; // Stop if failed
+      if (!success) return; 
       const res = await ApiCustomer.patch(
         `/api/case-information/${caseDetails.CaseID}`,
         {
@@ -470,7 +451,6 @@ const openPopup = () => {
         }
       );
       if (res.data.success) {
-        // Success alert
         const token = {
           user: getUserFromToken()
         }
@@ -495,7 +475,6 @@ const openPopup = () => {
           navigate(`/app/master/Case_table`);
         });
       } else {
-        // Error from API
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -611,7 +590,6 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
   const WOID = workOrders.WOID;
   const handleSave = async () => {
     try {
-      // Show loading alert
       Swal.fire({
         title: "Updating WORK ORDER...",
         text: "Please wait",
@@ -625,12 +603,9 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
        * TODO :
        * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
        */
-
-      // const resGeneralWO = await ApiCustomer.patch(`/api/work-order/`)
       const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
         //WO GENERAL
         ShipmentCountry: WOGeneral.ShipmentCountry || undefined,
-
         //SLA
         SLAJeopardy: SLA.slaJeopardy || undefined,
         DueDateCustomer: SLA.dueDateCustomer || undefined,
@@ -718,7 +693,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
     });
 
     if (!confirmResult.isConfirmed) {
-      return; // User canceled
+      return;
     }
     try {
       Swal.fire({
@@ -737,7 +712,6 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
         }
       );
       if (res.data.success) {
-        // Success alert
         const token = {
           user: getUserFromToken()
         }
@@ -760,7 +734,6 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
           navigate(`/app/case/${workOrders.CaseID}`);
         });
       } else {
-        // Error from API
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -867,7 +840,6 @@ export const TabsServiceMO = ({ materialOrders }) => {
         }
       );
       if (res.data.success) {
-        // Success alert
         const token = {
           user: getUserFromToken()
         }
@@ -890,7 +862,6 @@ export const TabsServiceMO = ({ materialOrders }) => {
           navigate(`/app/work/${materialOrders.WOID}`);
         });
       } else {
-        // Error from API
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -1021,9 +992,8 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
             navigate(`/app/mo_detail/${LineItemID}`);
           });
         }
-        return true; // Indicate success
+        return true;
       } else {
-        // Error from API
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -1071,7 +1041,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           changedBy: token.user.id,
           logDescription: `Edit : Change Material Order Line Item ${moLineItems.MOID} - ${moLineItems.LineItemID} Status from ${moLineItems.Status} to Closed`
         })
-        // Success alert
+       
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -1082,7 +1052,6 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           navigate(`/app/material-order/${MOLineDetails.MOID}`);
         });
       } else {
-        // Error from API
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -1226,7 +1195,6 @@ export const ServiceCase = ({
 
   const fetchCustomerData = async () => {
     try {
-      // console.log("Case Detail : ", caseDetails);
       const resMainAccount = await ApiCustomer.get(
         `/api/contact-information/${caseDetails.ContactID}`
       );
@@ -1245,11 +1213,9 @@ export const ServiceCase = ({
       } else {
         setDataFetchCustomerData((prev) => ({
           ...prev,
-          type: "Individual", // fallback if no site account
+          type: "Individual", 
         }));
       }
-
-      // const res = await ApiCustomer.get(`/api/`)
     } catch (err) {
       console.error("Error returning Customer Data : ", err);
       return null;
@@ -1272,7 +1238,6 @@ export const ServiceCase = ({
 
   const fetchCaseNotes = async () => {
     try {
-      // console.log("Case Details : ", caseDetails)
       const res = await ApiCustomer.get(`/api/case-information/case-notes`);
       const notes = res.data.data;
 
@@ -1306,7 +1271,7 @@ export const ServiceCase = ({
       );
       const noteDetail = detailRes.data.data;
 
-      console.log("✅ Case Note Detail:", noteDetail);
+      console.log("Case Note Detail:", noteDetail);
       return noteDetail;
     } catch (err) {
       console.error("Error in fetchCaseNotes:", err);
@@ -1350,10 +1315,10 @@ export const ServiceCase = ({
   const fetchGtc = async () => {
     try {
       const gtcData = caseDetails.global_trade_check;
-      setFormGtc(gtcData ?? formGtc); // pakai default jika null/undefined
+      setFormGtc(gtcData ?? formGtc); 
     } catch (err) {
       console.error("Error fetching GTC:", err);
-      setFormGtc(formGtc); // fallback jika error
+      setFormGtc(formGtc); 
     }
   };
 
@@ -1438,11 +1403,11 @@ export const ServiceCase = ({
         customerRequestedCloseDate: csrData.customerRequestedCloseDate ? new Date(csrData.customerRequestedCloseDate) : "",
       });
     } else {
-      setCsrForm(csrForm); // fallback jika null
+      setCsrForm(csrForm); 
     }
   } catch (err) {
     console.error("Error fetching CSR:", err);
-    setCsrForm(csrForm); // fallback jika error
+    setCsrForm(csrForm); 
   }
 };
 
@@ -1486,8 +1451,6 @@ const fetchActionLog = async () => {
     console.error("Error fetching ActionLog:", err);
   }
 }
-
-
   
   //handler all case
   useEffect(() => {
@@ -1518,13 +1481,10 @@ const fetchActionLog = async () => {
   }, []);
 
   useEffect(() => {
-    // Autofill entitlementStatus.OTCCode once otcCode is fetched and caseDetails is available
     if (otcCode.length > 0 && caseDetails?.OTCCode) {
       handleEntitlementStatus("OTCCode")(caseDetails.OTCCode)
     }
   }, [otcCode, caseDetails]);
-  //data for upper style
-  // const []
 
   useEffect(() => {
     console.log("Data Asset Info : ", dataFetchAssetInformation);
@@ -1532,10 +1492,6 @@ const fetchActionLog = async () => {
     console.log("Fetch Data Customer Success : ", dataFetchCustomerData);
     console.log("Fetch Data User ", ownerUserData);
   }, [ownerUserData]);
-
-  // useEffect(() =>{
-  //   console.log("Data Asset Info : ",dataFetchAssetInformation)
-  // }, dataFetchAssetInformation)
 
   // console.log("Selected Symptopm ",selectedSymptom)
 
@@ -1619,10 +1575,6 @@ const [endDate, setEndDate] = useState(null);
                     <SelectContent>
                       <SelectGroup>
                         <SelectItem value="case">Case</SelectItem>
-                        {/* <SelectItem value="??">??</SelectItem>
-                        <SelectItem value="!!">!!</SelectItem>
-                        <SelectItem value="**">**</SelectItem>
-                        <SelectItem value="&&">&&</SelectItem> */}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -1655,10 +1607,6 @@ const [endDate, setEndDate] = useState(null);
                         <SelectItem value="first" className="p-0">
                           {dataFetchCustomerData.SiteAccount?.Company}
                         </SelectItem>
-                        {/* <SelectItem value="??">??</SelectItem>
-                        <SelectItem value="!!">!!</SelectItem>
-                        <SelectItem value="**">**</SelectItem>
-                        <SelectItem value="&&">&&</SelectItem> */}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -1682,16 +1630,6 @@ const [endDate, setEndDate] = useState(null);
                   </TabsTrigger>
                 )
               )}
-              {/* <TabsTrigger variant="underline" value="case_info" className="">Case Information</TabsTrigger>
-              <TabsTrigger variant="underline" value="customer,add,entitement" className="">Customer, Asset & Entitement</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_notes" className="">Notes & Information</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_activitas" className="">Activities</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_actions" className="">Costumer Interactions</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_wo" className="">Work Order Validation</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_orders" className="">Orders</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_salles" className="">Sales Offer</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_knowledge" className="">Knowledge & Attachments</TabsTrigger>
-              <SelectBarRelated></SelectBarRelated> */}
               {open && (
                 <DropdownMenu>
                   <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
@@ -1736,9 +1674,6 @@ const [endDate, setEndDate] = useState(null);
                     value={caseDetails.IncomingChannel}
                   />
                 </CaseField>
-                {/* <CaseField label="Case Subject" span={3}>
-                  <Input variant="invisible" value={caseDetails.CaseSubject} />
-                </CaseField> */}
                 <CaseField label="Business Segment">
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
@@ -1799,7 +1734,6 @@ const [endDate, setEndDate] = useState(null);
                 </CaseField>
                 <CaseField label="Case Closed Date" icon span={3}>
                   <span className="flex gap-[5em]">
-                    {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
                     <DatePicker
                       variant="icon"
                       value={caseClosedDate}
@@ -1832,18 +1766,6 @@ const [endDate, setEndDate] = useState(null);
               
               <CardContent className="grid gap-10  grid-cols-6 p-3 items-center">
                 <CaseField label="Global Trade Status">
-                  {/* <Select value={formGtc.global_trade_status} onValueChange={onChangeGtc("global_trade_status")} defaultValue="--Select--">
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                      {["Pass", "Fail", "Not Done", "Not Needed", "Failed Confirmed"].map((status) => (
-                      <SelectItem key={status} value={status}>{status}</SelectItem>
-                      ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select> */}
                   <SearchCommandBlock
                     value={formGtc.global_trade_status}
                     onChange={onChangeGtc("global_trade_status")}
@@ -1859,28 +1781,6 @@ const [endDate, setEndDate] = useState(null);
                 </CaseField>
 
                 <CaseField label="GT Override Reason">
-                  {/* <Select  value={formGtc.gt_override_reason} onValueChange={onChangeGtc("gt_override_reason")} defaultValue="--select--">
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                      {[
-                    "Military Keyword False Match",
-                    "Embargo False Match",
-                    "RPL False Match",
-                    "Active Contract",
-                    "United States Government",
-                    "Global Trade Authorization",
-                    "RPL Manual Screening Passed",
-                    "Fail Confirmed by GT",
-                    "Other",
-                  ].map((reason) => (
-                    <SelectItem key={reason} value={reason}>{reason}</SelectItem>
-                  ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select> */}
                   <SearchCommandBlock
                     value={formGtc.gt_override_reason}
                     onChange={onChangeGtc("gt_override_reason")}
@@ -1899,18 +1799,6 @@ const [endDate, setEndDate] = useState(null);
                   />
                 </CaseField>
                 <CaseField label="GT Active Listening">
-                  {/* <Select    value={formGtc.gt_active_listening} onValueChange={onChangeGtc("gt_active_listening")} defaultValue="--select--">
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                      {["Pass", "Fail"].map((opt) => (
-                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                  ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select> */}
                   <SearchCommandBlock
                     value={formGtc.gt_active_listening}
                     onChange={onChangeGtc("gt_active_listening")}
@@ -2112,7 +2000,6 @@ const [endDate, setEndDate] = useState(null);
           </tr>
         </thead>
         <tbody>
-          {/* {console.log(caseDetails)} */}
           {caseDetails.accessory?.map((item, index) => (
             <tr key={index} className="hover:bg-gray-50">
               <td className="border px-4 py-2">{item.id}</td>
@@ -2404,59 +2291,6 @@ const [endDate, setEndDate] = useState(null);
                       onChange={(e) => onChange("Note", e.target.value)}
                     />
                   </CaseField>
-                  {/* <textarea
-                      className='h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500'
-                      value={formData?.Note || ''}
-                      onChange={(e) => onChange("Note", e.target.value)}
-                    /> */}
-
-                  {/* <div className='flex font-bold'>
-                    <span>Log Type</span>
-                      <Select onValueChange={(val) => onChange("LogType", val)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Log Type"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="NotesLog">Notes Log</SelectItem>
-                          <SelectItem value="PhoneLog">Phone Log</SelectItem>
-                        </SelectContent>
-                      </Select>
-                  </div>
-
-                  <div className='flex font-bold'>
-                    <span>Action Type</span>
-                    <span className=''>...</span>
-                  </div>
-
-                  <div className='flex font-bold'>
-                    <span>Template </span>
-                    <span className=''>...</span>
-                  </div>
-
-                  <div className='flex font-bold'>
-                    <span>Visible Externally</span>
-                    <span className=''>
-                    <Select onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="---"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1">Yes</SelectItem>
-                          <SelectItem value="0">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </span>
-                  </div>
-
-                  <div className='flex font-bold '>
-                    <span>Number of Minutes Spent</span>
-                    <span className=''>...</span>
-                  </div>
-
-                  <div className='flex'>
-                    <span className='font-bold'>Notes</span>
-                    <textarea className='h-40 p-2 border-2 border-black resize-none w-80' value={formData?.Note || ''} onChange={(e) => onChange("Note", e.target.value)}></textarea>
-                  </div> */}
                 </div>
 
                 <div className="flex flex-1">
@@ -2465,8 +2299,6 @@ const [endDate, setEndDate] = useState(null);
                     readOnly
                     value={formData?.NotesDisplay}
                   >
-
-                    
                   </textarea>
                 </div>
               </CardContent>
@@ -2583,19 +2415,6 @@ const [endDate, setEndDate] = useState(null);
                   >
                     {selectedSymptom?.SymptomCode}
                   </CaseField>
-
-                  {/* <div className='flex font-bold'>
-                    <span>Top Category</span>
-                    <span className=''>...{selectedSymptom?.TopCategory}</span>
-                  </div>
-                  <div className='flex font-bold'>
-                    <span>Sub Category</span>
-                    <span className=''>...{selectedSymptom?.SubCategory}</span>
-                  </div>
-                  <div className='flex font-bold'>
-                    <span>Spesific Symptom</span>
-                    <span className=''>...{selectedSymptom?.SymptomCode}</span>
-                  </div> */}
                 </div>
 
                 <div className="flex flex-1 font-bold">
@@ -2644,11 +2463,6 @@ const [endDate, setEndDate] = useState(null);
 
               <CardContent className="grid grid-cols-7 gap-5 p-3 ">
                 <CaseField label="Case Resolution Code" star>
-                  {/* <Input
-                  variant='invisible'
-                  value={csrForm.caseResolutionCode}
-                  onChange={(e) => onChangeCsr("caseResolutionCode")(e.target.value)}
-                /> */}
                   <SearchCommandBlock
                     value={csrForm.caseResolutionCode}
                     onChange={onChangeCsr("caseResolutionCode")}
@@ -2717,7 +2531,6 @@ const [endDate, setEndDate] = useState(null);
           <TabsContent value="ci_activitas">
             <Card className="mt-7">
               <CardHeader>Hello Word</CardHeader>
-              {/* <DatePicker icon={<Calendar>}></DatePicker> */}
             </Card>
           </TabsContent>
 
@@ -2884,9 +2697,7 @@ const [endDate, setEndDate] = useState(null);
                         <TableCell
                           className="font-medium "
                         >
-                          {/* <Link to={`/work/${work.WOID}`}> */}
                           {work.WOID}
-                          {/* </Link> */}
                         </TableCell>
                         <TableCell>{work.CaseID}</TableCell>
                         <TableCell>
@@ -2936,20 +2747,6 @@ const [endDate, setEndDate] = useState(null);
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {/* {partsorder.map((parts) => (
-                      <TableRow key={parts.name}>
-                        <TableCell className="font-medium">
-                          {parts.name}
-                        </TableCell>
-                        <TableCell>{parts.orderstatus}</TableCell>
-                        <TableCell>{parts.workorder}</TableCell>
-                        <TableCell>{parts.customerselfrepair}</TableCell>
-                        <TableCell>{parts.owner}</TableCell>
-                        <TableCell>{parts.createdon}</TableCell>
-                        <TableCell>{parts.ordercloseddate}</TableCell>
-                        <TableCell>{parts.createdby}</TableCell>
-                      </TableRow>
-                    ))} */}
                     <TableRow>
                       <TableCell className="font-medium">
                         No data available
@@ -3031,13 +2828,6 @@ const [endDate, setEndDate] = useState(null);
                         <TableCell>{material.ReadyForClosureDate}</TableCell>
                       </TableRow>
                     ))}
-                    {/* <TableRow>
-                      <TableCell className="font-medium">
-                        <Link to="/material_order">
-                        
-                        </Link>
-                      </TableCell>
-                    </TableRow> */}
                   </TableBody>
                 </Table>
               </CardContent>

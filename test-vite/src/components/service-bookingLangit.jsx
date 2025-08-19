@@ -4,21 +4,9 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Link } from 'react-router'
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import {
   Tabs,
   TabsContent,
@@ -27,16 +15,7 @@ import {
 } from "@/components/ui/tabs"
 import { SelectBarRelated } from './sc-select'
 import { CalendarDays,  Lock, PlusCircle } from 'lucide-react'
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+
 
 'use client'
 
@@ -45,35 +24,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import ApiCustomer from "@/api";
 import debounce from 'lodash.debounce';
 
-const workorder = [
-  {
-    workordernumber: "WO-027816939",
-    caseid: "54165182991",
-    serviceaccount: "Icon Plus",
-    substatus: "Waiting",
-    systemstatus: "Open",
-    priority: "WO Priority",
-    workorder: "In-Country",
-    primaryincident: "Depot Repair",
-    duedate: "21/03/2025 00.53",
-    orion: "-",
-    owner : "Jokowi",
-    created: "Widodo",
-  },
-]
 
-const partsorder = [
-  {
-    name: "Budiono",
-    orderstatus: "-",
-    workorder: "-",
-    customerselfrepair: "-",
-    owner: "Budiono",
-    createdon: "W-",
-    ordercloseddate: "-",
-    createdby: "-",
-  },
-]
 
 function formatDateForInput(dateString) {
   if (!dateString) return "";
@@ -144,9 +95,8 @@ export function ServiceBooking ({BookingId}) {
       try {
         const response = await ApiCustomer.get(`/api/bookings/${BookingId}`);
         setBookingData(response.data);
-        const data = response.data; // <- Harusnya langsung .data, BUKAN .data.booking
+        const data = response.data;
 
-        // Set field-field yang kamu butuhkan
         setResourceName(data?.bookingDetails?.[0]?.resource?.Name || "");
         setAccountName(data?.bookingDetails?.[0]?.account?.Name || "");
         setSubkTechnicianName(data?.bookingDetails?.[0]?.subkTechnician?.Name || "");
@@ -240,7 +190,7 @@ export function ServiceBooking ({BookingId}) {
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
     }
-  }, 500); // 500ms delay
+  }, 500);
 
 
   const handleSearchAccount = debounce(async (keyword) => {
@@ -257,7 +207,7 @@ export function ServiceBooking ({BookingId}) {
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
     }
-  }, 500); // 500ms delay
+  }, 500); 
 
 
   const handleSearchSubkTechnician = debounce(async (keyword) => {
@@ -302,10 +252,7 @@ export function ServiceBooking ({BookingId}) {
         <CardTitle className="text-xl ">New Bookable Resource Booking</CardTitle>
         <CardTitle className="text-sm">Bookable Resource Booking . Information</CardTitle>
       </CardHeader>
-
-      
-                <Button onClick={handleUpdate}>Save</Button>
-
+      <Button onClick={handleUpdate}>Save</Button>
       <CardContent>
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="bg-white w-[300px]">
@@ -355,7 +302,6 @@ export function ServiceBooking ({BookingId}) {
                     ))}
                   </ul>
                 )}
-                {/* <span className='ml-44'>...</span> */}
               </div>
 
               <div className='font-bold flex'>
@@ -388,17 +334,12 @@ export function ServiceBooking ({BookingId}) {
                     ))}
                   </ul>
                 )}
-                {/* <span className='ml-45.5'>...</span> */}
+              
               </div>
 
               <div className='font-bold flex'>
                 <span className='ml-7'>Subk Technician Name</span>
-                {/* <input 
-                  type="text" 
-                  className='ml-30.5' 
-                  value={subkTechnicianName} 
-                  onChange={(e) => setSubkTechnicianName(e.target.value)} 
-                /> */}
+  
                 <input
                   type="text"
                   className="ml-30.5"
@@ -431,12 +372,7 @@ export function ServiceBooking ({BookingId}) {
 
               <div className='font-bold flex'>
                 <span className='ml-7'>Subk Technician Learner ID</span>
-                {/* <input 
-                  type="text" 
-                  className='ml-22.5' 
-                  value={subkTechnicianLearnerName} 
-                  onChange={(e) => setSubkTechnicianLearnerName(e.target.value)} 
-                /> */}
+           
                 <input
                   type="text"
                   className="ml-22.5"
@@ -808,7 +744,6 @@ export function NewBookableResourceBooking({ WOID, CreatedBy }) {
 
       if (response.status === 201) {
         const { BookingId } = response.data;
-        // Lanjut ke navigasi sambil bawa BookingId
         navigate('/app/bookings', { state: { BookingId } });
       }
     } catch (error) {

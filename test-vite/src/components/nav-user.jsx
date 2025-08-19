@@ -6,7 +6,6 @@ import {
   ChevronsUpDown,
   CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -91,10 +90,6 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              {/* <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -112,8 +107,8 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-            <span onClick={logout} className="flex items-center cursor-pointer gap-2">
+            <DropdownMenuItem onClick={logout} className={"cursor-pointer bg-red-300 "}>
+            <span  className="flex items-center gap-2">
               <LogOut className="w-5 h-5" />
               <span>Log out</span>
             </span>

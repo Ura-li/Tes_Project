@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-
 import { Button } from "@/components/ui/button";
-
 import {
   Table,
   TableBody,
@@ -52,7 +50,7 @@ import { Textarea } from "./ui/textarea";
 import { Pencil, Trash } from "lucide-react";
 //import API
 import ApiCustomer from "@/api";
-import axios from "axios";
+
 import Swal from "sweetalert2";
 
 import {
@@ -73,20 +71,10 @@ import {
 } from "@/components/ui/pagination"
 
 import { getUserFromToken } from "@/lib/utils/auth";
-import { Description } from "@radix-ui/react-alert-dialog";
 import { Card, CardContent, CardTitle } from "./ui/card";
-import { Separator } from "./ui/separator";
 import ServiceRequestPDF from "./service-request-form";
 import { pdf } from '@react-pdf/renderer';
 
-// const assets = [
-//   {
-//     productname: "HP Victus 16 inch Gaming Laptop 16-r0555TX",
-//     product: "9T92PA94-92",
-//     HWPorfitCenter: "-",
-//     contact: "Slamet Meisa Putra",
-//   },
-// ];
 
 export function BtnModal({
   handleCreateCase,
@@ -98,9 +86,6 @@ export function BtnModal({
   setAccessories
 }) {
   
-  
-  // console.log("This is  the data",selectedAssetForCase.AssetID);
-
   const handleAccessoryChange = (index, field, value) => {
       const newAccessories = [...accessories];
       newAccessories[index][field] = value;
@@ -108,7 +93,6 @@ export function BtnModal({
     };
   
     const addAccessory = (e) => {
-      // e.prevent.default()
       setAccessories([...accessories, { name: "", note: "", code: "" }]);
     };
   return (
@@ -232,9 +216,7 @@ export function BtnModalContact({
     console.log("CHECK DATA FORM BTN MOdAL",selectedContact)
 
   //set modal state 
-
   console.log("Company Data in Modal Contact : ",companyData)
-  // const [isModalContactSearchInput, setIsModalContactSearchInput] = useState(false);
   
   const isControlled = externalOpen !== undefined;
   const [internalOpen, setInternalOpen] = useState(false);
@@ -242,7 +224,7 @@ export function BtnModalContact({
 
   const handleChange = (value) => {
     if (isControlled) {
-      externalOnChange?.(value); // ✅ Don't force false always
+      externalOnChange?.(value); // Don't force false always
     } else {
       setInternalOpen(value);
     }
@@ -327,10 +309,10 @@ export function BtnModalContact({
   // Function to fetch updated contacts
   const fetchContacts = async (companyId) => {
     try {
-      console.log("Fetching contacts for Company ID:", companyId); // ✅ Debugging
+      console.log("Fetching contacts for Company ID:", companyId); //  Debugging
       const response = await ApiCustomer.get(`/api/contact-information?SiteAccountID=${companyId}`);
       console.log("response Fetch Contacts: ", response.data)
-      return response.data.data; // ✅ Return updated contacts
+      return response.data.data; //  Return updated contacts
     } catch (error) {
       console.error("Error fetching contacts:", error);
       return [];
@@ -353,22 +335,20 @@ export function BtnModalContact({
       let responseMessage = '';
   
       if (formDataContact.ContactID) {
-        // ✅ Update existing contact
+        //  Update existing contact
         await ApiCustomer.patch(`/api/contact-information/${formDataContact.ContactID}`, formDataContact);
         responseMessage = 'Kontak berhasil diperbarui!';
       } else {
-        // ✅ Add new contact
+        //  Add new contact
         console.log("Selected Company in ModalContactSubmit : ", selectedCompany)
         await ApiCustomer.post("/api/contact-information", formDataContact);
         responseMessage = 'Kontak berhasil ditambahkan!';
       }
   
-      // 1✅ Tutup modal form input dulu
      if (!isControlled) {
       setInternalOpen(false);
      }
   
-      // ✅ Tunggu sebentar biar modal benar-benar hilang (hindari konflik z-index)
       setTimeout(async () => {
         await Swal.fire({
           icon: 'success',
@@ -378,13 +358,12 @@ export function BtnModalContact({
           allowEscapeKey: false,
         });
   
-        // ✅ Refresh data kontak setelah SweetAlert ditutup
         if (selectedCompany?.SiteAccountID) {
           const updatedContacts = await fetchContacts(selectedCompany.SiteAccountID);
           setSelectedContact(updatedContacts);
           console.log("Updated Selected Contacts:", updatedContacts);
         }
-      }, 300); // delay kecil untuk pastikan modal tertutup
+      }, 300); 
   
     } catch (error) {
       console.error("Error adding contact:", error);
@@ -420,15 +399,11 @@ export function BtnModalContact({
   
 
   // Edit function 
-
-  // ✅ Function to open Edit Modal
+  //  Function to open Edit Modal
   const openEditModal = (contact) => {
     setFormDataContact(contact);
   };
 
-  
-    // const [provinces, setProvinces] = useState([]);
-    // const [cities, setCities] = useState([]);
      useEffect(() => {
         fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json")
           .then((res) => res.json())
@@ -509,10 +484,6 @@ export function BtnModalContact({
             <Label htmlFor="Email">Email</Label>
             <Input value={formDataContact.Email} id="Email" type="email" className="p-1 border-b-black" onChange={handlerInputContactChange} />
           </div>
-          {/* <div className="space-y-0.4 ml-5">
-            <Label htmlFor="new">EXTN</Label>
-            <Input id="new" type="text" className="h-8 p-1 text-sm border-b-black w-73" />
-          </div> */}
         </div>
 
         <DialogHeader>
@@ -611,10 +582,8 @@ export function BtnModalContact({
               options={provinces}
               placeholder="Select a Province"
             />
-
-            
-                  {/* Hidden Input for SiteAccountID */}
-                  <Input type="hidden" id="SiteAccountID" value={formDataContact.SiteAccountID || ""} onChange={handlerInputContactChange} />
+              {/* Hidden Input for SiteAccountID */}
+            <Input type="hidden" id="SiteAccountID" value={formDataContact.SiteAccountID || ""} onChange={handlerInputContactChange} />
           </div>
         </div>
 
@@ -644,7 +613,7 @@ export function BtnModalAsset({
   contactID, 
   siteAccountID, 
   selectedContactForCase,
-  selectedCompany,
+ 
   setSelectedAsset,
   selectedAsset,
   open : externalOpen,
@@ -719,13 +688,12 @@ export function BtnModalAsset({
       });
 
       setAssets(response.data.data);
-      // setSelectedAsset(response.data.data);
       setTotalPages(response.data.totalPages);
       return response.data.data;
     } catch (error) {
       setError("Failed to load asset data.");
       console.error("Error fetching assets:", error);
-      return []; // ✅ Return an empty array instead of `undefined`
+      return []; //  Return an empty array instead of `undefined`
     } finally{
       setLoading(false);
     }
@@ -743,7 +711,7 @@ export function BtnModalAsset({
       }
       const response = await ApiCustomer.get(`/api/asset-information?${query}`);
       console.log("response Fetch Contacts: ", response.data)
-      return response.data.data; // ✅ Return updated contacts
+      return response.data.data; //  Return updated contacts
     } catch (error) {
       console.error("Error fetching contacts:", error);
       return [];
@@ -768,7 +736,6 @@ export function BtnModalAsset({
   const handleUpdateAsset = async () => {
     if (!selectedAssetForCreatingAsset) return;
   
-    // Tampilkan loading menggunakan SweetAlert2
     Swal.fire({
       title: 'Memperbarui asset...',
       text: 'Mohon tunggu sebentar',
@@ -790,7 +757,6 @@ export function BtnModalAsset({
         setSelectedAsset(updatedAssets);
         setIsOpen(false);
   
-        // Tutup loading dan tampilkan alert sukses
         Swal.fire({
           icon: 'success',
           title: 'Berhasil!',
@@ -801,7 +767,6 @@ export function BtnModalAsset({
         });
       }
     } catch (error) {
-      // Tutup loading dan tampilkan alert error
       Swal.fire({
         icon: 'error',
         title: 'Gagal',
@@ -832,10 +797,9 @@ export function BtnModalAsset({
       <DialogTrigger asChild>
         <Button 
           variant="outline" 
-          // className="bg-white mt-0.5"
           className={`mt-0.5 ${(!selectedContactForCase && typeSearch !== 'individual') ? "bg-white cursor-not-allowed" : "bg-blue-500"}`} 
           onClick={() => setIsOpen(true)}
-          disabled={!selectedContactForCase && typeSearch !== 'individual'} // 🔥 Button disabled if no contact selected
+          disabled={!selectedContactForCase && typeSearch !== 'individual'} // Button disabled if no contact selected
         >
           New Asset
         </Button>
@@ -851,46 +815,6 @@ export function BtnModalAsset({
         <DialogHeader>
           <DialogTitle className="text-md">Serial Number</DialogTitle>
         </DialogHeader>
-
-        {/* <div className="flex gap-3">  
-          <Input className="h-10 border-2 border-black rounded-2xl w-55 text-md" type="Search" onChange={handleSearchInputAssetsChange}></Input>
-          <Button variant="outline" className="h-10 border-2 border-blue-600 w-30 rounded-2xl">Search</Button>
-          
-        </div> */}
-
-
-        {/* <Table className="mx-auto table-fixed border-spacing-0">
-          <TableHeader>
-            <TableRow className="bg-blue-200">
-              <TableHead className="text-black">Product Name</TableHead>
-              <TableHead className="text-black">Product Number</TableHead>
-              <TableHead className="text-black">HW Profit Center</TableHead>
-              <TableHead className="text-black" colSpan="2">Contact</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody >
-            {assets.length > 0 ? ( assets.map((asset) => (
-              <TableRow key={asset?.AssetID}>
-                <TableCell className="whitespace-break-spaces ">{asset?.product_information?.ProductName}</TableCell>
-                <TableCell>{asset?.product_information?.ProductNumber}</TableCell>
-                <TableCell>{asset?.HWPorfitCenter ? asset?.HWPorfitCenter : '-' }</TableCell>
-                <TableCell>{asset?.contact_information !== null ? asset?.contact_information?.FirstName + ' ' + asset?.contact_information?.LastName : '-'   }</TableCell>
-              </TableRow>
-             )) ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="font-medium text-center whitespace-break-spaces"
-                  >
-                    Data Belum Tersedia
-                  </TableCell>
-                </TableRow>
-              )}
-          </TableBody>
-        </Table> */}
-
-        {/* <h3 className="mt-4 text-lg font-semibold">Unowned Assets</h3> */}
         
         <div className="flex items-center gap-3">
           <Input
@@ -977,7 +901,6 @@ export function BtnModalAsset({
 };
 
 //? MODAL FOR MASTER SITE
-
 export function AssetEdit ({ assetId, onUpdate }) {
   const [asset, setAsset] = useState(null);
   const [serialNumber, setSerialNumber] = useState("");
@@ -987,7 +910,7 @@ export function AssetEdit ({ assetId, onUpdate }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const fetchAsset = async () => {
-    if (!assetId) return; // Cegah fetch jika assetId tidak ada
+    if (!assetId) return;
     try {
       const response = await ApiCustomer.get(`/api/asset-information/${assetId}`);
       console.log("Response fetch asset: ", response.data);
@@ -1040,7 +963,6 @@ export function AssetEdit ({ assetId, onUpdate }) {
         ProductLine: productLine,
       });
   
-      // ✅ Tambahan SweetAlert berhasil update
       Swal.fire({
         icon: 'success',
         title: 'Success!',
@@ -1050,8 +972,8 @@ export function AssetEdit ({ assetId, onUpdate }) {
         allowEscapeKey: false,
       });
   
-      onUpdate();       // refresh data
-      setIsOpen(false); // tutup modal
+      onUpdate();       
+      setIsOpen(false); 
   
     } catch (error) {
       console.error("Error updating asset:", error);
@@ -1488,7 +1410,6 @@ export function ContactEdit({ contactID, onUpdate }) {
         ZipPostalCode: zipPostalCode,
       });
   
-      // ✅ Tampilkan notifikasi berhasil
       Swal.fire({
         icon: 'success',
         title: 'Success!',
@@ -1498,13 +1419,12 @@ export function ContactEdit({ contactID, onUpdate }) {
         allowEscapeKey: false,
       });
   
-      onUpdate();       // perbarui data di tampilan
-      setIsOpen(false); // tutup modal
+      onUpdate();       
+      setIsOpen(false); 
   
     } catch (error) {
       console.error("Error updating contact:", error);
   
-      // ❌ Tampilkan notifikasi gagal
       Swal.fire({
         icon: 'error',
         title: 'Update Failed',
@@ -1593,7 +1513,7 @@ export function ProductAdd() {
     ProductNumber: '',
     ProductLine: '',
     ProductName: '',
-    ProductTypeID: '', // <- penting!
+    ProductTypeID: '', 
   });
 
   // List ProductType untuk dropdown
@@ -1779,7 +1699,6 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
         ProductTypeID: parseInt(productTypeID),
       });
   
-      // ✅ Notifikasi jika berhasil
       Swal.fire({
         icon: 'success',
         title: 'Success!',
@@ -1789,13 +1708,12 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
         allowEscapeKey: false,  
       });
   
-      onUpdate();     // refresh data
-      setIsOpen(false); // tutup modal
+      onUpdate();     
+      setIsOpen(false); 
   
     } catch (error) {
       console.error("Error updating product:", error);
   
-      // ❌ Notifikasi jika gagal
       Swal.fire({
         icon: 'error',
         title: 'Update Failed',
@@ -1861,7 +1779,7 @@ export function ProductDelete ({ ProductNumber, isModalOpen, setIsModalOpen, onU
   
         console.log("Server Response:", response.data);
         if (response.status === 409 || response.data.success === false) {
-          // 🚨 Restriction triggered - Show alert message
+          //  Restriction triggered - Show alert message
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -1889,7 +1807,7 @@ export function ProductDelete ({ ProductNumber, isModalOpen, setIsModalOpen, onU
   
       } catch (error) {
         if (error.response && error.response.status === 409) {
-          // 🚨 Handle 409 Conflict error from backend
+          //  Handle 409 Conflict error from backend
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -2007,7 +1925,6 @@ export function ProductTypeAdd () {
                       <SelectContent >
                         <SelectGroup>
                           <SelectLabel>Product tower</SelectLabel>
-                          {/* <SelectItem value="">.</SelectItem> */}
                           <SelectItem value="PSG">PSG</SelectItem>
                           <SelectItem value="IPG">IPG</SelectItem>
                         </SelectGroup>
@@ -2025,7 +1942,6 @@ export function ProductTypeAdd () {
                       <SelectContent >
                         <SelectGroup>
                           <SelectLabel>Product group</SelectLabel>
-                          {/* <SelectItem value="">.</SelectItem> */}
                           <SelectItem value="Commercial">Commercial</SelectItem>
                           <SelectItem value="Consumer">Consumer</SelectItem>
                         </SelectGroup>
@@ -2099,7 +2015,6 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
         ProductType: productType,
       });
   
-      // ✅ Notifikasi sukses
       Swal.fire({
         icon: 'success',
         title: 'Success!',
@@ -2109,13 +2024,12 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
         allowEscapeKey: false,
       });
   
-      onUpdate();      // Refresh data parent
-      setIsOpen(false); // Tutup modal
+      onUpdate();      
+      setIsOpen(false); 
   
     } catch (error) {
       console.error("Error updating productType:", error);
   
-      // ❌ Notifikasi error
       Swal.fire({
         icon: 'error',
         title: 'Update Failed',
@@ -2205,7 +2119,7 @@ export function ProductTypeDelete ({ ProductTypeID, isModalOpen, setIsModalOpen,
   
         console.log("Server Response:", response.data);
         if (response.status === 409 || response.data.success === false) {
-          // 🚨 Restriction triggered - Show alert message
+          //  Restriction triggered - Show alert message
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -2225,16 +2139,16 @@ export function ProductTypeDelete ({ ProductTypeID, isModalOpen, setIsModalOpen,
           timerProgressBar: true,
           showConfirmButton: false,
         }).then(() => {
-          // ✅ Close the modal if it's open
+          //  Close the modal if it's open
           window.location.reload();
-          // ✅ Refresh the table by calling `onUpdate()`
+          //  Refresh the table by calling `onUpdate()`
           if (onUpdate) {
             onUpdate();
           }
         });
       } catch (error) {
         if (error.response && error.response.status === 409) {
-          // 🚨 Handle 409 Conflict error from backend
+          //  Handle 409 Conflict error from backend
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -2456,7 +2370,7 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
     }
   
     try {
-      // ⏳ Tampilkan loading saat proses update
+      //  Tampilkan loading saat proses update
       Swal.fire({
         title: "Updating...",
         text: "Please wait while saving data.",
@@ -2477,7 +2391,6 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
   
       Swal.close(); // Tutup loading
   
-      // ✅ Notifikasi sukses
       Swal.fire({
         icon: 'success',
         title: 'Success!',
@@ -2493,9 +2406,7 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
     } catch (error) {
       console.error("Error updating Warranty Service:", error);
   
-      Swal.close(); // Tutup loading jika error
-  
-      // ❌ Notifikasi error
+      Swal.close();
       Swal.fire({
         icon: 'error',
         title: 'Update Failed',
@@ -2573,7 +2484,7 @@ export function WarrantyServiceDelete ({ Service_offerID, isModalOpen, setIsModa
         
         console.log("Server Response:", response.data);
         if (response.status === 409 || response.data.success === false) {
-          // 🚨 Restriction triggered - Show alert message
+          //  Restriction triggered - Show alert message
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -2593,16 +2504,16 @@ export function WarrantyServiceDelete ({ Service_offerID, isModalOpen, setIsModa
           timerProgressBar: true,
           showConfirmButton: false,
         }).then(() => {
-          // ✅ Close the modal if it's open
+          //  Close the modal if it's open
           window.location.reload();
-          // ✅ Refresh the table by calling `onUpdate()`
+          //  Refresh the table by calling `onUpdate()`
           if (onUpdate) {
             onUpdate();
           }
         });
       } catch (error) {
         if (error.response && error.response.status === 409) {
-          // 🚨 Handle 409 Conflict error from backend
+          //  Handle 409 Conflict error from backend
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -2713,7 +2624,7 @@ export function MaterialOrderEdit({ MOID, onUpdate }) {
     }
   
     try {
-      // ⏳ Tampilkan loading
+      //  Tampilkan loading
       Swal.fire({
         title: "Updating...",
         text: "Please wait while saving data.",
@@ -2734,9 +2645,7 @@ export function MaterialOrderEdit({ MOID, onUpdate }) {
         Owner,
       });
   
-      Swal.close(); // Tutup loading
-  
-      // ✅ Notifikasi sukses
+      Swal.close(); 
       Swal.fire({
         icon: "success",
         title: "Success!",
@@ -2751,9 +2660,8 @@ export function MaterialOrderEdit({ MOID, onUpdate }) {
     } catch (error) {
       console.error("Error updating Material Order:", error);
   
-      Swal.close(); // Tutup loading jika gagal
+      Swal.close();
   
-      // ❌ Notifikasi gagal
       Swal.fire({
         icon: "error",
         title: "Update Failed",
@@ -2830,7 +2738,7 @@ export function MaterialOrderDelete ({ MOID, isModalOpen, setIsModalOpen, onUpda
         
         console.log("Server Response:", response.data);
         if (response.status === 409 || response.data.success === false) {
-          // 🚨 Restriction triggered - Show alert message
+          //  Restriction triggered - Show alert message
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -2857,7 +2765,7 @@ export function MaterialOrderDelete ({ MOID, isModalOpen, setIsModalOpen, onUpda
         });
       } catch (error) {
         if (error.response && error.response.status === 409) {
-          // 🚨 Handle 409 Conflict error from backend
+          //  Handle 409 Conflict error from backend
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -3001,7 +2909,6 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
     }
   
     try {
-      // ⏳ Tampilkan loading selama proses update
       Swal.fire({
         title: "Updating...",
         text: "Please wait while saving data.",
@@ -3012,9 +2919,7 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
   
       await ApiCustomer.patch(`/api/work-order/${WOID}`, formData);
   
-      Swal.close(); // Tutup loading
-  
-      // ✅ Notifikasi sukses
+      Swal.close(); 
       Swal.fire({
         title: "Success!",
         text: "Data berhasil diperbarui.",
@@ -3025,14 +2930,12 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
         allowEscapeKey: false,
       });
   
-      onUpdate();       // Refresh data
-      setIsOpen(false); // Tutup modal/form
+      onUpdate();   
+      setIsOpen(false); 
     } catch (error) {
       console.error("Error updating Work Order:", error);
   
-      Swal.close(); // Tutup loading jika gagal
-  
-      // ❌ Notifikasi gagal
+      Swal.close(); 
       Swal.fire({
         title: "Error",
         text: "Gagal memperbarui data!",
@@ -3140,7 +3043,7 @@ export function WorkOrderDelete ({ WOID, isModalOpen, setIsModalOpen, onUpdate }
         
         console.log("Server Response:", response.data);
         if (response.status === 409 || response.data.success === false) {
-          // 🚨 Restriction triggered - Show alert message
+          // Restriction triggered - Show alert message
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -3160,14 +3063,14 @@ export function WorkOrderDelete ({ WOID, isModalOpen, setIsModalOpen, onUpdate }
           timerProgressBar: true,
           showConfirmButton: false,
         }).then(() => {
-          window.location.reload(); // Memuat ulang halaman
+          window.location.reload();
           if (onUpdate) {
             onUpdate();
           }
         });
       } catch (error) {
         if (error.response && error.response.status === 409) {
-          // 🚨 Handle 409 Conflict error from backend
+          // Handle 409 Conflict error from backend
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -3272,10 +3175,10 @@ export function UserAdd({ onAdd }) {
         showConfirmButton: false,
         allowEscapeKey: false,
       }).then(() => {
-        window.location.reload(); // Memuat ulang halaman
+        window.location.reload();
       });
 
-      onAdd?.(); // panggil callback jika ada
+      onAdd?.();
       setIsOpen(false);
       setFormData({ Email: "", Username: "", Password: "", Name: "", Role: "", ProfilePhoto: "" });
       setSelectedFile(null);
@@ -3551,7 +3454,7 @@ const handleDelete = async () => {
       
       console.log("Server Response:", response.data);
       if (response.status === 409 || response.data.success === false) {
-        // 🚨 Restriction triggered - Show alert message
+        //  Restriction triggered - Show alert message
         Swal.fire({
           icon: 'warning',
           title: 'Tidak Bisa Dihapus!',
@@ -3571,14 +3474,14 @@ const handleDelete = async () => {
         timerProgressBar: true,
         showConfirmButton: false,
       }).then(() => {
-        window.location.reload(); // Memuat ulang halaman
+        window.location.reload(); 
         if (onUpdate) {
           onUpdate();
         }
       });
     } catch (error) {
       if (error.response && error.response.status === 409) {
-        // 🚨 Handle 409 Conflict error from backend
+        //  Handle 409 Conflict error from backend
         Swal.fire({
           icon: 'warning',
           title: 'Tidak Bisa Dihapus!',
@@ -3832,7 +3735,7 @@ export function PartEdit({ PartNumber, onUpdate }) {
   
       await ApiCustomer.patch(`/api/service-log/parts-catalog/${PartNumber}`, updatedData);
   
-      Swal.close(); // Tutup loading setelah selesai
+      Swal.close(); 
   
       Swal.fire({
         icon: "success",
@@ -3849,7 +3752,7 @@ export function PartEdit({ PartNumber, onUpdate }) {
   
     } catch (e) {
       console.error(e);
-      Swal.close(); // Tutup loading jika gagal
+      Swal.close();
       Swal.fire({
         icon: "error",
         title: "Gagal!",
@@ -3944,7 +3847,7 @@ export function PartDelete ({ PartNumber, isModalOpen, setIsModalOpen, onUpdate 
         
         console.log("Server Response:", response.data);
         if (response.status === 409 || response.data.success === false) {
-          // 🚨 Restriction triggered - Show alert message
+          //  Restriction triggered - Show alert message
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -3964,14 +3867,14 @@ export function PartDelete ({ PartNumber, isModalOpen, setIsModalOpen, onUpdate 
           timerProgressBar: true,
           showConfirmButton: false,
         }).then(() => {
-         window.location.reload(); // Memuat ulang halaman
+         window.location.reload(); 
           if (onUpdate) {
             onUpdate();
           }
         });
       } catch (error) {
         if (error.response && error.response.status === 409) {
-          // 🚨 Handle 409 Conflict error from backend
+          // Handle 409 Conflict error from backend
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -4217,7 +4120,7 @@ export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpda
         const response = await ApiCustomer.delete(`/api/resources/${ResourceId}`);
   
         if (response.status === 409 || response.data.success === false) {
-          // 🚨 Restriction triggered - Show alert message
+          //  Restriction triggered - Show alert message
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -4237,14 +4140,14 @@ export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpda
           timerProgressBar: true,
           showConfirmButton: false,
         }).then(() => {
-          window.location.reload(); // Memuat ulang halaman
+          window.location.reload(); 
           if (onUpdate) {
             onUpdate();
           }
         });
       } catch (error) {
         if (error.response && error.response.status === 409) {
-          // 🚨 Handle 409 Conflict error from backend
+          //  Handle 409 Conflict error from backend
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -4273,200 +4176,6 @@ export function ResourceDelete({ ResourceId, isModalOpen, setIsModalOpen, onUpda
     </Button>
   );
 }
-
-
-//? Service Case Tab List
-
-
-// export function BtnModalsServiceCatalog(){
-//   const [workOpen, setWorkOpen] = useState(false);
-
-//   const SC = [
-//     {
-//       ServiceOfferID : "DEPOT2",
-//       SeriviceDescription : "DEPOT REPAIR - 2DAY",
-//       CostumerTAT:"002",
-//       Price:"0.00",
-//       Tax:"0.00",
-//       Total:"00.00"
-//     },
-//     {
-//       ServiceOfferID : "DEPOT1",
-//       SeriviceDescription : "DEPOT REPAIR",
-//       CostumerTAT:"001",
-//       Price:"0.00",
-//       Tax:"0.00",
-//       Total:"00.00"
-//     },
-//     {
-//       ServiceOfferID : "APBPRP",
-//       SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
-//       CostumerTAT:"001",
-//       Price:"0.00",
-//       Tax:"0.00",
-//       Total:"00.00"
-//     },
-//     {
-//       ServiceOfferID : "APBPRP",
-//       SeriviceDescription : "SRS/CREW 1WDW DEF RETURN",
-//       CostumerTAT:"003",
-//       Price:"0.00",
-//       Tax:"0.00",
-//       Total:"00.00"
-//     },
-//   ]
-
-//   return (
-//     <>
-//     <Dialog open={workOpen}>
-//       <DialogContent>
-//         <DialogHeader>
-//           <DialogDescription>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
-//         </DialogHeader>
-//         <DialogTitle>Service Catalog</DialogTitle>
-//         <div className="flex">
-//           <DialogTitle>Select From List of Service Options</DialogTitle>
-//           <div className="">
-//             <p>Product Number</p>
-//             <p>Product Name</p>
-//             <p>Serial Number</p>
-//             <p>Warranty Status</p>
-//             <p>Currency</p>
-//           </div>
-//         </div>
-//         <Table>
-//           <TableCaption>Warrenty Services</TableCaption>
-//           <TableHeader>
-//             <TableRow>
-//               <TableHead>Select</TableHead>
-//               <TableHead>Service OfferID</TableHead>
-//               <TableHead>Service Description</TableHead>
-//               <TableHead>Costumer TAT/ Response TIme</TableHead>
-//               <TableHead>Price</TableHead>
-//               <TableHead>Tax</TableHead>
-//               <TableHead>Total</TableHead>
-//             </TableRow>
-//           </TableHeader>
-//           <TableBody>
-//               {SC.map((service) => {
-//             <TableRow>
-//               <TableCell><Checkbox></Checkbox></TableCell>
-//               <TableCell>{service.ServiceOfferID}</TableCell>
-//               <TableCell>{service.SeriviceDescription}</TableCell>
-//               <TableCell>{service.CostumerTAT}</TableCell>
-//               <TableCell>{service.Price}</TableCell>
-//               <TableCell>{service.Tax}</TableCell>
-//               <TableCell>{service.Total}</TableCell>
-//             </TableRow>
-//               })}
-//           </TableBody>
-//         </Table>
-//         <DialogFooter>
-//               <button>Cancel</button>
-//               <button>Next</button>
-//         </DialogFooter>
-//       </DialogContent>
-//       <DialogContent>
-//         <DialogHeader>
-//           <DialogDescription>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
-//         </DialogHeader>
-//         <DialogTitle>Service Catalog</DialogTitle>
-//         <div className="flex">
-//           <DialogTitle>Select From List of Service Options</DialogTitle>
-//           <div className="">
-//             <p>Product Number</p>
-//             <p>Product Name</p>
-//             <p>Serial Number</p>
-//             <p>Warranty Status</p>
-//             <p>Currency</p>
-//           </div>
-//         </div>
-//         <Table>
-//           <TableCaption>Warrenty Services</TableCaption>
-//           <TableHeader>
-//             <TableRow>
-//               <TableHead>Select</TableHead>
-//               <TableHead>Service OfferID</TableHead>
-//               <TableHead>Service Description</TableHead>
-//               <TableHead>Costumer TAT/ Response TIme</TableHead>
-//               <TableHead>Price</TableHead>
-//               <TableHead>Tax</TableHead>
-//               <TableHead>Total</TableHead>
-//             </TableRow>
-//           </TableHeader>
-//           <TableBody>
-//               {SC.map((service) => {
-//             <TableRow>
-//               <TableCell><Checkbox></Checkbox></TableCell>
-//               <TableCell>{service.ServiceOfferID}</TableCell>
-//               <TableCell>{service.SeriviceDescription}</TableCell>
-//               <TableCell>{service.CostumerTAT}</TableCell>
-//               <TableCell>{service.Price}</TableCell>
-//               <TableCell>{service.Tax}</TableCell>
-//               <TableCell>{service.Total}</TableCell>
-//             </TableRow>
-//               })}
-//           </TableBody>
-//         </Table>
-//         <DialogFooter>
-//           <button>Cancel</button>
-//           <button>Next</button>
-//         </DialogFooter>
-//       </DialogContent>
-//       <DialogContent>
-//         <DialogHeader>
-//           <DialogDescription>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
-//         </DialogHeader>
-//         <DialogTitle>Service Catalog</DialogTitle>
-//         <div className="flex">
-//           <DialogTitle>Select From List of Service Options</DialogTitle>
-//           <div className="">
-//             <p>Product Number</p>
-//             <p>Product Name</p>
-//             <p>Serial Number</p>
-//             <p>Warranty Status</p>
-//             <p>Currency</p>
-//           </div>
-//         </div>
-//         <Table>
-//           <TableCaption>Warrenty Services</TableCaption>
-//           <TableHeader>
-//             <TableRow>
-//               <TableHead>Select</TableHead>
-//               <TableHead>Service OfferID</TableHead>
-//               <TableHead>Service Description</TableHead>
-//               <TableHead>Costumer TAT/ Response TIme</TableHead>
-//               <TableHead>Price</TableHead>
-//               <TableHead>Tax</TableHead>
-//               <TableHead>Total</TableHead>
-//             </TableRow>
-//           </TableHeader>
-//           <TableBody>
-//               {SC.map((service) => {
-//             <TableRow>
-//               <TableCell><Checkbox></Checkbox></TableCell>
-//               <TableCell>{service.ServiceOfferID}</TableCell>
-//               <TableCell>{service.SeriviceDescription}</TableCell>
-//               <TableCell>{service.CostumerTAT}</TableCell>
-//               <TableCell>{service.Price}</TableCell>
-//               <TableCell>{service.Tax}</TableCell>
-//               <TableCell>{service.Total}</TableCell>
-//             </TableRow>
-//               })}
-//           </TableBody>
-//         </Table>
-//         <DialogFooter>
-//           <button>Cancel</button>
-//           <button>Cancel</button>
-//           <button>AddPart</button> // open another dialogs modals
-//           <button>Create Order</button> //submit
-//         </DialogFooter>
-//       </DialogContent>
-      
-//   </Dialog>
-//     </>
-//   )
-// }
 
 export function BtnModalsServiceCatalog({ 
   open, 
@@ -4499,7 +4208,7 @@ export function BtnModalsServiceCatalog({
   const fetchDataAssets = async () => {
     try {
       const response = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
-      // console.log("Response fetch Asset Modal Work Order :",response)
+   
       return response.data.data
     }catch(e){
       console.error("error fetching Asset: ", e)
@@ -4533,9 +4242,6 @@ export function BtnModalsServiceCatalog({
     });
     fetchDataPartCatalog();
   }, [])
-  // fetchDataServiceOffer().then((data) => {
-  //   if (data) setWarrantyOffer(data);
-  // });
 
   const [selected, setSelected] = useState("DepotRepair"); 
 
@@ -4565,9 +4271,6 @@ export function BtnModalsServiceCatalog({
     console.log("Selected Services:", selectedWarrantyServices);
   }, [selectedWarrantyServices]);
   
-
-
-  //part
   //part state
   const [partCatalog, setPartCatalog] = useState([])
   //fetch data part catalog
@@ -4587,9 +4290,6 @@ export function BtnModalsServiceCatalog({
   const [partNumberSearch, setPartNumberSearch] = useState("");
   const [keywordSearch, setKeywordSearch] = useState("");
   const [descriptionSearch, setDescriptionSearch] = useState("");
-
-
-
 
   //handler part
   const [selectedPartCatalog, setSelectedPartCatalog] = useState([])
@@ -4732,7 +4432,7 @@ export function BtnModalsServiceCatalog({
         }
       });
     } catch (err) {
-      console.error("❌ Order Creation Failed:", err);
+      console.error(" Order Creation Failed:", err);
       Swal.fire({
         title: "Error!",
         text: "Failed to create order",
@@ -4744,10 +4444,6 @@ export function BtnModalsServiceCatalog({
     }
   };
   
-
-
-  
-
   function renderStepContent() {
     switch (currentStep) {
       case 1:
@@ -4777,7 +4473,6 @@ export function BtnModalsServiceCatalog({
               </div>
             </div>
   
-            {/* Table */}
             <Table>
               <TableCaption className={'caption-top bg-blue-500 p-2 text-2xl text-left text-black'}>Warranty Services</TableCaption>
               <TableHeader>
@@ -4792,25 +4487,6 @@ export function BtnModalsServiceCatalog({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {/* {warrantyOffer.map((service, index) => {
-                  const isChecked = selectedWarrantyServices.some((item) => item.Service_offerID === service.Service_offerID)
-                  return (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <Checkbox 
-                          checked={isChecked}
-                          onCheckedChange={(checked) => handlerWarrantyServices(service, checked)}
-                        />
-                      </TableCell>
-                      <TableCell>{service.Service_offerID}</TableCell>
-                      <TableCell>{service.Service_description}</TableCell>
-                      <TableCell>{service.CTat_RTime}</TableCell>
-                      <TableCell>{service.Price}</TableCell>
-                      <TableCell>{service.Tax}</TableCell>
-                      <TableCell>{service.Total}</TableCell>
-                    </TableRow>
-                  )
-                })} */}
                 {warrantyOffer.map((service, index) => (
                   <TableRow key={index}>
                     <TableCell>
@@ -4889,7 +4565,6 @@ export function BtnModalsServiceCatalog({
                 <p>Currency</p><p>: </p>
               </div>
             </div>
-            {/* Your Custom Layout and Table for Step 2 */}
 
             <Tabs
             defaultValue="parts"
@@ -5074,7 +4749,6 @@ export function BtnModalsServiceCatalog({
                         <TableCell>{selectedWarrantyServices.Service_description}</TableCell>
                         <TableCell>{selectedWarrantyServices.CTat_RTime}</TableCell>
                         <TableCell>{selectedWarrantyServices.Shipping_Fee}</TableCell>
-                        {/* <TableCell>{service.Price}</TableCell> */}
                         <TableCell>1</TableCell>
                         <TableCell>{selectedWarrantyServices.Tax}</TableCell>
                         <TableCell>{selectedWarrantyServices.Price}</TableCell>
@@ -5190,7 +4864,6 @@ export function BtnModalsServiceCatalog({
       setSelectedPartCatalog={setSelectedPartCatalog}
     />
     </Dialog>
-    {/* <Button onClick={() => setWorkOpen(true)}>Open Work Order</Button> */}
   </>
   );
 }
@@ -5312,7 +4985,6 @@ export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen
 }
 
 export function ServiceCatalogPartEdit({ PartNumber, onUpdate }) {
-  // console.log(PartNumber);
   const [isOpen, setIsOpen] = useState(false);
   const [partData, setPartData] = useState({
     PartNumber: "",
@@ -5439,7 +5111,7 @@ export function ServiceCatalogPartDelete({ PartNumber, onUpdate }) {
     try {
       await ApiCustomer.delete(`/api/servicecatalog-parts/${PartNumber}`);
       if (onUpdate) {
-        onUpdate(); // untuk refresh data setelah delete
+        onUpdate(); 
       }
     } catch (error) {
       console.error("Error deleting part:", error);
@@ -5619,7 +5291,7 @@ export function BtnModalsPartAdd({
                     (part) => !prev.some((p) => p.PartNumber === part.PartNumber)
                   ),
                 ]);
-                setTempSelectedParts([]); // ✅ clear after adding
+                setTempSelectedParts([]); //  clear after adding
                 Swal.fire({
                   title: "Success!",
                   text: "Part(s) added successfully!",
@@ -5763,14 +5435,6 @@ export function BtnModalsResourceAccountAdd({
   );
 }
 
-// import { useState } from "react";
-// import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import Swal from "sweetalert2";
-// import { ApiCustomer } from "@/lib/axios";
-
 export function ResourceAccountAdd() {
   const [formData, setFormData] = useState({
     ResourceAccountId: '',
@@ -5784,9 +5448,8 @@ export function ResourceAccountAdd() {
     // Fetch list of Resources untuk opsi select
     const fetchResources = async () => {
       try {
-        const response = await ApiCustomer.get("/api/resources"); // pastikan endpoint ini sesuai
+        const response = await ApiCustomer.get("/api/resources"); 
         setResources(response.data.data);
-        // console.log("Hasil Respon",response.data.data);
       } catch (error) {
         console.error("Error fetching resources:", error);
       }
@@ -5941,11 +5604,9 @@ export function ResourceAccountEdit({ ResourceAccountId, onUpdate, resources }) 
         timerProgressBar: true,
         showConfirmButton: false,
       }).then(() => {
-        onUpdate(); // Refresh parent data
+        onUpdate(); 
         setIsOpen(false);
       })
-
-
 
     } catch (error) {
       console.error("Error updating ResourceAccount:", error);
@@ -6036,7 +5697,6 @@ export function ResourceAccountDelete({ ResourceAccountId, onUpdate }) {
           showConfirmButton: false,
         });
 
-        // Call onUpdate AFTER Swal closes
         if (onUpdate) onUpdate();
     } catch (error) {
       if (error.response?.status === 409) {
@@ -6076,8 +5736,8 @@ export function SubkTechnicianAdd() {
   const [resourceAccounts, setResourceAccounts] = useState([])
   const fetchResourceAccounts = async () => {
     try {
-      const res = await ApiCustomer.get("/api/resource-account?limit=1000"); // atau sesuaikan dengan pagination
-      setResourceAccounts(res.data.data); // ambil array data
+      const res = await ApiCustomer.get("/api/resource-account?limit=1000"); 
+      setResourceAccounts(res.data.data); 
     } catch (error) {
       console.error("Failed to fetch resource accounts:", error);
     }
@@ -6170,8 +5830,6 @@ export function SubkTechnicianAdd() {
               </option>
             ))}
           </select>
-          {/* <Label>ResourceAccountId (optional)</Label>
-          <Input id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} /> */}
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit}>Add</Button>
@@ -6262,7 +5920,7 @@ export function SubkTechnicianEdit({ SubkTechnicianId, onUpdate }) {
         showConfirmButton: false,
       });
 
-      onUpdate(); // Refresh parent data
+      onUpdate(); 
       setIsOpen(false);
     } catch (error) {
       console.error("Error updating SubkTechnician:", error);
@@ -6970,71 +6628,6 @@ export function BookingsEdit({ BookingId, onUpdate }) {
   );
 }
 
-// export function BookingsDelete({ BookingId, onUpdate }) {
-//   const [isModalOpen, setIsModalOpen] = useState(false);
-
-//   const handleDelete = async () => {
-//     try {
-//       const response = await ApiCustomer.delete(`/api/booking/${BookingId}`);
-
-//       if (response.status === 409 || response.data.success === false) {
-//         Swal.fire({
-//           icon: "error",
-//           title: "Cannot Delete",
-//           text: response.data.message || "This booking cannot be deleted due to relational restrictions.",
-//           timer: 1400,
-//           showConfirmButton: false,
-//           timerProgressBar: true,
-//         });
-//         return;
-//       }
-
-//       Swal.fire({
-//         icon: "success",
-//         title: "Deleted",
-//         text: "Booking has been deleted successfully.",
-//         timer: 1100,
-//         showConfirmButton: false,
-//         timerProgressBar: true,
-//       });
-
-//       setIsModalOpen(false);
-//       onUpdate?.(); // Refresh list
-//     } catch (error) {
-//       Swal.fire({
-//         icon: "error",
-//         title: "Failed",
-//         text: error?.response?.data?.message || "Failed to delete booking.",
-//         timer: 1400,
-//         showConfirmButton: false,
-//         timerProgressBar: true,
-//       });
-//     }
-//   };
-
-//   return (
-//     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-//       <DialogTrigger asChild>
-//         <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
-//           <Trash />
-//         </Button>
-//       </DialogTrigger>
-//       <DialogContent>
-//         <DialogHeader>
-//           <DialogTitle>Delete Booking</DialogTitle>
-//           <DialogDescription>Are you sure you want to delete this booking? This action cannot be undone.</DialogDescription>
-//         </DialogHeader>
-//         <p>This will permanently remove the booking record from the system.</p>
-//         <DialogFooter>
-//           <Button variant="destructive" onClick={handleDelete}>
-//             Delete
-//           </Button>
-//         </DialogFooter>
-//       </DialogContent>
-//     </Dialog>
-//   );
-// }
-
 export function BookingsDelete({ BookingId, onUpdate }) {
   const handleDelete = async () => {
     const result = await Swal.fire({
@@ -7071,7 +6664,7 @@ export function BookingsDelete({ BookingId, onUpdate }) {
           showConfirmButton: false,
         }).then(() => {
           if (onUpdate) {
-            onUpdate(); // untuk refresh list
+            onUpdate(); 
           }
         });
       } catch (error) {
@@ -7143,7 +6736,6 @@ export function BookingDetailsAdd({ onUpdate }) {
         ]);
 
         setBookings(bookingRes.data.data || []);
-        // console.log(getUserFromToken())
         setResources(resourceRes.data.data || []);
         setAccounts(accountRes.data.data || []);
         setTechnicians(techRes.data.data || []);
@@ -7225,20 +6817,6 @@ export function BookingDetailsAdd({ onUpdate }) {
               <option value="">-- Select Booking --</option>
               {bookings.map((b) => <option key={b.BookingId} value={b.BookingId}>{b.BookingId} - {b.bookingDetails?.[0]?.ResourceId}</option>)}
             </select>
-            {/* <Label htmlFor="BookingID">Booking ID</Label>
-            <select
-              id="BookingID"
-              value={resourceAccountId}
-              onChange={(e) => setResourceAccountId(e.target.value)}
-              className="w-full border border-gray-300 rounded px-3 py-2"
-            >
-              <option value="">-- Select Resource Account --</option>
-              {resourceAccounts.map((ra) => (
-                <option key={ra.ResourceAccountId} value={ra.ResourceAccountId}>
-                  {ra.Name} ({ra.ResourceAccountId})
-                </option>
-              ))}
-            </select> */}
           </div>
 
           <div>
@@ -7297,11 +6875,6 @@ export function BookingDetailsAdd({ onUpdate }) {
               <div><Label>Duration (minutes)</Label><Input type="number" id="DurationInMinutesUserTime" value={formData.DurationInMinutesUserTime} onChange={handleInputChange} /></div>
             </div>
           </div>
-
-          {/* <div>
-            <Label>Changed By *</Label>
-            <Input id="ChangedBy" type="number" value={formData.ChangedBy} onChange={handleInputChange} />
-          </div> */}
         </div>
 
         <DialogFooter className="mt-4">
@@ -7395,7 +6968,6 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
         ]);
 
         setBookings(bookingRes.data.data || []);
-        // console.log(getUserFromToken())
         setResources(resourceRes.data.data || []);
         setAccounts(accountRes.data.data || []);
         setTechnicians(techRes.data.data || []);
@@ -7408,7 +6980,6 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
 
   const toFullISOString = (value) => {
     if (!value) return null;
-    // Tambah ":00" jika hanya sampai menit
     return value.length === 16 ? value + ":00" : value;
   };
 
@@ -7416,7 +6987,6 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
     const userSubmit = getUserFromToken();
     try {
       const payload = {
-        // ...formData,
         BookingId: parseInt(form.BookingId),
         ResourceId: form.ResourceId || null,
         ResourceAccountId: form.ResourceAccountId || null,
@@ -7610,7 +7180,7 @@ export function BookingDetailsDelete({ BookingDetailId, onUpdate }) {
           timerProgressBar: true,
           showConfirmButton: false,
         }).then(() => {
-          if (onUpdate) onUpdate(); // Refresh list or trigger update
+          if (onUpdate) onUpdate(); 
         });
 
       } catch (error) {
@@ -7884,7 +7454,7 @@ export function RepairClassCodeDelete({ Code, isModalOpen, setIsModalOpen, onUpd
           timerProgressBar: true,
           showConfirmButton: false,
         }).then(() => {
-          window.location.reload(); // Memuat ulang halaman
+          window.location.reload(); 
           if (onUpdate) {
             onUpdate();
           }
@@ -8300,7 +7870,7 @@ export function ServiceCatalogDelete({ ServiceCatalogID, onUpdate }) {
           showConfirmButton: false,
         }).then(() => {
           if (onUpdate) {
-            onUpdate(); // Refresh data
+            onUpdate(); 
           }
         });
       } catch (error) {
@@ -8339,7 +7909,6 @@ export function ServiceCatalogDelete({ ServiceCatalogID, onUpdate }) {
     </Button>
   );
 }
-
 
 
 export function OTCAdd({ onUpdate }) {
@@ -8525,71 +8094,6 @@ export function OTCEdit({ OTCCode, onUpdate }) {
   );
 }
 
-// export function OTCDelete({ OTCCode, onUpdate }) {
-//   const [isModalOpen, setIsModalOpen] = useState(false);
-
-//   const handleDelete = async () => {
-//     try {
-//       const response = await ApiCustomer.delete(`/api/otc-code/${OTCCode}`);
-
-//       if (response.status === 409 || response.data.success === false) {
-//         Swal.fire({
-//           icon: "error",
-//           title: "Cannot Delete",
-//           text: response.data.message || "This OTCCode cannot be deleted due to relational restrictions.",
-//           timer: 1400,
-//           showConfirmButton: false,
-//           timerProgressBar: true,
-//         });
-//         return;
-//       }
-
-//       Swal.fire({
-//         icon: "success",
-//         title: "Deleted",
-//         text: "OTCCode has been deleted successfully.",
-//         timer: 1100,
-//         showConfirmButton: false,
-//         timerProgressBar: true,
-//       });
-
-//       setIsModalOpen(false);
-//       onUpdate?.(); // Refresh list
-//     } catch (error) {
-//       Swal.fire({
-//         icon: "error",
-//         title: "Failed",
-//         text: error?.response?.data?.message || "Failed to delete OTCCode.",
-//         timer: 1400,
-//         showConfirmButton: false,
-//         timerProgressBar: true,
-//       });
-//     }
-//   };
-
-//   return (
-//     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-//       <DialogTrigger asChild>
-//         <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={() => setIsModalOpen(true)}>
-//           <Trash />
-//         </Button>
-//       </DialogTrigger>
-//       <DialogContent>
-//         <DialogHeader>
-//           <DialogTitle>Delete OTCCode</DialogTitle>
-//           <DialogDescription>Are you sure you want to delete this OTCCode? This action cannot be undone.</DialogDescription>
-//         </DialogHeader>
-//         <p>This will permanently remove the OTCCode record from the system.</p>
-//         <DialogFooter>
-//           <Button variant="destructive" onClick={handleDelete}>
-//             Delete
-//           </Button>
-//         </DialogFooter>
-//       </DialogContent>
-//     </Dialog>
-//   );
-// }
-
 export function OTCDelete({ OTCCode, isModalOpen, setIsModalOpen, onUpdate }) {
   const handleDelete = async () => {
     const result = await Swal.fire({
@@ -8698,7 +8202,6 @@ export function CrsAdd() {
     try {
       console.log("Form Data : ", formData);
 
-      // Mengirim data ke API menggunakan POST untuk membuat data baru
       await ApiCustomer.post("/api/caseResolution", formData);
 
       Swal.fire({
@@ -8709,7 +8212,7 @@ export function CrsAdd() {
         timerProgressBar: true,
         showConfirmButton: false,
       }).then(() => {
-        window.location.reload(); // Refresh setelah berhasil
+        window.location.reload(); 
       });
     } catch (error) {
       console.error("Error saving Case Resolution:", error);
@@ -8974,7 +8477,6 @@ export function FailureEdit({ FailureId, onUpdate }) {
   );
 }
 
-
 export function FailureDelete({ FailureId, isModalOpen, setIsModalOpen, onUpdate }) {
   const handleDelete = async () => {
     const result = await Swal.fire({
@@ -8992,7 +8494,7 @@ export function FailureDelete({ FailureId, isModalOpen, setIsModalOpen, onUpdate
         const response = await ApiCustomer.delete(`/api/failure/${FailureId}`);
   
         if (response.status === 409 || response.data.success === false) {
-          // 🚨 Restriction triggered - Show alert message
+          // Restriction triggered - Show alert message
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -9012,14 +8514,14 @@ export function FailureDelete({ FailureId, isModalOpen, setIsModalOpen, onUpdate
           timerProgressBar: true,
           showConfirmButton: false,
         }).then(() => {
-          window.location.reload(); // Memuat ulang halaman
+          window.location.reload(); 
           if (onUpdate) {
             onUpdate();
           }
         });
       } catch (error) {
         if (error.response && error.response.status === 409) {
-          // 🚨 Handle 409 Conflict error from backend
+          // Handle 409 Conflict error from backend
           Swal.fire({
             icon: 'warning',
             title: 'Tidak Bisa Dihapus!',
@@ -9259,8 +8761,6 @@ export function CrsDelete({ id_csr, onDelete }) {
   }
 
 
-
-
 //! Home Page Modals
 
 export function FindCase({}){
@@ -9291,10 +8791,7 @@ console.log(caseData);
         Swal.showLoading();
       },
     });
-
-    // setError(null);
     
-
     try {
       const response = await ApiCustomer.get(baseurl);
       console.log("TJEdata",response.data.data.site_account.Company);
@@ -9302,9 +8799,8 @@ console.log(caseData);
       if (response.data.success && response.data.data.contact_information.Mobile === findingCase.Phoneno) {
         setCaseData(response.data.data);
         setOpenInfo(true);
-      Swal.close(); // <-- Tambahkan Swal.close() setelah berhasil
+      Swal.close(); 
       } else {
-        // setError("Failed to fetch case data");
         Swal.fire({
         title: "Error!",
         text: "Case Tidak Ditemukan",
@@ -9319,7 +8815,7 @@ console.log(caseData);
       console.error("Error fetching case data:", err);
       setError("Error fetching data");
 
-      Swal.close(); // Tetap tutup loading jika error
+      Swal.close(); 
 
       Swal.fire({
         title: "Error!",

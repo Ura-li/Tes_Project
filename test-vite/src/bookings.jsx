@@ -1,6 +1,5 @@
 import React from 'react'
 import { ServiceBooking } from './components/service-booking'
-// import { useLocation } from 'react-router-dom';
 import { useLocation } from 'react-router';
 
 
