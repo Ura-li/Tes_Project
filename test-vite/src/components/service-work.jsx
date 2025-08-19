@@ -1045,6 +1045,10 @@ export const ServiceWork = () => {
                           <TableCell>
                             {booking.ScheduleJeopardy ? "Jeopardy" : "-"}
                           </TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
                           <TableCell>{formatDate(booking.CreatedAt)}</TableCell>
                           {/* <TableCell>{formatDate(booking.StartTimeCustomerTime)}</TableCell>
                         <TableCell>{formatDate(booking.EstimatedArrivalTimeCustomerTime)}</TableCell>
