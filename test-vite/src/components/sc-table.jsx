@@ -17,7 +17,10 @@ import { BtnModalContact } from "./sc-modal";
 import { BtnModalAsset } from "./sc-modal";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
-import { User,Search, Laptop } from "lucide-react";
+import { ContactRound, User,Search, Laptop } from "lucide-react";
+import { Button } from "./ui/button";
+import { Loader2 } from "lucide-react";
+
 
 import ApiCustomer from "@/api";
 
@@ -42,10 +45,11 @@ export function TableCompany({
 
     searchByEmailPhoneForGlobalSearch,
     setSearchByEmailPhoneForGlobalSearch,
-    assetBasedOnContactsSearch,
+    assetBasedOnContactsSearch,   
     contactsBasedOnContactsSearch,
     companyBasedOnContactsSearch
   }) {
+
 
 
 
@@ -55,6 +59,10 @@ export function TableCompany({
 
     const [checkedCompanies, setCheckedCompanies] = useState({});
     const [relatedData, setRelatedData] = useState({}); // Stores related contacts/assets
+
+    const [loadingContacts, setLoadingContacts] = useState(false);
+    const [loadingAssets, setLoadingAssets] = useState(false);
+    
   /// Check if both `selectedAsset` and `selectedCompany` are empty
   const ifEmptyQuerySearch =
   (!selectedAsset || selectedAsset.length === 0) &&
@@ -218,6 +226,7 @@ export function TableCompany({
   //handle checkbox
   const handleCheckBoxCompanyChange = async (company, newCheckedState) => {
 
+
     setCheckedCompanies((prevChecked) => ({
       ...prevChecked,
       [company.key]: newCheckedState,
@@ -229,6 +238,8 @@ export function TableCompany({
         //check the type of search checked
         // console.log("Type after checked company",company.type)
         // console.log("Key after checked company",company.key)
+        setLoadingAssets(true);
+        setLoadingContacts(true);
         let response = [];
         if(company.type == 'individual'){
           response = await ApiCustomer(`/api/contact-information/check-contacts-affiliation?contactID=${company.key}`);
@@ -262,6 +273,9 @@ export function TableCompany({
         }
       } catch (err) {
         console.error("Error fetching company affiliations:", err);
+      } finally {
+        setLoadingContacts(false);
+        setLoadingAssets(false);
       }
     } else {
       setSelectedAsset([]);
@@ -371,7 +385,13 @@ export function TableCompany({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {contacts.length > 0 ? contacts.map((contact) => (
+              {loadingContacts ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center">
+                    <Loader2 className="h-2 w-5 animate-spin inline-block mr-2"/> Loading contacts...
+                  </TableCell>
+                </TableRow>
+              ) : contacts.length > 0 ? contacts.map((contact) => (
                 <TableRow key={contact.ContactID}
                 onClick={() => {
                   setSelectedContact(contact)
@@ -430,7 +450,13 @@ export function TableCompany({
               </TableRow>
             </TableHeader>
             <TableBody>
-                {assets.length > 0 ? assets.map((asset) => (
+                {loadingAssets ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center">
+                    <Loader2 className="h-2 w-5 animate-spin inline-block mr-2"/> Loading Assets...
+                  </TableCell>
+                </TableRow>
+              ) : assets.length > 0 ? assets.map((asset) => (
                   <TableRow 
                     key={asset.AssetID}
                     onClick={() => handleSelectedAssetForCaseRelated(asset)} //  Set selected asset
