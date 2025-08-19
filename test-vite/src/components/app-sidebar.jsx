@@ -307,32 +307,7 @@ export function AppSidebar({
       },
     ],
   
-    // recent: [
-    //   {
-    //     name: "Recent",
-    //     title: "Recent",
-    //     url: "#",
-    //     icon: PieChart,
-    //   }
-    // ],
-  
-    // mywork: [
-    //   {
-    //     name: "My work",
-    //     title: "My Work",
-    //     url: "/search_case",
-    //     icon: Table,
-    //   }
-    // ],
-  
-    // pinned: [
-    //   {
-    //     name: "Pinned",
-    //     title: "Pinned",
-    //     url: "#",
-    //     icon: Pin
-    //   }
-    // ],
+
   }
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -342,9 +317,6 @@ export function AppSidebar({
       <SidebarContent>
         <NavProjects projects={data.projects} />
         <Separator className={'border-2'}></Separator>
-        {/* <NavRecent recent={data.recent}/>
-        <NavPinned pinned={data.pinned}/>
-        <NavMywork mywork={data.mywork}/> */}
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
