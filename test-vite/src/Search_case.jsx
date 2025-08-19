@@ -459,10 +459,15 @@ const Search_case = () => {
   
     } catch (err) {
       console.error("Error saving customer: ", err);
+      let errorMessage = "Gagal menyimpan customer.";
+      if (err.response && err.response.data && err.response.data.message) {
+        errorMessage = err.response.data.message;
+      }
+
       Swal.fire({
         icon: 'error',
         title: 'Gagal!',
-        text: 'Gagal menyimpan customer.',
+        text: errorMessage,
       });
     }
   };

@@ -1839,8 +1839,8 @@ export const User_table = () => {
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Role</th>
               <th className="p-2 border">Profil Photo</th>
-              <th className="p-2 border">CreatedAt</th>
-              <th className="p-2 border">UpdateAt</th>
+              <th className="p-2 border">Created At</th>
+              <th className="p-2 border">Update At</th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
