@@ -919,7 +919,7 @@ export const ServiceWork = () => {
                       ? materialOrders.map((material) => (
                           <TableRow key={material.MOID}>
                             <TableCell className="font-medium">
-                              <Link to={`/material-order/${material.MOID}`}>
+                              <Link to={`/app/material-order/${material.MOID}`}>
                                 {material.MOID} on {material.WOID}
                               </Link>
                             </TableCell>

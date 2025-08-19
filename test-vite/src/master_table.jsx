@@ -46,11 +46,24 @@ import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectVa
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const itemsPerPage = 10;
+
+  //set debounce
+  useEffect(() => {
+    const handler = setTimeout(()=>{
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1)
+    }, 500)
+
+    return () =>{
+      clearTimeout(handler);
+    }
+  }, [searchTerm])
 
   // Fungsi untuk mengambil data dari API
   const fetchContacts = async () => {
@@ -70,7 +83,7 @@ export const Contact_table = () => {
 
     try {
       const response = await ApiCustomer.get(
-        `/api/contact-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`
+        `/api/contact-information?page=${currentPage}&limit=${itemsPerPage}&search=${debouncedSearchTerm}`
       );
       setContacts(response.data.data); // Menyimpan data kontak ke state
       setTotalPages(response.data.totalPages);
@@ -85,7 +98,7 @@ export const Contact_table = () => {
 
   useEffect(() => {
     fetchContacts();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, debouncedSearchTerm]);
 
   return (
     <div className="p-4">
@@ -215,8 +228,9 @@ export const Contact_table = () => {
 export const Company_table = () => {
   const [companies, setCompanies] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [filteredCompanies, setFilteredCompanies] = useState([]); 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const itemsPerPage = 10;
@@ -224,8 +238,22 @@ export const Company_table = () => {
   //set modal
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  useEffect(() => {
+    const handler = setTimeout(()=>{
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1)
+    }, 500)
+
+    return () =>{
+      clearTimeout(handler);
+    }
+  }, [searchTerm])
+
   // Fungsi untuk mengambil data dari API
   const fetchCompanies = async () => {
+    setError(null);
+    setLoading(true);
+
     Swal.fire({
       title: "Memuat Data Company...",
       text: "Mohon tunggu sebentar",
@@ -236,34 +264,48 @@ export const Company_table = () => {
       },
     });
 
-    setError(null);
-
     try {
       const response = await ApiCustomer.get(
-        `/api/site_account?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`
+        `/api/site_account`
       );
       setCompanies(response.data.data);
-      setTotalPages(response.data.totalPages);
 
       Swal.close();
     } catch (err) {
       console.error("Error fetching company data:", err);
       setError("Failed to fetch data");
 
-      Swal.close(); // Tetap tutup loading walaupun error
       Swal.fire({
         title: "Error!",
         text: "Gagal mengambil data perusahaan.",
         icon: "error",
         confirmButtonText: "OK",
       });
+    } finally {
+      Swal.close(); 
+      setLoading(false);
+
     }
   };
 
   useEffect(() => {
     fetchCompanies();
-  }, [currentPage, searchTerm]);
+  }, []);
 
+  useEffect(() =>{
+    const filtered = companies.filter((company) =>{
+      return Object.values(company).some((val)=> 
+        val?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    })
+    setFilteredCompanies(filtered)
+  }, [debouncedSearchTerm, companies])
+
+  const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
+  const currentData = filteredCompanies.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Company Table</h2>
@@ -299,8 +341,8 @@ export const Company_table = () => {
             </tr>
           </thead>
           <tbody>
-            {companies.length > 0 ? (
-              companies.map((company, index) => (
+            {filteredCompanies.length > 0 ? (
+              filteredCompanies.map((company, index) => (
                 <tr key={company.SiteAccountID} className="hover:bg-gray-100">
                   <td className="p-2 text-center border">
                     {(currentPage - 1) * itemsPerPage + index + 1}
@@ -366,6 +408,7 @@ export const Company_table = () => {
 
 export const Case_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Jumlah data per halaman
   const [loading, setLoading] = useState(false);
@@ -374,6 +417,19 @@ export const Case_table = () => {
   const [openClose, setOpenClose] = useState('Open')
   const state = ['Open','Close','InActive']
   console.log("casestate",openClose);
+
+  // ⏳ Debounce effect
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset page
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
   const fetchCaseDataTable = async () => {
     const baseurl = `/api/case-information`;
     const url =
@@ -427,7 +483,7 @@ export const Case_table = () => {
   // Filter data berdasarkan pencarian
   const filteredCaseTable = caseData.filter((item) =>
     Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     )
   );
 
@@ -566,6 +622,7 @@ export const Case_table = () => {
 
 export const Assets_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -574,8 +631,18 @@ export const Assets_table = () => {
   const [assets, setAssets] = useState([]);
 
   useEffect(() => {
+    const handler = setTimeout(()=>{
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1)
+    }, 500)
+
+    return () =>{
+      clearTimeout(handler);
+    }
+  }, [searchTerm])
+  useEffect(() => {
     fetchAssets();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, debouncedSearchTerm]);
 
   const fetchAssets = async () => {
     setLoading(true);
@@ -593,7 +660,7 @@ export const Assets_table = () => {
 
     try {
       const response = await ApiCustomer.get(
-        `/api/asset-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`
+        `/api/asset-information?page=${currentPage}&limit=${itemsPerPage}&search=${debouncedSearchTerm}`
       );
       setAssets(response.data.data);
       setTotalPages(response.data.totalPages);
@@ -1296,7 +1363,7 @@ export const Mo_table = () => {
   // Filter data berdasarkan pencarian
   const filteredMaterialOrderTable = MaterialOrderData.filter((item) =>
     Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
@@ -1490,7 +1557,7 @@ export const Wo_table = () => {
   // Filter data berdasarkan pencarian
   const filteredWorkOrderTable = WorkOrderData.filter((item) =>
     Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 

@@ -289,7 +289,6 @@ export function AppSidebar({
       <SidebarContent>
         <NavProjects projects={data.projects} />
         <Separator className={'border-2'}></Separator>
-       
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>

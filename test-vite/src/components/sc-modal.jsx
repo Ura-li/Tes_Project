@@ -8829,7 +8829,7 @@ console.log(caseData);
     <>
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant={'outline'}>Search Case</Button>
+        <Button variant={'outline'} className={'text-white bg-green-600 hover:bg-emerald-700 hover:text-green-300'} >Search Case</Button>
       </DialogTrigger>
       <DialogContent className={'flex   max-w-screen min-w-[60%] h-[fit]'}>
         <DialogHeader className={'flex flex-1 flex-col'}>
