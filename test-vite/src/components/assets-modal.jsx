@@ -1,11 +1,8 @@
-import { Copy } from "lucide-react";
-
 import React, { useState, useEffect, use } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -14,8 +11,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@radix-ui/react-checkbox";
 import { Search } from "lucide-react";
 import Swal from "sweetalert2";
 
@@ -23,31 +18,12 @@ import {
   Table,
   TableHeader,
   TableBody,
-  TableFooter,
   TableHead,
   TableRow,
   TableCell,
-  TableCaption,
 } from "@/components/ui/table";
 
-// const contacts = [
-//   {
-//     ContactID: "INV001",
-//     SiteAccountID: "Paid",
-//     Salution: "$250.00",
-//     Name: "Credit Card",
-//     Email: "Pakrt556@gmail.com",
-//     PreferredLanguage: "Indonesia",
-//     Phone: "089677544227",
-//     Mobile: "089677544227",
-//     WorkPhone: "2498910048",
-//     AddressLine: "Jakarta",
-//     City: "DKI Jakarta",
-//     StateProvince: "Jakarta",
-//     Country: "Indonesia",
-//     ZipPostalCode: "08972",
-//   },
-// ]
+
 
 //importing API
 import ApiCustomer from "@/api";
@@ -59,7 +35,6 @@ export function DialogCloseButton({
   setSearch,
   onSelectAsset,
 }) {
-  // console.log(isModalAssetOpen);
 
   // create search state
   const [searchAsset, setSearchAsset] = useState("");
@@ -99,7 +74,6 @@ export function DialogCloseButton({
   }, []);
   
   //filter item
-  
   const filteredAssets = search.SerialNumber ? assets.filter(
     (asset) =>
       asset.SerialNumber?.toLowerCase().includes(search?.SerialNumber?.toLowerCase()) ||
@@ -115,14 +89,6 @@ export function DialogCloseButton({
   return (
     <Dialog open={isModalAssetOpen} onOpenChange={setIsModalAssetOpen}>
       <DialogTrigger asChild>
-        {/* <Button
-          variant="outline"
-          onClick={() => {
-            setSearch("");
-          }}
-        >
-          Assets
-        </Button> */}
       </DialogTrigger>
       <DialogContent className="sm:max-w-3xl gap-y-10 shadow-white">
         <DialogHeader>
@@ -143,7 +109,6 @@ export function DialogCloseButton({
         <Table className="table-fixed border-spacing-0 mx-auto">
           <TableHeader>
             <TableRow className="text-md bg-blue-200">
-              {/* <TableHead></TableHead> */}
               <TableHead>Assets</TableHead>
               <TableHead>Serial Number</TableHead>
               <TableHead>Product No</TableHead>
@@ -159,7 +124,6 @@ export function DialogCloseButton({
                   onClick={()=>handleSelectAsset(asset)}
                   className={`cursor-pointer hover:bg-gray-200 ${selectedAsset?.AssetID === asset.AssetID ? "bg-blue-300" : ""}`}
                 >
-                  {/* <TableCell></TableCell> */}
                   <TableCell className="font-medium whitespace-break-spaces">
                     
                     {asset.product_information?.ProductName}
@@ -193,29 +157,7 @@ export function DialogCloseButton({
                 </TableRow>
               ))
             ) : 
-            // assets.length > 0 ? (
-            //   assets.map((asset) => (
-            //     <TableRow 
-            //       key={asset.AssetID}
-            //       className={`cursor-pointer hover:bg-gray-200 ${selectedAsset?.AssetID === asset.AssetID ? "bg-blue-300" : ""}`}
-            //       onClick={()=>handleSelectAsset(asset)}
-            //     >
-            //       {/* <TableCell>
-            //       <input type="checkbox"/>
-            //       </TableCell> */}
-            //       <TableCell className="font-medium whitespace-break-spaces">
-            //         {asset.product_information?.ProductName}
-            //       </TableCell>
-            //       <TableCell>{asset.SerialNumber}</TableCell>
-            //       <TableCell>{asset.ProductNumber}</TableCell>
-            //       <TableCell>{asset.product_information?.ProductLine}</TableCell>
-            //       <TableCell className="text-right">
-            //         {asset.site_account?.Company}
-            //       </TableCell>
-            //     </TableRow>
-            //   ))
-            // ) 
-            // : 
+         
             (
               <TableRow>
                 <TableCell
@@ -278,7 +220,7 @@ export function DialogCompanyBtn({
       //TODO : IF THE SEARCH IS EMPTY, set to not found.
       //TODO 2 : filtered the Site Account based on three main component : Company, City, and ZipPostalCode  
       const [filteredSiteAccount, setFilteredSiteAccount] = useState([]);
-          // ✅ Wait for `siteAccounts` to be updated before filtering
+          //  Wait for `siteAccounts` to be updated before filtering
       useEffect(() => {
         if (siteAccounts.length > 0 && search.Company?.trim()) { 
           console.log("Company searched : ", search) 
@@ -292,9 +234,9 @@ export function DialogCompanyBtn({
 
           
           if (filteredResults.length > 0) {
-            setFilteredSiteAccount(filteredResults); // ✅ Set results if matches found
+            setFilteredSiteAccount(filteredResults); //  Set results if matches found
           } else {
-            setFilteredSiteAccount([]); // ✅ Explicitly reset when no matches
+            setFilteredSiteAccount([]); //  Explicitly reset when no matches
             setIsModalCompanyOpen(false)
             Swal.fire({
               icon: "error",
@@ -319,12 +261,12 @@ export function DialogCompanyBtn({
         } else {
           setFilteredSiteAccount([]); // Reset when search is empty or no data
         }
-      }, [search.Company, siteAccounts]); // ✅ Depend on `siteAccounts`
+      }, [search.Company, siteAccounts]); //  Depend on `siteAccounts`
       useEffect(() => {
         console.log("Updated search state:", search);
         console.log("search.Company:", search.Company);
       }, [search]); // Logs every time `search` changes
-      // ✅ New useEffect to check updated `filteredSiteAccount`
+      // New useEffect to check updated `filteredSiteAccount`
       useEffect(() => {
         console.log("Filtered Site Account Updated:", filteredSiteAccount);
       }, [filteredSiteAccount]); // Runs when `filteredSiteAccount` updates
@@ -340,7 +282,7 @@ export function DialogCompanyBtn({
       //handle selection
       const handleSelectSiteAccount = (company) => {
         setSelectedSiteAccounts(company)
-        // onSelectCompany(company)
+        
       }
 
       //handle confirm 
@@ -367,7 +309,6 @@ export function DialogCompanyBtn({
               PIN: ""
             });
           }, 300);
-          // console.log("Company Selected:", selectedSiteAccounts);
         }
       }
       
@@ -376,9 +317,7 @@ export function DialogCompanyBtn({
       }, [selectedSiteAccounts]); // Runs when `selectedSiteAccounts` updates
   return (
     <Dialog open={isModalCompanyOpen} onOpenChange={setIsModalCompanyOpen}>
-      {/* <DialogTrigger asChild>
-        <Button variant="outline">Companny</Button>
-      </DialogTrigger> */}
+    
       <DialogContent className="sm:max-w-4xl gap-y-10 shadow-white">
         <DialogHeader>
           <DialogTitle className="mb-5">Companny</DialogTitle>
@@ -472,9 +411,7 @@ export function DialogContactBtn({
       console.error("Error fetching contacts:", err);
     }
   };
-  // fetchDataContacts();
     useEffect(() => {
-      // console.log("🔄 Running fetchDataContacts...");
       fetchDataContacts();
     }, []);
     

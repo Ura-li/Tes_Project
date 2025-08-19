@@ -8,7 +8,7 @@ function SidebarAutoClose() {
 
   useEffect(() => {
     if (location.pathname.includes("/case/:caseID")) {
-      setOpen(false); // Auto-close sidebar on specific routes
+      setOpen(false); 
     }
   }, [location, setOpen]);
 

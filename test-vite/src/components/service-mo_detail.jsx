@@ -9,14 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchCommandBlock, SelectBarRelated } from "./sc-select";
 import { ArrowDownNarrowWideIcon, Car, Lock, Plus, RotateCw, Search } from "lucide-react";
@@ -141,7 +133,7 @@ export const ServiceMoDetail = () => {
       console.error("Failed to fetch Material Line Items orders:", err);
     Swal.fire('Error', 'Failed to fetch Material Line Items', 'error');
   } finally {
-    Swal.close(); // Tutup alert
+    Swal.close();
     }
   };
   
@@ -183,10 +175,8 @@ export const ServiceMoDetail = () => {
         </div>
       )}
       {moLineItems.MOID ? (
-        // <TabsServiceMOLineItems MOLineDetails={moLineItems}/>
         <TabsServiceMOLineItems MOLineDetails={MODetailInput} LineItemID={lineItemID} moLineItems={moLineItems}/>
       ) : ''}
-      {/* {console.log(moLineItems)} */}
     <Card className="mt-2 rounded-none">
 
       <CardContent className={'p-0'}>
@@ -274,7 +264,6 @@ export const ServiceMoDetail = () => {
 
                 <div className="flex font-bold">
                   <span className="ml-7">Pick Pack Instructions</span>
-                  {/* <span className="ml-28">{MODetailInput.pickPackInstructions}</span> */}
                   <input
                     type="text"
                     className="ml-28"
@@ -287,7 +276,6 @@ export const ServiceMoDetail = () => {
 
                 <div className="flex font-bold">
                   <span className="ml-7">Collection Instructions</span>
-                  {/* <span className="ml-27">{MODetailInput.collectionInstructions}</span> */}
                   <select
                     className="ml-27"
                     name="collectionInstructions"
@@ -303,7 +291,6 @@ export const ServiceMoDetail = () => {
 
                 <div className="flex font-bold">
                   <span className="ml-7">Customer Response</span>
-                  {/* <span className="ml-33">{MODetailInput.customerResponse}</span> */}
                   <input
                     type="text"
                     className="ml-33"
@@ -316,7 +303,6 @@ export const ServiceMoDetail = () => {
 
                 <div className="flex font-bold">
                   <span className="ml-7">Rejected Reason</span>
-                  {/* <span className="ml-39">{MODetailInput.rejectedReason}</span> */}
                   <input
                     type="text"
                     className="ml-39"
@@ -329,7 +315,6 @@ export const ServiceMoDetail = () => {
 
                 <div className="flex font-bold">
                   <span className="text-red-500 ml-7">Other Reason</span>
-                  {/* <span className="ml-44">{MODetailInput.otherReason}</span> */}
                   <input
                     type="text"
                     className="ml-44"
@@ -420,14 +405,10 @@ export const ServiceMoDetail = () => {
                 <CaseField label="Failure Analysis" icon>
                   <Input variant="invisible" placeholder="---"/>
                 </CaseField>
-                {/* <div className="flex font-bold"> */}
-                  {/* <span className="ml-46">...</span> */}
                   <FailureSelect
                     failureId={MODetailInput.failureId}
                     setMODetailInput={setMODetailInput}
                   />
-                {/* </div> */}
-
                 <CaseField label="Additional Failure Code" icon>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>

@@ -696,12 +696,11 @@ export const Assets_table = () => {
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            setCurrentPage(1); // Reset ke halaman pertama saat mencari
+            setCurrentPage(1); 
           }}
         />
       </div>
 
-      {/* Tampilkan error jika terjadi kesalahan */}
       {error && <p className="text-red-500">{error}</p>}
 
       <div className="overflow-x-auto">

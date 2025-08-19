@@ -20,7 +20,6 @@ import { NotebookText } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import { Archive } from "lucide-react";
 import { LayoutDashboard } from "lucide-react";
-import { useState } from "react";
 
 
 export function NavProjects({
@@ -41,7 +40,6 @@ export function NavProjects({
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}
-            // className={activeitem === item.name ? "bg-gray-300" : "bg-sky-300"}
           >
             <SidebarMenuButton asChild tooltip={item.title}    isActive={isActive(item.url)} >
               <Link to={item.url} >
@@ -53,7 +51,6 @@ export function NavProjects({
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
                   <MoreHorizontal />
-                  {/* <span className="sr-only">More</span> */}
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -77,12 +74,6 @@ export function NavProjects({
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        {/* <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontal className="text-sidebar-foreground/70" />
-            <span>More</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem> */}
       </SidebarMenu>
     </SidebarGroup>
   );
@@ -108,7 +99,6 @@ export function NavRecent({
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
                   <MoreHorizontal />
-                  {/* <span className="sr-only">More</span> */}
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -132,12 +122,6 @@ export function NavRecent({
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        {/* <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontal className="text-sidebar-foreground/70" />
-            <span>More</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem> */}
       </SidebarMenu>
     </SidebarGroup>
   );
@@ -163,7 +147,6 @@ export function NavPinned({
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
                   <MoreHorizontal />
-                  {/* <span className="sr-only">More</span> */}
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -186,13 +169,7 @@ export function NavPinned({
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
-        ))}
-        {/* <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontal className="text-sidebar-foreground/70" />
-            <span>More</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem> */}
+        ))}       
       </SidebarMenu>
     </SidebarGroup>
   );
@@ -218,7 +195,6 @@ export function NavMywork({
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover >
                   <MoreHorizontal />
-                  {/* <span className="sr-only">More</span> */}
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent

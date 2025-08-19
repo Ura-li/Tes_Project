@@ -1,23 +1,14 @@
 import * as React from "react"
 import {
-  AudioWaveform,
   BookOpen,
   Bot,
-  Command,
-  Eye,
   FileCog,
-  Frame,
-  GalleryVerticalEnd,
   Home,
-  Map,
   PieChart,
   Pin,
-  Search,
-  ServerCogIcon,
   ServerIcon,
   Settings2,
   Slice,
-  SquareTerminal,
   Stamp,
   Table,
 } from "lucide-react"
@@ -37,9 +28,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
- 
-import { ScrollArea } from "@/components/ui/scroll-area"
-
 import { getUserFromToken } from "@/lib/utils/auth"
 import { Separator } from "./ui/separator"
 import { Hpicon, Javagicon } from "./icon";
@@ -48,7 +36,6 @@ import { useDraft } from "./DraftContext";
 
 
 // This is sample data.
-
 export function AppSidebar({
   ...props
 }) {
@@ -71,11 +58,7 @@ export function AppSidebar({
         logo: Hpicon,
         plan: "Main Company",
       },
-      // {
-      //   name: "Evil Corp.",
-      //   logo: Command,
-      //   plan: "Free",
-      // },
+     
     ],
     navMain: [
       {
@@ -114,14 +97,7 @@ export function AppSidebar({
             url: "/app/master/ProductType_table ",
             icon: Tag
           },
-          // {
-          //   title: "Service Catalog Type",
-          //   url: "/app/master/ServiceCatalogPartsTable ",
-          // },
-          // {
-          //   title: "Global Trade Check",
-          //   url: "/app/master/MaterialOrder ",
-          // },              
+                  
           {
             title: "Warranty Service",
             url: "/app/master/WarrantyService_table",
@@ -225,10 +201,7 @@ export function AppSidebar({
             title: "MO Line Item",
             url: `/app/material_order/material-order-line-items/${drafts.moliId}`,
           },
-          // {
-          //   title: "Catalog Service",
-          //   url: "/CatalogService",
-          // },
+        
         ],
       },
       {
@@ -307,7 +280,6 @@ export function AppSidebar({
       },
     ],
   
-
   }
   return (
     <Sidebar collapsible="icon" {...props}>
