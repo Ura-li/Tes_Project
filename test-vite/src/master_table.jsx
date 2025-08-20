@@ -1856,7 +1856,7 @@ export const User_table = () => {
                 <td className="p-2 border">{UserItem.Username}</td>
                 <td className="p-2 border">{UserItem.Name}</td>
                 <td className="p-2 border">{UserItem.Role}</td>
-                <td className="p-2 border">{UserItem.ProfilPhoto}</td>
+                <td className="p-2 border">{UserItem.ProfilePhoto}</td>
                 <td className="p-2 border">{UserItem.CreatedAt}</td>
                 <td className="p-2 border">{UserItem.UpdatedAt}</td>
                 <td className="flex p-2 space-x-2 border">

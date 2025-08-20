@@ -1654,7 +1654,7 @@ const [endDate, setEndDate] = useState(null);
               )}
             </TabsList>
           </CardHeader>
-
+               
           <TabsContent value="case_info" className={"p-2"}>
             <Card className="flex-row">
               <CardContent className="grid items-center grid-cols-6 gap-10 p-3 ">

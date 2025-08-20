@@ -39,6 +39,7 @@ export async function POST(request) {
              return NextResponse.json({ success: false, message: "Incorrect password" }, { status: 401 });
          }
 
+         console.log(user);
          // 🔥 Generate JWT Token
         const token = jwt.sign(
             {
