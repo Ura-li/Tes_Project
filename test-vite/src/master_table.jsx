@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useMemo} from "react";
 import ApiCustomer from "@/api";
 import { ContactEdit, ContactDelete } from "@/components/sc-modal";
 import { CompanyEdit, CompanyDelete } from "@/components/sc-modal";
@@ -47,46 +47,46 @@ export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [filteredContacts, setFilteredContacts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
-  //set debounce
+  // Filters
+  const [selectedCompany, setSelectedCompany] = useState("");
+  const [selectedSalutation, setSelectedSalutation] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedZipCode, setSelectedZipCode] = useState("");
+
+  // Debounce search input
   useEffect(() => {
-    const handler = setTimeout(()=>{
+    const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1)
-    }, 500)
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
-    return () =>{
-      clearTimeout(handler);
-    }
-  }, [searchTerm])
-
-  // Fungsi untuk mengambil data dari API
+  // Fetch all contacts sekali saja
   const fetchContacts = async () => {
-    // Menampilkan indikator loading menggunakan SweetAlert2
     Swal.fire({
       title: "Memuat Data Kontak...",
       text: "Mohon tunggu sebentar...",
       allowOutsideClick: false,
       allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading(); // Menampilkan indikator loading
-      },
+      didOpen: () => Swal.showLoading(),
     });
 
     setLoading(true);
     setError(null);
 
     try {
-      const response = await ApiCustomer.get(
-        `/api/contact-information?page=${currentPage}&limit=${itemsPerPage}&search=${debouncedSearchTerm}`
-      );
-      setContacts(response.data.data); // Menyimpan data kontak ke state
-      setTotalPages(response.data.totalPages);
+      const response = await ApiCustomer.get(`/api/contact-information`);
+      setContacts(response.data.data || []);
     } catch (err) {
       console.error("Error fetching contact data:", err);
       setError("Failed to fetch data");
@@ -98,28 +98,118 @@ export const Contact_table = () => {
 
   useEffect(() => {
     fetchContacts();
-  }, [currentPage, debouncedSearchTerm]);
+  }, []);
+
+  // Generate dropdown options (dari semua contacts, bukan cuma halaman tertentu)
+  const uniqueCompanies = useMemo(() => ["", ...new Set(contacts.map(c => c.Company).filter(Boolean).sort())], [contacts]);
+  const uniqueSalutations = useMemo(() => ["", ...new Set(contacts.map(c => c.Salutation).filter(Boolean).sort())], [contacts]);
+  const uniqueLanguages = useMemo(() => ["", ...new Set(contacts.map(c => c.PreferredLanguage).filter(Boolean).sort())], [contacts]);
+  const uniqueCountries = useMemo(() => ["", ...new Set(contacts.map(c => c.Country).filter(Boolean).sort())], [contacts]);
+
+  const uniqueStates = useMemo(() => {
+    const states = contacts.filter(c =>
+      !selectedCountry || c.Country === selectedCountry
+    ).map(c => c.StateProvince).filter(Boolean);
+    return ["", ...new Set(states.sort())];
+  }, [contacts, selectedCountry]);
+
+  const uniqueCities = useMemo(() => {
+    const cities = contacts.filter(c =>
+      (!selectedCountry || c.Country === selectedCountry) &&
+      (!selectedState || c.StateProvince === selectedState)
+    ).map(c => c.City).filter(Boolean);
+    return ["", ...new Set(cities.sort())];
+  }, [contacts, selectedCountry, selectedState]);
+
+  const uniqueZipCodes = useMemo(() => {
+    const zips = contacts.filter(c =>
+      (!selectedCountry || c.Country === selectedCountry) &&
+      (!selectedState || c.StateProvince === selectedState) &&
+      (!selectedCity || c.City === selectedCity)
+    ).map(c => c.ZipPostalCode).filter(Boolean);
+    return ["", ...new Set(zips.sort())];
+  }, [contacts, selectedCountry, selectedState, selectedCity]);
+
+  // Filtering (search + dropdown)
+  useEffect(() => {
+    let filtered = contacts.filter((contact) => {
+      const matchesSearch = Object.values(contact).some((val) =>
+        val?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      );
+
+      return (
+        matchesSearch &&
+        (!selectedCompany || contact.Company === selectedCompany) &&
+        (!selectedSalutation || contact.Salutation === selectedSalutation) &&
+        (!selectedLanguage || contact.PreferredLanguage === selectedLanguage) &&
+        (!selectedCountry || contact.Country === selectedCountry) &&
+        (!selectedState || contact.StateProvince === selectedState) &&
+        (!selectedCity || contact.City === selectedCity) &&
+        (!selectedZipCode || contact.ZipPostalCode === selectedZipCode)
+      );
+    });
+
+    setFilteredContacts(filtered);
+    setCurrentPage(1);
+  }, [debouncedSearchTerm, contacts, selectedCompany, selectedSalutation, selectedLanguage, selectedCountry, selectedState, selectedCity, selectedZipCode]);
+
+  // Pagination hasil filter
+  const totalPages = Math.ceil(filteredContacts.length / itemsPerPage);
+  const currentData = useMemo(() => {
+    return filteredContacts.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }, [filteredContacts, currentPage]);
 
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Contact Table</h2>
 
-      {/* Input Pencarian */}
-      <input
-        type="text"
-        placeholder="Search contacts..."
-        className="w-1/3 p-2 mb-4 border border-gray-300 rounded"
-        value={searchTerm}
-        onChange={(e) => {
-          setSearchTerm(e.target.value);
-          setCurrentPage(1); // Reset ke halaman pertama saat mencari
-        }}
-      />
+      {/* Search + Filters */}
+      <div className="mb-4 flex flex-wrap gap-4">
+        <input
+          type="text"
+          placeholder="Search contacts..."
+          className="p-2 border border-gray-300 rounded min-w-[200px]"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {/* Dropdown filters */}
+        <select value={selectedCompany} onChange={(e) => setSelectedCompany(e.target.value)} className="p-2 border rounded">
+          <option value="">All Companies</option>
+          {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select value={selectedSalutation} onChange={(e) => setSelectedSalutation(e.target.value)} className="p-2 border rounded">
+          <option value="">All Salutations</option>
+          {uniqueSalutations.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className="p-2 border rounded">
+          <option value="">All Languages</option>
+          {uniqueLanguages.map(l => <option key={l} value={l}>{l}</option>)}
+        </select>
+        <select value={selectedCountry} onChange={(e) => { setSelectedCountry(e.target.value); setSelectedState(""); setSelectedCity(""); setSelectedZipCode(""); }} className="p-2 border rounded">
+          <option value="">All Countries</option>
+          {uniqueCountries.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select value={selectedState} onChange={(e) => { setSelectedState(e.target.value); setSelectedCity(""); setSelectedZipCode(""); }} className="p-2 border rounded" disabled={!selectedCountry}>
+          <option value="">All States</option>
+          {uniqueStates.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select value={selectedCity} onChange={(e) => { setSelectedCity(e.target.value); setSelectedZipCode(""); }} className="p-2 border rounded" disabled={!selectedState}>
+          <option value="">All Cities</option>
+          {uniqueCities.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select value={selectedZipCode} onChange={(e) => setSelectedZipCode(e.target.value)} className="p-2 border rounded" disabled={!selectedCity}>
+          <option value="">All Zip Codes</option>
+          {uniqueZipCodes.map(z => <option key={z} value={z}>{z}</option>)}
+        </select>
+      </div>
 
-      {/* Tampilkan error jika terjadi kesalahan */}
       {error && <p className="text-red-500">{error}</p>}
 
-      <div className="overflow-x-scroll ">
+      {/* Table */}
+      <div className="overflow-x-scroll">
         <table className="border border-gray-300 shadow-lg">
           <thead>
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
@@ -148,15 +238,10 @@ export const Contact_table = () => {
             </tr>
           </thead>
           <tbody>
-            {contacts.length > 0 ? (
-              contacts.map((contact, index) => (
-                <tr
-                  key={contact.ContactID}
-                  className="text-center hover:bg-gray-100"
-                >
-                  <td className="p-2 text-center border">
-                    {(currentPage - 1) * itemsPerPage + index + 1}
-                  </td>
+            {currentData.length > 0 ? (
+              currentData.map((contact, index) => (
+                <tr key={contact.ContactID} className="text-center hover:bg-gray-100">
+                  <td className="p-2 border">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="p-2 border">{contact.ContactID}</td>
                   <td className="p-2 border">{contact.Company}</td>
                   <td className="p-2 border">{contact.Salutation}</td>
@@ -178,19 +263,14 @@ export const Contact_table = () => {
                   <td className="p-2 border">{contact.Country}</td>
                   <td className="p-2 border">{contact.ZipPostalCode}</td>
                   <td className="flex p-2 space-x-2 border">
-                    <ContactEdit
-                      contactID={contact.ContactID}
-                      onUpdate={fetchContacts}
-                    />
+                    <ContactEdit contactID={contact.ContactID} onUpdate={fetchContacts} />
                     <ContactDelete contactID={contact.ContactID} />
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="p-4 text-center">
-                  No data found.
-                </td>
+                <td colSpan="22" className="p-4 text-center">No data found.</td>
               </tr>
             )}
           </tbody>
@@ -202,19 +282,15 @@ export const Contact_table = () => {
         <div className="flex items-center justify-center mt-4 space-x-2">
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
           >
             Previous
           </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
+          <span>Page {currentPage} of {totalPages}</span>
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
           >
             Next
@@ -229,25 +305,46 @@ export const Company_table = () => {
   const [companies, setCompanies] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-  const [filteredCompanies, setFilteredCompanies] = useState([]); 
+  const [filteredCompanies, setFilteredCompanies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const itemsPerPage = 10;
 
-  //set modal
+  // State untuk sorting
+  const [sortConfig, setSortConfig] = useState({ key: 'Company', direction: 'ascending' });
+  // State untuk filter country dan city
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+
+  // State untuk modal
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    const handler = setTimeout(()=>{
-      setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1)
-    }, 500)
+  // Mendapatkan daftar negara unik dari data
+  const uniqueCountries = useMemo(() => {
+    const countries = companies.map(company => company.Country).filter(Boolean);
+    return ["", ...new Set(countries.sort())];
+  }, [companies]);
 
-    return () =>{
+  // Mendapatkan daftar kota unik dari data yang sudah difilter berdasarkan negara
+  const uniqueCities = useMemo(() => {
+    const cities = companies
+      .filter(company => selectedCountry === "" || company.Country === selectedCountry)
+      .map(company => company.City)
+      .filter(Boolean);
+    return ["", ...new Set(cities.sort())];
+  }, [companies, selectedCountry]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+
+    return () => {
       clearTimeout(handler);
-    }
-  }, [searchTerm])
+    };
+  }, [searchTerm]);
 
   // Fungsi untuk mengambil data dari API
   const fetchCompanies = async () => {
@@ -265,11 +362,8 @@ export const Company_table = () => {
     });
 
     try {
-      const response = await ApiCustomer.get(
-        `/api/site_account`
-      );
+      const response = await ApiCustomer.get(`/api/site_account`);
       setCompanies(response.data.data);
-
       Swal.close();
     } catch (err) {
       console.error("Error fetching company data:", err);
@@ -282,9 +376,8 @@ export const Company_table = () => {
         confirmButtonText: "OK",
       });
     } finally {
-      Swal.close(); 
+      Swal.close();
       setLoading(false);
-
     }
   };
 
@@ -292,57 +385,145 @@ export const Company_table = () => {
     fetchCompanies();
   }, []);
 
-  useEffect(() =>{
-    const filtered = companies.filter((company) =>{
-      return Object.values(company).some((val)=> 
+  // Filter dan sort companies
+  useEffect(() => {
+    let currentFiltered = companies.filter((company) => {
+      // General search term filter
+      const matchesSearchTerm = Object.values(company).some((val) =>
         val?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      )
-    })
-    setFilteredCompanies(filtered)
-  }, [debouncedSearchTerm, companies])
+      );
+
+      // Country and City filters
+      const matchesCountry = selectedCountry === "" || company.Country === selectedCountry;
+      const matchesCity = selectedCity === "" || company.City === selectedCity;
+
+      return matchesSearchTerm && matchesCountry && matchesCity;
+    });
+
+    // Sorting logic
+    if (sortConfig.key !== null) {
+      currentFiltered.sort((a, b) => {
+        const aValue = a[sortConfig.key]?.toString().toLowerCase() || '';
+        const bValue = b[sortConfig.key]?.toString().toLowerCase() || '';
+        if (aValue < bValue) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    setFilteredCompanies(currentFiltered);
+  }, [debouncedSearchTerm, companies, sortConfig, selectedCountry, selectedCity]);
 
   const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
   const currentData = filteredCompanies.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // Sorting handler
+  const requestSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIndicator = (key) => {
+    if (sortConfig.key === key) {
+      return sortConfig.direction === 'ascending' ? '▲' : '▼';
+    }
+    return '';
+  };
+
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Company Table</h2>
 
-      {/* Input Pencarian */}
-      <input
-        type="text"
-        placeholder="Search companies..."
-        className="w-1/3 p-2 mb-4 border border-gray-300 rounded"
-        value={searchTerm}
-        onChange={(e) => {
-          setSearchTerm(e.target.value);
-          setCurrentPage(1); // Reset ke halaman pertama saat mencari
-        }}
-      />
+      {/* Filter inputs section */}
+      <div className="mb-4 space-x-4 flex items-center">
+        {/* Text search input */}
+        <input
+          type="text"
+          placeholder="Search companies..."
+          className="w-1/3 p-2 border border-gray-300 rounded"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+        />
+        {/* Country filter dropdown */}
+        <select
+          className="p-2 border border-gray-300 rounded"
+          value={selectedCountry}
+          onChange={(e) => {
+            setSelectedCountry(e.target.value);
+            setSelectedCity(""); // Reset city filter when country changes
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Countries</option>
+          {uniqueCountries.map(country => (
+            <option key={country} value={country}>
+              {country}
+            </option>
+          ))}
+        </select>
+        {/* City filter dropdown */}
+        <select
+          className="p-2 border border-gray-300 rounded"
+          value={selectedCity}
+          onChange={(e) => {
+            setSelectedCity(e.target.value);
+            setCurrentPage(1);
+          }}
+          disabled={!selectedCountry && companies.length > 0} // Disable if no country is selected
+        >
+          <option value="">All Cities</option>
+          {uniqueCities.map(city => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {/* Tampilkan error jika terjadi kesalahan */}
       {error && <p className="text-red-500">{error}</p>}
 
-      {/* Tabel Data */}
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300">
           <thead>
             <tr className="bg-gray-200">
               <th className="p-2 border">No</th>
-              <th className="p-2 border">Company</th>
-              <th className="p-2 border">Email</th>
-              <th className="p-2 border">Primary Phone</th>
-              <th className="p-2 border">Whatsapp Number</th>
-              <th className="p-2 border">City</th>
-              <th className="p-2 border">Country</th>
+              <th className="p-2 border cursor-pointer" onClick={() => requestSort('Company')}>
+                Company {getSortIndicator('Company')}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => requestSort('Email')}>
+                Email {getSortIndicator('Email')}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => requestSort('PrimaryPhone')}>
+                Primary Phone {getSortIndicator('PrimaryPhone')}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => requestSort('WhatsappNo')}>
+                Whatsapp Number {getSortIndicator('WhatsappNo')}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => requestSort('City')}>
+                City {getSortIndicator('City')}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => requestSort('Country')}>
+                Country {getSortIndicator('Country')}
+              </th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredCompanies.length > 0 ? (
-              filteredCompanies.map((company, index) => (
+            {currentData.length > 0 ? (
+              currentData.map((company, index) => (
                 <tr key={company.SiteAccountID} className="hover:bg-gray-100">
                   <td className="p-2 text-center border">
                     {(currentPage - 1) * itemsPerPage + index + 1}
@@ -369,7 +550,7 @@ export const Company_table = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="p-4 text-center">
+                <td colSpan="8" className="p-4 text-center">
                   No data found.
                 </td>
               </tr>
@@ -378,7 +559,6 @@ export const Company_table = () => {
         </table>
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center mt-4 space-x-2">
           <button
@@ -410,32 +590,38 @@ export const Case_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Jumlah data per halaman
+  const itemsPerPage = 5; 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [caseData, setCaseData] = useState([]);
-  const [openClose, setOpenClose] = useState('Open')
-  const state = ['Open','Close','InActive']
-  console.log("casestate",openClose);
+  const [openClose, setOpenClose] = useState("Open");
 
-  // ⏳ Debounce effect
+  // 🔹 Tambahan state untuk filter dropdown
+  const [selectedHW, setSelectedHW] = useState("All");
+  const [selectedProduct, setSelectedProduct] = useState("All");
+  const [selectedCreatedName, setSelectedCreatedName] = useState("All");
+  const [selectedOwner, setSelectedOwner] = useState("All");
+  const [selectedWorkGroup, setSelectedWorkGroup] = useState("All"); // baru
+
+  // 🔹 State sorting
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  // Debounce Search
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1); // Reset page
+      setCurrentPage(1);
     }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    return () => clearTimeout(handler);
   }, [searchTerm]);
 
   const fetchCaseDataTable = async () => {
     const baseurl = `/api/case-information`;
     const url =
-      openClose === 'All'
-      ? baseurl
-      : `/api/case-information?CaseStatus=${openClose}`;
+      openClose === "All"
+        ? baseurl
+        : `/api/case-information?CaseStatus=${openClose}`;
+
     Swal.fire({
       title: "Memuat Data Case....",
       text: "Mohon Tunggu Sebentar",
@@ -447,25 +633,19 @@ export const Case_table = () => {
     });
 
     setError(null);
-    
 
     try {
       const response = await ApiCustomer.get(url);
-
       if (response.data.success) {
-        console.log(response.data.data)
         setCaseData(response.data.data);
       } else {
         setError("Failed to fetch case data");
       }
-
-      Swal.close(); // <-- Tambahkan Swal.close() setelah berhasil
+      Swal.close();
     } catch (err) {
       console.error("Error fetching case data:", err);
       setError("Error fetching data");
-
-      Swal.close(); // Tetap tutup loading jika error
-
+      Swal.close();
       Swal.fire({
         title: "Error!",
         text: "Gagal mengambil data perusahaan.",
@@ -475,45 +655,68 @@ export const Case_table = () => {
     }
   };
 
-  // 🔹 Load data when component mounts
   useEffect(() => {
     fetchCaseDataTable();
   }, [openClose]);
 
-  // Filter data berdasarkan pencarian
-  const filteredCaseTable = caseData.filter((item) =>
-    Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+  // 🔹 Buat unique value untuk dropdown filter
+  const uniqueHW = ["All", ...new Set(caseData.map((c) => c.HW))];
+  const uniqueProduct = ["All", ...new Set(caseData.map((c) => c.ProductName))];
+  const uniqueCreatedName = ["All", ...new Set(caseData.map((c) => c.CreatedName))];
+  const uniqueOwner = ["All", ...new Set(caseData.map((c) => c.Owner))];
+  const uniqueWorkGroup = ["All", ...new Set(caseData.map((c) => c.WorkGroup))]; // baru
+
+  // 🔹 Filtering data
+  let filteredCaseTable = caseData
+    .filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
     )
-  );
+    .filter((item) => (selectedHW === "All" ? true : item.HW === selectedHW))
+    .filter((item) => (selectedProduct === "All" ? true : item.ProductName === selectedProduct))
+    .filter((item) => (selectedCreatedName === "All" ? true : item.CreatedName === selectedCreatedName))
+    .filter((item) => (selectedOwner === "All" ? true : item.Owner === selectedOwner))
+    .filter((item) => (selectedWorkGroup === "All" ? true : item.WorkGroup === selectedWorkGroup)); // baru
 
-  // Hitung total halaman
+  // 🔹 Sorting CaseID
+  filteredCaseTable = [...filteredCaseTable].sort((a, b) => {
+    if (sortOrder === "asc") {
+      return a.CaseID.localeCompare(b.CaseID, undefined, { numeric: true });
+    } else {
+      return b.CaseID.localeCompare(a.CaseID, undefined, { numeric: true });
+    }
+  });
+
+  // Pagination
   const totalPages = Math.ceil(filteredCaseTable.length / itemsPerPage);
-
-  // Ambil data sesuai halaman saat ini
   const currentData = filteredCaseTable.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  //navigate
   const navigate = useNavigate();
 
+  // 🔹 Reset filter
+  const resetFilters = () => {
+    setSelectedHW("All");
+    setSelectedProduct("All");
+    setSelectedCreatedName("All");
+    setSelectedOwner("All");
+    setSelectedWorkGroup("All"); // reset WorkGroup
+  };
 
+  // 🔹 Toggle sort order
+  const toggleSortOrder = () => {
+    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+  };
 
   return (
     <div className="flex flex-col gap-2 p-4">
-      {/* <button
-        onClick={handleDownload}
-        className="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700"
-      >
-        Download Excel
-      </button> */}
-      <ExportExcel caseData={caseData}/>
-      <></>
-      {/* <ServiceRequestPDF></ServiceRequestPDF> */}
-      {/* <PDFButton></PDFButton> */}
+      <ExportExcel caseData={caseData} />
       <h2 className="mb-4 text-xl font-bold">ID Daily Aging Cases Javag FY</h2>
+
+      {/* Search Bar */}
       <input
         type="text"
         placeholder="Search..."
@@ -521,23 +724,119 @@ export const Case_table = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      <div className="flex items-center gap-3">
-        <Label htmlFor='status' className={''}>Toggle Status Of Case :</Label>
-        <Select  defaultValue='Open' value={openClose} onValueChange={setOpenClose}>
-          <SelectTrigger id='status'>
+
+      {/* Filter dropdown tambahan */}
+      <div className="flex flex-wrap gap-6 mb-4">
+        {/* Filter HW */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium mb-1">Filter by HW</label>
+          <select
+            value={selectedHW}
+            onChange={(e) => setSelectedHW(e.target.value)}
+            className="p-2 border rounded"
+          >
+            {uniqueHW.map((hw) => (
+              <option key={hw} value={hw}>
+                {hw}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Filter Product Name */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium mb-1">Filter by Product Name</label>
+          <select
+            value={selectedProduct}
+            onChange={(e) => setSelectedProduct(e.target.value)}
+            className="p-2 border rounded"
+          >
+            {uniqueProduct.map((prod) => (
+              <option key={prod} value={prod}>
+                {prod}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Filter Created Name */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium mb-1">Filter by Created Name</label>
+          <select
+            value={selectedCreatedName}
+            onChange={(e) => setSelectedCreatedName(e.target.value)}
+            className="p-2 border rounded"
+          >
+            {uniqueCreatedName.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Filter Owner */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium mb-1">Filter by Owner</label>
+          <select
+            value={selectedOwner}
+            onChange={(e) => setSelectedOwner(e.target.value)}
+            className="p-2 border rounded"
+          >
+            {uniqueOwner.map((owner) => (
+              <option key={owner} value={owner}>
+                {owner}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Filter WorkGroup */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium mb-1">Filter by WorkGroup</label>
+          <select
+            value={selectedWorkGroup}
+            onChange={(e) => setSelectedWorkGroup(e.target.value)}
+            className="p-2 border rounded"
+          >
+            {uniqueWorkGroup.map((wg) => (
+              <option key={wg} value={wg}>
+                {wg}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Reset Filter Button */}
+        <div className="flex items-end">
+          <button
+            onClick={resetFilters}
+            className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
+          >
+            Reset Filters
+          </button>
+        </div>
+      </div>
+
+      {/* Toggle Status */}
+      <div className="flex items-center gap-3 mb-4">
+        <Label htmlFor="status">Toggle Status Of Case :</Label>
+        <Select defaultValue="Open" value={openClose} onValueChange={setOpenClose}>
+          <SelectTrigger id="status">
             <SelectValue>{openClose}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value='Open'>Open Case Status</SelectItem>
-              <SelectItem value='Close'>Close Case Status</SelectItem>
-              <SelectItem value='InActive'>InActive Case Status</SelectItem>
-              <SelectItem value='All'>ALL Case Status</SelectItem>
+              <SelectItem value="Open">Open Case Status</SelectItem>
+              <SelectItem value="Close">Close Case Status</SelectItem>
+              <SelectItem value="InActive">InActive Case Status</SelectItem>
+              <SelectItem value="All">ALL Case Status</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
       </div>
-      {/* 🔹 Loading & Error Messages */}
+
+      {/* Loading & Error */}
       {loading && <p>Loading cases...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
@@ -546,7 +845,9 @@ export const Case_table = () => {
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border">Case ID</th>
+              <th className="p-2 border cursor-pointer" onClick={toggleSortOrder}>
+                Case ID {sortOrder === "asc" ? "▲" : "▼"}
+              </th>
               <th className="p-2 border">Created On</th>
               <th className="p-2 border">Case Subject</th>
               <th className="p-2 border">Customer Account</th>
@@ -584,7 +885,18 @@ export const Case_table = () => {
                 <td className="p-2 border">{caseItem.CreatedName}</td>
                 <td className="p-2 border">{caseItem.Owner}</td>
                 <td className="p-2 border">{caseItem.WorkGroup}</td>
-                <td className={cn("bg-emerald-300",caseItem.CaseStatus === "Close" ? "bg-red-300" : caseItem.CaseStatus === "InActive" ? "bg-sky-300" : "" )}>{caseItem.CaseStatus}</td>
+                <td
+                  className={cn(
+                    "bg-emerald-300",
+                    caseItem.CaseStatus === "Close"
+                      ? "bg-red-300"
+                      : caseItem.CaseStatus === "InActive"
+                      ? "bg-sky-300"
+                      : ""
+                  )}
+                >
+                  {caseItem.CaseStatus}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -608,9 +920,7 @@ export const Case_table = () => {
         </span>
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
         >
           Next
@@ -621,93 +931,207 @@ export const Case_table = () => {
 };
 
 export const Assets_table = () => {
+  const [assets, setAssets] = useState([]);                 // all data (fetched once)
+  const [filteredAssets, setFilteredAssets] = useState([]); // after search + filters
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const itemsPerPage = 10;
-  const [assets, setAssets] = useState([]);
 
+  // dropdown filters
+  const [selectedProductName, setSelectedProductName] = useState("");
+  const [selectedProductNumber, setSelectedProductNumber] = useState("");
+  const [selectedProductLine, setSelectedProductLine] = useState("");
+
+  // debounce search
   useEffect(() => {
-    const handler = setTimeout(()=>{
+    const t = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1)
-    }, 500)
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
 
-    return () =>{
-      clearTimeout(handler);
-    }
-  }, [searchTerm])
-  useEffect(() => {
-    fetchAssets();
-  }, [currentPage, debouncedSearchTerm]);
+  // fetch ALL assets once (and aggregate if API is paginated)
+  const fetchAllAssets = async () => {
+    Swal.fire({
+      title: "Memuat Data Asset...",
+      text: "Mohon tunggu sebentar...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading(),
+    });
 
-  const fetchAssets = async () => {
     setLoading(true);
     setError(null);
 
-    Swal.fire({
-      title: "Memuat Data Asset...",
-      text: "Mohon tunggu sebentar",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
-
     try {
-      const response = await ApiCustomer.get(
-        `/api/asset-information?page=${currentPage}&limit=${itemsPerPage}&search=${debouncedSearchTerm}`
-      );
-      setAssets(response.data.data);
-      setTotalPages(response.data.totalPages);
+      // try first page to see if API is paginated
+      const LIMIT = 1000; // adjust if your API supports larger limits
+      const first = await ApiCustomer.get(`/api/asset-information?page=1&limit=${LIMIT}`);
+      const firstData = first?.data?.data || [];
+      const totalPages = first?.data?.totalPages ?? 1;
 
-      Swal.close(); // Tutup loading kalau berhasil
+      let all = [...firstData];
+
+      // if there are more pages, fetch and merge (only once at mount)
+      for (let p = 2; p <= totalPages; p++) {
+        const res = await ApiCustomer.get(`/api/asset-information?page=${p}&limit=${LIMIT}`);
+        const more = res?.data?.data || [];
+        all = all.concat(more);
+      }
+
+      // if API is not paginated and returns all rows directly
+      if (totalPages === 1 && Array.isArray(first?.data) && !first?.data?.data) {
+        all = first.data;
+      }
+
+      setAssets(all);
+      setFilteredAssets(all); // initial view
     } catch (err) {
       console.error("Error fetching asset data:", err);
       setError("Failed to fetch data");
-
-      Swal.close(); // Tetap tutup loading walau error
-
-      Swal.fire({
-        title: "Error!",
-        text: "Gagal mengambil data asset.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
     } finally {
       setLoading(false);
+      Swal.close();
     }
+  };
+
+  useEffect(() => {
+    fetchAllAssets();
+  }, []);
+
+  // unique options derived from FULL dataset
+  const uniqueProductNames = useMemo(
+    () => ["", ...new Set(assets.map(a => a?.product_information?.ProductName).filter(Boolean).sort())],
+    [assets]
+  );
+
+  const uniqueProductNumbers = useMemo(
+    () => ["", ...new Set(assets.map(a => a?.ProductNumber).filter(Boolean).sort())],
+    [assets]
+  );
+
+  const uniqueProductLines = useMemo(
+    () => ["", ...new Set(assets.map(a => a?.product_information?.ProductLine).filter(Boolean).sort())],
+    [assets]
+  );
+
+  // filtering (search + dropdowns) on the FULL dataset
+  useEffect(() => {
+    const q = debouncedSearchTerm.trim().toLowerCase();
+
+    const next = assets.filter(a => {
+      // nested-safe grabbers
+      const pn = a?.product_information?.ProductName ?? "";
+      const pl = a?.product_information?.ProductLine ?? "";
+      const num = a?.ProductNumber ?? "";
+
+      // dropdown filters
+      const fName   = !selectedProductName  || pn === selectedProductName;
+      const fNumber = !selectedProductNumber|| num === selectedProductNumber;
+      const fLine   = !selectedProductLine  || pl === selectedProductLine;
+
+      if (!(fName && fNumber && fLine)) return false;
+
+      // general search across relevant fields (include nested)
+      if (!q) return true;
+      const haystack = [
+        a?.AssetID, a?.SerialNumber, a?.SiteAccountID, a?.ContactID,
+        pn, pl, num
+      ].map(v => (v ?? "").toString().toLowerCase()).join(" ");
+
+      return haystack.includes(q);
+    });
+
+    setFilteredAssets(next);
+    setCurrentPage(1);
+  }, [debouncedSearchTerm, assets, selectedProductName, selectedProductNumber, selectedProductLine]);
+
+  // client-side pagination
+  const totalPages = Math.ceil(filteredAssets.length / itemsPerPage) || 1;
+  const currentData = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return filteredAssets.slice(start, end);
+  }, [filteredAssets, currentPage]);
+
+  const resetFilters = () => {
+    setSelectedProductName("");
+    setSelectedProductNumber("");
+    setSelectedProductLine("");
+    setSearchTerm("");
+    setCurrentPage(1);
   };
 
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Asset Information Table</h2>
-      <div className="space-x-2">
-        {/* <BtnModalAsset /> */}
-        {/* Input Pencarian */}
+
+      {/* Search + actions */}
+      <div className="flex flex-wrap items-center gap-2 mb-3">
         <input
           type="text"
-          placeholder="Search asset... "
-          className="w-1/3 p-2 mb-4 border border-gray-300 rounded"
+          placeholder="Search asset..."
+          className="p-2 border border-gray-300 rounded min-w-[220px]"
           value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1); // Reset ke halaman pertama saat mencari
-          }}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
+
+        <button
+          onClick={resetFilters}
+          className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+        >
+          Reset Filter
+        </button>
+
       </div>
 
-      {/* Tampilkan error jika terjadi kesalahan */}
-      {error && <p className="text-red-500">{error}</p>}
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <select
+          className="p-2 border border-gray-300 rounded"
+          value={selectedProductName}
+          onChange={(e) => setSelectedProductName(e.target.value)}
+        >
+          <option value="">Filter by Product Name</option>
+          {uniqueProductNames.map(v => (
+            <option key={v} value={v}>{v || "—"}</option>
+          ))}
+        </select>
 
+        <select
+          className="p-2 border border-gray-300 rounded"
+          value={selectedProductNumber}
+          onChange={(e) => setSelectedProductNumber(e.target.value)}
+        >
+          <option value="">Filter by Product Number</option>
+          {uniqueProductNumbers.map(v => (
+            <option key={v} value={v}>{v || "—"}</option>
+          ))}
+        </select>
+
+        <select
+          className="p-2 border border-gray-300 rounded"
+          value={selectedProductLine}
+          onChange={(e) => setSelectedProductLine(e.target.value)}
+        >
+          <option value="">Filter by Product Line</option>
+          {uniqueProductLines.map(v => (
+            <option key={v} value={v}>{v || "—"}</option>
+          ))}
+        </select>
+      </div>
+
+      {error && <p className="mb-2 text-red-500">{error}</p>}
+
+      {/* Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300">
+        <table className="min-w-full border border-gray-300 shadow">
           <thead>
-            <tr className="bg-gray-200">
+            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
               <th className="p-2 border">No</th>
               <th className="p-2 border">Asset ID</th>
               <th className="p-2 border">Serial Number</th>
@@ -720,57 +1144,46 @@ export const Assets_table = () => {
             </tr>
           </thead>
           <tbody>
-            {assets.length > 0 ? (
-              assets.map((asset, index) => (
-                <tr key={asset.AssetID} className="hover:bg-gray-100">
-                  <td className="p-2 text-center border">
-                    {(currentPage - 1) * itemsPerPage + index + 1}
-                  </td>
-                  <td className="p-2 border">{asset.AssetID}</td>
-                  <td className="p-2 border">{asset.SerialNumber}</td>
-                  <td className="p-2 border">
-                    {asset.product_information?.ProductName}
-                  </td>
-                  <td className="p-2 border">{asset.ProductNumber}</td>
-                  <td className="p-2 border">
-                    {asset.product_information?.ProductLine}
-                  </td>
-                  <td className="p-2 border">{asset.SiteAccountID}</td>
-                  <td className="p-2 border">{asset.ContactID}</td>
-                  <td className="flex p-2 space-x-2 border">
-                    <AssetEdit assetId={asset.AssetID} onUpdate={fetchAssets} />
-                    <AssetDelete assetId={asset.AssetID} />
+            {loading ? (
+              <tr><td colSpan="9" className="p-4 text-center">Loading...</td></tr>
+            ) : currentData.length > 0 ? (
+              currentData.map((a, idx) => (
+                <tr key={a.AssetID} className="hover:bg-gray-100">
+                  <td className="p-2 text-center border">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
+                  <td className="p-2 border">{a.AssetID}</td>
+                  <td className="p-2 border">{a.SerialNumber}</td>
+                  <td className="p-2 border">{a?.product_information?.ProductName}</td>
+                  <td className="p-2 border">{a?.ProductNumber}</td>
+                  <td className="p-2 border">{a?.product_information?.ProductLine}</td>
+                  <td className="p-2 border">{a.SiteAccountID}</td>
+                  <td className="p-2 border">{a.ContactID}</td>
+                  <td className="flex p-2 gap-2 border">
+                    <AssetEdit assetId={a.AssetID} onUpdate={fetchAllAssets} />
+                    <AssetDelete assetId={a.AssetID} />
                   </td>
                 </tr>
               ))
             ) : (
-              <tr>
-                <td colSpan="7" className="p-4 text-center">
-                  No data found.
-                </td>
-              </tr>
+              <tr><td colSpan="9" className="p-4 text-center">No data found.</td></tr>
             )}
           </tbody>
         </table>
       </div>
-      {/* Pagination */}
+
+      {/* Pagination (client-side) */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center mt-4 space-x-2">
+        <div className="flex items-center justify-center mt-4 gap-2">
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
           >
             Previous
           </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
+          <span>Page {currentPage} of {totalPages}</span>
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
+            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
             disabled={currentPage === totalPages}
           >
             Next
@@ -782,84 +1195,226 @@ export const Assets_table = () => {
 };
 
 export const Product_table = () => {
-  const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [products, setProducts] = useState([]);              // all products (fetched once)
+  const [filteredProducts, setFilteredProducts] = useState([]); // after search + filters
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // search + pagination (client-side)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  //set modal
+  // filters (independent now)
+  const [selectedLine, setSelectedLine] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+  const [selectedGroup, setSelectedGroup] = useState("");
+  const [selectedTower, setSelectedTower] = useState("");
+
+  // modal (unchanged API)
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fungsi untuk mengambil data dari API
-  const fetchProducts = async () => {
-    setLoading(true);
-    setError(null);
+  // debounce search
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
 
+  // fetch ALL products once
+  const fetchAllProducts = async () => {
     Swal.fire({
       title: "Memuat Data Produk...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
       allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
+      didOpen: () => Swal.showLoading(),
     });
 
-    try {
-      const response = await ApiCustomer.get(
-        `/api/product-information?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`
-      );
-      setProducts(response.data.data);
-      setTotalPages(response.data.totalPages);
+    setLoading(true);
+    setError(null);
 
-      Swal.close(); // Tutup loading Swal setelah sukses
+    try {
+      const LIMIT = 1000;
+      const first = await ApiCustomer.get(`/api/product-information?page=1&limit=${LIMIT}`);
+      const firstData = first?.data?.data ?? [];
+      const totalPagesFromApi = first?.data?.totalPages ?? 1;
+
+      let all = [...firstData];
+      for (let p = 2; p <= totalPagesFromApi; p++) {
+        const res = await ApiCustomer.get(`/api/product-information?page=${p}&limit=${LIMIT}`);
+        all = all.concat(res?.data?.data ?? []);
+      }
+
+      if (totalPagesFromApi === 1 && Array.isArray(first?.data) && !first?.data?.data) {
+        all = first.data;
+      }
+
+      // stable order
+      all.sort((a, b) => (a?.ProductNumber ?? "").localeCompare(b?.ProductNumber ?? ""));
+
+      setProducts(all);
+      setFilteredProducts(all);
     } catch (err) {
       console.error("Error fetching product data:", err);
       setError("Failed to fetch data");
-
-      Swal.close(); // Tutup Swal kalau error juga
-
-      Swal.fire({
-        title: "Error!",
-        text: "Gagal mengambil data produk.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
     } finally {
       setLoading(false);
+      Swal.close();
     }
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, [currentPage, searchTerm]);
+    fetchAllProducts();
+  }, []);
+
+  // unique options (independent, not cascading)
+  const uniqueLines = useMemo(() => {
+    const lines = products.map(p => p?.ProductLine).filter(Boolean);
+    return ["", ...Array.from(new Set(lines)).sort()];
+  }, [products]);
+
+  const uniqueTypes = useMemo(() => {
+    const types = products.map(p => p?.product_type?.ProductType).filter(Boolean);
+    return ["", ...Array.from(new Set(types)).sort()];
+  }, [products]);
+
+  const uniqueGroups = useMemo(() => {
+    const groups = products.map(p => p?.product_type?.ProductGroup).filter(Boolean);
+    return ["", ...Array.from(new Set(groups)).sort()];
+  }, [products]);
+
+  const uniqueTowers = useMemo(() => {
+    const towers = products.map(p => p?.product_type?.ProductTower).filter(Boolean);
+    return ["", ...Array.from(new Set(towers)).sort()];
+  }, [products]);
+
+  // apply filters + search
+  useEffect(() => {
+    const q = debouncedSearchTerm.trim().toLowerCase();
+
+    const next = products.filter(p => {
+      const line = p?.ProductLine ?? "";
+      const name = p?.ProductName ?? "";
+      const number = p?.ProductNumber ?? "";
+      const type = p?.product_type?.ProductType ?? "";
+      const group = p?.product_type?.ProductGroup ?? "";
+      const tower = p?.product_type?.ProductTower ?? "";
+
+      // independent filters
+      const fLine  = !selectedLine  || line === selectedLine;
+      const fType  = !selectedType  || type === selectedType;
+      const fGroup = !selectedGroup || group === selectedGroup;
+      const fTower = !selectedTower || tower === selectedTower;
+      if (!(fLine && fType && fGroup && fTower)) return false;
+
+      if (!q) return true;
+      const haystack = [number, name, line, type, group, tower].join(" ").toLowerCase();
+      return haystack.includes(q);
+    });
+
+    setFilteredProducts(next);
+    setCurrentPage(1);
+  }, [products, debouncedSearchTerm, selectedLine, selectedType, selectedGroup, selectedTower]);
+
+  // client-side pagination
+  const totalPagesLocal = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
+  const currentData = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, currentPage]);
+
+  const resetFilters = () => {
+    setSelectedLine("");
+    setSelectedType("");
+    setSelectedGroup("");
+    setSelectedTower("");
+    setSearchTerm("");
+    setCurrentPage(1);
+  };
 
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Product Table</h2>
 
-      {/* Input Pencarian */}
-      <input
-        type="text"
-        placeholder="Search product..."
-        className="w-1/3 p-2 mb-4 border border-gray-300 rounded"
-        value={searchTerm}
-        onChange={(e) => {
-          setSearchTerm(e.target.value);
-          setCurrentPage(1); // Reset ke halaman pertama saat mencari
-        }}
-      />
+      {/* Search & Add */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <input
+          type="text"
+          placeholder="Search product..."
+          className="w-full sm:w-1/3 p-2 border border-gray-300 rounded"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <ProductAdd onAdded={fetchAllProducts} />
+      </div>
 
-      {/* Tampilkan error jika terjadi kesalahan */}
-      {error && <p className="text-red-500">{error}</p>}
+      {/* Independent Filters + Reset */}
+      <div className="flex flex-wrap gap-2 mb-4 items-center">
+        <select
+          className="p-2 border rounded"
+          value={selectedLine}
+          onChange={(e) => {
+            setSelectedLine(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Product Line</option>
+          {uniqueLines.map(v => <option key={v} value={v}>{v || "—"}</option>)}
+        </select>
 
-      <ProductAdd></ProductAdd>
-      {/* Tabel Data */}
+        <select
+          className="p-2 border rounded"
+          value={selectedType}
+          onChange={(e) => {
+            setSelectedType(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Product Type</option>
+          {uniqueTypes.map(v => <option key={v} value={v}>{v || "—"}</option>)}
+        </select>
+
+        <select
+          className="p-2 border rounded"
+          value={selectedGroup}
+          onChange={(e) => {
+            setSelectedGroup(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Product Group</option>
+          {uniqueGroups.map(v => <option key={v} value={v}>{v || "—"}</option>)}
+        </select>
+
+        <select
+          className="p-2 border rounded"
+          value={selectedTower}
+          onChange={(e) => {
+            setSelectedTower(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Product Tower</option>
+          {uniqueTowers.map(v => <option key={v} value={v}>{v || "—"}</option>)}
+        </select>
+
+        <button
+          onClick={resetFilters}
+          className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+        >
+          Reset Filter
+        </button>
+      </div>
+
+      {error && <p className="text-red-500 mb-2">{error}</p>}
+
+      {/* Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300">
+        <table className="min-w-full border border-gray-300 shadow">
           <thead>
             <tr className="bg-gray-200">
               <th className="p-2 border">No</th>
@@ -874,69 +1429,52 @@ export const Product_table = () => {
             </tr>
           </thead>
           <tbody>
-            {products.length > 0 ? (
-              products.map((product, index) => (
-                <tr key={product.ProductNumber} className="hover:bg-gray-100">
-                  <td className="p-2 text-center border">
-                    {(currentPage - 1) * itemsPerPage + index + 1}
-                  </td>
-                  <td className="p-2 border">{product.ProductNumber}</td>
-                  <td className="p-2 border">{product.ProductLine}</td>
-                  <td className="p-2 border">{product.ProductName}</td>
-                  <td className="p-2 border">
-                    {product.product_type?.ProductType}
-                  </td>
-                  <td className="p-2 border">
-                    {product.product_type?.ProductGroup}
-                  </td>
-                  <td className="p-2 border">
-                    {product.product_type?.ProductTower}
-                  </td>
+            {loading ? (
+              <tr><td colSpan="9" className="p-4 text-center">Loading...</td></tr>
+            ) : currentData.length > 0 ? (
+              currentData.map((p, idx) => (
+                <tr key={p.ProductNumber} className="hover:bg-gray-100">
+                  <td className="p-2 text-center border">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
+                  <td className="p-2 border">{p.ProductNumber}</td>
+                  <td className="p-2 border">{p.ProductLine}</td>
+                  <td className="p-2 border">{p.ProductName}</td>
+                  <td className="p-2 border">{p.product_type?.ProductType}</td>
+                  <td className="p-2 border">{p.product_type?.ProductGroup}</td>
+                  <td className="p-2 border">{p.product_type?.ProductTower}</td>
                   <td className="p-2 border">-</td>
-                  <td className="flex p-2 space-x-2 border">
-                    <ProductEdit
-                      ProductNumber={product.ProductNumber}
-                      onUpdate={fetchProducts}
-                    />
+                  <td className="flex p-2 gap-2 border">
+                    <ProductEdit ProductNumber={p.ProductNumber} onUpdate={fetchAllProducts} />
                     <ProductDelete
-                      ProductNumber={product.ProductNumber}
+                      ProductNumber={p.ProductNumber}
                       isModalOpen={isModalOpen}
                       setIsModalOpen={setIsModalOpen}
-                      onUpdate={fetchProducts}
+                      onUpdate={fetchAllProducts}
                     />
                   </td>
                 </tr>
               ))
             ) : (
-              <tr>
-                <td colSpan="7" className="p-4 text-center">
-                  No data found.
-                </td>
-              </tr>
+              <tr><td colSpan="9" className="p-4 text-center">No data found.</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center mt-4 space-x-2">
+      {totalPagesLocal > 1 && (
+        <div className="flex items-center justify-center mt-4 gap-2">
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
           >
             Previous
           </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
+          <span>Page {currentPage} of {totalPagesLocal}</span>
           <button
             className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPagesLocal))}
+            disabled={currentPage === totalPagesLocal}
           >
             Next
           </button>
@@ -1304,12 +1842,16 @@ export const WarrantyService_table = () => {
 export const Mo_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Jumlah data per halaman
+  const itemsPerPage = 5; 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [MaterialOrderData, setMaterialOrderData] = useState([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 🔹 State filter
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedType, setSelectedType] = useState("");
 
   const fetchMaterialOrderDataTable = async () => {
     setLoading(true);
@@ -1329,7 +1871,7 @@ export const Mo_table = () => {
       const response = await ApiCustomer.get("/api/mo-detaill");
       if (response.data.success) {
         setMaterialOrderData(response.data.data);
-        Swal.close(); // Tutup loading kalau sukses
+        Swal.close(); 
       } else {
         setError("Failed to fetch Material Order data");
         Swal.close();
@@ -1356,17 +1898,26 @@ export const Mo_table = () => {
     }
   };
 
-  // 🔹 Load data when component mounts
   useEffect(() => {
     fetchMaterialOrderDataTable();
   }, []);
 
-  // Filter data berdasarkan pencarian
-  const filteredMaterialOrderTable = MaterialOrderData.filter((item) =>
-    Object.values(item).some((value) =>
+  // 🔹 Filter data berdasarkan pencarian + filter select
+  const filteredMaterialOrderTable = MaterialOrderData.filter((item) => {
+    const matchesSearch = Object.values(item).some((value) =>
       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+    );
+
+    const matchesStatus = selectedStatus
+      ? item.OrderStatus === selectedStatus
+      : true;
+
+    const matchesType = selectedType
+      ? item.OrderType === selectedType
+      : true;
+
+    return matchesSearch && matchesStatus && matchesType;
+  });
 
   // Hitung total halaman
   const totalPages = Math.ceil(
@@ -1379,19 +1930,76 @@ export const Mo_table = () => {
     currentPage * itemsPerPage
   );
 
-  //navigate
   const navigate = useNavigate();
+
+  // 🔹 Ambil unique values untuk dropdown
+  const uniqueStatuses = [...new Set(MaterialOrderData.map((item) => item.OrderStatus))];
+  const uniqueTypes = [...new Set(MaterialOrderData.map((item) => item.OrderType))];
+
+  // 🔹 Reset semua filter
+  const resetFilters = () => {
+    setSearchTerm("");
+    setSelectedStatus("");
+    setSelectedType("");
+    setCurrentPage(1);
+  };
 
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Material Order Table</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+
+      {/* Search */}
+      <div className="flex items-center mb-4">
+        <input
+          type="text"
+          placeholder="Search..."
+          className="w-1/3 p-2 border rounded"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {/* Filter Select + Reset */}
+      <div className="flex items-center mb-4 space-x-4">
+        <select
+          value={selectedStatus}
+          onChange={(e) => {
+            setSelectedStatus(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="p-2 border rounded"
+        >
+          <option value="">All Order Status</option>
+          {uniqueStatuses.map((status, idx) => (
+            <option key={idx} value={status}>
+              {status}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={selectedType}
+          onChange={(e) => {
+            setSelectedType(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="p-2 border rounded"
+        >
+          <option value="">All Order Types</option>
+          {uniqueTypes.map((type, idx) => (
+            <option key={idx} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
+
+        <button
+          onClick={resetFilters}
+          className="px-4 py-2 text-white bg-gray-500 rounded"
+        >
+          Reset Filters
+        </button>
+      </div>
 
       {error && <p className="text-red-500">{error}</p>}
 
@@ -1401,13 +2009,13 @@ export const Mo_table = () => {
           <thead>
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
               <th className="p-2 border">MO ID</th>
-              <th className="p-2 border">WOID</th>
+              <th className="p-2 border">WO ID</th>
               <th className="p-2 border">Order Number</th>
               <th className="p-2 border">Order Status</th>
               <th className="p-2 border">Order Type</th>
               <th className="p-2 border">Created On</th>
               <th className="p-2 border">Sales Order Number</th>
-              <th className="p-2 border">RMANumber</th>
+              <th className="p-2 border">RMA Number</th>
               <th className="p-2 border">Ready For Closure Date</th>
               <th className="p-2 border">Owner</th>
               <th className="p-2 border">Actions</th>
@@ -1446,14 +2054,10 @@ export const Mo_table = () => {
                 </td>
                 <td className="p-2 border">{MaterialOrderItem.Owner}</td>
                 <td className="flex p-2 space-x-2 border">
-                  {/* <WarrantyServiceEdit Service_offerID={WarrantyServiceItem.Service_offerID} onUpdate={fetchWarrantyServiceDataTable}></WarrantyServiceEdit>
-                   */}
-
                   <MaterialOrderEdit
                     MOID={MaterialOrderItem.MOID}
                     onUpdate={fetchMaterialOrderDataTable}
                   />
-
                   <MaterialOrderDelete
                     MOID={MaterialOrderItem.MOID}
                     isModalOpen={isModalOpen}
@@ -1499,12 +2103,18 @@ export const Mo_table = () => {
 export const Wo_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Jumlah data per halaman
+  const itemsPerPage = 5;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [WorkOrderData, setWorkOrderData] = useState([]);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 🔹 filter states
+  const [filterWorkOrderType, setFilterWorkOrderType] = useState("");
+  const [filterSystemStatus, setFilterSystemStatus] = useState("");
+  const [filterShipmentCountry, setFilterShipmentCountry] = useState("");
+  const [filterShipmentState, setFilterShipmentState] = useState("");
+  const [filterOwner, setFilterOwner] = useState("");
 
   const fetchWorkOrderDataTable = async () => {
     setLoading(true);
@@ -1550,40 +2160,141 @@ export const Wo_table = () => {
     }
   };
 
-  // 🔹 Load data when component mounts
   useEffect(() => {
     fetchWorkOrderDataTable();
   }, []);
 
-  // Filter data berdasarkan pencarian
-  const filteredWorkOrderTable = WorkOrderData.filter((item) =>
-    Object.values(item).some((value) =>
+  // 🔹 ambil unique values untuk dropdown
+  const uniqueWorkOrderType = [...new Set(WorkOrderData.map((d) => d.WorkOrderType))];
+  const uniqueSystemStatus = [...new Set(WorkOrderData.map((d) => d.SystemStatus))];
+  const uniqueShipmentCountry = [...new Set(WorkOrderData.map((d) => d.ShipmentCountry))];
+  const uniqueShipmentState = [...new Set(WorkOrderData.map((d) => d.ShipmentState))];
+  const uniqueOwner = [...new Set(WorkOrderData.map((d) => d.Owner))];
+
+  // 🔹 Filter data berdasarkan search & select
+  const filteredWorkOrderTable = WorkOrderData.filter((item) => {
+    const matchSearch = Object.values(item).some((value) =>
       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+    );
+    const matchWorkOrderType = filterWorkOrderType ? item.WorkOrderType === filterWorkOrderType : true;
+    const matchSystemStatus = filterSystemStatus ? item.SystemStatus === filterSystemStatus : true;
+    const matchShipmentCountry = filterShipmentCountry ? item.ShipmentCountry === filterShipmentCountry : true;
+    const matchShipmentState = filterShipmentState ? item.ShipmentState === filterShipmentState : true;
+    const matchOwner = filterOwner ? item.Owner === filterOwner : true;
 
-  // Hitung total halaman
+    return (
+      matchSearch &&
+      matchWorkOrderType &&
+      matchSystemStatus &&
+      matchShipmentCountry &&
+      matchShipmentState &&
+      matchOwner
+    );
+  });
+
   const totalPages = Math.ceil(filteredWorkOrderTable.length / itemsPerPage);
-
-  // Ambil data sesuai halaman saat ini
   const currentData = filteredWorkOrderTable.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  //navigate
   const navigate = useNavigate();
 
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Work Order Table</h2>
+
+      {/* 🔹 Search */}
       <input
         type="text"
         placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
+        className="w-1/3 p-2 border rounded mb-2"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
+
+      {/* 🔹 Filters di bawah search */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <select
+          className="p-2 border rounded"
+          value={filterWorkOrderType}
+          onChange={(e) => setFilterWorkOrderType(e.target.value)}
+        >
+          <option value="">All Work Order Type</option>
+          {uniqueWorkOrderType.map((val, i) => (
+            <option key={i} value={val}>
+              {val}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="p-2 border rounded"
+          value={filterSystemStatus}
+          onChange={(e) => setFilterSystemStatus(e.target.value)}
+        >
+          <option value="">All System Status</option>
+          {uniqueSystemStatus.map((val, i) => (
+            <option key={i} value={val}>
+              {val}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="p-2 border rounded"
+          value={filterShipmentCountry}
+          onChange={(e) => setFilterShipmentCountry(e.target.value)}
+        >
+          <option value="">All Shipment Country</option>
+          {uniqueShipmentCountry.map((val, i) => (
+            <option key={i} value={val}>
+              {val}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="p-2 border rounded"
+          value={filterShipmentState}
+          onChange={(e) => setFilterShipmentState(e.target.value)}
+        >
+          <option value="">All Shipment State</option>
+          {uniqueShipmentState.map((val, i) => (
+            <option key={i} value={val}>
+              {val}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="p-2 border rounded"
+          value={filterOwner}
+          onChange={(e) => setFilterOwner(e.target.value)}
+        >
+          <option value="">All Owner</option>
+          {uniqueOwner.map((val, i) => (
+            <option key={i} value={val}>
+              {val}
+            </option>
+          ))}
+        </select>
+
+        {/* Reset Filters */}
+        <button
+          className="px-4 py-2 text-white bg-red-500 rounded"
+          onClick={() => {
+            setFilterWorkOrderType("");
+            setFilterSystemStatus("");
+            setFilterShipmentCountry("");
+            setFilterShipmentState("");
+            setFilterOwner("");
+            setSearchTerm("");
+          }}
+        >
+          Reset Filter
+        </button>
+      </div>
 
       {error && <p className="text-red-500">{error}</p>}
 
@@ -1621,7 +2332,7 @@ export const Wo_table = () => {
               <th className="p-2 border">WorkOrder Description</th>
               <th className="p-2 border">PartnerNotes</th>
               <th className="p-2 border">Incoming Channel</th>
-              <th className="p-2 border">material order</th>
+              <th className="p-2 border">Material Order</th>
               <th className="p-2 border">Case Information</th>
               <th className="p-2 border">Actions</th>
             </tr>
@@ -2288,6 +2999,7 @@ export const Resource_table = () => {
 
 export const ResourceAccountTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [resourceFilter, setResourceFilter] = useState(""); // NEW FILTER
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [loading, setLoading] = useState(false);
@@ -2296,16 +3008,17 @@ export const ResourceAccountTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [resources, setResources] = useState([]);
 
-const fetchResources = async () => {
-  try {
-    const response = await ApiCustomer.get("/api/resources"); // Adjust API endpoint if different
-    if (response.data.success) {
-      setResources(response.data.data);
+  const fetchResources = async () => {
+    try {
+      const response = await ApiCustomer.get("/api/resources"); 
+      if (response.data.success) {
+        setResources(response.data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching resources:", err);
     }
-  } catch (err) {
-    console.error("Error fetching resources:", err);
-  }
-};
+  };
+
   const fetchResourceAccounts = async () => {
     setLoading(true);
     setError(null);
@@ -2315,11 +3028,10 @@ const fetchResources = async () => {
       allowOutsideClick: false,
       allowEscapeKey: false,
       didOpen: () => {
-        Swal.showLoading(); // Menampilkan indikator loading
+        Swal.showLoading();
       },
-    });  
+    });
 
-    
     try {
       const response = await ApiCustomer.get("/api/resource-account");
       if (response.data.success) {
@@ -2341,11 +3053,20 @@ const fetchResources = async () => {
     fetchResourceAccounts();
   }, []);
 
-  const filteredAccounts = resourceAccounts.filter((item) =>
-    Object.values(item).some((value) =>
+  // Unique ResourceIds for filter
+  const uniqueResourceIds = [
+    ...new Set(resourceAccounts.map((item) => item.ResourceId).filter((v) => v))
+  ];
+
+  // Filtering logic
+  const filteredAccounts = resourceAccounts.filter((item) => {
+    const matchSearch = Object.values(item).some((value) =>
       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+    );
+    const matchResource = !resourceFilter || item.ResourceId === resourceFilter;
+
+    return matchSearch && matchResource;
+  });
 
   const totalPages = Math.ceil(filteredAccounts.length / itemsPerPage);
   const currentData = filteredAccounts.slice(
@@ -2358,15 +3079,51 @@ const fetchResources = async () => {
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Resource Accounts</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
 
-      <ResourceAccountAdd onAdd={fetchResourceAccounts} />
+      {/* Search + Add button */}
+      <div className="flex items-center gap-2 mb-2">
+        <input
+          type="text"
+          placeholder="Search..."
+          className="w-1/3 p-2 border rounded"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+        />
+        <ResourceAccountAdd onAdd={fetchResourceAccounts} />
+      </div>
+
+      {/* Filter ResourceId + Reset */}
+      <div className="flex items-center gap-2 mb-4">
+        <select
+          className="p-2 border rounded"
+          value={resourceFilter}
+          onChange={(e) => {
+            setResourceFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Resource IDs</option>
+          {uniqueResourceIds.map((id) => (
+            <option key={id} value={id}>
+              {id}
+            </option>
+          ))}
+        </select>
+
+        <button
+          className="p-2 text-white bg-gray-500 rounded"
+          onClick={() => {
+            setSearchTerm("");
+            setResourceFilter("");
+            setCurrentPage(1);
+          }}
+        >
+          Reset Filter
+        </button>
+      </div>
 
       {loading && <p>Loading accounts...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -2378,8 +3135,6 @@ const fetchResources = async () => {
               <th className="p-2 border">Resource Account ID</th>
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Resource ID</th>
-              {/* <th className="p-2 border">SUbk Technicians</th>
-              <th className="p-2 border">Booking Details</th> */}
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
@@ -2388,7 +3143,9 @@ const fetchResources = async () => {
               <tr key={account.ResourceAccountId} className="text-center hover:bg-gray-100">
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/app/resource-account/${account.ResourceAccountId}`)}
+                  onClick={() =>
+                    navigate(`/app/resource-account/${account.ResourceAccountId}`)
+                  }
                 >
                   {account.ResourceAccountId}
                 </td>
@@ -2425,7 +3182,9 @@ const fetchResources = async () => {
         >
           Previous
         </button>
-        <span>Page {currentPage} of {totalPages}</span>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
@@ -2438,8 +3197,10 @@ const fetchResources = async () => {
   );
 };
 
+
 export const SubkTechnician_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [resourceAccountFilter, setResourceAccountFilter] = useState(""); 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [loading, setLoading] = useState(false);
@@ -2454,7 +3215,7 @@ export const SubkTechnician_table = () => {
       allowOutsideClick: false,
       allowEscapeKey: false,
       didOpen: () => {
-        Swal.showLoading(); // Menampilkan indikator loading
+        Swal.showLoading();
       },
     });
     setLoading(true);
@@ -2464,7 +3225,7 @@ export const SubkTechnician_table = () => {
       if (response.data.success) {
         setSubkTechnicianData(response.data.data);
       } else {
-        setError("Failed to fetch SubkTechnician data");
+        setError("Failed to fetch Subk Technician data");
       }
     } catch (err) {
       console.error("Error fetching SubkTechnician data:", err);
@@ -2479,11 +3240,26 @@ export const SubkTechnician_table = () => {
     fetchSubkTechnicianData();
   }, []);
 
-  const filteredData = subkTechnicianData.filter((item) =>
-    Object.values(item).some((value) =>
+  // Ambil unique Resource Account untuk filter
+  const uniqueResourceAccounts = [
+    ...new Set(
+      subkTechnicianData
+        .map((item) => item.resourceAccount?.Name)
+        .filter((v) => v)
+    ),
+  ];
+
+  // Filtering logic (search + filter resource account)
+  const filteredData = subkTechnicianData.filter((item) => {
+    const matchSearch = Object.values(item).some((value) =>
       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+    );
+    const matchResource =
+      !resourceAccountFilter ||
+      item.resourceAccount?.Name === resourceAccountFilter;
+
+    return matchSearch && matchResource;
+  });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const currentData = filteredData.slice(
@@ -2496,15 +3272,51 @@ export const SubkTechnician_table = () => {
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Subk Technician Table</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
 
-      <SubkTechnicianAdd onUpdate={fetchSubkTechnicianData} />
+      {/* Search + Add Button (row 1, berdampingan rapat) */}
+      <div className="flex items-center gap-2 mb-2">
+        <input
+          type="text"
+          placeholder="Search..."
+          className="w-1/3 p-2 border rounded"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+        />
+        <SubkTechnicianAdd onUpdate={fetchSubkTechnicianData} />
+      </div>
+
+      {/* Filter + Reset (row 2) */}
+      <div className="flex items-center gap-2 mb-4">
+        <select
+          className="p-2 border rounded"
+          value={resourceAccountFilter}
+          onChange={(e) => {
+            setResourceAccountFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Resource Accounts</option>
+          {uniqueResourceAccounts.map((acc) => (
+            <option key={acc} value={acc}>
+              {acc}
+            </option>
+          ))}
+        </select>
+
+        <button
+          className="p-2 text-white bg-gray-500 rounded"
+          onClick={() => {
+            setSearchTerm("");
+            setResourceAccountFilter("");
+            setCurrentPage(1);
+          }}
+        >
+          Reset Filter
+        </button>
+      </div>
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -2516,20 +3328,32 @@ export const SubkTechnician_table = () => {
               <th className="p-2 border">Subk Technician ID</th>
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Resource Account ID</th>
-              {/* <th className="p-2 border">Booking Details</th> */}
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
-              <tr key={item.SubkTechnicianId} className="text-center hover:bg-gray-100">
-                <td className="p-2 text-blue-500 border cursor-pointer hover:underline" onClick={() => navigate(`/app/subk-technician/${item.SubkTechnicianId}`)}>
+              <tr
+                key={item.SubkTechnicianId}
+                className="text-center hover:bg-gray-100"
+              >
+                <td
+                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
+                  onClick={() =>
+                    navigate(`/app/subk-technician/${item.SubkTechnicianId}`)
+                  }
+                >
                   {item.SubkTechnicianId}
                 </td>
                 <td className="p-2 border">{item.Name}</td>
-                <td className="p-2 border">{item.resourceAccount?.Name || "N/A"}</td>
+                <td className="p-2 border">
+                  {item.resourceAccount?.Name || "N/A"}
+                </td>
                 <td className="flex justify-center p-2 space-x-2 border">
-                  <SubkTechnicianEdit SubkTechnicianId={item.SubkTechnicianId} onUpdate={fetchSubkTechnicianData} />
+                  <SubkTechnicianEdit
+                    SubkTechnicianId={item.SubkTechnicianId}
+                    onUpdate={fetchSubkTechnicianData}
+                  />
                   <SubkTechnicianDelete
                     SubkTechnicianId={item.SubkTechnicianId}
                     isModalOpen={isModalOpen}
@@ -2542,7 +3366,9 @@ export const SubkTechnician_table = () => {
           </tbody>
         </table>
         {filteredData.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No entries found.</p>
+          <p className="mt-4 text-center text-gray-500">
+            No entries found.
+          </p>
         )}
       </div>
 
@@ -2555,10 +3381,14 @@ export const SubkTechnician_table = () => {
         >
           Previous
         </button>
-        <span>Page {currentPage} of {totalPages}</span>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
           disabled={currentPage === totalPages}
         >
           Next
@@ -2718,21 +3548,25 @@ export const BookingsTable = () => {
   const [bookingData, setBookingData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // filters
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedJeopardy, setSelectedJeopardy] = useState("");
+  const [selectedCreatedBy, setSelectedCreatedBy] = useState("");
+
   const fetchBookingData = async () => {
     Swal.fire({
       title: "Memuat Data Bookings...",
       text: "Mohon tunggu sebentar...",
       allowOutsideClick: false,
       allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading(); // Menampilkan indikator loading
-      },
+      didOpen: () => Swal.showLoading(),
     });
     setLoading(true);
     setError(null);
     try {
       const response = await ApiCustomer.get("/api/booking");
       if (response.data.success) {
+        console.log("Data Response Booking", response.data.data);
         setBookingData(response.data.data);
       } else {
         setError("Failed to fetch booking data");
@@ -2750,32 +3584,118 @@ export const BookingsTable = () => {
     fetchBookingData();
   }, []);
 
-  const filteredData = bookingData.filter((item) =>
-    Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  // derive unique options
+  const uniqueStatus = useMemo(() => {
+    const all = bookingData.map(b => b.BookingStatus).filter(Boolean);
+    return ["", ...Array.from(new Set(all)).sort()];
+  }, [bookingData]);
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const uniqueJeopardy = ["", "Yes", "No"];
+
+  const uniqueCreatedBy = useMemo(() => {
+    const all = bookingData.map(b => b.createdByUser?.Username).filter(Boolean);
+    return ["", ...Array.from(new Set(all)).sort()];
+  }, [bookingData]);
+
+  // filter + search  
+  const filteredData = bookingData.filter((item) => {
+    const status = item.BookingStatus ?? "";
+    const jeopardy = item.ScheduleJeopardy ? "Yes" : "No";
+    const createdBy = item.createdByUser?.Username ?? "";
+
+    const fStatus = !selectedStatus || status === selectedStatus;
+    const fJeopardy = !selectedJeopardy || jeopardy === selectedJeopardy;
+    const fCreated = !selectedCreatedBy || createdBy === selectedCreatedBy;
+    console.log("Filter Status", fStatus, "Jeopardy", fJeopardy, "Created By", fCreated);
+    if (!(fStatus && fJeopardy && fCreated)) return false;
+
+    // search
+    const haystack = Object.values(item).join(" ").toLowerCase();
+    return haystack.includes(searchTerm.toLowerCase());
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
   const currentData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const resetFilters = () => {
+    setSelectedStatus("");
+    setSelectedJeopardy("");
+    setSelectedCreatedBy("");
+    setSearchTerm("");
+    setCurrentPage(1);
+  };
 
   const navigate = useNavigate();
 
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Bookings Table</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+      
+      {/* Search & Reset */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <input
+          type="text"
+          placeholder="Search..."
+          className="w-full sm:w-1/3 p-2 border rounded"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <BookingsAdd onUpdate={fetchBookingData} />
+      </div>
 
-      <BookingsAdd onUpdate={fetchBookingData} />
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <select
+          className="p-2 border rounded"
+          value={selectedStatus}
+          onChange={(e) => {
+            setSelectedStatus(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Status</option>
+          {uniqueStatus.map((v) => (
+            <option key={v} value={v}>{v || "—"}</option>
+          ))}
+        </select>
+
+        <select
+          className="p-2 border rounded"
+          value={selectedJeopardy}
+          onChange={(e) => {
+            setSelectedJeopardy(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Jeopardy</option>
+          {uniqueJeopardy.map((v) => (
+            <option key={v} value={v}>{v || "—"}</option>
+          ))}
+        </select>
+
+        <select
+          className="p-2 border rounded"
+          value={selectedCreatedBy}
+          onChange={(e) => {
+            setSelectedCreatedBy(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Created By</option>
+          {uniqueCreatedBy.map((v) => (
+            <option key={v} value={v}>{v || "—"}</option>
+          ))}
+        </select>
+
+        <button
+          onClick={resetFilters}
+          className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">
+          Reset Filter
+        </button>
+      </div>
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -2798,75 +3718,78 @@ export const BookingsTable = () => {
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item) => (
-              <tr key={item.BookingId} className="text-center hover:bg-gray-100">
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
-                >
-                  {item.BookingId}
-                </td>
-                <td className="p-2 border">{item.WOID}</td>
-                <td className="p-2 border">{item.BookingStatus || "-"}</td>
-                <td className="p-2 border">{item.ScheduleJeopardy ? "Yes" : "No"}</td>
-                <td className="p-2 border">
-                  {item.ScheduleJeopardyTime
-                    ? new Date(item.ScheduleJeopardyTime).toLocaleString("id-ID")
-                    : "-"}
-                </td>
-                <td className="p-2 border">{item.DoNotDisturb ? "Yes" : "No"}</td>
-                <td className="p-2 border">{item.CeScheduleChange ? "Yes" : "No"}</td>
-                <td className="p-2 border">
-                  Total Billable: {item.TotalBillableDurationInMinutes || 0} <br/> 
-                  Total In Progress: {item.TotalInProgressDurationInMinutes || 0}  <br/>
-                  Total Break: {item.TotalBreakDurationInMinutes || 0}
-                </td>
-                <td className="p-2 border">{item.CreatedBy}</td>
-                <td className="p-2 border">
-                  {new Date(item.CreatedAt).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-                <td className="flex justify-center p-2 space-x-2 border">
-                  <BookingsEdit BookingId={item.BookingId} onUpdate={fetchBookingData} />
-                  <BookingsDelete
-                    BookingId={item.BookingId}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchBookingData}
-                  />
-                </td>
-              </tr>
-            ))}
+            {currentData.length > 0 ? (
+              currentData.map((item) => (
+                <tr key={item.BookingId} className="text-center hover:bg-gray-100">
+                  <td
+                    className="p-2 text-blue-500 border cursor-pointer hover:underline"
+                    onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
+                  >
+                    {item.BookingId}
+                  </td>
+                  <td className="p-2 border">{item.WOID}</td>
+                  <td className="p-2 border">{item.BookingStatus || "-"}</td>
+                  <td className="p-2 border">{item.ScheduleJeopardy ? "Yes" : "No"}</td>
+                  <td className="p-2 border">
+                    {item.ScheduleJeopardyTime
+                      ? new Date(item.ScheduleJeopardyTime).toLocaleString("id-ID")
+                      : "-"}
+                  </td>
+                  <td className="p-2 border">{item.DoNotDisturb ? "Yes" : "No"}</td>
+                  <td className="p-2 border">{item.CeScheduleChange ? "Yes" : "No"}</td>
+                  <td className="p-2 border">
+                    Total Billable: {item.TotalBillableDurationInMinutes || 0} <br/> 
+                    Total In Progress: {item.TotalInProgressDurationInMinutes || 0} <br/>
+                    Total Break: {item.TotalBreakDurationInMinutes || 0}
+                  </td>
+                  <td className="p-2 border">{item.createdByUser?.Username || "-"}</td>
+                  <td className="p-2 border">
+                    {new Date(item.CreatedAt).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
+                  <td className="flex justify-center p-2 space-x-2 border">
+                    <BookingsEdit BookingId={item.BookingId} onUpdate={fetchBookingData} />
+                    <BookingsDelete
+                      BookingId={item.BookingId}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchBookingData}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr><td colSpan="11" className="p-4 text-center">No entries found.</td></tr>
+            )}
           </tbody>
         </table>
-        {filteredData.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No entries found.</p>
-        )}
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
-      </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center mt-4 space-x-2">
+          <button
+            className="p-2 bg-gray-300 rounded disabled:opacity-50"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="p-2 bg-gray-300 rounded disabled:opacity-50"
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -2881,6 +3804,10 @@ export const BookingDetailsTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
+  // filters
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedChangedBy, setSelectedChangedBy] = useState("");
+
   const fetchBookingDetails = async () => {
     Swal.fire({
       title: "Memuat Data Booking Details...",
@@ -2888,7 +3815,7 @@ export const BookingDetailsTable = () => {
       allowOutsideClick: false,
       allowEscapeKey: false,
       didOpen: () => {
-        Swal.showLoading(); // Menampilkan indikator loading
+        Swal.showLoading();
       },
     });
     setLoading(true);
@@ -2896,6 +3823,7 @@ export const BookingDetailsTable = () => {
     try {
       const response = await ApiCustomer.get("/api/bookingDetails");
       if (response.data.success) {
+        console.log("Data Response Booking", response.data.data);
         setBookingDetailsData(response.data.data);
       } else {
         setError("Failed to fetch booking details data");
@@ -2913,30 +3841,101 @@ export const BookingDetailsTable = () => {
     fetchBookingDetails();
   }, []);
 
-  const filteredData = bookingDetailsData.filter((item) =>
-    Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  // derive unique options
+  const uniqueStatus = useMemo(() => {
+    const all = bookingDetailsData.map(b => b.Status).filter(Boolean);
+    return ["", ...Array.from(new Set(all)).sort()];
+  }, [bookingDetailsData]);
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const uniqueChangedBy = useMemo(() => {
+    const all = bookingDetailsData.map(b => b.ChangedBy).filter(Boolean);
+    console.log("Data Response Changed By", all);
+    return ["", ...Array.from(new Set(all)).sort()];
+  }, [bookingDetailsData]);
+
+  // filter + search
+  const filteredData = bookingDetailsData.filter((item) => {
+    const status = item.Status ?? "";
+    const ChangedBy = item.ChangedBy ?? "";
+    
+    const fStatus = !selectedStatus || status === selectedStatus;
+    const fChangedBy = !selectedChangedBy || ChangedBy === parseInt(selectedChangedBy);
+    console.log(item.ChangedBy, selectedChangedBy, fChangedBy)
+//  console.log( "Created By", ChangedBy);
+    if (!(fStatus && fChangedBy)) return false;
+
+    // search
+    const haystack = Object.values(item).join(" ").toLowerCase();
+    // console.log("haystack", item);
+    return haystack.includes(searchTerm.toLowerCase());
+    
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
   const currentData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+  const resetFilters = () => {
+    setSelectedStatus("");
+    setSelectedChangedBy("");
+    setSearchTerm("");
+    setCurrentPage(1);
+  };
+
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Booking Details Table</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
 
-      <BookingDetailsAdd onUpdate={fetchBookingDetails} />
+      {/* Search & Add */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <input
+          type="text"
+          placeholder="Search..."
+          className="w-full sm:w-1/3 p-2 border rounded"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <BookingDetailsAdd onUpdate={fetchBookingDetails} />
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <select
+          className="p-2 border rounded"
+          value={selectedStatus}
+          onChange={(e) => {
+            setSelectedStatus(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Status</option>
+          {uniqueStatus.map((v) => (
+            <option key={v} value={v}>{v || "—"}</option>
+          ))}
+        </select>
+
+        <select
+          className="p-2 border rounded"
+          value={selectedChangedBy}
+          onChange={(e) => {
+            setSelectedChangedBy(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Changed By</option>
+          {uniqueChangedBy.map((v) => (
+            <option key={v} value={v}>{v || "—"}</option>
+          ))}
+        </select>
+
+        <button
+          onClick={resetFilters}
+          className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">
+          Reset Filter
+        </button>
+      </div>
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -2960,85 +3959,87 @@ export const BookingDetailsTable = () => {
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item) => (
-              <tr key={item.BookingDetailId} className="hover:bg-gray-100 text-center text-sm">
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                  onClick={() => navigate(`/app/bookings/${item.BookingDetailId}`)}
-                >
-                  {item.BookingDetailId}
-                </td>
-                <td className="border p-2">{item.BookingId}</td>
-                <td className="border p-2">{item.ResourceId}</td>
-                <td className="border p-2">{item.ResorceAccountId}</td>
-                <td className="border p-2">{item.SubkTechnicianId}</td>
-                <td className="border p-2">{item.Name}</td>
-                <td className="border p-2">{item.Status}</td>
+            {currentData.length > 0 ? (
+              currentData.map((item) => (
+                <tr key={item.BookingDetailId} className="hover:bg-gray-100 text-center text-sm">
+                  <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                    onClick={() => navigate(`/app/bookings/${item.BookingDetailId}`)}
+                  >
+                    {item.BookingDetailId}
+                  </td>
+                  <td className="border p-2">{item.BookingId}</td>
+                  <td className="border p-2">{item.ResourceId}</td>
+                  <td className="border p-2">{item.ResorceAccountId}</td>
+                  <td className="border p-2">{item.SubkTechnicianId}</td>
+                  <td className="border p-2">{item.Name}</td>
+                  <td className="border p-2">{item.Status}</td>
 
-                <td className="p-2 text-left border">
-                  <div>Start: {item.StartTimeCustomerTime ? new Date(item.StartTimeCustomerTime).toLocaleString() : "-"}</div>
-                  <div>End: {item.EndTimeCustomerTime ? new Date(item.EndTimeCustomerTime).toLocaleString() : "-"}</div>
-                  <div>Est. Arrival: {item.EstimatedArrivalTimeCustomerTime ? new Date(item.EstimatedArrivalTimeCustomerTime).toLocaleString() : "-"}</div>
-                  <div>Actual Arrival: {item.ActualArrivalTimeCustomerTime ? new Date(item.ActualArrivalTimeCustomerTime).toLocaleString() : "-"}</div>
-                </td>
+                  <td className="p-2 text-left border">
+                    <div>Start: {item.StartTimeCustomerTime ? new Date(item.StartTimeCustomerTime).toLocaleString() : "-"}</div>
+                    <div>End: {item.EndTimeCustomerTime ? new Date(item.EndTimeCustomerTime).toLocaleString() : "-"}</div>
+                    <div>Est. Arrival: {item.EstimatedArrivalTimeCustomerTime ? new Date(item.EstimatedArrivalTimeCustomerTime).toLocaleString() : "-"}</div>
+                    <div>Actual Arrival: {item.ActualArrivalTimeCustomerTime ? new Date(item.ActualArrivalTimeCustomerTime).toLocaleString() : "-"}</div>
+                  </td>
 
-                <td className="p-2 text-left border">
-                  <div>Start: {item.StartTimeUserTime ? new Date(item.StartTimeUserTime).toLocaleString() : "-"}</div>
-                  <div>End: {item.EndTimeUserTime ? new Date(item.EndTimeUserTime).toLocaleString() : "-"}</div>
-                  <div>Duration: {item.DurationInMinutesUserTime || 0} min</div>
-                  <div>Est. Arrival: {item.EstimatedArrivalTimeUserTime ? new Date(item.EstimatedArrivalTimeUserTime).toLocaleString() : "-"}</div>
-                  <div>Actual Arrival: {item.ActualArrivalTimeUserTime ? new Date(item.ActualArrivalTimeUserTime).toLocaleString() : "-"}</div>
-                </td>
+                  <td className="p-2 text-left border">
+                    <div>Start: {item.StartTimeUserTime ? new Date(item.StartTimeUserTime).toLocaleString() : "-"}</div>
+                    <div>End: {item.EndTimeUserTime ? new Date(item.EndTimeUserTime).toLocaleString() : "-"}</div>
+                    <div>Duration: {item.DurationInMinutesUserTime || 0} min</div>
+                    <div>Est. Arrival: {item.EstimatedArrivalTimeUserTime ? new Date(item.EstimatedArrivalTimeUserTime).toLocaleString() : "-"}</div>
+                    <div>Actual Arrival: {item.ActualArrivalTimeUserTime ? new Date(item.ActualArrivalTimeUserTime).toLocaleString() : "-"}</div>
+                  </td>
 
-                <td className="p-2 border">{item.ChangedBy}</td>
-                <td className="p-2 border">
-                  {new Date(item.ChangedAt).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-                <td className="flex justify-center gap-2 p-2 border">
-                  <BookingDetailsEdit
-                    BookingDetailId={item.BookingDetailId}
-                    onUpdate={fetchBookingDetails}
-                  />
-                  <BookingDetailsDelete
-                    BookingDetailId={item.BookingDetailId}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchBookingDetails}
-                  />
-                </td>
-              </tr>
-            ))}
+                  <td className="p-2 border">{item.ChangedBy}</td>
+                  <td className="p-2 border">
+                    {new Date(item.ChangedAt).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
+                  <td className="flex justify-center gap-2 p-2 border">
+                    <BookingDetailsEdit
+                      BookingDetailId={item.BookingDetailId}
+                      onUpdate={fetchBookingDetails}
+                    />
+                    <BookingDetailsDelete
+                      BookingDetailId={item.BookingDetailId}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchBookingDetails}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr><td colSpan="12" className="p-4 text-center">No entries found.</td></tr>
+            )}
           </tbody>
         </table>
-
-        {filteredData.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No entries found.</p>
-        )}
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
-      </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center mt-4 space-x-2">
+          <button
+            className="p-2 bg-gray-300 rounded disabled:opacity-50"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="p-2 bg-gray-300 rounded disabled:opacity-50"
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
