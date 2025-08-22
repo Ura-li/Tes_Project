@@ -13,8 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { BtnModalContact } from "./sc-modal";
-import { BtnModalAsset } from "./sc-modal";
+import { BtnModalContact } from "./model/sc-modal";
+import { BtnModalAsset } from "./model/sc-modal";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import { ContactRound, User,Search, Laptop } from "lucide-react";
@@ -23,8 +23,8 @@ import { Loader2 } from "lucide-react";
 
 
 import ApiCustomer from "@/api";
+// import { useModal } from "./tests/modal-context";
 
-import { useModal } from "@/components/modal-context";
 
 export function TableCompany({ 
     selectedAsset = [],

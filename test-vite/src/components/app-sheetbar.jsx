@@ -8,9 +8,16 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { BadgeAlert } from 'lucide-react'
-import { AppAccordion } from './app-accordion'
+import { Card, CardDescription, CardHeader, CardTitle } from './ui/card'
+// import { AppAccordion } from './app-accordion'
  
 export function SheetBar() {
+  const  notif = [
+    { id: 1, title: 'Notification 1', description: 'This is the first notification.', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+    { id: 2, title: 'Notification 2', description: 'This is the second notification.', content: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
+    { id: 3, title: 'Notification 3', description: 'This is the third notification.', content: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' },
+  ]
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -18,10 +25,20 @@ export function SheetBar() {
       </SheetTrigger>
       <SheetContent className="bg-white ">
         <SheetHeader>
-          <SheetTitle className="flex justify-center text-2xl mt-5">INFORMATION</SheetTitle>
+          <SheetTitle className="flex justify-center text-2xl mt-5">Notification</SheetTitle>
         </SheetHeader>
         <div className='overflow-auto'>
-        <AppAccordion></AppAccordion>
+        {/* <AppAccordion></AppAccordion> */}
+          {notif.map((c) => (
+            <Card key={c.id} className="shadow-sm border-2 border-gray-400">
+              <CardHeader>
+                <CardTitle>{c.title}</CardTitle>
+                <CardDescription>{c.description}</CardDescription>
+                <p className="text-sm leading-relaxed text-muted-foreground">{c.content}</p>
+              </CardHeader>
+
+            </Card>
+          ))}
         </div>
         {/* <div>
           <Button variant="secondary" className="p-10 ml-10 w-20 bg-white border-2 drop-shadow-md"><Building2 className='size-10'></Building2></Button>

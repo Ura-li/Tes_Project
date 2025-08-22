@@ -1,15 +1,50 @@
-import { StrictMode } from "react";
+import { StrictMode, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
-import "./index.css";
+import "./style/index.css";
 import { BrowserRouter, Routes, Route } from "react-router";
-import App from "./App";
-import Landing from "./landing";
-import Lorem from "./Lorem";
-import Search_case from "./Search_case";
-import { Case } from "./Case";
-import { Work } from "./work";
-import { MaterialOrder, MoDetail } from "./material_order";
-import {
+import { Buffer } from "buffer";
+import { DraftProvider } from "./components/DraftContext";
+import { Loader2 } from "lucide-react";
+import { ViewCase } from "./pages/ViewCase";
+import { AuthProvider } from "./context/auth-context";
+
+
+
+const Landing = lazy(() => import('./pages/landing'));
+const Lorem = lazy(() => import('./pages/Lorem'));
+const Search_case = lazy(() => import('./pages/Search_case'));
+const Case = lazy(() => import('./pages/Case').then(m => ({ default: m.Case })));
+const Work = lazy(() => import('./pages/work').then(m => ({ default: m.Work })));
+const MaterialOrder = lazy(() => import('./pages/material_order').then(m => ({ default: m.MaterialOrder })));
+const MoDetail = lazy(() => import('./pages/material_order').then(m => ({ default: m.MoDetail })));
+const FlowCase = lazy(() => import('./pages/FlowCase').then(m => ({ default: m.FlowCase })));
+
+const masterTables = {
+  Company_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.Company_table }))),
+  Assets_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.Assets_table }))),
+  Contact_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.Contact_table }))),
+  Case_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.Case_table }))),
+  Product_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.Product_table }))),
+  ProductType_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.ProductType_table }))),
+  WarrantyService_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.WarrantyService_table }))),
+  Mo_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.Mo_table }))),
+  Wo_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.Wo_table }))),
+  ResourceAccountTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.ResourceAccountTable }))),
+  SubkTechnician_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.SubkTechnician_table }))),
+  SymptomCodeTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.SymptomCodeTable }))),
+  BookingsTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.BookingsTable }))),
+  BookingDetailsTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.BookingDetailsTable }))),
+  User_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.User_table }))),
+  Part_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.Part_table }))),
+  Resource_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.Resource_table }))),
+  RepairClassCodeTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.RepairClassCodeTable }))),
+  ServiceCatalogTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.ServiceCatalogTable }))),
+  OTCCodeTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.OTCCodeTable }))),
+  CrsTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.CrsTable }))),
+  FailureTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.FailureTable }))),
+};
+
+const {
   Company_table,
   Assets_table,
   Contact_table,
@@ -19,53 +54,58 @@ import {
   WarrantyService_table,
   Mo_table,
   Wo_table,
+  ResourceAccountTable,
   SubkTechnician_table,
   SymptomCodeTable,
   BookingsTable,
   BookingDetailsTable,
+  User_table,
+  Part_table,
   Resource_table,
   RepairClassCodeTable,
   ServiceCatalogTable,
   OTCCodeTable,
   CrsTable,
   FailureTable,
-} from "./master_table";
-import { Bookings } from "./bookings";
-import { User_table } from "./master_table";
-import { Part_table } from "./master_table";
-import { Labor } from "./labor";
-// import { ModalContextProvider } from './components/modal-context';
-import { ResourceAccountTable } from "./master_table";
+} = masterTables;
 
-import { GateKeepingRouting } from "./components/GateKeepingRouting";
-import { Buffer } from "buffer";
-import { Auditwindows } from "./components/audit-windows";
-import { Home } from "./Home";
-import { DraftProvider } from "./components/DraftContext";
-import { MasterGateKeeping } from "./components/MasterGateKeeping";
-import Forbidden from "./components/forbidden";
+
+const Bookings = lazy(() => import('./bookings').then(m => ({ default: m.Bookings })));
+const Labor = lazy(() => import('./labor'));
+const Auditwindows = lazy(() => import('./components/audit-windows'));
+const Home = lazy(() => import('./Home').then(m => ({ default: m.Home })));
+const GateKeepingRouting = lazy(() =>
+  import('./components/GateKeepingRouting').then(m => ({ default: m.GateKeepingRouting }))
+);const MasterGateKeeping = lazy(() => import('./components/MasterGateKeeping').then(m => ({ default: m.MasterGateKeeping })));
+
+const Forbidden = lazy(() => import('./pages/forbidden'));
+const FrontDesk_Page = lazy(() => import('./layout/FrontDesk_Page'));
+const NotFound = () => <div style={{ padding: 40, textAlign: 'center' }}><h2>404 - Page Not Found</h2></div>;
+const Loading = () => <div style={{ padding: 40, textAlign: 'center', fontSize: 40 }}><h2>Loading...</h2><Loader2 className="h-20 w-50 animate-spin inline-block mr-2"/></div>;
 window.Buffer = Buffer;
 createRoot(document.getElementById("root")).render(
   <StrictMode>
+    <AuthProvider>
     <BrowserRouter>
-      {/* <ModalContextProvider> */}
       <DraftProvider>
+        <Suspense fallback={<Loading/>}>
         <Routes>
           {/* <Route path='/' element={<App />}> */}
           <Route path="/app" element={<GateKeepingRouting />}>
             <Route index element={<Landing />} />
+            <Route path="/app/frontdesk" element={<FrontDesk_Page />} />
             <Route path="/app/forbidden" element={<Forbidden />} />
             <Route path="/app/search_case" element={<Search_case />} />
             <Route path="/app/case/:caseId" element={<Case />} />
             <Route path="/app/work/:woid" element={<Work />} />
-            <Route
-              path="/app/material-order/:moid"
-              element={<MaterialOrder />}
-            />
+            <Route path="/app/material-order/:moid" element={<MaterialOrder />}/>
             <Route path="/app/mo_detail/:lineItemID" element={<MoDetail />} />
             <Route path="/app/bookings" element={<Bookings />} />
             <Route path="/app/bookings/:bookingid" element={<Bookings />} />
             <Route path="/app/labor" element={<Labor />} />
+            <Route path="/app/flowcase" element={<FlowCase />} />
+            <Route path="/app/viewcase" element={<ViewCase />} />
+
 
             {/* <Route path='/app/master' element> */}
 
@@ -249,14 +289,17 @@ createRoot(document.getElementById("root")).render(
               }
             />
             {/* </Route> */}
+            <Route path="*" element={<NotFound />} />
           </Route>
           {/* </Route> */}
-          <Route path="/" element={<Home />} />
-          <Route path="/auditwindows" element={<Auditwindows />} />
-          <Route path="/lorem" element={<Lorem />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/auditwindows" element={<Auditwindows />} />
+            <Route path="/lorem" element={<Lorem />} />
+            <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </DraftProvider>
-      {/* </ModalContextProvider> */}
     </BrowserRouter>
+    </AuthProvider>
   </StrictMode>
 );

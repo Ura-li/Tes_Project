@@ -1,5 +1,5 @@
 import React from 'react'
-import { ServiceBooking } from './components/service-booking'
+import { ServiceBooking } from './pages/services/service-booking'
 import { useLocation } from 'react-router';
 
 

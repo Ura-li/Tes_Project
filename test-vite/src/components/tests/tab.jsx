@@ -21,7 +21,7 @@ import {
   SelectGroup,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectBarRelated } from "./sc-select";
+import { SelectBarRelated } from "../sc-select";
 import {
   Table,
   TableBody,
@@ -46,7 +46,7 @@ import {
   ChevronDown,
   KeyRound,
 } from "lucide-react";
-import { Textarea } from "./ui/textarea";
+import { Textarea } from "../ui/textarea";
 import { useLocation, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -65,8 +65,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import Swal from "sweetalert2";
-import { BtnModalsServiceCatalog } from "./sc-modal";
-import DatePicker from "./date-picker";
+import { BtnModalsServiceCatalog } from "../model/sc-modal";
+import DatePicker from "../date-picker";
 
 import ApiCustomer from "@/api";
 

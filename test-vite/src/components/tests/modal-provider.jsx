@@ -1,5 +1,5 @@
 // import AccountModal from "@/components/modals/AccountModal"
-import {BtnModalAsset, BtnModalContact} from "@/components/sc-modal"
+import {BtnModalAsset, BtnModalContact} from "@/components/model/sc-modal"
 // import RepairModal from "@/components/modals/RepairModal"
 
 export default function ModalProvider({ 

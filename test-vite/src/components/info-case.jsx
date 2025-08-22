@@ -26,7 +26,7 @@ export function InfoCase({
     <SidebarGroup > 
       <SidebarGroupLabel className="text-xl">Information</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
+        {items?.map((item) => (
             <SidebarMenuItem
             key={item.title}
             className="group/collapsible">
@@ -40,7 +40,7 @@ export function InfoCase({
                 </SidebarMenuButton>
             </SidebarMenuItem>
         ))}
-        {items2.map((item) => (
+        {items2?.map((item) => (
           <Collapsible
             key={item.title}
             asChild

@@ -7,6 +7,7 @@ import { useState } from "react"
 
 import ApiCustomer from "@/api"
 import Swal from "sweetalert2"
+import { setToken } from "@/lib/utils/auth"
 
 export function LoginForm({
   className,
@@ -33,7 +34,7 @@ export function LoginForm({
       })
       console.log('Login success:', res.data);
       const { token } = res.data;
-      localStorage.setItem('token', token);
+      setToken(token);
 
       Swal.fire({
       title: "Success",

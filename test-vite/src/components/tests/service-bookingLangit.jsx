@@ -13,7 +13,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { SelectBarRelated } from './sc-select'
+import { SelectBarRelated } from '../sc-select'
 import { CalendarDays,  Lock, PlusCircle } from 'lucide-react'
 
 
