@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
 
 // GET - Ambil detail user berdasarkan ID
 export async function GET(request, { params }) {
@@ -46,32 +48,69 @@ export async function PATCH(request, { params }) {
   }
 
   try {
-    const body = await request.json();
-    const { Email, Username, Password, Name, Role, ProfilePhoto } = body;
+    const formData = await request.formData();
+    const Name = formData.get("Name");
+    const Email = formData.get("Email");
+    const Phone = formData.get("Phone");
+    const Password = formData.get("NewPassword");
+    const ProfilePhoto = formData.get("ProfilePhoto");
+    const Signature = formData.get("Signature");
 
-    if (!Email && !Username && !Password && !Name && !Role && !ProfilePhoto) {
+    let updateData = { Name, Email, Phone };
+
+    if (Password) {
+      updateData.Password = await bcrypt.hash(Password, 10);
+    }
+
+    // File
+    if (ProfilePhoto && typeof ProfilePhoto === "object") {
+      const bytes = await ProfilePhoto.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const uploadPath = path.join(process.cwd(), "public/uploads/profiles", ProfilePhoto.name);
+      fs.writeFileSync(uploadPath, buffer);
+      updateData.ProfilePhoto = `/uploads/profiles/${ProfilePhoto.name}`;
+    }
+
+    if (Signature && typeof Signature === "object") {
+      const bytes = await Signature.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const uploadPath = path.join(process.cwd(), "public/uploads/signatures", Signature.name);
+      fs.writeFileSync(uploadPath, buffer);
+      updateData.Signature = `/uploads/signatures/${Signature.name}`;
+    }
+
+
+    if (!Email && !Username && !Password && !Name && !Role && !ProfilePhoto && !Phone && !Signature) {
       return NextResponse.json({
         success: false,
         message: "Minimal satu field harus dikirim untuk diupdate."
       }, { status: 400 });
     }
 
-    const dataToUpdate = {};
-    if (Email) dataToUpdate.Email = Email;
-    if (Username) dataToUpdate.Username = Username;
-    if (Password) dataToUpdate.Password = await bcrypt.hash(Password, 10);
-    if (Name) dataToUpdate.Name = Name;
-    if (Role) dataToUpdate.Role = Role;
-    if (ProfilePhoto) dataToUpdate.ProfilePhoto = ProfilePhoto;
 
     const updatedUser = await prisma.user.update({
       where: { IDUser: idUser },
-      data: dataToUpdate,
+      data: updateData,
     });
+
+    
+    const newToken = jwt.sign(
+      {
+        id: updatedUser.IDUser,
+        email: updatedUser.Email,
+        role: updatedUser.Role,
+        name: updatedUser.Name,
+        avatar: updatedUser.ProfilePhoto || ""
+      },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
 
     return NextResponse.json({
       success: true,
       message: "Data user berhasil diperbarui",
+      token: newToken,
       data: updatedUser
     }, { status: 200 });
 

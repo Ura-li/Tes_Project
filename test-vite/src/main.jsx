@@ -43,7 +43,9 @@ import { Auditwindows } from "./components/audit-windows";
 import { Home } from "./Home";
 import { DraftProvider } from "./components/DraftContext";
 import { MasterGateKeeping } from "./components/MasterGateKeeping";
+import { UserProfile } from "./components/user-profile";
 import Forbidden from "./components/forbidden";
+import { getUserFromToken } from "./lib/utils/auth";
 window.Buffer = Buffer;
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -54,6 +56,7 @@ createRoot(document.getElementById("root")).render(
           {/* <Route path='/' element={<App />}> */}
           <Route path="/app" element={<GateKeepingRouting />}>
             <Route index element={<Landing />} />
+            <Route path="/app/profiles" element={<UserProfile user={getUserFromToken()} />} />
             <Route path="/app/forbidden" element={<Forbidden />} />
             <Route path="/app/search_case" element={<Search_case />} />
             <Route path="/app/case/:caseId" element={<Case />} />
