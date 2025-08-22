@@ -40,7 +40,6 @@ export async function PATCH(request, { params }) {
   const { IDUser } = await params;
   const idUser = parseInt(IDUser);
 
-
   if (isNaN(idUser)) {
     return NextResponse.json({
       success: false,
