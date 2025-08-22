@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
-import ApiCustomer from './api'
+import ApiCustomer from '../api'
 import Swal from 'sweetalert2';
-import { Skeleton } from './components/ui/skeleton'
-import { TabsService } from './components/service-case'
-import { useDraft } from './components/DraftContext';
+import { Skeleton } from '../components/ui/skeleton'
+import { TabsService } from '../pages/services/service-case'
+import { useDraft } from '../components/DraftContext';
 export const Case = () => {
   const { caseId } = useParams(); // Get caseId from URL params
   const { updateDraft } = useDraft(); // Access updateDraft from context

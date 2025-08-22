@@ -6,8 +6,8 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-} from "./components/ui/card";
-import { Input } from "./components/ui/input";
+} from "../components/ui/card";
+import { Input } from "../components/ui/input";
 import { useNavigate } from "react-router";
 
 import {
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/sidebar";
 
 //importing API
-import ApiCustomer from "./api";
+import ApiCustomer from "../api";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,17 +46,17 @@ import {
   DialogCloseButton,
   DialogCompanyBtn,
   DialogContactBtn,
-} from "./components/assets-modal";
-import { SelectBar } from "./components/sc-select";
-import { SelectBar1 } from "./components/sc-select";
-import { SelectBar2 } from "./components/sc-select";
-import { TableCompany, TableContact, TableAsset } from "./components/sc-table";
+} from "../components/assets-modal";
+import { SelectBar } from "../components/sc-select";
+import { SelectBar1 } from "../components/sc-select";
+import { SelectBar2 } from "../components/sc-select";
+import { TableCompany, TableContact, TableAsset } from "../components/sc-table";
 import {
   BtnModal,
   BtnModalContact,
   BtnModalAsset,
-} from "./components/sc-modal";
-import { Checkbox } from "./components/ui/checkbox";
+} from "../components/model/sc-modal";
+import { Checkbox } from "../components/ui/checkbox";
 import Swal from 'sweetalert2';
 import { InfoCase } from "@/components/info-case";
 
@@ -250,6 +250,16 @@ const Search_case = () => {
       fetchDataContacts(queryString);
       fetchDataSiteAccounts(queryString);
       
+    }
+
+    // check empty input search
+    if (search.Email === "" && search.SerialNumber === "" && search.Company === "") {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Perhatian!',
+        text: 'Harap isi minimal satu field untuk pencarian.',
+      });
+      return; // 🚫 Jangan lanjut pencarian
     }
   };
   useEffect(() => {
@@ -855,7 +865,7 @@ const Search_case = () => {
             <TabsContent value="search">
               <Card className="drop-shadow-md">
                 <Button className="self-end mr-2" variant="ghost"
-                onClick={handleClearAll}
+                  onClick={handleClearAll}
                 >
                   Clear All
                 </Button>
@@ -866,6 +876,12 @@ const Search_case = () => {
                       id="Email"
                       value={search.Email || ""}
                       onChange={handleInputChange}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault(); 
+                          handleSearchClick();
+                        }
+                      }}
                       className="border-b-black p-1 "
                     />
                   </div>
@@ -901,21 +917,27 @@ const Search_case = () => {
                       value={search.Company || ""}
                       className="border-b-black p-1"
                       onChange={handleInputChange}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault(); 
+                          handleSearchClick();
+                        }
+                      }}
                     />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="ZipPostalCode">Zip/Postal</Label>
-                    <Input 
-                      id="ZipPostalCode" 
+                    <Input
+                      id="ZipPostalCode"
                       value={search.ZipPostalCode || ""}
-                      className="border-b-black p-1" 
+                      className="border-b-black p-1"
                       onChange={handleInputChange}
                     />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="City">City</Label>
-                    <Input 
-                      id="City" 
+                    <Input
+                      id="City"
                       value={search.City || ""}
                       className="border-b-black p-1"
                       onChange={handleInputChange}
@@ -932,8 +954,8 @@ const Search_case = () => {
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="AssetTag">Asset Tag</Label>
-                    <Input 
-                      id="AssetTag" 
+                    <Input
+                      id="AssetTag"
                       value={search.AssetTag || ""}
                       className="border-b-black p-1"
                       onChange={handleInputChange}
@@ -941,8 +963,8 @@ const Search_case = () => {
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="ContractID">Contract Id</Label>
-                    <Input 
-                      id="ContractID" 
+                    <Input
+                      id="ContractID"
                       value={search.ContractID || ""}
                       className="border-b-black p-1"
                       onChange={handleInputChange}
@@ -959,30 +981,30 @@ const Search_case = () => {
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="TransactiontID">Transaction Id</Label>
-                    <Input 
-                    id="TransactiontID" 
-                    value={search.TransactiontID || ""}
-                    className="border-b-black p-1"
-                    onChange={handleInputChange}
+                    <Input
+                      id="TransactiontID"
+                      value={search.TransactiontID || ""}
+                      className="border-b-black p-1"
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div className="space-y-0.5">
                     <Label htmlFor="Opsi">Opsi</Label>
-                    <Input 
-                    id="Opsi" 
-                    value={search.Opsi || ""}
-                    className="border-b-black p-1"
-                    onChange={handleInputChange}
+                    <Input
+                      id="Opsi"
+                      value={search.Opsi || ""}
+                      className="border-b-black p-1"
+                      onChange={handleInputChange}
                     />
                   </div>
-                  {/* <div className="space-y-0.5">
-                  <Label htmlFor="LicenseKey">Lisense key</Label>
-                  <Input id="LicenseKey" className="border-b-black p-1"  />
-                </div>
-                <div className="space-y-0.5">
-                  <Label htmlFor="PIN">Pin</Label>
-                  <Input id="PIN" className="border-b-black p-1" />
-                </div> */}
+                  <div className="space-y-0.5" hidden>
+                    <Label htmlFor="LicenseKey">Lisense key</Label>
+                    <Input id="LicenseKey" className="border-b-black p-1" />
+                  </div>
+                  <div className="space-y-0.5" hidden>
+                    <Label htmlFor="PIN">Pin</Label>
+                    <Input id="PIN" className="border-b-black p-1" />
+                  </div>
                 </CardContent>
                 <CardFooter className="flex justify-end">
                   <Button

@@ -5,17 +5,17 @@ import {
     CardTitle,
     CardHeader,
     CardFooter
-} from './ui/card'
+} from '../../components/ui/card'
 import { 
     Tabs, 
     TabsContent, 
     TabsList, 
     TabsTrigger
-} from './ui/tabs'
-import { CaseField } from './quick-wo-input'
-import { Input } from './ui/input'
+} from '../../components/ui/tabs'
+import { CaseField } from '../../components/quick-wo-input'
+import { Input } from '../../components/ui/input'
 import { KeyRound } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from './ui/select'
+import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from '../../components/ui/select'
 
 export const ServiceLabor = () => {
   return (

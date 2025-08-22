@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SearchCommandBlock, SelectBarRelated } from "./sc-select";
+import { SearchCommandBlock, SelectBarRelated } from "../../components/sc-select";
 import { ArrowDownNarrowWideIcon, Car, Lock, Plus, RotateCw, Search } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import {
@@ -31,11 +31,11 @@ import { useParams } from "react-router";
 import debounce from 'lodash.debounce';
 import ApiCustomer from "@/api";
 
-import { CaseField } from "./quick-wo-input";
+import { CaseField } from "../../components/quick-wo-input";
 
 import { TabsServiceMOLineItems } from "./service-case";
 import { Description } from "@radix-ui/react-dialog";
-import { useDraft } from "./DraftContext";
+import { useDraft } from "../../components/DraftContext";
 export const ServiceMoDetail = () => {
   const { updateDraft } = useDraft(); // Access updateDraft from the DraftContext
 

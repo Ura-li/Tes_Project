@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button } from './ui/button'
+import { Button } from '../ui/button'
 import { ArrowLeftFromLine } from 'lucide-react'
 import { SquareArrowOutUpRight } from 'lucide-react'
 import { Save } from 'lucide-react'

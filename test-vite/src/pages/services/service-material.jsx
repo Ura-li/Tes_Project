@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectBarRelated } from "./sc-select";
+import { SelectBarRelated } from "../../components/sc-select";
 import { Car, Lock } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import {
@@ -38,10 +38,10 @@ import Swal from "sweetalert2";
 import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
-import { CaseField } from "./quick-wo-input";
-import DatePicker from "./date-picker";
-import { Case } from "@/Case";
-import { useDraft } from "./DraftContext";
+import { CaseField } from "../../components/quick-wo-input";
+import DatePicker from "../../components/date-picker";
+import { Case } from "@/pages/Case";
+import { useDraft } from "../../components/DraftContext";
 
 export const ServiceMaterial = () => {
     const { moid } = useParams();

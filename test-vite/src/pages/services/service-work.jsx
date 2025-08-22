@@ -20,7 +20,7 @@ import {
   SelectGroup,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectBarRelated } from "./sc-select";
+import { SelectBarRelated } from "../../components/sc-select";
 import { Car, Lock, Plus, RotateCw } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import {
@@ -40,12 +40,12 @@ import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
 
-import { CaseField, QuickWOInput } from "./quick-wo-input";
-import { NewBookableResourceBooking } from "./service-booking";
+import { CaseField, QuickWOInput } from "../../components/quick-wo-input";
+import { NewBookableResourceBooking } from "../services/service-booking";
 import { getUserFromToken } from "@/lib/utils/auth";
 
 import { useNavigate } from "react-router";
-import DatePicker from "./date-picker";
+import DatePicker from "../../components/date-picker";
 import {
   Pagination,
   PaginationContent,
@@ -55,7 +55,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { SearchCommandBlock } from "./sc-select";
+import { SearchCommandBlock } from "../../components/sc-select";
 import {
   Command,
   CommandEmpty,
@@ -66,7 +66,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import { useDraft } from "./DraftContext";
+import { useDraft } from "../../components/DraftContext";
 
 export const ServiceWork = () => {
   const user = getUserFromToken();

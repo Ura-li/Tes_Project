@@ -7,8 +7,8 @@ import {
 import { ChevronDown } from 'lucide-react'
 import { Checkbox } from "./ui/checkbox";
 import { Input } from './ui/input';
-import { BtnModal1 } from './sc-modal';
-import { BtnModal2 } from './sc-modal';
+import { BtnModal1 } from './model/sc-modal';
+import { BtnModal2 } from './model/sc-modal';
  
 export function ShelterBox() {
   return (

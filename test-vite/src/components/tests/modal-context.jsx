@@ -1,6 +1,6 @@
 // components/ModalProvider.jsx
 import { createContext, useContext, useState } from "react";
-import { BtnModalAsset, BtnModalContact } from "@/components/sc-modal";
+import { BtnModalAsset, BtnModalContact } from "@/components/model/sc-modal";
 
 const ModalContext = createContext();
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ServiceLabor } from './components/service-labor'
+import { ServiceLabor } from './pages/services/service-labor'
 export const Labor = () => {
   return (
     <div>
