@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card';
 import { Button } from './components/ui/button';
-import { FindCase } from './components/sc-modal'; // Assuming this is a modal trigger
+import { FindCase } from './components/model/sc-modal'; // Assuming this is a modal trigger
 import { useNavigate } from 'react-router-dom'; // Corrected import for useNavigate
 
 export const Home = () => {

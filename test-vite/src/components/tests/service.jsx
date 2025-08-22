@@ -20,7 +20,7 @@ import {
   SelectGroup,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectBarRelated } from "./sc-select";
+import { SelectBarRelated } from "../sc-select";
 import { Car, Lock, Plus } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import {
@@ -45,12 +45,12 @@ import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
 
-import { CaseField, QuickWOInput } from "./quick-wo-input";
-import { NewBookableResourceBooking } from "./service-booking";
+import { CaseField, QuickWOInput } from "../quick-wo-input";
+import { NewBookableResourceBooking } from "../service-booking";
 import { getUserFromToken } from "@/lib/utils/auth";
 
 import { useNavigate } from "react-router";
-import DatePicker from "./date-picker";
+import DatePicker from "../date-picker";
 
 export const ServiceWork = () => {
   const user = getUserFromToken();

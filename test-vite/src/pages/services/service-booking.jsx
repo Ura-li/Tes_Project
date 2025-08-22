@@ -22,7 +22,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { SelectBarRelated } from './sc-select'
+import { SelectBarRelated } from '../../components/sc-select'
 import { CalendarDays,  Lock, PlusCircle } from 'lucide-react'
 
 'use client'
@@ -33,9 +33,9 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import ApiCustomer from "@/api";
 import debounce from 'lodash.debounce';
 import Swal from 'sweetalert2';
-import { CaseField } from './quick-wo-input';
-import DatePicker from './date-picker';
-import { TabsBooking } from './tab';
+import { CaseField } from '../../components/quick-wo-input';
+import DatePicker from '../../components/date-picker';
+import { TabsBooking } from '../../components/tests/tab';
 
 import { getUserFromToken } from "@/lib/utils/auth";
 

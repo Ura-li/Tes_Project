@@ -1,46 +1,46 @@
 import React, { useState, useEffect } from "react";
 import ApiCustomer from "@/api";
-import { ContactEdit, ContactDelete } from "@/components/sc-modal";
-import { CompanyEdit, CompanyDelete } from "@/components/sc-modal";
-import { ProductAdd, ProductEdit, ProductDelete } from "@/components/sc-modal";
-import { BtnModalAsset, AssetEdit, AssetDelete } from "@/components/sc-modal";
+import { ContactEdit, ContactDelete } from "@/components/model/sc-modal";
+import { CompanyEdit, CompanyDelete } from "@/components/model/sc-modal";
+import { ProductAdd, ProductEdit, ProductDelete } from "@/components/model/sc-modal";
+import { BtnModalAsset, AssetEdit, AssetDelete } from "@/components/model/sc-modal";
 import {
   ProductTypeAdd,
   ProductTypeEdit,
   ProductTypeDelete,
-} from "@/components/sc-modal";
+} from "@/components/model/sc-modal";
 import {
   WarrantyServiceAdd,
   WarrantyServiceEdit,
   WarrantyServiceDelete,
-} from "@/components/sc-modal";
-import { MaterialOrderEdit, MaterialOrderDelete } from "@/components/sc-modal";
-import { WorkOrderDelete, WorkOrderEdit } from "@/components/sc-modal";
-import { UserAdd, UserEdit, UserDelete } from "@/components/sc-modal";
-import { PartAdd,PartEdit, PartDelete } from "@/components/sc-modal";
-import { ResourceAdd, ResourceEdit, ResourceDelete } from "@/components/sc-modal";
-import { ResourceAccountAdd, ResourceAccountEdit, ResourceAccountDelete } from "@/components/sc-modal";
-import { SubkTechnicianAdd, SubkTechnicianEdit, SubkTechnicianDelete } from "@/components/sc-modal";
-import { SymptomCodeAdd, SymptomCodeEdit, SymptomCodeDelete } from "@/components/sc-modal";
-import { BookingsAdd, BookingsEdit, BookingsDelete } from "@/components/sc-modal";
-import { BookingDetailsAdd, BookingDetailsEdit, BookingDetailsDelete } from "@/components/sc-modal";
-import { RepairClassCodeAdd, RepairClassCodeEdit, RepairClassCodeDelete } from "@/components/sc-modal";
-import { ServiceCatalogAdd, ServiceCatalogEdit, ServiceCatalogDelete } from "@/components/sc-modal";
-import { OTCAdd, OTCEdit, OTCDelete} from "@/components/sc-modal";
-import { CrsAdd, CrsEdit, CrsDelete } from "@/components/sc-modal";
+} from "@/components/model/sc-modal";
+import { MaterialOrderEdit, MaterialOrderDelete } from "@/components/model/sc-modal";
+import { WorkOrderDelete, WorkOrderEdit } from "@/components/model/sc-modal";
+import { UserAdd, UserEdit, UserDelete } from "@/components/model/sc-modal";
+import { PartAdd,PartEdit, PartDelete } from "@/components/model/sc-modal";
+import { ResourceAdd, ResourceEdit, ResourceDelete } from "@/components/model/sc-modal";
+import { ResourceAccountAdd, ResourceAccountEdit, ResourceAccountDelete } from "@/components/model/sc-modal";
+import { SubkTechnicianAdd, SubkTechnicianEdit, SubkTechnicianDelete } from "@/components/model/sc-modal";
+import { SymptomCodeAdd, SymptomCodeEdit, SymptomCodeDelete } from "@/components/model/sc-modal";
+import { BookingsAdd, BookingsEdit, BookingsDelete } from "@/components/model/sc-modal";
+import { BookingDetailsAdd, BookingDetailsEdit, BookingDetailsDelete } from "@/components/model/sc-modal";
+import { RepairClassCodeAdd, RepairClassCodeEdit, RepairClassCodeDelete } from "@/components/model/sc-modal";
+import { ServiceCatalogAdd, ServiceCatalogEdit, ServiceCatalogDelete } from "@/components/model/sc-modal";
+import { OTCAdd, OTCEdit, OTCDelete} from "@/components/model/sc-modal";
+import { CrsAdd, CrsEdit, CrsDelete } from "@/components/model/sc-modal";
 import { FailureAdd, 
   FailureEdit, 
-  FailureDelete } from "@/components/sc-modal";
+  FailureDelete } from "@/components/model/sc-modal";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Button } from "./components/ui/button";
-import { cn } from "./lib/utils";
+import { Button } from "../components/ui/button";
+import { cn } from "../lib/utils";
 
-import { ExportExcel } from "./components/Export-Excel";
+import { ExportExcel } from "../components/Export-Excel";
 
-import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectValue } from "./components/ui/select";
+import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectValue } from "../components/ui/select";
 // import PDFButton from "./components/PDFButton";
 // import ServiceRequestPDF from "./components/service-request-form";
 export const Contact_table = () => {

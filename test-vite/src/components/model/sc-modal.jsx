@@ -23,9 +23,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"
-import { Plus,PhoneCall, Copy, ExternalLink, XIcon, ArchiveIcon } from "lucide-react";
-import { Checkbox } from "./ui/checkbox";
-import { SelectBar3, SelectBarContact4, SelectYN } from "./sc-select";
+import { Plus,PhoneCall, Copy, ExternalLink, XIcon, ArchiveIcon, User } from "lucide-react";
+import { Checkbox } from "../ui/checkbox";
+import { SelectBar3, SelectBarContact4, SelectYN } from "../sc-select";
 import { 
   SelectBarContact,
   SelectBarContact2,
@@ -45,8 +45,8 @@ import {
   } from '@/components/ui/select'
 
   
- import { SnInput } from "./sn-input";
-import { Textarea } from "./ui/textarea";
+ import { SnInput } from "../sn-input";
+import { Textarea } from "../ui/textarea";
 import { Pencil, Trash } from "lucide-react";
 //import API
 import ApiCustomer from "@/api";
@@ -59,7 +59,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import {
   Pagination,
   PaginationContent,
@@ -71,10 +71,11 @@ import {
 } from "@/components/ui/pagination"
 
 import { getUserFromToken } from "@/lib/utils/auth";
-import { Card, CardContent, CardTitle } from "./ui/card";
-import ServiceRequestPDF from "./service-request-form";
+import { Card, CardContent, CardTitle } from "../ui/card";
+import ServiceRequestPDF from "../service-request-form";
 import { pdf } from '@react-pdf/renderer';
 
+import { cn } from "@/lib/utils";
 
 export function BtnModal({
   handleCreateCase,
@@ -8901,3 +8902,38 @@ console.log(caseData);
     </>
   )
 }
+
+// export function Profile({
+//   className
+// }) {
+//   const [open, setOpen] = useState(false);
+//   const [profileData, setProfileData] = useState({
+//     Email: "",
+//     Username: "",
+//     Name: "",
+//     Role: "",
+//     ProfilePicture: "",
+//   });
+//   const [newProfilePicture, setNewProfilePicture] = useState(null);
+
+//   return (
+//     <Dialog open={open} onOpenChange={setOpen}>
+//       <DialogTrigger asChild>
+//         <Button variant="outline" className={cn(
+//           "w-full justify-start text-left font-normal",
+//           className
+//         )}>
+//           <User className="mr-2" />
+//           Open
+//         </Button>
+//       </DialogTrigger>
+//       <DialogContent className="max-w-md">
+//       <DialogHeader>
+        
+//       </DialogHeader>
+//       <DialogFooter>
+//       </DialogFooter>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }

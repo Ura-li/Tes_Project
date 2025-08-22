@@ -1,6 +1,6 @@
 import React from 'react'
-import { ServiceMaterial } from './components/service-material'
-import { ServiceMoDetail } from './components/service-mo_detail'
+import { ServiceMaterial } from './services/service-material'
+import { ServiceMoDetail } from './services/service-mo_detail'
 
 
 export const MaterialOrder = () => {

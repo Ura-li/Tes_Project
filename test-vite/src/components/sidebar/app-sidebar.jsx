@@ -13,13 +13,13 @@ import {
   Table,
 } from "lucide-react"
 import { Building, Briefcase, Phone, Folder, Box, Tag, ShieldCheck, ShoppingCart, Wrench, User, HardHat, Heart, Calendar, ClipboardCheck, Hammer, Server, Barcode, CheckCircle } from 'lucide-react';
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavRecent } from "@/components/nav-projects"
-import { NavPinned } from "@/components/nav-projects"
-import { NavMywork } from "@/components/nav-projects"
-import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
+import { NavMain } from "@/components/sidebar/nav-main"
+import { NavProjects } from "@/components/sidebar/nav-projects"
+import { NavRecent } from "@/components/sidebar/nav-projects"
+import { NavPinned } from "@/components/sidebar/nav-projects"
+import { NavMywork } from "@/components/sidebar/nav-projects"
+import { NavUser } from "@/components/sidebar/nav-user"
+import { TeamSwitcher } from "@/components/sidebar/team-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -29,17 +29,20 @@ import {
 } from "@/components/ui/sidebar"
 
 import { getUserFromToken } from "@/lib/utils/auth"
-import { Separator } from "./ui/separator"
-import { Hpicon, Javagicon } from "./icon";
-import { useDraft } from "./DraftContext";
+import { Separator } from "../ui/separator"
+import { Hpicon, Javagicon } from "../icon";
+import { useDraft } from "../DraftContext";
 
 
 
-// This is sample data.
+
 export function AppSidebar({
   ...props
 }) {
   const { drafts } = useDraft();
+  if (!drafts) {
+    return null; 
+  }
   const data = {
     // user: {
     //   name: "ME",
@@ -187,19 +190,22 @@ export function AppSidebar({
         items: [
           {
             title: "Case",
-            url: `/app/Case/${drafts.caseId}`,
+            url: drafts.caseId ? `/app/Case/${drafts.caseId}`: "/app/Master/Case_table",
+            disabled: !drafts.caseId,
           },
           {
             title: "Work Order",
-            url: `/app/work/${drafts.woid}`,
+            url: drafts.woid ? `/app/work/${drafts.woid}` : "/app/Master/Wo_table",
+            disabled: !drafts.woid,
           },
           {
             title: "Material Order",
-            url: `/app/material_order/${drafts.moid}`,
+            url: drafts.moid ? `/app/material_order/${drafts.moid}` : "/app/Master/Mo_table",
+            disabled: !drafts.moid,
           },
           {
             title: "MO Line Item",
-            url: `/app/material_order/material-order-line-items/${drafts.moliId}`,
+            url: drafts.moliId ? `/app/material_order/material-order-line-items/${drafts.moliId} ` : "/app/Master/Mo_table",
           },
         
         ],
@@ -260,10 +266,10 @@ export function AppSidebar({
         url: "/app",
         icon: Home,
       },
-       {
-        name: "Recent",
-        title: "Recent",
-        url: "#",
+      {
+        name: "Your Cases",
+        title: "Your Cases",
+        url: "/app/flowcase",
         icon: PieChart,
       },
       {
@@ -273,23 +279,41 @@ export function AppSidebar({
         icon: Table,
       },
       {
-        name: "Pinned",
-        title: "Pinned",
-        url: "#",
+        name: "View Case",
+        title: "View Case",
+        url: "/app/viewcase",
         icon: Pin
       },
     ],
-  
   }
-  return (
+
+
+
+const navrole = data.projects;
+  
+  let DropNav;
+  if (data.user.role === 'admin') {
+    DropNav = (
+      <NavMain
+        className="bg-cyan-700"
+        items={data.navMain}
+        activeClassName="bg-cyan-800 text-white"
+      />
+    );
+  } else {
+    DropNav = '';
+  }
+
+  return (  
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className={'bg-cyan-700'}>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavProjects projects={data.projects} />
-        <Separator className={'border-2'}></Separator>
-        <NavMain items={data.navMain} />
+        <NavProjects projects={navrole} />
+        
+        {/* <Separator className={'border-2'}></Separator> */}
+        {DropNav}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

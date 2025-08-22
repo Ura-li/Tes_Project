@@ -21,7 +21,7 @@ import {
   SelectGroup,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectBarRelated } from "./sc-select";
+import { SelectBarRelated } from "../../components/sc-select";
 import {
   Table,
   TableBody,
@@ -51,7 +51,7 @@ import {
   Settings,
 } from "lucide-react";
 
-import { SelectYN } from "./sc-select";
+import { SelectYN } from "../../components/sc-select";
 import { useLocation, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -75,14 +75,14 @@ import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import Swal from "sweetalert2";
 
-import { BtnModalsServiceCatalog } from './sc-modal'
-import DatePicker from './date-picker'
+import { BtnModalsServiceCatalog } from '../../components/model/sc-modal'
+import DatePicker from '../../components/date-picker'
 
 
-import { SearchCommandBlock } from "./sc-select";
+import { SearchCommandBlock } from "../../components/sc-select";
 
 import { pdf } from '@react-pdf/renderer';
-import ServiceRequestPDF from './service-request-form'; // adjust path if needed
+import ServiceRequestPDF from '../../components/service-request-form'; // adjust path if needed
 
 
 export const TabsService = ({ 

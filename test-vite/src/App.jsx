@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { SheetBar } from './components/app-sheetbar'
 import { Button } from "@/components/ui/button"
-import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebar } from "@/components/sidebar/app-sidebar"
 import { Input } from './components/ui/input'
 import {
   Loader2,
@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/sidebar"
 
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router'
-import Lorem from './Lorem'
+import Lorem from './pages/Lorem'
 
 import ApiCustomer from './api'
 
@@ -154,33 +154,18 @@ const App = () => {
     "--sidebar-width-mobile": "20rem",
   }}>
       <AppSidebar />
-      <SidebarInset className="overflow-auto">
-        <header className="flex  items-center justify-between px-4 gap-2 bg-cyan-700">
+      <SidebarInset className="">
+        <header className="flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-cyan-700">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
-            {/* <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <Link to="/lorem">
-                    <BreadcrumbLink >
-                     Login
-                    </BreadcrumbLink>
-                  </Link>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Home Dashboard</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb> */}
             <Breadcrumbs/>
           </div>
             <div className="flex  p-2 items-center gap-2 self-center">
               <Search></Search>
               <GlobalSearchBar />
             </div>
-            {/* <SheetBar></SheetBar> */}
+            <SheetBar></SheetBar>
         </header>
         {/* <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="grid auto-rows-min gap-4 md:grid-cols-3">
