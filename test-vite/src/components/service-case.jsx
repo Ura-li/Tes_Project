@@ -1929,7 +1929,10 @@ const [endDate, setEndDate] = useState(null);
                     : dataFetchCustomerData?.MainAccount?.Phone}
                 </CaseField>
                 <CaseField label="Region" icon>
-                  <Input variant="invisible" placeholder="---" readOnly/>
+                  <Input 
+                  variant="invisible" 
+                  placeholder="---" readOnly 
+                  value={dataFetchCustomerData.SiteAccount?.City}/>
                 </CaseField>
                 <CaseField label="Submitted By">
                   <Input variant="invisible" placeholder="---"  />
@@ -2111,19 +2114,18 @@ const [endDate, setEndDate] = useState(null);
       <table className="min-w-full border text-sm text-left">
         <thead className="bg-gray-100 text-gray-700">
           <tr>
-            <th className="border px-4 py-2">Accessories ID</th>
-            <th className="border px-4 py-2">Case ID</th>
+            <th className="border px-4 py-2">No Accesories</th>
+            <th className="border px-4 py-2" hidden>Case ID</th>
             <th className="border px-4 py-2">Accessories</th>
             <th className="border px-4 py-2">Note</th>
-            <th className="border px-4 py-2">CT_SNCode</th>
+            <th className="border px-4 py-2">CT / SN code</th>
           </tr>
         </thead>
         <tbody>
-          {/* {console.log(caseDetails)} */}
           {caseDetails.accessory?.map((item, index) => (
             <tr key={index} className="hover:bg-gray-50">
               <td className="border px-4 py-2">{item.id}</td>
-              <td className="border px-4 py-2">{item.CaseID}</td>
+              <td className="border px-4 py-2" hidden>{item.CaseID}</td>
               <td className="border px-4 py-2">{item.Accessories}</td>
               <td className="border px-4 py-2">{item.Note || "---"}</td>
               <td className="border px-4 py-2">{item.CT_SNCode || "---"}</td>
@@ -2139,6 +2141,9 @@ const [endDate, setEndDate] = useState(null);
           )}
         </tbody>
       </table>
+      <span className="pt-10 text-lg text-gray-600">
+        Total Accesories: {caseDetails.accessory?.length || 0 }
+      </span>
     </div>
   </div>
 </Card>
