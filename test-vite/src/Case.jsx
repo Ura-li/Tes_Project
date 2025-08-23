@@ -24,16 +24,16 @@ useEffect(() => {
   updateDraft('caseId', caseId); // Save the visited caseId to drafts
 
   const loadCaseData = async () => {
-    Swal.fire({
-      title: 'Memuat Case Detail...',
-      text: 'Mohon tunggu sebentar',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => Swal.showLoading(),
-      customClass: {
-        popup: 'z-[9999]',
-      }
-    });
+    // Swal.fire({
+    //   title: 'Memuat Case Detail...',
+    //   text: 'Mohon tunggu sebentar',
+    //   allowOutsideClick: false,
+    //   allowEscapeKey: false,
+    //   didOpen: () => Swal.showLoading(),
+    //   customClass: {
+    //     popup: 'z-[9999]',
+    //   }
+    // });
 
     try {
       const response = await ApiCustomer.get(`/api/case-information/${caseId}`);
@@ -86,11 +86,11 @@ useEffect(() => {
 
   if (!caseDetails) {
     return (
-      <div className="p-6 space-y-6">
-        <Skeleton className="h-6 w-1/4" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-40 w-full rounded-lg" />
-        <div className="space-y-2">
+      <div className="p-2 space-y-6">
+        <Skeleton className="h-6 w-1/4"  />
+        <Skeleton className="w-1/1 h-30" />
+        <Skeleton className="h-100 w-full rounded-lg" />
+        <div className="space-y-2" hidden>
           <Skeleton className="h-4 w-3/4" />
           <Skeleton className="h-4 w-2/4" />
           <Skeleton className="h-4 w-full" />

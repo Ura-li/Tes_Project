@@ -50,7 +50,7 @@ import {
   CreditCard,
   Settings,
 } from "lucide-react";
-
+import { CircleChevronLeft } from "lucide-react";
 import { SelectYN } from "./sc-select";
 import { useLocation, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
@@ -382,7 +382,7 @@ const openPopup = () => {
 
   const buttons = [
     {
-      icon: ArrowLeftFromLine,
+      icon: CircleChevronLeft,
       label: "",
       onClick: () => navigate(`/app/master/Case_table`),
     },
@@ -394,7 +394,7 @@ const openPopup = () => {
       onClick: () => saveAndCloseCase(),
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
-    { icon: StepBack, label: "Complaint",},
+    // { icon: StepBack, label: "Complaint",},
     { icon: StepBack, label: "SRF", onClick: async () => {
       // console.log("Case Details ; ",caseDetails);
       const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails}  />).toBlob();
@@ -406,20 +406,20 @@ const openPopup = () => {
       link.click();
       document.body.removeChild(link);
     }, },
-    { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
-    { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
-    { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder") },
-    { icon: StepBack, label: "Sales Offer",},
-    { icon: StepBack, label: "Close Case", },
-    { icon: StepBack, label: "Pick", },
-    { icon: StepBack, label: "Queue Details", },
-    { icon: UserPen, label: "Assign" },
-    { icon: StepBack, label: "Add to Queue", },
-    { icon: StepBack, label: "Audit", onClick: () => openPopup() },
+    { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR"), hidden: true },
+    { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), hidden: true },
+    { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder"), hidden:true },
+    { icon: StepBack, label: "Sales Offer", hidden:true},
+    { icon: StepBack, label: "Close Case", hidden:true },
+    { icon: StepBack, label: "Pick", hidden:true },
+    { icon: StepBack, label: "Queue Details", hidden:true},
+    { icon: UserPen, label: "Assign", hidden:true },
+    { icon: StepBack, label: "Add to Queue", hidden:true },
+    { icon: StepBack, label: "Audit", onClick: () => openPopup(), hidden:true },
   ];
   console.log("TES CASE DETAILS VALUE",caseDetails);
-  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
-  const hiddenButtons = open ? buttons.slice(-3) : [];
+  // const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  // const hiddenButtons = open ? buttons.slice(-3) : [];
   const [serviceCatalogType, setServiceCatalogType] = useState("null");
   const openServiceCatalog = async (type) => {
     setOpenWorkOrder(true);
@@ -513,7 +513,7 @@ const openPopup = () => {
   return (
     <>
       <div className="flex items-center border-1 ">
-        {visibleButtons.map((btn, index) => (
+        {/* {visibleButtons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
@@ -539,7 +539,19 @@ const openPopup = () => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
+        )} */}
+        {buttons.map((btn, index) => (
+          <Button
+            key={index}
+            onClick={btn.onClick}
+            hidden={btn.hidden}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+          >
+            <btn.icon/>
+            {btn.label && <span className="text-md">{btn.label}</span>}
+          </Button>
+        ))  }
         <BtnModalsServiceCatalog 
           open={openWorkOrder}
           setOpen={setOpenWorkOrder}
@@ -584,7 +596,7 @@ const spanMap = {
   6: "col-span-6",
 };
 
-export const CaseField = ({ label, children, icon, span = 1, className, star }) => (
+export const CaseField = ({ label, children, icon, span = 1, className, star, }) => (
   <>
     <CardTitle
       className={twMerge(
@@ -1180,7 +1192,6 @@ export const ServiceCase = ({
   const [customerRequestedCloseDate, setCustomerRequestedCloseDate] =
     useState(null);
   const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
-  // const [cr]
   useEffect(() => {
     if (caseDetails?.CreatedOn) {
       setCreatedOn(new Date(caseDetails.CreatedOn)); // includes date + time
@@ -1188,25 +1199,26 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case Information" },
-    { value: "customer,add,entitement", label: "Customer, Asset & Entitement" },
+    { value: "case_info", label: "Case & Customer" },
+    { value: "customer,add,entitement", label: "Asset & Entitement" },
     { value: "ci_notes", label: "Notes & Information" },
-    { value: "ci_activitas", label: "Activities", disable: true },
-    { value: "ci_actions", label: "Customer Interactions", disable: true},
-    { value: "ci_wo", label: "Work Order Validation" },
-    { value: "ci_orders", label: "Orders" },
-    { value: "ci_salles", label: "Sales Offer", disable: true },
-    { value: "ci_knowledge", label: "Knowledge & Attachments", },
-    { component: <SelectBarRelated /> },
+    { value: "action_log", label: "Action Log"},
+    { value: "ci_activitas", label: "Activities", disable: true, hidden: true },
+    { value: "ci_actions", label: "Customer Interactions", disable: true, hidden: true},
+    { value: "ci_wo", label: "Work Order Validation", disable: true ,hidden: true},
+    { value: "ci_orders", label: "Orders",disable: true ,hidden: true},
+    { value: "ci_salles", label: "Sales Offer", disable: true ,hidden: true},
+    { value: "ci_knowledge", label: "Knowledge & Attachments", hidden: true},
+    // { component: <SelectBarRelated />,},
   ];
 
-  const visibleTabs = open ? tabs.slice(0, -2) : tabs;
-  const hiddenTabs = open
-    ? [
-        { value: "ci_knowledge", label: "Knowledge & Attachments" },
-        { component: <SelectBarRelated /> },
-      ]
-    : [];
+  // const visibleTabs = open ? tabs.slice(0, -2) : tabs;
+  // const hiddenTabs = open
+  //   ? [
+  //       { value: "ci_knowledge", label: "Knowledge & Attachments" },
+  //       { component: <SelectBarRelated /> },
+  //     ]
+  //   : [];
 
   const [selected, setSelected] = useState("--Selected--"); 
 
@@ -1226,7 +1238,6 @@ export const ServiceCase = ({
 
   const fetchCustomerData = async () => {
     try {
-      // console.log("Case Detail : ", caseDetails);
       const resMainAccount = await ApiCustomer.get(
         `/api/contact-information/${caseDetails.ContactID}`
       );
@@ -1248,8 +1259,6 @@ export const ServiceCase = ({
           type: "Individual", // fallback if no site account
         }));
       }
-
-      // const res = await ApiCustomer.get(`/api/`)
     } catch (err) {
       console.error("Error returning Customer Data : ", err);
       return null;
@@ -1272,7 +1281,6 @@ export const ServiceCase = ({
 
   const fetchCaseNotes = async () => {
     try {
-      // console.log("Case Details : ", caseDetails)
       const res = await ApiCustomer.get(`/api/case-information/case-notes`);
       const notes = res.data.data;
 
@@ -1664,10 +1672,28 @@ const [endDate, setEndDate] = useState(null);
                   </Select>
                   <p className="text-sm font-light ">Site Account</p>
                 </div>
+                
               </CardTitle>
             </div>
             <TabsList className="bg-white">
-              {visibleTabs.map((tab, index) =>
+            {tabs.map((tab,index) => (
+              tab.component ? (
+                <div key={index}>{tab.component}</div> 
+              ) : (
+                <TabsTrigger
+                  key={index}
+                  variant="underline"
+                  value={tab.value}
+                  disabled={tab.disable}
+                  hidden={tab.hidden}
+                  className="text-sm font-normal"
+                >
+                  {tab.label}
+                </TabsTrigger>
+              )
+            ))}
+
+              {/* {visibleTabs.map((tab, index) =>
                 tab.component ? (
                   <div key={index}>{tab.component}</div> // Ensure SelectBarRelated renders properly
                 ) : (
@@ -1681,7 +1707,7 @@ const [endDate, setEndDate] = useState(null);
                     {tab.label}
                   </TabsTrigger>
                 )
-              )}
+              )} */}
               {/* <TabsTrigger variant="underline" value="case_info" className="">Case Information</TabsTrigger>
               <TabsTrigger variant="underline" value="customer,add,entitement" className="">Customer, Asset & Entitement</TabsTrigger>
               <TabsTrigger variant="underline" value="ci_notes" className="">Notes & Information</TabsTrigger>
@@ -1692,7 +1718,7 @@ const [endDate, setEndDate] = useState(null);
               <TabsTrigger variant="underline" value="ci_salles" className="">Sales Offer</TabsTrigger>
               <TabsTrigger variant="underline" value="ci_knowledge" className="">Knowledge & Attachments</TabsTrigger>
               <SelectBarRelated></SelectBarRelated> */}
-              {open && (
+              {/* {open && (
                 <DropdownMenu>
                   <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
                     ...
@@ -1713,38 +1739,31 @@ const [endDate, setEndDate] = useState(null);
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
+              )} */}
             </TabsList>
           </CardHeader>
 
-          <TabsContent value="case_info" className={"p-2"}>
-            <Card className="flex-row">
-              <CardContent className="grid items-center grid-cols-6 gap-10 p-3 ">
-                <CaseField label="Case ID" icon>
-                  <Input
-                    variant="invisible"
-                    value={caseDetails.CaseID}
-                    readOnly
-                  />
-                </CaseField>
+          <TabsContent value="case_info" className={"p-1 flex flex-col gap-4 "}>
+            <Card className="flex-col">
+              <CardHeader>
+                <CardTitle className={"text-lg "}>Case Information</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid items-center grid-cols-6 gap-10  ">
                 <CaseField label="Case Subject" span={3}>
-                  <Input variant="invisible" value={caseDetails.CaseSubject} />
+                  <Input variant="invisible" value={caseDetails.CaseSubject}/>
                 </CaseField>
-                <CaseField label="Incoming Channel" icon>
+              
+                <CaseField label="Case ID Manual" icon>
                   <Input
                     variant="invisible"
-                    value={caseDetails.IncomingChannel}
+                    placeholder="---"
                   />
                 </CaseField>
+              
                 {/* <CaseField label="Case Subject" span={3}>
                   <Input variant="invisible" value={caseDetails.CaseSubject} />
                 </CaseField> */}
-                <CaseField label="Business Segment">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Email Status">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
                 <CaseField label="Case Status">
                 <SearchCommandBlock
                   value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
@@ -1756,7 +1775,18 @@ const [endDate, setEndDate] = useState(null);
                   options={Object.values(statusEnumToLabel)}
                 />
                 </CaseField>
-                <CaseField label="Case Type">
+                   <CaseField label="Case Priority">
+                  {caseDetails.CasePriority}
+                </CaseField>
+
+                  <CaseField label="Incoming Channel" icon>
+                  <Input
+                    variant="invisible"
+                    value={caseDetails.IncomingChannel}
+                  />
+                </CaseField>
+
+                    <CaseField label="Case Type">
                   <SearchCommandBlock
                     value={caseForm?.CaseType}
                     onChange={onChangeCase("CaseType")}
@@ -1768,22 +1798,32 @@ const [endDate, setEndDate] = useState(null);
                     ]}
                     />
                 </CaseField>
-                <CaseField label="KCI For Case?">
-                  {caseDetails.KCI_Flag ? "Yes" : "No"}
+              
+             
+                 <CaseField label="Customer Severity">
+                  {caseDetails.CustomerSeverity}
                 </CaseField>
-                <CaseField label="Case Priority">
-                  {caseDetails.CasePriority}
+
+                  <CaseField label="KCI For Case?" >
+                    <span className="pl-3">{caseDetails.KCI_Flag ? "Yes" : "No"}</span>
+                
                 </CaseField>
+
+                <CaseField label="Business Segment">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+
+               
                 <CaseField label="HPI Segment">
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
+             
+
                 <CaseField label="Customer Tracking Number" icon>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Customer Severity">
-                  {caseDetails.CustomerSeverity}
-                </CaseField>
-                <CaseField label="Update Customer Tracking Number" span={3}>
+               
+                <CaseField label="Update Customer Tracking Number" span={1}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Created ON" icon span={3}>
@@ -1821,10 +1861,110 @@ const [endDate, setEndDate] = useState(null);
                     ></DatePicker>
                   </span>
                 </CaseField>
+                  <CaseField label="Case ID" icon className="hidden">
+                  <Input
+                    variant="invisible"
+                    value={caseDetails.CaseID}
+                    hidden={true}
+                    readOnly
+                  />
+                </CaseField>
+                   
+                <CaseField label="Email Status" className="hidden">
+                  <Input variant="invisible" placeholder="---" hidden/>
+                </CaseField>
+
+              </CardContent>
+            </Card>
+                    
+            <Card className="flex-col">
+              <CardHeader>
+                <CardTitle className="text-lg ">Customer Information</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid items-center grid-cols-6 gap-10">
+                <CaseField label="Customer Account" icon>
+                  <Input
+                    variant="invisible"
+                    value={
+                      dataFetchCustomerData?.Type == "SiteAccount"
+                        ? dataFetchCustomerData?.SiteAccount?.Company
+                        : dataFetchCustomerData?.MainAccount?.FirstName +
+                          " " +
+                          dataFetchCustomerData?.MainAccount?.LastName
+                    }
+                    readOnly
+                  />
+                </CaseField>
+                <CaseField label="Primary Contact" icon>
+                  <Input
+                    variant="invisible"
+                    value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
+                    readOnly
+                  />
+                </CaseField>
+                <CaseField label="Country" icon>
+                  <Input
+                    variant="invisible"
+                    value={
+                      dataFetchCustomerData?.Type == "SiteAccount"
+                        ? dataFetchCustomerData?.SiteAccount?.Country
+                        : dataFetchCustomerData?.MainAccount?.Country
+                    }
+                    readOnly
+                  />                  
+                </CaseField>
+                <CaseField label=" Primary Email" icon>
+                  <Input
+                    variant="invisible"
+                    value={dataFetchCustomerData.MainAccount?.Email}
+                    placeholder="---"
+                    readOnly
+                  />
+                </CaseField>
+                <CaseField label="Phone" icon>
+                  {" "}
+                  {dataFetchCustomerData?.Type == "SiteAccount"
+                    ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone
+                    : dataFetchCustomerData?.MainAccount?.Phone}
+                </CaseField>
+                <CaseField label="Region" icon>
+                  <Input variant="invisible" placeholder="---" readOnly/>
+                </CaseField>
+                <CaseField label="Submitted By">
+                  <Input variant="invisible" placeholder="---"  />
+                </CaseField>
+                <CaseField label="Is Partner" icon>
+                  <Input variant="invisible" placeholder="---" readOnly/>
+                </CaseField>
+                <CaseField label="Partner & Customer" icon>
+                  <Input variant="invisible" placeholder="---"  readOnly/>
+                </CaseField>
+                <CaseField label="HIPAA" icon>
+                  <Input variant="invisible" placeholder="---" readOnly/>
+                </CaseField>
+                <CaseField label="PIN">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Secondary Contact">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Parent Company">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Customer Time Zone" icon>
+                  <Input variant="invisible" placeholder="---" readOnly/>
+                </CaseField>
+                <CaseField label="Parent Company Non-Latin">
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Account Tier" className={"col-start-5 hidden"}>
+                  <Input variant="invisible" placeholder="---" hidden/>
+                </CaseField>
               </CardContent>
             </Card>
 
-            <Card className="flex-col mt-5">
+            <Card className="flex-col mt-5" hidden>
               <CardHeader>
                 <CardTitle className="text-lg ">Global Trade Check</CardTitle>
                 <hr />
@@ -1832,18 +1972,6 @@ const [endDate, setEndDate] = useState(null);
               
               <CardContent className="grid gap-10  grid-cols-6 p-3 items-center">
                 <CaseField label="Global Trade Status">
-                  {/* <Select value={formGtc.global_trade_status} onValueChange={onChangeGtc("global_trade_status")} defaultValue="--Select--">
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                      {["Pass", "Fail", "Not Done", "Not Needed", "Failed Confirmed"].map((status) => (
-                      <SelectItem key={status} value={status}>{status}</SelectItem>
-                      ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select> */}
                   <SearchCommandBlock
                     value={formGtc.global_trade_status}
                     onChange={onChangeGtc("global_trade_status")}
@@ -1859,28 +1987,6 @@ const [endDate, setEndDate] = useState(null);
                 </CaseField>
 
                 <CaseField label="GT Override Reason">
-                  {/* <Select  value={formGtc.gt_override_reason} onValueChange={onChangeGtc("gt_override_reason")} defaultValue="--select--">
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                      {[
-                    "Military Keyword False Match",
-                    "Embargo False Match",
-                    "RPL False Match",
-                    "Active Contract",
-                    "United States Government",
-                    "Global Trade Authorization",
-                    "RPL Manual Screening Passed",
-                    "Fail Confirmed by GT",
-                    "Other",
-                  ].map((reason) => (
-                    <SelectItem key={reason} value={reason}>{reason}</SelectItem>
-                  ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select> */}
                   <SearchCommandBlock
                     value={formGtc.gt_override_reason}
                     onChange={onChangeGtc("gt_override_reason")}
@@ -1899,18 +2005,6 @@ const [endDate, setEndDate] = useState(null);
                   />
                 </CaseField>
                 <CaseField label="GT Active Listening">
-                  {/* <Select    value={formGtc.gt_active_listening} onValueChange={onChangeGtc("gt_active_listening")} defaultValue="--select--">
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                      {["Pass", "Fail"].map((opt) => (
-                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                  ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select> */}
                   <SearchCommandBlock
                     value={formGtc.gt_active_listening}
                     onChange={onChangeGtc("gt_active_listening")}
@@ -1964,94 +2058,7 @@ const [endDate, setEndDate] = useState(null);
             value="customer,add,entitement"
             className={"p-1 flex flex-col gap-4"}
           >
-            <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">Customer Information</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid items-center grid-cols-6 gap-10">
-                <CaseField label="Customer Account" icon>
-                  <Input
-                    variant="invisible"
-                    value={
-                      dataFetchCustomerData?.Type == "SiteAccount"
-                        ? dataFetchCustomerData?.SiteAccount?.Company
-                        : dataFetchCustomerData?.MainAccount?.FirstName +
-                          " " +
-                          dataFetchCustomerData?.MainAccount?.LastName
-                    }
-                    readOnly
-                  />
-                </CaseField>
-                <CaseField label="Primary Contact" icon>
-                  <Input
-                    variant="invisible"
-                    value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
-                    readOnly
-                  />
-                </CaseField>
-                <CaseField label="Submitted By">
-                  <Input variant="invisible" placeholder="---"  />
-                </CaseField>
-                <CaseField label="Is Partner" icon>
-                  <Input variant="invisible" placeholder="---" readOnly/>
-                </CaseField>
-                <CaseField label=" Primary Email" icon>
-                  <Input
-                    variant="invisible"
-                    value={dataFetchCustomerData.MainAccount?.Email}
-                    placeholder="---"
-                    readOnly
-                  />
-                </CaseField>
-                <CaseField label="Partner & Customer" icon>
-                  <Input variant="invisible" placeholder="---"  readOnly/>
-                </CaseField>
-                <CaseField label="HIPAA" icon>
-                  <Input variant="invisible" placeholder="---" readOnly/>
-                </CaseField>
-                <CaseField label="Phone" icon>
-                  {" "}
-                  {dataFetchCustomerData?.Type == "SiteAccount"
-                    ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone
-                    : dataFetchCustomerData?.MainAccount?.Phone}
-                </CaseField>
-                <CaseField label="Region" icon>
-                  <Input variant="invisible" placeholder="---" readOnly/>
-                </CaseField>
-                <CaseField label="PIN">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Secondary Contact">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Parent Company">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Customer Time Zone" icon>
-                  <Input variant="invisible" placeholder="---" readOnly/>
-                </CaseField>
-                <CaseField label="Country" icon>
-                  <Input
-                    variant="invisible"
-                    value={
-                      dataFetchCustomerData?.Type == "SiteAccount"
-                        ? dataFetchCustomerData?.SiteAccount?.Country
-                        : dataFetchCustomerData?.MainAccount?.Country
-                    }
-                    readOnly
-                  />                  
-                </CaseField>
-                <CaseField label="Parent Company Non-Latin">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Account Tier" className={"col-start-5"}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-              </CardContent>
-            </Card>
-
-            <Card className="flex-col ">
+            <Card className="flex-col">
               <CardHeader>
                 <CardTitle className="text-lg ">Asset Information</CardTitle>
                 <hr />
@@ -2134,9 +2141,9 @@ const [endDate, setEndDate] = useState(null);
       </table>
     </div>
   </div>
-            </Card>
+</Card>
 
-            <Card className="flex-col ">
+            {/* <Card className="flex-col ">
               <CardHeader>
                 <CardTitle className="text-lg ">SLA Information</CardTitle>
                 <hr />
@@ -2167,7 +2174,7 @@ const [endDate, setEndDate] = useState(null);
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
               </CardContent>
-            </Card>
+            </Card> */}
 
             <Card className="flex-col ">
               <CardHeader>
@@ -2465,57 +2472,12 @@ const [endDate, setEndDate] = useState(null);
                     readOnly
                     value={formData?.NotesDisplay}
                   >
-
-                    
                   </textarea>
                 </div>
               </CardContent>
             </Card>
-            
-            <Card className="flex-col mt-6">
-          <CardHeader>
-            <CardTitle className="text-lg">Action Log</CardTitle>
-            <hr />
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[60px]">No</TableHead>
-                  <TableHead>ReferenceId</TableHead>
-                  <TableHead>Change By</TableHead>
-                  <TableHead>Old Status</TableHead>
-                  <TableHead>New Status</TableHead>
-                  <TableHead>Change At</TableHead>
-                  <TableHead>Log Description</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {actionLogs?.length > 0 ? (
-                  actionLogs.map((log, index) => (
-                    <TableRow key={log.id || index}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{log.ReferenceId}</TableCell>
-                      <TableCell>{log.changedByUser?.Name}</TableCell>
-                      <TableCell>{log.dataOld}</TableCell>
-                      <TableCell>{log.dataNew}</TableCell>
-                      <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
-                      <TableCell>{log.logDescription}</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center italic">
-                      No action logs available.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
 
-            <Card className="flex-col ">
+            {/* <Card className="flex-col ">
               <CardHeader>
                 <CardTitle className="text-lg ">
                   Symptom Description / CardTitle
@@ -2582,7 +2544,7 @@ const [endDate, setEndDate] = useState(null);
                     span={3}
                   >
                     {selectedSymptom?.SymptomCode}
-                  </CaseField>
+                  </CaseField> */}
 
                   {/* <div className='flex font-bold'>
                     <span>Top Category</span>
@@ -2596,13 +2558,13 @@ const [endDate, setEndDate] = useState(null);
                     <span>Spesific Symptom</span>
                     <span className=''>...{selectedSymptom?.SymptomCode}</span>
                   </div> */}
-                </div>
+                {/* </div> */}
 
-                <div className="flex flex-1 font-bold">
+                {/* <div className="flex flex-1 font-bold">
                   <Table className="pverflow-auto">
-                    <TableCaption className="caption-top">
+                    <TableCaption className="caption-top"> */}
                       {/* Optional caption content here */}
-                    </TableCaption>
+                    {/* </TableCaption>
 
                     <TableHeader>
                       <TableRow className={""}>
@@ -2634,22 +2596,22 @@ const [endDate, setEndDate] = useState(null);
                   </Table>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
-            <Card className="flex-col mt-5">
+            {/* <Card className="flex-col mt-5">
               <CardHeader>
                 <CardTitle className="text-lg ">Case Resolution</CardTitle>
                 <hr />
               </CardHeader>
 
               <CardContent className="grid grid-cols-7 gap-5 p-3 ">
-                <CaseField label="Case Resolution Code" star>
+                <CaseField label="Case Resolution Code" star> */}
                   {/* <Input
                   variant='invisible'
                   value={csrForm.caseResolutionCode}
                   onChange={(e) => onChangeCsr("caseResolutionCode")(e.target.value)}
                 /> */}
-                  <SearchCommandBlock
+                  {/* <SearchCommandBlock
                     value={csrForm.caseResolutionCode}
                     onChange={onChangeCsr("caseResolutionCode")}
                     placeholder="--Select--"
@@ -2711,8 +2673,53 @@ const [endDate, setEndDate] = useState(null);
                   />
                 </CaseField>
               </CardContent>
-            </Card>
+            </Card> */}
           </TabsContent>
+
+          <TabsContent value="action_log">
+              <Card className="flex-col mt-6">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Action Log</CardTitle>
+                    <hr />
+                  </CardHeader>
+                  <CardContent className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[60px]">No</TableHead>
+                          <TableHead>ReferenceId</TableHead>
+                          <TableHead>Change By</TableHead>
+                          <TableHead>Old Status</TableHead>
+                          <TableHead>New Status</TableHead>
+                          <TableHead>Change At</TableHead>
+                          <TableHead>Log Description</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {actionLogs?.length > 0 ? (
+                          actionLogs.map((log, index) => (
+                            <TableRow key={log.id || index}>
+                              <TableCell>{index + 1}</TableCell>
+                              <TableCell>{log.ReferenceId}</TableCell>
+                              <TableCell>{log.changedByUser?.Name}</TableCell>
+                              <TableCell>{log.dataOld}</TableCell>
+                              <TableCell>{log.dataNew}</TableCell>
+                              <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
+                              <TableCell>{log.logDescription}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center italic">
+                              No action logs available.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+            </Card>
+            </TabsContent>
 
           <TabsContent value="ci_activitas">
             <Card className="mt-7">
