@@ -36,18 +36,18 @@ export function NavProjects({
 
   return (
     <SidebarGroup >
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel className={'font-bold text-gray-100'}>Projects</SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}
           >
             <SidebarMenuButton asChild tooltip={item.title}    isActive={isActive(item.url)} >
               <Link to={item.url} >
-                <item.icon />
-                <span>{item.name}</span>
+                <item.icon className=''/>
+                <span className="font-medium text-lg">{item.name}</span>
               </Link>
             </SidebarMenuButton>
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
                   <MoreHorizontal />
@@ -71,7 +71,7 @@ export function NavProjects({
                   <span>Delete Project</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
           </SidebarMenuItem>
         ))}
       </SidebarMenu>

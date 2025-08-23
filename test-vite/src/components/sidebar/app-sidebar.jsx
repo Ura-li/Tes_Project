@@ -15,9 +15,7 @@ import {
 import { Building, Briefcase, Phone, Folder, Box, Tag, ShieldCheck, ShoppingCart, Wrench, User, HardHat, Heart, Calendar, ClipboardCheck, Hammer, Server, Barcode, CheckCircle } from 'lucide-react';
 import { NavMain } from "@/components/sidebar/nav-main"
 import { NavProjects } from "@/components/sidebar/nav-projects"
-import { NavRecent } from "@/components/sidebar/nav-projects"
-import { NavPinned } from "@/components/sidebar/nav-projects"
-import { NavMywork } from "@/components/sidebar/nav-projects"
+
 import { NavUser } from "@/components/sidebar/nav-user"
 import { TeamSwitcher } from "@/components/sidebar/team-switcher"
 import {
@@ -273,7 +271,7 @@ export function AppSidebar({
         icon: PieChart,
       },
       {
-        name: "My work",
+        name: "My Work",
         title: "My Work",
         url: "/app/search_case",
         icon: Table,
@@ -305,11 +303,11 @@ const navrole = data.projects;
   }
 
   return (  
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" {...props} className="border-0 bg-none ">
       <SidebarHeader className={'bg-cyan-700'}>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className={'bg-cyan-700 text-white'}>
         <NavProjects projects={navrole} />
         
         {/* <Separator className={'border-2'}></Separator> */}

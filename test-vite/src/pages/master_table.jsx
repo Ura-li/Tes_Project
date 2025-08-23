@@ -41,6 +41,7 @@ import { cn } from "../lib/utils";
 import { ExportExcel } from "../components/Export-Excel";
 
 import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectValue } from "../components/ui/select";
+import { useAuth } from "@/context/auth-context";
 // import PDFButton from "./components/PDFButton";
 // import ServiceRequestPDF from "./components/service-request-form";
 export const Contact_table = () => {
@@ -499,20 +500,13 @@ export const Case_table = () => {
   //navigate
   const navigate = useNavigate();
 
-
+  const { user } = useAuth();
 
   return (
     <div className="flex flex-col gap-2 p-4">
-      {/* <button
-        onClick={handleDownload}
-        className="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700"
-      >
-        Download Excel
-      </button> */}
+      {user?.role === 'admin' ? 
       <ExportExcel caseData={caseData}/>
-      <></>
-      {/* <ServiceRequestPDF></ServiceRequestPDF> */}
-      {/* <PDFButton></PDFButton> */}
+      : null}
       <h2 className="mb-4 text-xl font-bold">ID Daily Aging Cases Javag FY</h2>
       <input
         type="text"

@@ -40,23 +40,19 @@ export function SearchBar({
     ]
 
     return (
-        <Sidebar side="right" variant="sidebar"  className={cn("mt-13", className)}>
-            <SidebarHeader className={"bg-cyan-500 text-white"}>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <span className="text-xl p-5 font-bold">Search Bar</span>
-                    </SidebarMenuItem>
-                </SidebarMenu>
+        <Sidebar side="right" variant="sidebar"  className={cn("z-0", className)}>
+            <SidebarHeader className={" bg-cyan-700 h-14"}>
+                
             </SidebarHeader>
 
-            <SidebarContent className={'bg-slate-300'}>
+            <SidebarContent className={'bg-cyan-700'}>
                 <SidebarGroup>
                     {/* <SidebarGroupLabel>Main</SidebarGroupLabel> */}
                     <SidebarGroupContent>
-                        <SidebarMenu className={"flex flex-col gap-5 p-2"}>
+                        <SidebarMenu className={"flex flex-col gap-5 p-5"}>
                             {items.map((item) => (
                                 <SidebarMenuItem key={item.title} className={"flex flex-col gap-3"}>
-                                    <Label className="flex items-center gap-2" htmlFor={item.title}>
+                                    <Label className="flex items-center gap-2 text-amber-50" htmlFor={item.title}>
                                         <item.icon />
                                         <span className="text-lg">{item.title}</span>
                                     </Label>
@@ -67,7 +63,7 @@ export function SearchBar({
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                <SidebarGroup>
+                {/* <SidebarGroup>
                     <SidebarGroupLabel>Shortcuts</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
@@ -81,10 +77,10 @@ export function SearchBar({
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
+                 */}
             </SidebarContent>
-
             <SidebarFooter>
-                <SidebarMenu>
+                {/* <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
                             <a href="#">
@@ -93,7 +89,7 @@ export function SearchBar({
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
-                </SidebarMenu>
+                </SidebarMenu> */}
             </SidebarFooter>
 
             {/* Mini-rail affordance when collapsed */}

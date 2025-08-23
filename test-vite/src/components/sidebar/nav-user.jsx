@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/sidebar"
 
 import Swal from "sweetalert2"
+import { useSheet } from "@/context/sheet-context"
 
 export function NavUser({
   user
@@ -60,7 +61,7 @@ export function NavUser({
     });
   };
   
-
+  const { setSheetOpen } = useSheet();
   return (
     <SidebarMenu>
       <SidebarMenuItem>

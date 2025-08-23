@@ -30,6 +30,7 @@ import ApiCustomer from './api'
 
 import {Outlet} from "react-router"
 import debounce from 'lodash.debounce';
+import { SheetProvider } from './context/sheet-context'
 
 export function Breadcrumbs() {
   const location = useLocation();
@@ -149,12 +150,13 @@ const App = () => {
   
   return (
     <div>
+      <SheetProvider >
       <SidebarProvider style={{
     "--sidebar-width": "13rem",
     "--sidebar-width-mobile": "20rem",
   }}>
-      <AppSidebar />
-      <SidebarInset className="">
+      <AppSidebar  />
+      <SidebarInset >
         <header className="flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-cyan-700">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
@@ -165,7 +167,7 @@ const App = () => {
               <Search></Search>
               <GlobalSearchBar />
             </div>
-            <SheetBar></SheetBar>
+            <SheetBar  ></SheetBar>
         </header>
         {/* <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="grid auto-rows-min gap-4 md:grid-cols-3">
@@ -177,7 +179,8 @@ const App = () => {
         </div> */}
         <Outlet/>
       </SidebarInset>
-    </SidebarProvider>  
+    </SidebarProvider> 
+    </SheetProvider> 
     </div>
   )
 }
