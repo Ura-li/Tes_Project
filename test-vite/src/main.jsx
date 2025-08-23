@@ -13,6 +13,8 @@ import { AuthProvider } from "./context/auth-context";
 const Landing = lazy(() => import('./pages/landing'));
 const Lorem = lazy(() => import('./pages/Lorem'));
 const Search_case = lazy(() => import('./pages/Search_case'));
+const SearchCase_Dev = lazy(() => import('./pages/SearchCase_V2'));
+const SearchCaseProto2 = lazy(() => import('./pages/SearchCase_V3'));
 const Case = lazy(() => import('./pages/Case').then(m => ({ default: m.Case })));
 const Work = lazy(() => import('./pages/work').then(m => ({ default: m.Work })));
 const MaterialOrder = lazy(() => import('./pages/material_order').then(m => ({ default: m.MaterialOrder })));
@@ -68,6 +70,8 @@ const {
   CrsTable,
   FailureTable,
 } = masterTables;
+import { getUserFromToken } from "./lib/utils/auth";
+
 
 
 const Bookings = lazy(() => import('./bookings').then(m => ({ default: m.Bookings })));
@@ -77,6 +81,7 @@ const Home = lazy(() => import('./Home').then(m => ({ default: m.Home })));
 const GateKeepingRouting = lazy(() =>
   import('./components/GateKeepingRouting').then(m => ({ default: m.GateKeepingRouting }))
 );const MasterGateKeeping = lazy(() => import('./components/MasterGateKeeping').then(m => ({ default: m.MasterGateKeeping })));
+const UserProfile = lazy(() => import('./components/user-profile'));
 
 const Forbidden = lazy(() => import('./pages/forbidden'));
 const FrontDesk_Page = lazy(() => import('./layout/FrontDesk_Page'));
@@ -93,9 +98,12 @@ createRoot(document.getElementById("root")).render(
           {/* <Route path='/' element={<App />}> */}
           <Route path="/app" element={<GateKeepingRouting />}>
             <Route index element={<Landing />} />
+            <Route path="/app/profiles" element={<UserProfile user={getUserFromToken()} />} />
             <Route path="/app/frontdesk" element={<FrontDesk_Page />} />
             <Route path="/app/forbidden" element={<Forbidden />} />
             <Route path="/app/search_case" element={<Search_case />} />
+            <Route path="/app/search_case_dev" element={<SearchCase_Dev />} />
+            <Route path="/app/searchcaseproto2" element={<SearchCaseProto2 />} />
             <Route path="/app/case/:caseId" element={<Case />} />
             <Route path="/app/work/:woid" element={<Work />} />
             <Route path="/app/material-order/:moid" element={<MaterialOrder />}/>

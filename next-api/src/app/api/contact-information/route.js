@@ -150,7 +150,7 @@ export async function POST(request) {
     if (availableContactEmailPhoneDuplicate !== 0) {
         return NextResponse.json({
             success: false,
-            message: "A company with this email or phone already exists."
+            message: "A Contact with this email or phone already exists."
         }, { status: 409 });
     }
 
