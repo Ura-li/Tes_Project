@@ -975,14 +975,14 @@ const Search_case = () => {
                     onChange={handleInputChange}
                     />
                   </div>
-                  {/* <div className="space-y-0.5">
+                  <div className="space-y-0.5" hidden>
                   <Label htmlFor="LicenseKey">Lisense key</Label>
                   <Input id="LicenseKey" className="border-b-black p-1"  />
                 </div>
-                <div className="space-y-0.5">
+                <div className="space-y-0.5" hidden>
                   <Label htmlFor="PIN">Pin</Label>
                   <Input id="PIN" className="border-b-black p-1" />
-                </div> */}
+                </div>
                 </CardContent>
                 <CardFooter className="flex justify-end">
                   <Button
