@@ -65,6 +65,9 @@ useEffect(() => {
         <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2">
           <Archive color="blue" hidden></Archive>
           <span className="pl-1">{renderLabel(selectedOption)}</span>
+          {/* <div className="flex items-center justify-start px-3 py-2 border rounded-md gap-2">
+            <Archive color="blue"></Archive>
+            <span className="text-md text-blue-500 font-black">{renderLabel(selectedOption)}</span> */}
           <button
             onClick={() => onChange(null)}
             className="ml-2  hover:text-red-600"
