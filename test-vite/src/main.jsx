@@ -81,7 +81,7 @@ const Home = lazy(() => import('./Home').then(m => ({ default: m.Home })));
 const GateKeepingRouting = lazy(() =>
   import('./components/GateKeepingRouting').then(m => ({ default: m.GateKeepingRouting }))
 );const MasterGateKeeping = lazy(() => import('./components/MasterGateKeeping').then(m => ({ default: m.MasterGateKeeping })));
-const UserProfile = lazy(() => import('./components/user-profile'));
+const UserProfile = lazy(() => import('./components/user-profile').then(m => ({ default: m.UserProfile })));
 
 const Forbidden = lazy(() => import('./pages/forbidden'));
 const FrontDesk_Page = lazy(() => import('./layout/FrontDesk_Page'));

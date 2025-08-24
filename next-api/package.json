@@ -20,6 +20,7 @@
     "nodemailer": "^7.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "socket.io": "^4.8.1",
     "xlsx": "npm:@e965/xlsx@0.20.3"
   },
   "devDependencies": {

@@ -28,72 +28,79 @@ import { cn } from "@/lib/utils"
 import { Label } from "../ui/label"
 import { Input } from "../ui/input"
 
-export function SearchBar({
-    className
-}) {
+export function SearchBar({ filters, setFilters, className }) {
     const items = [
-        { title: "Serial Number", icon: Home, url: "#" },
-        { title: "Company", icon: Inbox, url: "#" },
-        { title: "Email", icon: Calendar, url: "#" },
-        { title: "Phone", icon: Search, url: "#" },
-        { title: "Id", icon: Settings, url: "#" },
-    ]
+        { title: "SerialNumber", label: "Serial Number" },
+        { title: "Company", label: "Company" },
+        { title: "Email", label: "Email" },
+        { title: "Phone", label: "Phone" },
+        { title: "Id", label: "Case ID" },
+    ];
+
+    const handleChange = (field, value) => {
+        setFilters(prev => ({ ...prev, [field]: value }));
+    };
 
     return (
-        <Sidebar side="right" variant="sidebar"  className={cn("z-0", className)}>
-            <SidebarHeader className={" bg-cyan-700 h-14"}>
-                
-            </SidebarHeader>
+        <Sidebar side="right" variant="sidebar" className={cn("z-0", className)}>
+            {/* <SidebarHeader className="bg-cyan-700 h-14" /> */}
 
-            <SidebarContent className={'bg-cyan-700'}>
+            <SidebarContent className="mt-10 bg-gradient-to-br from-hp-200 to-hp-400">
                 <SidebarGroup>
-                    {/* <SidebarGroupLabel>Main</SidebarGroupLabel> */}
                     <SidebarGroupContent>
-                        <SidebarMenu className={"flex flex-col gap-5 p-5"}>
+                        <SidebarMenu className="flex flex-col gap-5 p-3">
                             {items.map((item) => (
-                                <SidebarMenuItem key={item.title} className={"flex flex-col gap-3"}>
+                                <SidebarMenuItem key={item.title} className="flex flex-col gap-3">
                                     <Label className="flex items-center gap-2 text-amber-50" htmlFor={item.title}>
-                                        <item.icon />
-                                        <span className="text-lg">{item.title}</span>
+                                        <span className="text-lg">{item.label}</span>
                                     </Label>
-                                    <Input variant={'outline'} name={item.title} id={item.title} placeholder={`Search ${item.title}`} className="ml-2" />
+                                    <Input
+                                        id={item.title}
+                                        value={filters[item.title] || ""}
+                                        onChange={(e) => handleChange(item.title, e.target.value)}
+                                        placeholder={`Search ${item.label}`}
+                                        className="ml-2"
+                                    />
                                 </SidebarMenuItem>
                             ))}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
 
-                {/* <SidebarGroup>
-                    <SidebarGroupLabel>Shortcuts</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton>
-                                    <User2 />
-                                    <span>Profile</span>
-                                    <ChevronRight className="ml-auto" />
-                                </SidebarMenuButton>
+                            {/* Dropdown filters */}
+                            <SidebarMenuItem className="flex flex-col gap-3">
+                                <Label className="text-amber-50">Case Status</Label>
+                                <select
+                                    value={filters.Status}
+                                    onChange={(e) => handleChange("Status", e.target.value)}
+                                    className="p-2 rounded-md"
+                                >
+                                    <option value="">All</option>
+                                    <option value="Open">Open</option>
+                                    <option value="InActive">InActive</option>
+                                    <option value="On Hold">On Hold</option>
+                                    <option value="Escalated">Escalated</option>
+                                </select>
+                            </SidebarMenuItem>
+
+                            <SidebarMenuItem className="flex flex-col gap-3">
+                                <Label className="text-amber-50">Case Type</Label>
+                                <select
+                                    value={filters.Type}
+                                    onChange={(e) => handleChange("Type", e.target.value)}
+                                    className="p-2 rounded-md"
+                                >
+                                    <option value="">All</option>
+                                    <option value="Hardware">Hardware</option>
+                                    <option value="Software">Software</option>
+                                    <option value="Warranty">Warranty</option>
+                                </select>
                             </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
-                 */}
             </SidebarContent>
-            <SidebarFooter>
-                {/* <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                            <a href="#">
-                                <User2 />
-                                <span>Account</span>
-                            </a>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu> */}
-            </SidebarFooter>
 
-            {/* Mini-rail affordance when collapsed */}
+            {/* <SidebarFooter /> */}
             <SidebarRail />
         </Sidebar>
-    )
+    );
 }
+

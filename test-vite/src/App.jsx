@@ -38,7 +38,7 @@ export function Breadcrumbs() {
 
   return (
     <nav className="text-sm">
-      <Link to="/" className="text-gray-400">Home</Link>
+      <Link to="/" className="text-gray-700 font-medium">Home</Link>
       {pathnames.map((segment, index) => {
         const to = '/' + pathnames.slice(0, index + 1).join('/');
         return (
@@ -107,7 +107,7 @@ export function GlobalSearchBar() {
           placeholder="Search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="border border-b-2 border-b-black bg-sky-100"
+          className="border bg-white/50"
           onFocus={() => {
             if (results) setShowResults(true);
           }}
@@ -157,7 +157,7 @@ const App = () => {
   }}>
       <AppSidebar  />
       <SidebarInset >
-        <header className="flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-cyan-700">
+        <header className="flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
@@ -169,15 +169,8 @@ const App = () => {
             </div>
             <SheetBar  ></SheetBar>
         </header>
-        {/* <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="aspect-video rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
-          </div>
-          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-        </div> */}
-        <Outlet/>
+
+        <Outlet />
       </SidebarInset>
     </SidebarProvider> 
     </SheetProvider> 

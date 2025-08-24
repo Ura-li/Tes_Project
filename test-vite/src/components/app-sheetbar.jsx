@@ -10,6 +10,7 @@ import {
 import { BadgeAlert, Bell } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { useSheet } from '@/context/sheet-context'
+import { NotificationCard } from '@/layout/FrontDesk_Page'
 // import { AppAccordion } from './app-accordion'
  
 export function SheetBar({
@@ -37,7 +38,7 @@ export function SheetBar({
         </SheetHeader>
         <div className='overflow-auto flex gap-2 flex-col p-4'>
         {/* <AppAccordion></AppAccordion> */}
-          {notif.map((c) => (
+          {/* {notif.map((c) => (
             <Card key={c.id} className="shadow-sm border-2 border-gray-400">
               <CardHeader>
                 <CardTitle className={'flex justify-between'}><p>{c.title}</p> 02/12/2020</CardTitle>
@@ -48,34 +49,10 @@ export function SheetBar({
                 <p className="text-sm leading-relaxed text-muted-foreground">{c.content}</p> 
                 </CardContent>
             </Card>
-          ))}
+          ))} */}
+          <NotificationCard />
         </div>
-        {/* <div>
-          <Button variant="secondary" className="p-10 ml-10 w-20 bg-white border-2 drop-shadow-md"><Building2 className='size-10'></Building2></Button>
-          <Button variant="secondary" className="p-10 ml-10 w-20 bg-white border-2 drop-shadow-md"><Contact className='size-10'></Contact></Button>
-          <Button variant="secondary" className="mt-10 p-10 ml-10 w-20 bg-white border-2 drop-shadow-md"><Boxes className='size-10'></Boxes></Button>
-          <Button variant="secondary" className="p-10 ml-10 w-20 bg-white border-2 drop-shadow-md"><PcCase className='size-10'></PcCase></Button>
-        </div> */}
-        {/* <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input id="name" value="Pedro Duarte" className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
-              Username
-            </Label>
-            <Input id="username" value="@peduarte" className="col-span-3" />
-          </div>
-        </div> */}
-        {/* <SheetFooter>
-          <SheetClose asChild>
-            <Button type="submit">Save changes</Button>
-          </SheetClose>
-        </SheetFooter> */}
-      </SheetContent>
+        </SheetContent>
     </Sheet>
   )
 }
