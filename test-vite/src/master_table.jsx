@@ -2884,12 +2884,18 @@ export const Wo_table = () => {
 export const User_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Jumlah data per halaman
+  const itemsPerPage = 5; 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [UserData, setUserData] = useState([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // sort state
+  const [sortConfig, setSortConfig] = useState({
+    key: "IDUser",
+    direction: "asc",
+  });
 
   const fetchUserDataTable = async () => {
     setLoading(true);
@@ -2935,29 +2941,63 @@ export const User_table = () => {
     }
   };
 
-  // 🔹 Load data when component mounts
   useEffect(() => {
     fetchUserDataTable();
   }, []);
 
-  // Filter data berdasarkan pencarian
-  const filteredUserTable = UserData.filter((item) =>
+  // handle sort
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // sorting logic
+  const sortedData = React.useMemo(() => {
+    let sortableItems = [...UserData];
+    if (sortConfig.key !== null) {
+      sortableItems.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [UserData, sortConfig]);
+
+  // filter
+  const filteredUserTable = sortedData.filter((item) =>
     Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  // Hitung total halaman
+  // pagination
   const totalPages = Math.ceil(filteredUserTable.length / itemsPerPage);
 
-  // Ambil data sesuai halaman saat ini
   const currentData = filteredUserTable.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  //navigate
   const navigate = useNavigate();
+
+  // helper render icon
+  const renderSortIcon = (key) => {
+    if (sortConfig.key !== key) {
+      return <ArrowUpDown className="inline w-4 h-4 ml-1" />;
+    }
+    if (sortConfig.direction === "asc") {
+      return <ArrowUp className="inline w-4 h-4 ml-1" />;
+    }
+    return <ArrowDown className="inline w-4 h-4 ml-1" />;
+  };
 
   return (
     <div className="p-4">
@@ -2978,14 +3018,54 @@ export const User_table = () => {
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border">ID User</th>
-              <th className="p-2 border">Email</th>
-              <th className="p-2 border">Username</th>
-              <th className="p-2 border">Name</th>
-              <th className="p-2 border">Role</th>
-              <th className="p-2 border">Profil Photo</th>
-              <th className="p-2 border">CreatedAt</th>
-              <th className="p-2 border">UpdateAt</th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("IDUser")}
+              >
+                ID User {renderSortIcon("IDUser")}
+              </th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("Email")}
+              >
+                Email {renderSortIcon("Email")}
+              </th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("Username")}
+              >
+                Username {renderSortIcon("Username")}
+              </th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("Name")}
+              >
+                Name {renderSortIcon("Name")}
+              </th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("Role")}
+              >
+                Role {renderSortIcon("Role")}
+              </th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("ProfilPhoto")}
+              >
+                Profil Photo {renderSortIcon("ProfilPhoto")}
+              </th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("CreatedAt")}
+              >
+                CreatedAt {renderSortIcon("CreatedAt")}
+              </th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("UpdatedAt")}
+              >
+                UpdatedAt {renderSortIcon("UpdatedAt")}
+              </th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
@@ -3055,12 +3135,17 @@ export const User_table = () => {
 export const Part_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Jumlah data per halaman
+  const itemsPerPage = 5;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [PartData, setPartData] = useState([]);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 🔹 state sorting
+  const [sortConfig, setSortConfig] = useState({
+    key: "PartNumber",
+    direction: "asc",
+  });
 
   const fetchPartDataTable = async () => {
     setLoading(true);
@@ -3071,9 +3156,7 @@ export const Part_table = () => {
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
       allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
+      didOpen: () => Swal.showLoading(),
     });
 
     try {
@@ -3106,29 +3189,64 @@ export const Part_table = () => {
     }
   };
 
-  // 🔹 Load data when component mounts
   useEffect(() => {
     fetchPartDataTable();
   }, []);
 
-  // Filter data berdasarkan pencarian
+  // 🔹 Filter data berdasarkan pencarian
   const filteredPartTable = PartData.filter((item) =>
     Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  // Hitung total halaman
-  const totalPages = Math.ceil(filteredPartTable.length / itemsPerPage);
+  // 🔹 Sorting
+  const sortedData = useMemo(() => {
+    const sorted = [...filteredPartTable];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
 
-  // Ambil data sesuai halaman saat ini
-  const currentData = filteredPartTable.slice(
+        if (aVal === null || aVal === undefined) aVal = "";
+        if (bVal === null || bVal === undefined) bVal = "";
+
+        if (typeof aVal === "string") aVal = aVal.toLowerCase();
+        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+
+        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return sorted;
+  }, [filteredPartTable, sortConfig]);
+
+  // 🔹 Pagination
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
+  const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  //navigate
-  const navigate = useNavigate();
+  // 🔹 Sorting handler
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === "asc" ? "desc" : "asc",
+        };
+      }
+      return { key, direction: "asc" };
+    });
+  };
+
+  // 🔹 Icon indikator sort
+  const getSortSymbol = (key) => {
+    if (sortConfig.key !== key) return "⇅";
+    return sortConfig.direction === "asc" ? "↑" : "↓";
+  };
 
   return (
     <div className="p-4">
@@ -3140,7 +3258,7 @@ export const Part_table = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      <PartAdd/>
+      <PartAdd />
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
@@ -3148,97 +3266,130 @@ export const Part_table = () => {
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border">PartNumber</th>
-              <th className="p-2 border"> Keyword </th>
-              <th className="p-2 border">PartDescription </th>
-              <th className="p-2 border">Orderability</th>
-              <th className="p-2 border">RestrictionReason</th>
-              <th className="p-2 border">CSR_Flag</th>
-              <th className="p-2 border"> ROHS Flag </th>
-              <th className="p-2 border">Returnable Flag</th>
-              <th className="p-2 border">HardRoll Flag</th>
-              <th className="p-2 border">DangerousGoods Flag</th>
-              <th className="p-2 border">LithiumBattery Flag</th>
-              <th className="p-2 border">Oversize Flag </th>
-              <th className="p-2 border">Heavy Flag </th>
-              <th className="p-2 border">Price </th>
-              <th className="p-2 border">FreightPrice </th>
-              <th className="p-2 border">Tax</th>
-              <th className="p-2 border">Total</th>
-              <th className="p-2 border">Shipping_Fee</th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("PartNumber")}>
+                PartNumber {getSortSymbol("PartNumber")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Keyword")}>
+                Keyword {getSortSymbol("Keyword")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("PartDescription")}>
+                PartDescription {getSortSymbol("PartDescription")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Orderability")}>
+                Orderability {getSortSymbol("Orderability")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("RestrictionReason")}>
+                RestrictionReason {getSortSymbol("RestrictionReason")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CSR_Flag")}>
+                CSR_Flag {getSortSymbol("CSR_Flag")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ROHS_Flag")}>
+                ROHS Flag {getSortSymbol("ROHS_Flag")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Returnable_Flag")}>
+                Returnable Flag {getSortSymbol("Returnable_Flag")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("HardRoll_Flag")}>
+                HardRoll Flag {getSortSymbol("HardRoll_Flag")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("DangerousGoods_Flag")}>
+                DangerousGoods Flag {getSortSymbol("DangerousGoods_Flag")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("LithiumBattery_Flag")}>
+                LithiumBattery Flag {getSortSymbol("LithiumBattery_Flag")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Oversize_Flag")}>
+                Oversize Flag {getSortSymbol("Oversize_Flag")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Heavy_Flag")}>
+                Heavy Flag {getSortSymbol("Heavy_Flag")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Price")}>
+                Price {getSortSymbol("Price")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("FreightPrice")}>
+                FreightPrice {getSortSymbol("FreightPrice")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Tax")}>
+                Tax {getSortSymbol("Tax")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Total")}>
+                Total {getSortSymbol("Total")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Shipping_Fee")}>
+                Shipping_Fee {getSortSymbol("Shipping_Fee")}
+              </th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((PartItem) => (
-              <tr
-                key={PartItem.PartNumber}
-                className="text-center hover:bg-gray-100"
-              >
+              <tr key={PartItem.PartNumber} className="text-center hover:bg-gray-100">
                 <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
                   {PartItem.PartNumber}
                 </td>
                 <td className="p-2 border">{PartItem.Keyword}</td>
                 <td className="p-2 border">{PartItem.PartDescription}</td>
                 <td className="p-2 border">
-  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Orderability ? "bg-green-500" : "bg-red-500"}`}>
-    {PartItem.Orderability ? "Yes" : "No"}
-  </span>
-</td>
+                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Orderability ? "bg-green-500" : "bg-red-500"}`}>
+                    {PartItem.Orderability ? "Yes" : "No"}
+                  </span>
+                </td>
                 <td className="p-2 border">{PartItem.RestrictionReason}</td>
-                 <td className="p-2 border">
-  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.CSR_Flag ? "bg-green-500" : "bg-red-500"}`}>
-    {PartItem.CSR_Flag ? "Yes" : "No"}
-  </span>
-</td>
                 <td className="p-2 border">
-  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.ROHS_Flag ? "bg-green-500" : "bg-red-500"}`}>
-    {PartItem.ROHS_Flag ? "Yes" : "No"}
-  </span>
-</td>
-<td className="p-2 border">
-  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Returnable_Flag ? "bg-green-500" : "bg-red-500"}`}>
-    {PartItem.Returnable_Flag ? "Yes" : "No"}
-  </span>
-</td>
-<td className="p-2 border">
-  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.HardRoll_Flag ? "bg-green-500" : "bg-red-500"}`}>
-    {PartItem.HardRoll_Flag ? "Yes" : "No"}
-  </span>
-</td>
-<td className="p-2 border">
-  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.DangerousGoods_Flag ? "bg-green-500" : "bg-red-500"}`}>
-    {PartItem.DangerousGoods_Flag ? "Yes" : "No"}
-  </span>
-</td>
-<td className="p-2 border">
-  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.LithiumBattery_Flag ? "bg-green-500" : "bg-red-500"}`}>
-    {PartItem.LithiumBattery_Flag ? "Yes" : "No"}
-  </span>
-</td>
-<td className="p-2 border">
-  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Oversize_Flag ? "bg-green-500" : "bg-red-500"}`}>
-    {PartItem.Oversize_Flag ? "Yes" : "No"}
-  </span>
-</td>
-<td className="p-2 border">
-  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Heavy_Flag ? "bg-green-500" : "bg-red-500"}`}>
-    {PartItem.Heavy_Flag ? "Yes" : "No"}
-  </span>
-</td>
- <td className="p-2 border">{PartItem.Price}</td>
+                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.CSR_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                    {PartItem.CSR_Flag ? "Yes" : "No"}
+                  </span>
+                </td>
+                <td className="p-2 border">
+                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.ROHS_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                    {PartItem.ROHS_Flag ? "Yes" : "No"}
+                  </span>
+                </td>
+                <td className="p-2 border">
+                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Returnable_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                    {PartItem.Returnable_Flag ? "Yes" : "No"}
+                  </span>
+                </td>
+                <td className="p-2 border">
+                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.HardRoll_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                    {PartItem.HardRoll_Flag ? "Yes" : "No"}
+                  </span>
+                </td>
+                <td className="p-2 border">
+                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.DangerousGoods_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                    {PartItem.DangerousGoods_Flag ? "Yes" : "No"}
+                  </span>
+                </td>
+                <td className="p-2 border">
+                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.LithiumBattery_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                    {PartItem.LithiumBattery_Flag ? "Yes" : "No"}
+                  </span>
+                </td>
+                <td className="p-2 border">
+                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Oversize_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                    {PartItem.Oversize_Flag ? "Yes" : "No"}
+                  </span>
+                </td>
+                <td className="p-2 border">
+                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Heavy_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                    {PartItem.Heavy_Flag ? "Yes" : "No"}
+                  </span>
+                </td>
+                <td className="p-2 border">{PartItem.Price}</td>
                 <td className="p-2 border">{PartItem.FreightPrice}</td>
                 <td className="p-2 border">{PartItem.Tax}</td>
                 <td className="p-2 border">{PartItem.Total}</td>
                 <td className="p-2 border">{PartItem.Shipping_Fee}</td>
                 <td className="flex p-2 space-x-2 border">
-                <PartEdit PartNumber={PartItem.PartNumber} onUpdate={fetchPartDataTable}></PartEdit>
-                <PartDelete
-                  PartNumber={PartItem.PartNumber}
-                  isModalOpen={isModalOpen}
-                  setIsModalOpen={setIsModalOpen}
-                  onUpdate={fetchPartDataTable}
-                />
+                  <PartEdit PartNumber={PartItem.PartNumber} onUpdate={fetchPartDataTable}></PartEdit>
+                  <PartDelete
+                    PartNumber={PartItem.PartNumber}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchPartDataTable}
+                  />
                 </td>
               </tr>
             ))}
@@ -3263,9 +3414,7 @@ export const Part_table = () => {
         </span>
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
         >
           Next
@@ -3274,6 +3423,7 @@ export const Part_table = () => {
     </div>
   );
 };
+
 
 export const Resource_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -3284,6 +3434,12 @@ export const Resource_table = () => {
   const [ResourceData, setResourceData] = useState([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 🔹 sort config
+  const [sortConfig, setSortConfig] = useState({
+    key: "ResourceId",
+    direction: "asc",
+  });
 
   const fetchResourceDataTable = async () => {
     setLoading(true);
@@ -3329,26 +3485,66 @@ export const Resource_table = () => {
     }
   };
 
-  // 🔹 Load data when component mounts
   useEffect(() => {
     fetchResourceDataTable();
   }, []);
 
-  // Filter data berdasarkan pencarian
+  // 🔹 Filter data berdasarkan pencarian
   const filteredResourceTable = ResourceData.filter((item) =>
     Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  // Hitung total halaman
-  const totalPages = Math.ceil(filteredResourceTable.length / itemsPerPage);
+  // 🔹 Sorting
+  const sortedData = useMemo(() => {
+    const sorted = [...filteredResourceTable];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
 
-  // Ambil data sesuai halaman saat ini
-  const currentData = filteredResourceTable.slice(
+        if (aVal === null || aVal === undefined) aVal = "";
+        if (bVal === null || bVal === undefined) bVal = "";
+
+        if (typeof aVal === "string") aVal = aVal.toLowerCase();
+        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+
+        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return sorted;
+  }, [filteredResourceTable, sortConfig]);
+
+  // 🔹 Hitung total halaman
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
+
+  // 🔹 Ambil data sesuai halaman saat ini
+  const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // 🔹 Sorting handler
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === "asc" ? "desc" : "asc",
+        };
+      }
+      return { key, direction: "asc" };
+    });
+  };
+
+  // 🔹 Symbol sort
+  const getSortSymbol = (key) => {
+    if (sortConfig.key !== key) return "⇅";
+    return sortConfig.direction === "asc" ? "↑" : "↓";
+  };
 
   //navigate
   const navigate = useNavigate();
@@ -3364,7 +3560,7 @@ export const Resource_table = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      <ResourceAdd/>  
+      <ResourceAdd />  
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
@@ -3372,8 +3568,18 @@ export const Resource_table = () => {
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border">Resource ID</th>
-              <th className="p-2 border">Name</th>
+              <th 
+                className="p-2 border cursor-pointer" 
+                onClick={() => handleSort("ResourceId")}
+              >
+                Resource ID {getSortSymbol("ResourceId")}
+              </th>
+              <th 
+                className="p-2 border cursor-pointer" 
+                onClick={() => handleSort("Name")}
+              >
+                Name {getSortSymbol("Name")}
+              </th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
@@ -3388,19 +3594,22 @@ export const Resource_table = () => {
                 </td>
                 <td className="p-2 border">{ResourceItem.Name}</td>
                 <td className="flex p-2 space-x-2 border">
-                <ResourceEdit ResourceId={ResourceItem.ResourceId} onUpdate={fetchResourceDataTable}></ResourceEdit>
-                <ResourceDelete
-                  ResourceId={ResourceItem.ResourceId}
-                  isModalOpen={isModalOpen}
-                  setIsModalOpen={setIsModalOpen}
-                  onUpdate={fetchResourceDataTable}                
-                />
+                  <ResourceEdit 
+                    ResourceId={ResourceItem.ResourceId} 
+                    onUpdate={fetchResourceDataTable} 
+                  />
+                  <ResourceDelete
+                    ResourceId={ResourceItem.ResourceId}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchResourceDataTable}                
+                  />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {filteredResourceTable.length === 0 && (
+        {sortedData.length === 0 && (
           <p className="mt-4 text-center text-gray-500">No data found.</p>
         )}
       </div>
@@ -4514,22 +4723,26 @@ export const BookingDetailsTable = () => {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedChangedBy, setSelectedChangedBy] = useState("");
 
+  // sorting config
+  const [sortConfig, setSortConfig] = useState({
+    key: "BookingDetailId",
+    direction: "asc",
+  });
+
   const fetchBookingDetails = async () => {
     Swal.fire({
       title: "Memuat Data Booking Details...",
       text: "Mohon tunggu sebentar...",
       allowOutsideClick: false,
       allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
+      didOpen: () => Swal.showLoading(),
     });
     setLoading(true);
     setError(null);
     try {
       const response = await ApiCustomer.get("/api/bookingDetails");
       if (response.data.success) {
-        console.log("Data Response Booking", response.data.data);
+        console.log("Data Response BookingDetails", response.data.data);
         setBookingDetailsData(response.data.data);
       } else {
         setError("Failed to fetch booking details data");
@@ -4549,36 +4762,56 @@ export const BookingDetailsTable = () => {
 
   // derive unique options
   const uniqueStatus = useMemo(() => {
-    const all = bookingDetailsData.map(b => b.Status).filter(Boolean);
+    const all = bookingDetailsData.map((b) => b.Status).filter(Boolean);
     return ["", ...Array.from(new Set(all)).sort()];
   }, [bookingDetailsData]);
 
   const uniqueChangedBy = useMemo(() => {
-    const all = bookingDetailsData.map(b => b.ChangedBy).filter(Boolean);
-    console.log("Data Response Changed By", all);
+    const all = bookingDetailsData.map((b) => b.ChangedBy).filter(Boolean);
     return ["", ...Array.from(new Set(all)).sort()];
   }, [bookingDetailsData]);
 
   // filter + search
   const filteredData = bookingDetailsData.filter((item) => {
     const status = item.Status ?? "";
-    const ChangedBy = item.ChangedBy ?? "";
-    
+    const changedBy = item.ChangedBy ?? "";
+
     const fStatus = !selectedStatus || status === selectedStatus;
-    const fChangedBy = !selectedChangedBy || ChangedBy === parseInt(selectedChangedBy);
-    console.log(item.ChangedBy, selectedChangedBy, fChangedBy)
-//  console.log( "Created By", ChangedBy);
+    const fChangedBy =
+      !selectedChangedBy || changedBy.toString() === selectedChangedBy.toString();
+
     if (!(fStatus && fChangedBy)) return false;
 
     // search
     const haystack = Object.values(item).join(" ").toLowerCase();
-    // console.log("haystack", item);
     return haystack.includes(searchTerm.toLowerCase());
-    
   });
 
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
-  const currentData = filteredData.slice(
+  // sorting
+  const sortedData = useMemo(() => {
+    const sorted = [...filteredData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
+
+        // default value handling
+        if (aVal === null || aVal === undefined) aVal = "";
+        if (bVal === null || bVal === undefined) bVal = "";
+
+        if (typeof aVal === "string") aVal = aVal.toLowerCase();
+        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+
+        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return sorted;
+  }, [filteredData, sortConfig]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
+  const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -4588,6 +4821,24 @@ export const BookingDetailsTable = () => {
     setSelectedChangedBy("");
     setSearchTerm("");
     setCurrentPage(1);
+  };
+
+  // sort handler
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === "asc" ? "desc" : "asc",
+        };
+      }
+      return { key, direction: "asc" };
+    });
+  };
+
+  const getSortSymbol = (key) => {
+    if (sortConfig.key !== key) return "⇅";
+    return sortConfig.direction === "asc" ? "↑" : "↓";
   };
 
   return (
@@ -4618,7 +4869,9 @@ export const BookingDetailsTable = () => {
         >
           <option value="">All Status</option>
           {uniqueStatus.map((v) => (
-            <option key={v} value={v}>{v || "—"}</option>
+            <option key={v} value={v}>
+              {v || "—"}
+            </option>
           ))}
         </select>
 
@@ -4632,13 +4885,16 @@ export const BookingDetailsTable = () => {
         >
           <option value="">All Changed By</option>
           {uniqueChangedBy.map((v) => (
-            <option key={v} value={v}>{v || "—"}</option>
+            <option key={v} value={v}>
+              {v || "—"}
+            </option>
           ))}
         </select>
 
         <button
           onClick={resetFilters}
-          className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">
+          className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+        >
           Reset Filter
         </button>
       </div>
@@ -4650,17 +4906,35 @@ export const BookingDetailsTable = () => {
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
-              <th className="border p-2">Booking Detail ID</th>
-              <th className="border p-2">Booking ID</th>
-              <th className="border p-2">Resource ID</th>
-              <th className="border p-2">Resource Account ID</th>
-              <th className="border p-2">Subk Technician ID</th>
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Status</th>
+              <th className="border p-2 cursor-pointer" onClick={() => handleSort("BookingDetailId")}>
+                Booking Detail ID {getSortSymbol("BookingDetailId")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => handleSort("BookingId")}>
+                Booking ID {getSortSymbol("BookingId")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => handleSort("ResourceId")}>
+                Resource ID {getSortSymbol("ResourceId")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => handleSort("ResorceAccountId")}>
+                Resource Account ID {getSortSymbol("ResorceAccountId")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => handleSort("SubkTechnicianId")}>
+                Subk Technician ID {getSortSymbol("SubkTechnicianId")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => handleSort("Name")}>
+                Name {getSortSymbol("Name")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => handleSort("Status")}>
+                Status {getSortSymbol("Status")}
+              </th>
               <th className="border p-2">Customer Time</th>
               <th className="border p-2">User Time</th>
-              <th className="border p-2">Changed By</th>
-              <th className="border p-2">Changed At</th>
+              <th className="border p-2 cursor-pointer" onClick={() => handleSort("ChangedBy")}>
+                Changed By {getSortSymbol("ChangedBy")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => handleSort("ChangedAt")}>
+                Changed At {getSortSymbol("ChangedAt")}
+              </th>
               <th className="border p-2">Actions</th>
             </tr>
           </thead>
@@ -4668,7 +4942,8 @@ export const BookingDetailsTable = () => {
             {currentData.length > 0 ? (
               currentData.map((item) => (
                 <tr key={item.BookingDetailId} className="hover:bg-gray-100 text-center text-sm">
-                  <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  <td
+                    className="border p-2 text-blue-500 cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/bookings/${item.BookingDetailId}`)}
                   >
                     {item.BookingDetailId}
@@ -4681,18 +4956,58 @@ export const BookingDetailsTable = () => {
                   <td className="border p-2">{item.Status}</td>
 
                   <td className="p-2 text-left border">
-                    <div>Start: {item.StartTimeCustomerTime ? new Date(item.StartTimeCustomerTime).toLocaleString() : "-"}</div>
-                    <div>End: {item.EndTimeCustomerTime ? new Date(item.EndTimeCustomerTime).toLocaleString() : "-"}</div>
-                    <div>Est. Arrival: {item.EstimatedArrivalTimeCustomerTime ? new Date(item.EstimatedArrivalTimeCustomerTime).toLocaleString() : "-"}</div>
-                    <div>Actual Arrival: {item.ActualArrivalTimeCustomerTime ? new Date(item.ActualArrivalTimeCustomerTime).toLocaleString() : "-"}</div>
+                    <div>
+                      Start:{" "}
+                      {item.StartTimeCustomerTime
+                        ? new Date(item.StartTimeCustomerTime).toLocaleString()
+                        : "-"}
+                    </div>
+                    <div>
+                      End:{" "}
+                      {item.EndTimeCustomerTime
+                        ? new Date(item.EndTimeCustomerTime).toLocaleString()
+                        : "-"}
+                    </div>
+                    <div>
+                      Est. Arrival:{" "}
+                      {item.EstimatedArrivalTimeCustomerTime
+                        ? new Date(item.EstimatedArrivalTimeCustomerTime).toLocaleString()
+                        : "-"}
+                    </div>
+                    <div>
+                      Actual Arrival:{" "}
+                      {item.ActualArrivalTimeCustomerTime
+                        ? new Date(item.ActualArrivalTimeCustomerTime).toLocaleString()
+                        : "-"}
+                    </div>
                   </td>
 
                   <td className="p-2 text-left border">
-                    <div>Start: {item.StartTimeUserTime ? new Date(item.StartTimeUserTime).toLocaleString() : "-"}</div>
-                    <div>End: {item.EndTimeUserTime ? new Date(item.EndTimeUserTime).toLocaleString() : "-"}</div>
+                    <div>
+                      Start:{" "}
+                      {item.StartTimeUserTime
+                        ? new Date(item.StartTimeUserTime).toLocaleString()
+                        : "-"}
+                    </div>
+                    <div>
+                      End:{" "}
+                      {item.EndTimeUserTime
+                        ? new Date(item.EndTimeUserTime).toLocaleString()
+                        : "-"}
+                    </div>
                     <div>Duration: {item.DurationInMinutesUserTime || 0} min</div>
-                    <div>Est. Arrival: {item.EstimatedArrivalTimeUserTime ? new Date(item.EstimatedArrivalTimeUserTime).toLocaleString() : "-"}</div>
-                    <div>Actual Arrival: {item.ActualArrivalTimeUserTime ? new Date(item.ActualArrivalTimeUserTime).toLocaleString() : "-"}</div>
+                    <div>
+                      Est. Arrival:{" "}
+                      {item.EstimatedArrivalTimeUserTime
+                        ? new Date(item.EstimatedArrivalTimeUserTime).toLocaleString()
+                        : "-"}
+                    </div>
+                    <div>
+                      Actual Arrival:{" "}
+                      {item.ActualArrivalTimeUserTime
+                        ? new Date(item.ActualArrivalTimeUserTime).toLocaleString()
+                        : "-"}
+                    </div>
                   </td>
 
                   <td className="p-2 border">{item.ChangedBy}</td>
@@ -4718,7 +5033,11 @@ export const BookingDetailsTable = () => {
                 </tr>
               ))
             ) : (
-              <tr><td colSpan="12" className="p-4 text-center">No entries found.</td></tr>
+              <tr>
+                <td colSpan="12" className="p-4 text-center">
+                  No entries found.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -4760,6 +5079,12 @@ export const RepairClassCodeTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
+  // 🔹 sort config
+  const [sortConfig, setSortConfig] = useState({
+    key: "Code",
+    direction: "asc",
+  });
+
   const fetchData = async () => {
     Swal.fire({
       title: "Memuat Data Repair Class Code...",
@@ -4792,17 +5117,62 @@ export const RepairClassCodeTable = () => {
     fetchData();
   }, []);
 
+  // 🔹 filter search
   const filteredData = data.filter((item) =>
     Object.values(item).some((value) =>
       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const currentData = filteredData.slice(
+  // 🔹 sorting
+  const sortedData = useMemo(() => {
+    const sorted = [...filteredData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
+
+        if (aVal === null || aVal === undefined) aVal = "";
+        if (bVal === null || bVal === undefined) bVal = "";
+
+        if (typeof aVal === "string") aVal = aVal.toLowerCase();
+        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+
+        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return sorted;
+  }, [filteredData, sortConfig]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
+  const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // 🔹 sort handlers
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === "asc" ? "desc" : "asc",
+        };
+      }
+      return { key, direction: "asc" };
+    });
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1" />
+    );
+  };
 
   return (
     <div className="p-4">
@@ -4825,11 +5195,36 @@ export const RepairClassCodeTable = () => {
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
-              <th className="border p-2">Code</th>
-              <th className="border p-2">Description</th>
-              <th className="border p-2">Definition</th>
-              <th className="border p-2">Payment Eligibility</th>
-              <th className="border p-2">Created On</th>
+              <th
+                className="border p-2 cursor-pointer"
+                onClick={() => handleSort("Code")}
+              >
+                Code {getSortIcon("Code")}
+              </th>
+              <th
+                className="border p-2 cursor-pointer"
+                onClick={() => handleSort("Description")}
+              >
+                Description {getSortIcon("Description")}
+              </th>
+              <th
+                className="border p-2 cursor-pointer"
+                onClick={() => handleSort("Definition")}
+              >
+                Definition {getSortIcon("Definition")}
+              </th>
+              <th
+                className="border p-2 cursor-pointer"
+                onClick={() => handleSort("PaymentEligibility")}
+              >
+                Payment Eligibility {getSortIcon("PaymentEligibility")}
+              </th>
+              <th
+                className="border p-2 cursor-pointer"
+                onClick={() => handleSort("CreatedOn")}
+              >
+                Created On {getSortIcon("CreatedOn")}
+              </th>
               <th className="border p-2">Actions</th>
             </tr>
           </thead>
@@ -4868,7 +5263,7 @@ export const RepairClassCodeTable = () => {
           </tbody>
         </table>
 
-        {filteredData.length === 0 && (
+        {sortedData.length === 0 && (
           <p className="text-center mt-4 text-gray-500">No entries found.</p>
         )}
       </div>
@@ -4905,6 +5300,7 @@ export const ServiceCatalogTable = () => {
   const [error, setError] = useState(null);
   const [serviceCatalogData, setServiceCatalogData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: "ServiceCatalogID", direction: "desc" });
   const navigate = useNavigate();
 
   const fetchServiceCatalog = async () => {
@@ -4939,7 +5335,32 @@ export const ServiceCatalogTable = () => {
     fetchServiceCatalog();
   }, []);
 
-  const filteredData = serviceCatalogData.filter((item) =>
+  // fungsi sorting
+  const requestSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedData = [...serviceCatalogData].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    const aVal = a[sortConfig.key] ?? "";
+    const bVal = b[sortConfig.key] ?? "";
+
+    if (!isNaN(aVal) && !isNaN(bVal)) {
+      return sortConfig.direction === "asc"
+        ? parseFloat(aVal) - parseFloat(bVal)
+        : parseFloat(bVal) - parseFloat(aVal);
+    }
+
+    return sortConfig.direction === "asc"
+      ? aVal.toString().localeCompare(bVal.toString())
+      : bVal.toString().localeCompare(aVal.toString());
+  });
+
+  const filteredData = sortedData.filter((item) =>
     Object.values(item).some((value) =>
       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -4950,6 +5371,15 @@ export const ServiceCatalogTable = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const renderSortIcon = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1" />
+    );
+  };
 
   return (
     <div className="p-4">
@@ -4962,7 +5392,7 @@ export const ServiceCatalogTable = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {/* Add Component (Optional) */}
+      {/* Add Component */}
       <ServiceCatalogAdd onUpdate={fetchServiceCatalog} />
 
       {loading && <p>Loading data...</p>}
@@ -4972,23 +5402,42 @@ export const ServiceCatalogTable = () => {
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
-              <th className="border p-2">Service Catalog ID</th>
-              <th className="border p-2">Asset ID</th>
-              <th className="border p-2">Service Offer ID</th>
-              <th className="border p-2">Part Number</th>
-              <th className="border p-2">Warranty Status</th>
-              <th className="border p-2">Currency</th>
-              <th className="border p-2">Price</th>
-              <th className="border p-2">Tax</th>
-              <th className="border p-2">Total</th>
+              <th className="border p-2 cursor-pointer" onClick={() => requestSort("ServiceCatalogID")}>
+                Service Catalog ID {renderSortIcon("ServiceCatalogID")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => requestSort("AssetID")}>
+                Asset ID {renderSortIcon("AssetID")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => requestSort("Service_offerID")}>
+                Service Offer ID {renderSortIcon("Service_offerID")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => requestSort("PartNumber")}>
+                Part Number {renderSortIcon("PartNumber")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => requestSort("WarrantyStatus")}>
+                Warranty Status {renderSortIcon("WarrantyStatus")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => requestSort("Currency")}>
+                Currency {renderSortIcon("Currency")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => requestSort("Price")}>
+                Price {renderSortIcon("Price")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => requestSort("Tax")}>
+                Tax {renderSortIcon("Tax")}
+              </th>
+              <th className="border p-2 cursor-pointer" onClick={() => requestSort("Total")}>
+                Total {renderSortIcon("Total")}
+              </th>
               <th className="border p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
               <tr key={item.ServiceCatalogID} className="hover:bg-gray-100 text-center text-sm">
-                <td className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                    onClick={() => navigate(`/app/service-log/${item.ServiceCatalogID}`)}
+                <td
+                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                  onClick={() => navigate(`/app/service-log/${item.ServiceCatalogID}`)}
                 >
                   {item.ServiceCatalogID}
                 </td>
@@ -4997,13 +5446,26 @@ export const ServiceCatalogTable = () => {
                 <td className="border p-2">{item.PartNumber || "-"}</td>
                 <td className="border p-2">{item.WarrantyStatus || "-"}</td>
                 <td className="border p-2">{item.Currency || "-"}</td>
-                <td className="border p-2">{item.Price ? parseFloat(item.Price).toFixed(2) : "-"}</td>
-                <td className="border p-2">{item.Tax ? parseFloat(item.Tax).toFixed(2) : "-"}</td>
-                <td className="border p-2">{item.Total ? parseFloat(item.Total).toFixed(2) : "-"}</td>
+                <td className="border p-2">
+                  {item.Price ? parseFloat(item.Price).toFixed(2) : "-"}
+                </td>
+                <td className="border p-2">
+                  {item.Tax ? parseFloat(item.Tax).toFixed(2) : "-"}
+                </td>
+                <td className="border p-2">
+                  {item.Total ? parseFloat(item.Total).toFixed(2) : "-"}
+                </td>
                 <td className="border p-2 flex justify-center gap-2">
-                  {/* Optional Edit/Delete Components */}
-                  <ServiceCatalogEdit ServiceCatalogID={item.ServiceCatalogID} onUpdate={fetchServiceCatalog} />
-                  <ServiceCatalogDelete ServiceCatalogID={item.ServiceCatalogID} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onUpdate={fetchServiceCatalog} />
+                  <ServiceCatalogEdit
+                    ServiceCatalogID={item.ServiceCatalogID}
+                    onUpdate={fetchServiceCatalog}
+                  />
+                  <ServiceCatalogDelete
+                    ServiceCatalogID={item.ServiceCatalogID}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchServiceCatalog}
+                  />
                 </td>
               </tr>
             ))}
@@ -5039,6 +5501,7 @@ export const ServiceCatalogTable = () => {
   );
 };
 
+
 export const OTCCodeTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -5047,6 +5510,12 @@ export const OTCCodeTable = () => {
   const [error, setError] = useState(null);
   const [otcCodeData, setOTCCodeData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // state sorting
+  const [sortConfig, setSortConfig] = useState({
+    key: "OTCCode",
+    direction: "asc",
+  });
 
   const fetchOTCCode = async () => {
     Swal.fire({
@@ -5080,18 +5549,53 @@ export const OTCCodeTable = () => {
     fetchOTCCode();
   }, []);
 
+  // handle sorting
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // filter & sort
   const filteredData = otcCodeData.filter((item) =>
     Object.values(item).some((value) =>
       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const currentData = filteredData.slice(
+  const sortedData = [...filteredData].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    const aValue = a[sortConfig.key];
+    const bValue = b[sortConfig.key];
+
+    if (aValue < bValue) {
+      return sortConfig.direction === "asc" ? -1 : 1;
+    }
+    if (aValue > bValue) {
+      return sortConfig.direction === "asc" ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+  const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
   const navigate = useNavigate();
+
+  // function ambil icon sort
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown size={16} />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp size={16} />
+    ) : (
+      <ArrowDown size={16} />
+    );
+  };
 
   return (
     <div className="p-4">
@@ -5112,19 +5616,37 @@ export const OTCCodeTable = () => {
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border">OTC Code</th>
-              <th className="p-2 border">Description</th>
-              <th className="p-2 border">Created At</th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("OTCCode")}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  OTC Code {getSortIcon("OTCCode")}
+                </div>
+              </th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("Description")}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  Description {getSortIcon("Description")}
+                </div>
+              </th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("CreatedOn")}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  Created At {getSortIcon("CreatedOn")}
+                </div>
+              </th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item) => (
               <tr key={item.OTCCode} className="hover:bg-gray-100 text-center">
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  // onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
-                >
+                <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
                   {item.OTCCode}
                 </td>
                 <td className="p-2 border">{item.Description}</td>
@@ -5167,7 +5689,9 @@ export const OTCCodeTable = () => {
         </span>
         <button
           className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
           disabled={currentPage === totalPages}
         >
           Next
@@ -5186,6 +5710,12 @@ export const CrsTable = () => {
   const [CrsData, setCrsData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // state sorting
+  const [sortConfig, setSortConfig] = useState({
+    key: "caseResolutionCode", // default sort field
+    direction: "asc",          // default asc
+  });
+
   const fetchCrs = async () => {
     Swal.fire({
       title: "Memuat Data CRS",
@@ -5193,7 +5723,7 @@ export const CrsTable = () => {
       allowOutsideClick: false,
       allowEscapeKey: false,
       didOpen: () => {
-        Swal.showLoading(); // Menampilkan indikator loading
+        Swal.showLoading();
       },
     });
     setLoading(true);
@@ -5203,10 +5733,10 @@ export const CrsTable = () => {
       if (response.data.success) {
         setCrsData(response.data.data);
       } else {
-        setError("Failed to fetch crs data");
+        setError("Failed to fetch CRS data");
       }
     } catch (err) {
-      console.error("Error fetching crs data:", err);
+      console.error("Error fetching CRS data:", err);
       setError("Error fetching data");
     } finally {
       setLoading(false);
@@ -5214,12 +5744,35 @@ export const CrsTable = () => {
     }
   };
 
-
   useEffect(() => {
     fetchCrs();
   }, []);
 
-  const filteredData = CrsData.filter((item) =>
+  // sorting function
+  const sortedData = [...CrsData].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    const aVal = a[sortConfig.key];
+    const bVal = b[sortConfig.key];
+
+    if (aVal == null) return 1;
+    if (bVal == null) return -1;
+
+    if (typeof aVal === "string") {
+      return sortConfig.direction === "asc"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    } else if (aVal instanceof Date || !isNaN(Date.parse(aVal))) {
+      return sortConfig.direction === "asc"
+        ? new Date(aVal) - new Date(bVal)
+        : new Date(bVal) - new Date(aVal);
+    } else {
+      return sortConfig.direction === "asc"
+        ? aVal - bVal
+        : bVal - aVal;
+    }
+  });
+
+  const filteredData = sortedData.filter((item) =>
     Object.values(item).some((value) =>
       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -5233,6 +5786,22 @@ export const CrsTable = () => {
 
   const navigate = useNavigate();
 
+  // handle click sort
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // render icon sort
+  const renderSortIcon = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown size={16} />;
+    if (sortConfig.direction === "asc") return <ArrowUp size={16} />;
+    return <ArrowDown size={16} />;
+  };
+
   return (
     <div className="p-4">
       <h2 className="mb-4 text-xl font-bold">Case Resolution Table</h2>
@@ -5244,7 +5813,7 @@ export const CrsTable = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-    <CrsAdd/>
+      <CrsAdd />
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -5253,14 +5822,46 @@ export const CrsTable = () => {
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border">ID Csr</th>
-              <th className="p-2 border">Case Resolution Code</th>
-              <th className="p-2 border">Auto Close</th>
-              <th className="p-2 border">Case Ready For Closure</th>
-              <th className="p-2 border">Ready For Close Days</th>
-              <th className="p-2 border">Ready For Closure Date</th>
-              <th className="p-2 border">Pending Customer Action</th>
-              <th className="p-2 border">Customer Requested CloseDate</th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("id_csr")}>
+                <div className="flex items-center justify-center gap-1">
+                  ID Csr {renderSortIcon("id_csr")}
+                </div>
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("caseResolutionCode")}>
+                <div className="flex items-center justify-center gap-1">
+                  Case Resolution Code {renderSortIcon("caseResolutionCode")}
+                </div>
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("autoClose")}>
+                <div className="flex items-center justify-center gap-1">
+                  Auto Close {renderSortIcon("autoClose")}
+                </div>
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("caseReadyForClosure")}>
+                <div className="flex items-center justify-center gap-1">
+                  Case Ready For Closure {renderSortIcon("caseReadyForClosure")}
+                </div>
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("readyForCloseDays")}>
+                <div className="flex items-center justify-center gap-1">
+                  Ready For Close Days {renderSortIcon("readyForCloseDays")}
+                </div>
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("readyForClosureDate")}>
+                <div className="flex items-center justify-center gap-1">
+                  Ready For Closure Date {renderSortIcon("readyForClosureDate")}
+                </div>
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("pendingCustomerAction")}>
+                <div className="flex items-center justify-center gap-1">
+                  Pending Customer Action {renderSortIcon("pendingCustomerAction")}
+                </div>
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("customerRequestedCloseDate")}>
+                <div className="flex items-center justify-center gap-1">
+                  Customer Requested CloseDate {renderSortIcon("customerRequestedCloseDate")}
+                </div>
+              </th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
@@ -5270,49 +5871,21 @@ export const CrsTable = () => {
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
                   onClick={() => navigate(`/app/case-resolution/${item.id_csr}`)}
-                > 
+                >
                   {item.id_csr}
-                </td> 
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  // onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
-                >
-                  {item.caseResolutionCode}
                 </td>
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  // onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
-                >
-                  {item.autoClose}
-                </td>
+                <td className="p-2 text-blue-500 border">{item.caseResolutionCode}</td>
+                <td className="p-2 border">{item.autoClose}</td>
                 <td className="p-2 border">{item.caseReadyForClosure}</td>
+                <td className="p-2 border">{item.readyForCloseDays}</td>
                 <td className="p-2 border">
-                  {new Date(item.readyForCloseDays).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-                 <td className="p-2 border">
-                  {new Date(item.readyForClosureDate).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-                 <td className="p-2 border">
-                  {new Date(item.pendingCustomerAction).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  {new Date(item.readyForClosureDate).toLocaleDateString("id-ID")}
                 </td>
                 <td className="p-2 border">
-                  {new Date(item.customerRequestedCloseDate).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  {new Date(item.pendingCustomerAction).toLocaleDateString("id-ID")}
+                </td>
+                <td className="p-2 border">
+                  {new Date(item.customerRequestedCloseDate).toLocaleDateString("id-ID")}
                 </td>
                 <td className="border p-2 flex space-x-2 justify-center">
                   <CrsEdit id_csr={item.id_csr} onUpdate={fetchCrs} />
@@ -5359,12 +5932,18 @@ export const CrsTable = () => {
 export const FailureTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; 
+  const itemsPerPage = 5;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [FailureData, setFailureData] = useState([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 🔹 State untuk sorting
+  const [sortConfig, setSortConfig] = useState({
+    key: "FailureId", // default sort di FailureId
+    direction: "asc",
+  });
 
   const fetchFailureDataTable = async () => {
     setLoading(true);
@@ -5410,17 +5989,36 @@ export const FailureTable = () => {
     }
   };
 
-  // 🔹 Load data when component mounts
   useEffect(() => {
     fetchFailureDataTable();
   }, []);
 
-  // Filter data berdasarkan pencarian
+  // 🔹 Fungsi sorting
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === "asc" ? "desc" : "asc",
+        };
+      }
+      return { key, direction: "asc" };
+    });
+  };
+
+  // 🔹 Filter dan Sorting data
   const filteredFailureTable = FailureData.filter((item) =>
     Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
-  );
+  ).sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    const valueA = a[sortConfig.key] ?? "";
+    const valueB = b[sortConfig.key] ?? "";
+    if (valueA < valueB) return sortConfig.direction === "asc" ? -1 : 1;
+    if (valueA > valueB) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
 
   // Hitung total halaman
   const totalPages = Math.ceil(filteredFailureTable.length / itemsPerPage);
@@ -5431,8 +6029,17 @@ export const FailureTable = () => {
     currentPage * itemsPerPage
   );
 
-  //navigate
   const navigate = useNavigate();
+
+  // 🔹 Ikon sort dinamis
+  const renderSortIcon = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1" />
+    );
+  };
 
   return (
     <div className="p-4">
@@ -5445,7 +6052,7 @@ export const FailureTable = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      <FailureAdd/>  
+      <FailureAdd />
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
@@ -5453,9 +6060,24 @@ export const FailureTable = () => {
         <table className="min-w-full border border-gray-300 shadow-lg">
           <thead>
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border">Failure ID</th>
-              <th className="p-2 border">Name</th>
-              <th className="p-2 border">Description</th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("FailureId")}
+              >
+                Failure ID {renderSortIcon("FailureId")}
+              </th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("Name")}
+              >
+                Name {renderSortIcon("Name")}
+              </th>
+              <th
+                className="p-2 border cursor-pointer"
+                onClick={() => handleSort("Description")}
+              >
+                Description {renderSortIcon("Description")}
+              </th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
@@ -5471,13 +6093,16 @@ export const FailureTable = () => {
                 <td className="p-2 border">{FailureItem.Name}</td>
                 <td className="p-2 border">{FailureItem.Description}</td>
                 <td className="flex p-2 space-x-2 border">
-                <FailureEdit FailureId={FailureItem.FailureId} onUpdate={fetchFailureDataTable}></FailureEdit>
-                <FailureDelete
-                  FailureId={FailureItem.FailureId}
-                  isModalOpen={isModalOpen}
-                  setIsModalOpen={setIsModalOpen}
-                  onUpdate={fetchFailureDataTable}                
-                />
+                  <FailureEdit
+                    FailureId={FailureItem.FailureId}
+                    onUpdate={fetchFailureDataTable}
+                  />
+                  <FailureDelete
+                    FailureId={FailureItem.FailureId}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen}
+                    onUpdate={fetchFailureDataTable}
+                  />
                 </td>
               </tr>
             ))}
