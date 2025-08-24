@@ -63,9 +63,9 @@ useEffect(() => {
   return (
     <div className="relative w-full">
       {selectedOption ? (
-        <div className="flex items-center justify-start px-3 py-2 border rounded-md gap-2">
-          <Archive color="blue"></Archive>
-          <span className="text-md text-blue-500 font-black">{renderLabel(selectedOption)}</span>
+        <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2">
+          <Archive color="blue" hidden></Archive>
+          <span className="pl-1">{renderLabel(selectedOption)}</span>
           <button
             onClick={() => onChange(null)}
             className="ml-2  hover:text-red-600"
@@ -276,7 +276,7 @@ useEffect(() => {
   export function SelectYN({ value, onValueChange }) {
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className="w-full hover:shadow-lg border-b-0">
+      <SelectTrigger className="w-full hover:shadow-lg border-b-0 p-3">
         {/* Menampilkan value terpilih */}
         <span>{value}</span>
       </SelectTrigger>

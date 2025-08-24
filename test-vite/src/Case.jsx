@@ -89,12 +89,16 @@ useEffect(() => {
       <div className="p-2 space-y-6">
         <Skeleton className="h-6 w-1/4"  />
         <Skeleton className="w-1/1 h-30" />
-        <Skeleton className="h-100 w-full rounded-lg" />
+        <div className="grid grid-cols-2 gap-4">
+        <Skeleton className="h-116 w-full rounded-lg" />
+        <Skeleton className="h-116 w-full rounded-lg" />
+        </div>
         <div className="space-y-2" hidden>
           <Skeleton className="h-4 w-3/4" />
           <Skeleton className="h-4 w-2/4" />
           <Skeleton className="h-4 w-full" />
         </div>
+        
       </div>
     );
   }

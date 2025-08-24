@@ -11,6 +11,7 @@ import {
 import { Link } from "react-router";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Accordion, AccordionItem, AccordionContent, AccordionTrigger } from "./ui/accordion";
 import {
   Select,
   SelectContent,
@@ -41,6 +42,7 @@ import {
   StepBack,
   CalendarDays,
   Lock,
+  LockOpen,
   UserPen,
   ArrowUp,
   ChevronDown,
@@ -61,10 +63,8 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import ApiCustomer from "@/api";
 import { getUserFromToken } from "@/lib/utils/auth";
-
 import {
   Popover,
   PopoverTrigger,
@@ -74,15 +74,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import Swal from "sweetalert2";
-
 import { BtnModalsServiceCatalog } from './sc-modal'
 import DatePicker from './date-picker'
-
-
 import { SearchCommandBlock } from "./sc-select";
-
 import { pdf } from '@react-pdf/renderer';
 import ServiceRequestPDF from './service-request-form'; // adjust path if needed
+import { Textarea } from "./ui/textarea";
 
 
 export const TabsService = ({ 
@@ -265,7 +262,7 @@ export const TabsService = ({
           break;
 
           case 'CASE':
-         if (caseFilled) {
+          if (caseFilled) {
               try {
                 const oldStatus = caseDetails.CaseStatus;
                 const newStatus = caseForm.CaseStatus;
@@ -313,7 +310,8 @@ export const TabsService = ({
         await Swal.fire({
           icon: "success",
           title: "Berhasil Disimpan",
-          text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
+          // text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
+          text: "Data berhasil disimpan",
           timer: 2500,
           showConfirmButton: false,
           allowOutsideClick: false,
@@ -427,14 +425,14 @@ const openPopup = () => {
   };
   const saveAndCloseCase = async () => {
 
-    if (!csrForm.caseResolutionCode || csrForm.caseResolutionCode.trim() === "") {
-    Swal.fire({
-      icon: "warning",
-      title: "Missing Case Resolution",
-      text: "You must select a Case Resolution Code before closing the case.",
-    });
-    return;
-  }
+  //   if (!csrForm.caseResolutionCode || csrForm.caseResolutionCode.trim() === "") {
+  //   Swal.fire({
+  //     icon: "warning",
+  //     title: "Missing Case Resolution",
+  //     text: "You must select a Case Resolution Code before closing the case.",
+  //   });
+  //   return;
+  // }
 
     const confirmResult = await Swal.fire({
       title: "Confirm Save",
@@ -596,17 +594,20 @@ const spanMap = {
   6: "col-span-6",
 };
 
-export const CaseField = ({ label, children, icon, span = 1, className, star, }) => (
+export const CaseField = ({ label, children, lock, open,span = 1, className, star, }) => (
   <>
     <CardTitle
       className={twMerge(
         `relative font-medium flex items-center gap-2`,
-        icon ? "pl-6" : "",
+        lock ? "pl-6" : "", open ? "pl-6" : "",
         className
       )}
     >
-      {icon && (
+      {lock && (
         <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
+      )}
+      {open && (
+        <LockOpen className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground"/>
       )}
       {label}
       {star ? <span className="text-red-400">*</span> : ""}
@@ -1199,10 +1200,10 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case & Customer" },
-    { value: "customer,add,entitement", label: "Asset & Entitement" },
-    { value: "ci_notes", label: "Notes & Information" },
-    { value: "action_log", label: "Action Log"},
+    { value: "case_info", label: "Case & Customer", hidden: true},
+    { value: "customer,add,entitement", label: "Asset & Entitement", hidden: true },
+    { value: "ci_notes", label: "Notes & Information", hidden: true },
+    { value: "action_log", label: "Action Log", hidden: true},
     { value: "ci_activitas", label: "Activities", disable: true, hidden: true },
     { value: "ci_actions", label: "Customer Interactions", disable: true, hidden: true},
     { value: "ci_wo", label: "Work Order Validation", disable: true ,hidden: true},
@@ -1495,8 +1496,6 @@ const fetchActionLog = async () => {
   }
 }
 
-
-  
   //handler all case
   useEffect(() => {
     fetchCustomerData();
@@ -1603,16 +1602,16 @@ const [endDate, setEndDate] = useState(null);
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (
-        <div className="p-4 my-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
+        <div className="p-4 mt-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
           This Case is <strong>read-only</strong> because it is{" "}
           <strong>Closed</strong>.
         </div>
       )}
-      <Card className="p-0 mt-2 border-0 rounded-none">
+      <Card className="border-0 w-full">
         <Tabs defaultValue="case_info">
-          <CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2">
+          <CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2 h-22">
             <div className="flex justify-between">
-              <CardTitle className="text-xl ">
+              <CardTitle className="text-2xl pl-1">
                 {caseDetails.CaseID}
                 <span className="flex items-center text-sm">
                   Case .
@@ -1743,50 +1742,43 @@ const [endDate, setEndDate] = useState(null);
             </TabsList>
           </CardHeader>
 
-          <TabsContent value="case_info" className={"p-1 flex flex-col gap-4 "}>
+          <TabsContent value="case_infor">
+          </TabsContent>
+
+          <div  className={"p-1 grid grid-cols-2 gap-4 mt-2"}>
             <Card className="flex-col">
               <CardHeader>
                 <CardTitle className={"text-lg "}>Case Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid items-center grid-cols-6 gap-10  ">
-                <CaseField label="Case Subject" span={3}>
-                  <Input variant="invisible" value={caseDetails.CaseSubject}/>
+              <CardContent className="grid grid-cols-2 gap-2">
+                <CaseField label="Case Subject" lock span={3}>
+                  <div className="ml-3">
+                    <Textarea
+                     value={caseDetails.CaseSubject}
+                     className="resize-none border-none"
+                    />
+                  </div>
                 </CaseField>
               
-                <CaseField label="Case ID Manual" icon>
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                  />
+                <CaseField label="Case ID manual" className={"mt-2"} lock span={2}>  
+                    <Input variant="invisible" placeholder="---"/>                    
                 </CaseField>
               
-                {/* <CaseField label="Case Subject" span={3}>
-                  <Input variant="invisible" value={caseDetails.CaseSubject} />
-                </CaseField> */}
-                <CaseField label="Case Status">
-                <SearchCommandBlock
-                  value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
-                  onChange={(label) => {
-                    const enumValue = labelToStatusEnum[label];
-                    onChangeCase("CaseStatus")(enumValue);
-                  }}
-                  placeholder="--Select--"
-                  options={Object.values(statusEnumToLabel)}
-                />
-                </CaseField>
-                   <CaseField label="Case Priority">
-                  {caseDetails.CasePriority}
+                <CaseField label="Case Status" className={"mt-2"} open span={2}>
+                  <SearchCommandBlock
+                      value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
+                      onChange={(label) => {
+                        const enumValue = labelToStatusEnum[label];
+                        onChangeCase("CaseStatus")(enumValue);
+                      }}
+                      placeholder="--Select--"
+                      options={Object.values(statusEnumToLabel)}
+                    />
+
                 </CaseField>
 
-                  <CaseField label="Incoming Channel" icon>
-                  <Input
-                    variant="invisible"
-                    value={caseDetails.IncomingChannel}
-                  />
-                </CaseField>
-
-                    <CaseField label="Case Type">
+                <CaseField label="Case Type" open className={"mt-2"} span={2}>
                   <SearchCommandBlock
                     value={caseForm?.CaseType}
                     onChange={onChangeCase("CaseType")}
@@ -1798,35 +1790,32 @@ const [endDate, setEndDate] = useState(null);
                     ]}
                     />
                 </CaseField>
-              
-             
-                 <CaseField label="Customer Severity">
-                  {caseDetails.CustomerSeverity}
+
+                 <CaseField label="Case Priority" className={"mt-2"} lock span={2}>
+                  <Input variant="invisible" value={caseDetails.CasePriority}/>
                 </CaseField>
 
-                  <CaseField label="KCI For Case?" >
-                    <span className="pl-3">{caseDetails.KCI_Flag ? "Yes" : "No"}</span>
-                
+                <CaseField label="Customer Severity" className={"mt-2"} lock span={2}>
+                  <Input
+                    variant="invisible"
+                    value={caseDetails.CustomerSeverity}
+                  />
                 </CaseField>
 
-                <CaseField label="Business Segment">
-                  <Input variant="invisible" placeholder="---" />
+                  <CaseField label="Incoming Channel" className={"mt-2"} lock span={2}>
+                  <Input
+                    variant="invisible"
+                    value={caseDetails.IncomingChannel}
+                  />
                 </CaseField>
 
-               
-                <CaseField label="HPI Segment">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-             
-
-                <CaseField label="Customer Tracking Number" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-               
-                <CaseField label="Update Customer Tracking Number" span={1}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Created ON" icon span={3}>
+                <CaseField label="KCI For Case?" lock span={2}>
+                     <Input 
+                      variant="invisible"
+                      value={caseDetails.KCI_Flag ? "Yes" : "No"}
+                     />
+                </CaseField>               
+                <CaseField label="Created ON" span={2} lock>
                   <DatePicker
                     variant="icon"
                     value={createdOn}
@@ -1834,56 +1823,84 @@ const [endDate, setEndDate] = useState(null);
                     readOnly
                   ></DatePicker>
                 </CaseField>
-                <CaseField label="Alternate Customer Tracking Number">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Case Closed Date" icon span={3}>
-                  <span className="flex gap-[5em]">
-                    {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
-                    <DatePicker
-                      variant="icon"
-                      value={caseClosedDate}
-                      onChange={setCaseClosedDate}
-                      readOnly
-                    ></DatePicker>
-                  </span>
-                </CaseField>
-                <CaseField label="Irrelevant" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Submitted To Base" icon span={3}>
-                  <span className="flex gap-[5em]">
-                    <DatePicker
-                      variant="icon"
-                      value={submittedToBase}
-                      onChange={setsubmittedToBase}
-                      readOnly
-                    ></DatePicker>
-                  </span>
-                </CaseField>
-                  <CaseField label="Case ID" icon className="hidden">
-                  <Input
-                    variant="invisible"
-                    value={caseDetails.CaseID}
-                    hidden={true}
-                    readOnly
-                  />
-                </CaseField>
-                   
-                <CaseField label="Email Status" className="hidden">
-                  <Input variant="invisible" placeholder="---" hidden/>
-                </CaseField>
 
+                <Accordion type="single" collapsible className="w-full col-span-2">
+                  <AccordionItem value="more-details" className="pl-5">
+                    <AccordionTrigger className={"decoration-transparent "}>More Details</AccordionTrigger>
+                    <AccordionContent className={"m-1"}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <CaseField label="Case Closed Date">
+                        <span className="gap-[5em]">
+                          {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
+                          <DatePicker
+                            variant="icon"
+                            value={caseClosedDate}
+                            onChange={setCaseClosedDate}
+                            readOnly
+                          ></DatePicker>
+                        </span>
+                      </CaseField>
+
+                      <CaseField label="Submitted To Base">
+                        <span className="gap-[5em]">
+                          <DatePicker
+                            variant="icon"
+                            value={submittedToBase}
+                            onChange={setsubmittedToBase}
+                            readOnly  
+                          ></DatePicker>
+                        </span>
+                      </CaseField>
+                      <CaseField label="Business Segment" >
+                        <Input variant="invisible" placeholder="---"/>
+                      </CaseField>          
+                
+                      <CaseField label="HPI Segment" >
+                        <Input variant="invisible" placeholder="---"/>
+                      </CaseField>
+                  
+                      <CaseField label="Customer Tracking Number" >
+                        <Input variant="invisible" placeholder="---"/>
+                      </CaseField>
+                    
+                      <CaseField label="Update Customer Tracking Number">
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                      <CaseField label="Alternate Customer Tracking Number" >
+                        <Input variant="invisible" placeholder="---"/>
+                      </CaseField>
+                    
+                      <CaseField label="Irrelevant" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                    
+                        
+                      <CaseField label="Email Status"  >
+                        <Input variant="invisible" placeholder="---"/>
+                      </CaseField>
+
+                        <CaseField label="Case ID" lock  className={"hidden"}>
+                        <Input
+                          variant="invisible"
+                          value={caseDetails.CaseID}
+                          readOnly
+                          hidden
+                        />
+                      </CaseField>
+                    </div>
+                  </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </CardContent>
             </Card>
                     
             <Card className="flex-col">
               <CardHeader>
-                <CardTitle className="text-lg ">Customer Information</CardTitle>
+                <CardTitle className="text-lg">Customer Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid items-center grid-cols-6 gap-10">
-                <CaseField label="Customer Account" icon>
+              <CardContent className="grid items-center grid-cols-2 gap-3">
+                <CaseField label="Customer Account"  lock>
                   <Input
                     variant="invisible"
                     value={
@@ -1896,14 +1913,25 @@ const [endDate, setEndDate] = useState(null);
                     readOnly
                   />
                 </CaseField>
-                <CaseField label="Primary Contact" icon>
+                <CaseField label="Primary Contact" lock>
                   <Input
                     variant="invisible"
                     value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
                     readOnly
                   />
                 </CaseField>
-                <CaseField label="Country" icon>
+                 <CaseField label="Secondary Contact" lock>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label=" Primary Email" lock>
+                  <Input
+                    variant="invisible"
+                    value={dataFetchCustomerData.MainAccount?.Email}
+                    placeholder="---"
+                    readOnly
+                  />
+                </CaseField>
+                <CaseField label="Country" lock>
                   <Input
                     variant="invisible"
                     value={
@@ -1914,60 +1942,61 @@ const [endDate, setEndDate] = useState(null);
                     readOnly
                   />                  
                 </CaseField>
-                <CaseField label=" Primary Email" icon>
-                  <Input
-                    variant="invisible"
-                    value={dataFetchCustomerData.MainAccount?.Email}
-                    placeholder="---"
-                    readOnly
-                  />
-                </CaseField>
-                <CaseField label="Phone" icon>
-                  {" "}
+                <CaseField label="Phone" lock>
+                  <span className="pl-3">
                   {dataFetchCustomerData?.Type == "SiteAccount"
                     ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone
                     : dataFetchCustomerData?.MainAccount?.Phone}
+                  </span>
                 </CaseField>
-                <CaseField label="Region" icon>
+                <CaseField label="Region" lock>
                   <Input 
                   variant="invisible" 
                   placeholder="---" readOnly 
                   value={dataFetchCustomerData.SiteAccount?.City}/>
                 </CaseField>
-                <CaseField label="Submitted By">
-                  <Input variant="invisible" placeholder="---"  />
-                </CaseField>
-                <CaseField label="Is Partner" icon>
+                <CaseField label="Is Partner" lock>
                   <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
-                <CaseField label="Partner & Customer" icon>
+                <CaseField label="Partner & Customer" lock>
                   <Input variant="invisible" placeholder="---"  readOnly/>
                 </CaseField>
-                <CaseField label="HIPAA" icon>
-                  <Input variant="invisible" placeholder="---" readOnly/>
-                </CaseField>
-                <CaseField label="PIN">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Secondary Contact">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Parent Company">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Customer Time Zone" icon>
-                  <Input variant="invisible" placeholder="---" readOnly/>
-                </CaseField>
-                <CaseField label="Parent Company Non-Latin">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Account Tier" className={"col-start-5 hidden"}>
-                  <Input variant="invisible" placeholder="---" hidden/>
-                </CaseField>
+                <Accordion type="single" collapsible className="col-span-2">
+                  <AccordionItem value="more-details" className={"pl-5 "}>
+                    <AccordionTrigger className={"decoration-transparent"}>More Details</AccordionTrigger>
+                    <AccordionContent className="m-1">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
+                        <CaseField label="Submitted By">
+                          <Input variant="invisible" placeholder="---"  />
+                        </CaseField>
+                        <CaseField label="HIPAA" >
+                          <Input variant="invisible" placeholder="---" readOnly/>
+                        </CaseField>
+                        <CaseField label="PIN">
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>              
+                        <CaseField label="Parent Company">
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                        <CaseField label="Parent Company Non-Latin">
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                        <CaseField label="Customer Time Zone">
+                          <Input variant="invisible" placeholder="---" readOnly/>
+                        </CaseField>
+                        <CaseField label="Account Tier">
+                          <Input variant="invisible" placeholder="---"/>
+                        </CaseField>
+                      </div>
+                    </AccordionContent>
+                </AccordionItem>
+                </Accordion>
               </CardContent>
             </Card>
 
-            <Card className="flex-col mt-5" hidden>
+          </div>
+
+          <Card className="flex-col mt-5" hidden>
               <CardHeader>
                 <CardTitle className="text-lg ">Global Trade Check</CardTitle>
                 <hr />
@@ -2015,7 +2044,7 @@ const [endDate, setEndDate] = useState(null);
                     options={["Pass", "Fail"]}
                   />
                 </CaseField>
-                <CaseField label="Embargoed Country" icon>
+                <CaseField label="Embargoed Country" lock>
                   <Input
                     variant="invisible"
                     placeholder="---"
@@ -2054,58 +2083,69 @@ const [endDate, setEndDate] = useState(null);
                   />
                 </CaseField>
               </CardContent>
-            </Card>
-          </TabsContent>
+          </Card>   
 
-          <TabsContent
-            value="customer,add,entitement"
-            className={"p-1 flex flex-col gap-4"}
-          >
+          <div className="mt-2 p-1">
             <Card className="flex-col">
               <CardHeader>
                 <CardTitle className="text-lg ">Asset Information</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid items-center grid-cols-6 gap-10">
-                <CaseField label="Assets" icon>
+                <CaseField label="Assets" lock>
                   {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
                 </CaseField>
-                <CaseField label="Product Number" icon>
-                  {
+                <CaseField label="Product Number" lock>
+                  <span className="pl-3">
+                    {
                     dataFetchAssetInformation?.AssetInformation
                       ?.product_information?.ProductNumber
                   } 
+                    </span>
                 </CaseField>
-                <CaseField label="Asset Location">
+                <CaseField label="Asset Location" lock> 
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Serial Number" icon>
+                <CaseField label="Serial Number" lock>
                   {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
                 </CaseField>
-                <CaseField label="HW Profit Center" icon>
-                  {" "}
+                <CaseField label="HWPC Code" lock>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="SNIC - Count" icon>
+                  <CaseField label="SNIC - Count" lock>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Product Name" icon>
+                <CaseField label="Product Name" lock>
                   {
                     dataFetchAssetInformation?.AssetInformation
                       ?.product_information?.ProductName
                   }{" "}
                 </CaseField>
-                <CaseField label="HWPC Code" icon>
+                <CaseField label="MV Product Description" lock>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="MV Product Description" icon>
+               
+                  <CaseField label="HW Profit Center" lock>
+                  {" "}
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <div className="grid items-center grid-cols-2 col-span-2 gap-2 p-5 ring-1">
-                  <CaseField label="Device Properties" icon>
+                  <CaseField label="Device Properties" lock>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
                 </div>
+                  <CaseField label="OTC Code" lock span={3}>
+                  <SearchCommandBlock
+                    options={otcCode}
+                    value={entitlementStatus.OTCCode}
+                    onChange={(value) =>
+                      handleEntitlementStatus("OTCCode")(value)
+                    }
+                    placeholder="---"
+                    renderLabel={(opt) => `${opt.OTCCode} - ${opt.Description}`}
+                    getValue={(opt) => opt.OTCCode}
+                  />
+                </CaseField>
               </CardContent>
               {/* TABEL ACCESSORY */}
   <div className="px-6 pb-6">
@@ -2141,46 +2181,15 @@ const [endDate, setEndDate] = useState(null);
           )}
         </tbody>
       </table>
-      <span className="pt-10 text-lg text-gray-600">
+      <div className="mt-2 text-md text-gray-600">
         Total Accesories: {caseDetails.accessory?.length || 0 }
-      </span>
+      </div>
     </div>
   </div>
-</Card>
+            </Card>
+          </div>
 
-            {/* <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">SLA Information</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid items-center grid-cols-6 gap-10">
-                <CaseField label="Latest Start Date (Cust Time)" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Coverage Window Used" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Response Time Value" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Guaranteed Fix Date (Cust Time)" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Coverage Window Value" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Repair Time Value" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Case Priority Index" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Case Priority Rule" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-              </CardContent>
-            </Card> */}
-
+          <div className="mt-2 p-1" hidden>
             <Card className="flex-col ">
               <CardHeader>
                 <CardTitle className="text-lg ">
@@ -2189,10 +2198,10 @@ const [endDate, setEndDate] = useState(null);
                 <hr />
               </CardHeader>
               <CardContent className="grid items-center grid-cols-9 gap-10">
-                <CaseField label="Case Entitlement" icon span={2}>
+                <CaseField label="Case Entitlement" lock span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Start Date" icon span={2}>
+                <CaseField label="Start Date" lock span={2}>
                   {" "}
                   <DatePicker
                     value={startDate}
@@ -2201,22 +2210,11 @@ const [endDate, setEndDate] = useState(null);
                   ></DatePicker>{" "}
                 </CaseField>
                 {console.log(entitlementStatus)}
-                <CaseField label="OTC Code" icon span={2}>
-                  <SearchCommandBlock
-                    options={otcCode}
-                    value={entitlementStatus.OTCCode}
-                    onChange={(value) =>
-                      handleEntitlementStatus("OTCCode")(value)
-                    }
-                    placeholder="---"
-                    renderLabel={(opt) => `${opt.OTCCode} - ${opt.Description}`}
-                    getValue={(opt) => opt.OTCCode}
-                  />
-                </CaseField>
-                <CaseField label="Entitlement Status" icon span={2}>
+
+                <CaseField label="Entitlement Status" lock span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="End Date" icon span={2}>
+                <CaseField label="End Date" lock span={2}>
                   {" "}
                   <DatePicker
                     value={endDate}
@@ -2224,24 +2222,24 @@ const [endDate, setEndDate] = useState(null);
                     readOnly
                   ></DatePicker>
                 </CaseField>
-                <CaseField label="Entitlement Override" icon span={2}>
+                <CaseField label="Entitlement Override" lock span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Selected Entitlement Offer" icon span={2}>
+                <CaseField label="Selected Entitlement Offer" lock span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Days Left" icon span={2}>
+                <CaseField label="Days Left" lock span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Authorizing Employee" icon span={2}>
+                <CaseField label="Authorizing Employee" lock span={2}>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
 
-          <TabsContent value="ci_notes" className={"p-2 flex flex-col gap-4"}>
-            <Card className="flex-col p-2 ">
+          <div className="mt-2 p-1">
+              <Card className="flex-col">
               <CardHeader>
                 <CardTitle className="text-lg ">
                   Customer Issue Description & System Information
@@ -2268,7 +2266,7 @@ const [endDate, setEndDate] = useState(null);
                     label="Device Manufacturer"
                     className={"col-span-3"}
                     span={3}
-                    icon
+                    
                   >
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
@@ -2330,8 +2328,10 @@ const [endDate, setEndDate] = useState(null);
                 </div>
               </CardContent>
             </Card>
+          </div>
 
-            <Card className="flex-col p-2 ">
+          <div className="mt-2 p-1">
+            <Card className="flex-col">
               <CardHeader>
                 <CardTitle className="text-lg ">Case Notes</CardTitle>
                 <hr />
@@ -2341,7 +2341,7 @@ const [endDate, setEndDate] = useState(null);
                   <CaseField label="Log Type" className={"col-span-2"} span={4}>
                     <Select  value={formData?.LogType}  onValueChange={(val) => onChange("LogType", val)}>
                       <SelectTrigger
-                        className={"w-[100%] hover:shadow-lg border-b-0"}
+                        className={"w-[100%] hover:shadow-lg border-b-0 p-3"}
                       >
                         <SelectValue placeholder="Log Type" />
                       </SelectTrigger>
@@ -2380,7 +2380,7 @@ const [endDate, setEndDate] = useState(null);
                     className={"col-span-2"}
                     span={4}
                   >
-                    <SelectYN
+                    <SelectYN 
                       value={
                         formData?.VisibleExternally === undefined ||
                         formData?.VisibleExternally === null
@@ -2398,7 +2398,6 @@ const [endDate, setEndDate] = useState(null);
                   <CaseField
                     label="Number of Minutes Spent"
                     className={"col-span-2"}
-                    icon
                     span={3}
                   >
                     <Input variant="invisible" placeholder="---" />
@@ -2481,6 +2480,96 @@ const [endDate, setEndDate] = useState(null);
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="mt-2 p-1">
+            <Card className="flex-col">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Action Log</CardTitle>
+                    <hr />
+                  </CardHeader>
+                  <CardContent className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[60px]">No</TableHead>
+                          <TableHead>ReferenceId</TableHead>
+                          <TableHead>Change By</TableHead>
+                          <TableHead>Old Status</TableHead>
+                          <TableHead>New Status</TableHead>
+                          <TableHead>Change At</TableHead>
+                          <TableHead>Log Description</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {actionLogs?.length > 0 ? (
+                          actionLogs.map((log, index) => (
+                            <TableRow key={log.id || index}>
+                              <TableCell>{index + 1}</TableCell>
+                              <TableCell>{log.ReferenceId}</TableCell>
+                              <TableCell>{log.changedByUser?.Name}</TableCell>
+                              <TableCell>{log.dataOld}</TableCell>
+                              <TableCell>{log.dataNew}</TableCell>
+                              <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
+                              <TableCell>{log.logDescription}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center italic">
+                              No action logs available.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+            </Card>
+          </div>
+
+          <TabsContent
+            value="customer,add,entitement"
+            className={"p-1 flex flex-col gap-4"}
+          >
+
+            {/* <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className="text-lg ">SLA Information</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid items-center grid-cols-6 gap-10">
+                <CaseField label="Latest Start Date (Cust Time)" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Coverage Window Used" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Response Time Value" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Guaranteed Fix Date (Cust Time)" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Coverage Window Value" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Repair Time Value" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Case Priority Index" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Case Priority Rule" icon>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+              </CardContent>
+            </Card> */}
+
+          
+          </TabsContent>
+
+          <TabsContent value="ci_notes" className={"p-2 flex flex-col gap-4"}>
+          
 
             {/* <Card className="flex-col ">
               <CardHeader>
@@ -2682,49 +2771,8 @@ const [endDate, setEndDate] = useState(null);
           </TabsContent>
 
           <TabsContent value="action_log">
-              <Card className="flex-col mt-6">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Action Log</CardTitle>
-                    <hr />
-                  </CardHeader>
-                  <CardContent className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[60px]">No</TableHead>
-                          <TableHead>ReferenceId</TableHead>
-                          <TableHead>Change By</TableHead>
-                          <TableHead>Old Status</TableHead>
-                          <TableHead>New Status</TableHead>
-                          <TableHead>Change At</TableHead>
-                          <TableHead>Log Description</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {actionLogs?.length > 0 ? (
-                          actionLogs.map((log, index) => (
-                            <TableRow key={log.id || index}>
-                              <TableCell>{index + 1}</TableCell>
-                              <TableCell>{log.ReferenceId}</TableCell>
-                              <TableCell>{log.changedByUser?.Name}</TableCell>
-                              <TableCell>{log.dataOld}</TableCell>
-                              <TableCell>{log.dataNew}</TableCell>
-                              <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
-                              <TableCell>{log.logDescription}</TableCell>
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={5} className="text-center italic">
-                              No action logs available.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-            </Card>
-            </TabsContent>
+              
+          </TabsContent>
 
           <TabsContent value="ci_activitas">
             <Card className="mt-7">
@@ -2739,7 +2787,7 @@ const [endDate, setEndDate] = useState(null);
             </Card>
           </TabsContent>
 
-           <TabsContent value="ci_wo">
+          <TabsContent value="ci_wo">
                       <div className="flex gap-4">
                         <Card className="flex-1/3  rounded-md">
                           <CardHeader>
@@ -2777,7 +2825,7 @@ const [endDate, setEndDate] = useState(null);
                             <CaseField label="GT Active Listening">
                             {caseDetails.global_trade_check?.gt_active_listening || "---"}
                             </CaseField>
-                            <CaseField label="Security Status" icon>
+                            <CaseField label="Security Status" lock>
                               <Input
                                 variant={"invisible"}
                                 className=""
@@ -2785,7 +2833,7 @@ const [endDate, setEndDate] = useState(null);
                                 readOnly
                               />
                             </CaseField>
-                            <CaseField label="Security Ovveride Reason" icon>
+                            <CaseField label="Security Ovveride Reason" lock>
                               <Input
                                 variant={"invisible"}
                                 className=""
@@ -2802,7 +2850,7 @@ const [endDate, setEndDate] = useState(null);
                               <hr />
                             </CardHeader>
                             <CardContent>
-                              <CaseField label="Notes History" icon>
+                              <CaseField label="Notes History" lock>
                                 <textarea
                                   className="mt-4 resize-none w-full min-h-[400px] p-2 ring-1 ring-gray-300 rounded-md text-md"
                                   readOnly
@@ -2813,7 +2861,7 @@ const [endDate, setEndDate] = useState(null);
                           </Card>
                         </div>
                       </div>
-            </TabsContent>
+          </TabsContent>
 
           <TabsContent value="ci_orders" className={"p-2 flex flex-col gap-4"}>
             <Card className="flex-col ">
@@ -2833,7 +2881,7 @@ const [endDate, setEndDate] = useState(null);
                 <CaseField label="Exception Order">
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label="Shipment State" icon>
+                <CaseField label="Shipment State" lock>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="SBD Override">
