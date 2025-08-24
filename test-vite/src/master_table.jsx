@@ -696,12 +696,11 @@ export const Assets_table = () => {
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            setCurrentPage(1); // Reset ke halaman pertama saat mencari
+            setCurrentPage(1); 
           }}
         />
       </div>
 
-      {/* Tampilkan error jika terjadi kesalahan */}
       {error && <p className="text-red-500">{error}</p>}
 
       <div className="overflow-x-auto">
@@ -1839,8 +1838,8 @@ export const User_table = () => {
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Role</th>
               <th className="p-2 border">Profil Photo</th>
-              <th className="p-2 border">CreatedAt</th>
-              <th className="p-2 border">UpdateAt</th>
+              <th className="p-2 border">Created At</th>
+              <th className="p-2 border">Update At</th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
@@ -1857,7 +1856,7 @@ export const User_table = () => {
                 <td className="p-2 border">{UserItem.Username}</td>
                 <td className="p-2 border">{UserItem.Name}</td>
                 <td className="p-2 border">{UserItem.Role}</td>
-                <td className="p-2 border">{UserItem.ProfilPhoto}</td>
+                <td className="p-2 border">{UserItem.ProfilePhoto}</td>
                 <td className="p-2 border">{UserItem.CreatedAt}</td>
                 <td className="p-2 border">{UserItem.UpdatedAt}</td>
                 <td className="flex p-2 space-x-2 border">

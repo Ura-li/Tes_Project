@@ -170,7 +170,6 @@ export const ServiceWork = () => {
         const resWO = await ApiCustomer.get(`/api/work-order/${woid}`);
         const workOrderData = resWO.data.data;
         setWorkOrders(workOrderData);
-        // console.log('Value of workorder data',workOrderData)
         updateDraft('woid',workOrderData.WOID)
         const resMO = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
         setMaterialOrders(resMO.data.data);
@@ -978,8 +977,6 @@ export const ServiceWork = () => {
                     
                     value={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}
                     onChange={handleSLAChange("requestedDateTimeCustomer")}
-                    // value={requestedDateTimeCustomer}
-                    // onChange={setrequestedDateTimeCustomer}
                   ></DatePicker>
                 </CaseField>
                 <CaseField label={"Guaranteed Fix Time (Customer)"} span={2}>
@@ -1002,20 +999,12 @@ export const ServiceWork = () => {
             <Card className="flex-col mt-5">
               <span className="ml-5 text-xl font-bold">Booking </span>
               <CardContent className="grid">
-                {/* <Button variant="link" className="w-50 ml-250 "> */}
-                {/* <Link 
-                  to="/bookings"
-                  state={{ WOID: workOrders.WOID }}
-                >
-                    + New Bookable Resource
-                  </Link> */}
                 <NewBookableResourceBooking
                   CaseID={caseInformation?.CaseID}
                   WOID={workOrders.WOID}
                   CreatedBy={user.id}
                   RequestedDateTimeCustomer={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}
                 />
-                {/* </Button> */}
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -1056,10 +1045,10 @@ export const ServiceWork = () => {
                           <TableCell>
                             {booking.ScheduleJeopardy ? "Jeopardy" : "-"}
                           </TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
                           <TableCell>{formatDate(booking.CreatedAt)}</TableCell>
                           {/* <TableCell>{formatDate(booking.StartTimeCustomerTime)}</TableCell>
                         <TableCell>{formatDate(booking.EstimatedArrivalTimeCustomerTime)}</TableCell>
@@ -1153,11 +1142,6 @@ export const ServiceWork = () => {
                     <CaseField label={"Resolution Notes/Diagnostics"} span={3}>
                       <textarea className="w-full h-20 p-2 border rounded-md resize-none"></textarea>
                     </CaseField>
-                    {/* <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Resolution Notes/Diagnostics</span>
-                      <span className="ml-30">...</span>
-                    </div> */}
                   </CardContent>
                 </Card>
 
@@ -1334,21 +1318,6 @@ export const ServiceWork = () => {
                     <CaseField label={"Reason if Not Available"} span={2}>
                       <Input variant={"invisible"} placeholder={"---"}></Input>
                     </CaseField>
-                    {/* <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Meter Read Available</span>
-                      <span className="ml-40">...</span>
-                    </div>
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Reason if Not Available</span>
-                      <span className="ml-36.5">...</span>
-                    </div>
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Reason if Not Available</span>
-                      <span className="ml-36">...</span>
-                    </div> */}
                   </CardContent>
                 </Card>
 
@@ -1364,15 +1333,9 @@ export const ServiceWork = () => {
                     <CaseField label={"DOA Letter"} span={2}>
                       <Input variant={"invisible"} placeholder={"---"}></Input>
                     </CaseField>
-                    {/* <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Product ID</span>
-                      <span className="ml-50">...</span>
-                    </div> */}
                   </CardContent>
                 </Card>
               </div>
-              {/* Right column 30% of the size */}
               <div className="flex flex-col w-1/3 gap-4">
                 <Card className="flex-col">
                   <CardHeader>
@@ -1420,26 +1383,6 @@ export const ServiceWork = () => {
                     <CaseField label={"Follow Up Note"} span={2}>
                       <Input variant={"invisible"} placeholder={"---"}></Input>
                     </CaseField>
-                    {/* <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Follow Up Required</span>
-                      <span className="ml-43">...</span>
-                    </div>
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Follow Up Reason Code</span>
-                      <span className="ml-36">...</span>
-                    </div>
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Follow Up Completed </span>
-                      <span className="ml-39.5">...</span>
-                    </div>
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Follow Up Note</span>
-                      <span className="ml-51">...</span>
-                    </div> */}
                   </CardContent>
                 </Card>
                 <Card className="flex-col">
@@ -1472,37 +1415,6 @@ export const ServiceWork = () => {
                     <CaseField label={"Customer Resolution Date"} span={2} icon>
                       <Input variant={"invisible"} placeholder={"---"}></Input>
                     </CaseField>
-                    {/* 
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Finished By</span>
-                      <span className="ml-62">...</span>
-                    </div>
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Finished on Date (Customer)</span>
-                      <span className="ml-30">...</span>
-                    </div>
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Finished on Date </span>
-                      <span className="ml-52">...</span>
-                    </div>
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Patner Contact</span>
-                      <span className="ml-50">...</span>
-                    </div>
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Workorder Closed Date</span>
-                      <span className="ml-34.5">...</span>
-                    </div>
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Customer Resolution Date</span>
-                      <span className="ml-29.5">...</span>
-                    </div> */}
                   </CardContent>
                 </Card>
                 <Card className="flex-col">
@@ -1524,21 +1436,6 @@ export const ServiceWork = () => {
                     <CaseField label={"Travel Zone"} span={2}>
                       <Input variant={"invisible"} value={"---"} />
                     </CaseField>
-                    {/* <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Delay Codes</span>
-                      <span className="ml-50">...</span>
-                    </div>
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Repair Class Codes</span>
-                      <span className="ml-38">...</span>
-                    </div>
-                    <div className="flex font-bold">
-                      <Lock className="mr-2 size-5"></Lock>
-                      <span>Travel Zone </span>
-                      <span className="ml-51">...</span>
-                    </div> */}
                   </CardContent>
                 </Card>
               </div>

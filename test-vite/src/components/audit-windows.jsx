@@ -43,7 +43,6 @@ export const Auditwindows = () => {
                       No action logs available.
                     </TableCell>
                   </TableRow>
-                {/* )} */}
               </TableBody>
             </Table>
           </CardContent>

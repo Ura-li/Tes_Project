@@ -2,19 +2,12 @@ import React from 'react'
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
-  SheetClose,
   SheetContent,
-  SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { BadgeAlert } from 'lucide-react'
-import { Building2 } from 'lucide-react'
-import { Contact } from 'lucide-react'
-import { PcCase } from 'lucide-react'
-import { Boxes } from 'lucide-react'
 import { AppAccordion } from './app-accordion'
  
 export function SheetBar() {

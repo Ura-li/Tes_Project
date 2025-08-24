@@ -4,12 +4,9 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Link } from 'react-router'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -27,16 +24,6 @@ import {
 } from "@/components/ui/tabs"
 import { SelectBarRelated } from './sc-select'
 import { CalendarDays,  Lock, PlusCircle } from 'lucide-react'
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 
 'use client'
 
@@ -52,35 +39,6 @@ import { TabsBooking } from './tab';
 
 import { getUserFromToken } from "@/lib/utils/auth";
 
-const workorder = [
-  {
-    workordernumber: "WO-027816939",
-    caseid: "54165182991",
-    serviceaccount: "Icon Plus",
-    substatus: "Waiting",
-    systemstatus: "Open",
-    priority: "WO Priority",
-    workorder: "In-Country",
-    primaryincident: "Depot Repair",
-    duedate: "21/03/2025 00.53",
-    orion: "-",
-    owner : "Jokowi",
-    created: "Widodo",
-  },
-]
-
-const partsorder = [
-  {
-    name: "Budiono",
-    orderstatus: "-",
-    workorder: "-",
-    customerselfrepair: "-",
-    owner: "Budiono",
-    createdon: "W-",
-    ordercloseddate: "-",
-    createdby: "-",
-  },
-]
 
 function formatDateForInput(dateString) {
   if (!dateString) return "";
@@ -202,24 +160,6 @@ export function ServiceBooking ({BookingId , woid}) {
         setTotalBillableDurationInMinutes(data?.TotalBillableDurationInMinutes || 0);
         setTotalInProgressDurationInMinutes(data?.TotalInProgressDurationInMinutes || 0);
         setTotalBreakDurationInMinutes(data?.TotalBreakDurationInMinutes || 0);
-        
-        // const updatedBookingData = {
-        //   ...bookingData, // keep all original fields
-        //   ResourceId: resourceId,
-        //   ResourceAccountId: accountId,
-        //   SubkTechnicianId: subkTechnicianId,
-        //   StartTimeCustomerTime: startTimeCustomerTime || null,
-        //   EndTimeCustomerTime: endTimeCustomerTime || null,
-        //   EstimatedArrivalTimeCustomerTime: estimatedArrivalTimeCustomerTime || null,
-        //   ActualArrivalTimeCustomerTime: actualArrivalTimeCustomerTime || null,
-        //   StartTimeUserTime: startTimeUserTime || null,
-        //   EndTimeUserTime: endTimeUserTime || null,
-        //   DurationInMinutesUserTime: durationInMinutesUserTime || null,
-        //   EstimatedArrivalTimeUserTime: estimatedArrivalTimeUserTime || null,
-        //   ActualArrivalTimeUserTime: actualArrivalTimeUserTime || null,
-        // };
-        
-        // setBookingData(updatedBookingData);
       } catch (error) {
         console.error("Failed to fetch booking data:", error);
         Swal.fire({
@@ -320,7 +260,7 @@ export function ServiceBooking ({BookingId , woid}) {
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
     }
-  }, 500); // 500ms delay
+  }, 500); 
 
   
   const fetchResourceAccount = async (resourceId) => {
@@ -340,9 +280,6 @@ export function ServiceBooking ({BookingId , woid}) {
     }
   }
   
-  
-
-
   const handleSearchAccount = debounce(async (keyword) => {
     if (!keyword) {
       setSearchResultsAccount([]);
@@ -358,7 +295,7 @@ export function ServiceBooking ({BookingId , woid}) {
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
     }
-  }, 500); // 500ms delay
+  }, 500); 
 
 
   const handleSearchSubkTechnician = debounce(async (keyword) => {
@@ -376,7 +313,7 @@ export function ServiceBooking ({BookingId , woid}) {
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
     }
-  }, 500); // 500ms delay
+  }, 500); 
   
 
   const handleSearchSubkTechnicianLearner = debounce(async (keyword) => {
@@ -591,14 +528,6 @@ export function ServiceBooking ({BookingId , woid}) {
                       setRequestedDateTimeCustomer
                     }
                     />
-                  {/* <Input
-                    variant={"invisible"}
-                    value={requestedDateTimeCustomer}
-                    onChange={(e) =>
-                      setRequestedDateTimeCustomer(e.target.value)
-                    }
-                    readOnly
-                  /> */}
                 </CaseField>
                 <CaseField
                   label={"Guaranteed Fix Time (costumer)"}
@@ -609,22 +538,6 @@ export function ServiceBooking ({BookingId , woid}) {
                     value={guaranteedFixTimeCustomer}
                     onChange={setGuaranteedFixTimeCustomer}
                     />
-                  {/* <Input
-                    variant={"invisible"}
-                    value={
-                      guaranteedFixTimeCustomer
-                        ? guaranteedFixTimeCustomer.slice(0, 16)
-                        : ""
-                    }
-                    onChange={(e) => {
-                      const dateTimeGuaranteed = e.target.value;
-                      const isoDateTimeGuaranteed = new Date(
-                        dateTimeGuaranteed
-                      ).toISOString();
-                      setGuaranteedFixTimeCustomer(isoDateTimeGuaranteed);
-                    }}
-                    readOnly
-                  /> */}
                 </CaseField>
               </div>
               <CaseField
@@ -651,13 +564,6 @@ export function ServiceBooking ({BookingId , woid}) {
                 span={2}
                 childClass={" justify-center place-content-center flex"}
               >
-                {/* <Input
-                  className={"w-4 place-content-center"}
-                  type="checkbox"
-                  variant={"invisible"}
-                  checked={ceScheduleChange}
-                  onChange={(e) => setCeScheduleChange(e.target.checked)}
-                /> */}
                 <Select
                   className=""
                   value={ceScheduleChange ? 'yes' : 'no'}
@@ -838,38 +744,6 @@ export function ServiceBooking ({BookingId , woid}) {
                   }
                 />
               </CaseField>
-              {/* <div className="flex font-bold">
-                <span>Total Billable Duration</span>
-                <input
-                  type="number"
-                  value={totalBillableDurationInMinutes}
-                  onChange={(e) =>
-                    setTotalBillableDurationInMinutes(e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="flex font-bold">
-                <span>Total Duration in Progress</span>
-                <input
-                  type="number"
-                  value={totalInProgressDurationInMinutes}
-                  onChange={(e) =>
-                    setTotalInProgressDurationInMinutes(e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="flex font-bold">
-                <span>Total Break Duration</span>
-                <input
-                  type="number"
-                  value={totalBreakDurationInMinutes}
-                  onChange={(e) =>
-                    setTotalBreakDurationInMinutes(e.target.value)
-                  }
-                />
-              </div> */}
             </CardContent>
           </Card>
         </TabsContent>
@@ -906,7 +780,6 @@ export function ServiceBooking ({BookingId , woid}) {
 // Fungsi pengecekan format dan isi dari RequestedDateTimeCustomer
 const CheckRequestedDateTimeCustomer = async (rawDateTime) => {
   try {
-    // 💡 Tambahan keamanan sebelum lanjut
     if (!rawDateTime || 
       !(rawDateTime instanceof Date) || 
       isNaN(rawDateTime.getTime())) {
@@ -920,12 +793,11 @@ const CheckRequestedDateTimeCustomer = async (rawDateTime) => {
         allowEscapeKey: false,
         allowOutsideClick: false,
       });
-      // window.location.reload();
       return false;
     }
 
     const formatted = formatDateForInput(rawDateTime);
-    console.log('Formatted:', formatted); // 👈 Debug output
+    console.log('Formatted:', formatted); //  Debug output
 
     const isValidFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(formatted);
     if (!isValidFormat) {
@@ -1006,7 +878,6 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
       })
       if (response.status === 201) {
         const { BookingId } = response.data;
-        // Lanjut ke navigasi sambil bawa BookingId
         navigate(`/app/bookings/${BookingId}`);
       }
     } catch (error) {

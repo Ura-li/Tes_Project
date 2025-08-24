@@ -67,7 +67,7 @@ export const ExportExcel = ({ caseData }) => {
           ProblemDescription: c.caseinformation.ProblemDescription,
           CaseProductNote: c.caseinformation.CaseProductNote,
           
-          // 🔽 NEW COLUMNS
+          //  NEW COLUMNS
           Accessories: accessories,
           DurationDays: range,
         };

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `User` ADD COLUMN `Phone` VARCHAR(20) NULL,
+    ADD COLUMN `Signature` VARCHAR(500) NULL;

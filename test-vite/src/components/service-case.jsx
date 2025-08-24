@@ -98,15 +98,6 @@ export const TabsService = ({
   const [entitlementStatus, setEntitlementStatus] = useState({
     OTCCode: ''
   })
-  //casenote
-  // const [caseNoteFormData, setCaseNoteFormData] = useState({
-  //   LogType: "",
-  //   ActionType: "",
-  //   Template: "",
-  //   VisibleExternally: null,
-  //   MinutesSpent: 0,
-  //   Note: "",
-  // });
 
   const [caseForm, setCaseForm] = useState({
     CaseType: "",
@@ -145,7 +136,7 @@ export const TabsService = ({
   const handleCaseNoteChange = (key, value) => {
     setCaseNoteFormData((prev) => {
       const updated = { ...prev, [key]: value };
-      console.log("🔄 Updated Form:", updated); // ✅ Log on every change
+      console.log(" Updated Form:", updated); // Log on every change
       return updated;
     });
   };
@@ -163,7 +154,7 @@ export const TabsService = ({
   };
 
  const handleSave = async (redirect = true) => {
-  console.log("📝 Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
+  console.log("Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
 
   try {
     Swal.fire({
@@ -304,7 +295,6 @@ export const TabsService = ({
       }
     }
 
-    // Satu alert saja jika banyak data berhasil disimpan
     if (savedModules.length > 0) {
       if(redirect){
         await Swal.fire({
@@ -323,7 +313,7 @@ export const TabsService = ({
     }
 
   } catch (error) {
-    console.error("❌ Save failed:", error);
+    console.error("Save failed:", error);
     Swal.fire({
       icon: "error",
       title: "Error",
@@ -364,14 +354,6 @@ const openPopup = () => {
           VisibleExternally: noteDetail.VisibleExternally,
         })
       } 
-      // const symptomCodeDetail = await fetchSymptomCodes();
-      // if(symptomCodeDetail){
-      //   setSelectedSymptom({
-      //     TopCategory: symptomCodeDetail.TopCategory,
-      //     SubCategory: symptomCodeDetail.SubCategory,
-      //     SymptomCode: symptomCodeDetail.SymptomCode,
-      //   })
-      // }
     }
     loadNote()
   }, [])
@@ -394,7 +376,6 @@ const openPopup = () => {
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     // { icon: StepBack, label: "Complaint",},
     { icon: StepBack, label: "SRF", onClick: async () => {
-      // console.log("Case Details ; ",caseDetails);
       const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails}  />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -445,7 +426,7 @@ const openPopup = () => {
     });
 
     if (!confirmResult.isConfirmed) {
-      return; // User canceled
+      return; 
     }
     try {
       
@@ -459,7 +440,7 @@ const openPopup = () => {
         },
       });
       const success = await handleSave(false);
-      if (!success) return; // Stop if failed
+      if (!success) return; 
       const res = await ApiCustomer.patch(
         `/api/case-information/${caseDetails.CaseID}`,
         {
@@ -468,7 +449,6 @@ const openPopup = () => {
         }
       );
       if (res.data.success) {
-        // Success alert
         const token = {
           user: getUserFromToken()
         }
@@ -493,7 +473,6 @@ const openPopup = () => {
           navigate(`/app/master/Case_table`);
         });
       } else {
-        // Error from API
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -624,7 +603,6 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
   const WOID = workOrders.WOID;
   const handleSave = async () => {
     try {
-      // Show loading alert
       Swal.fire({
         title: "Updating WORK ORDER...",
         text: "Please wait",
@@ -638,12 +616,9 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
        * TODO :
        * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
        */
-
-      // const resGeneralWO = await ApiCustomer.patch(`/api/work-order/`)
       const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
         //WO GENERAL
         ShipmentCountry: WOGeneral.ShipmentCountry || undefined,
-
         //SLA
         SLAJeopardy: SLA.slaJeopardy || undefined,
         DueDateCustomer: SLA.dueDateCustomer || undefined,
@@ -731,7 +706,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
     });
 
     if (!confirmResult.isConfirmed) {
-      return; // User canceled
+      return;
     }
     try {
       Swal.fire({
@@ -750,7 +725,6 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
         }
       );
       if (res.data.success) {
-        // Success alert
         const token = {
           user: getUserFromToken()
         }
@@ -773,7 +747,6 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
           navigate(`/app/case/${workOrders.CaseID}`);
         });
       } else {
-        // Error from API
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -880,7 +853,6 @@ export const TabsServiceMO = ({ materialOrders }) => {
         }
       );
       if (res.data.success) {
-        // Success alert
         const token = {
           user: getUserFromToken()
         }
@@ -903,7 +875,6 @@ export const TabsServiceMO = ({ materialOrders }) => {
           navigate(`/app/work/${materialOrders.WOID}`);
         });
       } else {
-        // Error from API
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -1034,9 +1005,8 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
             navigate(`/app/mo_detail/${LineItemID}`);
           });
         }
-        return true; // Indicate success
+        return true;
       } else {
-        // Error from API
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -1084,7 +1054,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           changedBy: token.user.id,
           logDescription: `Edit : Change Material Order Line Item ${moLineItems.MOID} - ${moLineItems.LineItemID} Status from ${moLineItems.Status} to Closed`
         })
-        // Success alert
+       
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -1095,7 +1065,6 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           navigate(`/app/material-order/${MOLineDetails.MOID}`);
         });
       } else {
-        // Error from API
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -1257,7 +1226,7 @@ export const ServiceCase = ({
       } else {
         setDataFetchCustomerData((prev) => ({
           ...prev,
-          type: "Individual", // fallback if no site account
+          type: "Individual", 
         }));
       }
     } catch (err) {
@@ -1315,7 +1284,7 @@ export const ServiceCase = ({
       );
       const noteDetail = detailRes.data.data;
 
-      console.log("✅ Case Note Detail:", noteDetail);
+      console.log("Case Note Detail:", noteDetail);
       return noteDetail;
     } catch (err) {
       console.error("Error in fetchCaseNotes:", err);
@@ -1359,10 +1328,10 @@ export const ServiceCase = ({
   const fetchGtc = async () => {
     try {
       const gtcData = caseDetails.global_trade_check;
-      setFormGtc(gtcData ?? formGtc); // pakai default jika null/undefined
+      setFormGtc(gtcData ?? formGtc); 
     } catch (err) {
       console.error("Error fetching GTC:", err);
-      setFormGtc(formGtc); // fallback jika error
+      setFormGtc(formGtc); 
     }
   };
 
@@ -1447,11 +1416,11 @@ export const ServiceCase = ({
         customerRequestedCloseDate: csrData.customerRequestedCloseDate ? new Date(csrData.customerRequestedCloseDate) : "",
       });
     } else {
-      setCsrForm(csrForm); // fallback jika null
+      setCsrForm(csrForm); 
     }
   } catch (err) {
     console.error("Error fetching CSR:", err);
-    setCsrForm(csrForm); // fallback jika error
+    setCsrForm(csrForm); 
   }
 };
 
@@ -1525,13 +1494,10 @@ const fetchActionLog = async () => {
   }, []);
 
   useEffect(() => {
-    // Autofill entitlementStatus.OTCCode once otcCode is fetched and caseDetails is available
     if (otcCode.length > 0 && caseDetails?.OTCCode) {
       handleEntitlementStatus("OTCCode")(caseDetails.OTCCode)
     }
   }, [otcCode, caseDetails]);
-  //data for upper style
-  // const []
 
   useEffect(() => {
     console.log("Data Asset Info : ", dataFetchAssetInformation);
@@ -1539,10 +1505,6 @@ const fetchActionLog = async () => {
     console.log("Fetch Data Customer Success : ", dataFetchCustomerData);
     console.log("Fetch Data User ", ownerUserData);
   }, [ownerUserData]);
-
-  // useEffect(() =>{
-  //   console.log("Data Asset Info : ",dataFetchAssetInformation)
-  // }, dataFetchAssetInformation)
 
   // console.log("Selected Symptopm ",selectedSymptom)
 
@@ -1626,10 +1588,6 @@ const [endDate, setEndDate] = useState(null);
                     <SelectContent>
                       <SelectGroup>
                         <SelectItem value="case">Case</SelectItem>
-                        {/* <SelectItem value="??">??</SelectItem>
-                        <SelectItem value="!!">!!</SelectItem>
-                        <SelectItem value="**">**</SelectItem>
-                        <SelectItem value="&&">&&</SelectItem> */}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -1662,10 +1620,6 @@ const [endDate, setEndDate] = useState(null);
                         <SelectItem value="first" className="p-0">
                           {dataFetchCustomerData.SiteAccount?.Company}
                         </SelectItem>
-                        {/* <SelectItem value="??">??</SelectItem>
-                        <SelectItem value="!!">!!</SelectItem>
-                        <SelectItem value="**">**</SelectItem>
-                        <SelectItem value="&&">&&</SelectItem> */}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -2415,59 +2369,6 @@ const [endDate, setEndDate] = useState(null);
                       onChange={(e) => onChange("Note", e.target.value)}
                     />
                   </CaseField>
-                  {/* <textarea
-                      className='h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500'
-                      value={formData?.Note || ''}
-                      onChange={(e) => onChange("Note", e.target.value)}
-                    /> */}
-
-                  {/* <div className='flex font-bold'>
-                    <span>Log Type</span>
-                      <Select onValueChange={(val) => onChange("LogType", val)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Log Type"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="NotesLog">Notes Log</SelectItem>
-                          <SelectItem value="PhoneLog">Phone Log</SelectItem>
-                        </SelectContent>
-                      </Select>
-                  </div>
-
-                  <div className='flex font-bold'>
-                    <span>Action Type</span>
-                    <span className=''>...</span>
-                  </div>
-
-                  <div className='flex font-bold'>
-                    <span>Template </span>
-                    <span className=''>...</span>
-                  </div>
-
-                  <div className='flex font-bold'>
-                    <span>Visible Externally</span>
-                    <span className=''>
-                    <Select onValueChange={(val) => onChange("VisibleExternally", val === "1")}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="---"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1">Yes</SelectItem>
-                          <SelectItem value="0">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </span>
-                  </div>
-
-                  <div className='flex font-bold '>
-                    <span>Number of Minutes Spent</span>
-                    <span className=''>...</span>
-                  </div>
-
-                  <div className='flex'>
-                    <span className='font-bold'>Notes</span>
-                    <textarea className='h-40 p-2 border-2 border-black resize-none w-80' value={formData?.Note || ''} onChange={(e) => onChange("Note", e.target.value)}></textarea>
-                  </div> */}
                 </div>
 
                 <div className="flex flex-1">
@@ -2777,7 +2678,6 @@ const [endDate, setEndDate] = useState(null);
           <TabsContent value="ci_activitas">
             <Card className="mt-7">
               <CardHeader>Hello Word</CardHeader>
-              {/* <DatePicker icon={<Calendar>}></DatePicker> */}
             </Card>
           </TabsContent>
 
@@ -2944,9 +2844,7 @@ const [endDate, setEndDate] = useState(null);
                         <TableCell
                           className="font-medium "
                         >
-                          {/* <Link to={`/work/${work.WOID}`}> */}
                           {work.WOID}
-                          {/* </Link> */}
                         </TableCell>
                         <TableCell>{work.CaseID}</TableCell>
                         <TableCell>
@@ -2996,20 +2894,6 @@ const [endDate, setEndDate] = useState(null);
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {/* {partsorder.map((parts) => (
-                      <TableRow key={parts.name}>
-                        <TableCell className="font-medium">
-                          {parts.name}
-                        </TableCell>
-                        <TableCell>{parts.orderstatus}</TableCell>
-                        <TableCell>{parts.workorder}</TableCell>
-                        <TableCell>{parts.customerselfrepair}</TableCell>
-                        <TableCell>{parts.owner}</TableCell>
-                        <TableCell>{parts.createdon}</TableCell>
-                        <TableCell>{parts.ordercloseddate}</TableCell>
-                        <TableCell>{parts.createdby}</TableCell>
-                      </TableRow>
-                    ))} */}
                     <TableRow>
                       <TableCell className="font-medium">
                         No data available
@@ -3091,13 +2975,6 @@ const [endDate, setEndDate] = useState(null);
                         <TableCell>{material.ReadyForClosureDate}</TableCell>
                       </TableRow>
                     ))}
-                    {/* <TableRow>
-                      <TableCell className="font-medium">
-                        <Link to="/material_order">
-                        
-                        </Link>
-                      </TableCell>
-                    </TableRow> */}
                   </TableBody>
                 </Table>
               </CardContent>

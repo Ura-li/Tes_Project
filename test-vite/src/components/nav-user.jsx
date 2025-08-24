@@ -1,12 +1,12 @@
 "use client"
 
+import { useNavigate } from "react-router"
 import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
   CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -35,7 +35,15 @@ import Swal from "sweetalert2"
 export function NavUser({
   user
 }) {
+  const navigate = useNavigate();
+
+  const goToProfile = () => {
+    navigate("/app/profiles");
+  };
+
   const { isMobile } = useSidebar()
+
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -62,8 +70,8 @@ export function NavUser({
               size="lg"
               className="bg-white data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="bg-cyan-700 rounded-lg text-white font-semibold">CN</AvatarFallback>
+                <AvatarImage src={`${API_BASE}${user.avatar}` || "/default-avatar.png"} alt={user.name} />
+                <AvatarFallback className="bg-cyan-700 rounded-lg text-white font-semibold">{user.name?.[0]?.toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -80,8 +88,8 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="bg-cyan-700 rounded-lg text-white font-semibold">CN</AvatarFallback>
+                  <AvatarImage src={`${API_BASE}${user.avatar}` || "/default-avatar.png"} alt={user.name} />
+                  <AvatarFallback className="bg-cyan-700 rounded-lg text-white font-semibold">{user.name?.[0]?.toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -91,14 +99,10 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              {/* <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={goToProfile}  className="cursor-pointer">
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
@@ -112,8 +116,8 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-            <span onClick={logout} className="flex items-center cursor-pointer gap-2">
+            <DropdownMenuItem onClick={logout} className={"cursor-pointer bg-red-300 "}>
+            <span  className="flex items-center gap-2">
               <LogOut className="w-5 h-5" />
               <span>Log out</span>
             </span>

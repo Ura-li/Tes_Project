@@ -63,7 +63,7 @@ useEffect(() => {
       const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`);
       setCaseNote(detailRes.data.data);
 
-      // ✅ Delay sedikit agar UI sempat render dulu
+      // Delay sedikit agar UI sempat render dulu
       await new Promise(resolve => setTimeout(resolve, 500));
 
     } catch (error) {

@@ -70,7 +70,6 @@ export function QuickWOInput ({
   setSLA
 }) {
   // State untuk 8 field General
-  // console.log('case_informtion in quick wo input : ', caseInformation)
   const [tab, setTab] = useState("Quick_WO_Input");
   const [general, setGeneral] = useState({
     incomingChannel: "",
@@ -89,15 +88,6 @@ export function QuickWOInput ({
       [field]: e.target.value,
     }));
   }
-
-  // const [incomingChannel, setIncomingChannel] = useState("");
-  // const [workOrderNumber, setWorkOrderNumber] = useState("");
-  // const [workOrderType, setWorkOrderType] = useState("");
-  // const [systemStatus, setSystemStatus] = useState("");
-  // const [subStatus, setSubStatus] = useState("");
-  // const [partnerStatus, setPartnerStatus] = useState("");
-  // const [workOrderDescription, setWorkOrderDescription] = useState("");
-  // const [workOrderInstruction, setWorkOrderInstruction] = useState("");
 
   //Service Delivery Address
   const [addressID, setAddressID] = useState(""); // nanti bisa jadi ID
@@ -129,47 +119,13 @@ export function QuickWOInput ({
     }));
   }
   
-  // const [companyName, setCompanyName] = useState("");
-  // const [contactFirstName, setContactFirstName] = useState("");
-  // const [contactLastName, setContactLastName] = useState("");
-  // const [phoneNumber, setPhoneNumber] = useState("");
-  // const [email, setEmail] = useState("");
-  // const [addressLine1, setAddressLine1] = useState("");
-  // const [addressLine2, setAddressLine2] = useState("");
-  // const [addressLine3, setAddressLine3] = useState("");
-  // const [city, setCity] = useState("");
-  // const [stateOrProvince, setStateOrProvince] = useState("");
-  // const [countryOrRegion, setCountryOrRegion] = useState("");
-  // const [postalCode, setPostalCode] = useState("");
-  // const [timezone, setTimezone] = useState("");
-  // const [serviceTerritory, setServiceTerritory] = useState("");
-  // const [businessSegment, setBusinessSegment] = useState("");
-  // const [longitude, setLongitude] = useState("");
-  // const [latitude, setLatitude] = useState("");
-
   //SLA
-  
-
   const handleChangeSLA = (field) => (e) => {
     setSLA((prev) => ({
       ...prev,
       [field]: e.target.value,
     }));
   }
-
-  // const [slaJeopardy, setSlaJeopardy] = useState("");
-  // const [dueDateCustomer, setDueDateCustomer] = useState("");
-  // const [coverageWindow, setCoverageWindow] = useState("");
-  // const [response, setResponse] = useState("");
-  // const [otcCode, setOtcCode] = useState("");
-  // const [requestedDateTimeCustomer, setRequestedDateTimeCustomer] = useState("");
-  // const [guaranteedFixTimeCustomer, setGuaranteedFixTimeCustomer] = useState("");
-  // const [earlyStartDateTimeCustomer, setEarlyStartDateTimeCustomer] = useState("");
-  // const [latestStartDateTimeCustomer, setLatestStartDateTimeCustomer] = useState("");
-  // const [slaReschedule, setSlaReschedule] = useState("");
-  // const [activeScheduleDate, setActiveScheduleDate] = useState("");
-  // const [slaErrorDescription, setSlaErrorDescription] = useState("");
-  // const [casePriorityIndex, setCasePriorityIndex] = useState("");
 
   //fetch data site_account
   const [siteAccountInformation, setSiteAccountInformation] = useState([])
@@ -222,69 +178,6 @@ export function QuickWOInput ({
         workOrderDescription: wo.WorkOrderDescription || "...",
         workOrderInstruction: wo.WorkOrderInstruction || "...",
       })
-      // setIncomingChannel(wo.IncomingChannel || "..."); 
-      // setWorkOrderNumber(wo.WorkOrderNumber || "...");
-      // setWorkOrderType(wo.WorkOrderType || "...");
-      // setSystemStatus(wo.SystemStatus || "...");
-      // setSubStatus(wo.SubStatus || "...");
-      // setPartnerStatus(wo.PartnerStatus || "...");
-      // setWorkOrderDescription(wo.WorkOrderDescription || "...");
-      // setWorkOrderInstruction(wo.WorkOrderInstruction || "...");
-
-      //SLA
-      // setSLA({
-      //   slaJeopardy: wo.SLAJeopardy || "...",
-      //   dueDateCustomer: wo.DueDateCustomer || "...",
-      //   coverageWindow: wo.CoverageWindow || "...",
-      //   response: wo.Response || "...",
-      //   otcCode: wo.OTCCode || "...",
-      //   requestedDateTimeCustomer: wo.RequestedDateTimeCustomer || "...",
-      //   guaranteedFixTimeCustomer: wo.GuaranteedFixTimeCustomer || "...",
-      //   earlyStartDateTimeCustomer: wo.EarlyStartDateTimeCustomer || "...",
-      //   latestStartDateTimeCustomer: wo.LatestStartDateTimeCustomer || "...",
-      //   slaReschedule: wo.SLAReschedule || "...",
-      //   activeScheduleDate: wo.ActiveScheduleDate || "...",
-      //   slaErrorDescription: wo.SLAErrorDescription || "...",
-      //   casePriorityIndex: wo.CasePriorityIndex?.toString() || "...",
-      // })
-
-      // setSlaJeopardy(wo.SLAJeopardy || "...");
-      // setDueDateCustomer(wo.DueDateCustomer || "...");
-      // setCoverageWindow(wo.CoverageWindow || "...");
-      // setResponse(wo.Response || "...");
-      // setOtcCode(wo.OTCCode || "...");
-      // setRequestedDateTimeCustomer(wo.RequestedDateTimeCustomer || "...");
-      // setGuaranteedFixTimeCustomer(wo.GuaranteedFixTimeCustomer || "...");
-      // setEarlyStartDateTimeCustomer(wo.EarlyStartDateTimeCustomer || "...");
-      // setLatestStartDateTimeCustomer(wo.LatestStartDateTimeCustomer || "...");
-      // setSlaReschedule(wo.SLAReschedule || "...");
-      // setActiveScheduleDate(wo.ActiveScheduleDate || "...");
-      // setSlaErrorDescription(wo.SLAErrorDescription || "...");
-      // setCasePriorityIndex(wo.CasePriorityIndex?.toString() || "...");
-
-      //Service Delivery Address
-      // const res2 = await ApiCustomer.get(`/api/workorder/${WOID}/service-address`);
-      // const address = res2.data.data;
-
-
-      // setAddressID(siteAccount.SiteAccountID || "---");
-      // setCompanyName(siteAccount.Company || "---");
-      // setContactFirstName(contact.FirstName || "---");
-      // setContactLastName(contact.LastName || "---");
-      // setPhoneNumber(siteAccount.PrimaryPhone || contact.Phone || "---");
-      // setEmail(siteAccount.Email || contact.Email || "---");
-      // setAddressLine1(siteAccount.AddressLine1 || contact.AddressLine1 || "---");
-      // setAddressLine2(siteAccount.AddressLine2 || contact.AddressLine2 || "---");
-      // setAddressLine3("---");
-      // setCity(siteAccount.City || contact.City || "---");
-      // setStateOrProvince(siteAccount.StateProvince || contact.StateProvince || "---");
-      // setCountryOrRegion(siteAccount.Country || contact.Country || "---");
-      // setPostalCode(siteAccount.ZipPostalCode || contact.ZipPostalCode || "---");
-      // setTimezone("---");
-      // setServiceTerritory("---");
-      // setBusinessSegment("---");
-      // setLongitude("---");
-      // setLatitude( "---");
       setMainAccount(newMainAccount);
       console.log("Main Account : ",mainAccount);
 
@@ -310,23 +203,6 @@ export function QuickWOInput ({
       });
 
       setAddressID(siteAccount?.SiteAccountID || "---");
-      // setCompanyName(address.CompanyName || "---");
-      // setContactFirstName(address.ContactFirstName || "---");
-      // setContactLastName(address.ContactLastName || "---");
-      // setPhoneNumber(address.PhoneNumber || "---");
-      // setEmail(address.Email || "---");
-      // setAddressLine1(address.AddressLine1 || "---");
-      // setAddressLine2(address.AddressLine2 || "---");
-      // setAddressLine3(address.AddressLine3 || "---");
-      // setCity(address.City || "---");
-      // setStateOrProvince(address.StateOrProvince || "---");
-      // setCountryOrRegion(address.CountryOrRegion || "---");
-      // setPostalCode(address.PostalCode || "---");
-      // setTimezone(address.TimeZone || "---");
-      // setServiceTerritory(address.ServiceTerritory || "---");
-      // setBusinessSegment(address.BusinessSegment || "---");
-      // setLongitude(address.Longitude || "---");
-      // setLatitude(address.Latitude || "---");
     })();
   }, [WOID]);
 
@@ -476,7 +352,6 @@ export function QuickWOInput ({
           </TabsContent>
         </Tabs>
         <CardFooter className="flex justify-end">
-          {/* <Button onClick={handleSave}>Save</Button> */}
         </CardFooter>
       </CardContent>
   );

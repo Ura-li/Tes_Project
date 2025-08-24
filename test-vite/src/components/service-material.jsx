@@ -148,25 +148,24 @@ export const ServiceMaterial = () => {
   };
 
   useEffect(() => {
-    // Display SweetAlert2 loading indicator before starting fetch
     Swal.fire({
       title: 'Memuat Data...',
       text: 'Mohon tunggu sebentar...',
       allowOutsideClick: false,
       didOpen: () => {
-        Swal.showLoading(); // Show loading spinner
+        Swal.showLoading(); 
       }
     });
 
     // Run both fetch functions in parallel
     Promise.all([fetchMaterialOrder(), fetchMaterialLineOrdersInMODetail()])
       .then(() => {
-        Swal.close(); // Close SweetAlert2 once data is fetched successfully
+        Swal.close(); 
       })
       .catch((err) => {
-        Swal.close(); // Close SweetAlert2 if there's an error
+        Swal.close();
       });
-  }, [moid]); // Make sure to include moid as a dependency to refetch on change
+  }, [moid]);
 
   // If error state is set, display error message to user
   if (error) {
@@ -374,151 +373,6 @@ export const ServiceMaterial = () => {
                       value={"---"}
                     />
                 </CaseField>
-
-                {/* <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Order Number</span>
-                  <span className="ml-40">{materialOrders.MOID}</span>
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Service Offer ID (Case)</span>
-                  <span className="ml-[150px]">{materialOrderInformation.serviceOfferID}</span>
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Service Description (Case)</span>
-                  <span className="ml-[124px]">{materialOrderInformation.serviceDescription}</span>
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Order Type</span>
-                  <span className="ml-46.5">{materialOrders.OrderType}</span>
-                </div>
-
-                <div className="flex font-bold">
-                  <span className="ml-7">Shipping Priority</span>
-                  <span className="ml-35.5">{materialOrders.ShippingPriority}</span>
-                </div>
-
-                <div className="flex font-bold">
-                <Lock className="mr-2 size-5"></Lock>
-                  <span>Ready For Closure Date</span>
-                  <span className="ml-24">{materialOrders.ReadyForClosureDate}</span>
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Case ID</span>
-                  <span className="ml-54">{materialOrders.workorder?.CaseID}</span>
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5"></Lock>
-                  <span>Contact</span>
-                  <span className="ml-53">{materialOrders.workorder?.caseinformation?.contact_information?.Salutation} {materialOrders.workorder?.caseinformation?.contact_information?.FirstName} {materialOrders.workorder?.caseinformation?.contact_information?.LastName}</span>
-                </div>
-
-                <div className="flex font-bold">
-                  <span className="ml-7">Delivery Requested Date (Customer Time)</span>
-                  <span className="ml-10 mr-16">...</span>
-                  <CalendarDays></CalendarDays>
-                </div>
-                
-                <div className="flex items-center font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Collection Requested Date (MO)</span>
-                  <span className="ml-[156px] mr-16">
-                    {materialOrderInformation.collectionRequestedDate
-                      ? new Date(materialOrderInformation.collectionRequestedDate).toLocaleString()
-                      : '-'}
-                  </span>
-                  <CalendarDays />
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Promo Code</span>
-                  <span className="ml-[260px]">{materialOrderInformation.promoCode }</span>
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Customer Induced Damage (MO)</span>
-                  <span className="ml-[150px]">
-                    {materialOrderInformation.customerInducedDamage ? 'Yes' : 'No'}
-                  </span>
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Accidental Damage Protection (MO)</span>
-                  <span className="ml-[128px]">
-                    {materialOrderInformation.accidentalDamageProtection ? 'Yes' : 'No'}
-                  </span>
-                </div>
-
-                <div className="flex font-bold">
-                  <span className="ml-7">Defective Media Retention (MO)</span>
-                  <span className="ml-[158px]">
-                    {materialOrderInformation.defectiveMediaRetention ? 'Yes' : 'No'}
-                  </span>
-
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Notification Number (MO?)</span>
-                  <span className="ml-[204px]">{materialOrderInformation.notificationNumber }</span>
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>Sales Order Number (MO?)</span>
-                  <span className="ml-[208px]">{materialOrderInformation.salesOrderNumber }</span>
-                </div>                
-
-                <div className="flex font-bold">
-                  <span className="ml-7">Resource Name</span>
-                  <span className="ml-40">{materialOrders.workorder?.bookings?.[0].bookingDetails?.[0].ResourceId || ""}</span>
-                </div>
-
-                <div className="flex font-bold">
-                <Lock className="mr-2 size-5"></Lock>
-                    <span>Work Order</span>
-                    <span className="ml-47">{materialOrders.WOID}</span>
-                </div>
-
-                <div className="flex font-bold">
-                  <span className="ml-7">Parent Mo</span>
-                  <span className="ml-[200px]">
-                    {materialOrderInformation.parentMO?.MOID }
-                  </span>
-                </div>
-
-                <div className="flex font-bold">
-                  <Lock className="mr-2 size-5" />
-                  <span>BCP Order (MO?)</span>
-                  <span className="ml-[200px]">
-                    {materialOrderInformation.isBCPOrder ? 'Yes' : 'No'}
-                  </span>
-                </div>
-
-                <div className="flex font-bold">
-                  <span className="ml-7">Material Order Type</span>
-                  <span className="ml-[128px]">
-                    {materialOrderInformation.materialOrderType }
-                  </span>
-                </div>
-
-                  <div className="flex font-bold">
-                    
-                    <span className="ml-7">EOT Order Number</span>
-                    <span className="ml-34">...</span>
-                  </div> */}
               </CardContent>
             </Card>
           </TabsContent>
@@ -562,17 +416,6 @@ export const ServiceMaterial = () => {
 
                       </TableRow>
                     ))}
-                    {/* <TableRow>
-                      <TableCell className="font-medium">
-                       <Link to="/mo_detail">MO-8292819129-1</Link>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        Shipped
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        available
-                      </TableCell>
-                    </TableRow> */}
                   </TableBody>
                 </Table>
               </CardContent>
