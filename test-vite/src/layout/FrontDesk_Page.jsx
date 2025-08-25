@@ -38,8 +38,8 @@ export default function FrontDesk_Page() {
       const response = await ApiCustomer.get('/api/case-information');
       const valuefiltercases = response.data.data.filter(c => c?.CreatedName == user.name);
       const valueFilterOpenCase = response.data.data.filter(c => c?.CaseStatus == 'Open' && c?.CreatedName == user.name)
-      const valueFilterInActiveCase = response.data.data.filter(c => c?.CaseStatus == 'Open' && c?.CreatedName == user.name)
-      const valueFilterCloseCase = response.data.data.filter(c => c?.CaseStatus == 'Open' && c?.CreatedName == user.name)
+      const valueFilterInActiveCase = response.data.data.filter(c => c?.CaseStatus == 'Close' && c?.CreatedName == user.name)
+      const valueFilterCloseCase = response.data.data.filter(c => c?.CaseStatus == 'InActive' && c?.CreatedName == user.name)
       const filtercases = response.data.data.filter(c => c?.CaseStatus !== 'Close' && c?.CreatedName == user.name);
       const sortedCases = filtercases.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
       const recentCases = sortedCases.slice(0, 4);
