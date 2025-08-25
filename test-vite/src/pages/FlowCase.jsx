@@ -10,11 +10,14 @@ import { se } from 'date-fns/locale'
 import { set } from 'lodash'
 import { PanelRight } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import Swal from 'sweetalert2'
 
 
 
 export const FlowCase = () => {
+  const { user } = useAuth();
+
   const [caseData, setCaseData] = useState([]);
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -32,7 +35,7 @@ export const FlowCase = () => {
     setLoading(true);
     try {
       const response = await ApiCustomer.get('/api/case-information');
-      const filtercases = response.data.data.filter(c => c.CaseStatus !== 'Close');
+      const filtercases = response.data.data.filter(c => c.CaseStatus !== 'Close' && c?.CreatedName == user.name);
       setCaseData(filtercases);
       setError(false)
       return response.data.data;
@@ -70,7 +73,7 @@ export const FlowCase = () => {
   
   console.log(caseData)
 
-  const { user } = useAuth();
+  const navigate = useNavigate();
   return (
     <SidebarProvider defaultOpen>
 
@@ -143,6 +146,10 @@ export const FlowCase = () => {
                             <p className="text-md text-gray-500 col-span-2">
                                 {c.CustomerAccount || "No Company"}
                             </p>
+                            <p className="font-medium">Phone Number</p>
+                            <p className="text-md text-gray-500 col-span-2">
+                                {c.CustomerAccount || "No Phone Set"}
+                            </p>
                           </div>
                         </div>
                         <div className="p-3 rounded-lg bg-muted/50">
@@ -156,9 +163,9 @@ export const FlowCase = () => {
                         </div>
                       </CardContent>
                       <CardFooter className="justify-between">
-                        <p className="text-sm text-muted-foreground">Case Distribution {c.Owner}</p>
+                        <p className="text-sm text-muted-foreground">Case Holder {c.Owner}</p>
                         <p className="text-sm text-muted-foreground">Status Right Now {c.CaseStatus}</p>
-                        <Button size="sm" variant="outline">Details</Button>
+                        <Button size="sm" variant="outline" onClick={() => navigate(`/app/case/${c.CaseID}`)}>Details</Button>
                       </CardFooter>
                     </Card>
 
@@ -166,6 +173,7 @@ export const FlowCase = () => {
                 ))
               )}
               {error ? <h1 className='text-center text-destructive' > Something went wrong </h1> : ''}
+              {/* {caseData.values == 0 ? <h1 className='text-center text-destructive' > You dont have any case yet </h1>  : 'TEWS'} */}
             </div>
           </section>
         </div>
