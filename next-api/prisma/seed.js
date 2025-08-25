@@ -10,7 +10,7 @@ async function main() {
     update: {},
     create: {
       Email: 'admin@admin.com',
-      Username: 'admin',
+      Username: '12345678',
       Password: hashedPassword,
       Name: 'Admin Account',
       Role: 'admin',
