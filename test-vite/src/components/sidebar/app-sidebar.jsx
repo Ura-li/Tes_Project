@@ -303,11 +303,11 @@ const navrole = data.projects;
   }
 
   return (  
-    <Sidebar collapsible="icon" {...props} className="border-0 bg-none ">
-      <SidebarHeader className={'bg-cyan-700'}>
+    <Sidebar collapsible="icon" {...props} className="border-0 bg-none z-40 ">
+      <SidebarHeader className={'bg-gradient-to-l from-hp-50 via-hp-200 to-hp-300'}>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
-      <SidebarContent className={'bg-cyan-700 text-white'}>
+      <SidebarContent className={'bg-gradient-to-b from-hp-300 via-hp-400 to-hp-500 text-white'}>
         <NavProjects projects={navrole} />
         
         {/* <Separator className={'border-2'}></Separator> */}

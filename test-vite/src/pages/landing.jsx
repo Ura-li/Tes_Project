@@ -9,7 +9,7 @@ export default function Landing() {
   const { user } = useAuth();
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="text-center">Loading...</div>}>
       {user?.role === "admin" && <AdminLanding />}
       {/* {user?.role === "manager" && <ManagerLanding />} */}
       {user?.role === "user" && <WorkerLanding />}
