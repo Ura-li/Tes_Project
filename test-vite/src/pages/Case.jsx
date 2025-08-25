@@ -5,6 +5,8 @@ import Swal from 'sweetalert2';
 import { Skeleton } from '../components/ui/skeleton'
 import { TabsService } from '../pages/services/service-case'
 import { useDraft } from '../components/DraftContext';
+import { useAuth } from '@/context/auth-context';
+import { TabsServiceCaseDetails } from './CaseDetail';
 export const Case = () => {
   const { caseId } = useParams(); // Get caseId from URL params
   const { updateDraft } = useDraft(); // Access updateDraft from context
@@ -98,14 +100,25 @@ useEffect(() => {
       </div>
     );
   }
-
+  const { user } = useAuth();
   return (
-    <TabsService 
-      caseDetails={caseDetails} 
-      setCaseDetails={setCaseDetails}
-      caseNote={caseNote}
-      caseNoteFormData={caseNoteFormData}
-      setCaseNoteFormData={setCaseNoteFormData}
-    />
+    <>
+    {user.role === 'admin' ?
+      <TabsService
+        caseDetails={caseDetails}
+        setCaseDetails={setCaseDetails}
+        caseNote={caseNote}
+        caseNoteFormData={caseNoteFormData}
+        setCaseNoteFormData={setCaseNoteFormData}
+      /> :
+      <TabsServiceCaseDetails
+          caseDetails={caseDetails}
+          setCaseDetails={setCaseDetails}
+          caseNote={caseNote}
+          caseNoteFormData={caseNoteFormData}
+          setCaseNoteFormData={setCaseNoteFormData}
+      />
+    }
+    </>
   );
 };

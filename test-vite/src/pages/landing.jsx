@@ -13,6 +13,8 @@ export default function Landing() {
       {user?.role === "admin" && <AdminLanding />}
       {/* {user?.role === "manager" && <ManagerLanding />} */}
       {user?.role === "user" && <WorkerLanding />}
+      {user?.role === "apo" && <WorkerLanding />}
+      {user?.role === "fd" && <WorkerLanding />}
     </Suspense>
   );
 }

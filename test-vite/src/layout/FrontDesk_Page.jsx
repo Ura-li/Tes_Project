@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/auth-context';
 import { set } from 'lodash';
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router';
 import Swal from 'sweetalert2';
 
 
@@ -17,12 +18,15 @@ export default function FrontDesk_Page() {
   const [caseData, setCaseData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [casevaluedata, setCasevaluedata] = useState([])
+  const [inactivecasevaluedata, setInactivecasevaluedata] = useState([])
+  const [closecasevaluedata, setClosecasevaluedata] = useState([])
+
 
   const radialchartdata = [
-    { name: "Open", value: casevaluedata?.open || 0, fill: "#3B82F6" },
-    { name: "In Progress", value: casevaluedata?.inActive || 0, fill: "#FACC15" },
-    { name: "Closed", value: casevaluedata?.closed || 0, fill: "#10B981" },
-    { name: "Pending", value: 5, fill: "#F97316" },
+    { name: "Open", value: casevaluedata || 0, fill: "#3B82F6" },
+    { name: "In Progress", value: inactivecasevaluedata || 0, fill: "#FACC15" },
+    { name: "Closed", value: closecasevaluedata || 0, fill: "#10B981" },
+    // { name: "Pending", value: 5, fill: "#F97316" },
   ];
 
   console.log(radialchartdata,"the data")
@@ -32,13 +36,18 @@ export default function FrontDesk_Page() {
     try {
 
       const response = await ApiCustomer.get('/api/case-information');
-      const valuefiltercases = response.data.data.filter(c => c.Owner !== 'user');
-      const filtercases = response.data.data.filter(c => c.CaseStatus !== 'Close');
+      const valuefiltercases = response.data.data.filter(c => c?.CreatedName == user.name);
+      const valueFilterOpenCase = response.data.data.filter(c => c?.CaseStatus == 'Open' && c?.CreatedName == user.name)
+      const valueFilterInActiveCase = response.data.data.filter(c => c?.CaseStatus == 'Open' && c?.CreatedName == user.name)
+      const valueFilterCloseCase = response.data.data.filter(c => c?.CaseStatus == 'Open' && c?.CreatedName == user.name)
+      const filtercases = response.data.data.filter(c => c?.CaseStatus !== 'Close' && c?.CreatedName == user.name);
       const sortedCases = filtercases.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
       const recentCases = sortedCases.slice(0, 4);
-
+      console.log("Length of the arrays",valuefiltercases);
       setCaseData(recentCases);
-      setCasevaluedata(valuefiltercases);
+      setCasevaluedata(valueFilterOpenCase?.length);
+      setInactivecasevaluedata(valueFilterInActiveCase?.length)
+      setClosecasevaluedata(valueFilterCloseCase?.length);
       return response.data.data;
     } catch (error) {
       Swal.fire({
@@ -57,7 +66,10 @@ export default function FrontDesk_Page() {
     fetchData();
   }, []);
 
+  const navigate = useNavigate();
+
   console.log(caseData)
+  console.log("THe value ",casevaluedata)
   return (
     <div className="max-h-[calc(100vh-64px)] w-full grid grid-cols-4 grid-rows-2 gap-4 p-4 bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Left Column - Profile */}
@@ -133,7 +145,8 @@ export default function FrontDesk_Page() {
               <>
                 <Card
                   key={c.SerialNumber}
-                  className="p-3 border-l-4 rounded-lg shadow-sm hover:shadow-md transition border-teal-400 bg-white"
+                  className="p-3 border-l-4 rounded-lg shadow-sm hover:shadow-md transition border-teal-400 bg-white cursor-pointer"
+                  onClick={() => navigate(`/app/case/${c.CaseID}`)}
                 >
                   <div className="">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium
