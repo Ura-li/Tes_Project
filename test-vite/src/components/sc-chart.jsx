@@ -1,7 +1,7 @@
 "use client"
 import {useState, useMemo, useEffect, } from "react"
 import { Archive, AreaChartIcon, BarChart3, TrendingUp } from "lucide-react"
-import { Label, Pie, PieChart, Bar, BarChart, Area, AreaChart, CartesianGrid, XAxis, YAxis, } from "recharts"
+import { Label, Pie, PieChart, Bar, BarChart, Area, AreaChart, CartesianGrid, XAxis, YAxis, PolarGrid, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts"
 
 import {
   Card,
@@ -292,4 +292,78 @@ export function ChartPie() {
       </CardFooter>
     </Card>
   )
+}
+
+
+export const description = "A radial chart with text"
+
+
+export function ChartRadialText({
+  radialchartdata
+}) {
+  const total = radialchartdata.reduce((sum, d) => sum + d.value, 0);
+
+  return (
+    <Card className="flex   p-0 m-0 gap-0 h-fit shadow-none border-0 ring-0 ">
+      {/* <CardHeader className="items-center pb-0 bg-amber-100">
+        <CardTitle>Cases Overview</CardTitle>
+        <CardDescription>Today’s activity</CardDescription>
+      </CardHeader> */}
+
+      <CardContent className="pb-0 flex justify-center m-0 p-0">
+        <RadialBarChart
+          width={220}
+          height={190}
+          data={radialchartdata}
+          startAngle={90}
+          endAngle={-270}
+          innerRadius={60}
+          outerRadius={100}
+        >
+          <RadialBar dataKey="value" background cornerRadius={6} />
+          <PolarRadiusAxis tick={false} axisLine={false}>
+            <Label
+              content={({ viewBox }) =>
+                viewBox && "cx" in viewBox && (
+                  <text
+                    x={viewBox.cx}
+                    y={viewBox.cy}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                  >
+                    <tspan
+                      x={viewBox.cx}
+                      y={viewBox.cy}
+                      className="fill-foreground text-2xl font-bold"
+                    >
+                      {total}
+                    </tspan>
+                    <tspan
+                      x={viewBox.cx}
+                      y={(viewBox.cy || 0) + 20}
+                      className="fill-muted-foreground text-xs"
+                    >
+                      Total Cases
+                    </tspan>
+                  </text>
+                )
+              }
+            />
+          </PolarRadiusAxis>
+        </RadialBarChart>
+      <CardFooter className="grid  items-center justify-center gap-2 text-xs text-gray-600">
+        {radialchartdata.map((d) => (
+          <div key={d.name} className="flex items-center gap-2">
+            <span
+              className="w-3 h-3 rounded-full"
+              style={{ background: d.fill }}
+            ></span>
+            {d.name}: <span className="font-semibold">{d.value}</span>
+          </div>
+        ))}
+      </CardFooter>
+      </CardContent>
+
+    </Card>
+  );
 }

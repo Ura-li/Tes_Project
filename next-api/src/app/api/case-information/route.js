@@ -56,8 +56,9 @@ export async function GET(request) {
           ContactID: true,
           FirstName: true,
           LastName: true,
+          Email: true,
           site_account: {
-            select: { Company: true },
+            select: { Company: true, Email: true },
           },
         },
       },

@@ -100,21 +100,49 @@ export async function POST(request) {
     const { 
         SerialNumber,
         ProductNumber,
+        ProductLine,
+        ProductName,
         SiteAccountID,
         ProductTypeID,
         ContactID
     } = await request.json();
 
-    console.log()
+    // if (!ContactID) {
+    //     return NextResponse.json({
+    //         success: false,
+    //         message: "Asset must be linked to a Contact."
+    //     }, { status: 400 });
+    // }
+
+    let productInfo = await prisma.product_information.findUnique({
+        where: { ProductNumber }
+    });
+
+    if (!productInfo) {
+        productInfo = await prisma.product_information.create({
+            data: {
+                ProductNumber,
+                ProductLine,
+                ProductName,
+                ProductTypeID
+            }
+        });
+    }
+    
     //create data 
-    const asset_information = await prisma.asset_information.create({
-        data:{
-            SerialNumber: SerialNumber,
-            ProductNumber: ProductNumber,
-            ProductTypeID: ProductTypeID,
-            SiteAccountID: SiteAccountID,
-            ContactID: ContactID
+       const asset_information = await prisma.asset_information.create({
+        data: {
+            SerialNumber,
+            ProductNumber: productInfo.ProductNumber,
+            ProductTypeID,
+            SiteAccountID,
+            ContactID
         },
+        include: {
+            product_information: true,
+            contact_information: true,
+            site_account: true
+        }
     });
 
     return NextResponse.json(
