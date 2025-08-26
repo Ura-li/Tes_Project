@@ -9,6 +9,7 @@ import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "./ui/dialog";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 
 export function UserProfile({ user }) {
@@ -112,7 +113,10 @@ export function UserProfile({ user }) {
             }
 
         } catch (error) {
-            Swal.fire("Error : " + error);
+            // Swal.fire("Error : " + error);
+            toast("Error", {
+                description: error.response?.data?.message || error.message || "Something went wrong",
+            });
         }
 
     }
@@ -146,7 +150,7 @@ export function UserProfile({ user }) {
                     <div className="flex w-full justify-evenly text-sm text-gray-500">
                         <span>{formData.Email || "#####@gmail.com"}</span>
                         <span>{formData?.Phone || "######"}</span>
-                    </div>
+                    </div> 
                 </CardContent>
 
                 {/* Footer */}
@@ -170,9 +174,9 @@ export function UserProfile({ user }) {
                     <Button variant="outline" className="absolute top-4 right-4">Edit Profile
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-lg p-10">
+                <DialogContent className="sm:max-w-lg p-10 ">
                     <form onSubmit={handleSubmit} className="relative space-y-6">
-                        <Card className="p-6 shadow-md rounded-2xl">
+                        <Card className="p-6 shadow-md rounded-2xl ">
                             {/* Header */}
                             <CardHeader className="text-center space-y-1">
                                 <CardTitle className="text-xl font-bold">User Profile</CardTitle>
