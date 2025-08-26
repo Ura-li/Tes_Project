@@ -1,14 +1,17 @@
 import ApiCustomer from '@/api';
 import { ChartRadialText } from '@/components/sc-chart';
+import ToastTester from '@/components/ToastComponent';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardFooter, CardContent, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/auth-context';
+import { useSocket } from '@/hooks/useSocket';
 import { set } from 'lodash';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
 import Swal from 'sweetalert2';
 
 
@@ -26,6 +29,7 @@ export default function FrontDesk_Page() {
       Signature: null,
   });
 
+  const [notfilog, setNotfilog] = useState([])
 
   const radialchartdata = [
     { name: "Open", value: casevaluedata || 0, fill: "#3B82F6" },
@@ -34,7 +38,21 @@ export default function FrontDesk_Page() {
     // { name: "Pending", value: 5, fill: "#F97316" },
   ];
 
-  console.log(radialchartdata,"the data")
+  console.log(radialchartdata, "the data")
+
+  useSocket("case:created", (newCase) => {
+    console.log("case Created",newCase);
+    setCaseData((prev) => [newCase, ...prev]); // prepend
+  });
+
+  useSocket("case:updated", (updated) => {
+    console.log("Case Updated",updated);
+    setCaseData((prev) =>
+      prev.map((c) => (c.CaseID === updated.CaseID ? updated : c))
+    );
+  });
+
+
 
   const fetchData = async () => {
     setLoading(true);
@@ -64,7 +82,7 @@ export default function FrontDesk_Page() {
       const filtercases = response.data.data.filter(c => c?.CaseStatus !== 'Close' && c?.CreatedName == user.name);
       const sortedCases = filtercases.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
       const recentCases = sortedCases.slice(0, 4);
-      console.log("Length of the arrays",valuefiltercases);
+      console.log("Length of the arrays", valuefiltercases);
       setCaseData(recentCases);
       setCasevaluedata(valueFilterOpenCase?.length);
       setInactivecasevaluedata(valueFilterInActiveCase?.length)
@@ -90,12 +108,7 @@ export default function FrontDesk_Page() {
   const navigate = useNavigate();
 
   console.log(caseData)
-  console.log("THe value ",casevaluedata)
-
-
-  
-
-
+  console.log("THe value ", casevaluedata)
   return (
     <div className="max-h-[calc(100vh-64px)] w-full grid grid-cols-4 grid-rows-2 gap-4 p-4 bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Left Column - Profile */}
@@ -145,7 +158,7 @@ export default function FrontDesk_Page() {
           </CardFooter>
         </Card>
       </div>
-
+    
       {/* Center Column - Chart */}
       <div className="col-span-2 space-y-4">
         <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col">
@@ -154,7 +167,7 @@ export default function FrontDesk_Page() {
             <CardDescription>Today’s activity</CardDescription>
           </CardHeader>
           <CardContent className="flex-1 flex items-center justify-center">
-            <ChartRadialText  radialchartdata={radialchartdata}/>
+            <ChartRadialText radialchartdata={radialchartdata} />
           </CardContent>
         </Card>
       </div>
@@ -179,39 +192,43 @@ export default function FrontDesk_Page() {
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4 overflow-y-auto max-h-[40vh]" >
             {loading ?
-            (
+              (
                 Array.from({ length: 4 }).map((_, i) => (
-                      <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-20 w-full" />
                 ))
               )
-              : 
-            (caseData.map((c) => (
-              <>
-                <Card
-                  key={c.SerialNumber}
-                  className="p-3 border-l-4 rounded-lg shadow-sm hover:shadow-md transition border-teal-400 bg-white cursor-pointer"
-                  onClick={() => navigate(`/app/case/${c.CaseID}`)}
-                >
-                  <div className="">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium
+              :
+              (caseData.map((c) => (
+                <>
+                  <Card
+                    key={c.SerialNumber}
+                    className="p-3 border-l-4 hover:scale-95 rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400 bg-white cursor-pointer"
+                    onClick={() => navigate(`/app/case/${c.CaseID}`)}
+                  >
+                    <div className="space-x-1">
+                      <Badge className={`px-2 py-1 rounded-md text-xs font-medium
             ${c.CasePriority === "High" ? "bg-orange-100 text-orange-700" :
-                      c.CasePriority === "Critical" ? "bg-red-100 text-red-700" :
-                        "bg-gray-200 text-gray-700"}`}>
-                    {c?.CasePriority || 'Low'}
-                  </span>
-                    <p className="font-medium truncate">{c.CaseSubject}</p>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1 flex justify-between">
-                  <p>{c.CaseID}</p>
-                    <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700">
-                      {c.CaseStatus}
-                    </span>
-                    <span>{c.CreatedOn}</span>
-                  </div>
-                </Card>
-              </>
-            )))}
-            
+                          c.CasePriority === "Critical" ? "bg-red-100 text-red-700" :
+                            "bg-gray-200 text-gray-700"}`}>
+                        {c?.CasePriority || 'Low'}
+
+                      </Badge>
+                      <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
+                        {c.CaseStatus}
+                      </Badge>
+                      <p className="font-medium truncate">{c.CaseSubject}</p>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1 flex justify-between">
+                      <p>{c.CaseID}</p>
+
+                      <span>{c.CreatedOn}</span>
+                    </div>
+                  </Card>
+                </>
+              )))}
+              <div className="">
+                {/* <ToastTester/> */}
+              </div>
           </CardContent>
         </Card>
       </div>
@@ -236,8 +253,8 @@ export function NotificationCard({ n }) {
   };
 
   return (
-    
-      notif.map((i) => (
+
+    notif.map((i) => (
       <Card className="shadow-md border rounded-xl hover:shadow-lg transition" key={i.caseId}>
         <CardHeader className="flex flex-col gap-1">
           <div className="flex justify-between items-center gap-2">
@@ -250,7 +267,7 @@ export function NotificationCard({ n }) {
           <CardDescription>{i.description} by {i.user}</CardDescription>
         </CardHeader>
       </Card>
-      ))
-    
+    ))
+
   );
 }
