@@ -1,4 +1,32 @@
-import { useEffect, useMemo, useState } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/SearchCase_V2.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/SearchCase_V2.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardHeader,
@@ -67,61 +95,61 @@ export function CompanySearchResult({
     }
   }
   return (
-    <Card className="mt-4">
-      <CardHeader>
-        <CardTitle>Companies ({companies.length})</CardTitle>
-      </CardHeader>
-      <CardContent>
+    &lt;Card className="mt-4">
+      &lt;CardHeader>
+        &lt;CardTitle>Companies ({companies.length})&lt;/CardTitle>
+      &lt;/CardHeader>
+      &lt;CardContent>
         {loading ? (
-            <TableRow>
-              <TableCell colSpan={4}>Loading companies…</TableCell>
-            </TableRow>
+            &lt;TableRow>
+              &lt;TableCell colSpan={4}>Loading companies…&lt;/TableCell>
+            &lt;/TableRow>
           ) : (
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-blue-200">
-                <TableHead>Account Name</TableHead>
-                <TableHead>City</TableHead>
-                <TableHead>Zip</TableHead>
-                <TableHead>Country</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          &lt;Table>
+            &lt;TableHeader>
+              &lt;TableRow className="bg-blue-200">
+                &lt;TableHead>Account Name&lt;/TableHead>
+                &lt;TableHead>City&lt;/TableHead>
+                &lt;TableHead>Zip&lt;/TableHead>
+                &lt;TableHead>Country&lt;/TableHead>
+              &lt;/TableRow>
+            &lt;/TableHeader>
+            &lt;TableBody>
               {companies.length > 0 ? (
                 companies.map((c) => (
-                  <TableRow
+                  &lt;TableRow
                     key={c.SiteAccountID}
                     onClick={() => handleSelect(c)}
                     className={`cursor-pointer ${ selectedCompanyId == c.SiteAccountID ? "bg-blue-100" : " hover:bg-gray-100" }`}
                   >
-                    <TableCell className="whitespace-break-spaces">{c.Company}</TableCell>
-                    <TableCell>{c.City || "-"}</TableCell>
-                    <TableCell>{c.ZipPostalCode || "-"}</TableCell>
-                    <TableCell>{c.Country || "-"}</TableCell>
-                  </TableRow>
+                    &lt;TableCell className="whitespace-break-spaces">{c.Company}&lt;/TableCell>
+                    &lt;TableCell>{c.City || "-"}&lt;/TableCell>
+                    &lt;TableCell>{c.ZipPostalCode || "-"}&lt;/TableCell>
+                    &lt;TableCell>{c.Country || "-"}&lt;/TableCell>
+                  &lt;/TableRow>
                 ))
               ) : (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center">
+                &lt;TableRow>
+                  &lt;TableCell colSpan={4} className="text-center">
                     No companies found
-                  </TableCell>
-                </TableRow>
+                  &lt;/TableCell>
+                &lt;/TableRow>
               )}
-              <Button 
+              &lt;Button 
                 className="mt-2" 
                 onClick={() => { showCreateCompany ? setShowCreateCompany(false) : setShowCreateCompany(true) }}
-              >+ Create Company</Button>
-              {showCreateCompany && (
-                <CompanyForm 
+              >+ Create Company&lt;/Button>
+              {showCreateCompany &amp;&amp; (
+                &lt;CompanyForm 
                   onSubmit={handleCreateCompany}
                   onCancel={() => setShowCreateCompany(false)}
                 />
               )}
-            </TableBody>
-          </Table>
+            &lt;/TableBody>
+          &lt;/Table>
         )}
-      </CardContent>
-    </Card>
+      &lt;/CardContent>
+    &lt;/Card>
   );
 }
 
@@ -140,28 +168,28 @@ export function ContactSearchResult({ contacts = [], onSelectContact, title = "C
     }
   };
   return (
-    <Card className="mt-4">
-      <CardHeader>
-        <CardTitle>{title} ({contacts.length})</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-blue-200">
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Country</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+    &lt;Card className="mt-4">
+      &lt;CardHeader>
+        &lt;CardTitle>{title} ({contacts.length})&lt;/CardTitle>
+      &lt;/CardHeader>
+      &lt;CardContent>
+        &lt;Table>
+          &lt;TableHeader>
+            &lt;TableRow className="bg-blue-200">
+              &lt;TableHead>Name&lt;/TableHead>
+              &lt;TableHead>Email&lt;/TableHead>
+              &lt;TableHead>Phone&lt;/TableHead>
+              &lt;TableHead>Country&lt;/TableHead>
+            &lt;/TableRow>
+          &lt;/TableHeader>
+          &lt;TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={4}>Loading contacts…</TableCell>
-              </TableRow>
+              &lt;TableRow>
+                &lt;TableCell colSpan={4}>Loading contacts…&lt;/TableCell>
+              &lt;/TableRow>
             ) : contacts.length > 0 ? (
               contacts.map((p) => (
-                <TableRow
+                &lt;TableRow
                   key={p.ContactID}
                   onClick={() => handleSelect(p)}
                   className={`
@@ -169,32 +197,32 @@ export function ContactSearchResult({ contacts = [], onSelectContact, title = "C
                     ${ selectedContactId == p.ContactID ? "bg-blue-100" : "hover:bg-gray-100"}
                     `}
                 >
-                  <TableCell>{`${p.FirstName ?? ""} ${p.LastName ?? ""}`.trim()}</TableCell>
-                  <TableCell>{p.Email || "-"}</TableCell>
-                  <TableCell>{p.Phone || p.Mobile || "-"}</TableCell>
-                  <TableCell>{p.Country || "-"}</TableCell>
-                </TableRow>
+                  &lt;TableCell>{`${p.FirstName ?? ""} ${p.LastName ?? ""}`.trim()}&lt;/TableCell>
+                  &lt;TableCell>{p.Email || "-"}&lt;/TableCell>
+                  &lt;TableCell>{p.Phone || p.Mobile || "-"}&lt;/TableCell>
+                  &lt;TableCell>{p.Country || "-"}&lt;/TableCell>
+                &lt;/TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center">
+              &lt;TableRow>
+                &lt;TableCell colSpan={4} className="text-center">
                   No contacts found
-                </TableCell>
-              </TableRow>
+                &lt;/TableCell>
+              &lt;/TableRow>
             )}
-            <Button
+            &lt;Button
               className="mt-2"
               onClick={() => {
                 showCreateContact ? setShowCreateContact(false) : setShowCreateContact(true)
               }}
-            >+ Create COnctac</Button>
-            {showCreateContact && (
-              <ContactForm onSubmit={handleCreateContact} onCancel={() => setShowCreateContact(false)}/>
+            >+ Create COnctac&lt;/Button>
+            {showCreateContact &amp;&amp; (
+              &lt;ContactForm onSubmit={handleCreateContact} onCancel={() => setShowCreateContact(false)}/>
             )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+          &lt;/TableBody>
+        &lt;/Table>
+      &lt;/CardContent>
+    &lt;/Card>
   );
 }
 
@@ -213,65 +241,65 @@ export function AssetSearchResult({ assets = [], onSelectAsset, loading, handleC
     }
   };
   return (
-    <Card className="mt-4">
-      <CardHeader>
-        <CardTitle>Assets ({assets.length})</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-blue-200">
-              <TableHead>Product Name</TableHead>
-              <TableHead>Serial Number</TableHead>
-              <TableHead>Product #</TableHead>
-              <TableHead>Product Line</TableHead>
-              <TableHead>Account</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+    &lt;Card className="mt-4">
+      &lt;CardHeader>
+        &lt;CardTitle>Assets ({assets.length})&lt;/CardTitle>
+      &lt;/CardHeader>
+      &lt;CardContent>
+        &lt;Table>
+          &lt;TableHeader>
+            &lt;TableRow className="bg-blue-200">
+              &lt;TableHead>Product Name&lt;/TableHead>
+              &lt;TableHead>Serial Number&lt;/TableHead>
+              &lt;TableHead>Product #&lt;/TableHead>
+              &lt;TableHead>Product Line&lt;/TableHead>
+              &lt;TableHead>Account&lt;/TableHead>
+            &lt;/TableRow>
+          &lt;/TableHeader>
+          &lt;TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={5}>Loading assets…</TableCell>
-              </TableRow>
+              &lt;TableRow>
+                &lt;TableCell colSpan={5}>Loading assets…&lt;/TableCell>
+              &lt;/TableRow>
             ) : assets.length > 0 ? (
               assets.map((a) => (
-                <TableRow
+                &lt;TableRow
                   key={a.AssetID}
                   onClick={() => handleSelect(a)}
                   className={`cursor-pointer
                     ${selectedAssetId == a.AssetID ? "bg-blue-100" :"hover:bg-gray-100"}
                     `}
                 >
-                  <TableCell className="whitespace-break-spaces">{a.product_information?.ProductName || "-"}</TableCell>
-                  <TableCell>{a.SerialNumber}</TableCell>
-                  <TableCell>{a.ProductNumber}</TableCell>
-                  <TableCell>{a.product_information?.ProductLine || "-"}</TableCell>
-                  <TableCell>{a.site_account?.Company || "-"}</TableCell>
-                </TableRow>
+                  &lt;TableCell className="whitespace-break-spaces">{a.product_information?.ProductName || "-"}&lt;/TableCell>
+                  &lt;TableCell>{a.SerialNumber}&lt;/TableCell>
+                  &lt;TableCell>{a.ProductNumber}&lt;/TableCell>
+                  &lt;TableCell>{a.product_information?.ProductLine || "-"}&lt;/TableCell>
+                  &lt;TableCell>{a.site_account?.Company || "-"}&lt;/TableCell>
+                &lt;/TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center">
+              &lt;TableRow>
+                &lt;TableCell colSpan={5} className="text-center">
                   No assets found
-                </TableCell>
-              </TableRow>
+                &lt;/TableCell>
+              &lt;/TableRow>
             )}
-            <Button
+            &lt;Button
               className="mt-2"
               onClick={() => showCreateAsset ? setShowCreateAsset(false) : setShowCreateAsset(true)}
-            > +Create Asset</Button>
-            {showCreateAsset && (
-              <AssetForm onSubmit={handleCreateAsset} onCancel={() => setShowCreateAsset(false)}/>
+            > +Create Asset&lt;/Button>
+            {showCreateAsset &amp;&amp; (
+              &lt;AssetForm onSubmit={handleCreateAsset} onCancel={() => setShowCreateAsset(false)}/>
             )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+          &lt;/TableBody>
+        &lt;/Table>
+      &lt;/CardContent>
+    &lt;/Card>
   );
 }
 
 /** ----------------------------------------------------------------------
- *  High-level container that owns the flow & API calls
+ *  High-level container that owns the flow &amp; API calls
  *  ---------------------------------------------------------------------- */
 export default function CaseSearchRefactor() {
   // form state
@@ -357,7 +385,7 @@ export default function CaseSearchRefactor() {
   const handleSearchClick = async () => {
     const { SerialNumber, Company, Email, Phone, Country } = search;
 
-    if (!SerialNumber && !Company && !Email && !Phone) {
+    if (!SerialNumber &amp;&amp; !Company &amp;&amp; !Email &amp;&amp; !Phone) {
       Swal.fire({
         icon: "warning",
         title: "Perhatian!",
@@ -466,7 +494,7 @@ export default function CaseSearchRefactor() {
     setSelectedAsset(null);
 
     // If contact linked to company but we don't have it selected yet, set it
-    if (contact.SiteAccountID && !selectedCompany) {
+    if (contact.SiteAccountID &amp;&amp; !selectedCompany) {
       const map = byId(companies, "SiteAccountID");
       const maybeCompany = map.get(contact.SiteAccountID);
       if (maybeCompany) setSelectedCompany(maybeCompany);
@@ -480,7 +508,7 @@ export default function CaseSearchRefactor() {
       );
       const { assets: asts = [], site_account: sa } = res.data?.data || {};
       setAssets(asts);
-      if (sa && !selectedCompany) setSelectedCompany(sa);
+      if (sa &amp;&amp; !selectedCompany) setSelectedCompany(sa);
     } catch (e) {
       console.error(e);
     } finally {
@@ -491,7 +519,7 @@ export default function CaseSearchRefactor() {
   const onSelectAsset = async (asset) => {
     setSelectedAsset(asset);
 
-    // fetch asset details to auto-fill contact & company
+    // fetch asset details to auto-fill contact &amp; company
     try {
       const res = await ApiCustomer.get(`/api/asset-information/${asset.AssetID}`);
       const data = res.data?.data;
@@ -545,138 +573,161 @@ export default function CaseSearchRefactor() {
    * Render: Search form + Results hub
    * -------------------------------------------------------------- */
   return (
-    <>
-    <Tabs defaultValue="search" className="w-full">
+    &lt;>
+    &lt;Tabs defaultValue="search" className="w-full">
       {/* SEARCH FORM */}
-      <TabsContent value="search">
-        <Card className="drop-shadow-md">
-          <Button className="self-end mr-2" variant="ghost" onClick={handleClearAll}>
+      &lt;TabsContent value="search">
+        &lt;Card className="drop-shadow-md">
+          &lt;Button className="self-end mr-2" variant="ghost" onClick={handleClearAll}>
             Clear All
-          </Button>
-          <CardContent className="grid gap-5 grid-cols-3">
-            <div className="space-y-0.5">
-              <Label htmlFor="Email">Email</Label>
-              <div className="relative flex items-center">
-                <Search className="absolute right-2" />
-                <Input id="Email" value={search.Email} onChange={handleInputChange} className="border-b-black p-1 pr-9" />
-              </div>
-            </div>
-            <div className="space-y-0.5">
-              <Label htmlFor="SerialNumber">Serial Number</Label>
-              <Input id="SerialNumber" value={search.SerialNumber} onChange={handleInputChange} className="border-b-black p-1" />
-            </div>
-            <div className="space-y-0.5">
-              <Label htmlFor="Phone">Phone</Label>
-              <Input id="Phone" value={search.Phone} onChange={handleInputChange} className="border-b-black p-1" />
-            </div>
-            <div className="space-y-0.5 flex flex-col">
-              <Label htmlFor="Country">Country</Label>
-              <Input id="Country" value={search.Country} onChange={handleInputChange} className="border-b-black p-1" />
-            </div>
-            <div className="space-y-0.5">
-              <Label htmlFor="Company">Company</Label>
-              <Input id="Company" value={search.Company} onChange={handleInputChange} className="border-b-black p-1" />
-            </div>
-            <div className="space-y-0.5">
-              <Label htmlFor="City">City</Label>
-              <Input id="City" value={search.City} onChange={handleInputChange} className="border-b-black p-1" />
-            </div>
-            <div className="space-y-0.5">
-              <Label htmlFor="ZipPostalCode">Zip/Postal</Label>
-              <Input id="ZipPostalCode" value={search.ZipPostalCode} onChange={handleInputChange} className="border-b-black p-1" />
-            </div>
+          &lt;/Button>
+          &lt;CardContent className="grid gap-5 grid-cols-3">
+            &lt;div className="space-y-0.5">
+              &lt;Label htmlFor="Email">Email&lt;/Label>
+              &lt;div className="relative flex items-center">
+                &lt;Search className="absolute right-2" />
+                &lt;Input id="Email" value={search.Email} onChange={handleInputChange} className="border-b-black p-1 pr-9" />
+              &lt;/div>
+            &lt;/div>
+            &lt;div className="space-y-0.5">
+              &lt;Label htmlFor="SerialNumber">Serial Number&lt;/Label>
+              &lt;Input id="SerialNumber" value={search.SerialNumber} onChange={handleInputChange} className="border-b-black p-1" />
+            &lt;/div>
+            &lt;div className="space-y-0.5">
+              &lt;Label htmlFor="Phone">Phone&lt;/Label>
+              &lt;Input id="Phone" value={search.Phone} onChange={handleInputChange} className="border-b-black p-1" />
+            &lt;/div>
+            &lt;div className="space-y-0.5 flex flex-col">
+              &lt;Label htmlFor="Country">Country&lt;/Label>
+              &lt;Input id="Country" value={search.Country} onChange={handleInputChange} className="border-b-black p-1" />
+            &lt;/div>
+            &lt;div className="space-y-0.5">
+              &lt;Label htmlFor="Company">Company&lt;/Label>
+              &lt;Input id="Company" value={search.Company} onChange={handleInputChange} className="border-b-black p-1" />
+            &lt;/div>
+            &lt;div className="space-y-0.5">
+              &lt;Label htmlFor="City">City&lt;/Label>
+              &lt;Input id="City" value={search.City} onChange={handleInputChange} className="border-b-black p-1" />
+            &lt;/div>
+            &lt;div className="space-y-0.5">
+              &lt;Label htmlFor="ZipPostalCode">Zip/Postal&lt;/Label>
+              &lt;Input id="ZipPostalCode" value={search.ZipPostalCode} onChange={handleInputChange} className="border-b-black p-1" />
+            &lt;/div>
             {/* Optional fields (kept for parity) */}
-            <div className="space-y-0.5">
-              <Label htmlFor="AssetTag">Asset Tag</Label>
-              <Input id="AssetTag" value={search.AssetTag} onChange={handleInputChange} className="border-b-black p-1" />
-            </div>
-            <div className="space-y-0.5">
-              <Label htmlFor="ContractID">Contract Id</Label>
-              <Input id="ContractID" value={search.ContractID} onChange={handleInputChange} className="border-b-black p-1" />
-            </div>
-            <div className="space-y-0.5">
-              <Label htmlFor="TransactionType">Transaction Type</Label>
-              <Input id="TransactionType" value={search.TransactionType} onChange={handleInputChange} className="border-b-black p-1" />
-            </div>
-            <div className="space-y-0.5">
-              <Label htmlFor="TransactiontID">Transaction Id</Label>
-              <Input id="TransactiontID" value={search.TransactiontID} onChange={handleInputChange} className="border-b-black p-1" />
-            </div>
-            <div className="space-y-0.5">
-              <Label htmlFor="Opsi">Opsi</Label>
-              <Input id="Opsi" value={search.Opsi} onChange={handleInputChange} className="border-b-black p-1" />
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-end">
-            <Button variant="secondary" className="bg-white drop-shadow-md border cursor-pointer w-40 h-11" onClick={handleSearchClick}>
-              <p className="text-2xl mb-1">Search</p>
-            </Button>
-          </CardFooter>
-        </Card>
-      </TabsContent>
+            &lt;div className="space-y-0.5">
+              &lt;Label htmlFor="AssetTag">Asset Tag&lt;/Label>
+              &lt;Input id="AssetTag" value={search.AssetTag} onChange={handleInputChange} className="border-b-black p-1" />
+            &lt;/div>
+            &lt;div className="space-y-0.5">
+              &lt;Label htmlFor="ContractID">Contract Id&lt;/Label>
+              &lt;Input id="ContractID" value={search.ContractID} onChange={handleInputChange} className="border-b-black p-1" />
+            &lt;/div>
+            &lt;div className="space-y-0.5">
+              &lt;Label htmlFor="TransactionType">Transaction Type&lt;/Label>
+              &lt;Input id="TransactionType" value={search.TransactionType} onChange={handleInputChange} className="border-b-black p-1" />
+            &lt;/div>
+            &lt;div className="space-y-0.5">
+              &lt;Label htmlFor="TransactiontID">Transaction Id&lt;/Label>
+              &lt;Input id="TransactiontID" value={search.TransactiontID} onChange={handleInputChange} className="border-b-black p-1" />
+            &lt;/div>
+            &lt;div className="space-y-0.5">
+              &lt;Label htmlFor="Opsi">Opsi&lt;/Label>
+              &lt;Input id="Opsi" value={search.Opsi} onChange={handleInputChange} className="border-b-black p-1" />
+            &lt;/div>
+          &lt;/CardContent>
+          &lt;CardFooter className="flex justify-end">
+            &lt;Button variant="secondary" className="bg-white drop-shadow-md border cursor-pointer w-40 h-11" onClick={handleSearchClick}>
+              &lt;p className="text-2xl mb-1">Search&lt;/p>
+            &lt;/Button>
+          &lt;/CardFooter>
+        &lt;/Card>
+      &lt;/TabsContent>
 
       {/* RESULTS AREA */}
       {mode === "idle" ? (
-        <p className="text-center mt-10">Fill the form and click Search</p>
+        &lt;p className="text-center mt-10">Fill the form and click Search&lt;/p>
       ) : (
-        <div className="mt-4">
+        &lt;div className="mt-4">
           {/* A. Company-first flow */}
-          {mode === "company" && (
-            <>
-              <CompanySearchResult companies={companies} onSelectCompany={onSelectCompany} loading={loadingCompanies} handleCreateCompany={handleCreateCompany} />
-              {selectedCompany && (
-                <>
-                  <ContactSearchResult contacts={contacts} onSelectContact={onSelectContact} loading={loadingContacts} handleCreateContact={handleCreateContact} />
-                  <AssetSearchResult assets={assets} onSelectAsset={onSelectAsset} loading={loadingAssets} handleCreateAsset={handleCreateAsset}/>
-                </>
+          {mode === "company" &amp;&amp; (
+            &lt;>
+              &lt;CompanySearchResult companies={companies} onSelectCompany={onSelectCompany} loading={loadingCompanies} handleCreateCompany={handleCreateCompany} />
+              {selectedCompany &amp;&amp; (
+                &lt;>
+                  &lt;ContactSearchResult contacts={contacts} onSelectContact={onSelectContact} loading={loadingContacts} handleCreateContact={handleCreateContact} />
+                  &lt;AssetSearchResult assets={assets} onSelectAsset={onSelectAsset} loading={loadingAssets} handleCreateAsset={handleCreateAsset}/>
+                &lt;/>
               )}
-            </>
+            &lt;/>
           )}
 
           {/* B. Asset-first flow */}
-          {mode === "asset" && (
-            <>
-              <AssetSearchResult assets={assets} onSelectAsset={onSelectAsset} loading={loadingAssets} handleCreateAsset={handleCreateAsset}/>
-              {(selectedContact || selectedCompany) && (
-                <>
-                  {selectedCompany && (
-                    <CompanySearchResult companies={[selectedCompany]} onSelectCompany={() => {}} handleCreateCompany={handleCreateCompany}/>
+          {mode === "asset" &amp;&amp; (
+            &lt;>
+              &lt;AssetSearchResult assets={assets} onSelectAsset={onSelectAsset} loading={loadingAssets} handleCreateAsset={handleCreateAsset}/>
+              {(selectedContact || selectedCompany) &amp;&amp; (
+                &lt;>
+                  {selectedCompany &amp;&amp; (
+                    &lt;CompanySearchResult companies={[selectedCompany]} onSelectCompany={() => {}} handleCreateCompany={handleCreateCompany}/>
                   )}
-                  {selectedContact && (
-                    <ContactSearchResult contacts={[selectedContact]} onSelectContact={onSelectContact} handleCreateContact={handleCreateContact} />
+                  {selectedContact &amp;&amp; (
+                    &lt;ContactSearchResult contacts={[selectedContact]} onSelectContact={onSelectContact} handleCreateContact={handleCreateContact} />
                   )}
-                </>
+                &lt;/>
               )}
-            </>
+            &lt;/>
           )}
 
           {/* C. Email/Phone flow */}
-          {mode === "emailphone" && (
-            <>
+          {mode === "emailphone" &amp;&amp; (
+            &lt;>
               {/* Case 1: email/phone belongs to a company */}
-              {companies.length > 0 && (
-                <CompanySearchResult companies={companies} onSelectCompany={onSelectCompany} loading={loadingCompanies} handleCreateCompany={handleCreateCompany} />
+              {companies.length > 0 &amp;&amp; (
+                &lt;CompanySearchResult companies={companies} onSelectCompany={onSelectCompany} loading={loadingCompanies} handleCreateCompany={handleCreateCompany} />
               )}
 
               {/* Case 2: email/phone belongs to contact with company → show companies (if any) and linked contacts */}
-              {contactsLinked.length > 0 && (
-                <ContactSearchResult title="Linked Contacts" contacts={contactsLinked} onSelectContact={onSelectContact} loading={loadingContacts} handleCreateContact={handleCreateContact} />
+              {contactsLinked.length > 0 &amp;&amp; (
+                &lt;ContactSearchResult title="Linked Contacts" contacts={contactsLinked} onSelectContact={onSelectContact} loading={loadingContacts} handleCreateContact={handleCreateContact} />
               )}
 
               {/* Case 3: email/phone belongs to contact w/o company → show the unlinked contacts and their assets on click */}
-              {contactsUnlinked.length > 0 && (
-                <ContactSearchResult title="Unlinked Contacts" contacts={contactsUnlinked} onSelectContact={onSelectContact} loading={loadingContacts} handleCreateContact={handleCreateContact} />
+              {contactsUnlinked.length > 0 &amp;&amp; (
+                &lt;ContactSearchResult title="Unlinked Contacts" contacts={contactsUnlinked} onSelectContact={onSelectContact} loading={loadingContacts} handleCreateContact={handleCreateContact} />
               )}
 
               {/* If a company/contact is chosen from above, also show their assets */}
-              {(selectedCompany || selectedContact) && (
-                <AssetSearchResult assets={assets} onSelectAsset={onSelectAsset} loading={loadingAssets} handleCreateAsset={handleCreateAsset}/>)
+              {(selectedCompany || selectedContact) &amp;&amp; (
+                &lt;AssetSearchResult assets={assets} onSelectAsset={onSelectAsset} loading={loadingAssets} handleCreateAsset={handleCreateAsset}/>)
               }
-            </>
+            &lt;/>
           )}
-        </div>
+        &lt;/div>
       )}
-      </Tabs>
-    </>
+      &lt;/Tabs>
+    &lt;/>
   );
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#BtnModalAsset">BtnModalAsset</a></li><li><a href="global.html#BtnModalContact">BtnModalContact</a></li><li><a href="global.html#CompanySearchResult">CompanySearchResult</a></li><li><a href="global.html#byId">byId</a></li><li><a href="global.html#classNames">classNames</a></li><li><a href="global.html#getUserFromTokenSafe">getUserFromTokenSafe</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Aug 23 2025 11:48:03 GMT+0700 (Indochina Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

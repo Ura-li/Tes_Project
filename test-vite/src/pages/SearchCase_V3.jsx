@@ -28,6 +28,10 @@ import { Loader2, Plus, Trash2, Image as ImageIcon, Search } from "lucide-react"
 import { format } from "date-fns";
 
 
+// ----------------------------
+// Typedefs
+// ----------------------------
+
 /**
  * @typedef {Object} ProductInfo
  * @property {string} ProductNumber
@@ -85,6 +89,7 @@ import { format } from "date-fns";
  * @property {string} note
  * @property {string} code
  */
+
 
 
 // ----------------------------
@@ -220,29 +225,37 @@ export default function NewCaseForm() {
   const [kciFlag, setKciFlag] = useState(false);
 
   // Lookup: Asset by serial
-  /** @type {[string, Function]} */
+  /** @type {[string, (val: string) => void]} */
   const [serialQuery, setSerialQuery] = useState("");
-  /** @type {[AssetInfo[], Function]} */
+
+  /** @type {[AssetInfo[], (val: AssetInfo[]) => void]} */
   const [assetResults, setAssetResults] = useState([]);
-  /** @type {[AssetInfo|null, Function]} */
+
+  /** @type {[AssetInfo|null, (val: AssetInfo|null) => void]} */
   const [selectedAsset, setSelectedAsset] = useState(null);
 
   // Lookup: Customer / Contact / Company
   const [customerQuery, setCustomerQuery] = useState("");
-  /** @type {[ContactInfo[], Function]} */
+
+  /** @type {[ContactInfo[], (val: ContactInfo[]) => void]} */
   const [contactResults, setContactResults] = useState([]);
-  /** @type {[SiteAccount[], Function]} */
+
+  /** @type {[SiteAccount[], (val: SiteAccount[]) => void]} */
   const [companyResults, setCompanyResults] = useState([]);
-  /** @type {[ContactInfo|null, Function]} */
+
+  /** @type {[ContactInfo|null, (val: ContactInfo|null) => void]} */
   const [selectedContact, setSelectedContact] = useState(null);
-  /** @type {[SiteAccount|null, Function]} */
+
+  /** @type {[SiteAccount|null, (val: SiteAccount|null) => void]} */
   const [selectedCompany, setSelectedCompany] = useState(null);
 
-  // Product fields (auto from asset or by search)
+  // Product fields
   const [productQuery, setProductQuery] = useState("");
-  /** @type {[ProductInfo[], Function]} */
+
+  /** @type {[ProductInfo[], (val: ProductInfo[]) => void]} */
   const [productResults, setProductResults] = useState([]);
-  /** @type {[ProductInfo|null, Function]} */
+
+  /** @type {[ProductInfo|null, (val: ProductInfo|null) => void]} */
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productTower, setProductTower] = useState(""); // IPG/PSG
   const [productGroup, setProductGroup] = useState(""); // Commercial/Consumer
@@ -257,14 +270,14 @@ export default function NewCaseForm() {
   const [eowDate, setEowDate] = useState("");
 
   // Accessories
-  /** @type {[AccessoryRow[], Function]} */
+  /** @type {[AccessoryRow[], (val: AccessoryRow[]) => void]} */
   const [accessories, setAccessories] = useState([
     { id: crypto.randomUUID(), name: "", note: "", code: "" },
   ]);
 
 
   // Photos
-  /** @type {[File[], Function]} */
+  /** @type {[File[], (val: File[]) => void]} */
   const [photos, setPhotos] = useState([]);
 
   // Log notes (optional extra note besides CaseNote)
@@ -427,8 +440,12 @@ export default function NewCaseForm() {
   // ----------------------------
   // EMSIFA Province / City (ID only)
   // ----------------------------
+  /** @type {[any[], (val: any[]) => void]} */
   const [prov, setProv] = useState([]);
+
+  /** @type {[any[], (val: any[]) => void]} */
   const [city, setCity] = useState([]);
+
   const [selectedProvId, setSelectedProvId] = useState("");
   const [selectedCityId, setSelectedCityId] = useState("");
 
@@ -479,7 +496,7 @@ export default function NewCaseForm() {
   /**
    * Update accessory field.
    * @param {string} id
-   * @param {keyof AccessoryRow} key
+   * @param {"id"|"name"|"note"|"code"} key
    * @param {string} val
    */
   const updateAccessory = (id, key, val) =>

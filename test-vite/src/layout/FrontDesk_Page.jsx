@@ -18,11 +18,16 @@ import Swal from 'sweetalert2';
 
 export default function FrontDesk_Page() {
   const { user } = useAuth();
+  const [userData, setUserData] = useState([]);
   const [caseData, setCaseData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [casevaluedata, setCasevaluedata] = useState([]);
-  const [inactivecasevaluedata, setInactivecasevaluedata] = useState([]);
-  const [closecasevaluedata, setClosecasevaluedata] = useState([]);
+  const [casevaluedata, setCasevaluedata] = useState([])
+  const [inactivecasevaluedata, setInactivecasevaluedata] = useState([])
+  const [closecasevaluedata, setClosecasevaluedata] = useState([])
+  const [preview, setPreview] = useState({
+      ProfilePhoto: null,
+      Signature: null,
+  });
 
   const [notfilog, setNotfilog] = useState([])
 
@@ -54,6 +59,22 @@ export default function FrontDesk_Page() {
     try {
 
       const response = await ApiCustomer.get('/api/case-information');
+      const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`);
+      const resFetchUserData = fecthUserData.data.data;
+      console.log("Fetch user daya : ", user)
+      setUserData({
+        ...userData,
+        Username: resFetchUserData.Username,
+        Name: resFetchUserData.Name,
+        Email: resFetchUserData.Email,
+        Phone: resFetchUserData.Phone || "",
+        ProfilePhoto: resFetchUserData.ProfilePhoto,
+        Signature: resFetchUserData.Signature,
+      })
+      setPreview({
+        ProfilePhoto: fecthUserData.data.data.ProfilePhoto ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.ProfilePhoto}` : null,
+        Signature: fecthUserData.data.data.Signature ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.Signature}` : null,
+      });
       const valuefiltercases = response.data.data.filter(c => c?.CreatedName == user.name);
       const valueFilterOpenCase = response.data.data.filter(c => c?.CaseStatus == 'Open' && c?.CreatedName == user.name)
       const valueFilterInActiveCase = response.data.data.filter(c => c?.CaseStatus == 'Close' && c?.CreatedName == user.name)
@@ -94,17 +115,35 @@ export default function FrontDesk_Page() {
       <div className="col-span-1 space-y-4">
         <Card className="rounded-xl shadow-lg h-full flex flex-col">
           <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-300 text-white text-center">
-            <div className="flex flex-col items-center">
+            {/* <div className="flex flex-col items-center">
               <img
                 src={user?.avatar || "/default-avatar.png"}
                 alt="avatar"
                 className="w-20 h-20 rounded-full border-4 border-white shadow-md -mb-10"
               />
-            </div>
+            </div> */}
+            {!preview.ProfilePhoto && (
+              
+              <div className="flex flex-col items-center">
+                <div className="w-20 h-20 rounded-full border-4 border-white shadow-md -mb-10">
+                  <span className="text-3xl font-bold">?</span>
+                </div>
+              </div>
+            )}
+            {preview.ProfilePhoto && (
+              <div className="flex flex-col items-center">
+                <img
+                  src={preview.ProfilePhoto}
+                  alt="Profile Preview"
+                  className="w-20 h-20 rounded-full border-4 border-white shadow-md -mb-10"
+                />
+              </div>
+            )}
           </CardHeader>
           <CardContent className="pt-12 text-center flex-1">
             <CardTitle>{user?.name || "User"}</CardTitle>
             <p className="text-sm text-gray-500">{user?.email}</p>
+            <p className='text-sm text-gray-500'>{userData.Phone}</p>
           </CardContent>
           <CardFooter className="flex flex-col gap-2">
             <Badge

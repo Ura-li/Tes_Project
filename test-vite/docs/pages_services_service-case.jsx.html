@@ -1,0 +1,2909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/services/service-case.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/services/service-case.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Link } from "react-router";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectLabel,
+  SelectGroup,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SelectBarRelated } from "../../components/sc-select";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  ArrowLeftFromLine,
+  SquareArrowOutUpRight,
+  Save,
+  FileSymlink,
+  RotateCw,
+  StepBack,
+  CalendarDays,
+  Lock,
+  UserPen,
+  ArrowUp,
+  ChevronDown,
+  Smile,
+  User,
+  Calculator,
+  CreditCard,
+  Settings,
+} from "lucide-react";
+
+import { SelectYN } from "../../components/sc-select";
+import { useLocation, useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { useSidebar } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import ApiCustomer from "@/api";
+import { getUserFromToken } from "@/lib/utils/auth";
+
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { twMerge } from "tailwind-merge";
+import Swal from "sweetalert2";
+
+import { BtnModalsServiceCatalog } from '../../components/model/sc-modal'
+import DatePicker from '../../components/date-picker'
+
+
+import { SearchCommandBlock } from "../../components/sc-select";
+
+import { pdf } from '@react-pdf/renderer';
+import ServiceRequestPDF from '../../components/service-request-form'; // adjust path if needed
+
+
+export const TabsService = ({ 
+  caseDetails,
+  setCaseDetails, 
+  caseNote,
+  caseNoteFormData,
+  setCaseNoteFormData
+}) => {
+  const navigate = useNavigate();
+  const [openWorkOrder, setOpenWorkOrder] = useState(false);
+
+  const [selectedSymptom, setSelectedSymptom] = useState(null);
+
+  const { open } = useSidebar();
+  const [entitlementStatus, setEntitlementStatus] = useState({
+    OTCCode: ''
+  })
+
+  const [caseForm, setCaseForm] = useState({
+    CaseType: "",
+    CaseStatus: "",
+    CaseSubject: "",
+  });
+
+  const [gtcForm, setGtcForm] = useState({
+    global_trade_status: "",
+    embargoed_country: "",
+    gt_override_reason: "",
+    gt_details: "",
+    screening_id: "",
+    gt_active_listening: "",
+    gt_al_comments: "",
+    });
+
+   const [csrForm, setCsrForm] = useState({
+    caseResolutionCode: "",
+    autoClose: "",
+    caseReadyForClosure: "",
+    readyForCloseDays: "",
+    readyForClosureDate: "",
+    pendingCustomerAction: "",
+    customerRequestedCloseDate: "",
+  });
+
+  const handleCaseDetails = (field) => (value) => {
+    setCaseDetails((prev) => ({ ...prev, [field]: value }));
+  }
+  
+  const handleCaseChange = (field) => (value) => {
+    setCaseForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  const handleCaseNoteChange = (key, value) => {
+    setCaseNoteFormData((prev) => {
+      const updated = { ...prev, [key]: value };
+      console.log(" Updated Form:", updated); // Log on every change
+      return updated;
+    });
+  };
+
+  const handleGtcChange = (field) => (value) => {
+    setGtcForm((prev) => ({ ...prev, [field]: value }));
+  };
+  
+  const handleEntitlementStatus = (field) => (value) => {
+    setEntitlementStatus((prev) => ({ ...prev, [field]: value }));
+  };
+
+   const handleCsrChange = (field) => (value) => {
+    setCsrForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+ const handleSave = async (redirect = true) => {
+  console.log("Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
+
+  try {
+    Swal.fire({
+      title: 'Saving Case...',
+      text: 'Mohon tunggu sebentar',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    const user = getUserFromToken();
+    const timestamp = new Date().toLocaleString();
+    const author = user?.name || user?.email || "Unknown User";
+    const role = user?.role || "Unknown"; 
+
+    const noteFilled = caseNoteFormData.Note &amp;&amp; caseNoteFormData.Note.trim() !== "";
+    const caseFilled = caseForm.CaseType &amp;&amp; caseForm.CaseType.trim() !== "" ;
+    const gtcEdited = gtcForm &amp;&amp; Object.keys(gtcForm).length > 0;
+    const entitlementEdited = entitlementStatus !== undefined;
+    const csrEdited = csrForm &amp;&amp; Object.keys(csrForm).length > 0;
+
+    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseFilled;
+
+    if (!hasIntentToSave) {
+      alert("Tidak ada data yang disimpan.");
+      return;
+    }
+
+    let savedModules = [];
+    const dataToUpdate = {};
+    for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE']) {
+      switch (target) {
+
+       case 'NOTE':
+  if (noteFilled) {
+    const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
+
+    const response = await ApiCustomer.post("/api/case-information/case-notes", {
+      LogType: caseNoteFormData.LogType,
+      ActionType: caseNoteFormData.ActionType,
+      VisibleExternally: caseNoteFormData.VisibleExternally,
+      Note: modifiedNote,
+      CaseID: caseDetails.CaseID
+    });
+      dataToUpdate.CaseNote = response.data.data.NoteID;
+
+    const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
+    setCaseNotes({ NotesDisplay: NotedDisplay, 
+          ActionType: caseNoteFormData.ActionType,
+          LogType: caseNoteFormData.LogType,
+          VisibleExternally: caseNoteFormData.VisibleExternally,});
+    
+     if (selectedSymptom) {
+      dataToUpdate.SymptomCode = selectedSymptom.SymptomCodeID;
+    }
+
+    savedModules.push("Note");
+  }
+  break;
+
+        case 'GTC':
+          if (gtcEdited) {
+            await ApiCustomer.patch("/api/case-information/global-trade-check", {
+              ...gtcForm,
+              screening_id: gtcForm.screening_id || "",
+              CaseID: caseDetails.CaseID,
+            });
+            savedModules.push("GTC");
+          }
+          break;
+
+        case 'ENTITLEMENT':
+          if (entitlementEdited) {
+            console.log(entitlementStatus);
+            Object.assign(dataToUpdate, entitlementStatus); // includes OTCCo
+            savedModules.push("Entitlement");
+          }
+          break;
+
+        case 'CSR':
+          if (csrEdited) {
+            let response;
+            if (caseDetails.id_csr) {
+              response = await ApiCustomer.patch(`/api/caseResolution/${caseDetails.id_csr}`, {
+                ...csrForm,
+                caseResolutionCode: csrForm.caseResolutionCode || "",
+              });
+            } else {
+              response = await ApiCustomer.post("/api/caseResolution", {
+                ...csrForm,
+                caseResolutionCode: csrForm.caseResolutionCode || "",
+              });
+              dataToUpdate.id_csr = response.data.data.id_csr;
+            }
+            savedModules.push("CSR");
+          }
+          break;
+
+          case 'CASE':
+         if (caseFilled) {
+              try {
+                const oldStatus = caseDetails.CaseStatus;
+                const newStatus = caseForm.CaseStatus;
+                 Object.assign(dataToUpdate, {
+                  CaseType: caseForm.CaseType || "",
+                  CaseStatus: newStatus || "",
+                });
+                savedModules.push("Case");
+                if (oldStatus !== newStatus) {
+                  const token = {
+                    user: getUserFromToken()
+                  }
+                  await ApiCustomer.post("/api/actionlog", {
+                    CaseId: `${caseDetails.CaseID}`,
+                    ReferenceId: ``,
+                    model: "Case",
+                    dataOld: oldStatus,
+                    dataNew: newStatus,
+                    changedBy: token.user.id,
+                    logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${oldStatus} to ${newStatus}`,
+                  });
+                }
+              } catch (err) {
+                console.error("Gagal update case:", err);
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  text: "Gagal menyimpan data case.",
+                  allowOutsideClick: false,
+                  allowEscapeKey: false,
+                });
+              }
+          }
+          break;
+      }
+
+      if (Object.keys(dataToUpdate).length > 0) {
+        await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataToUpdate);
+      }
+    }
+
+    if (savedModules.length > 0) {
+      if(redirect){
+        await Swal.fire({
+          icon: "success",
+          title: "Berhasil Disimpan",
+          text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
+          timer: 2500,
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        });
+        window.location.reload();
+      }
+      return true
+    }
+
+  } catch (error) {
+    console.error("Save failed:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error.message || "Something went wrong.",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+    }).then(() => {
+      Swal.close();
+    });
+  }
+};
+
+const openPopup = () => {
+  console.log("TeSPOP");
+  const popup = window.open(
+    '/auditwindows',
+    'Popup Title',
+    'width=600,height=400'
+  );
+
+  if (popup) {
+    popup.focus();
+  } else {
+    alert('Popup blocked by browser. Please allow popups for this site.');
+  }
+};
+  
+
+  useEffect(() => {
+    const loadNote = async () => {
+      const noteDetail = caseNote;
+      if(noteDetail ){
+        const NotedDisplay = `@Created On : ${noteDetail.CreatedOn}\n${noteDetail.Note}`;
+        setCaseNotes({
+          NotesDisplay: NotedDisplay,
+          ActionType: noteDetail.ActionType,
+          LogType: noteDetail.LogType,
+          VisibleExternally: noteDetail.VisibleExternally,
+        })
+      } 
+    }
+    loadNote()
+  }, [])
+
+  const [caseNotes, setCaseNotes] = useState([]);
+
+  const buttons = [
+    {
+      icon: ArrowLeftFromLine,
+      label: "",
+      onClick: () => navigate(`/app/master/Case_table`),
+    },
+    { icon: SquareArrowOutUpRight, label: "",},
+    { icon: Save, label: "Save", onClick: () => handleSave() },
+    {
+      icon: FileSymlink,
+      label: "Save &amp; Close",
+      onClick: () => saveAndCloseCase(),
+    },
+    { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
+    { icon: StepBack, label: "Complaint",},
+    { icon: StepBack, label: "SRF", onClick: async () => {
+      const blob = await pdf(&lt;ServiceRequestPDF caseDetails={caseDetails}  />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Service_Request_Form.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, },
+    { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
+    { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
+    { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder") },
+    { icon: StepBack, label: "Sales Offer",},
+    { icon: StepBack, label: "Close Case", },
+    { icon: StepBack, label: "Pick", },
+    { icon: StepBack, label: "Queue Details", },
+    { icon: UserPen, label: "Assign" },
+    { icon: StepBack, label: "Add to Queue", },
+    { icon: StepBack, label: "Audit", onClick: () => openPopup() },
+  ];
+  console.log("TES CASE DETAILS VALUE",caseDetails);
+  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  const hiddenButtons = open ? buttons.slice(-3) : [];
+  const [serviceCatalogType, setServiceCatalogType] = useState("null");
+  const openServiceCatalog = async (type) => {
+    setOpenWorkOrder(true);
+    setServiceCatalogType(type)
+  };
+  const saveAndCloseCase = async () => {
+
+    if (!csrForm.caseResolutionCode || csrForm.caseResolutionCode.trim() === "") {
+    Swal.fire({
+      icon: "warning",
+      title: "Missing Case Resolution",
+      text: "You must select a Case Resolution Code before closing the case.",
+    });
+    return;
+  }
+
+    const confirmResult = await Swal.fire({
+      title: "Confirm Save",
+      text: "This will give the Case status as CLOSED. Are you sure you want to save changes?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Save it",
+    });
+
+    if (!confirmResult.isConfirmed) {
+      return; 
+    }
+    try {
+      
+      Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update the Case.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      const success = await handleSave(false);
+      if (!success) return; 
+      const res = await ApiCustomer.patch(
+        `/api/case-information/${caseDetails.CaseID}`,
+        {
+          CaseStatus: "Close",
+          CaseClosedDate: new Date().toISOString(), 
+        }
+      );
+      if (res.data.success) {
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${caseDetails.CaseID}`,
+          ReferenceId: ``,
+          model: "Case",
+          dataOld: caseDetails.CaseStatus,
+          dataNew: res.data.data.CaseStatus,
+          changedBy: token.user.id,
+          logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${caseDetails.CaseStatus} to ${res.data.data.CaseStatus}`
+        })
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        }).then(() => {
+          navigate(`/app/master/Case_table`);
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: res.data.message,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to update!",
+        text: error.message || "Something went wrong.",
+      });
+    }
+  };
+  return (
+    &lt;>
+      &lt;div className="flex items-center border-1 ">
+        {visibleButtons.map((btn, index) => (
+          &lt;Button
+            key={index}
+            onClick={btn.onClick}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+          >
+            &lt;btn.icon className="w-4 h-4" />
+            {btn.label &amp;&amp; &lt;span className="text-md">{btn.label}&lt;/span>}
+          &lt;/Button>
+        ))}
+
+        {open &amp;&amp; hiddenButtons.length > 0 &amp;&amp; (
+          &lt;DropdownMenu>
+            &lt;DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
+              ...
+            &lt;/DropdownMenuTrigger>
+            &lt;DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                &lt;DropdownMenuItem key={index} onClick={btn.onClick}>
+                  &lt;btn.icon className="inline-block w-4 h-4 mr-2" />
+                  {btn.label}
+                &lt;/DropdownMenuItem>
+              ))}
+            &lt;/DropdownMenuContent>
+          &lt;/DropdownMenu>
+        )}
+        &lt;BtnModalsServiceCatalog 
+          open={openWorkOrder}
+          setOpen={setOpenWorkOrder}
+          caseDetails={caseDetails}
+          serviceCatalogType={serviceCatalogType}
+        />
+      &lt;/div>
+        &lt;div>
+          &lt;ServiceCase
+            caseDetails={caseDetails}
+            formData={caseNoteFormData}
+            setCaseNoteFormData={setCaseNoteFormData}
+            formGtc={gtcForm}
+            setFormGtc={setGtcForm}
+            onChangeCase={handleCaseChange}
+            caseForm={caseForm}
+            setCaseForm={setCaseForm}
+            onChangeGtc={handleGtcChange}
+            onChange={handleCaseNoteChange}
+            handleCaseDetails={handleCaseDetails}
+            caseNotes={caseNotes}
+            setCaseNotes={setCaseNotes}
+            selectedSymptom={selectedSymptom}
+            setSelectedSymptom={setSelectedSymptom}
+            entitlementStatus={entitlementStatus}
+            handleEntitlementStatus={handleEntitlementStatus}
+            csrForm={csrForm}
+            setCsrForm={setCsrForm}
+            onChangeCsr={handleCsrChange}
+          />
+      &lt;/div>
+    &lt;/>
+  );
+};
+
+const spanMap = {
+  1: "col-span-1",
+  2: "col-span-2",
+  3: "col-span-3",
+  4: "col-span-4",
+  5: "col-span-5",
+  6: "col-span-6",
+};
+
+export const CaseField = ({ label, children, icon, span = 1, className, star }) => (
+  &lt;>
+    &lt;CardTitle
+      className={twMerge(
+        `relative font-medium flex items-center gap-2`,
+        icon ? "pl-6" : "",
+        className
+      )}
+    >
+      {icon &amp;&amp; (
+        &lt;Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
+      )}
+      {label}
+      {star ? &lt;span className="text-red-400">*&lt;/span> : ""}
+    &lt;/CardTitle>
+
+    &lt;CardTitle className={twMerge(spanMap[span], "")}>
+      {children}
+    &lt;/CardTitle>
+  &lt;/>
+);
+
+export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
+  const navigate = useNavigate();
+  const WOID = workOrders.WOID;
+  const handleSave = async () => {
+    try {
+      Swal.fire({
+        title: "Updating WORK ORDER...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      /**
+       * TODO :
+       * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
+       */
+      const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
+        //WO GENERAL
+        ShipmentCountry: WOGeneral.ShipmentCountry || undefined,
+        //SLA
+        SLAJeopardy: SLA.slaJeopardy || undefined,
+        DueDateCustomer: SLA.dueDateCustomer || undefined,
+        CoverageWindow: SLA.coverageWindow || undefined,
+        Response: SLA.response || undefined,
+        OTCCode: SLA.otcCode || undefined,
+        RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer || undefined,
+        GuaranteedFixTimeCustomer: SLA.guaranteedFixTimeCustomer || undefined,
+        EarlyStartDateTimeCustomer: SLA.earlyStartDateTimeCustomer || undefined,
+        LatestStartDateTimeCustomer: SLA.latestStartDateTimeCustomer || undefined,
+        SLAReschedule: SLA.slaReschedule || undefined,
+        ActiveScheduleDate: SLA.activeScheduleDate || undefined,
+        SLAErrorDescription: SLA.slaErrorDescription || undefined,
+        CasePriorityIndex:
+          SLA.casePriorityIndex !== ""
+            ? parseInt(SLA.casePriorityIndex, 10)
+            : undefined,
+      });
+
+      const result = response.data;
+      console.log(response);
+      
+
+      if (!result.success) {
+        return Swal.fire({
+          icon: "error",
+          title: "Update Failed",
+          text: result.message || "Unknown error",
+        });
+      }
+
+      return Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "SLA updated successfully!",
+      });
+    } catch (error) {
+      return Swal.fire({
+        icon: "error",
+        title: "Request Error",
+        text: error.message || "Something went wrong!",
+      });
+    }
+  };
+
+  const buttons = [
+    {
+      icon: ArrowLeftFromLine,
+      label: "",
+      onClick: () => navigate(`/app/case/${workOrders.CaseID}`),
+    },
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: Save, label: "Save", onClick: () => handleSave() },
+    {
+      icon: FileSymlink,
+      label: "Save &amp; Close",
+      onClick: () => saveAndCloseWorkOrder(),
+    },
+    { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Refresh", onClick: () => window.location.reload() },
+    { icon: StepBack, label: "Process", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
+    {
+      icon: UserPen,
+      label: "Create Material Order",
+      onClick: () => alert("not now"),
+    },
+    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now") },
+  ];
+  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  const hiddenButtons = open ? buttons.slice(-3) : [];
+  const saveAndCloseWorkOrder = async () => {
+    const confirmResult = await Swal.fire({
+      title: "Confirm Save",
+      text: "This will give the order status as CLOSED. Are you sure you want to save changes?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Save it",
+    });
+
+    if (!confirmResult.isConfirmed) {
+      return;
+    }
+    try {
+      Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update the Work Order.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const res = await ApiCustomer.patch(
+        `/api/work-order/${workOrders.WOID}`,
+        {
+          SystemStatus: "CLOSED_POSTED",
+        }
+      );
+      if (res.data.success) {
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${workOrders.CaseID}`,
+          ReferenceId: `${workOrders.WOID}`,
+          model: "Work Orders",
+          dataOld: workOrders.SystemStatus,
+          dataNew: res.data.data.SystemStatus,
+          changedBy: token.user.id,
+          logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${workOrders.SystemStatus} to ${res.data.data.SystemStatus}`
+        })
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate(`/app/case/${workOrders.CaseID}`);
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: res.data.message,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to update!",
+        text: error.message || "Something went wrong.",
+      });
+    }
+  };
+  return (
+    &lt;>
+      &lt;div className="flex items-center border-1 ">
+        {visibleButtons.map((btn, index) => (
+          &lt;Button
+            key={index}
+            onClick={btn.onClick}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+          >
+            &lt;btn.icon className="w-4 h-4" />
+            {btn.label &amp;&amp; &lt;span className="text-md">{btn.label}&lt;/span>}
+          &lt;/Button>
+        ))}
+
+        {open &amp;&amp; hiddenButtons.length > 0 &amp;&amp; (
+          &lt;DropdownMenu>
+            &lt;DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
+              ...
+            &lt;/DropdownMenuTrigger>
+            &lt;DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                &lt;DropdownMenuItem key={index}>
+                  &lt;btn.icon className="inline-block w-4 h-4 mr-2" />
+                  {btn.label}
+                &lt;/DropdownMenuItem>
+              ))}
+            &lt;/DropdownMenuContent>
+          &lt;/DropdownMenu>
+        )}
+    {/* &lt;BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    &lt;/div>
+    &lt;div>
+    {/* &lt;ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
+      /> */}
+      &lt;/div>
+    &lt;/>
+  );
+};
+
+export const TabsServiceMO = ({ materialOrders }) => {
+  const navigate = useNavigate();
+  const buttons = [
+    {
+      icon: ArrowLeftFromLine,
+      label: "",
+      onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
+    },
+    { icon: SquareArrowOutUpRight, label: "", },
+    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    {
+      icon: FileSymlink,
+      label: "Save &amp; Close",
+      onClick: () => saveAndCloseMaterialOrder(),
+    },
+    { icon: RotateCw, label: "ATP", },
+    { icon: StepBack, label: "Cancel Order", },
+    { icon: StepBack, label: "Add To Queue", },
+    { icon: StepBack, label: "Add Parts", },
+    { icon: StepBack, label: "Pick", },
+    { icon: StepBack, label: "Place Order", },
+    { icon: StepBack, label: "Tax", },
+    { icon: StepBack, label: "CustID Search", },
+    { icon: UserPen, label: "PUDO Search", },
+    { icon: StepBack, label: "Audit", },
+  ];
+  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  const hiddenButtons = open ? buttons.slice(-3) : [];
+  const saveAndCloseMaterialOrder = async () => {
+    try {
+      Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update the Material Order.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      const res = await ApiCustomer.patch(
+        `/api/material-order/${materialOrders.MOID}`,
+        {
+          OrderStatus: "Closed",
+        }
+      );
+      if (res.data.success) {
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${materialOrders.workorder?.CaseID}`,
+          ReferenceId: `${materialOrders.MOID}`,
+          model: "Material Orders",
+          dataOld: materialOrders.OrderStatus,
+          dataNew: res.data.data.OrderStatus,
+          changedBy: token.user.id,
+          logDescription: `Edit : Changed Material Order ${materialOrders.MOID} from ${materialOrders.OrderStatus} to ${res.data.data.OrderStatus}`
+        })
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate(`/app/work/${materialOrders.WOID}`);
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: res.data.message,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to update!",
+        text: error.message || "Something went wrong.",
+      });
+    }
+  };
+  return (
+    &lt;>
+      &lt;div className="flex items-center border-1 ">
+        {visibleButtons.map((btn, index) => (
+          &lt;Button
+            key={index}
+            onClick={btn.onClick}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+          >
+            &lt;btn.icon className="w-4 h-4" />
+            {btn.label &amp;&amp; &lt;span className="text-md">{btn.label}&lt;/span>}
+          &lt;/Button>
+        ))}
+
+        {open &amp;&amp; hiddenButtons.length > 0 &amp;&amp; (
+          &lt;DropdownMenu>
+            &lt;DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
+              ...
+            &lt;/DropdownMenuTrigger>
+            &lt;DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                &lt;DropdownMenuItem key={index}>
+                  &lt;btn.icon className="inline-block w-4 h-4 mr-2" />
+                  {btn.label}
+                &lt;/DropdownMenuItem>
+              ))}
+            &lt;/DropdownMenuContent>
+          &lt;/DropdownMenu>
+        )}
+    {/* &lt;BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    &lt;/div>
+    &lt;div>
+    {/* &lt;ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
+      /> */}
+      &lt;/div>
+    &lt;/>
+  );
+};
+
+export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems }) => {
+  const navigate = useNavigate();
+
+  const buttons = [
+    {
+      icon: ArrowLeftFromLine,
+      label: "",
+      onClick: () => navigate(`/app/material-order/${MOLineDetails.MOID}`),
+    },
+    { icon: SquareArrowOutUpRight, label: "", },
+    { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
+    {
+      icon: FileSymlink,
+      label: "Save &amp; Close",
+      onClick: () => saveAndCloseMaterialLineItemsOrder(),
+    },
+    { icon: StepBack, label: "Cancel", },
+    { icon: StepBack, label: "Audit", },
+    { icon: RotateCw, label: "Assign", },
+    {
+      icon: StepBack,
+      label: "Word Templates",
+      onClick: () => alert("not now"),
+    },
+    { icon: StepBack, label: "Run Report", },
+    { icon: StepBack, label: "Geo Code", },
+    { icon: StepBack, label: "Process", },
+    { icon: StepBack, label: "Reset RDT", },
+    // { icon: UserPen, label:  "Add To Queue", onClick: () => alert("not now") },
+    // { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+  ];
+  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  const hiddenButtons = open ? buttons.slice(-3) : [];
+
+  const saveMOLI = async (LineItemID, shouldRedirect = true) => {
+    try {
+      Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we update the line item.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${LineItemID}`, {
+        Description: MOLineDetails.description,
+        PickPackInstructions: MOLineDetails.pickPackInstructions,
+        CollectionInstructions: MOLineDetails.collectionInstructions || "None",
+        CustomerResponse: MOLineDetails.customerResponse,
+        RejectedReason: MOLineDetails.rejectedReason,
+        OtherReason: MOLineDetails.otherReason,
+        FailureId: MOLineDetails.failureId,
+        SerialNumber: MOLineDetails.serialNumber,
+        RemovedPartNumber: MOLineDetails.removedPartNumber,
+        RemovedSerialNumber: MOLineDetails.removedSerialNumber,
+        RemovedPartDescription: MOLineDetails.removedPartDescription,
+      });
+      if (res.data.success) {
+        if (shouldRedirect) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Updated!',
+            text: res.data.message,
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => {
+            navigate(`/app/mo_detail/${LineItemID}`);
+          });
+        }
+        return true;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: res.data.message
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to update!',
+        text: error.message || 'Something went wrong.'
+      });
+    }
+  }
+
+  const saveAndCloseMaterialLineItemsOrder = async () => {
+    try {
+      Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update the line item.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      const success = await saveMOLI(LineItemID, false);
+      if (!success) return; // Stop if saveMOLI failed
+      const res = await ApiCustomer.patch(
+        `/api/material-order/material-order-line-items/${LineItemID}`,
+        {
+          Status: "Closed",
+        }
+      );
+      if (res.data.success) {
+        console.log("MATERIAL ORDeR IN CLOSED POSTED : ", moLineItems)
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${moLineItems.materialorder?.workorder?.CaseID}`,
+          ReferenceId: `${moLineItems.MOID}`,
+          model: "Material Order Line Item",
+          dataOld: moLineItems.Status,
+          dataNew: "Closed",
+          changedBy: token.user.id,
+          logDescription: `Edit : Change Material Order Line Item ${moLineItems.MOID} - ${moLineItems.LineItemID} Status from ${moLineItems.Status} to Closed`
+        })
+       
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate(`/app/material-order/${MOLineDetails.MOID}`);
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: res.data.message,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to update!",
+        text: error.message || "Something went wrong.",
+      });
+    }
+  };
+
+  return (
+    &lt;>
+      &lt;div className="flex items-center border-1 ">
+        {visibleButtons.map((btn, index) => (
+          &lt;Button
+            key={index}
+            onClick={btn.onClick}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+          >
+            &lt;btn.icon className="w-4 h-4" />
+            {btn.label &amp;&amp; &lt;span className="text-md">{btn.label}&lt;/span>}
+          &lt;/Button>
+        ))}
+    {console.log(MOLineDetails)}
+        {open &amp;&amp; hiddenButtons.length > 0 &amp;&amp; (
+          &lt;DropdownMenu>
+            &lt;DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
+              ...
+            &lt;/DropdownMenuTrigger>
+            &lt;DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                &lt;DropdownMenuItem key={index}>
+                  &lt;btn.icon className="inline-block w-4 h-4 mr-2" />
+                  {btn.label}
+                &lt;/DropdownMenuItem>
+              ))}
+            &lt;/DropdownMenuContent>
+          &lt;/DropdownMenu>
+        )}
+    {/* &lt;BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    &lt;/div>
+    &lt;div>
+    {/* &lt;ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
+      /> */}
+      &lt;/div>
+    &lt;/>
+  );
+};
+
+export const ServiceCase = ({
+  caseDetails,
+  formData,
+  setCaseNoteFormData,
+  onChange,
+  caseNotes,
+  setCaseNotes,
+  handleCaseDetails,
+  selectedSymptom,
+  setSelectedSymptom,
+  formGtc,
+  setFormGtc,
+  onChangeGtc,
+  entitlementStatus,
+  handleEntitlementStatus,
+  csrForm,
+  setCsrForm,
+  onChangeCsr,
+  caseForm,
+  onChangeCase,
+  setCaseForm,
+}) => {
+  const { open } = useSidebar();
+
+  const [symptomSearchTerm, setSymptomSearchTerm] = useState("");
+  const [symptomSuggestions, setSymptomSuggestions] = useState([]);
+
+  const [createdOn, setCreatedOn] = useState(null);
+  const [caseClosedDate, setCaseClosedDate] = useState(null);
+  const [submittedToBase, setsubmittedToBase] = useState(null);
+
+  const [pendingCustomerAction, setPendingCustomerAction] = useState(null);
+  const [customerRequestedCloseDate, setCustomerRequestedCloseDate] =
+    useState(null);
+  const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
+  // const [cr]
+  useEffect(() => {
+    if (caseDetails?.CreatedOn) {
+      setCreatedOn(new Date(caseDetails.CreatedOn)); // includes date + time
+    }
+  }, [caseDetails]);
+
+  const tabs = [
+    { value: "case_info", label: "Case Information" },
+    { value: "customer,add,entitement", label: "Customer, Asset &amp; Entitement" },
+    { value: "ci_notes", label: "Notes &amp; Information" },
+    { value: "ci_activitas", label: "Activities", disable: true },
+    { value: "ci_actions", label: "Customer Interactions", disable: true},
+    { value: "ci_wo", label: "Work Order Validation" },
+    { value: "ci_orders", label: "Orders" },
+    { value: "ci_salles", label: "Sales Offer", disable: true },
+    { value: "ci_knowledge", label: "Knowledge &amp; Attachments", },
+    { component: &lt;SelectBarRelated /> },
+  ];
+
+  const visibleTabs = open ? tabs.slice(0, -2) : tabs;
+  const hiddenTabs = open
+    ? [
+        { value: "ci_knowledge", label: "Knowledge &amp; Attachments" },
+        { component: &lt;SelectBarRelated /> },
+      ]
+    : [];
+
+  const [selected, setSelected] = useState("--Selected--"); 
+
+  const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
+    MainAccount: null,
+    SiteAccount: null,
+    Type: null,
+  });
+  const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
+  const [ownerUserData, setOwnerUserData] = useState([]);
+
+  const [workOrders, setWorkOrders] = useState([]);
+
+  const [materialOrders, setMaterialOrders] = useState([]);
+
+  const [actionLogs, setActionLogs] = useState([]);
+
+  const fetchCustomerData = async () => {
+    try {
+      const resMainAccount = await ApiCustomer.get(
+        `/api/contact-information/${caseDetails.ContactID}`
+      );
+      setDataFetchCustomerData({
+        MainAccount: resMainAccount.data.data,
+      });
+      if (caseDetails.SiteAccountID !== null) {
+        const resSiteAccount = await ApiCustomer.get(
+          `/api/site_account/${caseDetails.SiteAccountID}`
+        );
+        setDataFetchCustomerData((prev) => ({
+          ...prev,
+          SiteAccount: resSiteAccount.data.data,
+          Type: "SiteAccount",
+        }));
+      } else {
+        setDataFetchCustomerData((prev) => ({
+          ...prev,
+          type: "Individual", 
+        }));
+      }
+    } catch (err) {
+      console.error("Error returning Customer Data : ", err);
+      return null;
+    }
+  };
+
+  const fetchAssetInformation = async () => {
+    try {
+      const resAsset = await ApiCustomer.get(
+        `/api/asset-information/${caseDetails.AssetID}`
+      );
+      setDataFetchAssetInformation({
+        AssetInformation: resAsset.data.data,
+      });
+    } catch (err) {
+      console.error("Error returning Asset Data : ", err);
+      return null;
+    }
+  };
+
+  const fetchCaseNotes = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/case-information/case-notes`);
+      const notes = res.data.data;
+
+      const existingNote = notes.find(
+        (note) => note.CaseID === caseDetails.CaseID
+      );
+
+      let noteID = null;
+
+      if (existingNote) {
+        noteID = existingNote.NoteID;
+      } else {
+        const createResponse = await ApiCustomer.post(
+          `/api/case-information/case-notes`,
+          {
+            LogType: "NotesLog",
+            ActionType: "",
+            Template: "",
+            VisibleExternally: false,
+            MinutesSpent: 0,
+            Note: "",
+            CaseID: caseID,
+          }
+        );
+
+        noteID = createResponse.data.data.NoteID;
+      }
+
+      const detailRes = await ApiCustomer.get(
+        `/api/case-information/case-notes/${noteID}`
+      );
+      const noteDetail = detailRes.data.data;
+
+      console.log("Case Note Detail:", noteDetail);
+      return noteDetail;
+    } catch (err) {
+      console.error("Error in fetchCaseNotes:", err);
+      return null;
+    }
+  };
+
+  const fetchOwnerUserData = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
+      setOwnerUserData(response.data.data)
+    } catch (error) {
+      
+    }
+  }
+
+  const fetchWorkOrders = async () => {
+    try {
+      const res = await ApiCustomer.get(
+        `/api/work-order?CaseID=${caseDetails.CaseID}`
+      );
+      setWorkOrders(res.data.data); // adjust based on API response shape
+      console.log("Fetch Work Order: ", res.data.data);
+    } catch (err) {
+      console.error("Failed to fetch work orders:", err);
+    }
+  };
+
+  const fetchMaterialOrders = async () => {
+    try {
+      if (!workOrders.length) return;
+
+      const woidList = workOrders.map((wo) => wo.WOID).join(",");
+      const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
+      setMaterialOrders(res.data.data);
+    } catch (err) {
+      console.error("Failed to fetch Material orders:", err);
+    }
+  };
+
+  const fetchGtc = async () => {
+    try {
+      const gtcData = caseDetails.global_trade_check;
+      setFormGtc(gtcData ?? formGtc); 
+    } catch (err) {
+      console.error("Error fetching GTC:", err);
+      setFormGtc(formGtc); 
+    }
+  };
+
+  const [otcCode, setOtcCode] = useState([])
+  
+  const fetchOTCCode = async () => {
+    try{
+      const res = await ApiCustomer.get('/api/otc-code')
+      setOtcCode(res.data.data)
+    }catch(e){
+      console.error("Failed to fetch OTC Code:", err);
+    }
+  }
+
+  const [caseTipe, setCaseTipe] = useState([
+    {
+      CaseType : "Administrative"
+    },
+    {
+      CaseType : "ASP/Reseller/GS1"
+    },
+    {
+      CaseType : "Bench"
+    },
+    {
+      CaseType : "Call to Repair"
+    },
+    {
+      CaseType : "Complex T&amp;M"
+    },
+    {
+      CaseType : "Depot Repair"
+    },
+    {
+      CaseType : "Electronic"
+    },
+    {
+      CaseType : "HW Delivery"
+    },
+    {
+      CaseType : "IMACD"
+    },
+    {
+      CaseType : "Internal Service"
+    },
+    {
+      CaseType : "Internal Support"
+    },
+    {
+      CaseType : "Onsite"
+    },
+    {
+      CaseType : "Proactive"
+    },
+    {
+      CaseType : "Remote Services"
+    },
+    {
+      CaseType : "Services (VAS)"
+    },
+    {
+      CaseType : "SW Delivery"
+    },
+    {
+      CaseType : "T&amp;M"
+    },
+  ])
+
+  const fetchCsr = async () => {
+  try {
+    const csrData = caseDetails.caseresolution;
+    console.log("CSR Data: ", csrData);
+
+    if (csrData) {
+      setCsrForm({
+        caseResolutionCode: csrData.caseResolutionCode || "",
+        autoClose: csrData.autoClose || "",
+        caseReadyForClosure: csrData.caseReadyForClosure || "",
+        readyForCloseDays: csrData.readyForCloseDays || "",
+        readyForClosureDate: csrData.readyForClosureDate ? new Date(csrData.readyForClosureDate) : "",
+        pendingCustomerAction: csrData.pendingCustomerAction ? new Date(csrData.pendingCustomerAction) : "",
+        customerRequestedCloseDate: csrData.customerRequestedCloseDate ? new Date(csrData.customerRequestedCloseDate) : "",
+      });
+    } else {
+      setCsrForm(csrForm); 
+    }
+  } catch (err) {
+    console.error("Error fetching CSR:", err);
+    setCsrForm(csrForm); 
+  }
+};
+
+
+const statusEnumToLabel = {
+  New: "New",
+  Open: "Open",
+  InActive: "Inactive",
+  Close: "Closed",
+  Active: "Active",
+  Monitor: "Monitor",
+  Pending_Customer_Action: "Pending Customer Action",
+  Quote_Requested: "Quote Requested",
+  Pending_Follow_Up: "Pending Follow Up",
+  Pending_Order: "Pending Order",
+  Escalated: "Escalated",
+  Quote_Approved: "Quote Approved",
+  Pending_Quote: "Pending Quote"
+};
+
+const labelToStatusEnum = Object.fromEntries(
+  Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
+);
+
+
+const fetchCase = async () => {
+  try {
+    const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`);
+    setCaseForm(res.data.data);
+  } catch (err) {
+    console.error("Error fetching case:", err);
+    setCaseForm(caseForm); // fallback jika error
+  }
+};
+
+const fetchActionLog = async () => {
+  try {
+    const actionlog = await ApiCustomer.get(`/api/actionlog?caseId=${caseDetails.CaseID}`)
+    setActionLogs(actionlog.data.data)
+  } catch (error) {
+    console.error("Error fetching ActionLog:", err);
+  }
+}
+  
+  //handler all case
+  useEffect(() => {
+    fetchCustomerData();
+    fetchAssetInformation();
+    fetchOwnerUserData();
+
+    fetchWorkOrders();
+    const loadNote = async () => {
+      const noteDetail = await fetchCaseNotes();
+      if (noteDetail) {
+        setCaseNoteFormData((prev) => ({
+          ...prev,
+          NotesDisplay: noteDetail.Note,
+          ActionType: noteDetail.ActionType,
+          CreatedOn: noteDetail.CreatedOn,
+          LogType: noteDetail.LogType,
+          VisibleExternally: noteDetail.VisibleExternally,
+        }));
+      }
+    };
+    loadNote();
+    fetchGtc(); 
+    fetchOTCCode();
+    fetchCsr();
+    fetchCase();
+    fetchActionLog();
+  }, []);
+
+  useEffect(() => {
+    if (otcCode.length > 0 &amp;&amp; caseDetails?.OTCCode) {
+      handleEntitlementStatus("OTCCode")(caseDetails.OTCCode)
+    }
+  }, [otcCode, caseDetails]);
+
+  useEffect(() => {
+    console.log("Data Asset Info : ", dataFetchAssetInformation);
+
+    console.log("Fetch Data Customer Success : ", dataFetchCustomerData);
+    console.log("Fetch Data User ", ownerUserData);
+  }, [ownerUserData]);
+
+  // console.log("Selected Symptopm ",selectedSymptom)
+
+  // useEffect(() => {
+  // }, selectedSymptom)
+
+  //order section
+  //workorder
+
+  useEffect(() => {
+    console.log("Work Orders Fetching L ", workOrders);
+    if (workOrders.length > 0) {
+      fetchMaterialOrders();
+    }
+  }, [workOrders]);
+
+  const navigate = useNavigate();
+
+  const handleClick = async () => {
+    // await fetchOwnerUserData();
+    // await fetchCustomerData();
+    {
+      workOrders.map((work) => {
+        navigate(`/app/work/${work.WOID}`, {
+          // state: { ownerUserData, dataFetchCustomerData }
+        });
+      });
+    }
+  };
+
+useEffect(() =>{
+  console.log("Data Asset Info : ",dataFetchAssetInformation)
+  
+  console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
+  console.log("Fetch Data User ", ownerUserData)
+}, [ownerUserData])
+
+const fetchSymptomCodes = async (term) => {
+  try {
+    const response = await ApiCustomer.get("/api/symptom-codes");
+    const allCodes = response.data.data;
+
+    const filtered = allCodes.filter((sym) =>
+      sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+    );
+
+    setSymptomSuggestions(filtered);
+  } catch (err) {
+    console.error("Error fetching symptom codes", err);
+  }
+};
+
+
+const [startDate, setstartDate] = useState(null);
+const [endDate, setEndDate] = useState(null);
+
+  return (
+    &lt;>
+      {caseDetails.CaseStatus === "Close" &amp;&amp; (
+        &lt;div className="p-4 my-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
+          This Case is &lt;strong>read-only&lt;/strong> because it is{" "}
+          &lt;strong>Closed&lt;/strong>.
+        &lt;/div>
+      )}
+      &lt;Card className="p-0 mt-2 border-0 rounded-none">
+        &lt;Tabs defaultValue="case_info">
+          &lt;CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2">
+            &lt;div className="flex justify-between">
+              &lt;CardTitle className="text-xl ">
+                {caseDetails.CaseID}
+                &lt;span className="flex items-center text-sm">
+                  Case .
+                  &lt;Select
+                    onValueChange={setSelected}
+                    defaultValue="case"
+                    className="shadow-xl"
+                  >
+                    &lt;SelectTrigger className="border-none shadow-none">
+                      &lt;SelectValue />
+                    &lt;/SelectTrigger>
+                    &lt;SelectContent>
+                      &lt;SelectGroup>
+                        &lt;SelectItem value="case">Case&lt;/SelectItem>
+                      &lt;/SelectGroup>
+                    &lt;/SelectContent>
+                  &lt;/Select>
+                &lt;/span>
+              &lt;/CardTitle>
+              &lt;CardTitle className="flex">
+                &lt;div className="flex flex-col justify-center px-2 border-r-2 item-center">
+                  &lt;h1 className="text-blue-500">{ownerUserData.Name}&lt;/h1>
+                  &lt;p className="text-sm font-light ">Owner&lt;/p>
+                &lt;/div>
+                &lt;div className="flex flex-col justify-center px-2 border-r-2 item-center">
+                  &lt;h1 className="text-blue-500">---&lt;/h1>
+                  &lt;p className="text-sm font-light ">Queue&lt;/p>
+                &lt;/div>
+                &lt;div className="flex flex-col justify-center px-2 border-r-2 item-center">
+                  &lt;h1 className="text-blue-500">
+                    {dataFetchCustomerData.MainAccount?.Salutation}{" "}
+                    {dataFetchCustomerData.MainAccount?.FirstName}{" "}
+                    {dataFetchCustomerData.MainAccount?.LastName}
+                  &lt;/h1>
+                  &lt;p className="text-sm font-light ">Contact&lt;/p>
+                &lt;/div>
+                &lt;div className="flex flex-col justify-center px-2 border-r-2 item-center">
+                  &lt;Select onValueChange={setSelected} defaultValue="first">
+                    &lt;SelectTrigger className="p-0 text-blue-500 border-none shadow-none">
+                      &lt;SelectValue />
+                    &lt;/SelectTrigger>
+                    &lt;SelectContent className="p-0">
+                      &lt;SelectGroup className="p-0">
+                        &lt;SelectItem value="first" className="p-0">
+                          {dataFetchCustomerData.SiteAccount?.Company}
+                        &lt;/SelectItem>
+                      &lt;/SelectGroup>
+                    &lt;/SelectContent>
+                  &lt;/Select>
+                  &lt;p className="text-sm font-light ">Site Account&lt;/p>
+                &lt;/div>
+              &lt;/CardTitle>
+            &lt;/div>
+            &lt;TabsList className="bg-white">
+              {visibleTabs.map((tab, index) =>
+                tab.component ? (
+                  &lt;div key={index}>{tab.component}&lt;/div> // Ensure SelectBarRelated renders properly
+                ) : (
+                  &lt;TabsTrigger
+                    key={index}
+                    variant="underline"
+                    value={tab.value}
+                    disabled={tab.disable}
+                   
+                  >
+                    {tab.label}
+                  &lt;/TabsTrigger>
+                )
+              )}
+              {open &amp;&amp; (
+                &lt;DropdownMenu>
+                  &lt;DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
+                    ...
+                  &lt;/DropdownMenuTrigger>
+                  &lt;DropdownMenuContent>
+                    {hiddenTabs.map((tab, index) =>
+                      tab.component ? (
+                        &lt;DropdownMenuItem key={index}>
+                          {tab.component}
+                        &lt;/DropdownMenuItem>
+                      ) : (
+                        &lt;DropdownMenuItem key={index}>
+                          &lt;TabsTrigger variant="underline" value={tab.value}>
+                            {tab.label}
+                          &lt;/TabsTrigger>
+                        &lt;/DropdownMenuItem>
+                      )
+                    )}
+                  &lt;/DropdownMenuContent>
+                &lt;/DropdownMenu>
+              )}
+            &lt;/TabsList>
+          &lt;/CardHeader>
+
+          &lt;TabsContent value="case_info" className={"p-2"}>
+            &lt;Card className="flex-row">
+              &lt;CardContent className="grid items-center grid-cols-6 gap-10 p-3 ">
+                &lt;CaseField label="Case ID" icon>
+                  &lt;Input
+                    variant="invisible"
+                    value={caseDetails.CaseID}
+                    readOnly
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="Case Subject" span={3}>
+                  &lt;Input variant="invisible" value={caseDetails.CaseSubject} />
+                &lt;/CaseField>
+                &lt;CaseField label="Incoming Channel" icon>
+                  &lt;Input
+                    variant="invisible"
+                    value={caseDetails.IncomingChannel}
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="Business Segment">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Email Status">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Case Status">
+                &lt;SearchCommandBlock
+                  value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
+                  onChange={(label) => {
+                    const enumValue = labelToStatusEnum[label];
+                    onChangeCase("CaseStatus")(enumValue);
+                  }}
+                  placeholder="--Select--"
+                  options={Object.values(statusEnumToLabel)}
+                />
+                &lt;/CaseField>
+                &lt;CaseField label="Case Type">
+                  &lt;SearchCommandBlock
+                    value={caseForm?.CaseType}
+                    onChange={onChangeCase("CaseType")}
+                    placeholder="--Select--"
+                    options={[
+                    "Depot Repair",
+                    "Onsite",
+                    "Bench",
+                    ]}
+                    />
+                &lt;/CaseField>
+                &lt;CaseField label="KCI For Case?">
+                  {caseDetails.KCI_Flag ? "Yes" : "No"}
+                &lt;/CaseField>
+                &lt;CaseField label="Case Priority">
+                  {caseDetails.CasePriority}
+                &lt;/CaseField>
+                &lt;CaseField label="HPI Segment">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Customer Tracking Number" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Customer Severity">
+                  {caseDetails.CustomerSeverity}
+                &lt;/CaseField>
+                &lt;CaseField label="Update Customer Tracking Number" span={3}>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Created ON" icon span={3}>
+                  &lt;DatePicker
+                    variant="icon"
+                    value={createdOn}
+                    onChange={setCreatedOn}
+                    readOnly
+                  >&lt;/DatePicker>
+                &lt;/CaseField>
+                &lt;CaseField label="Alternate Customer Tracking Number">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Case Closed Date" icon span={3}>
+                  &lt;span className="flex gap-[5em]">
+                    &lt;DatePicker
+                      variant="icon"
+                      value={caseClosedDate}
+                      onChange={setCaseClosedDate}
+                      readOnly
+                    >&lt;/DatePicker>
+                  &lt;/span>
+                &lt;/CaseField>
+                &lt;CaseField label="Irrelevant" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Submitted To Base" icon span={3}>
+                  &lt;span className="flex gap-[5em]">
+                    &lt;DatePicker
+                      variant="icon"
+                      value={submittedToBase}
+                      onChange={setsubmittedToBase}
+                      readOnly
+                    >&lt;/DatePicker>
+                  &lt;/span>
+                &lt;/CaseField>
+              &lt;/CardContent>
+            &lt;/Card>
+
+            &lt;Card className="flex-col mt-5">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">Global Trade Check&lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              
+              &lt;CardContent className="grid gap-10  grid-cols-6 p-3 items-center">
+                &lt;CaseField label="Global Trade Status">
+                  &lt;SearchCommandBlock
+                    value={formGtc.global_trade_status}
+                    onChange={onChangeGtc("global_trade_status")}
+                    placeholder="--Select--"
+                    options={[
+                      "Pass",
+                      "Fail",
+                      "Not Done",
+                      "Not Needed",
+                      "Failed Confirmed",
+                    ]}
+                  />
+                &lt;/CaseField>
+
+                &lt;CaseField label="GT Override Reason">
+                  &lt;SearchCommandBlock
+                    value={formGtc.gt_override_reason}
+                    onChange={onChangeGtc("gt_override_reason")}
+                    placeholder="--Select--"
+                    options={[
+                      "Military Keyword False Match",
+                      "Embargo False Match",
+                      "RPL False Match",
+                      "Active Contract",
+                      "United States Government",
+                      "Global Trade Authorization",
+                      "RPL Manual Screening Passed",
+                      "Fail Confirmed by GT",
+                      "Other",
+                    ]}
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="GT Active Listening">
+                  &lt;SearchCommandBlock
+                    value={formGtc.gt_active_listening}
+                    onChange={onChangeGtc("gt_active_listening")}
+                    placeholder="--Select--"
+                    options={["Pass", "Fail"]}
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="Embargoed Country" icon>
+                  &lt;Input
+                    variant="invisible"
+                    placeholder="---"
+                    value={formGtc.embargoed_country}
+                    onChange={(e) =>
+                      onChangeGtc("embargoed_country")(e.target.value)
+                    }
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="GT Details">
+                  &lt;Input
+                    variant="invisible"
+                    placeholder="---"
+                    value={formGtc.gt_details}
+                    onChange={(e) => onChangeGtc("gt_details")(e.target.value)}
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="GT All Comments">
+                  &lt;Input
+                    variant="invisible"
+                    placeholder="---"
+                    value={formGtc.gt_al_comments}
+                    onChange={(e) =>
+                      onChangeGtc("gt_al_comments")(e.target.value)
+                    }
+                  />
+                &lt;/CaseField>
+                &lt;CaseField className={"col-start-3"} label="Screening ID">
+                  &lt;Input
+                    variant="invisible"
+                    placeholder="---"
+                    value={formGtc.screening_id}
+                    onChange={(e) =>
+                      onChangeGtc("screening_id")(e.target.value)
+                    }
+                  />
+                &lt;/CaseField>
+              &lt;/CardContent>
+            &lt;/Card>
+          &lt;/TabsContent>
+
+          &lt;TabsContent
+            value="customer,add,entitement"
+            className={"p-1 flex flex-col gap-4"}
+          >
+            &lt;Card className="flex-col ">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">Customer Information&lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              &lt;CardContent className="grid items-center grid-cols-6 gap-10">
+                &lt;CaseField label="Customer Account" icon>
+                  &lt;Input
+                    variant="invisible"
+                    value={
+                      dataFetchCustomerData?.Type == "SiteAccount"
+                        ? dataFetchCustomerData?.SiteAccount?.Company
+                        : dataFetchCustomerData?.MainAccount?.FirstName +
+                          " " +
+                          dataFetchCustomerData?.MainAccount?.LastName
+                    }
+                    readOnly
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="Primary Contact" icon>
+                  &lt;Input
+                    variant="invisible"
+                    value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
+                    readOnly
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="Submitted By">
+                  &lt;Input variant="invisible" placeholder="---"  />
+                &lt;/CaseField>
+                &lt;CaseField label="Is Partner" icon>
+                  &lt;Input variant="invisible" placeholder="---" readOnly/>
+                &lt;/CaseField>
+                &lt;CaseField label=" Primary Email" icon>
+                  &lt;Input
+                    variant="invisible"
+                    value={dataFetchCustomerData.MainAccount?.Email}
+                    placeholder="---"
+                    readOnly
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="Partner &amp; Customer" icon>
+                  &lt;Input variant="invisible" placeholder="---"  readOnly/>
+                &lt;/CaseField>
+                &lt;CaseField label="HIPAA" icon>
+                  &lt;Input variant="invisible" placeholder="---" readOnly/>
+                &lt;/CaseField>
+                &lt;CaseField label="Phone" icon>
+                  {" "}
+                  {dataFetchCustomerData?.Type == "SiteAccount"
+                    ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone
+                    : dataFetchCustomerData?.MainAccount?.Phone}
+                &lt;/CaseField>
+                &lt;CaseField label="Region" icon>
+                  &lt;Input variant="invisible" placeholder="---" readOnly/>
+                &lt;/CaseField>
+                &lt;CaseField label="PIN">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Secondary Contact">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Parent Company">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Customer Time Zone" icon>
+                  &lt;Input variant="invisible" placeholder="---" readOnly/>
+                &lt;/CaseField>
+                &lt;CaseField label="Country" icon>
+                  &lt;Input
+                    variant="invisible"
+                    value={
+                      dataFetchCustomerData?.Type == "SiteAccount"
+                        ? dataFetchCustomerData?.SiteAccount?.Country
+                        : dataFetchCustomerData?.MainAccount?.Country
+                    }
+                    readOnly
+                  />                  
+                &lt;/CaseField>
+                &lt;CaseField label="Parent Company Non-Latin">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Account Tier" className={"col-start-5"}>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+              &lt;/CardContent>
+            &lt;/Card>
+
+            &lt;Card className="flex-col ">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">Asset Information&lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              &lt;CardContent className="grid items-center grid-cols-6 gap-10">
+                &lt;CaseField label="Assets" icon>
+                  {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
+                &lt;/CaseField>
+                &lt;CaseField label="Product Number" icon>
+                  {
+                    dataFetchAssetInformation?.AssetInformation
+                      ?.product_information?.ProductNumber
+                  } 
+                &lt;/CaseField>
+                &lt;CaseField label="Asset Location">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Serial Number" icon>
+                  {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
+                &lt;/CaseField>
+                &lt;CaseField label="HW Profit Center" icon>
+                  {" "}
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="SNIC - Count" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Product Name" icon>
+                  {
+                    dataFetchAssetInformation?.AssetInformation
+                      ?.product_information?.ProductName
+                  }{" "}
+                &lt;/CaseField>
+                &lt;CaseField label="HWPC Code" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="MV Product Description" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;div className="grid items-center grid-cols-2 col-span-2 gap-2 p-5 ring-1">
+                  &lt;CaseField label="Device Properties" icon>
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                &lt;/div>
+              &lt;/CardContent>
+              {/* TABEL ACCESSORY */}
+  &lt;div className="px-6 pb-6">
+    &lt;h3 className="text-md font-semibold mb-2">Accessory&lt;/h3>
+    &lt;div className="overflow-x-auto">
+      &lt;table className="min-w-full border text-sm text-left">
+        &lt;thead className="bg-gray-100 text-gray-700">
+          &lt;tr>
+            &lt;th className="border px-4 py-2">Accessories ID&lt;/th>
+            &lt;th className="border px-4 py-2">Case ID&lt;/th>
+            &lt;th className="border px-4 py-2">Accessories&lt;/th>
+            &lt;th className="border px-4 py-2">Note&lt;/th>
+            &lt;th className="border px-4 py-2">CT_SNCode&lt;/th>
+          &lt;/tr>
+        &lt;/thead>
+        &lt;tbody>
+          {caseDetails.accessory?.map((item, index) => (
+            &lt;tr key={index} className="hover:bg-gray-50">
+              &lt;td className="border px-4 py-2">{item.id}&lt;/td>
+              &lt;td className="border px-4 py-2">{item.CaseID}&lt;/td>
+              &lt;td className="border px-4 py-2">{item.Accessories}&lt;/td>
+              &lt;td className="border px-4 py-2">{item.Note || "---"}&lt;/td>
+              &lt;td className="border px-4 py-2">{item.CT_SNCode || "---"}&lt;/td>
+            &lt;/tr>
+          ))}
+          {(!caseDetails?.accessory ||
+            caseDetails.accessory.length === 0) &amp;&amp; (
+            &lt;tr>
+              &lt;td className="border px-4 py-2 text-center" colSpan={5}>
+                No accessories found.
+              &lt;/td>
+            &lt;/tr>
+          )}
+        &lt;/tbody>
+      &lt;/table>
+    &lt;/div>
+  &lt;/div>
+            &lt;/Card>
+
+            &lt;Card className="flex-col ">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">SLA Information&lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              &lt;CardContent className="grid items-center grid-cols-6 gap-10">
+                &lt;CaseField label="Latest Start Date (Cust Time)" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Coverage Window Used" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Response Time Value" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Guaranteed Fix Date (Cust Time)" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Coverage Window Value" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Repair Time Value" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Case Priority Index" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Case Priority Rule" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+              &lt;/CardContent>
+            &lt;/Card>
+
+            &lt;Card className="flex-col ">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">
+                  Entitlement Information
+                &lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              &lt;CardContent className="grid items-center grid-cols-9 gap-10">
+                &lt;CaseField label="Case Entitlement" icon span={2}>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Start Date" icon span={2}>
+                  {" "}
+                  &lt;DatePicker
+                    value={startDate}
+                    onChange={setstartDate}
+                    readOnly
+                  >&lt;/DatePicker>{" "}
+                &lt;/CaseField>
+                {console.log(entitlementStatus)}
+                &lt;CaseField label="OTC Code" icon span={2}>
+                  &lt;SearchCommandBlock
+                    options={otcCode}
+                    value={entitlementStatus.OTCCode}
+                    onChange={(value) =>
+                      handleEntitlementStatus("OTCCode")(value)
+                    }
+                    placeholder="---"
+                    renderLabel={(opt) => `${opt.OTCCode} - ${opt.Description}`}
+                    getValue={(opt) => opt.OTCCode}
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="Entitlement Status" icon span={2}>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="End Date" icon span={2}>
+                  {" "}
+                  &lt;DatePicker
+                    value={endDate}
+                    onChange={setEndDate}
+                    readOnly
+                  >&lt;/DatePicker>
+                &lt;/CaseField>
+                &lt;CaseField label="Entitlement Override" icon span={2}>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Selected Entitlement Offer" icon span={2}>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Days Left" icon span={2}>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Authorizing Employee" icon span={2}>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+              &lt;/CardContent>
+            &lt;/Card>
+          &lt;/TabsContent>
+
+          &lt;TabsContent value="ci_notes" className={"p-2 flex flex-col gap-4"}>
+            &lt;Card className="flex-col p-2 ">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">
+                  Customer Issue Description &amp; System Information
+                &lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              &lt;CardContent className="flex p-4 gap-x-5">
+                &lt;div className="grid items-center flex-1 grid-cols-6 grid-row-7 gap-y-7">
+                  &lt;div className="row-span-4 col-span-full">
+                    &lt;textarea
+                      className="border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none"
+                      readOnly
+                      value={caseDetails?.CaseProductNote}
+                    >&lt;/textarea>
+                  &lt;/div>
+                  &lt;CaseField
+                    label="Related Device"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                  &lt;CaseField
+                    label="Device Manufacturer"
+                    className={"col-span-3"}
+                    span={3}
+                    icon
+                  >
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                  &lt;CaseField
+                    label="Device Model"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                &lt;/div>
+
+                &lt;div className="grid flex-1 grid-flow-row grid-cols-6 gap-y-7">
+                  &lt;CaseField
+                    label="Program/Category"
+                    className={"col-span-3"}
+                    span={2}
+                  >
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                  &lt;CaseField
+                    label="Operating System"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                  &lt;CaseField label="Version" className={"col-span-3"} span={3}>
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                  &lt;CaseField
+                    label="Remote Diag Code"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                  &lt;CaseField
+                    label="Application Information"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                  &lt;CaseField
+                    label="Provider / Platform"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                  &lt;CaseField
+                    label="Software Version"
+                    className={"col-span-3"}
+                    span={3}
+                  >
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                &lt;/div>
+              &lt;/CardContent>
+            &lt;/Card>
+
+            &lt;Card className="flex-col p-2 ">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">Case Notes&lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              &lt;CardContent className="flex gap-4">
+                &lt;div className="grid flex-1 grid-cols-6 gap-y-7">
+                  &lt;CaseField label="Log Type" className={"col-span-2"} span={4}>
+                    &lt;Select  value={formData?.LogType}  onValueChange={(val) => onChange("LogType", val)}>
+                      &lt;SelectTrigger
+                        className={"w-[100%] hover:shadow-lg border-b-0"}
+                      >
+                        &lt;SelectValue placeholder="Log Type" />
+                      &lt;/SelectTrigger>
+                      &lt;SelectContent>
+                        &lt;SelectItem value="NotesLog">Notes Log&lt;/SelectItem>
+                        &lt;SelectItem value="PhoneLog">Phone Log&lt;/SelectItem>
+                      &lt;/SelectContent>
+                    &lt;/Select>
+                  &lt;/CaseField>
+
+                  &lt;CaseField
+                    label="Action Type"
+                    className={"col-span-2"}
+                    span={4}
+                  >
+                      &lt;SearchCommandBlock
+                      value={formData?.ActionType}
+                      onChange={(val) => onChange("ActionType", val)}
+                      placeholder="--Select--"
+                      options={[
+                        "Inbound Customer call",
+                        "Action Plan",
+                        "Administrative task",
+                        "CE/Partner Assist",
+                        "Customer Email",
+                      ]}
+                    />
+                  &lt;/CaseField>
+
+                  &lt;CaseField label="Template" className={"col-span-2"} span={4}>
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+
+                  &lt;CaseField
+                    label="Visible Externally"
+                    className={"col-span-2"}
+                    span={4}
+                  >
+                    &lt;SelectYN
+                      value={
+                        formData?.VisibleExternally === undefined ||
+                        formData?.VisibleExternally === null
+                          ? ""
+                          : formData?.VisibleExternally
+                          ? "Yes"
+                          : "No"
+                      }
+                      onValueChange={(val) =>
+                        onChange("VisibleExternally", val === "Yes")
+                      }
+                    >&lt;/SelectYN>
+                  &lt;/CaseField>
+
+                  &lt;CaseField
+                    label="Number of Minutes Spent"
+                    className={"col-span-2"}
+                    icon
+                    span={3}
+                  >
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+
+                  &lt;CaseField
+                    label="Notes"
+                    className={"col-span-2 self-start bg-red"}
+                    span={4}
+                    star
+                  >
+                    &lt;textarea
+                      className="h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500"
+                      value={formData?.Note || ""}
+                      onChange={(e) => onChange("Note", e.target.value)}
+                    />
+                  &lt;/CaseField>
+                &lt;/div>
+
+                &lt;div className="flex flex-1">
+                  &lt;textarea
+                    className="w-[100%] h-[100%] resize-none p-2 ring-1 ring-gray-500"
+                    readOnly
+                    value={formData?.NotesDisplay}
+                  >
+                  &lt;/textarea>
+                &lt;/div>
+              &lt;/CardContent>
+            &lt;/Card>
+            
+            &lt;Card className="flex-col mt-6">
+          &lt;CardHeader>
+            &lt;CardTitle className="text-lg">Action Log&lt;/CardTitle>
+            &lt;hr />
+          &lt;/CardHeader>
+          &lt;CardContent className="overflow-x-auto">
+            &lt;Table>
+              &lt;TableHeader>
+                &lt;TableRow>
+                  &lt;TableHead className="w-[60px]">No&lt;/TableHead>
+                  &lt;TableHead>ReferenceId&lt;/TableHead>
+                  &lt;TableHead>Change By&lt;/TableHead>
+                  &lt;TableHead>Old Status&lt;/TableHead>
+                  &lt;TableHead>New Status&lt;/TableHead>
+                  &lt;TableHead>Change At&lt;/TableHead>
+                  &lt;TableHead>Log Description&lt;/TableHead>
+                &lt;/TableRow>
+              &lt;/TableHeader>
+              &lt;TableBody>
+                {actionLogs?.length > 0 ? (
+                  actionLogs.map((log, index) => (
+                    &lt;TableRow key={log.id || index}>
+                      &lt;TableCell>{index + 1}&lt;/TableCell>
+                      &lt;TableCell>{log.ReferenceId}&lt;/TableCell>
+                      &lt;TableCell>{log.changedByUser?.Name}&lt;/TableCell>
+                      &lt;TableCell>{log.dataOld}&lt;/TableCell>
+                      &lt;TableCell>{log.dataNew}&lt;/TableCell>
+                      &lt;TableCell>{new Date(log.ChangeAt).toLocaleString()}&lt;/TableCell>
+                      &lt;TableCell>{log.logDescription}&lt;/TableCell>
+                    &lt;/TableRow>
+                  ))
+                ) : (
+                  &lt;TableRow>
+                    &lt;TableCell colSpan={5} className="text-center italic">
+                      No action logs available.
+                    &lt;/TableCell>
+                  &lt;/TableRow>
+                )}
+              &lt;/TableBody>
+            &lt;/Table>
+          &lt;/CardContent>
+        &lt;/Card>
+
+            &lt;Card className="flex-col ">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">
+                  Symptom Description / CardTitle
+                &lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              &lt;CardContent className="flex gap-6">
+                &lt;div className="grid flex-1 grid-cols-5 gap-y-7 gap-x-2">
+                  &lt;CaseField
+                    label="Keyword Search"
+                    className={"col-span-2"}
+                    span={3}
+                    star
+                  >
+                    &lt;Input
+                      placeholder="..."
+                      type="search"
+                      className=""
+                      value={symptomSearchTerm}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setSymptomSearchTerm(value);
+                        if (value.length >= 2) fetchSymptomCodes(value);
+                        else setSymptomSuggestions([]);
+                      }}
+                    />
+                  &lt;/CaseField>
+
+                  {symptomSuggestions.length > 0 &amp;&amp; (
+                    &lt;ul className="absolute z-10 overflow-y-auto bg-white border max-h-40">
+                      {symptomSuggestions.map((sym) => (
+                        &lt;li
+                          key={sym.SymptomCodeID}
+                          className="p-2 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            setSelectedSymptom(sym);
+                            setSymptomSearchTerm(sym.SymptomCode);
+                            setSymptomSuggestions([]);
+                          }}
+                        >
+                          {sym.SymptomCode}
+                        &lt;/li>
+                      ))}
+                    &lt;/ul>
+                  )}
+
+                  &lt;CaseField
+                    label="Top Category"
+                    className={"col-span-2"}
+                    span={3}
+                  >
+                    {selectedSymptom?.TopCategory}
+                  &lt;/CaseField>
+                  &lt;CaseField
+                    label="Sub Category"
+                    className={"col-span-2"}
+                    span={3}
+                  >
+                    {selectedSymptom?.SubCategory}
+                  &lt;/CaseField>
+                  &lt;CaseField
+                    label="Spesific Symptom"
+                    className={"col-span-2"}
+                    span={3}
+                  >
+                    {selectedSymptom?.SymptomCode}
+                  &lt;/CaseField>
+                &lt;/div>
+
+                &lt;div className="flex flex-1 font-bold">
+                  &lt;Table className="pverflow-auto">
+                    &lt;TableCaption className="caption-top">
+                      {/* Optional caption content here */}
+                    &lt;/TableCaption>
+
+                    &lt;TableHeader>
+                      &lt;TableRow className={""}>
+                        &lt;TableHead>Quality Codes&lt;/TableHead>
+                        &lt;TableHead className={"text-right"}>
+                          Add Existing QA Code
+                        &lt;/TableHead>
+                      &lt;/TableRow>
+                      &lt;TableRow>
+                        &lt;TableHead className="">
+                          &lt;div className="flex items-center gap-1">
+                            QA Level 1 &lt;ArrowUp /> &lt;ChevronDown />
+                          &lt;/div>
+                        &lt;/TableHead>
+                        &lt;TableHead className="">
+                          &lt;div className="flex items-center gap-1">
+                            QA Level 2 &lt;ArrowUp /> &lt;ChevronDown />
+                          &lt;/div>
+                        &lt;/TableHead>
+                      &lt;/TableRow>
+                    &lt;/TableHeader>
+
+                    &lt;TableBody>
+                      &lt;TableRow>
+                        &lt;TableCell>Entry&lt;/TableCell>
+                        &lt;TableCell>0A - see comments&lt;/TableCell>
+                      &lt;/TableRow>
+                    &lt;/TableBody>
+                  &lt;/Table>
+                &lt;/div>
+              &lt;/CardContent>
+            &lt;/Card>
+
+            &lt;Card className="flex-col mt-5">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">Case Resolution&lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+
+              &lt;CardContent className="grid grid-cols-7 gap-5 p-3 ">
+                &lt;CaseField label="Case Resolution Code" star>
+                  &lt;SearchCommandBlock
+                    value={csrForm.caseResolutionCode}
+                    onChange={onChangeCsr("caseResolutionCode")}
+                    placeholder="--Select--"
+                    options={[
+                      "Offsite Solution",
+                      "Cancel per Customer/No Contact",
+                      "Case Voided",
+                      "Cloud Recovery Download",
+                      "Customer Satisfaction",
+                    ]}
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="Case Ready for Closure" icon>
+                  &lt;SelectYN
+                    value={csrForm.caseReadyForClosure}
+                    onValueChange={(val) =>
+                      onChangeCsr("caseReadyForClosure")(val)
+                    }
+                  />
+                &lt;/CaseField>
+
+                &lt;CaseField label="Pending Customer Action" icon span={2}>
+                  &lt;DatePicker
+                    value={csrForm.pendingCustomerAction}
+                    onChange={onChangeCsr("pendingCustomerAction")}
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="Auto Close">
+                  &lt;SelectYN
+                    value={csrForm.autoClose}
+                    onValueChange={(val) => onChangeCsr("autoClose")(val)}
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="Ready for Close Days" icon>
+                  &lt;Input
+                    type="number"
+                    variant="invisible"
+                    value={csrForm.readyForCloseDays}
+                    onChange={(e) =>
+                      onChangeCsr("readyForCloseDays")(e.target.value)
+                    }
+                  />
+                &lt;/CaseField>
+                &lt;CaseField label="Customer Requested Close Date" icon span={2}>
+                  &lt;DatePicker
+                    value={csrForm.customerRequestedCloseDate}
+                    onChange={onChangeCsr("customerRequestedCloseDate")}
+                  />
+                &lt;/CaseField>
+                &lt;CaseField
+                  className={"col-start-3"}
+                  label="Ready for Closure Date"
+                  icon
+                  span={2}
+                >
+                  &lt;DatePicker
+                    value={csrForm.readyForClosureDate}
+                    onChange={onChangeCsr("readyForClosureDate")}
+                  />
+                &lt;/CaseField>
+              &lt;/CardContent>
+            &lt;/Card>
+          &lt;/TabsContent>
+
+          &lt;TabsContent value="ci_activitas">
+            &lt;Card className="mt-7">
+              &lt;CardHeader>Hello Word&lt;/CardHeader>
+            &lt;/Card>
+          &lt;/TabsContent>
+
+          &lt;TabsContent value="ci_actions">
+            &lt;Card className="mt-7">
+              &lt;CardHeader>Hello Word&lt;/CardHeader>
+            &lt;/Card>
+          &lt;/TabsContent>
+
+           &lt;TabsContent value="ci_wo">
+                      &lt;div className="flex gap-4">
+                        &lt;Card className="flex-1/3  rounded-md">
+                          &lt;CardHeader>
+                            &lt;CardTitle className=" text-lg">Case Information&lt;/CardTitle>
+                            &lt;hr />
+                          &lt;/CardHeader>
+                          &lt;CardContent className="grid gap-5 grid-cols-2">
+                          &lt;CaseField label="Case Subject" span={1}>
+                          {caseDetails.CaseSubject}
+                          &lt;/CaseField>
+                          &lt;CaseField label="Case Type">{caseDetails.CaseType}&lt;/CaseField>
+                            &lt;CaseField label="Businnes Segment">
+                              &lt;Input
+                                variant={"invisible"}
+                                className=""
+                                value={"---"}
+                                readOnly
+                              />
+                            &lt;/CaseField>
+                            &lt;CaseField label="HPI Segment">
+                              &lt;Input
+                                variant={"invisible"}
+                                className=""
+                                value={"---"}
+                                readOnly
+                              />
+                            &lt;/CaseField>
+          
+                            &lt;CaseField label="Global Trade Status">
+                            {caseDetails.global_trade_check?.global_trade_status || "---"}
+                            &lt;/CaseField>
+                            &lt;CaseField label="Global Trade Ovveride Reason">
+                            {caseDetails.global_trade_check?.gt_override_reason || "---"}
+                            &lt;/CaseField>
+                            &lt;CaseField label="GT Active Listening">
+                            {caseDetails.global_trade_check?.gt_active_listening || "---"}
+                            &lt;/CaseField>
+                            &lt;CaseField label="Security Status" icon>
+                              &lt;Input
+                                variant={"invisible"}
+                                className=""
+                                value={"---"}
+                                readOnly
+                              />
+                            &lt;/CaseField>
+                            &lt;CaseField label="Security Ovveride Reason" icon>
+                              &lt;Input
+                                variant={"invisible"}
+                                className=""
+                                value={"---"}
+                                readOnly
+                              />
+                            &lt;/CaseField>
+                          &lt;/CardContent>
+                        &lt;/Card>
+                        &lt;div className="flex-3 flex flex-col gap-4">
+                          &lt;Card className="rounded-md">
+                            &lt;CardHeader>
+                              &lt;CardTitle className="text-lg">Case Notes History&lt;/CardTitle>
+                              &lt;hr />
+                            &lt;/CardHeader>
+                            &lt;CardContent>
+                              &lt;CaseField label="Notes History" icon>
+                                &lt;textarea
+                                  className="mt-4 resize-none w-full min-h-[400px] p-2 ring-1 ring-gray-300 rounded-md text-md"
+                                  readOnly
+                                  value={caseNotes?.NotesDisplay}
+                                />
+                              &lt;/CaseField>
+                            &lt;/CardContent>
+                          &lt;/Card>
+                        &lt;/div>
+                      &lt;/div>
+            &lt;/TabsContent>
+
+          &lt;TabsContent value="ci_orders" className={"p-2 flex flex-col gap-4"}>
+            &lt;Card className="flex-col ">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">Shipment Information&lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              &lt;CardContent className="grid items-center grid-cols-4 gap-10">
+                &lt;CaseField label="Shipment Country">
+                    &lt;SearchCommandBlock 
+                      variant="invisible" 
+                      value={workOrders[0]?.ShipmentCountry ||"---"}
+                      readOnly
+                      options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"] }
+                    />
+                &lt;/CaseField>
+                &lt;CaseField label="Exception Order">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Shipment State" icon>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="SBD Override">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Major Account Id">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Currency">
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+                &lt;CaseField label="Promo Code" className={"col-start-3"}>
+                  &lt;Input variant="invisible" placeholder="---" />
+                &lt;/CaseField>
+              &lt;/CardContent>
+            &lt;/Card>
+
+            &lt;Card className="flex-col ">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">Work Order&lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              &lt;CardContent className="flex flex-col gap-5 p-3 ">
+                &lt;div className="grid grid-cols-4 gap-5">
+                  &lt;CaseField label="Incident Type" span={3}>
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                  &lt;CaseField label="Work Order Description" span={3}>
+                    &lt;Input variant="invisible" placeholder="---" />
+                  &lt;/CaseField>
+                &lt;/div>
+
+                &lt;Table>
+                  &lt;TableHeader>
+                    &lt;TableRow>
+                      &lt;TableHead className="w-[100px]">
+                        Work Order Number
+                      &lt;/TableHead>
+                      &lt;TableHead>Case ID&lt;/TableHead>
+                      &lt;TableHead>Service Account&lt;/TableHead>
+                      &lt;TableHead>Sub-Status&lt;/TableHead>
+                      &lt;TableHead>System Status&lt;/TableHead>
+                      &lt;TableHead>Priority&lt;/TableHead>
+                      &lt;TableHead>Work Order&lt;/TableHead>
+                      &lt;TableHead>Primary Incident&lt;/TableHead>
+                      &lt;TableHead>Due Date&lt;/TableHead>
+                      &lt;TableHead>Orion&lt;/TableHead>
+                      &lt;TableHead>Owner&lt;/TableHead>
+                      &lt;TableHead>Created By&lt;/TableHead>
+                      &lt;TableHead>Created At&lt;/TableHead>
+                    &lt;/TableRow>
+                  &lt;/TableHeader>
+                  &lt;TableBody>
+                    {workOrders.map((work) => (
+                      &lt;TableRow
+                        key={work.WOID}
+                        className="cursor-pointer hover:bg-gray-300"
+                        onClick={handleClick}
+                      >
+                        &lt;TableCell
+                          className="font-medium "
+                        >
+                          {work.WOID}
+                        &lt;/TableCell>
+                        &lt;TableCell>{work.CaseID}&lt;/TableCell>
+                        &lt;TableCell>
+                          {work.caseinformation?.site_account?.Company ||
+                            work.caseinformation?.contact_information
+                              ?.FirstName +
+                              " " +
+                              work.caseinformation?.contact_information
+                                ?.LastName ||
+                            "-"}
+                        &lt;/TableCell>
+
+                        &lt;TableCell>{work.SubStatus}&lt;/TableCell>
+                        &lt;TableCell>{work.SystemStatus}&lt;/TableCell>
+                        &lt;TableCell>{work.Priority}&lt;/TableCell>
+                        &lt;TableCell>&lt;/TableCell>
+                        &lt;TableCell>&lt;/TableCell>
+                        &lt;TableCell>&lt;/TableCell>
+                        &lt;TableCell>&lt;/TableCell>
+                        &lt;TableCell>{work.owner?.Name}&lt;/TableCell>
+                        &lt;TableCell>{work.owner?.Name}&lt;/TableCell>
+                        &lt;TableCell>{work.CreatedOn}&lt;/TableCell>
+                      &lt;/TableRow>
+                    ))}
+                  &lt;/TableBody>
+                &lt;/Table>
+              &lt;/CardContent>
+            &lt;/Card>
+
+            &lt;Card className="flex-col ">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">Parts Order&lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              &lt;CardContent className="grid gap-5">
+                &lt;Table>
+                  &lt;TableHeader>
+                    &lt;TableRow>
+                      &lt;TableHead className="w-[100px]">Name&lt;/TableHead>
+                      &lt;TableHead>Order Status&lt;/TableHead>
+                      &lt;TableHead>Work Order&lt;/TableHead>
+                      &lt;TableHead>Customer Self Repair (CSR)&lt;/TableHead>
+                      &lt;TableHead>Owner&lt;/TableHead>
+                      &lt;TableHead>Created On&lt;/TableHead>
+                      &lt;TableHead>Order Closed Date&lt;/TableHead>
+                      &lt;TableHead>Created By&lt;/TableHead>
+                    &lt;/TableRow>
+                  &lt;/TableHeader>
+                  &lt;TableBody>
+                    &lt;TableRow>
+                      &lt;TableCell className="font-medium">
+                        No data available
+                      &lt;/TableCell>
+                    &lt;/TableRow>
+                  &lt;/TableBody>
+                &lt;/Table>
+              &lt;/CardContent>
+            &lt;/Card>
+
+            &lt;Card className="flex-col ">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">Service Order&lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              &lt;CardContent className="grid gap-5">
+                &lt;Table>
+                  &lt;TableHeader>
+                    &lt;TableRow>
+                      &lt;TableHead className="w-[100px]">Name&lt;/TableHead>
+                      &lt;TableHead>Order Refere&lt;/TableHead>
+                      &lt;TableHead>Case ID&lt;/TableHead>
+                      &lt;TableHead>Service Status&lt;/TableHead>
+                      &lt;TableHead>Site&lt;/TableHead>
+                      &lt;TableHead>Submit&lt;/TableHead>
+                      &lt;TableHead>Date and Time&lt;/TableHead>
+                      &lt;TableHead>EMEA&lt;/TableHead>
+                      &lt;TableHead>Custom Owner&lt;/TableHead>
+                      &lt;TableHead>Created By&lt;/TableHead>
+                      &lt;TableHead>Created On&lt;/TableHead>
+                    &lt;/TableRow>
+                  &lt;/TableHeader>
+
+                  &lt;TableBody>
+                    &lt;TableRow>
+                      &lt;TableCell className="font-medium">
+                        No data available
+                      &lt;/TableCell>
+                    &lt;/TableRow>
+                  &lt;/TableBody>
+                &lt;/Table>
+              &lt;/CardContent>
+            &lt;/Card>
+
+            &lt;Card className="flex-col ">
+              &lt;CardHeader>
+                &lt;CardTitle className="text-lg ">Material Order&lt;/CardTitle>
+                &lt;hr />
+              &lt;/CardHeader>
+              &lt;CardContent className="grid gap-5">
+                &lt;Table>
+                  &lt;TableHeader>
+                    &lt;TableRow>
+                      &lt;TableHead className="w-[100px]">Name&lt;/TableHead>
+                      &lt;TableHead>Case ID&lt;/TableHead>
+                      &lt;TableHead>Created On&lt;/TableHead>
+                      &lt;TableHead>Order Status&lt;/TableHead>
+                      &lt;TableHead>Order Type&lt;/TableHead>
+                      &lt;TableHead>Owner&lt;/TableHead>
+                      &lt;TableHead>Work Order&lt;/TableHead>
+                      &lt;TableHead>Ready For Closure Date&lt;/TableHead>
+                    &lt;/TableRow>
+                  &lt;/TableHeader>
+
+                  &lt;TableBody>
+                    {materialOrders.map((material) => (
+                      &lt;TableRow key={material.MOID}>
+                        &lt;TableCell className="font-medium">
+                          &lt;Link to={`/material-order/${material.MOID}`}>
+                            {material.MOID} on {material.WOID}
+                          &lt;/Link>
+                        &lt;/TableCell>
+                        &lt;TableCell>{material.workorder?.CaseID}&lt;/TableCell>
+                        &lt;TableCell>{material.CreatedOn}&lt;/TableCell>
+                        &lt;TableCell>{material.OrderStatus}&lt;/TableCell>
+                        &lt;TableCell>{material.OrderType}&lt;/TableCell>
+                        &lt;TableCell>{material.owner?.Name}&lt;/TableCell>
+                        &lt;TableCell>{material.WOID}&lt;/TableCell>
+                        &lt;TableCell>{material.ReadyForClosureDate}&lt;/TableCell>
+                      &lt;/TableRow>
+                    ))}
+                  &lt;/TableBody>
+                &lt;/Table>
+              &lt;/CardContent>
+            &lt;/Card>
+          &lt;/TabsContent>
+
+          &lt;TabsContent value="ci_salles">
+            &lt;Card className="mt-7">
+              &lt;CardHeader>Hello Word&lt;/CardHeader>
+            &lt;/Card>
+          &lt;/TabsContent>
+
+          &lt;TabsContent value="ci_knowledge">
+            &lt;Card className="mt-7">
+              &lt;CardHeader>Hello Word&lt;/CardHeader>
+            &lt;/Card>
+          &lt;/TabsContent>
+
+          &lt;TabsContent value="ci_related">
+            &lt;Card className="mt-7">
+              &lt;CardHeader>Hello Word&lt;/CardHeader>
+            &lt;/Card>
+          &lt;/TabsContent>
+        &lt;/Tabs>
+      &lt;/Card>
+    &lt;/>
+  );
+};
+  </code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#BtnModalAsset">BtnModalAsset</a></li><li><a href="global.html#BtnModalContact">BtnModalContact</a></li><li><a href="global.html#CompanySearchResult">CompanySearchResult</a></li><li><a href="global.html#byId">byId</a></li><li><a href="global.html#classNames">classNames</a></li><li><a href="global.html#getUserFromTokenSafe">getUserFromTokenSafe</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Aug 23 2025 11:48:03 GMT+0700 (Indochina Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
