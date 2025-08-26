@@ -94,6 +94,7 @@ export async function PATCH(request, { params }) {
         'KCI_Flag',
         'IncomingChannel',
         'CaseStatus',
+        'Owner',
         'CasePriority',
         'CustomerSeverity',
         'CaseClosedDate',

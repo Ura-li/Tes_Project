@@ -186,6 +186,7 @@ export async function POST(request) {
           CaseNote: CaseNote,
           SymptomCode: SymptomCode,
           CaseResolution: CaseResolution,
+          Owner: parseInt(CreatedBy),
           CreatedBy: parseInt(CreatedBy),
           ProblemDescription: ProblemDescription,
           CaseProductNote : CaseNoteProduct,

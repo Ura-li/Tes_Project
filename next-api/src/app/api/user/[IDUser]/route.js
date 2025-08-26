@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
+import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
+
+const JWT_SECRET =  process.env.JWT_SECRET || '' 
 
 // GET - Ambil detail user berdasarkan ID
 export async function GET(request, { params }) {

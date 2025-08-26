@@ -9,14 +9,17 @@ import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "./ui/dialog";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
+import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 
 
-export function UserProfile({ user }) {
+export function UserProfile() {
+    const {user} = useAuth();
     const [formData, setFormData] = useState({
-        Username: user.Username,
-        Name: user.Name,
-        Email: user.Email,
-        Phone: user.Phone || "",
+        Username: '',
+        Name: '',
+        Email: '',
+        Phone: "",
         NewPassword: "",
         ProfilePhoto: null,
         Signature: null,
@@ -38,6 +41,7 @@ export function UserProfile({ user }) {
                 },
             });
             try {
+
                 const getResFromUser = await ApiCustomer.get(`/api/user/${user.id}`);
 
                 if (getResFromUser.data.success) {
@@ -171,6 +175,8 @@ export function UserProfile({ user }) {
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-lg p-10">
+                    <DialogTitle></DialogTitle>
+                    <DialogDescription></DialogDescription>
                     <form onSubmit={handleSubmit} className="relative space-y-6">
                         <Card className="p-6 shadow-md rounded-2xl">
                             {/* Header */}

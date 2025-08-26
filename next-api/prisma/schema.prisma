@@ -684,6 +684,10 @@ enum CaseStatus {
   Escalated
   Quote_Approved
   Pending_Quote
+  NEW_AssignCE
+  NEW_AssignAPO
+  NEW_AssignLeader
+  NEW_AssignPS
 }
 
 enum ShippingPriority {
