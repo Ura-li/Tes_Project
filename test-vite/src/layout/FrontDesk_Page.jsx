@@ -1,14 +1,17 @@
 import ApiCustomer from '@/api';
 import { ChartRadialText } from '@/components/sc-chart';
+import ToastTester from '@/components/ToastComponent';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardFooter, CardContent, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/auth-context';
+import { useSocket } from '@/hooks/useSocket';
 import { set } from 'lodash';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
 import Swal from 'sweetalert2';
 
 
@@ -17,10 +20,11 @@ export default function FrontDesk_Page() {
   const { user } = useAuth();
   const [caseData, setCaseData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [casevaluedata, setCasevaluedata] = useState([])
-  const [inactivecasevaluedata, setInactivecasevaluedata] = useState([])
-  const [closecasevaluedata, setClosecasevaluedata] = useState([])
+  const [casevaluedata, setCasevaluedata] = useState([]);
+  const [inactivecasevaluedata, setInactivecasevaluedata] = useState([]);
+  const [closecasevaluedata, setClosecasevaluedata] = useState([]);
 
+  const [notfilog, setNotfilog] = useState([])
 
   const radialchartdata = [
     { name: "Open", value: casevaluedata || 0, fill: "#3B82F6" },
@@ -30,6 +34,20 @@ export default function FrontDesk_Page() {
   ];
 
   console.log(radialchartdata, "the data")
+
+  useSocket("case:created", (newCase) => {
+    console.log("case Created",newCase);
+    setCaseData((prev) => [newCase, ...prev]); // prepend
+  });
+
+  useSocket("case:updated", (updated) => {
+    console.log("Case Updated",updated);
+    setCaseData((prev) =>
+      prev.map((c) => (c.CaseID === updated.CaseID ? updated : c))
+    );
+  });
+
+
 
   const fetchData = async () => {
     setLoading(true);
@@ -101,7 +119,7 @@ export default function FrontDesk_Page() {
           </CardFooter>
         </Card>
       </div>
-
+    
       {/* Center Column - Chart */}
       <div className="col-span-2 space-y-4">
         <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col">
@@ -169,7 +187,9 @@ export default function FrontDesk_Page() {
                   </Card>
                 </>
               )))}
-
+              <div className="">
+                {/* <ToastTester/> */}
+              </div>
           </CardContent>
         </Card>
       </div>

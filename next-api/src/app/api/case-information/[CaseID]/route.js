@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import prisma from "../../../../../prisma/client";
+import { notifySocket } from "../../../../../lib/SocketClient";
 
 export async function GET(request, { params }) {
     //get params id
@@ -122,6 +123,8 @@ export async function PATCH(request, { params }) {
         where: { CaseID: caseID },
         data: dataToUpdate,
     });
+
+    await notifySocket("case:updated", case_information);
 
     return NextResponse.json(
         {

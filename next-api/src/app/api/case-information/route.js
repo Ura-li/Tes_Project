@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import prisma  from "../../../../prisma/client";
 
 import { generateID } from "@/utils/generateID";
+import { notifySocket } from "../../../../lib/SocketClient";
 // import * as XLSX from 'xlsx';
 
 export async function GET(request) {
@@ -201,6 +202,8 @@ export async function POST(request) {
           }),
         },
     });
+
+  await notifySocket("case:created", case_information);
 
     return NextResponse.json(
         {

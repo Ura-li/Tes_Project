@@ -32,6 +32,7 @@ import {Outlet} from "react-router"
 import debounce from 'lodash.debounce';
 import { SheetProvider } from './context/sheet-context'
 import { Toaster } from 'sonner'
+import { GlobalLogListener } from './components/GlobalLogListener'
 
 export function Breadcrumbs() {
   const location = useLocation();
@@ -179,6 +180,7 @@ const App = () => {
       </SidebarInset>
     </SidebarProvider> 
     </SheetProvider> 
+    <GlobalLogListener />
     <Toaster/>
     </div>
   )
