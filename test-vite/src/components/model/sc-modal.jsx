@@ -4421,11 +4421,11 @@ export function BtnModalsServiceCatalog({
         const MOID = res.data.MOID
         switch (serviceCatalogType) {
           case "CSR":
-            window.open(`/material-order/${MOID}`, '_blank');
+            window.open(`/app/material-order/${MOID}`, '_blank');
             break;
 
           case "workorder":
-            window.open(`/work/${WOID}`, '_blank');  
+            window.open(`/app/work/${WOID}`, '_blank');  
             break;
 
           default:
