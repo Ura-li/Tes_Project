@@ -7698,7 +7698,7 @@ export function RepairClassCodeAdd() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm mb-4">Add Repair Class Code</Button>
+        <Button variant="outline" className="h-11 rounded-sm ">Add Repair Class Code</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -8398,7 +8398,7 @@ export function OTCAdd({ onUpdate }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="mb-4 ml-2 rounded-sm h-11">Add OTC Code</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Add OTC Code</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

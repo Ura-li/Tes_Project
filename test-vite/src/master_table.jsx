@@ -47,15 +47,18 @@ export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-  const [filteredContacts, setFilteredContacts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const itemsPerPage = 5;
+  const [goToPageInput, setGoToPageInput] = useState("");
+  // Ubah dari konstanta menjadi state agar bisa diubah
+  const [itemsPerPage, setItemsPerPage] = useState(10); 
 
-  // Sorting
-  const [sortColumn, setSortColumn] = useState("ContactID");
-  const [sortDirection, setSortDirection] = useState("asc");
+  // Sort config (pakai style BookingsTable)
+  const [sortConfig, setSortConfig] = useState({
+    key: "ContactID",
+    direction: "asc",
+  });
 
   // Filters
   const [selectedCompany, setSelectedCompany] = useState("");
@@ -135,8 +138,8 @@ export const Contact_table = () => {
   }, [contacts, selectedCountry, selectedState, selectedCity]);
 
   // Filtering (search + dropdown)
-  useEffect(() => {
-    let filtered = contacts.filter((contact) => {
+  const filteredData = useMemo(() => {
+    return contacts.filter((contact) => {
       const matchesSearch = Object.values(contact).some((val) =>
         val?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
@@ -152,30 +155,6 @@ export const Contact_table = () => {
         (!selectedZipCode || contact.ZipPostalCode === selectedZipCode)
       );
     });
-
-    // Sorting
-    if (sortColumn) {
-      filtered.sort((a, b) => {
-        let aVal = a[sortColumn] ?? "";
-        let bVal = b[sortColumn] ?? "";
-
-        // Numeric comparison kalau bisa
-        if (!isNaN(Number(aVal)) && !isNaN(Number(bVal))) {
-          aVal = Number(aVal);
-          bVal = Number(bVal);
-        } else {
-          aVal = aVal.toString().toLowerCase();
-          bVal = bVal.toString().toLowerCase();
-        }
-
-        if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
-        if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
-        return 0;
-      });
-    }
-
-    setFilteredContacts(filtered);
-    setCurrentPage(1);
   }, [
     debouncedSearchTerm,
     contacts,
@@ -186,145 +165,220 @@ export const Contact_table = () => {
     selectedState,
     selectedCity,
     selectedZipCode,
-    sortColumn,
-    sortDirection,
   ]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredContacts.length / itemsPerPage);
+  // Sorting (pakai sortConfig)
+  const sortedData = useMemo(() => {
+    const sorted = [...filteredData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
+
+        if (aVal === null || aVal === undefined) aVal = "";
+        if (bVal === null || bVal === undefined) bVal = "";
+
+        // cek apakah numeric
+        if (!isNaN(Number(aVal)) && !isNaN(Number(bVal))) {
+          aVal = Number(aVal);
+          bVal = Number(bVal);
+        } else {
+          aVal = aVal.toString().toLowerCase();
+          bVal = bVal.toString().toLowerCase();
+        }
+
+        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return sorted;
+  }, [filteredData, sortConfig]);
+
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
   const currentData = useMemo(() => {
-    return filteredContacts.slice(
+    return sortedData.slice(
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage
     );
-  }, [filteredContacts, currentPage]);
+  }, [sortedData, currentPage, itemsPerPage]); // Tambahkan itemsPerPage di dependency array
 
   // Sorting handler
-  const handleSort = (column) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === "asc" ? "desc" : "asc",
+        };
+      }
+      return { key, direction: "asc" };
+    });
   };
 
-  const renderSortArrow = (column) => {
-    if (sortColumn !== column) return null;
-    return sortDirection === "asc" ? " ▲" : " ▼";
+  // Ubah fungsi getSortSymbol menjadi getSortIcon
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) {
+      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    }
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+    );
+  };
+
+  // Tambahkan handler untuk Go to Page
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+    setGoToPageInput("");
   };
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Contact Table</h2>
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Contact Management</h2>
 
       {/* Search + Filters */}
-      <div className="mb-4 flex flex-wrap gap-4">
+      <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3">
         <input
           type="text"
-          placeholder="Search contacts..."
-          className="p-2 border border-gray-300 rounded min-w-[200px]"
+          placeholder="🔍 Search contacts..."
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         {/* Dropdown filters */}
-        <select value={selectedCompany} onChange={(e) => setSelectedCompany(e.target.value)} className="p-2 border rounded">
+        <select value={selectedCompany} onChange={(e) => setSelectedCompany(e.target.value)} className="p-2 border rounded-lg shadow-sm">
           <option value="">All Companies</option>
           {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
-        <select value={selectedSalutation} onChange={(e) => setSelectedSalutation(e.target.value)} className="p-2 border rounded">
+        <select value={selectedSalutation} onChange={(e) => setSelectedSalutation(e.target.value)} className="p-2 border rounded-lg shadow-sm">
           <option value="">All Salutations</option>
           {uniqueSalutations.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className="p-2 border rounded">
+        <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className="p-2 border rounded-lg shadow-sm">
           <option value="">All Languages</option>
           {uniqueLanguages.map(l => <option key={l} value={l}>{l}</option>)}
         </select>
-        <select value={selectedCountry} onChange={(e) => { setSelectedCountry(e.target.value); setSelectedState(""); setSelectedCity(""); setSelectedZipCode(""); }} className="p-2 border rounded">
+        <select value={selectedCountry} onChange={(e) => { setSelectedCountry(e.target.value); setSelectedState(""); setSelectedCity(""); setSelectedZipCode(""); }} className="p-2 border rounded-lg shadow-sm">
           <option value="">All Countries</option>
           {uniqueCountries.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
-        <select value={selectedState} onChange={(e) => { setSelectedState(e.target.value); setSelectedCity(""); setSelectedZipCode(""); }} className="p-2 border rounded" disabled={!selectedCountry}>
+        <select value={selectedState} onChange={(e) => { setSelectedState(e.target.value); setSelectedCity(""); setSelectedZipCode(""); }} className="p-2 border rounded-lg shadow-sm" disabled={!selectedCountry}>
           <option value="">All States</option>
           {uniqueStates.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select value={selectedCity} onChange={(e) => { setSelectedCity(e.target.value); setSelectedZipCode(""); }} className="p-2 border rounded" disabled={!selectedState}>
+        <select value={selectedCity} onChange={(e) => { setSelectedCity(e.target.value); setSelectedZipCode(""); }} className="p-2 border rounded-lg shadow-sm" disabled={!selectedState}>
           <option value="">All Cities</option>
           {uniqueCities.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
-        <select value={selectedZipCode} onChange={(e) => setSelectedZipCode(e.target.value)} className="p-2 border rounded" disabled={!selectedCity}>
+        <select value={selectedZipCode} onChange={(e) => setSelectedZipCode(e.target.value)} className="p-2 border rounded-lg shadow-sm" disabled={!selectedCity}>
           <option value="">All Zip Codes</option>
           {uniqueZipCodes.map(z => <option key={z} value={z}>{z}</option>)}
         </select>
       </div>
 
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="overflow-x-scroll">
-        <table className="border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              {[
-                { key: "No", label: "No", disableSort: true },
-                { key: "ContactID", label: "Contact ID" },
-                { key: "Company", label: "Company" },
-                { key: "Salutation", label: "Salutation" },
-                { key: "FirstName", label: "First Name" },
-                { key: "LastName", label: "Last Name" },
-                { key: "Email", label: "Email" },
-                { key: "PreferredLanguage", label: "Preferred Language" },
-                { key: "Phone", label: "Phone" },
-                { key: "Mobile", label: "Mobile" },
-                { key: "WorkPhone", label: "Work Phone" },
-                { key: "WorkExtension", label: "Work Extension" },
-                { key: "OtherPhone", label: "Other Phone" },
-                { key: "OtherExtension", label: "Other Extension" },
-                { key: "Fax", label: "Fax" },
-                { key: "AddressLine1", label: "Address Line 1" },
-                { key: "AddressLine2", label: "Address Line 2" },
-                { key: "City", label: "City" },
-                { key: "StateProvince", label: "State/Province" },
-                { key: "Country", label: "Country" },
-                { key: "ZipPostalCode", label: "Zip/Postal Code" },
-                { key: "Actions", label: "Actions", disableSort: true },
-              ].map(col => (
-                <th
-                  key={col.key}
-                  className="p-2 border cursor-pointer select-none"
-                  onClick={() => !col.disableSort && handleSort(col.key)}
-                >
-                  {col.label}{!col.disableSort && renderSortArrow(col.key)}
-                </th>
-              ))}
+      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[70vh]">
+        <table className="w-full relative border-collapse">
+          <thead className="sticky z-10 top-0 bg-gray-100">
+            <tr>
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ContactID")}>
+                Contact ID {getSortIcon("ContactID")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Company")}>
+                Company {getSortIcon("Company")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Salutation")}>
+                Salutation {getSortIcon("Salutation")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("FirstName")}>
+                First Name {getSortIcon("FirstName")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("LastName")}>
+                Last Name {getSortIcon("LastName")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Email")}>
+                Email {getSortIcon("Email")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PreferredLanguage")}>
+                Preferred Language {getSortIcon("PreferredLanguage")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Phone")}>
+                Phone {getSortIcon("Phone")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Mobile")}>
+                Mobile {getSortIcon("Mobile")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("WorkPhone")}>
+                Work Phone {getSortIcon("WorkPhone")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("WorkExtension")}>
+                Work Extension {getSortIcon("WorkExtension")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("OtherPhone")}>
+                Other Phone {getSortIcon("OtherPhone")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("OtherExtension")}>
+                Other Extension {getSortIcon("OtherExtension")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Fax")}>
+                Fax {getSortIcon("Fax")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("AddressLine1")}>
+                Address Line 1 {getSortIcon("AddressLine1")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("AddressLine2")}>
+                Address Line 2 {getSortIcon("AddressLine2")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("City")}>
+                City {getSortIcon("City")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("StateProvince")}>
+                State/Province {getSortIcon("StateProvince")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Country")}>
+                Country {getSortIcon("Country")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ZipPostalCode")}>
+                Zip/Postal Code {getSortIcon("ZipPostalCode")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.length > 0 ? (
               currentData.map((contact, index) => (
-                <tr key={contact.ContactID} className="text-center hover:bg-gray-100">
-                  <td className="p-2 border">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                  <td className="p-2 border">{contact.ContactID}</td>
-                  <td className="p-2 border">{contact.Company}</td>
-                  <td className="p-2 border">{contact.Salutation}</td>
-                  <td className="p-2 border">{contact.FirstName}</td>
-                  <td className="p-2 border">{contact.LastName}</td>
-                  <td className="p-2 border">{contact.Email}</td>
-                  <td className="p-2 border">{contact.PreferredLanguage}</td>
-                  <td className="p-2 border">{contact.Phone}</td>
-                  <td className="p-2 border">{contact.Mobile}</td>
-                  <td className="p-2 border">{contact.WorkPhone}</td>
-                  <td className="p-2 border">{contact.WorkExtension}</td>
-                  <td className="p-2 border">{contact.OtherPhone}</td>
-                  <td className="p-2 border">{contact.OtherExtension}</td>
-                  <td className="p-2 border">{contact.Fax}</td>
-                  <td className="p-2 border">{contact.AddressLine1}</td>
-                  <td className="p-2 border">{contact.AddressLine2}</td>
-                  <td className="p-2 border">{contact.City}</td>
-                  <td className="p-2 border">{contact.StateProvince}</td>
-                  <td className="p-2 border">{contact.Country}</td>
-                  <td className="p-2 border">{contact.ZipPostalCode}</td>
-                  <td className="flex p-2 space-x-2 border">
+                <tr key={contact.ContactID} className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                  <td className="p-3 border">{contact.ContactID}</td>
+                  <td className="p-3 border">{contact.Company}</td>
+                  <td className="p-3 border">{contact.Salutation}</td>
+                  <td className="p-3 border">{contact.FirstName}</td>
+                  <td className="p-3 border">{contact.LastName}</td>
+                  <td className="p-3 border">{contact.Email}</td>
+                  <td className="p-3 border">{contact.PreferredLanguage}</td>
+                  <td className="p-3 border">{contact.Phone}</td>
+                  <td className="p-3 border">{contact.Mobile}</td>
+                  <td className="p-3 border">{contact.WorkPhone}</td>
+                  <td className="p-3 border">{contact.WorkExtension}</td>
+                  <td className="p-3 border">{contact.OtherPhone}</td>
+                  <td className="p-3 border">{contact.OtherExtension}</td>
+                  <td className="p-3 border">{contact.Fax}</td>
+                  <td className="p-3 border">{contact.AddressLine1}</td>
+                  <td className="p-3 border">{contact.AddressLine2}</td>
+                  <td className="p-3 border">{contact.City}</td>
+                  <td className="p-3 border">{contact.StateProvince}</td>
+                  <td className="p-3 border">{contact.Country}</td>
+                  <td className="p-3 border">{contact.ZipPostalCode}</td>
+                  <td className="flex items-center justify-center gap-2 p-3 border">
                     <ContactEdit contactID={contact.ContactID} onUpdate={fetchContacts} />
                     <ContactDelete contactID={contact.ContactID} />
                   </td>
@@ -332,106 +386,152 @@ export const Contact_table = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="22" className="p-4 text-center">No data found.</td>
+                <td colSpan="22" className="p-6 text-center text-gray-500">No data found 🚫</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center mt-4 space-x-2">
-          <button
-            className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
           >
-            Previous
-          </button>
-          <span>Page {currentPage} of {totalPages}</span>
-          <button
-            className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value="all">All</option>
+          </select>
         </div>
-      )}
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> contacts
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
-
 
 export const Company_table = () => {
   const [companies, setCompanies] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-  const [filteredCompanies, setFilteredCompanies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const itemsPerPage = 10;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
 
-  // State untuk sorting
-  const [sortConfig, setSortConfig] = useState({ key: 'Company', direction: 'ascending' });
-  // State untuk filter country dan city
+  // sort
+  const [sortConfig, setSortConfig] = useState({ key: "Company", direction: "asc" });
+
+  // filter
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
 
-  // State untuk modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Mendapatkan daftar negara unik dari data
   const uniqueCountries = useMemo(() => {
-    const countries = companies.map(company => company.Country).filter(Boolean);
+    const countries = companies.map((c) => c.Country).filter(Boolean);
     return ["", ...new Set(countries.sort())];
   }, [companies]);
 
-  // Mendapatkan daftar kota unik dari data yang sudah difilter berdasarkan negara
   const uniqueCities = useMemo(() => {
     const cities = companies
-      .filter(company => selectedCountry === "" || company.Country === selectedCountry)
-      .map(company => company.City)
+      .filter((c) => !selectedCountry || c.Country === selectedCountry)
+      .map((c) => c.City)
       .filter(Boolean);
     return ["", ...new Set(cities.sort())];
   }, [companies, selectedCountry]);
 
+  // debounce search
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
       setCurrentPage(1);
     }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Fungsi untuk mengambil data dari API
+  // fetch
   const fetchCompanies = async () => {
     setError(null);
     setLoading(true);
-
     Swal.fire({
       title: "Memuat Data Company...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
       allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
+      didOpen: () => Swal.showLoading(),
     });
-
     try {
-      const response = await ApiCustomer.get(`/api/site_account`);
-      setCompanies(response.data.data);
+      const res = await ApiCustomer.get(`/api/site_account`);
+      setCompanies(res.data.data);
       Swal.close();
     } catch (err) {
       console.error("Error fetching company data:", err);
       setError("Failed to fetch data");
-
       Swal.fire({
         title: "Error!",
         text: "Gagal mengambil data perusahaan.",
@@ -439,8 +539,8 @@ export const Company_table = () => {
         confirmButtonText: "OK",
       });
     } finally {
-      Swal.close();
       setLoading(false);
+      Swal.close();
     }
   };
 
@@ -448,203 +548,257 @@ export const Company_table = () => {
     fetchCompanies();
   }, []);
 
-  // Filter dan sort companies
-  useEffect(() => {
-    let currentFiltered = companies.filter((company) => {
-      // General search term filter
-      const matchesSearchTerm = Object.values(company).some((val) =>
-        val?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      );
+  // filter + search
+  const filteredData = companies.filter((c) => {
+    const matchesSearch = Object.values(c).some((val) =>
+      val?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    );
+    const matchesCountry = !selectedCountry || c.Country === selectedCountry;
+    const matchesCity = !selectedCity || c.City === selectedCity;
+    return matchesSearch && matchesCountry && matchesCity;
+  });
 
-      // Country and City filters
-      const matchesCountry = selectedCountry === "" || company.Country === selectedCountry;
-      const matchesCity = selectedCity === "" || company.City === selectedCity;
-
-      return matchesSearchTerm && matchesCountry && matchesCity;
-    });
-
-    // Sorting logic
-    if (sortConfig.key !== null) {
-      currentFiltered.sort((a, b) => {
-        const aValue = a[sortConfig.key]?.toString().toLowerCase() || '';
-        const bValue = b[sortConfig.key]?.toString().toLowerCase() || '';
-        if (aValue < bValue) {
-          return sortConfig.direction === 'ascending' ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === 'ascending' ? 1 : -1;
-        }
+  // sorting
+  const sortedData = useMemo(() => {
+    const sorted = [...filteredData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
+        if (aVal == null) aVal = "";
+        if (bVal == null) bVal = "";
+        if (typeof aVal === "string") aVal = aVal.toLowerCase();
+        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
         return 0;
       });
     }
+    return sorted;
+  }, [filteredData, sortConfig]);
 
-    setFilteredCompanies(currentFiltered);
-  }, [debouncedSearchTerm, companies, sortConfig, selectedCountry, selectedCity]);
-
-  const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
-  const currentData = filteredCompanies.slice(
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
+  const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // Sorting handler
-  const requestSort = (key) => {
-    let direction = 'ascending';
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
   };
 
-  const getSortIndicator = (key) => {
-    if (sortConfig.key === key) {
-      return sortConfig.direction === 'ascending' ? '▲' : '▼';
-    }
-    return '';
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key)
+      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+    );
+  };
+
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
   };
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Company Table</h2>
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Company Management</h2>
 
-      {/* Filter inputs section */}
-      <div className="mb-4 space-x-4 flex items-center">
-        {/* Text search input */}
+      {/* Filters */}
+      <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3">
         <input
           type="text"
-          placeholder="Search companies..."
-          className="w-1/3 p-2 border border-gray-300 rounded"
+          placeholder="🔍 Search companies..."
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
         />
-        {/* Country filter dropdown */}
         <select
-          className="p-2 border border-gray-300 rounded"
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={selectedCountry}
           onChange={(e) => {
             setSelectedCountry(e.target.value);
-            setSelectedCity(""); // Reset city filter when country changes
+            setSelectedCity("");
             setCurrentPage(1);
           }}
         >
-          <option value="">All Countries</option>
-          {uniqueCountries.map(country => (
-            <option key={country} value={country}>
-              {country}
-            </option>
+          <option value="">🌍 All Countries</option>
+          {uniqueCountries.map((c) => (
+            <option key={c} value={c}>{c}</option>
           ))}
         </select>
-        {/* City filter dropdown */}
         <select
-          className="p-2 border border-gray-300 rounded"
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={selectedCity}
           onChange={(e) => {
             setSelectedCity(e.target.value);
             setCurrentPage(1);
           }}
-          disabled={!selectedCountry && companies.length > 0} // Disable if no country is selected
+          disabled={!selectedCountry && companies.length > 0}
         >
-          <option value="">All Cities</option>
-          {uniqueCities.map(city => (
-            <option key={city} value={city}>
-              {city}
-            </option>
+          <option value="">🏙 All Cities</option>
+          {uniqueCities.map((city) => (
+            <option key={city} value={city}>{city}</option>
           ))}
         </select>
       </div>
 
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="mb-4 text-red-500">{error}</p>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="p-2 border">No</th>
-              <th className="p-2 border cursor-pointer" onClick={() => requestSort('Company')}>
-                Company {getSortIndicator('Company')}
+      {/* Table */}
+      <div className=" bg-white rounded-2xl shadow overflow-scroll max-h-150">
+        <table className="w-full relative border-collapse">
+          <thead className="sticky z-10 top-0 bg-gray-100">
+            <tr>
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("Company")}>
+                Company {getSortIcon("Company")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => requestSort('Email')}>
-                Email {getSortIndicator('Email')}
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("Email")}>
+                Email {getSortIcon("Email")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => requestSort('PrimaryPhone')}>
-                Primary Phone {getSortIndicator('PrimaryPhone')}
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("PrimaryPhone")}>
+                Primary Phone {getSortIcon("PrimaryPhone")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => requestSort('WhatsappNo')}>
-                Whatsapp Number {getSortIndicator('WhatsappNo')}
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("WhatsappNo")}>
+                Whatsapp {getSortIcon("WhatsappNo")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => requestSort('City')}>
-                City {getSortIndicator('City')}
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("City")}>
+                City {getSortIcon("City")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => requestSort('Country')}>
-                Country {getSortIndicator('Country')}
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("Country")}>
+                Country {getSortIcon("Country")}
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="">
             {currentData.length > 0 ? (
-              currentData.map((company, index) => (
-                <tr key={company.SiteAccountID} className="hover:bg-gray-100">
-                  <td className="p-2 text-center border">
-                    {(currentPage - 1) * itemsPerPage + index + 1}
+              currentData.map((c, i) => (
+                <tr key={c.SiteAccountID}
+                    className={`hover:bg-blue-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <td className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + i + 1}
                   </td>
-                  <td className="p-2 border">{company.Company}</td>
-                  <td className="p-2 border">{company.Email}</td>
-                  <td className="p-2 border">{company.PrimaryPhone}</td>
-                  <td className="p-2 border">{company.WhatsappNo}</td>
-                  <td className="p-2 border">{company.City}</td>
-                  <td className="p-2 border">{company.Country}</td>
-                  <td className="flex p-2 space-x-2 border">
-                    <CompanyEdit
-                      siteAccountId={company.SiteAccountID}
-                      onUpdate={fetchCompanies}
-                    />
-                    <CompanyDelete
-                      siteAccountId={company.SiteAccountID}
-                      isModalOpen={isModalOpen}
-                      setIsModalOpen={setIsModalOpen}
-                      onUpdate={fetchCompanies}
-                    />
+                  <td className="p-3 border">{c.Company}</td>
+                  <td className="p-3 border">{c.Email}</td>
+                  <td className="p-3 border">{c.PrimaryPhone}</td>
+                  <td className="p-3 border">{c.WhatsappNo}</td>
+                  <td className="p-3 border">{c.City}</td>
+                  <td className="p-3 border">{c.Country}</td>
+                  <td className="flex items-center justify-center gap-2 p-3 border">
+                    <CompanyEdit siteAccountId={c.SiteAccountID} onUpdate={fetchCompanies}/>
+                    <CompanyDelete siteAccountId={c.SiteAccountID}
+                                   isModalOpen={isModalOpen}
+                                   setIsModalOpen={setIsModalOpen}
+                                   onUpdate={fetchCompanies}/>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="p-4 text-center">
-                  No data found.
-                </td>
+                <td colSpan="8" className="p-6 text-center text-gray-500">No data found 🚫</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center mt-4 space-x-2">
-          <button
-            className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm">Rows per page:</span>
+        <select
+          className="p-1 text-sm border rounded-lg"
+          value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === "all") {
+              setItemsPerPage(sortedData.length);
+              setCurrentPage(1);
+            } else {
+              setItemsPerPage(Number(value));
+              setCurrentPage(1);
             }
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
+          }}
+        >
+          <option value={10}>10</option>
+          <option value={25}>25</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+          <option value="all">All</option>
+        </select>
+      </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> companies
         </div>
-      )}
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -653,7 +807,8 @@ export const Case_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(5); // ⬅️ Tambahan fitur 1
+  const [goToPageInput, setGoToPageInput] = useState(""); // ⬅️ Tambahan fitur 2
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [caseData, setCaseData] = useState([]);
@@ -666,9 +821,11 @@ export const Case_table = () => {
   const [selectedOwner, setSelectedOwner] = useState("All");
   const [selectedWorkGroup, setSelectedWorkGroup] = useState("All");
 
-  // 🔹 Sort states
-  const [sortOrder, setSortOrder] = useState("asc");
-  const [sortColumn, setSortColumn] = useState("CaseID"); // default sort
+  // 🔹 Sort state
+  const [sortConfig, setSortConfig] = useState({
+    key: "CaseID",
+    direction: "asc",
+  });
 
   // 🔹 Debounce search
   useEffect(() => {
@@ -732,7 +889,7 @@ export const Case_table = () => {
   const uniqueWorkGroup = ["All", ...new Set(caseData.map((c) => c.WorkGroup))];
 
   // 🔹 Filtering
-  let filteredCaseTable = caseData
+  const filteredData = caseData
     .filter((item) =>
       Object.values(item).some((value) =>
         value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
@@ -751,26 +908,38 @@ export const Case_table = () => {
     );
 
   // 🔹 Sorting
-  filteredCaseTable = [...filteredCaseTable].sort((a, b) => {
-    const valA = a[sortColumn] ?? "";
-    const valB = b[sortColumn] ?? "";
+  const sortedData = useMemo(() => {
+    const sorted = [...filteredData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
 
-    // coba numeric
-    const numA = parseFloat(valA);
-    const numB = parseFloat(valB);
-    if (!isNaN(numA) && !isNaN(numB)) {
-      return sortOrder === "asc" ? numA - numB : numB - numA;
+        if (aVal === null || aVal === undefined) aVal = "";
+        if (bVal === null || bVal === undefined) bVal = "";
+
+        // coba numeric dulu
+        const numA = parseFloat(aVal);
+        const numB = parseFloat(bVal);
+        if (!isNaN(numA) && !isNaN(numB)) {
+          return sortConfig.direction === "asc" ? numA - numB : numB - numA;
+        }
+
+        // fallback string
+        if (typeof aVal === "string") aVal = aVal.toLowerCase();
+        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+
+        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
     }
-
-    // fallback string
-    return sortOrder === "asc"
-      ? valA.toString().localeCompare(valB.toString(), undefined, { numeric: true })
-      : valB.toString().localeCompare(valA.toString(), undefined, { numeric: true });
-  });
+    return sorted;
+  }, [filteredData, sortConfig]);
 
   // 🔹 Pagination
-  const totalPages = Math.ceil(filteredCaseTable.length / itemsPerPage);
-  const currentData = filteredCaseTable.slice(
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
+  const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -787,13 +956,33 @@ export const Case_table = () => {
   };
 
   // 🔹 Handle sort
-  const handleSort = (column) => {
-    if (sortColumn === column) {
-      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortColumn(column);
-      setSortOrder("asc");
-    }
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === "asc" ? "desc" : "asc",
+        };
+      }
+      return { key, direction: "asc" };
+    });
+  };
+
+  const getSortSymbol = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+    );
+  };
+
+  // 🔹 Handle Go to Page
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
   };
 
   return (
@@ -926,48 +1115,48 @@ export const Case_table = () => {
           <thead>
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseID")}>
-                Case ID {sortColumn === "CaseID" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                Case ID {getSortSymbol("CaseID")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CreatedOn")}>
-                Created On {sortColumn === "CreatedOn" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                Created On {getSortSymbol("CreatedOn")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseSubject")}>
-                Case Subject {sortColumn === "CaseSubject" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                Case Subject {getSortSymbol("CaseSubject")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CustomerAccount")}>
-                Customer Account {sortColumn === "CustomerAccount" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                Customer Account {getSortSymbol("CustomerAccount")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("Primary")}>
-                Primary {sortColumn === "Primary" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                Primary {getSortSymbol("Primary")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("HW")}>
-                HW {sortColumn === "HW" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                HW {getSortSymbol("HW")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("SerialNumber")}>
-                Serial Number {sortColumn === "SerialNumber" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                Serial Number {getSortSymbol("SerialNumber")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductNumber")}>
-                Product Number {sortColumn === "ProductNumber" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                Product Number {getSortSymbol("ProductNumber")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductName")}>
-                Product Name {sortColumn === "ProductName" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                Product Name {getSortSymbol("ProductName")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CreatedName")}>
-                Created Name {sortColumn === "CreatedName" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                Created Name {getSortSymbol("CreatedName")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("Owner")}>
-                Owner {sortColumn === "Owner" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                Owner {getSortSymbol("Owner")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("WorkGroup")}>
-                WorkGroup {sortColumn === "WorkGroup" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                WorkGroup {getSortSymbol("WorkGroup")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseStatus")}>
-                Case Status {sortColumn === "CaseStatus" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                Case Status {getSortSymbol("CaseStatus")}
               </th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((caseItem) => (
+            {currentData.map((caseItem, index) => (
               <tr key={caseItem.CaseID} className="text-center hover:bg-gray-100">
                 <td
                   className="p-2 text-blue-500 border cursor-pointer hover:underline"
@@ -992,8 +1181,8 @@ export const Case_table = () => {
                     caseItem.CaseStatus === "Close"
                       ? "bg-red-300"
                       : caseItem.CaseStatus === "InActive"
-                      ? "bg-sky-300"
-                      : ""
+                        ? "bg-sky-300"
+                        : ""
                   )}
                 >
                   {caseItem.CaseStatus}
@@ -1002,30 +1191,86 @@ export const Case_table = () => {
             ))}
           </tbody>
         </table>
-        {filteredCaseTable.length === 0 && (
+        {sortedData.length === 0 && (
           <p className="mt-4 text-center text-gray-500">No cases found.</p>
         )}
       </div>
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value="all">All</option>
+          </select>
+        </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> cases
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1037,17 +1282,18 @@ export const Assets_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const itemsPerPage = 10;
+  const [goToPageInput, setGoToPageInput] = useState("");
 
   // dropdown filters
   const [selectedProductName, setSelectedProductName] = useState("");
   const [selectedProductNumber, setSelectedProductNumber] = useState("");
   const [selectedProductLine, setSelectedProductLine] = useState("");
 
-  // state untuk sorting (default sort by ProductNumber ascending)
-  const [sortConfig, setSortConfig] = useState({ key: "ProductNumber", direction: "asc" });
+  // sorting
+  const [sortConfig, setSortConfig] = useState({ key: "AssetID", direction: "asc" });
 
   // debounce search
   useEffect(() => {
@@ -1074,15 +1320,13 @@ export const Assets_table = () => {
     try {
       const LIMIT = 1000;
       const first = await ApiCustomer.get(`/api/asset-information?page=1&limit=${LIMIT}`);
-      console.log("Fetched first page of assets:", first.data.data);
       const firstData = first?.data?.data || [];
       const totalPages = first?.data?.totalPages ?? 1;
 
       let all = [...firstData];
       for (let p = 2; p <= totalPages; p++) {
         const res = await ApiCustomer.get(`/api/asset-information?page=${p}&limit=${LIMIT}`);
-        const more = res?.data?.data || [];
-        all = all.concat(more);
+        all = all.concat(res?.data?.data || []);
       }
       if (totalPages === 1 && Array.isArray(first?.data) && !first?.data?.data) {
         all = first.data;
@@ -1131,10 +1375,8 @@ export const Assets_table = () => {
       if (!(fName && fNumber && fLine)) return false;
 
       if (!q) return true;
-      const haystack = [
-        a?.AssetID, a?.SerialNumber, a?.SiteAccountID, a?.ContactID,
-        pn, pl, num
-      ].map(v => (v ?? "").toString().toLowerCase()).join(" ");
+      const haystack = [a?.AssetID, a?.SerialNumber, a?.SiteAccountID, a?.ContactID, pn, pl, num]
+        .map(v => (v ?? "").toString().toLowerCase()).join(" ");
       return haystack.includes(q);
     });
     setFilteredAssets(next);
@@ -1160,17 +1402,15 @@ export const Assets_table = () => {
           valB = b?.[sortConfig.key] ?? "";
       }
 
-      // Try to treat as numbers if both are numeric
-    const numA = Number(valA);
-    const numB = Number(valB);
-    const bothNumeric = !isNaN(numA) && !isNaN(numB);
+      const numA = Number(valA);
+      const numB = Number(valB);
+      const bothNumeric = !isNaN(numA) && !isNaN(numB);
 
-    if (bothNumeric) {
-      if (numA < numB) return sortConfig.direction === "asc" ? -1 : 1;
-      if (numA > numB) return sortConfig.direction === "asc" ? 1 : -1;
-      return 0;
-    }
-
+      if (bothNumeric) {
+        if (numA < numB) return sortConfig.direction === "asc" ? -1 : 1;
+        if (numA > numB) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      }
 
       valA = valA.toString().toLowerCase();
       valB = valB.toString().toLowerCase();
@@ -1184,9 +1424,9 @@ export const Assets_table = () => {
   const currentData = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return sortedAssets.slice(start, start + itemsPerPage);
-  }, [sortedAssets, currentPage]);
+  }, [sortedAssets, currentPage, itemsPerPage]);
 
-  // handle sort on header click
+  // handle sort
   const handleSort = (key) => {
     setSortConfig(prev => {
       if (prev.key === key) {
@@ -1196,38 +1436,45 @@ export const Assets_table = () => {
     });
   };
 
+  const renderSortIcon = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    if (sortConfig.direction === "asc") return <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />;
+    return <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />;
+  };
+
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
+
   const resetFilters = () => {
     setSelectedProductName("");
     setSelectedProductNumber("");
     setSelectedProductLine("");
     setSearchTerm("");
     setCurrentPage(1);
-    setSortConfig({ key: "ProductNumber", direction: "asc" }); // reset ke default
+    setSortConfig({ key: "AssetID", direction: "asc" });
   };
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Asset Information Table</h2>
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📦 Asset Information</h2>
 
       {/* Search + Reset */}
-      <div className="flex flex-wrap items-center gap-2 mb-3">
+      <div className="flex flex-wrap items-center gap-2 mb-4">
         <input
           type="text"
-          placeholder="Search asset..."
-          className="p-2 border border-gray-300 rounded min-w-[220px]"
+          placeholder="🔍 Search asset..."
+          className="p-2 border border-gray-300 rounded min-w-[300px]"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <button
-          onClick={resetFilters}
-          className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
-        >
-          Reset Filter
-        </button>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-6">
         <select className="p-2 border rounded" value={selectedProductName} onChange={(e) => setSelectedProductName(e.target.value)}>
           <option value="">Filter by Product Name</option>
           {uniqueProductNames.map(v => <option key={v} value={v}>{v || "—"}</option>)}
@@ -1240,36 +1487,41 @@ export const Assets_table = () => {
           <option value="">Filter by Product Line</option>
           {uniqueProductLines.map(v => <option key={v} value={v}>{v || "—"}</option>)}
         </select>
+          <button
+          onClick={resetFilters}
+          className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+        >Reset Filter</button>
       </div>
 
       {error && <p className="mb-2 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow">
-          <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm">
-              {[
-                { key: "no", label: "No" },
-                { key: "AssetID", label: "Asset ID" },
-                { key: "SerialNumber", label: "Serial Number" },
-                { key: "ProductName", label: "Product Name" },
-                { key: "ProductNumber", label: "Product Number" },
-                { key: "ProductLine", label: "Product Line" },
-                { key: "SiteAccountID", label: "Site Account ID" },
-                { key: "ContactID", label: "Contact ID" },
-              ].map(col => (
-                <th
-                  key={col.key}
-                  className={`p-2 border ${col.key !== "no" ? "cursor-pointer hover:bg-gray-300" : ""}`}
-                  onClick={() => col.key !== "no" && handleSort(col.key)}
-                >
-                  {col.label}
-                  {sortConfig.key === col.key && (
-                    <span>{sortConfig.direction === "asc" ? " ▲" : " ▼"}</span>
-                  )}
-                </th>
-              ))}
+      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-150">
+        <table className="w-full relative border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-100">
+            <tr>
+              <th className="p-2 border">No</th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("AssetID")}>
+                Asset ID {renderSortIcon("AssetID")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("SerialNumber")}>
+                Serial Number {renderSortIcon("SerialNumber")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductName")}>
+                Product Name {renderSortIcon("ProductName")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductNumber")}>
+                Product Number {renderSortIcon("ProductNumber")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductLine")}>
+                Product Line {renderSortIcon("ProductLine")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("SiteAccountID")}>
+                Site Account ID {renderSortIcon("SiteAccountID")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ContactID")}>
+                Contact ID {renderSortIcon("ContactID")}
+              </th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
@@ -1278,7 +1530,7 @@ export const Assets_table = () => {
               <tr><td colSpan="9" className="p-4 text-center">Loading...</td></tr>
             ) : currentData.length > 0 ? (
               currentData.map((a, idx) => (
-                <tr key={a.AssetID} className="hover:bg-gray-100">
+                <tr key={a.AssetID} className="hover:bg-gray-50">
                   <td className="p-2 text-center border">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
                   <td className="p-2 border">{a.AssetID}</td>
                   <td className="p-2 border">{a.SerialNumber}</td>
@@ -1294,311 +1546,439 @@ export const Assets_table = () => {
                 </tr>
               ))
             ) : (
-              <tr><td colSpan="9" className="p-4 text-center">No data found.</td></tr>
+              <tr><td colSpan="9" className="p-4 text-center text-gray-500">No data found 🚫</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center mt-4 gap-2">
-          <button
-            className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-          >Previous</button>
-          <span>Page {currentPage} of {totalPages}</span>
-          <button
-            className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >Next</button>
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedAssets.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedAssets.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
         </div>
-      )}
+
+        {/* Info */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> – {" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedAssets.length)}</b> of {" "}
+          <b>{sortedAssets.length}</b> assets
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >⬅ Prev</button>
+
+            <span className="px-3 py-1 text-sm">Page <b>{currentPage}</b> of {totalPages}</span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >Next ➡</button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >Go</button>
+            </form>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
 export const Product_table = () => {
-  const [products, setProducts] = useState([]);              
-  const [filteredProducts, setFilteredProducts] = useState([]); 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // search + pagination
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  // search + pagination
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [goToPageInput, setGoToPageInput] = useState("");
 
-  // filters
-  const [selectedLine, setSelectedLine] = useState("");
-  const [selectedType, setSelectedType] = useState("");
-  const [selectedGroup, setSelectedGroup] = useState("");
-  const [selectedTower, setSelectedTower] = useState("");
+  // filters
+  const [selectedLine, setSelectedLine] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+  const [selectedGroup, setSelectedGroup] = useState("");
+  const [selectedTower, setSelectedTower] = useState("");
 
-  // modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // sorting → default ProductNumber ASC
-  const [sortConfig, setSortConfig] = useState({ key: "ProductNumber", direction: "asc" });
+  // sorting → default ProductNumber ASC
+  const [sortConfig, setSortConfig] = useState({ key: "ProductNumber", direction: "asc" });
 
-  const handleSort = (key) => {
-    setSortConfig((prev) => {
-      if (prev.key === key) {
-        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
-      }
-      return { key, direction: "asc" };
-    });
-  };
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+  };
 
-  const getSortIcon = (key) => {
-    if (sortConfig.key !== key) return <ArrowUpDown size={14} className="inline ml-1" />;
-    return sortConfig.direction === "asc" 
-      ? <ArrowUp size={14} className="inline ml-1" /> 
-      : <ArrowDown size={14} className="inline ml-1" />;
-  };
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    return sortConfig.direction === "asc"
+      ? <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+      : <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />;
+  };
 
-  // debounce search
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1);
-    }, 500);
-    return () => clearTimeout(t);
-  }, [searchTerm]);
+  // debounce search
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
 
-  // fetch ALL products once
-  const fetchAllProducts = async () => {
-    Swal.fire({
-      title: "Memuat Data Produk...",
-      text: "Mohon tunggu sebentar",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => Swal.showLoading(),
-    });
+  // fetch ALL products once
+  const fetchAllProducts = async () => {
+    Swal.fire({
+      title: "Memuat Data Produk...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading(),
+    });
 
-    setLoading(true);
-    setError(null);
+    setLoading(true);
+    setError(null);
 
-    try {
-      const LIMIT = 1000;
-      const first = await ApiCustomer.get(`/api/product-information?page=1&limit=${LIMIT}`);
-      const firstData = first?.data?.data ?? [];
-      const totalPagesFromApi = first?.data?.totalPages ?? 1;
+    try {
+      const LIMIT = 1000;
+      const first = await ApiCustomer.get(`/api/product-information?page=1&limit=${LIMIT}`);
+      const firstData = first?.data?.data ?? [];
+      const totalPagesFromApi = first?.data?.totalPages ?? 1;
 
-      let all = [...firstData];
-      for (let p = 2; p <= totalPagesFromApi; p++) {
-        const res = await ApiCustomer.get(`/api/product-information?page=${p}&limit=${LIMIT}`);
-        all = all.concat(res?.data?.data ?? []);
-      }
+      let all = [...firstData];
+      for (let p = 2; p <= totalPagesFromApi; p++) {
+        const res = await ApiCustomer.get(`/api/product-information?page=${p}&limit=${LIMIT}`);
+        all = all.concat(res?.data?.data ?? []);
+      }
 
-      if (totalPagesFromApi === 1 && Array.isArray(first?.data) && !first?.data?.data) {
-        all = first.data;
-      }
+      if (totalPagesFromApi === 1 && Array.isArray(first?.data) && !first?.data?.data) {
+        all = first.data;
+      }
 
-      setProducts(all);
-      setFilteredProducts(all);
-    } catch (err) {
-      console.error("Error fetching product data:", err);
-      setError("Failed to fetch data");
-    } finally {
-      setLoading(false);
-      Swal.close();
-    }
-  };
+      setProducts(all);
+      setFilteredProducts(all);
+    } catch (err) {
+      console.error("Error fetching product data:", err);
+      setError("Failed to fetch data");
+    } finally {
+      setLoading(false);
+      Swal.close();
+    }
+  };
 
-  useEffect(() => {
-    fetchAllProducts();
-  }, []);
+  useEffect(() => {
+    fetchAllProducts();
+  }, []);
 
-  // unique filters
-  const uniqueLines = useMemo(() => ["", ...new Set(products.map(p => p?.ProductLine).filter(Boolean)).values()], [products]);
-  const uniqueTypes = useMemo(() => ["", ...new Set(products.map(p => p?.product_type?.ProductType).filter(Boolean)).values()], [products]);
-  const uniqueGroups = useMemo(() => ["", ...new Set(products.map(p => p?.product_type?.ProductGroup).filter(Boolean)).values()], [products]);
-  const uniqueTowers = useMemo(() => ["", ...new Set(products.map(p => p?.product_type?.ProductTower).filter(Boolean)).values()], [products]);
+  // unique filters
+  const uniqueLines = useMemo(() => ["", ...new Set(products.map(p => p?.ProductLine).filter(Boolean)).values()].sort(), [products]);
+  const uniqueTypes = useMemo(() => ["", ...new Set(products.map(p => p?.product_type?.ProductType).filter(Boolean)).values()].sort(), [products]);
+  const uniqueGroups = useMemo(() => ["", ...new Set(products.map(p => p?.product_type?.ProductGroup).filter(Boolean)).values()].sort(), [products]);
+  const uniqueTowers = useMemo(() => ["", ...new Set(products.map(p => p?.product_type?.ProductTower).filter(Boolean)).values()].sort(), [products]);
 
-  // apply filters + search
-  useEffect(() => {
-    const q = debouncedSearchTerm.trim().toLowerCase();
+  // apply filters + search
+  useEffect(() => {
+    const q = debouncedSearchTerm.trim().toLowerCase();
 
-    const next = products.filter(p => {
-      const line = p?.ProductLine ?? "";
-      const name = p?.ProductName ?? "";
-      const number = p?.ProductNumber ?? "";
-      const type = p?.product_type?.ProductType ?? "";
-      const group = p?.product_type?.ProductGroup ?? "";
-      const tower = p?.product_type?.ProductTower ?? "";
+    const next = products.filter(p => {
+      const line = p?.ProductLine ?? "";
+      const name = p?.ProductName ?? "";
+      const number = p?.ProductNumber ?? "";
+      const type = p?.product_type?.ProductType ?? "";
+      const group = p?.product_type?.ProductGroup ?? "";
+      const tower = p?.product_type?.ProductTower ?? "";
 
-      const fLine  = !selectedLine  || line === selectedLine;
-      const fType  = !selectedType  || type === selectedType;
-      const fGroup = !selectedGroup || group === selectedGroup;
-      const fTower = !selectedTower || tower === selectedTower;
-      if (!(fLine && fType && fGroup && fTower)) return false;
+      const fLine  = !selectedLine  || line === selectedLine;
+      const fType  = !selectedType  || type === selectedType;
+      const fGroup = !selectedGroup || group === selectedGroup;
+      const fTower = !selectedTower || tower === selectedTower;
+      if (!(fLine && fType && fGroup && fTower)) return false;
 
-      if (!q) return true;
-      const haystack = [number, name, line, type, group, tower].join(" ").toLowerCase();
-      return haystack.includes(q);
-    });
+      if (!q) return true;
+      const haystack = [number, name, line, type, group, tower].join(" ").toLowerCase();
+      return haystack.includes(q);
+    });
 
-    setFilteredProducts(next);
-    setCurrentPage(1);
-  }, [products, debouncedSearchTerm, selectedLine, selectedType, selectedGroup, selectedTower]);
+    setFilteredProducts(next);
+    setCurrentPage(1);
+  }, [products, debouncedSearchTerm, selectedLine, selectedType, selectedGroup, selectedTower]);
 
-  // sorting applied here
-  const sortedProducts = useMemo(() => {
-    let sortable = [...filteredProducts];
-    if (sortConfig.key) {
-      sortable.sort((a, b) => {
-        const aVal = a?.[sortConfig.key] ?? a?.product_type?.[sortConfig.key] ?? "";
-        const bVal = b?.[sortConfig.key] ?? b?.product_type?.[sortConfig.key] ?? "";
+  // sorting applied here
+  const sortedProducts = useMemo(() => {
+    let sortable = [...filteredProducts];
+    if (sortConfig.key) {
+      sortable.sort((a, b) => {
+        const aVal = a?.[sortConfig.key] ?? a?.product_type?.[sortConfig.key] ?? "";
+        const bVal = b?.[sortConfig.key] ?? b?.product_type?.[sortConfig.key] ?? "";
 
-        if (!isNaN(aVal) && !isNaN(bVal)) {
-          return sortConfig.direction === "asc" ? aVal - bVal : bVal - aVal;
-        }
-        return sortConfig.direction === "asc"
-          ? String(aVal).localeCompare(String(bVal))
-          : String(bVal).localeCompare(String(aVal));
-      });
-    }
-    return sortable;
-  }, [filteredProducts, sortConfig]);
+        if (!isNaN(aVal) && !isNaN(bVal)) {
+          return sortConfig.direction === "asc" ? aVal - bVal : bVal - aVal;
+        }
+        return sortConfig.direction === "asc"
+          ? String(aVal).localeCompare(String(bVal))
+          : String(bVal).localeCompare(String(aVal));
+      });
+    }
+    return sortable;
+  }, [filteredProducts, sortConfig]);
 
-  // pagination
-  const totalPagesLocal = Math.max(1, Math.ceil(sortedProducts.length / itemsPerPage));
-  const currentData = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return sortedProducts.slice(start, start + itemsPerPage);
-  }, [sortedProducts, currentPage]);
+  // pagination
+  const totalPagesLocal = Math.max(1, Math.ceil(sortedProducts.length / itemsPerPage));
+  const currentData = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return sortedProducts.slice(start, start + itemsPerPage);
+  }, [sortedProducts, currentPage, itemsPerPage]);
 
-  const resetFilters = () => {
-    setSelectedLine("");
-    setSelectedType("");
-    setSelectedGroup("");
-    setSelectedTower("");
-    setSearchTerm("");
-    setCurrentPage(1);
-  };
+  const resetFilters = () => {
+    setSelectedLine("");
+    setSelectedType("");
+    setSelectedGroup("");
+    setSelectedTower("");
+    setSearchTerm("");
+    setCurrentPage(1);
+    setItemsPerPage(10);
+  };
 
-  return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Product Table</h2>
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPagesLocal) setCurrentPage(page);
+    setGoToPageInput("");
+  };
 
-      {/* Search & Add */}
+  return (
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Product Management</h2>
+
+      {/*search + reset */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Search product..."
-          className="w-full sm:w-1/3 p-2 border border-gray-300 rounded"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+          <input
+          type="text"
+          placeholder="🔍 Search products..."
+          className=" p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         <ProductAdd onAdded={fetchAllProducts} />
       </div>
+      {/* Filters */}
+      <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+       <select className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400" value={selectedLine} onChange={(e) => {setSelectedLine(e.target.value); setCurrentPage(1)}}>
+          <option value="">All Product Line</option>
+          {uniqueLines.map(v => <option key={v} value={v}>{v || "—"}</option>)}
+        </select>
+        <select className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400" value={selectedType} onChange={(e) => {setSelectedType(e.target.value); setCurrentPage(1)}}>
+          <option value="">All Product Type</option>
+          {uniqueTypes.map(v => <option key={v} value={v}>{v || "—"}</option>)}
+        </select>
+        <select className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400" value={selectedGroup} onChange={(e) => {setSelectedGroup(e.target.value); setCurrentPage(1)}}>
+          <option value="">All Product Group</option>
+          {uniqueGroups.map(v => <option key={v} value={v}>{v || "—"}</option>)}
+        </select>
+        <select className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400" value={selectedTower} onChange={(e) => {setSelectedTower(e.target.value); setCurrentPage(1)}}>
+          <option value="">All Product Tower</option>
+          {uniqueTowers.map(v => <option key={v} value={v}>{v || "—"}</option>)}
+        </select>
+        <button onClick={resetFilters} className="px-3 py-2 bg-gray-400 text-white rounded-lg shadow hover:bg-gray-500">Reset Filter</button>
+      </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-2 mb-4 items-center">
-        <select className="p-2 border rounded" value={selectedLine} onChange={(e) => setSelectedLine(e.target.value)}>
-          <option value="">All Product Line</option>
-          {uniqueLines.map(v => <option key={v} value={v}>{v || "—"}</option>)}
-        </select>
-        <select className="p-2 border rounded" value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
-          <option value="">All Product Type</option>
-          {uniqueTypes.map(v => <option key={v} value={v}>{v || "—"}</option>)}
-        </select>
-        <select className="p-2 border rounded" value={selectedGroup} onChange={(e) => setSelectedGroup(e.target.value)}>
-          <option value="">All Product Group</option>
-          {uniqueGroups.map(v => <option key={v} value={v}>{v || "—"}</option>)}
-        </select>
-        <select className="p-2 border rounded" value={selectedTower} onChange={(e) => setSelectedTower(e.target.value)}>
-          <option value="">All Product Tower</option>
-          {uniqueTowers.map(v => <option key={v} value={v}>{v || "—"}</option>)}
-        </select>
-        <button onClick={resetFilters} className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">Reset Filter</button>
-      </div>
+      {error && <p className="mb-4 text-red-500">{error}</p>}
+      
 
-      {error && <p className="text-red-500 mb-2">{error}</p>}
+      {/* Table */}
+      <div className=" bg-white rounded-2xl shadow overflow-scroll max-h-150 mt-4">
+        <table className="w-full relative border-collapse">
+          <thead className="sticky z-10 top-0 bg-gray-100">
+            <tr>
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductNumber")}>
+                Product Number {getSortIcon("ProductNumber")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductLine")}>
+                Product Line {getSortIcon("ProductLine")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductName")}>
+                Product Name {getSortIcon("ProductName")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductType")}>
+                Product Type {getSortIcon("ProductType")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductGroup")}>
+                Product Group {getSortIcon("ProductGroup")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductTower")}>
+                Product Tower {getSortIcon("ProductTower")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border">Vendor</th>
+              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan="9" className="p-4 text-center text-gray-500">Loading...</td></tr>
+            ) : currentData.length > 0 ? (
+              currentData.map((p, idx) => (
+                <tr key={p.ProductNumber} className={`hover:bg-blue-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
+                  <td className="p-3 border">{p.ProductNumber}</td>
+                  <td className="p-3 border">{p.ProductLine}</td>
+                  <td className="p-3 border">{p.ProductName}</td>
+                  <td className="p-3 border">{p.product_type?.ProductType}</td>
+                  <td className="p-3 border">{p.product_type?.ProductGroup}</td>
+                  <td className="p-3 border">{p.product_type?.ProductTower}</td>
+                  <td className="p-3 border">-</td>
+                  <td className="flex items-center justify-center gap-2 p-3 border">
+                    <ProductEdit ProductNumber={p.ProductNumber} onUpdate={fetchAllProducts} />
+                    <ProductDelete ProductNumber={p.ProductNumber} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onUpdate={fetchAllProducts}/>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr><td colSpan="9" className="p-6 text-center text-gray-500">No data found 🚫</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="p-2 border">No</th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductNumber")}>
-                Product Number {getSortIcon("ProductNumber")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductLine")}>
-                Product Line {getSortIcon("ProductLine")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductName")}>
-                Product Name {getSortIcon("ProductName")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductType")}>
-                Product Type {getSortIcon("ProductType")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductGroup")}>
-                Product Group {getSortIcon("ProductGroup")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductTower")}>
-                Product Tower {getSortIcon("ProductTower")}
-              </th>
-              <th className="p-2 border">Vendor</th>
-              <th className="p-2 border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan="9" className="p-4 text-center">Loading...</td></tr>
-            ) : currentData.length > 0 ? (
-              currentData.map((p, idx) => (
-                <tr key={p.ProductNumber} className="hover:bg-gray-100">
-                  <td className="p-2 text-center border">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                  <td className="p-2 border">{p.ProductNumber}</td>
-                  <td className="p-2 border">{p.ProductLine}</td>
-                  <td className="p-2 border">{p.ProductName}</td>
-                  <td className="p-2 border">{p.product_type?.ProductType}</td>
-                  <td className="p-2 border">{p.product_type?.ProductGroup}</td>
-                  <td className="p-2 border">{p.product_type?.ProductTower}</td>
-                  <td className="p-2 border">-</td>
-                  <td className="flex p-2 gap-2 border">
-                    <ProductEdit ProductNumber={p.ProductNumber} onUpdate={fetchAllProducts} />
-                    <ProductDelete ProductNumber={p.ProductNumber} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onUpdate={fetchAllProducts}/>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr><td colSpan="9" className="p-4 text-center">No data found.</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedProducts.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedProducts.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
 
-      {/* Pagination */}
-      {totalPagesLocal > 1 && (
-        <div className="flex items-center justify-center mt-4 gap-2">
-          <button className="p-2 bg-gray-300 rounded disabled:opacity-50" onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>
-            Previous
-          </button>
-          <span>Page {currentPage} of {totalPagesLocal}</span>
-          <button className="p-2 bg-gray-300 rounded disabled:opacity-50" onClick={() => setCurrentPage(p => Math.min(p + 1, totalPagesLocal))} disabled={currentPage === totalPagesLocal}>
-            Next
-          </button>
-        </div>
-      )}
-    </div>
-  );
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedProducts.length)}</b> of{" "}
+          <b>{sortedProducts.length}</b> products
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPagesLocal > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPagesLocal}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPagesLocal))}
+              disabled={currentPage === totalPagesLocal}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPagesLocal}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export const ProductType_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(10); // ✅ MODIFIED: Dari const ke state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [ProductTypeData, setProductTypeData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState(""); // ✅ ADDED: State untuk input "Go to page"
 
   // ✅ Default sort langsung ke ProductTypeID asc
   const [sortConfig, setSortConfig] = useState({
@@ -1609,15 +1989,11 @@ export const ProductType_table = () => {
   const fetchProductTypeDataTable = async () => {
     setLoading(true);
     setError(null);
-
     Swal.fire({
       title: "Memuat Data Tipe Produk...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
+      didOpen: () => Swal.showLoading(),
     });
 
     try {
@@ -1627,27 +2003,15 @@ export const ProductType_table = () => {
         Swal.close();
       } else {
         setError("Failed to fetch ProductType data");
-        Swal.close();
-        Swal.fire({
-          title: "Error!",
-          text: "Gagal mengambil data tipe produk.",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
+        Swal.fire("Error!", "Gagal mengambil data tipe produk.", "error");
       }
     } catch (err) {
       console.error("Error fetching ProductType data:", err);
       setError("Error fetching data");
-
-      Swal.close();
-      Swal.fire({
-        title: "Error!",
-        text: "Gagal mengambil data tipe produk.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
+      Swal.fire("Error!", "Gagal mengambil data tipe produk.", "error");
     } finally {
       setLoading(false);
+      Swal.close();
     }
   };
 
@@ -1655,22 +2019,17 @@ export const ProductType_table = () => {
     fetchProductTypeDataTable();
   }, []);
 
-  // 🔍 Filter data
   const filteredProductTypeTable = ProductTypeData.filter((item) =>
     Object.values(item).some((value) =>
       value.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  // 🔽 Sorting function
   const sortedData = [...filteredProductTypeTable].sort((a, b) => {
     const { key, direction } = sortConfig;
     if (!key) return 0;
-
     let aValue = a[key];
     let bValue = b[key];
-
-    // Pastikan angka tetap numerik
     if (!isNaN(aValue) && !isNaN(bValue)) {
       aValue = Number(aValue);
       bValue = Number(bValue);
@@ -1678,7 +2037,6 @@ export const ProductType_table = () => {
       aValue = aValue?.toString().toLowerCase();
       bValue = bValue?.toString().toLowerCase();
     }
-
     if (aValue < bValue) return direction === "asc" ? -1 : 1;
     if (aValue > bValue) return direction === "asc" ? 1 : -1;
     return 0;
@@ -1692,8 +2050,7 @@ export const ProductType_table = () => {
     setSortConfig({ key, direction });
   };
 
-  // Pagination
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
   const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -1701,145 +2058,216 @@ export const ProductType_table = () => {
 
   const navigate = useNavigate();
 
-  // 🔹 Render icon sort
   const renderSortArrow = (key) => {
     if (sortConfig.key !== key) {
-      return <ArrowUpDown className="inline w-4 h-4 ml-1" />;
+      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
     }
     return sortConfig.direction === "asc" ? (
-      <ArrowUp className="inline w-4 h-4 ml-1" />
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
     ) : (
-      <ArrowDown className="inline w-4 h-4 ml-1" />
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
     );
+  };
+
+  // ✅ ADDED: Handler untuk "Go to page"
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+    setGoToPageInput("");
   };
 
   return (
     <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">ProductType Table</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-
-      <ProductTypeAdd />
+      <h2 className="mb-4 text-xl font-bold">Product Type Table</h2>
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <input
+          type="text"
+          placeholder="Search..."
+          className="w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // Kembali ke halaman 1 saat search
+          }}
+        />
+        <ProductTypeAdd onUpdate={fetchProductTypeDataTable} />
+      </div>
 
       {error && <p className="text-red-500">{error}</p>}
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
+      {/* ✅ MODIFIED: Table wrapper for scrolling */}
+      <div className="bg-white rounded-lg shadow overflow-scroll max-h-[60vh]">
+        <table className="w-full border-collapse">
+          {/* ✅ MODIFIED: Sticky header */}
+          <thead className="sticky top-0 z-10">
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-3 font-semibold text-center border">No</th> {/* ✅ ADDED: Kolom Nomor */}
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 font-semibold text-left border cursor-pointer"
                 onClick={() => requestSort("ProductTypeID")}
               >
                 ProductType ID {renderSortArrow("ProductTypeID")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 font-semibold text-left border cursor-pointer"
                 onClick={() => requestSort("ProductTower")}
               >
                 Product Tower {renderSortArrow("ProductTower")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 font-semibold text-left border cursor-pointer"
                 onClick={() => requestSort("ProductGroup")}
               >
                 Product Group {renderSortArrow("ProductGroup")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 font-semibold text-left border cursor-pointer"
                 onClick={() => requestSort("ProductType")}
               >
                 Product Type {renderSortArrow("ProductType")}
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 font-semibold text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((ProductTypeItem) => (
-              <tr
-                key={ProductTypeItem.ProductTypeID}
-                className="text-center hover:bg-gray-100"
-              >
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() =>
-                    navigate(`/app/case/${ProductTypeItem.ProductTypeID}`)
-                  }
+            {currentData.length > 0 ? (
+              currentData.map((item, index) => (
+                <tr
+                  key={item.ProductTypeID}
+                  className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  {ProductTypeItem.ProductTypeID}
-                </td>
-                <td className="p-2 border">{ProductTypeItem.ProductTower}</td>
-                <td className="p-2 border">{ProductTypeItem.ProductGroup}</td>
-                <td className="p-2 border">{ProductTypeItem.ProductType}</td>
-                <td className="flex p-2 space-x-2 border">
-                  <ProductTypeEdit
-                    ProductTypeID={ProductTypeItem.ProductTypeID}
-                    onUpdate={fetchProductTypeDataTable}
-                  />
-                  <ProductTypeDelete
-                    ProductTypeID={ProductTypeItem.ProductTypeID}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchProductTypeDataTable}
-                  />
+                  <td className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </td>
+                  <td
+                    className="p-3 text-blue-500 border cursor-pointer hover:underline"
+                    onClick={() => navigate(`/app/case/${item.ProductTypeID}`)}
+                  >
+                    {item.ProductTypeID}
+                  </td>
+                  <td className="p-3 border">{item.ProductTower}</td>
+                  <td className="p-3 border">{item.ProductGroup}</td>
+                  <td className="p-3 border">{item.ProductType}</td>
+                  <td className="flex items-center justify-center gap-2 p-3 border">
+                    <ProductTypeEdit
+                      ProductTypeID={item.ProductTypeID}
+                      onUpdate={fetchProductTypeDataTable}
+                    />
+                    <ProductTypeDelete
+                      ProductTypeID={item.ProductTypeID}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchProductTypeDataTable}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="p-6 text-center text-gray-500">
+                  No data found 🚫
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {sortedData.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No data found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* ✅ MODIFIED: Pagination controls yang lebih lengkap */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
+
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> entries
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export const WarrantyService_table = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  // === State Management ===
+  const [WarrantyServiceData, setWarrantyServiceData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [WarrantyServiceData, setWarrantyServiceData] = useState([]);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Search & Filter
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Default sorting by Service_offerID ascending
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [goToPageInput, setGoToPageInput] = useState("");
+
+  // Sorting
   const [sortConfig, setSortConfig] = useState({
     key: "Service_offerID",
     direction: "asc",
   });
 
+  // Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // === Data Fetching ===
   const fetchWarrantyServiceDataTable = async () => {
     setLoading(true);
     setError(null);
@@ -1858,10 +2286,8 @@ export const WarrantyService_table = () => {
       const response = await ApiCustomer.get("/api/warranty-services");
       if (response.data.success) {
         setWarrantyServiceData(response.data.data);
-        Swal.close();
       } else {
         setError("Failed to fetch Warranty Service data");
-        Swal.close();
         Swal.fire({
           title: "Error!",
           text: "Gagal mengambil data Warranty Service.",
@@ -1872,8 +2298,6 @@ export const WarrantyService_table = () => {
     } catch (err) {
       console.error("Error fetching Warranty Service data:", err);
       setError("Error fetching data");
-
-      Swal.close();
       Swal.fire({
         title: "Error!",
         text: "Gagal mengambil data Warranty Service.",
@@ -1882,6 +2306,7 @@ export const WarrantyService_table = () => {
       });
     } finally {
       setLoading(false);
+      Swal.close();
     }
   };
 
@@ -1889,188 +2314,301 @@ export const WarrantyService_table = () => {
     fetchWarrantyServiceDataTable();
   }, []);
 
-  // Sorting logic
+  // === Filtering & Sorting Logic ===
   const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const getSortedData = (data) => {
-    if (!sortConfig.key) return data;
-    return [...data].sort((a, b) => {
-      const valA = a[sortConfig.key];
-      const valB = b[sortConfig.key];
-
-      if (!isNaN(valA) && !isNaN(valB)) {
-        return sortConfig.direction === "asc"
-          ? Number(valA) - Number(valB)
-          : Number(valB) - Number(valA);
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
       }
-
-      return sortConfig.direction === "asc"
-        ? valA.toString().localeCompare(valB.toString())
-        : valB.toString().localeCompare(valA.toString());
+      return { key, direction: "asc" };
     });
   };
 
+  const getSortedData = useMemo(() => {
+    const filteredData = WarrantyServiceData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    const sorted = [...filteredData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        const valA = a[sortConfig.key];
+        const valB = b[sortConfig.key];
+        if (!isNaN(valA) && !isNaN(valB)) {
+          return sortConfig.direction === "asc"
+            ? Number(valA) - Number(valB)
+            : Number(valB) - Number(valA);
+        }
+        return sortConfig.direction === "asc"
+          ? valA?.toString().localeCompare(valB?.toString())
+          : valB?.toString().localeCompare(valA?.toString());
+      });
+    }
+    return sorted;
+  }, [WarrantyServiceData, searchTerm, sortConfig]);
+
   const renderSortIcon = (key) => {
-    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4" />;
-    if (sortConfig.direction === "asc") return <ArrowUp className="inline w-4 h-4" />;
-    return <ArrowDown className="inline w-4 h-4" />;
+    if (sortConfig.key !== key)
+      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+    );
   };
 
-  // Filter data
-  const filteredWarrantyServiceTable = WarrantyServiceData.filter((item) =>
-    Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
-  // Apply sorting
-  const sortedData = getSortedData(filteredWarrantyServiceTable);
-
-  // Pagination
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-  const currentData = sortedData.slice(
+  // === Pagination Logic ===
+  const totalPages = Math.ceil(getSortedData.length / itemsPerPage) || 1;
+  const currentData = getSortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
+
+  // === Render Section ===
   const navigate = useNavigate();
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Warranty Service Table</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Warranty Service Table</h2>
 
-      <WarrantyServiceAdd />
+      {/* Search and Add Button */}
+      <div className="flex flex-warp items-center gap-2 mb-4"> {/* Mengubah mb-6 di sini */}
+        <input
+          type="text"
+          placeholder="🔍 Search..."
+          className="w-full p-2 border rounded-lg shadow-sm sm:w-1/3 focus:ring-2 focus:ring-blue-400" // Menggunakan flex-grow agar input mengambil sisa ruang
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <WarrantyServiceAdd /> {/* Tombol Add di samping input search */}
+      </div>
 
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-red-500 mb-4">{error}</p>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Service_offerID")}>
+      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[300px]">
+        <table className="w-full relative border-collapse">
+          <thead className="sticky z-10 top-0 bg-gray-100">
+            <tr>
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("Service_offerID")}
+              >
                 Service offerID {renderSortIcon("Service_offerID")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Service_description")}>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("Service_description")}
+              >
                 Service description {renderSortIcon("Service_description")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CTat_RTime")}>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("CTat_RTime")}
+              >
                 Customer Tat {renderSortIcon("CTat_RTime")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Price")}>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("Price")}
+              >
                 Price {renderSortIcon("Price")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Shipping_Fee")}>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("Shipping_Fee")}
+              >
                 Shipping Fee {renderSortIcon("Shipping_Fee")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("qty_ws")}>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("qty_ws")}
+              >
                 Quantity {renderSortIcon("qty_ws")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Tax")}>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("Tax")}
+              >
                 Tax {renderSortIcon("Tax")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Total")}>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("Total")}
+              >
                 Total {renderSortIcon("Total")}
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-sm font-semibold text-center border">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((WarrantyServiceItem) => (
-              <tr
-                key={WarrantyServiceItem.Service_offerID}
-                className="text-center hover:bg-gray-100"
-              >
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() =>
-                    navigate(`/app/case/${WarrantyServiceItem.Service_offerID}`)
-                  }
+            {currentData.length > 0 ? (
+              currentData.map((WarrantyServiceItem, i) => (
+                <tr
+                  key={WarrantyServiceItem.Service_offerID}
+                  className={`hover:bg-blue-50 ${
+                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  }`}
                 >
-                  {WarrantyServiceItem.Service_offerID}
-                </td>
-                <td className="p-2 border">{WarrantyServiceItem.Service_description}</td>
-                <td className="p-2 border">{WarrantyServiceItem.CTat_RTime}</td>
-                <td className="p-2 border">{WarrantyServiceItem.Price}</td>
-                <td className="p-2 border">{WarrantyServiceItem.Shipping_Fee}</td>
-                <td className="p-2 border">{WarrantyServiceItem.qty_ws}</td>
-                <td className="p-2 border">{WarrantyServiceItem.Tax}</td>
-                <td className="p-2 border">{WarrantyServiceItem.Total}</td>
-                <td className="flex p-2 space-x-2 border">
-                  <WarrantyServiceEdit
-                    Service_offerID={WarrantyServiceItem.Service_offerID}
-                    onUpdate={fetchWarrantyServiceDataTable}
-                  />
-                  <WarrantyServiceDelete
-                    Service_offerID={WarrantyServiceItem.Service_offerID}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchWarrantyServiceDataTable}
-                  />
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
+                  <td
+                    className="p-3 border text-blue-500 cursor-pointer hover:underline"
+                    onClick={() =>
+                      navigate(`/app/case/${WarrantyServiceItem.Service_offerID}`)
+                    }
+                  >
+                    {WarrantyServiceItem.Service_offerID}
+                  </td>
+                  <td className="p-3 border">
+                    {WarrantyServiceItem.Service_description}
+                  </td>
+                  <td className="p-3 border">{WarrantyServiceItem.CTat_RTime}</td>
+                  <td className="p-3 border">{WarrantyServiceItem.Price}</td>
+                  <td className="p-3 border">{WarrantyServiceItem.Shipping_Fee}</td>
+                  <td className="p-3 border">{WarrantyServiceItem.qty_ws}</td>
+                  <td className="p-3 border">{WarrantyServiceItem.Tax}</td>
+                  <td className="p-3 border">{WarrantyServiceItem.Total}</td>
+                  <td className="flex p-3 space-x-2 border justify-center">
+                    <WarrantyServiceEdit
+                      Service_offerID={WarrantyServiceItem.Service_offerID}
+                      onUpdate={fetchWarrantyServiceDataTable}
+                    />
+                    <WarrantyServiceDelete
+                      Service_offerID={WarrantyServiceItem.Service_offerID}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchWarrantyServiceDataTable}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="9" className="p-6 text-center text-gray-500">
+                  No data found 🚫
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {filteredWarrantyServiceTable.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No data found.</p>
-        )}
       </div>
 
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === getSortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(getSortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing{" "}
+          <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, getSortedData.length)}</b>{" "}
+          of <b>{getSortedData.length}</b> services
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export const Mo_table = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [MaterialOrderData, setMaterialOrderData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [MaterialOrderData, setMaterialOrderData] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // 🔹 Filter
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedType, setSelectedType] = useState("");
 
-  // 🔹 Sorting state (default sort by MOID ascending)
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [goToPageInput, setGoToPageInput] = useState("");
+
+  // Sorting
   const [sortConfig, setSortConfig] = useState({
     key: "MOID",
     direction: "asc",
   });
 
+  // Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // === Data Fetching ===
   const fetchMaterialOrderDataTable = async () => {
     setLoading(true);
     setError(null);
@@ -2089,10 +2627,8 @@ export const Mo_table = () => {
       const response = await ApiCustomer.get("/api/mo-detaill");
       if (response.data.success) {
         setMaterialOrderData(response.data.data);
-        Swal.close();
       } else {
         setError("Failed to fetch Material Order data");
-        Swal.close();
         Swal.fire({
           title: "Error!",
           text: "Gagal mengambil data Material Order.",
@@ -2103,8 +2639,6 @@ export const Mo_table = () => {
     } catch (err) {
       console.error("Error fetching Material Order data:", err);
       setError("Error fetching data");
-
-      Swal.close();
       Swal.fire({
         title: "Error!",
         text: "Gagal mengambil data Material Order.",
@@ -2113,6 +2647,7 @@ export const Mo_table = () => {
       });
     } finally {
       setLoading(false);
+      Swal.close();
     }
   };
 
@@ -2120,70 +2655,72 @@ export const Mo_table = () => {
     fetchMaterialOrderDataTable();
   }, []);
 
-  // 🔹 Sorting logic
+  // === Filtering & Sorting Logic ===
   const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const getSortedData = (data) => {
-    if (!sortConfig.key) return data;
-
-    return [...data].sort((a, b) => {
-      const valueA = a[sortConfig.key];
-      const valueB = b[sortConfig.key];
-
-      // numeric check
-      if (!isNaN(valueA) && !isNaN(valueB)) {
-        return sortConfig.direction === "asc"
-          ? Number(valueA) - Number(valueB)
-          : Number(valueB) - Number(valueA);
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
       }
-
-      // string fallback
-      return sortConfig.direction === "asc"
-        ? String(valueA).localeCompare(String(valueB))
-        : String(valueB).localeCompare(String(valueA));
+      return { key, direction: "asc" };
     });
   };
 
-  // 🔹 Filter data
-  const filteredMaterialOrderTable = MaterialOrderData.filter((item) => {
-    const matchesSearch = Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const renderSortIcon = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown size={16} />;
+    if (sortConfig.direction === "asc") return <ArrowUp size={16} />;
+    return <ArrowDown size={16} />;
+  };
 
-    const matchesStatus = selectedStatus
-      ? item.OrderStatus === selectedStatus
-      : true;
+  const getSortedData = useMemo(() => {
+    const filteredData = MaterialOrderData.filter((item) => {
+      const matchesSearch = Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      const matchesStatus = selectedStatus ? item.OrderStatus === selectedStatus : true;
+      const matchesType = selectedType ? item.OrderType === selectedType : true;
+      return matchesSearch && matchesStatus && matchesType;
+    });
 
-    const matchesType = selectedType ? item.OrderType === selectedType : true;
+    const sorted = [...filteredData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        const valA = a[sortConfig.key];
+        const valB = b[sortConfig.key];
+        if (!isNaN(valA) && !isNaN(valB)) {
+          return sortConfig.direction === "asc"
+            ? Number(valA) - Number(valB)
+            : Number(valB) - Number(valA);
+        }
+        return sortConfig.direction === "asc"
+          ? valA?.toString().localeCompare(valB?.toString())
+          : valB?.toString().localeCompare(valA?.toString());
+      });
+    }
+    return sorted;
+  }, [MaterialOrderData, searchTerm, selectedStatus, selectedType, sortConfig]);
 
-    return matchesSearch && matchesStatus && matchesType;
-  });
+  // Dropdown values
+  const uniqueStatuses = useMemo(() => [
+    ...new Set(MaterialOrderData.map((item) => item.OrderStatus)),
+  ].filter(Boolean).sort(), [MaterialOrderData]);
+  
+  const uniqueTypes = useMemo(() => [
+    ...new Set(MaterialOrderData.map((item) => item.OrderType)),
+  ].filter(Boolean).sort(), [MaterialOrderData]);
 
-  // 🔹 Apply sorting
-  const sortedData = getSortedData(filteredMaterialOrderTable);
-
-  // Pagination
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-  const currentData = sortedData.slice(
+  // === Pagination Logic ===
+  const totalPages = Math.ceil(getSortedData.length / itemsPerPage) || 1;
+  const currentData = getSortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const navigate = useNavigate();
-
-  // 🔹 Dropdown values
-  const uniqueStatuses = [
-    ...new Set(MaterialOrderData.map((item) => item.OrderStatus)),
-  ];
-  const uniqueTypes = [
-    ...new Set(MaterialOrderData.map((item) => item.OrderType)),
-  ];
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -2192,37 +2729,29 @@ export const Mo_table = () => {
     setCurrentPage(1);
   };
 
-  // 🔹 Sort Icon
-  const renderSortIcon = (key) => {
-    if (sortConfig.key !== key) return <ArrowUpDown size={16} />;
-    if (sortConfig.direction === "asc") return <ArrowUp size={16} />;
-    return <ArrowDown size={16} />;
-  };
+  // === Render Section ===
+  const navigate = useNavigate();
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Material Order Table</h2>
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Material Order Table</h2>
 
-      {/* Search */}
-      <div className="flex items-center mb-4">
+      {/* Filters */}
+      <div className="flex flex-col mb-6 space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
         <input
           type="text"
-          placeholder="Search..."
-          className="w-1/3 p-2 border rounded"
+          placeholder="🔍 Search..."
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 sm:w-1/3"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-      </div>
-
-      {/* Filter Select + Reset */}
-      <div className="flex items-center mb-4 space-x-4">
         <select
           value={selectedStatus}
           onChange={(e) => {
             setSelectedStatus(e.target.value);
             setCurrentPage(1);
           }}
-          className="p-2 border rounded"
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
         >
           <option value="">All Order Status</option>
           {uniqueStatuses.map((status, idx) => (
@@ -2231,14 +2760,13 @@ export const Mo_table = () => {
             </option>
           ))}
         </select>
-
         <select
           value={selectedType}
           onChange={(e) => {
             setSelectedType(e.target.value);
             setCurrentPage(1);
           }}
-          className="p-2 border rounded"
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
         >
           <option value="">All Order Types</option>
           {uniqueTypes.map((type, idx) => (
@@ -2247,204 +2775,257 @@ export const Mo_table = () => {
             </option>
           ))}
         </select>
-
         <button
           onClick={resetFilters}
-          className="px-4 py-2 text-white bg-gray-500 rounded"
+          className="px-4 py-2 text-white bg-gray-500 rounded-lg shadow-sm hover:bg-gray-600"
         >
           Reset Filters
         </button>
       </div>
 
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="mb-4 text-red-500">{error}</p>}
 
-      {/* Table (❗struktur tetap, hanya th dibuat bisa klik sort) */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+      {/* Table with Sticky Header and Scroll */}
+      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[400px]">
+        <table className="w-full relative border-collapse">
+          <thead className="sticky z-10 top-0 bg-gray-100">
+            <tr>
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("MOID")}
               >
                 <div className="flex items-center justify-center space-x-1">
-                  <span>MO ID</span>
-                  {renderSortIcon("MOID")}
+                  <span>MO ID</span> {renderSortIcon("MOID")}
                 </div>
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("WOID")}
               >
                 <div className="flex items-center justify-center space-x-1">
-                  <span>WO ID</span>
-                  {renderSortIcon("WOID")}
+                  <span>WO ID</span> {renderSortIcon("WOID")}
                 </div>
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("OrderNumber")}
               >
                 <div className="flex items-center justify-center space-x-1">
-                  <span>Order Number</span>
-                  {renderSortIcon("OrderNumber")}
+                  <span>Order Number</span> {renderSortIcon("OrderNumber")}
                 </div>
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("OrderStatus")}
               >
                 <div className="flex items-center justify-center space-x-1">
-                  <span>Order Status</span>
-                  {renderSortIcon("OrderStatus")}
+                  <span>Order Status</span> {renderSortIcon("OrderStatus")}
                 </div>
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("OrderType")}
               >
                 <div className="flex items-center justify-center space-x-1">
-                  <span>Order Type</span>
-                  {renderSortIcon("OrderType")}
+                  <span>Order Type</span> {renderSortIcon("OrderType")}
                 </div>
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("CreatedOn")}
               >
                 <div className="flex items-center justify-center space-x-1">
-                  <span>Created On</span>
-                  {renderSortIcon("CreatedOn")}
+                  <span>Created On</span> {renderSortIcon("CreatedOn")}
                 </div>
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("SalesOrderNumber")}
               >
                 <div className="flex items-center justify-center space-x-1">
-                  <span>Sales Order Number</span>
-                  {renderSortIcon("SalesOrderNumber")}
+                  <span>Sales Order Number</span> {renderSortIcon("SalesOrderNumber")}
                 </div>
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("RMANumber")}
               >
                 <div className="flex items-center justify-center space-x-1">
-                  <span>RMA Number</span>
-                  {renderSortIcon("RMANumber")}
+                  <span>RMA Number</span> {renderSortIcon("RMANumber")}
                 </div>
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("ReadyForClosureDate")}
               >
                 <div className="flex items-center justify-center space-x-1">
-                  <span>Ready For Closure Date</span>
-                  {renderSortIcon("ReadyForClosureDate")}
+                  <span>Ready For Closure Date</span> {renderSortIcon("ReadyForClosureDate")}
                 </div>
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Owner")}
               >
                 <div className="flex items-center justify-center space-x-1">
-                  <span>Owner</span>
-                  {renderSortIcon("Owner")}
+                  <span>Owner</span> {renderSortIcon("Owner")}
                 </div>
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-sm font-semibold text-center border">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((MaterialOrderItem) => (
-              <tr
-                key={MaterialOrderItem.MOID}
-                className="text-center hover:bg-gray-100"
-              >
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() =>
-                    navigate(`/app/material-order/${MaterialOrderItem.MOID}`)
-                  }
+            {currentData.length > 0 ? (
+              currentData.map((MaterialOrderItem, i) => (
+                <tr
+                  key={MaterialOrderItem.MOID}
+                  className={`text-center hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  {MaterialOrderItem.MOID}
-                </td>
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() =>
-                    navigate(`/app/work/${MaterialOrderItem.WOID}`)
-                  }
-                >
-                  {MaterialOrderItem.WOID}
-                </td>
-                <td className="p-2 border">{MaterialOrderItem.OrderNumber}</td>
-                <td className="p-2 border">{MaterialOrderItem.OrderStatus}</td>
-                <td className="p-2 border">{MaterialOrderItem.OrderType}</td>
-                <td className="p-2 border">{MaterialOrderItem.CreatedOn}</td>
-                <td className="p-2 border">
-                  {MaterialOrderItem.SalesOrderNumber}
-                </td>
-                <td className="p-2 border">{MaterialOrderItem.RMANumber}</td>
-                <td className="p-2 border">
-                  {MaterialOrderItem.ReadyForClosureDate}
-                </td>
-                <td className="p-2 border">{MaterialOrderItem.Owner}</td>
-                <td className="flex p-2 space-x-2 border">
-                  <MaterialOrderEdit
-                    MOID={MaterialOrderItem.MOID}
-                    onUpdate={fetchMaterialOrderDataTable}
-                  />
-                  <MaterialOrderDelete
-                    MOID={MaterialOrderItem.MOID}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchMaterialOrderDataTable}
-                  />
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
+                  <td
+                    className="p-3 text-blue-500 border cursor-pointer hover:underline"
+                    onClick={() =>
+                      navigate(`/app/material-order/${MaterialOrderItem.MOID}`)
+                    }
+                  >
+                    {MaterialOrderItem.MOID}
+                  </td>
+                  <td
+                    className="p-3 text-blue-500 border cursor-pointer hover:underline"
+                    onClick={() =>
+                      navigate(`/app/work/${MaterialOrderItem.WOID}`)
+                    }
+                  >
+                    {MaterialOrderItem.WOID}
+                  </td>
+                  <td className="p-3 border">{MaterialOrderItem.OrderNumber}</td>
+                  <td className="p-3 border">{MaterialOrderItem.OrderStatus}</td>
+                  <td className="p-3 border">{MaterialOrderItem.OrderType}</td>
+                  <td className="p-3 border">{MaterialOrderItem.CreatedOn}</td>
+                  <td className="p-3 border">
+                    {MaterialOrderItem.SalesOrderNumber}
+                  </td>
+                  <td className="p-3 border">{MaterialOrderItem.RMANumber}</td>
+                  <td className="p-3 border">
+                    {MaterialOrderItem.ReadyForClosureDate}
+                  </td>
+                  <td className="p-3 border">{MaterialOrderItem.Owner}</td>
+                  <td className="flex items-center justify-center p-3 space-x-2 border">
+                    <MaterialOrderEdit
+                      MOID={MaterialOrderItem.MOID}
+                      onUpdate={fetchMaterialOrderDataTable}
+                    />
+                    <MaterialOrderDelete
+                      MOID={MaterialOrderItem.MOID}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchMaterialOrderDataTable}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="11" className="p-6 text-center text-gray-500">
+                  No data found 🚫
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {sortedData.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No data found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === getSortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(getSortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing{" "}
+          <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, getSortedData.length)}</b>{" "}
+          of <b>{getSortedData.length}</b> orders
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export const Wo_table = () => {
+  const [WorkOrderData, setWorkOrderData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [WorkOrderData, setWorkOrderData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
 
   // 🔹 filter states
   const [filterWorkOrderType, setFilterWorkOrderType] = useState("");
@@ -2458,6 +3039,54 @@ export const Wo_table = () => {
     key: "WOID",
     direction: "asc",
   });
+
+  const navigate = useNavigate();
+
+  // Ambil unique values untuk dropdown filter, menggunakan useMemo untuk performa
+  const uniqueWorkOrderType = useMemo(
+    () => [
+      "",
+      ...new Set(WorkOrderData.map((d) => d.WorkOrderType).filter(Boolean)),
+    ],
+    [WorkOrderData]
+  );
+  const uniqueSystemStatus = useMemo(
+    () => [
+      "",
+      ...new Set(WorkOrderData.map((d) => d.SystemStatus).filter(Boolean)),
+    ],
+    [WorkOrderData]
+  );
+  const uniqueShipmentCountry = useMemo(
+    () => [
+      "",
+      ...new Set(WorkOrderData.map((d) => d.ShipmentCountry).filter(Boolean)),
+    ],
+    [WorkOrderData]
+  );
+  const uniqueShipmentState = useMemo(
+    () => [
+      "",
+      ...new Set(WorkOrderData.map((d) => d.ShipmentState).filter(Boolean)),
+    ],
+    [WorkOrderData]
+  );
+  const uniqueOwner = useMemo(
+    () => [
+      "",
+      ...new Set(WorkOrderData.map((d) => d.Owner).filter(Boolean)),
+    ],
+    [WorkOrderData]
+  );
+
+  // 🔹 Debounce untuk search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const fetchWorkOrderDataTable = async () => {
     setLoading(true);
@@ -2500,6 +3129,7 @@ export const Wo_table = () => {
       });
     } finally {
       setLoading(false);
+      Swal.close();
     }
   };
 
@@ -2507,395 +3137,561 @@ export const Wo_table = () => {
     fetchWorkOrderDataTable();
   }, []);
 
-  // 🔹 ambil unique values untuk dropdown
-  const uniqueWorkOrderType = [...new Set(WorkOrderData.map((d) => d.WorkOrderType))];
-  const uniqueSystemStatus = [...new Set(WorkOrderData.map((d) => d.SystemStatus))];
-  const uniqueShipmentCountry = [...new Set(WorkOrderData.map((d) => d.ShipmentCountry))];
-  const uniqueShipmentState = [...new Set(WorkOrderData.map((d) => d.ShipmentState))];
-  const uniqueOwner = [...new Set(WorkOrderData.map((d) => d.Owner))];
+  // 🔹 Filter & Search logic, menggunakan useMemo
+  const filteredWorkOrderTable = useMemo(() => {
+    return WorkOrderData.filter((item) => {
+      const matchSearch = Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      );
+      const matchWorkOrderType = filterWorkOrderType ? item.WorkOrderType === filterWorkOrderType : true;
+      const matchSystemStatus = filterSystemStatus ? item.SystemStatus === filterSystemStatus : true;
+      const matchShipmentCountry = filterShipmentCountry ? item.ShipmentCountry === filterShipmentCountry : true;
+      const matchShipmentState = filterShipmentState ? item.ShipmentState === filterShipmentState : true;
+      const matchOwner = filterOwner ? item.Owner === filterOwner : true;
 
-  // 🔹 Filter data
-  const filteredWorkOrderTable = WorkOrderData.filter((item) => {
-    const matchSearch = Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    const matchWorkOrderType = filterWorkOrderType ? item.WorkOrderType === filterWorkOrderType : true;
-    const matchSystemStatus = filterSystemStatus ? item.SystemStatus === filterSystemStatus : true;
-    const matchShipmentCountry = filterShipmentCountry ? item.ShipmentCountry === filterShipmentCountry : true;
-    const matchShipmentState = filterShipmentState ? item.ShipmentState === filterShipmentState : true;
-    const matchOwner = filterOwner ? item.Owner === filterOwner : true;
-
-    return (
-      matchSearch &&
-      matchWorkOrderType &&
-      matchSystemStatus &&
-      matchShipmentCountry &&
-      matchShipmentState &&
-      matchOwner
-    );
-  });
-
-  // 🔹 Sorting logic
-  const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const getSortedData = (data) => {
-    if (!sortConfig.key) return data;
-
-    return [...data].sort((a, b) => {
-      const valueA = a[sortConfig.key];
-      const valueB = b[sortConfig.key];
-
-      if (!isNaN(valueA) && !isNaN(valueB)) {
-        return sortConfig.direction === "asc"
-          ? Number(valueA) - Number(valueB)
-          : Number(valueB) - Number(valueA);
-      }
-
-      return sortConfig.direction === "asc"
-        ? String(valueA).localeCompare(String(valueB))
-        : String(valueB).localeCompare(String(valueA));
+      return (
+        matchSearch &&
+        matchWorkOrderType &&
+        matchSystemStatus &&
+        matchShipmentCountry &&
+        matchShipmentState &&
+        matchOwner
+      );
     });
-  };
+  }, [
+    WorkOrderData,
+    debouncedSearchTerm,
+    filterWorkOrderType,
+    filterSystemStatus,
+    filterShipmentCountry,
+    filterShipmentState,
+    filterOwner,
+  ]);
 
-  // 🔹 Apply sorting
-  const sortedData = getSortedData(filteredWorkOrderTable);
+  // 🔹 Sorting logic, menggunakan useMemo
+  const sortedData = useMemo(() => {
+    const sorted = [...filteredWorkOrderTable];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        const aVal = a[sortConfig.key];
+        const bVal = b[sortConfig.key];
 
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+            return sortConfig.direction === "asc" ? aVal - bVal : bVal - aVal;
+        }
+
+        if (String(aVal) < String(bVal)) {
+          return sortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (String(aVal) > String(bVal)) {
+          return sortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sorted;
+  }, [filteredWorkOrderTable, sortConfig]);
+
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
   const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const navigate = useNavigate();
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+  };
 
-  // 🔹 Sort Icon
-  const renderSortIcon = (key) => {
-    if (sortConfig.key !== key) return <ArrowUpDown size={16} />;
-    if (sortConfig.direction === "asc") return <ArrowUp size={16} />;
-    return <ArrowDown size={16} />;
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key)
+      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+    );
+  };
+
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
   };
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Work Order Table</h2>
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Work Order Table</h2>
 
-      {/* 🔹 Search */}
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 border rounded mb-2"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+      {/* 🔹 Search & Filters */}
+      <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center">
+        <input
+          type="text"
+          placeholder="🔍 Search..."
+          className="p-2 border rounded-lg shadow-sm w-full md:w-1/3 focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <div className="flex flex-wrap gap-2">
+          <select
+            className="p-2 border rounded-lg shadow-sm"
+            value={filterWorkOrderType}
+            onChange={(e) => {
+              setFilterWorkOrderType(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">All Work Order Types</option>
+            {uniqueWorkOrderType.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+          <select
+            className="p-2 border rounded-lg shadow-sm"
+            value={filterSystemStatus}
+            onChange={(e) => {
+              setFilterSystemStatus(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">All System Status</option>
+            {uniqueSystemStatus.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+          <select
+            className="p-2 border rounded-lg shadow-sm"
+            value={filterShipmentCountry}
+            onChange={(e) => {
+              setFilterShipmentCountry(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">All Shipment Countries</option>
+            {uniqueShipmentCountry.map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
+          </select>
+          <select
+            className="p-2 border rounded-lg shadow-sm"
+            value={filterShipmentState}
+            onChange={(e) => {
+              setFilterShipmentState(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">All Shipment States</option>
+            {uniqueShipmentState.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
+          <select
+            className="p-2 border rounded-lg shadow-sm"
+            value={filterOwner}
+            onChange={(e) => {
+              setFilterOwner(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">All Owners</option>
+            {uniqueOwner.map((owner) => (
+              <option key={owner} value={owner}>
+                {owner}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
-      {/* 🔹 Filters */}
-      {/* ... filter select sama seperti sebelumnya ... */}
+      {error && <p className="mb-4 text-red-500">{error}</p>}
 
-      {error && <p className="text-red-500">{error}</p>}
-
-      {/* Table with sorting */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("WOID")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>WOID</span>
-                  {renderSortIcon("WOID")}
-                </div>
+      {/* 🔹 Table with fixed header and scrollable body */}
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
+        <table className="min-w-full relative border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-200">
+            <tr className="text-sm text-gray-700 uppercase">
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("WOID")}
+              >
+                WOID {getSortIcon("WOID")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseID")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Case ID</span>
-                  {renderSortIcon("CaseID")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("CaseID")}
+              >
+                Case ID {getSortIcon("CaseID")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("WorkOrderType")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Work Order Type</span>
-                  {renderSortIcon("WorkOrderType")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("WorkOrderType")}
+              >
+                Work Order Type {getSortIcon("WorkOrderType")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Priority")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Priority</span>
-                  {renderSortIcon("Priority")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Priority")}
+              >
+                Priority {getSortIcon("Priority")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("SystemStatus")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>System Status</span>
-                  {renderSortIcon("SystemStatus")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("SystemStatus")}
+              >
+                System Status {getSortIcon("SystemStatus")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("SubStatus")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Sub Status</span>
-                  {renderSortIcon("SubStatus")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("SubStatus")}
+              >
+                Sub Status {getSortIcon("SubStatus")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("PreferredDay")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Preferred Day</span>
-                  {renderSortIcon("PreferredDay")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("PreferredDay")}
+              >
+                Preferred Day {getSortIcon("PreferredDay")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("PreferredTime")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Preferred Time</span>
-                  {renderSortIcon("PreferredTime")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("PreferredTime")}
+              >
+                Preferred Time {getSortIcon("PreferredTime")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ShipmentCountry")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Shipment Country</span>
-                  {renderSortIcon("ShipmentCountry")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ShipmentCountry")}
+              >
+                Shipment Country {getSortIcon("ShipmentCountry")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ShipmentState")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Shipment State</span>
-                  {renderSortIcon("ShipmentState")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ShipmentState")}
+              >
+                Shipment State {getSortIcon("ShipmentState")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CreatedOn")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Created On</span>
-                  {renderSortIcon("CreatedOn")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("CreatedOn")}
+              >
+                Created On {getSortIcon("CreatedOn")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Owner")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Owner</span>
-                  {renderSortIcon("Owner")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Owner")}
+              >
+                Owner {getSortIcon("Owner")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("SLAJeopardy")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>SLAJeopardy</span>
-                  {renderSortIcon("SLAJeopardy")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("SLAJeopardy")}
+              >
+                SLAJeopardy {getSortIcon("SLAJeopardy")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("DueDateCustomer")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>DueDate Customer</span>
-                  {renderSortIcon("DueDateCustomer")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("DueDateCustomer")}
+              >
+                DueDate Customer {getSortIcon("DueDateCustomer")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CoverageWindow")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Coverage Window</span>
-                  {renderSortIcon("CoverageWindow")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("CoverageWindow")}
+              >
+                Coverage Window {getSortIcon("CoverageWindow")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Response")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Response</span>
-                  {renderSortIcon("Response")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Response")}
+              >
+                Response {getSortIcon("Response")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("OTCCode")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>OTCCode</span>
-                  {renderSortIcon("OTCCode")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("OTCCode")}
+              >
+                OTCCode {getSortIcon("OTCCode")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("RequestedDateTimeCustomer")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Requested DateTime Customer</span>
-                  {renderSortIcon("RequestedDateTimeCustomer")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("RequestedDateTimeCustomer")}
+              >
+                Requested DateTime Customer {getSortIcon("RequestedDateTimeCustomer")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("GuaranteedFixTimeCustomer")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Guaranteed FixTime Customer</span>
-                  {renderSortIcon("GuaranteedFixTimeCustomer")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("GuaranteedFixTimeCustomer")}
+              >
+                Guaranteed FixTime Customer {getSortIcon("GuaranteedFixTimeCustomer")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("EarlyStartDateTimeCustomer")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Early Start DateTime Customer</span>
-                  {renderSortIcon("EarlyStartDateTimeCustomer")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("EarlyStartDateTimeCustomer")}
+              >
+                Early Start DateTime Customer {getSortIcon("EarlyStartDateTimeCustomer")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("LatestStartDateTimeCustomer")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Latest Start DateTime Customer</span>
-                  {renderSortIcon("LatestStartDateTimeCustomer")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("LatestStartDateTimeCustomer")}
+              >
+                Latest Start DateTime Customer {getSortIcon("LatestStartDateTimeCustomer")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("SLAReschedule")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>SLAReschedule</span>
-                  {renderSortIcon("SLAReschedule")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("SLAReschedule")}
+              >
+                SLAReschedule {getSortIcon("SLAReschedule")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ActiveScheduleDate")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Active Schedule Date</span>
-                  {renderSortIcon("ActiveScheduleDate")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ActiveScheduleDate")}
+              >
+                Active Schedule Date {getSortIcon("ActiveScheduleDate")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("SLAErrorDescription")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>SLA Error Description</span>
-                  {renderSortIcon("SLAErrorDescription")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("SLAErrorDescription")}
+              >
+                SLA Error Description {getSortIcon("SLAErrorDescription")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CasePriorityIndex")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Case Priority Index</span>
-                  {renderSortIcon("CasePriorityIndex")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("CasePriorityIndex")}
+              >
+                Case Priority Index {getSortIcon("CasePriorityIndex")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("PartnerStatus")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Partner Status</span>
-                  {renderSortIcon("PartnerStatus")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("PartnerStatus")}
+              >
+                Partner Status {getSortIcon("PartnerStatus")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("WorkOrderDescription")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>WorkOrder Description</span>
-                  {renderSortIcon("WorkOrderDescription")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("WorkOrderDescription")}
+              >
+                WorkOrder Description {getSortIcon("WorkOrderDescription")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("PartnerNotes")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>PartnerNotes</span>
-                  {renderSortIcon("PartnerNotes")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("PartnerNotes")}
+              >
+                PartnerNotes {getSortIcon("PartnerNotes")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("IncomingChannel")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Incoming Channel</span>
-                  {renderSortIcon("IncomingChannel")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("IncomingChannel")}
+              >
+                Incoming Channel {getSortIcon("IncomingChannel")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("MaterialOrder")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Material Order</span>
-                  {renderSortIcon("MaterialOrder")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("MaterialOrder")}
+              >
+                Material Order {getSortIcon("MaterialOrder")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseInformation")}>
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Case Information</span>
-                  {renderSortIcon("CaseInformation")}
-                </div>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("CaseInformation")}
+              >
+                Case Information {getSortIcon("CaseInformation")}
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((WorkOrderItem) => (
-              <tr key={WorkOrderItem.WOID} className="text-center hover:bg-gray-100">
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/app/work/${WorkOrderItem.WOID}`)}
+            {currentData.length > 0 ? (
+              currentData.map((WorkOrderItem, i) => (
+                <tr
+                  key={WorkOrderItem.WOID}
+                  className={`text-center hover:bg-gray-100 text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  {WorkOrderItem.WOID}
-                </td>
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/app/case/${WorkOrderItem.CaseID}`)}
-                >
-                  {WorkOrderItem.CaseID}
-                </td>
-                <td className="p-2 border">{WorkOrderItem.WorkOrderType}</td>
-                <td className="p-2 border">{WorkOrderItem.Priority}</td>
-                <td className="p-2 border">{WorkOrderItem.SystemStatus}</td>
-                <td className="p-2 border">{WorkOrderItem.SubStatus}</td>
-                <td className="p-2 border">{WorkOrderItem.PreferredDay}</td>
-                <td className="p-2 border">{WorkOrderItem.PreferredTime}</td>
-                <td className="p-2 border">{WorkOrderItem.ShipmentCountry}</td>
-                <td className="p-2 border">{WorkOrderItem.ShipmentState}</td>
-                <td className="p-2 border">{WorkOrderItem.CreatedOn}</td>
-                <td className="p-2 border">{WorkOrderItem.Owner}</td>
-                <td className="p-2 border">{WorkOrderItem.SLAJeopardy}</td>
-                <td className="p-2 border">{WorkOrderItem.DueDateCustomer}</td>
-                <td className="p-2 border">{WorkOrderItem.CoverageWindow}</td>
-                <td className="p-2 border">{WorkOrderItem.Response}</td>
-                <td className="p-2 border">{WorkOrderItem.OTCCode}</td>
-                <td className="p-2 border">{WorkOrderItem.RequestedDateTimeCustomer}</td>
-                <td className="p-2 border">{WorkOrderItem.GuaranteedFixTimeCustomer}</td>
-                <td className="p-2 border">{WorkOrderItem.EarlyStartDateTimeCustomer}</td>
-                <td className="p-2 border">{WorkOrderItem.LatestStartDateTimeCustomer}</td>
-                <td className="p-2 border">{WorkOrderItem.SLAReschedule}</td>
-                <td className="p-2 border">{WorkOrderItem.ActiveScheduleDate}</td>
-                <td className="p-2 border">{WorkOrderItem.SLAErrorDescription}</td>
-                <td className="p-2 border">{WorkOrderItem.CasePriorityIndex}</td>
-                <td className="p-2 border">{WorkOrderItem.PartnerStatus}</td>
-                <td className="p-2 border">{WorkOrderItem.WorkOrderDescription}</td>
-                <td className="p-2 border">{WorkOrderItem.PartnerNotes}</td>
-                <td className="p-2 border">{WorkOrderItem.IncomingChannel}</td>
-                <td className="p-2 border">{WorkOrderItem.MaterialOrder}</td>
-                <td className="p-2 border">{WorkOrderItem.CaseInformation}</td>
-                <td className="flex p-2 space-x-2 border">
-                  <WorkOrderEdit WOID={WorkOrderItem.WOID} onUpdate={fetchWorkOrderDataTable} />
-                  <WorkOrderDelete
-                    MOID={WorkOrderItem.MOID}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchWorkOrderDataTable}
-                  />
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
+                  <td
+                    className="p-2 text-blue-500 border cursor-pointer hover:underline"
+                    onClick={() => navigate(`/app/work/${WorkOrderItem.WOID}`)}
+                  >
+                    {WorkOrderItem.WOID}
+                  </td>
+                  <td
+                    className="p-2 text-blue-500 border cursor-pointer hover:underline"
+                    onClick={() => navigate(`/app/case/${WorkOrderItem.CaseID}`)}
+                  >
+                    {WorkOrderItem.CaseID}
+                  </td>
+                  <td className="p-2 border">{WorkOrderItem.WorkOrderType}</td>
+                  <td className="p-2 border">{WorkOrderItem.Priority}</td>
+                  <td className="p-2 border">{WorkOrderItem.SystemStatus}</td>
+                  <td className="p-2 border">{WorkOrderItem.SubStatus}</td>
+                  <td className="p-2 border">{WorkOrderItem.PreferredDay}</td>
+                  <td className="p-2 border">{WorkOrderItem.PreferredTime}</td>
+                  <td className="p-2 border">{WorkOrderItem.ShipmentCountry}</td>
+                  <td className="p-2 border">{WorkOrderItem.ShipmentState}</td>
+                  <td className="p-2 border">{WorkOrderItem.CreatedOn}</td>
+                  <td className="p-2 border">{WorkOrderItem.Owner}</td>
+                  <td className="p-2 border">{WorkOrderItem.SLAJeopardy}</td>
+                  <td className="p-2 border">{WorkOrderItem.DueDateCustomer}</td>
+                  <td className="p-2 border">{WorkOrderItem.CoverageWindow}</td>
+                  <td className="p-2 border">{WorkOrderItem.Response}</td>
+                  <td className="p-2 border">{WorkOrderItem.OTCCode}</td>
+                  <td className="p-2 border">{WorkOrderItem.RequestedDateTimeCustomer}</td>
+                  <td className="p-2 border">{WorkOrderItem.GuaranteedFixTimeCustomer}</td>
+                  <td className="p-2 border">{WorkOrderItem.EarlyStartDateTimeCustomer}</td>
+                  <td className="p-2 border">{WorkOrderItem.LatestStartDateTimeCustomer}</td>
+                  <td className="p-2 border">{WorkOrderItem.SLAReschedule}</td>
+                  <td className="p-2 border">{WorkOrderItem.ActiveScheduleDate}</td>
+                  <td className="p-2 border">{WorkOrderItem.SLAErrorDescription}</td>
+                  <td className="p-2 border">{WorkOrderItem.CasePriorityIndex}</td>
+                  <td className="p-2 border">{WorkOrderItem.PartnerStatus}</td>
+                  <td className="p-2 border">{WorkOrderItem.WorkOrderDescription}</td>
+                  <td className="p-2 border">{WorkOrderItem.PartnerNotes}</td>
+                  <td className="p-2 border">{WorkOrderItem.IncomingChannel}</td>
+                  <td className="p-2 border">{WorkOrderItem.MaterialOrder}</td>
+                  <td className="p-2 border">{WorkOrderItem.CaseInformation}</td>
+                  <td className="flex items-center justify-center gap-2 p-2 border">
+                    <WorkOrderEdit WOID={WorkOrderItem.WOID} onUpdate={fetchWorkOrderDataTable} />
+                    <WorkOrderDelete
+                      MOID={WorkOrderItem.MOID}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchWorkOrderDataTable}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="32" className="p-6 text-center text-gray-500">
+                  No data found 🚫
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {sortedData.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No data found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* 🔹 Bottom controls (Pagination) */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> work orders
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export const User_table = () => {
+  const [UserData, setUserData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; 
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [UserData, setUserData] = useState([]);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
 
-  // sort state
+  // 🔹 sort state
   const [sortConfig, setSortConfig] = useState({
     key: "IDUser",
     direction: "asc",
   });
+
+  const navigate = useNavigate();
+
+  // 🔹 Debounce search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const fetchUserDataTable = async () => {
     setLoading(true);
@@ -2917,7 +3713,7 @@ export const User_table = () => {
         setUserData(response.data.data);
         Swal.close();
       } else {
-        setError("Failed to fetch Userr data");
+        setError("Failed to fetch User data");
         Swal.close();
         Swal.fire({
           title: "Error!",
@@ -2945,207 +3741,308 @@ export const User_table = () => {
     fetchUserDataTable();
   }, []);
 
-  // handle sort
-  const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-  };
+  // 🔹 Filter data based on debounced search
+  const filteredUserTable = useMemo(() => {
+    return UserData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    );
+  }, [UserData, debouncedSearchTerm]);
 
-  // sorting logic
-  const sortedData = React.useMemo(() => {
-    let sortableItems = [...UserData];
+  // 🔹 Sorting logic
+  const sortedData = useMemo(() => {
+    let sortableItems = [...filteredUserTable];
     if (sortConfig.key !== null) {
       sortableItems.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
+        
+        // Handle null or undefined values
+        if (aVal === null || aVal === undefined) aVal = "";
+        if (bVal === null || bVal === undefined) bVal = "";
+        
+        // Case-insensitive sorting for strings
+        if (typeof aVal === "string") aVal = aVal.toLowerCase();
+        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+
+        if (aVal < bVal) {
           return sortConfig.direction === "asc" ? -1 : 1;
         }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
+        if (aVal > bVal) {
           return sortConfig.direction === "asc" ? 1 : -1;
         }
         return 0;
       });
     }
     return sortableItems;
-  }, [UserData, sortConfig]);
+  }, [filteredUserTable, sortConfig]);
 
-  // filter
-  const filteredUserTable = sortedData.filter((item) =>
-    Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  // 🔹 Calculate total pages
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
 
-  // pagination
-  const totalPages = Math.ceil(filteredUserTable.length / itemsPerPage);
-
-  const currentData = filteredUserTable.slice(
+  // 🔹 Get current page data
+  const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const navigate = useNavigate();
+  // 🔹 Sorting handler
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+  };
 
-  // helper render icon
-  const renderSortIcon = (key) => {
-    if (sortConfig.key !== key) {
-      return <ArrowUpDown className="inline w-4 h-4 ml-1" />;
-    }
-    if (sortConfig.direction === "asc") {
-      return <ArrowUp className="inline w-4 h-4 ml-1" />;
-    }
-    return <ArrowDown className="inline w-4 h-4 ml-1" />;
+  // 🔹 Sort icon
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key)
+      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+    );
+  };
+  
+  // 🔹 Go to page handler
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
   };
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">User Table</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <UserAdd></UserAdd>
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 User Table</h2>
 
-      {error && <p className="text-red-500">{error}</p>}
+      {/* Flexbox container for search input and Add button */}
+      <div className="flex flex-warp items-center gap-2 mb-4 ">
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="🔍 Search users..."
+          className="w-full p-2 border rounded-lg shadow-sm sm:w-1/3 focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {/* Add User Button */}
+        <UserAdd />
+      </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+      {error && <p className="mb-4 text-red-500">{error}</p>}
+
+      {/* Table with fixed header and scrollable body */}
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
+        <table className="min-w-full relative border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-200">
+            <tr className="text-sm text-gray-700 uppercase">
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("IDUser")}
               >
-                ID User {renderSortIcon("IDUser")}
+                ID User {getSortIcon("IDUser")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Email")}
               >
-                Email {renderSortIcon("Email")}
+                Email {getSortIcon("Email")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Username")}
               >
-                Username {renderSortIcon("Username")}
+                Username {getSortIcon("Username")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Name")}
               >
-                Name {renderSortIcon("Name")}
+                Name {getSortIcon("Name")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Role")}
               >
-                Role {renderSortIcon("Role")}
+                Role {getSortIcon("Role")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("ProfilPhoto")}
               >
-                Profil Photo {renderSortIcon("ProfilPhoto")}
+                Profil Photo {getSortIcon("ProfilPhoto")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("CreatedAt")}
               >
-                CreatedAt {renderSortIcon("CreatedAt")}
+                CreatedAt {getSortIcon("CreatedAt")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("UpdatedAt")}
               >
-                UpdatedAt {renderSortIcon("UpdatedAt")}
+                UpdatedAt {getSortIcon("UpdatedAt")}
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((UserItem) => (
-              <tr
-                key={UserItem.IDUser}
-                className="text-center hover:bg-gray-100"
-              >
-                <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
-                  {UserItem.IDUser}
-                </td>
-                <td className="p-2 border">{UserItem.Email}</td>
-                <td className="p-2 border">{UserItem.Username}</td>
-                <td className="p-2 border">{UserItem.Name}</td>
-                <td className="p-2 border">{UserItem.Role}</td>
-                <td className="p-2 border">{UserItem.ProfilPhoto}</td>
-                <td className="p-2 border">{UserItem.CreatedAt}</td>
-                <td className="p-2 border">{UserItem.UpdatedAt}</td>
-                <td className="flex p-2 space-x-2 border">
-                  <UserEdit
-                    IDUser={UserItem.IDUser}
-                    onUpdate={fetchUserDataTable}
-                  ></UserEdit>
-                  <UserDelete
-                    IDUser={UserItem.IDUser}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchUserDataTable}
-                  />
+            {currentData.length > 0 ? (
+              currentData.map((UserItem, i) => (
+                <tr
+                  key={UserItem.IDUser}
+                  className={`text-center text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+                >
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td> 
+                  <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
+                    {UserItem.IDUser}
+                  </td>
+                  <td className="p-2 border">{UserItem.Email}</td>
+                  <td className="p-2 border">{UserItem.Username}</td>
+                  <td className="p-2 border">{UserItem.Name}</td>
+                  <td className="p-2 border">{UserItem.Role}</td>
+                  <td className="p-2 border">{UserItem.ProfilPhoto}</td>
+                  <td className="p-2 border">{UserItem.CreatedAt}</td>
+                  <td className="p-2 border">{UserItem.UpdatedAt}</td>
+                  <td className="flex items-center justify-center gap-2 p-2 border">
+                    <UserEdit
+                      IDUser={UserItem.IDUser}
+                      onUpdate={fetchUserDataTable}
+                    />
+                    <UserDelete
+                      IDUser={UserItem.IDUser}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchUserDataTable}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="9" className="p-6 text-center text-gray-500">
+                  No data found 🚫
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {filteredUserTable.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No data found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* 🔹 Bottom controls (Pagination) */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> users
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export const Part_table = () => {
+  const [PartData, setPartData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(10); // 🔹 Updated state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [PartData, setPartData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState(""); // 🔹 New state for "Go to"
 
   // 🔹 state sorting
   const [sortConfig, setSortConfig] = useState({
     key: "PartNumber",
     direction: "asc",
   });
+
+  // 🔹 Debounce search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset page on new search
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const fetchPartDataTable = async () => {
     setLoading(true);
@@ -3193,12 +4090,14 @@ export const Part_table = () => {
     fetchPartDataTable();
   }, []);
 
-  // 🔹 Filter data berdasarkan pencarian
-  const filteredPartTable = PartData.filter((item) =>
-    Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  // 🔹 Filter data berdasarkan pencarian (using debounced search term)
+  const filteredPartTable = useMemo(() => {
+    return PartData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    );
+  }, [PartData, debouncedSearchTerm]);
 
   // 🔹 Sorting
   const sortedData = useMemo(() => {
@@ -3242,204 +4141,299 @@ export const Part_table = () => {
     });
   };
 
-  // 🔹 Icon indikator sort
-  const getSortSymbol = (key) => {
-    if (sortConfig.key !== key) return "⇅";
-    return sortConfig.direction === "asc" ? "↑" : "↓";
+  // 🔹 Icon indikator sort (using Lucide-React icons)
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key)
+      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+    );
+  };
+
+  // 🔹 "Go to page" handler
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
   };
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Part Table</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <PartAdd />
-      {error && <p className="text-red-500">{error}</p>}
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Part Table</h2>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("PartNumber")}>
-                PartNumber {getSortSymbol("PartNumber")}
+      {/* Flexbox container for search input and Add button */}
+      <div className="flex flex-wrap items-center gap-2 mb-4 ">
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="🔍 Search parts..."
+          className="w-full p-2 border rounded-lg shadow-sm sm:w-1/3 focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {/* Add Part Button */}
+        <PartAdd />
+      </div>
+
+      {error && <p className="mb-4 text-red-500">{error}</p>}
+
+      {/* 🔹 Table with fixed header and scrollable body */}
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
+        <table className="min-w-full relative border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-200">
+            <tr className="text-sm text-gray-700 uppercase">
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("PartNumber")}>
+                PartNumber {getSortIcon("PartNumber")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Keyword")}>
-                Keyword {getSortSymbol("Keyword")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Keyword")}>
+                Keyword {getSortIcon("Keyword")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("PartDescription")}>
-                PartDescription {getSortSymbol("PartDescription")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("PartDescription")}>
+                PartDescription {getSortIcon("PartDescription")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Orderability")}>
-                Orderability {getSortSymbol("Orderability")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Orderability")}>
+                Orderability {getSortIcon("Orderability")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("RestrictionReason")}>
-                RestrictionReason {getSortSymbol("RestrictionReason")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("RestrictionReason")}>
+                RestrictionReason {getSortIcon("RestrictionReason")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CSR_Flag")}>
-                CSR_Flag {getSortSymbol("CSR_Flag")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("CSR_Flag")}>
+                CSR_Flag {getSortIcon("CSR_Flag")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ROHS_Flag")}>
-                ROHS Flag {getSortSymbol("ROHS_Flag")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ROHS_Flag")}>
+                ROHS Flag {getSortIcon("ROHS_Flag")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Returnable_Flag")}>
-                Returnable Flag {getSortSymbol("Returnable_Flag")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Returnable_Flag")}>
+                Returnable Flag {getSortIcon("Returnable_Flag")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("HardRoll_Flag")}>
-                HardRoll Flag {getSortSymbol("HardRoll_Flag")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("HardRoll_Flag")}>
+                HardRoll Flag {getSortIcon("HardRoll_Flag")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("DangerousGoods_Flag")}>
-                DangerousGoods Flag {getSortSymbol("DangerousGoods_Flag")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("DangerousGoods_Flag")}>
+                DangerousGoods Flag {getSortIcon("DangerousGoods_Flag")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("LithiumBattery_Flag")}>
-                LithiumBattery Flag {getSortSymbol("LithiumBattery_Flag")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("LithiumBattery_Flag")}>
+                LithiumBattery Flag {getSortIcon("LithiumBattery_Flag")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Oversize_Flag")}>
-                Oversize Flag {getSortSymbol("Oversize_Flag")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Oversize_Flag")}>
+                Oversize Flag {getSortIcon("Oversize_Flag")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Heavy_Flag")}>
-                Heavy Flag {getSortSymbol("Heavy_Flag")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Heavy_Flag")}>
+                Heavy Flag {getSortIcon("Heavy_Flag")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Price")}>
-                Price {getSortSymbol("Price")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Price")}>
+                Price {getSortIcon("Price")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("FreightPrice")}>
-                FreightPrice {getSortSymbol("FreightPrice")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("FreightPrice")}>
+                FreightPrice {getSortIcon("FreightPrice")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Tax")}>
-                Tax {getSortSymbol("Tax")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Tax")}>
+                Tax {getSortIcon("Tax")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Total")}>
-                Total {getSortSymbol("Total")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Total")}>
+                Total {getSortIcon("Total")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Shipping_Fee")}>
-                Shipping_Fee {getSortSymbol("Shipping_Fee")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Shipping_Fee")}>
+                Shipping_Fee {getSortIcon("Shipping_Fee")}
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((PartItem) => (
-              <tr key={PartItem.PartNumber} className="text-center hover:bg-gray-100">
-                <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
-                  {PartItem.PartNumber}
-                </td>
-                <td className="p-2 border">{PartItem.Keyword}</td>
-                <td className="p-2 border">{PartItem.PartDescription}</td>
-                <td className="p-2 border">
-                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Orderability ? "bg-green-500" : "bg-red-500"}`}>
-                    {PartItem.Orderability ? "Yes" : "No"}
-                  </span>
-                </td>
-                <td className="p-2 border">{PartItem.RestrictionReason}</td>
-                <td className="p-2 border">
-                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.CSR_Flag ? "bg-green-500" : "bg-red-500"}`}>
-                    {PartItem.CSR_Flag ? "Yes" : "No"}
-                  </span>
-                </td>
-                <td className="p-2 border">
-                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.ROHS_Flag ? "bg-green-500" : "bg-red-500"}`}>
-                    {PartItem.ROHS_Flag ? "Yes" : "No"}
-                  </span>
-                </td>
-                <td className="p-2 border">
-                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Returnable_Flag ? "bg-green-500" : "bg-red-500"}`}>
-                    {PartItem.Returnable_Flag ? "Yes" : "No"}
-                  </span>
-                </td>
-                <td className="p-2 border">
-                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.HardRoll_Flag ? "bg-green-500" : "bg-red-500"}`}>
-                    {PartItem.HardRoll_Flag ? "Yes" : "No"}
-                  </span>
-                </td>
-                <td className="p-2 border">
-                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.DangerousGoods_Flag ? "bg-green-500" : "bg-red-500"}`}>
-                    {PartItem.DangerousGoods_Flag ? "Yes" : "No"}
-                  </span>
-                </td>
-                <td className="p-2 border">
-                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.LithiumBattery_Flag ? "bg-green-500" : "bg-red-500"}`}>
-                    {PartItem.LithiumBattery_Flag ? "Yes" : "No"}
-                  </span>
-                </td>
-                <td className="p-2 border">
-                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Oversize_Flag ? "bg-green-500" : "bg-red-500"}`}>
-                    {PartItem.Oversize_Flag ? "Yes" : "No"}
-                  </span>
-                </td>
-                <td className="p-2 border">
-                  <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Heavy_Flag ? "bg-green-500" : "bg-red-500"}`}>
-                    {PartItem.Heavy_Flag ? "Yes" : "No"}
-                  </span>
-                </td>
-                <td className="p-2 border">{PartItem.Price}</td>
-                <td className="p-2 border">{PartItem.FreightPrice}</td>
-                <td className="p-2 border">{PartItem.Tax}</td>
-                <td className="p-2 border">{PartItem.Total}</td>
-                <td className="p-2 border">{PartItem.Shipping_Fee}</td>
-                <td className="flex p-2 space-x-2 border">
-                  <PartEdit PartNumber={PartItem.PartNumber} onUpdate={fetchPartDataTable}></PartEdit>
-                  <PartDelete
-                    PartNumber={PartItem.PartNumber}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchPartDataTable}
-                  />
+            {currentData.length > 0 ? (
+              currentData.map((PartItem, i) => (
+                <tr key={PartItem.PartNumber} className={`text-center text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
+                  <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
+                    {PartItem.PartNumber}
+                  </td>
+                  <td className="p-2 border">{PartItem.Keyword}</td>
+                  <td className="p-2 border">{PartItem.PartDescription}</td>
+                  <td className="p-2 border">
+                    <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Orderability ? "bg-green-500" : "bg-red-500"}`}>
+                      {PartItem.Orderability ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="p-2 border">{PartItem.RestrictionReason}</td>
+                  <td className="p-2 border">
+                    <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.CSR_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                      {PartItem.CSR_Flag ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="p-2 border">
+                    <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.ROHS_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                      {PartItem.ROHS_Flag ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="p-2 border">
+                    <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Returnable_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                      {PartItem.Returnable_Flag ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="p-2 border">
+                    <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.HardRoll_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                      {PartItem.HardRoll_Flag ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="p-2 border">
+                    <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.DangerousGoods_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                      {PartItem.DangerousGoods_Flag ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="p-2 border">
+                    <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.LithiumBattery_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                      {PartItem.LithiumBattery_Flag ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="p-2 border">
+                    <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Oversize_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                      {PartItem.Oversize_Flag ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="p-2 border">
+                    <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Heavy_Flag ? "bg-green-500" : "bg-red-500"}`}>
+                      {PartItem.Heavy_Flag ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="p-2 border">{PartItem.Price}</td>
+                  <td className="p-2 border">{PartItem.FreightPrice}</td>
+                  <td className="p-2 border">{PartItem.Tax}</td>
+                  <td className="p-2 border">{PartItem.Total}</td>
+                  <td className="p-2 border">{PartItem.Shipping_Fee}</td>
+                  <td className="flex items-center justify-center gap-2 p-2 border">
+                    <PartEdit PartNumber={PartItem.PartNumber} onUpdate={fetchPartDataTable} />
+                    <PartDelete
+                      PartNumber={PartItem.PartNumber}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchPartDataTable}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="19" className="p-6 text-center text-gray-500">
+                  No data found 🚫
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {filteredPartTable.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No data found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* 🔹 Bottom controls (Pagination) */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> parts
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-
 export const Resource_table = () => {
+  const [ResourceData, setResourceData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; 
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [ResourceData, setResourceData] = useState([]);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
 
   // 🔹 sort config
   const [sortConfig, setSortConfig] = useState({
     key: "ResourceId",
     direction: "asc",
   });
+
+  const navigate = useNavigate();
+
+  // 🔹 Debounce search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const fetchResourceDataTable = async () => {
     setLoading(true);
@@ -3489,12 +4483,14 @@ export const Resource_table = () => {
     fetchResourceDataTable();
   }, []);
 
-  // 🔹 Filter data berdasarkan pencarian
-  const filteredResourceTable = ResourceData.filter((item) =>
-    Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  // 🔹 Filter data based on debounced search
+  const filteredResourceTable = useMemo(() => {
+    return ResourceData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    );
+  }, [ResourceData, debouncedSearchTerm]);
 
   // 🔹 Sorting
   const sortedData = useMemo(() => {
@@ -3518,10 +4514,10 @@ export const Resource_table = () => {
     return sorted;
   }, [filteredResourceTable, sortConfig]);
 
-  // 🔹 Hitung total halaman
+  // 🔹 Calculate total pages
   const totalPages = Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
 
-  // 🔹 Ambil data sesuai halaman saat ini
+  // 🔹 Get current page data
   const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -3540,119 +4536,213 @@ export const Resource_table = () => {
     });
   };
 
-  // 🔹 Symbol sort
-  const getSortSymbol = (key) => {
-    if (sortConfig.key !== key) return "⇅";
-    return sortConfig.direction === "asc" ? "↑" : "↓";
+  // 🔹 Sort icon
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key)
+      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+    );
+  };
+  
+  // 🔹 Go to page handler
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
   };
 
-  //navigate
-  const navigate = useNavigate();
-
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Resource Table</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Resource Table</h2>
 
-      <ResourceAdd />  
-      {error && <p className="text-red-500">{error}</p>}
+      {/* Kontainer Flexbox untuk pencarian dan tombol Add */}
+      <div className="flex flex-warp items-center gap-2 mb-4">
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="🔍 Search..."
+          className="w-full p-2 border rounded-lg shadow-sm sm:w-1/3 focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {/* Add Button */}
+        <ResourceAdd />
+      </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th 
-                className="p-2 border cursor-pointer" 
+      {error && <p className="mb-4 text-red-500">{error}</p>}
+
+      {/* Table with fixed header and scrollable body */}
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
+        <table className="min-w-full relative border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-200">
+            <tr className="text-sm text-gray-700 uppercase">
+              <th className="p-3 text-sm font-semibold text-center border">No</th>
+              <th
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("ResourceId")}
               >
-                Resource ID {getSortSymbol("ResourceId")}
+                Resource ID {getSortIcon("ResourceId")}
               </th>
-              <th 
-                className="p-2 border cursor-pointer" 
+              <th
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Name")}
               >
-                Name {getSortSymbol("Name")}
+                Name {getSortIcon("Name")}
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((ResourceItem) => (
-              <tr
-                key={ResourceItem.ResourceId}
-                className="text-center hover:bg-gray-100"
-              >
-                <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
-                  {ResourceItem.ResourceId}
-                </td>
-                <td className="p-2 border">{ResourceItem.Name}</td>
-                <td className="flex p-2 space-x-2 border">
-                  <ResourceEdit 
-                    ResourceId={ResourceItem.ResourceId} 
-                    onUpdate={fetchResourceDataTable} 
-                  />
-                  <ResourceDelete
-                    ResourceId={ResourceItem.ResourceId}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchResourceDataTable}                
-                  />
+            {currentData.length > 0 ? (
+              currentData.map((ResourceItem, i) => (
+                <tr
+                  key={ResourceItem.ResourceId}
+                  className={`text-center hover:bg-gray-100 text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+                >
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
+                  <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
+                    {ResourceItem.ResourceId}
+                  </td>
+                  <td className="p-2 border">{ResourceItem.Name}</td>
+                  <td className="flex items-center justify-center gap-2 p-2 border">
+                    <ResourceEdit
+                      ResourceId={ResourceItem.ResourceId}
+                      onUpdate={fetchResourceDataTable}
+                    />
+                    <ResourceDelete
+                      ResourceId={ResourceItem.ResourceId}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchResourceDataTable}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3" className="p-6 text-center text-gray-500">
+                  No data found 🚫
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {sortedData.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No data found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* 🔹 Bottom controls (Pagination) */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> resources
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export const ResourceAccountTable = () => {
+  const [resourceAccounts, setResourceAccounts] = useState([]);
+  const [resources, setResources] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [resourceFilter, setResourceFilter] = useState(""); 
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [resourceFilter, setResourceFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [goToPageInput, setGoToPageInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [resourceAccounts, setResourceAccounts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [resources, setResources] = useState([]);
 
   // SORTING STATE
-  const [sortConfig, setSortConfig] = useState({ key: "ResourceAccountId", direction: "asc" });
+  const [sortConfig, setSortConfig] = useState({
+    key: "ResourceAccountId",
+    direction: "asc",
+  });
+
+  const navigate = useNavigate();
+
+  // Debounce search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const handleSort = (key) => {
     setSortConfig((prev) => {
@@ -3665,15 +4755,18 @@ export const ResourceAccountTable = () => {
   };
 
   const getSortIcon = (key) => {
-    if (sortConfig.key !== key) return <ArrowUpDown size={14} className="inline ml-1" />;
-    return sortConfig.direction === "asc" 
-      ? <ArrowUp size={14} className="inline ml-1" /> 
-      : <ArrowDown size={14} className="inline ml-1" />;
+    if (sortConfig.key !== key)
+      return <ArrowUpDown size={14} className="inline ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp size={14} className="inline ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown size={14} className="inline ml-1 text-blue-600" />
+    );
   };
 
   const fetchResources = async () => {
     try {
-      const response = await ApiCustomer.get("/api/resources"); 
+      const response = await ApiCustomer.get("/api/resources");
       if (response.data.success) {
         setResources(response.data.data);
       }
@@ -3717,20 +4810,24 @@ export const ResourceAccountTable = () => {
   }, []);
 
   // Unique ResourceIds for filter
-  const uniqueResourceIds = [
-    ...new Set(resourceAccounts.map((item) => item.ResourceId).filter((v) => v))
-  ];
+  const uniqueResourceIds = useMemo(() => {
+    return [
+      ...new Set(resourceAccounts.map((item) => item.ResourceId).filter((v) => v)),
+    ].sort();
+  }, [resourceAccounts]);
 
-  // Filtering logic
-  const filteredAccounts = resourceAccounts.filter((item) => {
-    const matchSearch = Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    const matchResource = !resourceFilter || item.ResourceId === resourceFilter;
-    return matchSearch && matchResource;
-  });
+  // Filtering logic (using debounced search term)
+  const filteredAccounts = useMemo(() => {
+    return resourceAccounts.filter((item) => {
+      const matchSearch = Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      );
+      const matchResource = !resourceFilter || item.ResourceId === resourceFilter;
+      return matchSearch && matchResource;
+    });
+  }, [resourceAccounts, debouncedSearchTerm, resourceFilter]);
 
-  // SORTING applied di sini
+  // SORTING applied here
   const sortedAccounts = useMemo(() => {
     let sortable = [...filteredAccounts];
     if (sortConfig.key) {
@@ -3749,154 +4846,237 @@ export const ResourceAccountTable = () => {
     return sortable;
   }, [filteredAccounts, sortConfig]);
 
-  const totalPages = Math.ceil(sortedAccounts.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedAccounts.length / itemsPerPage) || 1;
   const currentData = sortedAccounts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const navigate = useNavigate();
+  // "Go to page" handler
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Resource Accounts</h2>
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Resource Accounts</h2>
 
-      {/* Search + Add button */}
-      <div className="flex items-center gap-2 mb-2">
+      {/* NEW: Search Input + Add button in one row */}
+      <div className="flex flex-col items-start gap-4 mb-4 sm:flex-row sm:items-center">
         <input
           type="text"
-          placeholder="Search..."
-          className="w-1/3 p-2 border rounded"
+          placeholder="🔍 Search accounts..."
+          className="w-full p-2 border rounded-lg shadow-sm sm:w-1/3 focus:ring-2 focus:ring-blue-400"
           value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
         <ResourceAccountAdd onAdd={fetchResourceAccounts} />
       </div>
 
-      {/* Filter ResourceId + Reset */}
-      <div className="flex items-center gap-2 mb-4">
+      {/* NEW: Filters + Reset button below */}
+      <div className="flex flex-col items-start gap-4 mb-4 sm:flex-row sm:items-center">
         <select
-          className="p-2 border rounded"
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={resourceFilter}
           onChange={(e) => {
             setResourceFilter(e.target.value);
             setCurrentPage(1);
           }}
         >
-          <option value="">All Resource IDs</option>
+          <option value="">All Resources</option>
           {uniqueResourceIds.map((id) => (
             <option key={id} value={id}>
               {id}
             </option>
           ))}
         </select>
-
         <button
-          className="p-2 text-white bg-gray-500 rounded"
+          className="px-4 py-2 text-white bg-gray-500 rounded-lg shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
           onClick={() => {
             setSearchTerm("");
             setResourceFilter("");
             setCurrentPage(1);
           }}
         >
-          Reset Filter
+          Reset Filters
         </button>
       </div>
-
+      
       {loading && <p>Loading accounts...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="mb-4 text-red-500">{error}</p>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ResourceAccountId")}>
+      {/* Table with fixed header and scrollable body */}
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
+        <table className="min-w-full relative border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-200">
+            <tr className="text-sm text-gray-700 uppercase">
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th className="p-3 text-center border cursor-pointer max-w-20" onClick={() => handleSort("ResourceAccountId")}>
                 Resource Account ID {getSortIcon("ResourceAccountId")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Name")}>
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Name")}>
                 Name {getSortIcon("Name")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ResourceId")}>
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ResourceId")}>
                 Resource ID {getSortIcon("ResourceId")}
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((account) => (
-              <tr key={account.ResourceAccountId} className="text-center hover:bg-gray-100">
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() =>
-                    navigate(`/app/resource-account/${account.ResourceAccountId}`)
-                  }
+            {currentData.length > 0 ? (
+              currentData.map((account, i) => (
+                <tr
+                  key={account.ResourceAccountId}
+                  className={`text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  {account.ResourceAccountId}
-                </td>
-                <td className="p-2 border">{account.Name}</td>
-                <td className="p-2 border">{account.ResourceId || "-"}</td>
-                <td className="flex justify-center p-2 space-x-2 border">
-                  <ResourceAccountEdit
-                    ResourceAccountId={account.ResourceAccountId}
-                    resources={resources}
-                    onUpdate={fetchResourceAccounts}
-                  />
-                  <ResourceAccountDelete
-                    ResourceAccountId={account.ResourceAccountId}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchResourceAccounts}
-                  />
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
+                  <td
+                    className="p-3 text-center text-blue-500 border cursor-pointer hover:underline"
+                    onClick={() =>
+                      navigate(`/app/resource-account/${account.ResourceAccountId}`)
+                    }
+                  >
+                    {account.ResourceAccountId}
+                  </td>
+                  <td className="p-3 border text-center">{account.Name}</td>
+                  <td className="p-3 border text-center">{account.ResourceId || "-"}</td>
+                  <td className="flex items-center justify-center gap-2 p-3 border">
+                    <ResourceAccountEdit
+                      ResourceAccountId={account.ResourceAccountId}
+                      resources={resources}
+                      onUpdate={fetchResourceAccounts}
+                    />
+                    <ResourceAccountDelete
+                      ResourceAccountId={account.ResourceAccountId}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchResourceAccounts}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="p-6 text-center text-gray-500">
+                  No accounts found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {sortedAccounts.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No accounts found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* Bottom controls (Pagination) */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedAccounts.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedAccounts.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedAccounts.length)}</b> of{" "}
+          <b>{sortedAccounts.length}</b> accounts
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-
 export const SubkTechnician_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [resourceAccountFilter, setResourceAccountFilter] = useState(""); 
+  const [resourceAccountFilter, setResourceAccountFilter] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [subkTechnicianData, setSubkTechnicianData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
 
-  // 🔽 STATE SORTING
-  const [sortConfig, setSortConfig] = useState({ key: "SubkTechnicianId", direction: "asc" });
+  // Debounce search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // SORTING STATE
+  const [sortConfig, setSortConfig] = useState({
+    key: "SubkTechnicianId",
+    direction: "asc",
+  });
 
   const handleSort = (key) => {
     setSortConfig((prev) => {
@@ -3909,10 +5089,13 @@ export const SubkTechnician_table = () => {
   };
 
   const getSortIcon = (key) => {
-    if (sortConfig.key !== key) return <ArrowUpDown size={14} className="inline ml-1" />;
-    return sortConfig.direction === "asc" 
-      ? <ArrowUp size={14} className="inline ml-1" /> 
-      : <ArrowDown size={14} className="inline ml-1" />;
+    if (sortConfig.key !== key)
+      return <ArrowUpDown size={14} className="inline ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp size={14} className="inline ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown size={14} className="inline ml-1 text-blue-600" />
+    );
   };
 
   const fetchSubkTechnicianData = async () => {
@@ -3948,27 +5131,31 @@ export const SubkTechnician_table = () => {
   }, []);
 
   // Ambil unique Resource Account untuk filter
-  const uniqueResourceAccounts = [
-    ...new Set(
-      subkTechnicianData
-        .map((item) => item.resourceAccount?.Name)
-        .filter((v) => v)
-    ),
-  ];
+  const uniqueResourceAccounts = useMemo(() => {
+    return [
+      ...new Set(
+        subkTechnicianData
+          .map((item) => item.resourceAccount?.Name)
+          .filter((v) => v)
+      ),
+    ].sort();
+  }, [subkTechnicianData]);
 
   // Filtering logic (search + filter resource account)
-  const filteredData = subkTechnicianData.filter((item) => {
-    const matchSearch = Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    const matchResource =
-      !resourceAccountFilter ||
-      item.resourceAccount?.Name === resourceAccountFilter;
+  const filteredData = useMemo(() => {
+    return subkTechnicianData.filter((item) => {
+      const matchSearch = Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      );
+      const matchResource =
+        !resourceAccountFilter ||
+        item.resourceAccount?.Name === resourceAccountFilter;
 
-    return matchSearch && matchResource;
-  });
+      return matchSearch && matchResource;
+    });
+  }, [subkTechnicianData, debouncedSearchTerm, resourceAccountFilter]);
 
-  // 🔽 APPLY SORTING DI SINI
+  // APPLY SORTING DI SINI
   const sortedData = useMemo(() => {
     let sortable = [...filteredData];
     if (sortConfig.key) {
@@ -3994,7 +5181,7 @@ export const SubkTechnician_table = () => {
     return sortable;
   }, [filteredData, sortConfig]);
 
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
   const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -4002,145 +5189,205 @@ export const SubkTechnician_table = () => {
 
   const navigate = useNavigate();
 
-  return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Subk Technician Table</h2>
+  // Handle "Go to page" input
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
 
-      {/* Search + Add Button (row 1) */}
-      <div className="flex items-center gap-2 mb-2">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="w-1/3 p-2 border rounded"
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-        />
-        <SubkTechnicianAdd onUpdate={fetchSubkTechnicianData} />
+  return (
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">Subk Technician Table</h2>
+
+      {/* Search and Add Button on the same row */}
+      <div className="flex flex-col items-center justify-between gap-4 mb-4 sm:flex-row">
+        <div className="flex items-center w-full gap-2">
+          <input
+            type="text"
+            placeholder="🔍 Search technicians..."
+            className="w-full p-2 border rounded-lg shadow-sm sm:w-1/3 focus:ring-2 focus:ring-blue-400"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <SubkTechnicianAdd onUpdate={fetchSubkTechnicianData} />
+        </div>
       </div>
 
-      {/* Filter + Reset (row 2) */}
-      <div className="flex items-center gap-2 mb-4">
-        <select
-          className="p-2 border rounded"
-          value={resourceAccountFilter}
-          onChange={(e) => {
-            setResourceAccountFilter(e.target.value);
-            setCurrentPage(1);
-          }}
-        >
-          <option value="">All Resource Accounts</option>
-          {uniqueResourceAccounts.map((acc) => (
-            <option key={acc} value={acc}>
-              {acc}
-            </option>
-          ))}
-        </select>
+      {/* Filter and Reset Button on a new row */}
+      <div className="flex flex-col items-center justify-between gap-4 mb-4 sm:flex-row">
+        <div className="flex items-center w-full gap-2">
+          <select
+            className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+            value={resourceAccountFilter}
+            onChange={(e) => {
+              setResourceAccountFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">All Resource Accounts</option>
+            {uniqueResourceAccounts.map((acc) => (
+              <option key={acc} value={acc}>
+                {acc}
+              </option>
+            ))}
+          </select>
 
-        <button
-          className="p-2 text-white bg-gray-500 rounded"
-          onClick={() => {
-            setSearchTerm("");
-            setResourceAccountFilter("");
-            setCurrentPage(1);
-          }}
-        >
-          Reset Filter
-        </button>
+          <button
+            className="px-4 py-2 text-white bg-gray-500 rounded-lg shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            onClick={() => {
+              setSearchTerm("");
+              setResourceAccountFilter("");
+              setCurrentPage(1);
+            }}
+          >
+            Reset Filters
+          </button>
+        </div>
       </div>
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th
-                className="p-2 border cursor-pointer"
-                onClick={() => handleSort("SubkTechnicianId")}
-              >
+      {/* Table with fixed header and scrollable body */}
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
+        <table className="min-w-full relative border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-200">
+            <tr className="text-sm text-gray-700 uppercase">
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("SubkTechnicianId")}>
                 Subk Technician ID {getSortIcon("SubkTechnicianId")}
               </th>
-              <th
-                className="p-2 border cursor-pointer"
-                onClick={() => handleSort("Name")}
-              >
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Name")}>
                 Name {getSortIcon("Name")}
               </th>
-              <th
-                className="p-2 border cursor-pointer"
-                onClick={() => handleSort("ResourceAccount")}
-              >
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ResourceAccount")}>
                 Resource Account {getSortIcon("ResourceAccount")}
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item) => (
-              <tr
-                key={item.SubkTechnicianId}
-                className="text-center hover:bg-gray-100"
-              >
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() =>
-                    navigate(`/app/subk-technician/${item.SubkTechnicianId}`)
-                  }
+            {currentData.length > 0 ? (
+              currentData.map((item, i) => (
+                <tr
+                  key={item.SubkTechnicianId}
+                  className={`text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  {item.SubkTechnicianId}
-                </td>
-                <td className="p-2 border">{item.Name}</td>
-                <td className="p-2 border">
-                  {item.resourceAccount?.Name || "N/A"}
-                </td>
-                <td className="flex justify-center p-2 space-x-2 border">
-                  <SubkTechnicianEdit
-                    SubkTechnicianId={item.SubkTechnicianId}
-                    onUpdate={fetchSubkTechnicianData}
-                  />
-                  <SubkTechnicianDelete
-                    SubkTechnicianId={item.SubkTechnicianId}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchSubkTechnicianData}
-                  />
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
+                  <td
+                    className="p-3 text-center text-blue-500 border cursor-pointer hover:underline"
+                    onClick={() => navigate(`/app/subk-technician/${item.SubkTechnicianId}`)}
+                  >
+                    {item.SubkTechnicianId}
+                  </td>
+                  <td className="p-3 border text-center">{item.Name}</td>
+                  <td className="p-3 border text-center">
+                    {item.resourceAccount?.Name || "N/A"}
+                  </td>
+                  <td className="flex items-center justify-center gap-2 p-3 border">
+                    <SubkTechnicianEdit
+                      SubkTechnicianId={item.SubkTechnicianId}
+                      onUpdate={fetchSubkTechnicianData}
+                    />
+                    <SubkTechnicianDelete
+                      SubkTechnicianId={item.SubkTechnicianId}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchSubkTechnicianData}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="p-6 text-center text-gray-500">
+                  No entries found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {sortedData.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">
-            No entries found.
-          </p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* Bottom controls (Pagination) */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing{" "}
+          <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> technicians
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -4148,15 +5395,49 @@ export const SubkTechnician_table = () => {
 
 export const SymptomCodeTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [symptomCodeData, setSymptomCodeData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
 
-  // ✅ Default sort pada SymptomCodeID ascending
-  const [sortConfig, setSortConfig] = useState({ key: "SymptomCodeID", direction: "asc" });
+  // Debounce search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset page on new search
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // SORTING STATE
+  const [sortConfig, setSortConfig] = useState({
+    key: "SymptomCodeID",
+    direction: "asc",
+  });
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+    setCurrentPage(1);
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key)
+      return <ArrowUpDown size={14} className="inline ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp size={14} className="inline ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown size={14} className="inline ml-1 text-blue-600" />
+    );
+  };
 
   const fetchSymptomCodeData = async () => {
     Swal.fire({
@@ -4190,44 +5471,39 @@ export const SymptomCodeTable = () => {
     fetchSymptomCodeData();
   }, []);
 
-  const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
+  // Filtering logic
+  const filteredData = useMemo(() => {
+    return symptomCodeData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    );
+  }, [symptomCodeData, debouncedSearchTerm]);
+
+  // APPLY SORTING DI SINI
+  const sortedData = useMemo(() => {
+    const sortable = [...filteredData];
+    if (sortConfig.key) {
+      sortable.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+
+        if (typeof aValue === "string" || typeof bValue === "string") {
+          return sortConfig.direction === "asc"
+            ? String(aValue).localeCompare(String(bValue))
+            : String(bValue).localeCompare(String(aValue));
+        }
+
+        return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
+      });
     }
-    setSortConfig({ key, direction });
-  };
+    return sortable;
+  }, [filteredData, sortConfig]);
 
-  const filteredData = symptomCodeData.filter((item) =>
-    Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
-  const sortedData = [...filteredData].sort((a, b) => {
-    if (!sortConfig.key) return 0;
-    const aValue = a[sortConfig.key];
-    const bValue = b[sortConfig.key];
-
-    if (aValue === null || aValue === undefined) return 1;
-    if (bValue === null || bValue === undefined) return -1;
-
-    if (typeof aValue === "string") {
-      return sortConfig.direction === "asc"
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue);
-    }
-
-    if (aValue instanceof Date || !isNaN(Date.parse(aValue))) {
-      return sortConfig.direction === "asc"
-        ? new Date(aValue) - new Date(bValue)
-        : new Date(bValue) - new Date(aValue);
-    }
-
-    return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
-  });
-
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
   const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -4235,149 +5511,219 @@ export const SymptomCodeTable = () => {
 
   const navigate = useNavigate();
 
-  const renderSortArrow = (key) => {
-    if (sortConfig.key !== key) return "⇅";
-    return sortConfig.direction === "asc" ? "↑" : "↓";
+  // Handle "Go to page" input
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
   };
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Symptom Code Table</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">Symptom Code Table</h2>
 
-      <SymptomCodeAdd onUpdate={fetchSymptomCodeData} />
+      {/* Search + Add Button (row 1) */}
+      <div className="flex flex-col items-center justify-between gap-4 mb-4 sm:flex-row">
+        <div className="flex w-full gap-2">
+          <input
+            type="text"
+            placeholder="🔍 Search symptom codes..."
+            className="w-full p-2 border rounded-lg shadow-sm sm:w-1/3 focus:ring-2 focus:ring-blue-400"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <SymptomCodeAdd onUpdate={fetchSymptomCodeData} />
+      </div>
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+      {/* Table with fixed header and scrollable body */}
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
+        <table className="min-w-full relative border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-200">
+            <tr className="text-sm text-gray-700 uppercase">
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SymptomCodeID")}
               >
-                Symptom Code ID {renderSortArrow("SymptomCodeID")}
+                Symptom Code ID {getSortIcon("SymptomCodeID")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SymptomCode")}
               >
-                Symptom Code {renderSortArrow("SymptomCode")}
+                Symptom Code {getSortIcon("SymptomCode")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("TopCategory")}
               >
-                Top Category {renderSortArrow("TopCategory")}
+                Top Category {getSortIcon("TopCategory")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SubCategory")}
               >
-                Sub Category {renderSortArrow("SubCategory")}
+                Sub Category {getSortIcon("SubCategory")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("QualityCodes")}
               >
-                Quality Codes {renderSortArrow("QualityCodes")}
+                Quality Codes {getSortIcon("QualityCodes")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("CreatedOn")}
               >
-                Created On {renderSortArrow("CreatedOn")}
+                Created On {getSortIcon("CreatedOn")}
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item) => (
-              <tr
-                key={item.SymptomCodeID}
-                className="text-center hover:bg-gray-100"
-              >
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() =>
-                    navigate(`/app/symptom-code/${item.SymptomCodeID}`)
-                  }
-                >
-                  {item.SymptomCodeID}
-                </td>
-                <td className="p-2 border">{item.SymptomCode}</td>
-                <td className="p-2 border">{item.TopCategory}</td>
-                <td className="p-2 border">{item.SubCategory}</td>
-                <td className="p-2 border">{item.QualityCodes || "N/A"}</td>
-                <td className="p-2 border">
-                  {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-                <td className="flex justify-center p-2 space-x-2 border">
-                  <SymptomCodeEdit
-                    SymptomCodeID={item.SymptomCodeID}
-                    onUpdate={fetchSymptomCodeData}
-                  />
-                  <SymptomCodeDelete
-                    SymptomCodeID={item.SymptomCodeID}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchSymptomCodeData}
-                  />
+            {currentData.length > 0 ? (
+              currentData.map((item, i) => (
+                <tr key={item.SymptomCodeID} className={`text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
+                  <td
+                    className="p-3 text-center text-blue-500 border cursor-pointer hover:underline"
+                    onClick={() => navigate(`/app/symptom-code/${item.SymptomCodeID}`)}
+                  >
+                    {item.SymptomCodeID}
+                  </td>
+                  <td className="p-3 border text-center">{item.SymptomCode}</td>
+                  <td className="p-3 border text-center">{item.TopCategory}</td>
+                  <td className="p-3 border text-center">{item.SubCategory}</td>
+                  <td className="p-3 border text-center">{item.QualityCodes || "N/A"}</td>
+                  <td className="p-3 border text-center">
+                    {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
+                  <td className="flex items-center justify-center gap-2 p-3 border">
+                    <SymptomCodeEdit
+                      SymptomCodeID={item.SymptomCodeID}
+                      onUpdate={fetchSymptomCodeData}
+                    />
+                    <SymptomCodeDelete
+                      SymptomCodeID={item.SymptomCodeID}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchSymptomCodeData}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="p-6 text-center text-gray-500">
+                  No entries found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {filteredData.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No entries found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* Bottom controls (Pagination) */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing{" "}
+          <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> symptom codes
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-
 export const BookingsTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [bookingData, setBookingData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
 
   // filters
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -4389,6 +5735,15 @@ export const BookingsTable = () => {
     key: "BookingId",
     direction: "asc",
   });
+
+  // Debounce search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset page on new search
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const fetchBookingData = async () => {
     Swal.fire({
@@ -4435,20 +5790,22 @@ export const BookingsTable = () => {
   }, [bookingData]);
 
   // filter + search
-  const filteredData = bookingData.filter((item) => {
-    const status = item.BookingStatus ?? "";
-    const jeopardy = item.ScheduleJeopardy ? "Yes" : "No";
-    const createdBy = item.createdByUser?.Username ?? "";
+  const filteredData = useMemo(() => {
+    return bookingData.filter((item) => {
+      const status = item.BookingStatus ?? "";
+      const jeopardy = item.ScheduleJeopardy ? "Yes" : "No";
+      const createdBy = item.createdByUser?.Username ?? "";
 
-    const fStatus = !selectedStatus || status === selectedStatus;
-    const fJeopardy = !selectedJeopardy || jeopardy === selectedJeopardy;
-    const fCreated = !selectedCreatedBy || createdBy === selectedCreatedBy;
-    if (!(fStatus && fJeopardy && fCreated)) return false;
+      const fStatus = !selectedStatus || status === selectedStatus;
+      const fJeopardy = !selectedJeopardy || jeopardy === selectedJeopardy;
+      const fCreated = !selectedCreatedBy || createdBy === selectedCreatedBy;
+      if (!(fStatus && fJeopardy && fCreated)) return false;
 
-    // search
-    const haystack = Object.values(item).join(" ").toLowerCase();
-    return haystack.includes(searchTerm.toLowerCase());
-  });
+      // search
+      const haystack = Object.values(item).join(" ").toLowerCase();
+      return haystack.includes(debouncedSearchTerm.toLowerCase());
+    });
+  }, [bookingData, debouncedSearchTerm, selectedStatus, selectedJeopardy, selectedCreatedBy]);
 
   // sorting
   const sortedData = useMemo(() => {
@@ -4510,21 +5867,33 @@ export const BookingsTable = () => {
     });
   };
 
-  const getSortSymbol = (key) => {
-    if (sortConfig.key !== key) return "⇅";
-    return sortConfig.direction === "asc" ? "↑" : "↓";
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key)
+      return <ArrowUpDown size={14} className="inline ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp size={14} className="inline ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown size={14} className="inline ml-1 text-blue-600" />
+    );
+  };
+
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
   };
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Bookings Table</h2>
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">Bookings Table</h2>
 
       {/* Search & Add */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <input
           type="text"
-          placeholder="Search..."
-          className="w-full sm:w-1/3 p-2 border rounded"
+          placeholder="🔍 Search bookings..."
+          className="w-full sm:w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -4534,7 +5903,7 @@ export const BookingsTable = () => {
       {/* Filters */}
       <div className="flex flex-wrap gap-2 mb-4">
         <select
-          className="p-2 border rounded"
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={selectedStatus}
           onChange={(e) => {
             setSelectedStatus(e.target.value);
@@ -4550,7 +5919,7 @@ export const BookingsTable = () => {
         </select>
 
         <select
-          className="p-2 border rounded"
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={selectedJeopardy}
           onChange={(e) => {
             setSelectedJeopardy(e.target.value);
@@ -4566,7 +5935,7 @@ export const BookingsTable = () => {
         </select>
 
         <select
-          className="p-2 border rounded"
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={selectedCreatedBy}
           onChange={(e) => {
             setSelectedCreatedBy(e.target.value);
@@ -4583,7 +5952,7 @@ export const BookingsTable = () => {
 
         <button
           onClick={resetFilters}
-          className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+          className="px-3 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
         >
           Reset Filter
         </button>
@@ -4592,75 +5961,78 @@ export const BookingsTable = () => {
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("BookingId")}>
-                Booking ID {getSortSymbol("BookingId")}
+      {/* Table with fixed header and scrollable body */}
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
+        <table className="min-w-full relative border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-200">
+            <tr className="text-sm text-gray-700 uppercase">
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("BookingId")}>
+                Booking ID {getSortIcon("BookingId")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("WOID")}>
-                WOID {getSortSymbol("WOID")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("WOID")}>
+                WOID {getSortIcon("WOID")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("BookingStatus")}>
-                Status {getSortSymbol("BookingStatus")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("BookingStatus")}>
+                Status {getSortIcon("BookingStatus")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ScheduleJeopardy")}>
-                Schedule Jeopardy {getSortSymbol("ScheduleJeopardy")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ScheduleJeopardy")}>
+                Schedule Jeopardy {getSortIcon("ScheduleJeopardy")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ScheduleJeopardyTime")}>
-                Jeopardy Time {getSortSymbol("ScheduleJeopardyTime")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ScheduleJeopardyTime")}>
+                Jeopardy Time {getSortIcon("ScheduleJeopardyTime")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("DoNotDisturb")}>
-                Do Not Disturb {getSortSymbol("DoNotDisturb")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("DoNotDisturb")}>
+                Do Not Disturb {getSortIcon("DoNotDisturb")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CeScheduleChange")}>
-                CE Schedule Change {getSortSymbol("CeScheduleChange")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("CeScheduleChange")}>
+                CE Schedule Change {getSortIcon("CeScheduleChange")}
               </th>
-              <th className="p-2 border">Durations (min)</th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Username")}>
-                Created By {getSortSymbol("Username")}
+              <th className="p-3 text-center border">Durations (min)</th>
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Username")}>
+                Created By {getSortIcon("Username")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CreatedAt")}>
-                Created At {getSortSymbol("CreatedAt")}
+              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("CreatedAt")}>
+                Created At {getSortIcon("CreatedAt")}
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.length > 0 ? (
-              currentData.map((item) => (
-                <tr key={item.BookingId} className="text-center hover:bg-gray-100">
+              currentData.map((item, i) => (
+                <tr key={item.BookingId} className={`text-center hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
                   <td
-                    className="p-2 text-blue-500 border cursor-pointer hover:underline"
+                    className="p-3 text-blue-500 border cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
                   >
                     {item.BookingId}
                   </td>
-                  <td className="p-2 border">{item.WOID}</td>
-                  <td className="p-2 border">{item.BookingStatus || "-"}</td>
-                  <td className="p-2 border">{item.ScheduleJeopardy ? "Yes" : "No"}</td>
-                  <td className="p-2 border">
+                  <td className="p-3 border text-center">{item.WOID}</td>
+                  <td className="p-3 border text-center">{item.BookingStatus || "-"}</td>
+                  <td className="p-3 border text-center">{item.ScheduleJeopardy ? "Yes" : "No"}</td>
+                  <td className="p-3 border text-center">
                     {item.ScheduleJeopardyTime
                       ? new Date(item.ScheduleJeopardyTime).toLocaleString("id-ID")
                       : "-"}
                   </td>
-                  <td className="p-2 border">{item.DoNotDisturb ? "Yes" : "No"}</td>
-                  <td className="p-2 border">{item.CeScheduleChange ? "Yes" : "No"}</td>
-                  <td className="p-2 border">
+                  <td className="p-3 border text-center">{item.DoNotDisturb ? "Yes" : "No"}</td>
+                  <td className="p-3 border text-center">{item.CeScheduleChange ? "Yes" : "No"}</td>
+                  <td className="p-3 border text-center">
                     Total Billable: {item.TotalBillableDurationInMinutes || 0} <br />
                     Total In Progress: {item.TotalInProgressDurationInMinutes || 0} <br />
                     Total Break: {item.TotalBreakDurationInMinutes || 0}
                   </td>
-                  <td className="p-2 border">{item.createdByUser?.Username || "-"}</td>
-                  <td className="p-2 border">
+                  <td className="p-3 border text-center">{item.createdByUser?.Username || "-"}</td>
+                  <td className="p-3 border text-center">
                     {new Date(item.CreatedAt).toLocaleDateString("id-ID", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
                   </td>
-                  <td className="flex justify-center p-2 space-x-2 border">
+                  <td className="flex justify-center p-3 space-x-2 border">
                     <BookingsEdit BookingId={item.BookingId} onUpdate={fetchBookingData} />
                     <BookingsDelete
                       BookingId={item.BookingId}
@@ -4673,7 +6045,7 @@ export const BookingsTable = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="11" className="p-4 text-center">
+                <td colSpan="11" className="p-6 text-center text-gray-500">
                   No entries found.
                 </td>
               </tr>
@@ -4682,41 +6054,98 @@ export const BookingsTable = () => {
         </table>
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center mt-4 space-x-2">
-          <button
-            className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
           >
-            Previous
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
         </div>
-      )}
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing{" "}
+          <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> bookings
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-
 export const BookingDetailsTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Default 10 per page
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [bookingDetailsData, setBookingDetailsData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
   const navigate = useNavigate();
 
   // filters
@@ -4728,6 +6157,15 @@ export const BookingDetailsTable = () => {
     key: "BookingDetailId",
     direction: "asc",
   });
+
+  // debounce search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const fetchBookingDetails = async () => {
     Swal.fire({
@@ -4782,9 +6220,9 @@ export const BookingDetailsTable = () => {
 
     if (!(fStatus && fChangedBy)) return false;
 
-    // search
+    // search with debounced term
     const haystack = Object.values(item).join(" ").toLowerCase();
-    return haystack.includes(searchTerm.toLowerCase());
+    return haystack.includes(debouncedSearchTerm.toLowerCase());
   });
 
   // sorting
@@ -4810,7 +6248,7 @@ export const BookingDetailsTable = () => {
     return sorted;
   }, [filteredData, sortConfig]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
   const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -4841,16 +6279,23 @@ export const BookingDetailsTable = () => {
     return sortConfig.direction === "asc" ? "↑" : "↓";
   };
 
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
+
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Booking Details Table</h2>
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Booking Details Management</h2>
 
       {/* Search & Add */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
+      <div className="flex flex-wrap items-center gap-4 mb-4">
         <input
           type="text"
-          placeholder="Search..."
-          className="w-full sm:w-1/3 p-2 border rounded"
+          placeholder="🔍 Search..."
+          className="w-full sm:w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -4858,9 +6303,9 @@ export const BookingDetailsTable = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-4 mb-6">
         <select
-          className="p-2 border rounded"
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={selectedStatus}
           onChange={(e) => {
             setSelectedStatus(e.target.value);
@@ -4876,7 +6321,7 @@ export const BookingDetailsTable = () => {
         </select>
 
         <select
-          className="p-2 border rounded"
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={selectedChangedBy}
           onChange={(e) => {
             setSelectedChangedBy(e.target.value);
@@ -4893,7 +6338,7 @@ export const BookingDetailsTable = () => {
 
         <button
           onClick={resetFilters}
-          className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+          className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors"
         >
           Reset Filter
         </button>
@@ -4902,46 +6347,49 @@ export const BookingDetailsTable = () => {
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
-              <th className="border p-2 cursor-pointer" onClick={() => handleSort("BookingDetailId")}>
+      {/* Table Container */}
+      <div className="bg-white rounded-2xl shadow overflow-auto max-h-[600px] relative">
+        <table className="w-full relative border-collapse">
+          <thead className="sticky top-0 bg-gray-100 z-10">
+            <tr className="text-gray-700 uppercase text-sm text-center">
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("BookingDetailId")}>
                 Booking Detail ID {getSortSymbol("BookingDetailId")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => handleSort("BookingId")}>
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("BookingId")}>
                 Booking ID {getSortSymbol("BookingId")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => handleSort("ResourceId")}>
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("ResourceId")}>
                 Resource ID {getSortSymbol("ResourceId")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => handleSort("ResorceAccountId")}>
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("ResorceAccountId")}>
                 Resource Account ID {getSortSymbol("ResorceAccountId")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => handleSort("SubkTechnicianId")}>
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("SubkTechnicianId")}>
                 Subk Technician ID {getSortSymbol("SubkTechnicianId")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => handleSort("Name")}>
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("Name")}>
                 Name {getSortSymbol("Name")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => handleSort("Status")}>
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("Status")}>
                 Status {getSortSymbol("Status")}
               </th>
-              <th className="border p-2">Customer Time</th>
-              <th className="border p-2">User Time</th>
-              <th className="border p-2 cursor-pointer" onClick={() => handleSort("ChangedBy")}>
+              <th className="border p-3">Customer Time</th>
+              <th className="border p-3">User Time</th>
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("ChangedBy")}>
                 Changed By {getSortSymbol("ChangedBy")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => handleSort("ChangedAt")}>
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("ChangedAt")}>
                 Changed At {getSortSymbol("ChangedAt")}
               </th>
-              <th className="border p-2">Actions</th>
+              <th className="border p-3">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentData.length > 0 ? (
-              currentData.map((item) => (
-                <tr key={item.BookingDetailId} className="hover:bg-gray-100 text-center text-sm">
+              currentData.map((item, i) => (
+                <tr key={item.BookingDetailId} className={`hover:bg-gray-100 text-center text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
                   <td
                     className="border p-2 text-blue-500 cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/bookings/${item.BookingDetailId}`)}
@@ -4954,7 +6402,6 @@ export const BookingDetailsTable = () => {
                   <td className="border p-2">{item.SubkTechnicianId}</td>
                   <td className="border p-2">{item.Name}</td>
                   <td className="border p-2">{item.Status}</td>
-
                   <td className="p-2 text-left border">
                     <div>
                       Start:{" "}
@@ -4981,7 +6428,6 @@ export const BookingDetailsTable = () => {
                         : "-"}
                     </div>
                   </td>
-
                   <td className="p-2 text-left border">
                     <div>
                       Start:{" "}
@@ -5009,7 +6455,6 @@ export const BookingDetailsTable = () => {
                         : "-"}
                     </div>
                   </td>
-
                   <td className="p-2 border">{item.ChangedBy}</td>
                   <td className="p-2 border">
                     {new Date(item.ChangedAt).toLocaleDateString("id-ID", {
@@ -5034,8 +6479,8 @@ export const BookingDetailsTable = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="12" className="p-4 text-center">
-                  No entries found.
+                <td colSpan="12" className="p-4 text-center text-gray-500">
+                  No entries found 🚫
                 </td>
               </tr>
             )}
@@ -5043,40 +6488,100 @@ export const BookingDetailsTable = () => {
         </table>
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center mt-4 space-x-2">
-          <button
-            className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
           >
-            Previous
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-2 bg-gray-300 rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
         </div>
-      )}
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> booking details
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
 export const RepairClassCodeTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  // State untuk menunda pencarian (debounce)
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  // Default 10 item per halaman, dapat diubah
+  const [itemsPerPage, setItemsPerPage] = useState(10); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [data, setData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // State untuk input "Go to page"
+  const [goToPageInput, setGoToPageInput] = useState("");
   const navigate = useNavigate();
 
   // 🔹 sort config
@@ -5084,6 +6589,15 @@ export const RepairClassCodeTable = () => {
     key: "Code",
     direction: "asc",
   });
+
+  // Efek untuk menunda (debounce) pencarian selama 500ms
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const fetchData = async () => {
     Swal.fire({
@@ -5117,10 +6631,10 @@ export const RepairClassCodeTable = () => {
     fetchData();
   }, []);
 
-  // 🔹 filter search
+  // 🔹 filter search menggunakan debouncedSearchTerm
   const filteredData = data.filter((item) =>
     Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     )
   );
 
@@ -5166,127 +6680,205 @@ export const RepairClassCodeTable = () => {
   };
 
   const getSortIcon = (key) => {
-    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1" />;
+    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
     return sortConfig.direction === "asc" ? (
-      <ArrowUp className="inline w-4 h-4 ml-1" />
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
     ) : (
-      <ArrowDown className="inline w-4 h-4 ml-1" />
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
     );
+  };
+  
+  // Fungsi untuk menangani "Go to page"
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Repair Class Code Table</h2>
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Repair Class Code Management</h2>
 
-      <input
-        type="text"
-        placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-
-      <RepairClassCodeAdd onUpdate={fetchData} />
-
+      {/* Kontainer untuk Search dan Tombol Add yang sejajar dan sama tinggi */}
+      <div className="flex flex-wrap items-center  gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="🔍 Search codes..."
+          className="w-full sm:w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {/* RepairClassCodeAdd akan sejajar dengan input berkat flexbox */}
+        <RepairClassCodeAdd onUpdate={fetchData} />
+      </div>
+      
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
+      {/* Kontainer tabel dengan gulir dan header tetap */}
+      <div className="bg-white rounded-2xl shadow overflow-auto max-h-[600px] relative">
+        <table className="w-full relative border-collapse">
+          {/* Header tabel dengan sticky class */}
+          <thead className="sticky top-0 bg-gray-100 z-10">
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
+              <th className="p-3 text-sm font-semibold text-center border">No</th>
               <th
-                className="border p-2 cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Code")}
               >
                 Code {getSortIcon("Code")}
               </th>
               <th
-                className="border p-2 cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Description")}
               >
                 Description {getSortIcon("Description")}
               </th>
               <th
-                className="border p-2 cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Definition")}
               >
                 Definition {getSortIcon("Definition")}
               </th>
               <th
-                className="border p-2 cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("PaymentEligibility")}
               >
                 Payment Eligibility {getSortIcon("PaymentEligibility")}
               </th>
               <th
-                className="border p-2 cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("CreatedOn")}
               >
                 Created On {getSortIcon("CreatedOn")}
               </th>
-              <th className="border p-2">Actions</th>
+              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item) => (
-              <tr key={item.Code} className="hover:bg-gray-100 text-center text-sm">
-                <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                  onClick={() => navigate(`/app/repair-class-code/${item.Code}`)}
-                >
-                  {item.Code}
-                </td>
-                <td className="border p-2">{item.Description}</td>
-                <td className="border p-2">{item.Definition}</td>
-                <td className="border p-2">{item.PaymentEligibility}</td>
-                <td className="border p-2">
-                  {item.CreatedOn
-                    ? new Date(item.CreatedOn).toLocaleDateString("id-ID", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : "-"}
-                </td>
-                <td className="border p-2 flex justify-center gap-2">
-                  <RepairClassCodeEdit Code={item.Code} onUpdate={fetchData} />
-                  <RepairClassCodeDelete
-                    Code={item.Code}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchData}
-                  />
+            {currentData.length > 0 ? (
+              currentData.map((item, i) => (
+                <tr key={item.Code} className={`hover:bg-gray-100 text-center text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <td className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + i + 1}
+                  </td>
+                  <td
+                    className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                    onClick={() => navigate(`/app/repair-class-code/${item.Code}`)}
+                  >
+                    {item.Code}
+                  </td>
+                  <td className="border p-2">{item.Description}</td>
+                  <td className="border p-2">{item.Definition}</td>
+                  <td className="border p-2">{item.PaymentEligibility}</td>
+                  <td className="border p-2">
+                    {item.CreatedOn
+                      ? new Date(item.CreatedOn).toLocaleDateString("id-ID", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "-"}
+                  </td>
+                  <td className="border p-2 flex justify-center gap-2">
+                    <RepairClassCodeEdit Code={item.Code} onUpdate={fetchData} />
+                    <RepairClassCodeDelete
+                      Code={item.Code}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchData}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="p-4 text-center text-gray-500">
+                  No entries found 🚫
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-
-        {sortedData.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No entries found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> codes
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -5294,14 +6886,28 @@ export const RepairClassCodeTable = () => {
 
 export const ServiceCatalogTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  // State untuk menunda pencarian (debounce)
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  // Default 10 item per halaman, dapat diubah
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [serviceCatalogData, setServiceCatalogData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // State untuk input "Go to page"
+  const [goToPageInput, setGoToPageInput] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "ServiceCatalogID", direction: "desc" });
   const navigate = useNavigate();
+
+  // Efek untuk menunda (debounce) pencarian selama 500ms
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const fetchServiceCatalog = async () => {
     Swal.fire({
@@ -5335,187 +6941,289 @@ export const ServiceCatalogTable = () => {
     fetchServiceCatalog();
   }, []);
 
-  // fungsi sorting
-  const requestSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
+  // fungsi sorting dengan useMemo untuk performa lebih baik
+  const sortedData = useMemo(() => {
+    const sorted = [...serviceCatalogData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        const aVal = a[sortConfig.key] ?? "";
+        const bVal = b[sortConfig.key] ?? "";
+
+        if (!isNaN(parseFloat(aVal)) && !isNaN(parseFloat(bVal))) {
+          const numA = parseFloat(aVal);
+          const numB = parseFloat(bVal);
+          return sortConfig.direction === "asc" ? numA - numB : numB - numA;
+        }
+
+        const strA = aVal.toString().toLowerCase();
+        const strB = bVal.toString().toLowerCase();
+
+        if (strA < strB) return sortConfig.direction === "asc" ? -1 : 1;
+        if (strA > strB) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
     }
-    setSortConfig({ key, direction });
-  };
+    return sorted;
+  }, [serviceCatalogData, sortConfig]);
 
-  const sortedData = [...serviceCatalogData].sort((a, b) => {
-    if (!sortConfig.key) return 0;
-    const aVal = a[sortConfig.key] ?? "";
-    const bVal = b[sortConfig.key] ?? "";
-
-    if (!isNaN(aVal) && !isNaN(bVal)) {
-      return sortConfig.direction === "asc"
-        ? parseFloat(aVal) - parseFloat(bVal)
-        : parseFloat(bVal) - parseFloat(aVal);
-    }
-
-    return sortConfig.direction === "asc"
-      ? aVal.toString().localeCompare(bVal.toString())
-      : bVal.toString().localeCompare(aVal.toString());
-  });
-
+  // filter search menggunakan debouncedSearchTerm
   const filteredData = sortedData.filter((item) =>
     Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     )
   );
-
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
   const currentData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+  const requestSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+  };
+
   const renderSortIcon = (key) => {
-    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1" />;
+    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
     return sortConfig.direction === "asc" ? (
-      <ArrowUp className="inline w-4 h-4 ml-1" />
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
     ) : (
-      <ArrowDown className="inline w-4 h-4 ml-1" />
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
     );
   };
 
-  return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Service Catalog Table</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="mb-4 p-2 border rounded w-1/3"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+  // Fungsi untuk menangani "Go to page"
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
 
-      {/* Add Component */}
-      <ServiceCatalogAdd onUpdate={fetchServiceCatalog} />
+  return (
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Service Catalog Table</h2>
+
+      {/* Kontainer untuk Search dan Tombol Add yang sejajar dan sama tinggi */}
+      <div className="flex flex-wrap items-center gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="🔍 Search..."
+          className="w-full sm:w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {/* ServiceCatalogAdd akan sejajar dengan input berkat flexbox */}
+        <ServiceCatalogAdd onUpdate={fetchServiceCatalog} />
+      </div>
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
+      {/* Kontainer tabel dengan gulir dan header tetap */}
+      <div className="bg-white rounded-2xl shadow overflow-auto max-h-[600px] relative">
+        <table className="w-full relative border-collapse">
+          {/* Header tabel dengan sticky class */}
+          <thead className="sticky top-0 bg-gray-100 z-10">
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
-              <th className="border p-2 cursor-pointer" onClick={() => requestSort("ServiceCatalogID")}>
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("ServiceCatalogID")}>
                 Service Catalog ID {renderSortIcon("ServiceCatalogID")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => requestSort("AssetID")}>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("AssetID")}>
                 Asset ID {renderSortIcon("AssetID")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => requestSort("Service_offerID")}>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Service_offerID")}>
                 Service Offer ID {renderSortIcon("Service_offerID")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => requestSort("PartNumber")}>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("PartNumber")}>
                 Part Number {renderSortIcon("PartNumber")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => requestSort("WarrantyStatus")}>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("WarrantyStatus")}>
                 Warranty Status {renderSortIcon("WarrantyStatus")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => requestSort("Currency")}>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Currency")}>
                 Currency {renderSortIcon("Currency")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => requestSort("Price")}>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Price")}>
                 Price {renderSortIcon("Price")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => requestSort("Tax")}>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Tax")}>
                 Tax {renderSortIcon("Tax")}
               </th>
-              <th className="border p-2 cursor-pointer" onClick={() => requestSort("Total")}>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Total")}>
                 Total {renderSortIcon("Total")}
               </th>
-              <th className="border p-2">Actions</th>
+              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item) => (
-              <tr key={item.ServiceCatalogID} className="hover:bg-gray-100 text-center text-sm">
-                <td
-                  className="border p-2 text-blue-500 cursor-pointer hover:underline"
-                  onClick={() => navigate(`/app/service-log/${item.ServiceCatalogID}`)}
-                >
-                  {item.ServiceCatalogID}
-                </td>
-                <td className="border p-2">{item.AssetID}</td>
-                <td className="border p-2">{item.Service_offerID}</td>
-                <td className="border p-2">{item.PartNumber || "-"}</td>
-                <td className="border p-2">{item.WarrantyStatus || "-"}</td>
-                <td className="border p-2">{item.Currency || "-"}</td>
-                <td className="border p-2">
-                  {item.Price ? parseFloat(item.Price).toFixed(2) : "-"}
-                </td>
-                <td className="border p-2">
-                  {item.Tax ? parseFloat(item.Tax).toFixed(2) : "-"}
-                </td>
-                <td className="border p-2">
-                  {item.Total ? parseFloat(item.Total).toFixed(2) : "-"}
-                </td>
-                <td className="border p-2 flex justify-center gap-2">
-                  <ServiceCatalogEdit
-                    ServiceCatalogID={item.ServiceCatalogID}
-                    onUpdate={fetchServiceCatalog}
-                  />
-                  <ServiceCatalogDelete
-                    ServiceCatalogID={item.ServiceCatalogID}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchServiceCatalog}
-                  />
+            {currentData.length > 0 ? (
+              currentData.map((item, i) => (
+                <tr key={item.ServiceCatalogID} className={`hover:bg-gray-100 text-center text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <td className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + i + 1}
+                  </td>
+                  <td
+                    className="border p-2 text-blue-500 cursor-pointer hover:underline"
+                    onClick={() => navigate(`/app/service-log/${item.ServiceCatalogID}`)}
+                  >
+                    {item.ServiceCatalogID}
+                  </td>
+                  <td className="border p-2">{item.AssetID}</td>
+                  <td className="border p-2">{item.Service_offerID}</td>
+                  <td className="border p-2">{item.PartNumber || "-"}</td>
+                  <td className="border p-2">{item.WarrantyStatus || "-"}</td>
+                  <td className="border p-2">{item.Currency || "-"}</td>
+                  <td className="border p-2">
+                    {item.Price ? parseFloat(item.Price).toFixed(2) : "-"}
+                  </td>
+                  <td className="border p-2">
+                    {item.Tax ? parseFloat(item.Tax).toFixed(2) : "-"}
+                  </td>
+                  <td className="border p-2">
+                    {item.Total ? parseFloat(item.Total).toFixed(2) : "-"}
+                  </td>
+                  <td className="border p-2 flex justify-center gap-2">
+                    <ServiceCatalogEdit
+                      ServiceCatalogID={item.ServiceCatalogID}
+                      onUpdate={fetchServiceCatalog}
+                    />
+                    <ServiceCatalogDelete
+                      ServiceCatalogID={item.ServiceCatalogID}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchServiceCatalog}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="11" className="p-4 text-center text-gray-500">
+                  No entries found 🚫
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-
-        {filteredData.length === 0 && (
-          <p className="text-center mt-4 text-gray-500">No entries found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === filteredData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(filteredData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, filteredData.length)}</b> of{" "}
+          <b>{filteredData.length}</b> entries
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-
 export const OTCCodeTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  // State untuk menunda pencarian (debounce)
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  // Default 10 item per halaman, dapat diubah
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [otcCodeData, setOTCCodeData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // State untuk input "Go to page"
+  const [goToPageInput, setGoToPageInput] = useState("");
+  const navigate = useNavigate();
 
   // state sorting
   const [sortConfig, setSortConfig] = useState({
     key: "OTCCode",
     direction: "asc",
   });
+
+  // Efek untuk menunda (debounce) pencarian selama 500ms
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const fetchOTCCode = async () => {
     Swal.fire({
@@ -5549,43 +7257,49 @@ export const OTCCodeTable = () => {
     fetchOTCCode();
   }, []);
 
-  // handle sorting
+  // handle sorting dengan useMemo untuk performa lebih baik
   const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
   };
 
   // filter & sort
-  const filteredData = otcCodeData.filter((item) =>
-    Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  const filteredData = useMemo(() => {
+    return otcCodeData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    );
+  }, [otcCodeData, debouncedSearchTerm]);
 
-  const sortedData = [...filteredData].sort((a, b) => {
-    if (!sortConfig.key) return 0;
-    const aValue = a[sortConfig.key];
-    const bValue = b[sortConfig.key];
-
-    if (aValue < bValue) {
-      return sortConfig.direction === "asc" ? -1 : 1;
+  const sortedData = useMemo(() => {
+    const sorted = [...filteredData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        const aValue = a[sortConfig.key] ?? "";
+        const bValue = b[sortConfig.key] ?? "";
+        
+        if (aValue < bValue) {
+          return sortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
     }
-    if (aValue > bValue) {
-      return sortConfig.direction === "asc" ? 1 : -1;
-    }
-    return 0;
-  });
+    return sorted;
+  }, [filteredData, sortConfig]);
 
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
   const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  const navigate = useNavigate();
 
   // function ambil icon sort
   const getSortIcon = (key) => {
@@ -5597,105 +7311,175 @@ export const OTCCodeTable = () => {
     );
   };
 
+  // Fungsi untuk menangani "Go to page"
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
+
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">OTC Codes Table</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <OTCAdd onUpdate={fetchOTCCode} />
+    <div className="p-6">
+      <h2 className="text-xl font-bold mb-4">📊 OTC Codes Table</h2>
+
+      {/* Kontainer untuk Search dan Tombol Add yang sejajar dan sama tinggi */}
+      <div className="flex flex-wrap items-center gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="🔍 Search..."
+          className="w-full sm:w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {/* OTCAdd akan sejajar dengan input berkat flexbox */}
+        <OTCAdd onUpdate={fetchOTCCode} />
+      </div>
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
+      {/* Kontainer tabel dengan gulir dan header tetap */}
+      <div className="bg-white rounded-2xl shadow overflow-auto max-h-[600px] relative">
+        <table className="w-full relative border-collapse">
+          {/* Header tabel dengan sticky class */}
+          <thead className="sticky top-0 bg-gray-100 z-10">
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th
-                className="p-2 border cursor-pointer"
-                onClick={() => handleSort("OTCCode")}
-              >
+              <th className="p-3 text-sm font-semibold text-center border">No</th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("OTCCode")}>
                 <div className="flex items-center justify-center gap-1">
                   OTC Code {getSortIcon("OTCCode")}
                 </div>
               </th>
-              <th
-                className="p-2 border cursor-pointer"
-                onClick={() => handleSort("Description")}
-              >
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Description")}>
                 <div className="flex items-center justify-center gap-1">
                   Description {getSortIcon("Description")}
                 </div>
               </th>
-              <th
-                className="p-2 border cursor-pointer"
-                onClick={() => handleSort("CreatedOn")}
-              >
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("CreatedOn")}>
                 <div className="flex items-center justify-center gap-1">
                   Created At {getSortIcon("CreatedOn")}
                 </div>
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item) => (
-              <tr key={item.OTCCode} className="hover:bg-gray-100 text-center">
-                <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
-                  {item.OTCCode}
-                </td>
-                <td className="p-2 border">{item.Description}</td>
-                <td className="p-2 border">
-                  {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-                <td className="border p-2 flex space-x-2 justify-center">
-                  <OTCEdit OTCCode={item.OTCCode} onUpdate={fetchOTCCode} />
-                  <OTCDelete
-                    OTCCode={item.OTCCode}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchOTCCode}
-                  />
+            {currentData.length > 0 ? (
+              currentData.map((item, i) => (
+                <tr key={item.OTCCode} className={`hover:bg-gray-100 text-center text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <td className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + i + 1}
+                  </td>
+                  <td className="p-3 text-blue-500 border cursor-pointer hover:underline">
+                    {item.OTCCode}
+                  </td>
+                  <td className="p-3 border">{item.Description}</td>
+                  <td className="p-3 border">
+                    {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
+                  <td className="border p-2 flex space-x-2 justify-center">
+                    <OTCEdit OTCCode={item.OTCCode} onUpdate={fetchOTCCode} />
+                    <OTCDelete
+                      OTCCode={item.OTCCode}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchOTCCode}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="p-4 text-center text-gray-500">
+                  No entries found 🚫
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {filteredData.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No entries found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> entries
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -5704,16 +7488,17 @@ export const OTCCodeTable = () => {
 export const CrsTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Menambahkan itemsPerPage
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [CrsData, setCrsData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState(""); // Menambahkan goToPageInput
 
   // state sorting
   const [sortConfig, setSortConfig] = useState({
-    key: "caseResolutionCode", // default sort field
-    direction: "asc",          // default asc
+    key: "caseResolutionCode",
+    direction: "asc",
   });
 
   const fetchCrs = async () => {
@@ -5748,37 +7533,54 @@ export const CrsTable = () => {
     fetchCrs();
   }, []);
 
-  // sorting function
-  const sortedData = [...CrsData].sort((a, b) => {
-    if (!sortConfig.key) return 0;
-    const aVal = a[sortConfig.key];
-    const bVal = b[sortConfig.key];
+  // Sorting function
+  const sortedData = useMemo(() => {
+    const sorted = [...CrsData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
+        
+        // Handle null/undefined values
+        if (aVal == null) aVal = "";
+        if (bVal == null) bVal = "";
 
-    if (aVal == null) return 1;
-    if (bVal == null) return -1;
+        // Tipe data date
+        const aIsDate = !isNaN(Date.parse(aVal));
+        const bIsDate = !isNaN(Date.parse(bVal));
 
-    if (typeof aVal === "string") {
-      return sortConfig.direction === "asc"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    } else if (aVal instanceof Date || !isNaN(Date.parse(aVal))) {
-      return sortConfig.direction === "asc"
-        ? new Date(aVal) - new Date(bVal)
-        : new Date(bVal) - new Date(aVal);
-    } else {
-      return sortConfig.direction === "asc"
-        ? aVal - bVal
-        : bVal - aVal;
+        if (aIsDate && bIsDate) {
+          const dateA = new Date(aVal);
+          const dateB = new Date(bVal);
+          return sortConfig.direction === "asc"
+            ? dateA.getTime() - dateB.getTime()
+            : dateB.getTime() - dateA.getTime();
+        }
+
+        // Tipe data string
+        if (typeof aVal === "string") {
+            const result = aVal.localeCompare(bVal);
+            return sortConfig.direction === "asc" ? result : -result;
+        }
+
+        // Tipe data angka
+        const result = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+        return sortConfig.direction === "asc" ? result : -result;
+      });
     }
-  });
+    return sorted;
+  }, [CrsData, sortConfig]);
 
-  const filteredData = sortedData.filter((item) =>
-    Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  // Filtering function
+  const filteredData = useMemo(() => {
+    return sortedData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [sortedData, searchTerm]);
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
   const currentData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -5797,9 +7599,18 @@ export const CrsTable = () => {
 
   // render icon sort
   const renderSortIcon = (key) => {
-    if (sortConfig.key !== key) return <ArrowUpDown size={16} />;
-    if (sortConfig.direction === "asc") return <ArrowUp size={16} />;
-    return <ArrowDown size={16} />;
+    if (sortConfig.key !== key)
+      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    if (sortConfig.direction === "asc")
+      return <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />;
+    return <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />;
+  };
+
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
   };
 
   return (
@@ -5810,7 +7621,10 @@ export const CrsTable = () => {
         placeholder="Search..."
         className="w-1/3 p-2 mb-4 border rounded"
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // Reset halaman ke 1 saat mencari
+        }}
       />
 
       <CrsAdd />
@@ -5818,10 +7632,12 @@ export const CrsTable = () => {
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+      {/* Kontainer untuk tabel yang bisa digulir */}
+      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-300">
+        <table className="min-w-full border border-gray-300 border-collapse">
+          <thead className="sticky z-10 top-0 bg-gray-200">
+            <tr className="text-sm text-gray-700 uppercase">
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("id_csr")}>
                 <div className="flex items-center justify-center gap-1">
                   ID Csr {renderSortIcon("id_csr")}
@@ -5866,64 +7682,120 @@ export const CrsTable = () => {
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item) => (
-              <tr key={item.id_csr} className="text-center hover:bg-gray-100">
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
-                  onClick={() => navigate(`/app/case-resolution/${item.id_csr}`)}
-                >
-                  {item.id_csr}
-                </td>
-                <td className="p-2 text-blue-500 border">{item.caseResolutionCode}</td>
-                <td className="p-2 border">{item.autoClose}</td>
-                <td className="p-2 border">{item.caseReadyForClosure}</td>
-                <td className="p-2 border">{item.readyForCloseDays}</td>
-                <td className="p-2 border">
-                  {new Date(item.readyForClosureDate).toLocaleDateString("id-ID")}
-                </td>
-                <td className="p-2 border">
-                  {new Date(item.pendingCustomerAction).toLocaleDateString("id-ID")}
-                </td>
-                <td className="p-2 border">
-                  {new Date(item.customerRequestedCloseDate).toLocaleDateString("id-ID")}
-                </td>
-                <td className="border p-2 flex space-x-2 justify-center">
-                  <CrsEdit id_csr={item.id_csr} onUpdate={fetchCrs} />
-                  <CrsDelete
-                    id_csr={item.id_csr}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchCrs}
-                  />
+            {currentData.length > 0 ? (
+              currentData.map((item, i) => (
+                <tr key={item.id_csr} className={`text-center hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
+                  <td
+                    className="p-2 text-blue-500 border cursor-pointer hover:underline"
+                    onClick={() => navigate(`/app/case-resolution/${item.id_csr}`)}
+                  >
+                    {item.id_csr}
+                  </td>
+                  <td className="p-2 text-blue-500 border">{item.caseResolutionCode}</td>
+                  <td className="p-2 border">{item.autoClose}</td>
+                  <td className="p-2 border">{item.caseReadyForClosure}</td>
+                  <td className="p-2 border">{item.readyForCloseDays}</td>
+                  <td className="p-2 border">
+                    {item.readyForClosureDate ? new Date(item.readyForClosureDate).toLocaleDateString("id-ID") : "-"}
+                  </td>
+                  <td className="p-2 border">
+                    {item.pendingCustomerAction ? new Date(item.pendingCustomerAction).toLocaleDateString("id-ID") : "-"}
+                  </td>
+                  <td className="p-2 border">
+                    {item.customerRequestedCloseDate ? new Date(item.customerRequestedCloseDate).toLocaleDateString("id-ID") : "-"}
+                  </td>
+                  <td className="border p-2 flex space-x-2 justify-center">
+                    <CrsEdit id_csr={item.id_csr} onUpdate={fetchCrs} />
+                    <CrsDelete
+                      id_csr={item.id_csr}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchCrs}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="9" className="p-4 text-center text-gray-500">
+                  No entries found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {filteredData.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No entries found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* Pagination dan Rows per page */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, filteredData.length)}</b> of{" "}
+          <b>{filteredData.length}</b> entries
+        </div>
+
+        {/* Tombol Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -5932,23 +7804,22 @@ export const CrsTable = () => {
 export const FailureTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Mengubah default itemsPerPage menjadi 10
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [FailureData, setFailureData] = useState([]);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState(""); // Menambahkan state untuk "Go to page"
 
   // 🔹 State untuk sorting
   const [sortConfig, setSortConfig] = useState({
-    key: "FailureId", // default sort di FailureId
+    key: "FailureId",
     direction: "asc",
   });
 
   const fetchFailureDataTable = async () => {
     setLoading(true);
     setError(null);
-
     Swal.fire({
       title: "Memuat Data Failure...",
       text: "Mohon tunggu sebentar",
@@ -5958,34 +7829,19 @@ export const FailureTable = () => {
         Swal.showLoading();
       },
     });
-
     try {
       const response = await ApiCustomer.get("/api/failure");
       if (response.data.success) {
         setFailureData(response.data.data);
-        Swal.close();
       } else {
         setError("Failed to fetch Failure data");
-        Swal.close();
-        Swal.fire({
-          title: "Error!",
-          text: "Gagal mengambil data Failure.",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
       }
     } catch (err) {
       console.error("Error fetching Failure data:", err);
       setError("Error fetching data");
-      Swal.close();
-      Swal.fire({
-        title: "Error!",
-        text: "Gagal mengambil data Failure.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
     } finally {
       setLoading(false);
+      Swal.close();
     }
   };
 
@@ -6006,25 +7862,31 @@ export const FailureTable = () => {
     });
   };
 
-  // 🔹 Filter dan Sorting data
-  const filteredFailureTable = FailureData.filter((item) =>
-    Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  ).sort((a, b) => {
-    if (!sortConfig.key) return 0;
-    const valueA = a[sortConfig.key] ?? "";
-    const valueB = b[sortConfig.key] ?? "";
-    if (valueA < valueB) return sortConfig.direction === "asc" ? -1 : 1;
-    if (valueA > valueB) return sortConfig.direction === "asc" ? 1 : -1;
-    return 0;
-  });
+  // 🔹 Menggunakan useMemo untuk sorting dan filtering
+  const sortedAndFilteredData = useMemo(() => {
+    const filtered = FailureData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    const sorted = [...filtered].sort((a, b) => {
+      if (!sortConfig.key) return 0;
+      const valueA = a[sortConfig.key] ?? "";
+      const valueB = b[sortConfig.key] ?? "";
+      if (valueA < valueB) return sortConfig.direction === "asc" ? -1 : 1;
+      if (valueA > valueB) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  }, [FailureData, searchTerm, sortConfig]);
 
   // Hitung total halaman
-  const totalPages = Math.ceil(filteredFailureTable.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedAndFilteredData.length / itemsPerPage) || 1;
 
   // Ambil data sesuai halaman saat ini
-  const currentData = filteredFailureTable.slice(
+  const currentData = sortedAndFilteredData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -6033,107 +7895,186 @@ export const FailureTable = () => {
 
   // 🔹 Ikon sort dinamis
   const renderSortIcon = (key) => {
-    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1" />;
+    if (sortConfig.key !== key)
+      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
     return sortConfig.direction === "asc" ? (
-      <ArrowUp className="inline w-4 h-4 ml-1" />
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
     ) : (
-      <ArrowDown className="inline w-4 h-4 ml-1" />
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
     );
   };
 
+  // 🔹 Fungsi untuk "Go to page"
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
+
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-xl font-bold">Failure Table</h2>
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">Failure Management</h2>
       <input
         type="text"
-        placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
+        placeholder="🔍 Search failures..."
+        className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 mb-4 w-full md:w-1/3"
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setCurrentPage(1);
+        }}
       />
 
       <FailureAdd />
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="mb-4 text-red-500">{error}</p>}
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+      {/* Kontainer untuk tabel yang bisa digulir */}
+      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-300">
+        <table className="w-full relative border-collapse">
+          <thead className="sticky z-10 top-0 bg-gray-100">
+            <tr>
+              <th className="p-3 text-sm font-semibold text-center border">No</th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("FailureId")}
               >
                 Failure ID {renderSortIcon("FailureId")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Name")}
               >
                 Name {renderSortIcon("Name")}
               </th>
               <th
-                className="p-2 border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Description")}
               >
                 Description {renderSortIcon("Description")}
               </th>
-              <th className="p-2 border">Actions</th>
+              <th className="p-3 text-sm font-semibold text-center border">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((FailureItem) => (
-              <tr
-                key={FailureItem.FailureId}
-                className="text-center hover:bg-gray-100"
-              >
-                <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
-                  {FailureItem.FailureId}
-                </td>
-                <td className="p-2 border">{FailureItem.Name}</td>
-                <td className="p-2 border">{FailureItem.Description}</td>
-                <td className="flex p-2 space-x-2 border">
-                  <FailureEdit
-                    FailureId={FailureItem.FailureId}
-                    onUpdate={fetchFailureDataTable}
-                  />
-                  <FailureDelete
-                    FailureId={FailureItem.FailureId}
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
-                    onUpdate={fetchFailureDataTable}
-                  />
+            {currentData.length > 0 ? (
+              currentData.map((FailureItem, i) => (
+                <tr
+                  key={FailureItem.FailureId}
+                  className={`hover:bg-blue-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+                >
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
+                  <td
+                    className="p-3 text-blue-500 text-center border cursor-pointer hover:underline"
+                    onClick={() => navigate(`/app/failure/${FailureItem.FailureId}`)}
+                  >
+                    {FailureItem.FailureId}
+                  </td>
+                  <td className="p-3 border">{FailureItem.Name}</td>
+                  <td className="p-3 border">{FailureItem.Description}</td>
+                  <td className="flex p-3 space-x-2 justify-center border">
+                    <FailureEdit
+                      FailureId={FailureItem.FailureId}
+                      onUpdate={fetchFailureDataTable}
+                    />
+                    <FailureDelete
+                      FailureId={FailureItem.FailureId}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchFailureDataTable}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="p-6 text-center text-gray-500">
+                  No data found 🚫
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        {filteredFailureTable.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No data found.</p>
-        )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-center mt-4 space-x-2">
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="p-2 bg-gray-300 rounded disabled:opacity-50"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      {/* Kontrol di bagian bawah tabel */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedAndFilteredData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedAndFilteredData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedAndFilteredData.length)}</b> of{" "}
+          <b>{sortedAndFilteredData.length}</b> entries
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
