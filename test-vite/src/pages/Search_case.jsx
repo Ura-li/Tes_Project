@@ -721,7 +721,7 @@ const Search_case = () => {
       
       const res = await ApiCustomer.post("/api/case-information", newCase);
       const caseid = res.data.data.CaseID 
-      const updateLog = await ApiCustomer.post("/api/actionlog",{
+      await ApiCustomer.post("/api/actionlog",{
         CaseId: `${caseid}`,
         ReferenceId: `${caseid}`,
         model: "Case",

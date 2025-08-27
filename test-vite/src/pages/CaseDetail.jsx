@@ -579,20 +579,24 @@ const spanMap = {
   6: "col-span-6",
 };
 
-export const CaseField = ({ label, children, lock, open,span = 1, className, star, }) => (
+export const CaseField = ({ label, children, lock, open,span = 1, className, star, hide }) => {
+  if (hide) return null;
+
+  return (
   <>
     <CardTitle
       className={twMerge(
         `relative font-medium flex items-center gap-2`,
         lock ? "pl-6" : "", open ? "pl-6" : "",
         className
+
       )}
     >
       {lock && (
         <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
       )}
       {open && (
-        <LockOpen className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground"/>
+        <LockOpen className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
       )}
       {label}
       {star ? <span className="text-red-400">*</span> : ""}
@@ -602,7 +606,10 @@ export const CaseField = ({ label, children, lock, open,span = 1, className, sta
       {children}
     </CardTitle>
   </>
-);
+  )
+
+
+};
 
 // export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
 //   const navigate = useNavigate();
@@ -1781,7 +1788,7 @@ const [endDate, setEndDate] = useState(null);
                     />
 
                 </CaseField>
-                  <CaseField label="Assign To" className={"mt-2"} open span={2} >
+                <CaseField label="Assign To" className={"mt-2"} open span={2} hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}>
                     <SearchCommandBlock
                       value={caseForm?.Owner}
                       onChange={(selectedID) => {
