@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Plus, Trash2, Image as ImageIcon, Search } from "lucide-react";
 import { format } from "date-fns";
+import { SelectBar } from "@/components/sc-select";
 
 
 // ----------------------------
@@ -245,15 +246,37 @@ export default function NewCaseForm() {
 
   /** @type {[ContactInfo|null, (val: ContactInfo|null) => void]} */
   const [selectedContact, setSelectedContact] = useState(null);
+  const [contactSalutation, setContactSalutation] = useState("");
+  const [contactFirstName, setContactFirstName] = useState("");
+  const [contactLastName, setContactLastName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactMobile, setContactMobile] = useState("");
+  const [contactAddressLine1, setContactAddressLine1] = useState("");
+  const [contactCity, setContactCity] = useState("");
+  const [contactCountry, setContactCountry] = useState("");
+  const [contactStateProvince, setContactStateProvince] = useState("");
+  const [contactZipPostalCode, setContactZipPostalCode] = useState("");
 
   /** @type {[SiteAccount|null, (val: SiteAccount|null) => void]} */
   const [selectedCompany, setSelectedCompany] = useState(null);
+  const [companyName, setCompanyName] = useState("");
+  const [companyEmail, setCompanyEmail] = useState("");
+  const [companyPhone, setCompanyPhone] = useState("");
+  const [companyWhatsapp, setCompanyWhatsapp] = useState("");
+  const [companyAddressLine1, setCompanyAddressLine1] = useState("");
+  const [companyCity, setCompanyCity] = useState("");
+  const [companyStateProvince, setCompanyStateProvince] = useState("");
+  const [companyCountry, setCompanyCountry] = useState("");
+  const [companyZipPostalCode, setCompanyZipPostalCode] = useState("");
 
   // Product fields
   const [productQuery, setProductQuery] = useState("");
 
   /** @type {[ProductInfo[], (val: ProductInfo[]) => void]} */
   const [productResults, setProductResults] = useState([]);
+
+  const [productTypeList, setProductTypeList] = useState([]);
 
   /** @type {[ProductInfo|null, (val: ProductInfo|null) => void]} */
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -264,6 +287,10 @@ export default function NewCaseForm() {
   const [productNo, setProductNo] = useState("");
   const [productName, setProductName] = useState("");
   const [vendor, setVendor] = useState("");
+
+  const [isNewProduct, setIsNewProduct] = useState(false);
+  const [isNewAsset, setIsNewAsset] = useState(false);
+
   
   // Warranty
   const [warrantyStatus, setWarrantyStatus] = useState("");
@@ -301,7 +328,7 @@ export default function NewCaseForm() {
         }
         try {
           const res = await ApiCustomer.get(`/api/asset-information`, {
-            params: { serial: q },
+            params: { search: q },
           });
           const list = res.data?.data || [];
           setAssetResults(list);
@@ -329,8 +356,8 @@ export default function NewCaseForm() {
         try {
           // Try both contact & company search
           const [contacts, companies] = await Promise.all([
-            ApiCustomer.get(`/api/contact-information`, { params: { q } }),
-            ApiCustomer.get(`/api/site_account`, { params: { q } }),
+            ApiCustomer.get(`/api/contact-information`, { params: { search: q } }),
+            ApiCustomer.get(`/api/site_account`, { params: { search: q } }),
           ]);
           setContactResults(contacts.data?.data || []);
           setCompanyResults(companies.data?.data || []);
@@ -356,7 +383,7 @@ export default function NewCaseForm() {
         }
         try {
           const res = await ApiCustomer.get(`/api/product-information`, {
-            params: { q },
+            params: { search: q },
           });
           const list = res.data?.data || [];
           setProductResults(list);
@@ -368,9 +395,70 @@ export default function NewCaseForm() {
     []
   );
 
+  /**
+   * Search products type.
+   * @param {string} q
+   */
+
+  // List ProductType untuk dropdown
+  const [productTypes, setProductTypes] = useState([]);
+
+  // Fetch product types when tower/group changes
+  useEffect(() => {
+    if (productTower && productGroup) {
+      fetchProductTypes(productTower, productGroup);
+    } else {
+      setProductTypeList([]);
+    }
+  }, [productTower, productGroup]);
+
+  // Fetch product types from API
+  const fetchProductTypes = async (tower, group) => {
+    try {
+      const response = await ApiCustomer.get(`/api/product-type`, {
+        params: { ProductTower: tower, ProductGroup: group },
+      });
+      console.log("Product Type List : ",response);
+      setProductTypeList(response.data.data || []);
+    } catch (err) {
+      setProductTypeList([]);
+    }
+  };
+
   // ----------------------------
   // Effects
   // ----------------------------
+
+
+  // Auto-fill company when company field selected
+  useEffect(() => {
+    if(selectedCompany?.Company){
+      const cm = selectedCompany;
+      setCompanyName(cm.Company);
+      setCompanyEmail(cm.Email);
+      setCompanyPhone(cm.PrimaryPhone);
+      setCompanyWhatsapp(cm.WhatsappNo);
+      setCompanyAddressLine1(cm.AddressLine1);
+      setCompanyCity(cm.City);
+      setCompanyStateProvince(cm.StateProvince);
+      setCompanyCountry(cm.Country);
+      setCompanyZipPostalCode(cm.ZipPostalCode);
+    }
+  },[selectedCompany])
+
+  // Auto-fill Contact when Company field selected 
+  useEffect(() =>{
+    (async () => {
+      if (!selectedCompany) return;
+      try {
+        const resContactAffiliated = await ApiCustomer.get(`/api/contact-information?SiteAccountID=${selectedCompany.SiteAccountID}`);
+        const listContactAffiliated = resContactAffiliated.data.data || []
+        setContactResults(listContactAffiliated); 
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  },[selectedCompany])
 
   // Auto-fill product when asset selected
   useEffect(() => {
@@ -389,22 +477,23 @@ export default function NewCaseForm() {
   // Auto-fill customer when asset selected (if asset has owner)
   useEffect(() => {
     (async () => {
+      if (!selectedAsset) return;
       if (selectedAsset?.ContactID) {
         try {
           const [cRes] = await Promise.all([
-            ApiCustomer.get(`/api/contact-information`, {
-              params: { id: selectedAsset.ContactID },
-            }),
+            ApiCustomer.get(`/api/contact-information/${selectedAsset.ContactID}`),
           ]);
-          const c = cRes.data?.data?.[0];
+          const c = cRes.data?.data;
           if (c) {
             setSelectedContact(c);
             if (c.SiteAccountID) {
-              const sa = await ApiCustomer.get(`/api/site_account`, {
-                params: { id: c.SiteAccountID },
-              });
-              const comp = sa.data?.data?.[0];
+              setShowCompanySection(true);
+              const sa = await ApiCustomer.get(`/api/site_account/${c.SiteAccountID}`);
+              const comp = sa.data?.data;
+              
               if (comp) setSelectedCompany(comp);
+            }else{
+              setSelectedCompany([]);
             }
           }
         } catch (e) {
@@ -436,6 +525,62 @@ export default function NewCaseForm() {
       }
     })();
   }, [selectedAsset]);
+  
+
+  // Auto-fill customer when customer field selected
+  useEffect(() =>{
+    if(selectedContact?.ContactID){
+      const ct = selectedContact;
+      setContactSalutation(ct.Salutation);
+      setContactFirstName(ct.FirstName);
+      setContactLastName(ct.LastName);
+      setContactEmail(ct.Email);
+      setContactPhone(ct.Phone);
+      setContactMobile(ct.Mobile);
+      setContactAddressLine1(ct.AddressLine1);
+      setContactCity(ct.City);
+      setContactCountry(ct.Country);
+      setContactStateProvince(ct.StateProvince);
+      setContactZipPostalCode(ct.ZipPostalCode);
+    }
+  },[selectedContact])
+
+
+  // Auto-fill Company when contact selected (if any)
+  useEffect(() => {
+    (async () => {
+      if (!selectedContact) return;
+      try { 
+        if (selectedContact?.SiteAccountID) {
+          setShowCompanySection(true);
+          const sa = await ApiCustomer.get(`/api/site_account/${selectedContact.SiteAccountID}`);
+          const comp = sa.data?.data;
+          
+          if (comp) setSelectedCompany(comp);
+        }else{
+          setSelectedCompany([]);
+        }  
+      } catch (err) {
+        console.error(err);
+        
+      }
+    })();
+  }, [selectedContact])
+
+  // Auto-fill product when contact selected (asset owned by contact)
+  useEffect(() => {
+    (async () => {
+      if (!selectedContact) return;
+      try {
+        const checkAssetAffiliatedContact = await ApiCustomer.get(`/api/asset-information?ContactID=${selectedContact.ContactID}`)
+        const listAffiliatedAsset = checkAssetAffiliatedContact.data.data || [];
+        console.log(selectedContact, listAffiliatedAsset)
+        setAssetResults(listAffiliatedAsset);
+      } catch (err) {
+        console.error(err);
+      }
+    })()
+  }, [selectedContact]);
 
   // ----------------------------
   // EMSIFA Province / City (ID only)
@@ -452,29 +597,34 @@ export default function NewCaseForm() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("https://dev.farizdotid.com/api/daerahindonesia/provinsi");
+        const res = await fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json");
         const json = await res.json();
-        setProv(json?.provinsi ?? []);
+        setProv(json ?? []);
+        console.log("Province :",res)
+        console.log("json :",json)
       } catch (e) {
         console.warn("EMSIFA provinces fetch failed");
       }
     })();
   }, []);
-
+  
   useEffect(() => {
     (async () => {
+      console.log(selectedProvId)
       if (!selectedProvId) return;
       try {
         const res = await fetch(
-          `https://dev.farizdotid.com/api/daerahindonesia/kota?id_provinsi=${selectedProvId}`
+          `https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${contactStateProvince}.json`
         );
         const json = await res.json();
         setCity(json?.kota_kabupaten ?? []);
+        console.log("State :",res)
+        console.log("json :",json)
       } catch (e) {
         console.warn("EMSIFA cities fetch failed");
       }
     })();
-  }, [selectedProvId]);
+  }, [setContactStateProvince]);
 
   // ----------------------------
   // Accessory handlers
@@ -524,8 +674,8 @@ export default function NewCaseForm() {
    * Performs optional photo upload and action log creation.
    */
   const onCreateCase = async () => {
-    if (!selectedAsset || !selectedContact) {
-      alert("Please select both an Asset and a Contact before creating a case.");
+    if ((!selectedAsset && !isNewAsset) || (!selectedContact)) {
+      alert("Please select or Create both an Asset and a Contact before creating a case.");
       return;
     }
     setLoading(true);
@@ -537,8 +687,32 @@ export default function NewCaseForm() {
         (a) => a.name.trim() || a.note.trim() || a.code.trim()
       );
 
+      let assetId = selectedAsset?.AssetID;
+      let productId = selectedProduct?.ProductNumber;
+      
+      if(isNewProduct){
+        const productRes = await ApiCustomer.post("/api/product-information",{
+          ProductNumber: productNo,
+          ProductName: productName,
+          ProductLine: productLine,
+          vendor: vendor,
+          ProductTypeID: parseInt(productTypeId)
+        })
+        productId = productRes.data?.data?.ProductNumber
+      }
+
+      if(isNewAsset){
+        const assetRes = await ApiCustomer.post("/api/asset-information", {
+          SerialNumber: serialQuery,
+          ProductNumber: productId,
+          ContactID: selectedContact.ContactID,
+          SiteAccountID: selectedCompany?.SiteAccountID ?? null
+        })
+        assetId = assetRes.data?.data?.AssetID
+      }
+
       const payload = {
-        AssetID: selectedAsset.AssetID,
+        AssetID: assetId,
         ContactID: selectedContact.ContactID,
         SiteAccountID: selectedCompany?.SiteAccountID ?? null,
         CaseSubject: problemDesc?.slice(0, 100) || "New Case",
@@ -558,6 +732,7 @@ export default function NewCaseForm() {
         ...(filteredAccessories.length > 0 && { accessories: filteredAccessories }),
       };
 
+      
       const res = await ApiCustomer.post("/api/case-information", payload);
       const caseId = res.data?.data?.CaseID;
 
@@ -660,6 +835,14 @@ export default function NewCaseForm() {
                 ))}
               </div>
             )}
+            <div className="mt-2 flex items-center gap-2">
+              <Checkbox
+                id="isNewAsset"
+                checked={isNewAsset}
+                onCheckedChange={(v) => setIsNewAsset(Boolean(v))}
+              />
+              <Label htmlFor="isNewAsset">Buat Asset Baru</Label>
+            </div>
           </div>
 
           <div>
@@ -741,7 +924,7 @@ export default function NewCaseForm() {
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <Label>Received Date</Label>
+            <Label>Received Date <Label className="text-red-600">*</Label></Label>
             <Input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} />
           </div>
           <div>
@@ -757,7 +940,7 @@ export default function NewCaseForm() {
             <Input value={referenceCase} onChange={(e) => setReferenceCase(e.target.value)} />
           </div>
           <div>
-            <Label>Case Status</Label>
+            <Label>Case Status <Label className="text-red-600">*</Label></Label>
             <Select value={caseStatus} onValueChange={setCaseStatus}>
               <SelectTrigger>
                 <SelectValue placeholder="Select Case Status" />
@@ -770,7 +953,7 @@ export default function NewCaseForm() {
             </Select>
           </div>
           <div>
-            <Label>Case Type</Label>
+            <Label>Case Type <Label className="text-red-600">*</Label></Label>
             <Select value={caseType} onValueChange={setCaseType} disabled={mustDOA}>
               <SelectTrigger>
                 <SelectValue placeholder="Select Case Type" />
@@ -792,181 +975,175 @@ export default function NewCaseForm() {
             </div>
           </div>
           <div className="md:col-span-3">
-            <Label>Problem Description</Label>
+            <Label>Problem Description <Label className="text-red-600">*</Label></Label>
             <Textarea rows={3} value={problemDesc} onChange={(e) => setProblemDesc(e.target.value)} />
           </div>
           <div className="md:col-span-3">
-            <Label>Case Note</Label>
+            <Label>Case Note <Label className="text-red-600">*</Label></Label>
             <Textarea rows={3} value={caseNote} onChange={(e) => setCaseNote(e.target.value)} />
           </div>
         </CardContent>
       </Card>
 
       {/* 2) Customer / Company */}
-      {showCustomerCard && (
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle>2) Customer / Company</CardTitle>
-            <CardDescription>Isi data customer baru. Centang untuk include ke Company.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Customer */}
-              <div className="space-y-2">
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Salutation</Label>
-                  <div className="col-span-2">
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Mr / Mrs" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Mr">Mr</SelectItem>
-                        <SelectItem value="Mrs">Mrs</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Nama Customer</Label>
-                  <div className="col-span-2 grid grid-cols-2 gap-2">
-                    <Input placeholder="First Name" />
-                    <Input placeholder="Last Name" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">No. Telepon</Label>
-                  <Input className="col-span-2" />
-                </div>
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">No. Whatsapp</Label>
-                  <Input className="col-span-2" />
-                </div>
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Email</Label>
-                  <Input className="col-span-2" type="email" />
-                </div>
-                <Separator className="my-2" />
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Alamat</Label>
-                  <Input className="col-span-2" />
-                </div>
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Country</Label>
-                  <Input className="col-span-2" placeholder="Indonesia / other" />
-                </div>
-                {/* Province/City (Indonesia via EMSIFA) */}
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Province</Label>
-                  <div className="col-span-2">
-                    <Select onValueChange={(v) => setSelectedProvId(v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select province (ID)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {prov.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>{p.nama}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">City</Label>
-                  <div className="col-span-2">
-                    <Select onValueChange={(v) => setSelectedCityId(v)} disabled={!selectedProvId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select city" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {city.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.nama}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Zip Code</Label>
-                  <Input className="col-span-2" />
+      <Card className="shadow-sm">
+        <CardHeader>
+          <CardTitle>2) Customer / Company</CardTitle>
+          <CardDescription>Isi data customer baru. Centang untuk include ke Company.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Customer */}
+            <div className="space-y-2">
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <Label className="col-span-1">Salutation<Label className="text-red-600">*</Label></Label>
+                <div className="col-span-2">
+                  <Select value={contactSalutation} onValueChange={setContactSalutation}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Mr / Mrs" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Mr.">Mr</SelectItem>
+                      <SelectItem value="Mrs.">Mrs</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-
-              {/* Company (optional) */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="incCompany"
-                    checked={showCompanySection}
-                    onCheckedChange={(v) => setShowCompanySection(Boolean(v))}
-                  />
-                  <Label htmlFor="incCompany">Termasuk dalam company</Label>
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <Label className="col-span-1">Nama Customer<Label className="text-red-600">*</Label></Label>
+                <div className="col-span-2 grid grid-cols-2 gap-2">
+                  <Input placeholder="First Name" value={contactFirstName} onChange={(e) => setContactFirstName(e.target.value)}/>
+                  <Input placeholder="Last Name" value={contactLastName} onChange={(e) => setContactLastName(e.target.value)}/>
                 </div>
-                {showCompanySection && (
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Nama Company</Label>
-                      <Input className="col-span-2" placeholder="Cari / isi nama company" />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Email Company</Label>
-                      <Input className="col-span-2" type="email" />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Nomor Telepon</Label>
-                      <Input className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Nomor WA</Label>
-                      <Input className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Alamat</Label>
-                      <Input className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Country</Label>
-                      <Input className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Province (ID)</Label>
-                      <div className="col-span-2">
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select province" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {prov.map((p) => (
-                              <SelectItem key={p.id} value={p.id}>{p.nama}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">City (ID)</Label>
-                      <div className="col-span-2">
-                        <Select disabled>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select city" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="-">-</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Zip Code</Label>
-                      <Input className="col-span-2" />
-                    </div>
-                  </div>
-                )}
+              </div>
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <Label className="col-span-1">No. Telepon<Label className="text-red-600">*</Label></Label>
+                <Input className="col-span-2" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)}/>
+              </div>
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <Label className="col-span-1">No. Whatsapp</Label>
+                <Input className="col-span-2" value={contactMobile} onChange={(e) => setContactMobile(e.target.value)}/>
+              </div>
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <Label className="col-span-1">Email<Label className="text-red-600">*</Label></Label>
+                <Input className="col-span-2" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)}/>
+              </div>
+              <Separator className="my-2" />
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <Label className="col-span-1">Alamat<Label className="text-red-600">*</Label></Label>
+                <Input className="col-span-2" value={contactAddressLine1} onChange={(e) => setContactAddressLine1(e.target.value)}/>
+              </div>
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <Label className="col-span-1">Country<Label className="text-red-600">*</Label></Label>
+                <Input className="col-span-2" placeholder="Indonesia / other" value={contactCountry} onChange={(e) => setContactCountry(e.target.value)}/>
+              </div>
+              {/* Province/City (Indonesia via EMSIFA) */}
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <Label className="col-span-1">Province<Label className="text-red-600">*</Label></Label>
+                <div className="col-span-2">
+                  <SelectBar
+                    id="StateProvince"
+                    value={contactStateProvince}
+                    onChange={setContactStateProvince}
+                    options={prov}
+                    placeholder="Select a Province"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <Label className="col-span-1">City<Label className="text-red-600">*</Label></Label>
+                <div className="col-span-2">
+                  <SelectBar
+                    id="City"
+                    value={contactCity}
+                    onChange={setContactCity}
+                    options={city}
+                    placeholder="Select a City"
+                  /> 
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
+                <Input className="col-span-2" value={contactZipPostalCode} onChange={(e) => setContactZipPostalCode(e.target.value)}/>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+
+            {/* Company (optional) */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="incCompany"
+                  checked={showCompanySection}
+                  onCheckedChange={(v) => setShowCompanySection(Boolean(v))}
+                />
+                <Label htmlFor="incCompany">Termasuk dalam company</Label>
+              </div>
+              {showCompanySection && (
+                <div className="space-y-2">
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">Nama Company<Label className="text-red-600">*</Label></Label>
+                    <Input className="col-span-2" placeholder="Cari / isi nama company" value={companyName} onChange={(e) => setCompanyName(e.target.value)}/>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">Email Company<Label className="text-red-600">*</Label></Label>
+                    <Input className="col-span-2" type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)}/>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">Nomor Telepon<Label className="text-red-600">*</Label></Label>
+                    <Input className="col-span-2" value={companyPhone} onChange={(e) => setCompanyPhone(e.target.value)}/>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">Nomor WA</Label>
+                    <Input className="col-span-2" value={companyWhatsapp} onChange={(e) => setCompanyWhatsapp(e.target.value)}/>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">Alamat<Label className="text-red-600">*</Label></Label>
+                    <Input className="col-span-2" value={companyAddressLine1} onChange={(e) => setCompanyAddressLine1(e.target.value)}/>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">Country<Label className="text-red-600">*</Label></Label>
+                    <Input className="col-span-2" value={companyCountry} onChange={(e) => setCompanyCountry(e.target.value)}/>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">Province (ID)<Label className="text-red-600">*</Label></Label>
+                    <div className="col-span-2">
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select province" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {prov.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>{p.nama}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">City (ID)<Label className="text-red-600">*</Label></Label>
+                    <div className="col-span-2">
+                      <Select disabled>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select city" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="-">-</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
+                    <Input className="col-span-2" value={companyZipPostalCode} onChange={(e) => setCompanyZipPostalCode(e.target.value)}/>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      {/* {showCustomerCard && (
+      )} */}
 
       {/* 3) Product */}
       <Card className="shadow-sm">
@@ -979,7 +1156,7 @@ export default function NewCaseForm() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label>Serial No.</Label>
+              <Label>Serial No.<Label className="text-red-600">*</Label></Label>
               <Input value={selectedAsset?.SerialNumber || serialQuery} readOnly={!!selectedAsset} onChange={(e) => setSerialQuery(e.target.value)} />
             </div>
             <div className="md:col-span-2">
@@ -993,6 +1170,14 @@ export default function NewCaseForm() {
                   searchProduct(v);
                 }}
               />
+              <div className="mt-2 flex items-center gap-2">
+                <Checkbox
+                  id="isNewProduct"
+                  checked={isNewProduct}
+                  onCheckedChange={(v) => setIsNewProduct(Boolean(v))}
+                />
+                <Label htmlFor="isNewProduct">Buat Product Baru</Label>
+              </div>
               {productResults.length > 0 && (
                 <div className="mt-2 rounded-xl border p-2 max-h-40 overflow-auto">
                   {productResults.map((p) => (
@@ -1023,7 +1208,7 @@ export default function NewCaseForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label>Product Tower</Label>
+              <Label>Product Tower<Label className="text-red-600">*</Label></Label>
               <Select value={productTower} onValueChange={setProductTower}>
                 <SelectTrigger>
                   <SelectValue placeholder="IPG / PSG" />
@@ -1035,7 +1220,7 @@ export default function NewCaseForm() {
               </Select>
             </div>
             <div>
-              <Label>Product Group</Label>
+              <Label>Product Group<Label className="text-red-600">*</Label></Label>
               <Select value={productGroup} onValueChange={setProductGroup}>
                 <SelectTrigger>
                   <SelectValue placeholder="Commercial / Consumer" />
@@ -1046,19 +1231,39 @@ export default function NewCaseForm() {
                 </SelectContent>
               </Select>
             </div>
+            {productTower && productGroup && (
+              <div>
+                <Label>Product Type *</Label>
+                <Select
+                  value={productTypeId || null}
+                  onValueChange={setProductTypeId}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Product Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {productTypeList.map((type) => (
+                      <SelectItem key={type.ProductTypeID} value={type.ProductTypeID.toString()}>
+                        {type.ProductType}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label>Product Line</Label>
+              <Label>Product Line<Label className="text-red-600">*</Label></Label>
               <Input value={productLine} onChange={(e) => setProductLine(e.target.value)} />
             </div>
             <div>
-              <Label>Product No</Label>
+              <Label>Product No<Label className="text-red-600">*</Label></Label>
               <Input value={productNo} onChange={(e) => setProductNo(e.target.value)} />
             </div>
             <div>
-              <Label>Product Name</Label>
+              <Label>Product Name<Label className="text-red-600">*</Label></Label>
               <Input value={productName} onChange={(e) => setProductName(e.target.value)} />
             </div>
             <div>
@@ -1171,13 +1376,14 @@ export default function NewCaseForm() {
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>
             Cancel
           </Button>
-          <Button type="button" onClick={onCreateCase} disabled={loading || !selectedAsset || !selectedContact}>
+          <Button type="button" onClick={onCreateCase} disabled={loading || (!selectedAsset && !isNewAsset) || (!selectedContact)}>
             {loading ? (
               <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Saving...</span>
             ) : (
               "Create Case"
             )}
           </Button>
+          {console.log(loading || (!selectedAsset || !isNewAsset) || (!selectedContact))}
         </div>
       </div>
     </div>
