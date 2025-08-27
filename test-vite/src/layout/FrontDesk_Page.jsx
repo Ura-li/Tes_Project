@@ -75,11 +75,11 @@ export default function FrontDesk_Page() {
         ProfilePhoto: fecthUserData.data.data.ProfilePhoto ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.ProfilePhoto}` : null,
         Signature: fecthUserData.data.data.Signature ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.Signature}` : null,
       });
-      const valuefiltercases = response.data.data.filter(c => c?.CreatedName == user.name);
-      const valueFilterOpenCase = response.data.data.filter(c => c?.CaseStatus == 'Open' && c?.CreatedName == user.name)
-      const valueFilterInActiveCase = response.data.data.filter(c => c?.CaseStatus == 'Close' && c?.CreatedName == user.name)
-      const valueFilterCloseCase = response.data.data.filter(c => c?.CaseStatus == 'InActive' && c?.CreatedName == user.name)
-      const filtercases = response.data.data.filter(c => c?.CaseStatus !== 'Close' && c?.CreatedName == user.name);
+      const valuefiltercases = response.data.data.filter(c => c?.caseinformation?.CreatedBy == user.id);
+      const valueFilterOpenCase = response.data.data.filter(c => c?.CaseStatus == 'Open' && c?.caseinformation?.CreatedBy == user.id)
+      const valueFilterInActiveCase = response.data.data.filter(c => c?.CaseStatus == 'Close' && c?.caseinformation?.CreatedBy == user.id)
+      const valueFilterCloseCase = response.data.data.filter(c => c?.CaseStatus == 'InActive' && c?.caseinformation?.CreatedBy == user.id)
+      const filtercases = response.data.data.filter(c => c?.CaseStatus !== 'Close' && c?.caseinformation?.Owner == user.id);
       const sortedCases = filtercases.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
       const recentCases = sortedCases.slice(0, 4);
       console.log("Length of the arrays", valuefiltercases);

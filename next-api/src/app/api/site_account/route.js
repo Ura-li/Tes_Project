@@ -7,6 +7,7 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const search = searchParams.get("search") || "";
         
+        const SiteAccountID = searchParams.get("SiteAccountID") || "";
         const email = searchParams.get("email") || "";
         const phone = searchParams.get("phone") || "";
         
@@ -18,6 +19,7 @@ export async function GET(request) {
          // Initialize search filters
          let whereCondition = {};
 
+         //seacrh by ID {}
          // Search by Email
          if (email) {
              whereCondition.OR = [{ Email: { contains: email } }];

@@ -35,7 +35,9 @@ export const FlowCase = () => {
     setLoading(true);
     try {
       const response = await ApiCustomer.get('/api/case-information');
-      const filtercases = response.data.data.filter(c => c.CaseStatus !== 'Close' && c?.CreatedName == user.name);
+      // console.log("Case INFO LOG : ",response.data.data[23].caseinformation.CreatedBy);
+      // console.log("Case INFO LOG : ",user.id);
+      const filtercases = response.data.data.filter(c => c.CaseStatus !== 'Close' && c?.caseinformation?.CreatedBy == user.id);
       setCaseData(filtercases);
       setError(false)
       return response.data.data;
