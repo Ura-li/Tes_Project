@@ -407,6 +407,9 @@ model User {
   ProfilePhoto String?  @db.VarChar(500)
   CreatedAt    DateTime @default(now())
   UpdatedAt    DateTime @updatedAt
+  Phone        String?   @db.VarChar(20)
+  Signature    String?   @db.VarChar(500)
+
 
   caseinformations_created caseinformation[] @relation("UserCreatedCases")
   bookings_created         Bookings[]        @relation("UserCreatedBookings")
@@ -681,6 +684,10 @@ enum CaseStatus {
   Escalated
   Quote_Approved
   Pending_Quote
+  NEW_AssignCE
+  NEW_AssignAPO
+  NEW_AssignLeader
+  NEW_AssignPS
 }
 
 enum ShippingPriority {

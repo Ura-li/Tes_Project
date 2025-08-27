@@ -6,6 +6,7 @@ export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url);
         const search = searchParams.get("search") || "";
+        const role = searchParams.get("role") || "";
         
         const page = parseInt(searchParams.get("page")) || 1;
         const limit = parseInt(searchParams.get("limit")) || 10;
@@ -14,9 +15,15 @@ export async function GET(request) {
          // Initialize search filters
          let whereCondition = {};
          
-         if (search) {
+        if (search) {
             whereCondition.OR = [...(whereCondition.OR || []), { CaseID: { contains: caseID } }];
         }
+
+        if(role){
+          whereCondition.Role = role;
+        }
+
+
 
 
 

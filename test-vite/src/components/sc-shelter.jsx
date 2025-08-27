@@ -1,18 +1,14 @@
 import React from 'react'
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
 import { ChevronDown } from 'lucide-react'
 import { Checkbox } from "./ui/checkbox";
 import { Input } from './ui/input';
-import { BtnModal1 } from './sc-modal';
-import { BtnModal2 } from './sc-modal';
+import { BtnModal1 } from './model/sc-modal';
+import { BtnModal2 } from './model/sc-modal';
  
 export function ShelterBox() {
   return (

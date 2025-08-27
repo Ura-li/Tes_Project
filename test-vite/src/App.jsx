@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { SheetBar } from './components/app-sheetbar'
 import { Button } from "@/components/ui/button"
-import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebar } from "@/components/sidebar/app-sidebar"
 import { Input } from './components/ui/input'
 import {
   Loader2,
@@ -24,12 +24,15 @@ import {
 } from "@/components/ui/sidebar"
 
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router'
-import Lorem from './Lorem'
+import Lorem from './pages/Lorem'
 
 import ApiCustomer from './api'
 
 import {Outlet} from "react-router"
 import debounce from 'lodash.debounce';
+import { SheetProvider } from './context/sheet-context'
+import { Toaster } from 'sonner'
+import { GlobalLogListener } from './components/GlobalLogListener'
 
 export function Breadcrumbs() {
   const location = useLocation();
@@ -37,7 +40,7 @@ export function Breadcrumbs() {
 
   return (
     <nav className="text-sm">
-      <Link to="/" className="text-gray-400">Home</Link>
+      <Link to="/" className="text-gray-700 font-medium">Home</Link>
       {pathnames.map((segment, index) => {
         const to = '/' + pathnames.slice(0, index + 1).join('/');
         return (
@@ -99,6 +102,10 @@ export function GlobalSearchBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    fetch("/api/socket"); // Initialize the WebSocket server
+  }, []);
+
   return (
     <div ref={containerRef} className="relative">
       <span className='flex items-center gap-2'> 
@@ -106,7 +113,7 @@ export function GlobalSearchBar() {
           placeholder="Search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="border border-b-2 border-b-black bg-sky-100"
+          className="border bg-white/50"
           onFocus={() => {
             if (results) setShowResults(true);
           }}
@@ -149,51 +156,32 @@ const App = () => {
   
   return (
     <div>
+      <SheetProvider >
       <SidebarProvider style={{
     "--sidebar-width": "13rem",
     "--sidebar-width-mobile": "20rem",
   }}>
-      <AppSidebar />
-      <SidebarInset className="overflow-auto">
-        <header className="flex  items-center justify-between px-4 gap-2 bg-cyan-700">
+      <AppSidebar  />
+      <SidebarInset >
+        <header className="flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
-            {/* <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <Link to="/lorem">
-                    <BreadcrumbLink >
-                     Login
-                    </BreadcrumbLink>
-                  </Link>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Home Dashboard</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb> */}
             <Breadcrumbs/>
           </div>
             <div className="flex  p-2 items-center gap-2 self-center">
               <Search></Search>
               <GlobalSearchBar />
-              {/* <Input placeholder="Search" className="w-110 mr-45 border-b-black border border-b-2" ></Input> */}
             </div>
-            {/* <SheetBar></SheetBar> */}
+            <SheetBar  ></SheetBar>
         </header>
-        {/* <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="aspect-video rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
-          </div>
-          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-        </div> */}
-        <Outlet/>
+
+        <Outlet />
       </SidebarInset>
-    </SidebarProvider>  
+    </SidebarProvider> 
+    </SheetProvider> 
+    <GlobalLogListener />
+    <Toaster/>
     </div>
   )
 }

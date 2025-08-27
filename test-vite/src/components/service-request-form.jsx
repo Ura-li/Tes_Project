@@ -88,19 +88,19 @@ const styles = StyleSheet.create({
     rowGap: 2,
   },
   label: {
-    width: '30%', // 1 of 4 columns
+    width: '30%', 
     fontSize: 9,
   },
   label2: {
-    width: '20%', // 1 of 4 columns
+    width: '20%', 
     fontSize: 9,
   },
   value: {
-    width: '70%', // col-span-3
+    width: '70%',
     fontSize: 9,
   },
   value2: {
-    width: '80%', // col-span-3
+    width: '80%',
     fontSize: 9,
   },
   table: {
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   tableHeader: {
-    backgroundColor: '#e5e7eb', // Tailwind's gray-200
+    backgroundColor: '#e5e7eb', 
   },
   tableCell: {
     flex: 1,
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     padding: 2,
     fontSize: 7,
     textAlign: 'center',
-    backgroundColor: '#f3f4f6', // Tailwind's gray-100
+    backgroundColor: '#f3f4f6', 
     fontWeight: 'bold',
   },
 });

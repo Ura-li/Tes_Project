@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
+    "axios": "^1.11.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "dotenv": "^16.5.0",
@@ -20,6 +21,7 @@
     "nodemailer": "^7.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "socket.io": "^4.8.1",
     "xlsx": "npm:@e965/xlsx@0.20.3"
   },
   "devDependencies": {

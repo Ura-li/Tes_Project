@@ -5,7 +5,6 @@ import {
     SelectContent,
     SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
   } from "@/components/ui/select"
@@ -113,7 +112,18 @@ useEffect(() => {
    
   export function SelectBar({ id, onChange, value, options, placeholder }) {
     return (
-      <Select value={value} onValueChange={(val) => onChange({ target: { id, value: val } })}>
+      <Select value={value} onValueChange={(val) => 
+      {
+        // Case 1: handler expects event-like object (id/value)
+        if (onChange.length === 1 && onChange.toString().includes("e.target")) {
+          onChange({ target: { id, value: val } });
+        }
+        // Case 2: plain setter (just a string)
+        else {
+          onChange(val);
+        }
+      }}
+      >
         <SelectTrigger className="w-full border-black">
           <SelectValue placeholder={placeholder || "Select an option"} />
         </SelectTrigger>
@@ -176,9 +186,6 @@ useEffect(() => {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {/* { id: "Depot Repair", name: "Depot Repair" },
-                { id: "Onsite", name: "Onsite" },
-                { id: "Bench", name: "Bench" }, */}
             <SelectItem value="Depot Repair">Depot Repair</SelectItem>
             <SelectItem value="Onsite">Onsite</SelectItem>
             <SelectItem value="Bench">Bench</SelectItem>
