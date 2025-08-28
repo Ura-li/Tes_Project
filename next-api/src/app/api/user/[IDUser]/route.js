@@ -4,11 +4,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
-import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || '';
-
-const JWT_SECRET =  process.env.JWT_SECRET || '' 
+const JWT_SECRET = process.env.JWT_SECRET || ''; 
 
 // GET - Ambil detail user berdasarkan ID
 export async function GET(request, { params }) {
@@ -106,7 +103,7 @@ export async function PATCH(request, { params }) {
         email: updatedUser.Email,
         role: updatedUser.Role,
         name: updatedUser.Name,
-        avatar: updatedUser.ProfilePhoto || ""
+        avatar: updatedUser.ProfilePhoto || "",
       },
       JWT_SECRET,
       { expiresIn: "7d" }

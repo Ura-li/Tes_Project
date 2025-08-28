@@ -4,6 +4,7 @@ import { lazy, Suspense } from "react";
 const AdminLanding = lazy(() => import("../layout/SupervisorLanding"));
 const WorkerLanding = lazy(() => import("../layout/FrontDesk_Page"));
 const ApoLanding = lazy(() => import("../layout/Apo_Page"));
+const CeLanding = lazy(() => import("../layout/Ce_Page"))
 // const UserLanding = lazy(() => import("../pages/user/Dashboard"));
 
 export default function Landing() {
@@ -14,8 +15,9 @@ export default function Landing() {
       {user?.role === "admin" && <AdminLanding />}
       {/* {user?.role === "manager" && <ManagerLanding />} */}
       {user?.role === "user" && <WorkerLanding />}
-      {user?.role === "apo" && <ApoLanding/>}
       {user?.role === "fd" && <WorkerLanding />}
+      {user?.role === "ce" && <CeLanding/>}
+      {user?.role === "apo" && <ApoLanding/>}
     </Suspense>
   );
 }
