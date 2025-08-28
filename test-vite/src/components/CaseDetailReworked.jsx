@@ -11,7 +11,7 @@ import {
 import { Link } from "react-router";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Accordion, AccordionItem, AccordionContent, AccordionTrigger } from "@/components/ui/accordion";
+import { Accordion, AccordionItem, AccordionContent, AccordionTrigger } from "./ui/accordion";
 import {
   Select,
   SelectContent,
@@ -22,7 +22,7 @@ import {
   SelectGroup,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectBarRelated, SelectYN, SearchCommandBlock } from "@/components/sc-select";
+import { SelectBarRelated } from "./sc-select";
 import {
   Table,
   TableBody,
@@ -53,6 +53,7 @@ import {
   Settings,
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
+import { SelectYN } from "./sc-select";
 import { useLocation, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -73,14 +74,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import Swal from "sweetalert2";
-import { BtnModalsServiceCatalog } from '@/components/model/sc-modal'
-import DatePicker from '@/components/date-picker'
+import { BtnModalsServiceCatalog } from './sc-modal'
+import DatePicker from './date-picker'
+import { SearchCommandBlock } from "./sc-select";
 import { pdf } from '@react-pdf/renderer';
-import ServiceRequestPDF from '@/components/service-request-form'; // adjust path if needed
-import { Textarea } from "@/components/ui/textarea";
+import ServiceRequestPDF from './service-request-form'; // adjust path if needed
+import { Textarea } from "./ui/textarea";
 
 
-export const TabsServiceCaseDetails = ({ 
+export const TabsService = ({ 
   caseDetails,
   setCaseDetails, 
   caseNote,
@@ -101,7 +103,6 @@ export const TabsServiceCaseDetails = ({
     CaseType: "",
     CaseStatus: "",
     CaseSubject: "",
-    Owner: "",
   });
 
   const [gtcForm, setGtcForm] = useState({
@@ -154,7 +155,6 @@ export const TabsServiceCaseDetails = ({
 
  const handleSave = async (redirect = true) => {
   console.log("Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
-  console.log("CaseForm Data to Submit:", caseForm);
 
   try {
     Swal.fire({
@@ -255,16 +255,11 @@ export const TabsServiceCaseDetails = ({
           case 'CASE':
           if (caseFilled) {
               try {
-                console.log("CaseForm Data To Update: ", caseForm);
                 const oldStatus = caseDetails.CaseStatus;
-                let newStatus = caseForm.CaseStatus;
-                
-                const isNewAssignStatus = newStatus.includes("NEW_Assign");
-                if(isNewAssignStatus) newStatus = "Open";
+                const newStatus = caseForm.CaseStatus;
                  Object.assign(dataToUpdate, {
                   CaseType: caseForm.CaseType || "",
                   CaseStatus: newStatus || "",
-                  Owner: caseForm.Owner || caseDetails.Owner
                 });
                 savedModules.push("Case");
                 if (oldStatus !== newStatus) {
@@ -296,7 +291,6 @@ export const TabsServiceCaseDetails = ({
       }
 
       if (Object.keys(dataToUpdate).length > 0) {
-        console.log("Data To Update: ", dataToUpdate);
         await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataToUpdate);
       }
     }
@@ -370,7 +364,7 @@ const openPopup = () => {
     {
       icon: CircleChevronLeft,
       label: "",
-      onClick: () => navigate(`/app/viewcase`),
+      onClick: () => navigate(`/app/master/Case_table`),
     },
     { icon: SquareArrowOutUpRight, label: "",},
     { icon: Save, label: "Save", onClick: () => handleSave() },
@@ -579,24 +573,20 @@ const spanMap = {
   6: "col-span-6",
 };
 
-export const CaseField = ({ label, children, lock, open,span = 1, className, star, hide }) => {
-  if (hide) return null;
-
-  return (
+export const CaseField = ({ label, children, lock, open,span = 1, className, star, }) => (
   <>
     <CardTitle
       className={twMerge(
         `relative font-medium flex items-center gap-2`,
         lock ? "pl-6" : "", open ? "pl-6" : "",
         className
-
       )}
     >
       {lock && (
         <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
       )}
       {open && (
-        <LockOpen className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
+        <LockOpen className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground"/>
       )}
       {label}
       {star ? <span className="text-red-400">*</span> : ""}
@@ -606,539 +596,536 @@ export const CaseField = ({ label, children, lock, open,span = 1, className, sta
       {children}
     </CardTitle>
   </>
-  )
+);
 
+export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
+  const navigate = useNavigate();
+  const WOID = workOrders.WOID;
+  const handleSave = async () => {
+    try {
+      Swal.fire({
+        title: "Updating WORK ORDER...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
 
-};
+      /**
+       * TODO :
+       * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
+       */
+      const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
+        //WO GENERAL
+        ShipmentCountry: WOGeneral.ShipmentCountry || undefined,
+        //SLA
+        SLAJeopardy: SLA.slaJeopardy || undefined,
+        DueDateCustomer: SLA.dueDateCustomer || undefined,
+        CoverageWindow: SLA.coverageWindow || undefined,
+        Response: SLA.response || undefined,
+        OTCCode: SLA.otcCode || undefined,
+        RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer || undefined,
+        GuaranteedFixTimeCustomer: SLA.guaranteedFixTimeCustomer || undefined,
+        EarlyStartDateTimeCustomer: SLA.earlyStartDateTimeCustomer || undefined,
+        LatestStartDateTimeCustomer: SLA.latestStartDateTimeCustomer || undefined,
+        SLAReschedule: SLA.slaReschedule || undefined,
+        ActiveScheduleDate: SLA.activeScheduleDate || undefined,
+        SLAErrorDescription: SLA.slaErrorDescription || undefined,
+        CasePriorityIndex:
+          SLA.casePriorityIndex !== ""
+            ? parseInt(SLA.casePriorityIndex, 10)
+            : undefined,
+      });
 
-// export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
-//   const navigate = useNavigate();
-//   const WOID = workOrders.WOID;
-//   const handleSave = async () => {
-//     try {
-//       Swal.fire({
-//         title: "Updating WORK ORDER...",
-//         text: "Please wait",
-//         allowOutsideClick: false,
-//         didOpen: () => {
-//           Swal.showLoading();
-//         },
-//       });
-
-//       /**
-//        * TODO :
-//        * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
-//        */
-//       const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
-//         //WO GENERAL
-//         ShipmentCountry: WOGeneral.ShipmentCountry || undefined,
-//         //SLA
-//         SLAJeopardy: SLA.slaJeopardy || undefined,
-//         DueDateCustomer: SLA.dueDateCustomer || undefined,
-//         CoverageWindow: SLA.coverageWindow || undefined,
-//         Response: SLA.response || undefined,
-//         OTCCode: SLA.otcCode || undefined,
-//         RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer || undefined,
-//         GuaranteedFixTimeCustomer: SLA.guaranteedFixTimeCustomer || undefined,
-//         EarlyStartDateTimeCustomer: SLA.earlyStartDateTimeCustomer || undefined,
-//         LatestStartDateTimeCustomer: SLA.latestStartDateTimeCustomer || undefined,
-//         SLAReschedule: SLA.slaReschedule || undefined,
-//         ActiveScheduleDate: SLA.activeScheduleDate || undefined,
-//         SLAErrorDescription: SLA.slaErrorDescription || undefined,
-//         CasePriorityIndex:
-//           SLA.casePriorityIndex !== ""
-//             ? parseInt(SLA.casePriorityIndex, 10)
-//             : undefined,
-//       });
-
-//       const result = response.data;
-//       console.log(response);
+      const result = response.data;
+      console.log(response);
       
 
-//       if (!result.success) {
-//         return Swal.fire({
-//           icon: "error",
-//           title: "Update Failed",
-//           text: result.message || "Unknown error",
-//         });
-//       }
+      if (!result.success) {
+        return Swal.fire({
+          icon: "error",
+          title: "Update Failed",
+          text: result.message || "Unknown error",
+        });
+      }
 
-//       return Swal.fire({
-//         icon: "success",
-//         title: "Success",
-//         text: "SLA updated successfully!",
-//       });
-//     } catch (error) {
-//       return Swal.fire({
-//         icon: "error",
-//         title: "Request Error",
-//         text: error.message || "Something went wrong!",
-//       });
-//     }
-//   };
+      return Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "SLA updated successfully!",
+      });
+    } catch (error) {
+      return Swal.fire({
+        icon: "error",
+        title: "Request Error",
+        text: error.message || "Something went wrong!",
+      });
+    }
+  };
 
-//   const buttons = [
-//     {
-//       icon: ArrowLeftFromLine,
-//       label: "",
-//       onClick: () => navigate(`/app/case/${workOrders.CaseID}`),
-//     },
-//     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-//     { icon: Save, label: "Save", onClick: () => handleSave() },
-//     {
-//       icon: FileSymlink,
-//       label: "Save & Close",
-//       onClick: () => saveAndCloseWorkOrder(),
-//     },
-//     { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
-//     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
-//     { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
-//     { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
-//     { icon: StepBack, label: "Refresh", onClick: () => window.location.reload() },
-//     { icon: StepBack, label: "Process", onClick: () => alert("not now") },
-//     { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
-//     { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
-//     {
-//       icon: UserPen,
-//       label: "Create Material Order",
-//       onClick: () => alert("not now"),
-//     },
-//     { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now") },
-//   ];
-//   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
-//   const hiddenButtons = open ? buttons.slice(-3) : [];
-//   const saveAndCloseWorkOrder = async () => {
-//     const confirmResult = await Swal.fire({
-//       title: "Confirm Save",
-//       text: "This will give the order status as CLOSED. Are you sure you want to save changes?",
-//       icon: "warning",
-//       showCancelButton: true,
-//       confirmButtonColor: "#3085d6",
-//       cancelButtonColor: "#d33",
-//       confirmButtonText: "Yes, Save it",
-//     });
+  const buttons = [
+    {
+      icon: ArrowLeftFromLine,
+      label: "",
+      onClick: () => navigate(`/app/case/${workOrders.CaseID}`),
+    },
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: Save, label: "Save", onClick: () => handleSave() },
+    {
+      icon: FileSymlink,
+      label: "Save & Close",
+      onClick: () => saveAndCloseWorkOrder(),
+    },
+    { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Refresh", onClick: () => window.location.reload() },
+    { icon: StepBack, label: "Process", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
+    {
+      icon: UserPen,
+      label: "Create Material Order",
+      onClick: () => alert("not now"),
+    },
+    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now") },
+  ];
+  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  const hiddenButtons = open ? buttons.slice(-3) : [];
+  const saveAndCloseWorkOrder = async () => {
+    const confirmResult = await Swal.fire({
+      title: "Confirm Save",
+      text: "This will give the order status as CLOSED. Are you sure you want to save changes?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Save it",
+    });
 
-//     if (!confirmResult.isConfirmed) {
-//       return;
-//     }
-//     try {
-//       Swal.fire({
-//         title: "Saving...",
-//         text: "Please wait while we update the Work Order.",
-//         allowOutsideClick: false,
-//         didOpen: () => {
-//           Swal.showLoading();
-//         },
-//       });
+    if (!confirmResult.isConfirmed) {
+      return;
+    }
+    try {
+      Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update the Work Order.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
 
-//       const res = await ApiCustomer.patch(
-//         `/api/work-order/${workOrders.WOID}`,
-//         {
-//           SystemStatus: "CLOSED_POSTED",
-//         }
-//       );
-//       if (res.data.success) {
-//         const token = {
-//           user: getUserFromToken()
-//         }
-//         const updateLog = await ApiCustomer.post("/api/actionlog",{
-//           CaseId: `${workOrders.CaseID}`,
-//           ReferenceId: `${workOrders.WOID}`,
-//           model: "Work Orders",
-//           dataOld: workOrders.SystemStatus,
-//           dataNew: res.data.data.SystemStatus,
-//           changedBy: token.user.id,
-//           logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${workOrders.SystemStatus} to ${res.data.data.SystemStatus}`
-//         })
-//         Swal.fire({
-//           icon: "success",
-//           title: "Updated!",
-//           text: res.data.message,
-//           timer: 2000,
-//           showConfirmButton: false,
-//         }).then(() => {
-//           navigate(`/app/case/${workOrders.CaseID}`);
-//         });
-//       } else {
-//         Swal.fire({
-//           icon: "error",
-//           title: "Error",
-//           text: res.data.message,
-//         });
-//       }
-//     } catch (error) {
-//       Swal.fire({
-//         icon: "error",
-//         title: "Failed to update!",
-//         text: error.message || "Something went wrong.",
-//       });
-//     }
-//   };
-//   return (
-//     <>
-//       <div className="flex items-center border-1 ">
-//         {visibleButtons.map((btn, index) => (
-//           <Button
-//             key={index}
-//             onClick={btn.onClick}
-//             variant="link"
-//             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-//           >
-//             <btn.icon className="w-4 h-4" />
-//             {btn.label && <span className="text-md">{btn.label}</span>}
-//           </Button>
-//         ))}
+      const res = await ApiCustomer.patch(
+        `/api/work-order/${workOrders.WOID}`,
+        {
+          SystemStatus: "CLOSED_POSTED",
+        }
+      );
+      if (res.data.success) {
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${workOrders.CaseID}`,
+          ReferenceId: `${workOrders.WOID}`,
+          model: "Work Orders",
+          dataOld: workOrders.SystemStatus,
+          dataNew: res.data.data.SystemStatus,
+          changedBy: token.user.id,
+          logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${workOrders.SystemStatus} to ${res.data.data.SystemStatus}`
+        })
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate(`/app/case/${workOrders.CaseID}`);
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: res.data.message,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to update!",
+        text: error.message || "Something went wrong.",
+      });
+    }
+  };
+  return (
+    <>
+      <div className="flex items-center border-1 ">
+        {visibleButtons.map((btn, index) => (
+          <Button
+            key={index}
+            onClick={btn.onClick}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+          >
+            <btn.icon className="w-4 h-4" />
+            {btn.label && <span className="text-md">{btn.label}</span>}
+          </Button>
+        ))}
 
-//         {open && hiddenButtons.length > 0 && (
-//           <DropdownMenu>
-//             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
-//               ...
-//             </DropdownMenuTrigger>
-//             <DropdownMenuContent>
-//               {hiddenButtons.map((btn, index) => (
-//                 <DropdownMenuItem key={index}>
-//                   <btn.icon className="inline-block w-4 h-4 mr-2" />
-//                   {btn.label}
-//                 </DropdownMenuItem>
-//               ))}
-//             </DropdownMenuContent>
-//           </DropdownMenu>
-//         )}
-//     {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-//     </div>
-//     <div>
-//     {/* <ServiceCase 
-//       caseDetails={caseDetails}
-//       formData={caseNoteFormData}
-//       onChange={handleCaseNoteChange}
-//       caseNotes={caseNotes}
-//       setCaseNotes={setCaseNotes}
-//       selectedSymptom={selectedSymptom}
-//       setSelectedSymptom={setSelectedSymptom}
-//       /> */}
-//       </div>
-//     </>
-//   );
-// };
+        {open && hiddenButtons.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
+              ...
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                <DropdownMenuItem key={index}>
+                  <btn.icon className="inline-block w-4 h-4 mr-2" />
+                  {btn.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    </div>
+    <div>
+    {/* <ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
+      /> */}
+      </div>
+    </>
+  );
+};
 
-// export const TabsServiceMO = ({ materialOrders }) => {
-//   const navigate = useNavigate();
-//   const buttons = [
-//     {
-//       icon: ArrowLeftFromLine,
-//       label: "",
-//       onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
-//     },
-//     { icon: SquareArrowOutUpRight, label: "", },
-//     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
-//     {
-//       icon: FileSymlink,
-//       label: "Save & Close",
-//       onClick: () => saveAndCloseMaterialOrder(),
-//     },
-//     { icon: RotateCw, label: "ATP", },
-//     { icon: StepBack, label: "Cancel Order", },
-//     { icon: StepBack, label: "Add To Queue", },
-//     { icon: StepBack, label: "Add Parts", },
-//     { icon: StepBack, label: "Pick", },
-//     { icon: StepBack, label: "Place Order", },
-//     { icon: StepBack, label: "Tax", },
-//     { icon: StepBack, label: "CustID Search", },
-//     { icon: UserPen, label: "PUDO Search", },
-//     { icon: StepBack, label: "Audit", },
-//   ];
-//   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
-//   const hiddenButtons = open ? buttons.slice(-3) : [];
-//   const saveAndCloseMaterialOrder = async () => {
-//     try {
-//       Swal.fire({
-//         title: "Saving...",
-//         text: "Please wait while we update the Material Order.",
-//         allowOutsideClick: false,
-//         didOpen: () => {
-//           Swal.showLoading();
-//         },
-//       });
-//       const res = await ApiCustomer.patch(
-//         `/api/material-order/${materialOrders.MOID}`,
-//         {
-//           OrderStatus: "Closed",
-//         }
-//       );
-//       if (res.data.success) {
-//         const token = {
-//           user: getUserFromToken()
-//         }
-//         const updateLog = await ApiCustomer.post("/api/actionlog",{
-//           CaseId: `${materialOrders.workorder?.CaseID}`,
-//           ReferenceId: `${materialOrders.MOID}`,
-//           model: "Material Orders",
-//           dataOld: materialOrders.OrderStatus,
-//           dataNew: res.data.data.OrderStatus,
-//           changedBy: token.user.id,
-//           logDescription: `Edit : Changed Material Order ${materialOrders.MOID} from ${materialOrders.OrderStatus} to ${res.data.data.OrderStatus}`
-//         })
-//         Swal.fire({
-//           icon: "success",
-//           title: "Updated!",
-//           text: res.data.message,
-//           timer: 2000,
-//           showConfirmButton: false,
-//         }).then(() => {
-//           navigate(`/app/work/${materialOrders.WOID}`);
-//         });
-//       } else {
-//         Swal.fire({
-//           icon: "error",
-//           title: "Error",
-//           text: res.data.message,
-//         });
-//       }
-//     } catch (error) {
-//       Swal.fire({
-//         icon: "error",
-//         title: "Failed to update!",
-//         text: error.message || "Something went wrong.",
-//       });
-//     }
-//   };
-//   return (
-//     <>
-//       <div className="flex items-center border-1 ">
-//         {visibleButtons.map((btn, index) => (
-//           <Button
-//             key={index}
-//             onClick={btn.onClick}
-//             variant="link"
-//             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-//           >
-//             <btn.icon className="w-4 h-4" />
-//             {btn.label && <span className="text-md">{btn.label}</span>}
-//           </Button>
-//         ))}
+export const TabsServiceMO = ({ materialOrders }) => {
+  const navigate = useNavigate();
+  const buttons = [
+    {
+      icon: ArrowLeftFromLine,
+      label: "",
+      onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
+    },
+    { icon: SquareArrowOutUpRight, label: "", },
+    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    {
+      icon: FileSymlink,
+      label: "Save & Close",
+      onClick: () => saveAndCloseMaterialOrder(),
+    },
+    { icon: RotateCw, label: "ATP", },
+    { icon: StepBack, label: "Cancel Order", },
+    { icon: StepBack, label: "Add To Queue", },
+    { icon: StepBack, label: "Add Parts", },
+    { icon: StepBack, label: "Pick", },
+    { icon: StepBack, label: "Place Order", },
+    { icon: StepBack, label: "Tax", },
+    { icon: StepBack, label: "CustID Search", },
+    { icon: UserPen, label: "PUDO Search", },
+    { icon: StepBack, label: "Audit", },
+  ];
+  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  const hiddenButtons = open ? buttons.slice(-3) : [];
+  const saveAndCloseMaterialOrder = async () => {
+    try {
+      Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update the Material Order.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      const res = await ApiCustomer.patch(
+        `/api/material-order/${materialOrders.MOID}`,
+        {
+          OrderStatus: "Closed",
+        }
+      );
+      if (res.data.success) {
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${materialOrders.workorder?.CaseID}`,
+          ReferenceId: `${materialOrders.MOID}`,
+          model: "Material Orders",
+          dataOld: materialOrders.OrderStatus,
+          dataNew: res.data.data.OrderStatus,
+          changedBy: token.user.id,
+          logDescription: `Edit : Changed Material Order ${materialOrders.MOID} from ${materialOrders.OrderStatus} to ${res.data.data.OrderStatus}`
+        })
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate(`/app/work/${materialOrders.WOID}`);
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: res.data.message,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to update!",
+        text: error.message || "Something went wrong.",
+      });
+    }
+  };
+  return (
+    <>
+      <div className="flex items-center border-1 ">
+        {visibleButtons.map((btn, index) => (
+          <Button
+            key={index}
+            onClick={btn.onClick}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+          >
+            <btn.icon className="w-4 h-4" />
+            {btn.label && <span className="text-md">{btn.label}</span>}
+          </Button>
+        ))}
 
-//         {open && hiddenButtons.length > 0 && (
-//           <DropdownMenu>
-//             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
-//               ...
-//             </DropdownMenuTrigger>
-//             <DropdownMenuContent>
-//               {hiddenButtons.map((btn, index) => (
-//                 <DropdownMenuItem key={index}>
-//                   <btn.icon className="inline-block w-4 h-4 mr-2" />
-//                   {btn.label}
-//                 </DropdownMenuItem>
-//               ))}
-//             </DropdownMenuContent>
-//           </DropdownMenu>
-//         )}
-//     {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-//     </div>
-//     <div>
-//     {/* <ServiceCase 
-//       caseDetails={caseDetails}
-//       formData={caseNoteFormData}
-//       onChange={handleCaseNoteChange}
-//       caseNotes={caseNotes}
-//       setCaseNotes={setCaseNotes}
-//       selectedSymptom={selectedSymptom}
-//       setSelectedSymptom={setSelectedSymptom}
-//       /> */}
-//       </div>
-//     </>
-//   );
-// };
+        {open && hiddenButtons.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
+              ...
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                <DropdownMenuItem key={index}>
+                  <btn.icon className="inline-block w-4 h-4 mr-2" />
+                  {btn.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    </div>
+    <div>
+    {/* <ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
+      /> */}
+      </div>
+    </>
+  );
+};
 
-// export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems }) => {
-//   const navigate = useNavigate();
+export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems }) => {
+  const navigate = useNavigate();
 
-//   const buttons = [
-//     {
-//       icon: ArrowLeftFromLine,
-//       label: "",
-//       onClick: () => navigate(`/app/material-order/${MOLineDetails.MOID}`),
-//     },
-//     { icon: SquareArrowOutUpRight, label: "", },
-//     { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
-//     {
-//       icon: FileSymlink,
-//       label: "Save & Close",
-//       onClick: () => saveAndCloseMaterialLineItemsOrder(),
-//     },
-//     { icon: StepBack, label: "Cancel", },
-//     { icon: StepBack, label: "Audit", },
-//     { icon: RotateCw, label: "Assign", },
-//     {
-//       icon: StepBack,
-//       label: "Word Templates",
-//       onClick: () => alert("not now"),
-//     },
-//     { icon: StepBack, label: "Run Report", },
-//     { icon: StepBack, label: "Geo Code", },
-//     { icon: StepBack, label: "Process", },
-//     { icon: StepBack, label: "Reset RDT", },
-//     // { icon: UserPen, label:  "Add To Queue", onClick: () => alert("not now") },
-//     // { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
-//   ];
-//   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
-//   const hiddenButtons = open ? buttons.slice(-3) : [];
+  const buttons = [
+    {
+      icon: ArrowLeftFromLine,
+      label: "",
+      onClick: () => navigate(`/app/material-order/${MOLineDetails.MOID}`),
+    },
+    { icon: SquareArrowOutUpRight, label: "", },
+    { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
+    {
+      icon: FileSymlink,
+      label: "Save & Close",
+      onClick: () => saveAndCloseMaterialLineItemsOrder(),
+    },
+    { icon: StepBack, label: "Cancel", },
+    { icon: StepBack, label: "Audit", },
+    { icon: RotateCw, label: "Assign", },
+    {
+      icon: StepBack,
+      label: "Word Templates",
+      onClick: () => alert("not now"),
+    },
+    { icon: StepBack, label: "Run Report", },
+    { icon: StepBack, label: "Geo Code", },
+    { icon: StepBack, label: "Process", },
+    { icon: StepBack, label: "Reset RDT", },
+    // { icon: UserPen, label:  "Add To Queue", onClick: () => alert("not now") },
+    // { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
+  ];
+  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  const hiddenButtons = open ? buttons.slice(-3) : [];
 
-//   const saveMOLI = async (LineItemID, shouldRedirect = true) => {
-//     try {
-//       Swal.fire({
-//         title: 'Saving...',
-//         text: 'Please wait while we update the line item.',
-//         allowOutsideClick: false,
-//         didOpen: () => {
-//           Swal.showLoading();
-//         }
-//       });
-//       const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${LineItemID}`, {
-//         Description: MOLineDetails.description,
-//         PickPackInstructions: MOLineDetails.pickPackInstructions,
-//         CollectionInstructions: MOLineDetails.collectionInstructions || "None",
-//         CustomerResponse: MOLineDetails.customerResponse,
-//         RejectedReason: MOLineDetails.rejectedReason,
-//         OtherReason: MOLineDetails.otherReason,
-//         FailureId: MOLineDetails.failureId,
-//         SerialNumber: MOLineDetails.serialNumber,
-//         RemovedPartNumber: MOLineDetails.removedPartNumber,
-//         RemovedSerialNumber: MOLineDetails.removedSerialNumber,
-//         RemovedPartDescription: MOLineDetails.removedPartDescription,
-//       });
-//       if (res.data.success) {
-//         if (shouldRedirect) {
-//           Swal.fire({
-//             icon: 'success',
-//             title: 'Updated!',
-//             text: res.data.message,
-//             timer: 2000,
-//             showConfirmButton: false
-//           }).then(() => {
-//             navigate(`/app/mo_detail/${LineItemID}`);
-//           });
-//         }
-//         return true;
-//       } else {
-//         Swal.fire({
-//           icon: 'error',
-//           title: 'Error',
-//           text: res.data.message
-//         });
-//       }
-//     } catch (error) {
-//       Swal.fire({
-//         icon: 'error',
-//         title: 'Failed to update!',
-//         text: error.message || 'Something went wrong.'
-//       });
-//     }
-//   }
+  const saveMOLI = async (LineItemID, shouldRedirect = true) => {
+    try {
+      Swal.fire({
+        title: 'Saving...',
+        text: 'Please wait while we update the line item.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${LineItemID}`, {
+        Description: MOLineDetails.description,
+        PickPackInstructions: MOLineDetails.pickPackInstructions,
+        CollectionInstructions: MOLineDetails.collectionInstructions || "None",
+        CustomerResponse: MOLineDetails.customerResponse,
+        RejectedReason: MOLineDetails.rejectedReason,
+        OtherReason: MOLineDetails.otherReason,
+        FailureId: MOLineDetails.failureId,
+        SerialNumber: MOLineDetails.serialNumber,
+        RemovedPartNumber: MOLineDetails.removedPartNumber,
+        RemovedSerialNumber: MOLineDetails.removedSerialNumber,
+        RemovedPartDescription: MOLineDetails.removedPartDescription,
+      });
+      if (res.data.success) {
+        if (shouldRedirect) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Updated!',
+            text: res.data.message,
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => {
+            navigate(`/app/mo_detail/${LineItemID}`);
+          });
+        }
+        return true;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: res.data.message
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to update!',
+        text: error.message || 'Something went wrong.'
+      });
+    }
+  }
 
-//   const saveAndCloseMaterialLineItemsOrder = async () => {
-//     try {
-//       Swal.fire({
-//         title: "Saving...",
-//         text: "Please wait while we update the line item.",
-//         allowOutsideClick: false,
-//         didOpen: () => {
-//           Swal.showLoading();
-//         },
-//       });
-//       const success = await saveMOLI(LineItemID, false);
-//       if (!success) return; // Stop if saveMOLI failed
-//       const res = await ApiCustomer.patch(
-//         `/api/material-order/material-order-line-items/${LineItemID}`,
-//         {
-//           Status: "Closed",
-//         }
-//       );
-//       if (res.data.success) {
-//         console.log("MATERIAL ORDeR IN CLOSED POSTED : ", moLineItems)
-//         const token = {
-//           user: getUserFromToken()
-//         }
-//         const updateLog = await ApiCustomer.post("/api/actionlog",{
-//           CaseId: `${moLineItems.materialorder?.workorder?.CaseID}`,
-//           ReferenceId: `${moLineItems.MOID}`,
-//           model: "Material Order Line Item",
-//           dataOld: moLineItems.Status,
-//           dataNew: "Closed",
-//           changedBy: token.user.id,
-//           logDescription: `Edit : Change Material Order Line Item ${moLineItems.MOID} - ${moLineItems.LineItemID} Status from ${moLineItems.Status} to Closed`
-//         })
+  const saveAndCloseMaterialLineItemsOrder = async () => {
+    try {
+      Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update the line item.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      const success = await saveMOLI(LineItemID, false);
+      if (!success) return; // Stop if saveMOLI failed
+      const res = await ApiCustomer.patch(
+        `/api/material-order/material-order-line-items/${LineItemID}`,
+        {
+          Status: "Closed",
+        }
+      );
+      if (res.data.success) {
+        console.log("MATERIAL ORDeR IN CLOSED POSTED : ", moLineItems)
+        const token = {
+          user: getUserFromToken()
+        }
+        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${moLineItems.materialorder?.workorder?.CaseID}`,
+          ReferenceId: `${moLineItems.MOID}`,
+          model: "Material Order Line Item",
+          dataOld: moLineItems.Status,
+          dataNew: "Closed",
+          changedBy: token.user.id,
+          logDescription: `Edit : Change Material Order Line Item ${moLineItems.MOID} - ${moLineItems.LineItemID} Status from ${moLineItems.Status} to Closed`
+        })
        
-//         Swal.fire({
-//           icon: "success",
-//           title: "Updated!",
-//           text: res.data.message,
-//           timer: 2000,
-//           showConfirmButton: false,
-//         }).then(() => {
-//           navigate(`/app/material-order/${MOLineDetails.MOID}`);
-//         });
-//       } else {
-//         Swal.fire({
-//           icon: "error",
-//           title: "Error",
-//           text: res.data.message,
-//         });
-//       }
-//     } catch (error) {
-//       Swal.fire({
-//         icon: "error",
-//         title: "Failed to update!",
-//         text: error.message || "Something went wrong.",
-//       });
-//     }
-//   };
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate(`/app/material-order/${MOLineDetails.MOID}`);
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: res.data.message,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to update!",
+        text: error.message || "Something went wrong.",
+      });
+    }
+  };
 
-//   return (
-//     <>
-//       <div className="flex items-center border-1 ">
-//         {visibleButtons.map((btn, index) => (
-//           <Button
-//             key={index}
-//             onClick={btn.onClick}
-//             variant="link"
-//             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-//           >
-//             <btn.icon className="w-4 h-4" />
-//             {btn.label && <span className="text-md">{btn.label}</span>}
-//           </Button>
-//         ))}
-//     {console.log(MOLineDetails)}
-//         {open && hiddenButtons.length > 0 && (
-//           <DropdownMenu>
-//             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
-//               ...
-//             </DropdownMenuTrigger>
-//             <DropdownMenuContent>
-//               {hiddenButtons.map((btn, index) => (
-//                 <DropdownMenuItem key={index}>
-//                   <btn.icon className="inline-block w-4 h-4 mr-2" />
-//                   {btn.label}
-//                 </DropdownMenuItem>
-//               ))}
-//             </DropdownMenuContent>
-//           </DropdownMenu>
-//         )}
-//     {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-//     </div>
-//     <div>
-//     {/* <ServiceCase 
-//       caseDetails={caseDetails}
-//       formData={caseNoteFormData}
-//       onChange={handleCaseNoteChange}
-//       caseNotes={caseNotes}
-//       setCaseNotes={setCaseNotes}
-//       selectedSymptom={selectedSymptom}
-//       setSelectedSymptom={setSelectedSymptom}
-//       /> */}
-//       </div>
-//     </>
-//   );
-// };
+  return (
+    <>
+      <div className="flex items-center border-1 ">
+        {visibleButtons.map((btn, index) => (
+          <Button
+            key={index}
+            onClick={btn.onClick}
+            variant="link"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+          >
+            <btn.icon className="w-4 h-4" />
+            {btn.label && <span className="text-md">{btn.label}</span>}
+          </Button>
+        ))}
+    {console.log(MOLineDetails)}
+        {open && hiddenButtons.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
+              ...
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                <DropdownMenuItem key={index}>
+                  <btn.icon className="inline-block w-4 h-4 mr-2" />
+                  {btn.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+    </div>
+    <div>
+    {/* <ServiceCase 
+      caseDetails={caseDetails}
+      formData={caseNoteFormData}
+      onChange={handleCaseNoteChange}
+      caseNotes={caseNotes}
+      setCaseNotes={setCaseNotes}
+      selectedSymptom={selectedSymptom}
+      setSelectedSymptom={setSelectedSymptom}
+      /> */}
+      </div>
+    </>
+  );
+};
 
 export const ServiceCase = ({
   caseDetails,
@@ -1174,8 +1161,6 @@ export const ServiceCase = ({
   const [pendingCustomerAction, setPendingCustomerAction] = useState(null);
   const [customerRequestedCloseDate, setCustomerRequestedCloseDate] =
     useState(null);
-  
-  const [roleAssign, setRoleAssign] = useState([]);
   const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
   useEffect(() => {
     if (caseDetails?.CreatedOn) {
@@ -1309,7 +1294,7 @@ export const ServiceCase = ({
 
   const fetchOwnerUserData = async () => {
     try {
-      const response = await ApiCustomer.get(`/api/user/${caseDetails.Owner}`)
+      const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
       setOwnerUserData(response.data.data)
     } catch (error) {
       
@@ -1440,46 +1425,26 @@ export const ServiceCase = ({
 };
 
 
-  const statusEnumToLabel = {
-    New: "New",
-    Open: "Open",
-    InActive: "Inactive",
-    Close: "Closed",
-    Active: "Active",
-    Monitor: "Monitor",
-    Pending_Customer_Action: "Pending Customer Action",
-    Quote_Requested: "Quote Requested",
-    Pending_Follow_Up: "Pending Follow Up",
-    Pending_Order: "Pending Order",
-    Escalated: "Escalated",
-    Quote_Approved: "Quote Approved",
-    Pending_Quote: "Pending Quote",
-    NEW_AssignCE: "New Assign To CE",
-    NEW_AssignAPO: "New Assign To APO"
-  };
+const statusEnumToLabel = {
+  New: "New",
+  Open: "Open",
+  InActive: "Inactive",
+  Close: "Closed",
+  Active: "Active",
+  Monitor: "Monitor",
+  Pending_Customer_Action: "Pending Customer Action",
+  Quote_Requested: "Quote Requested",
+  Pending_Follow_Up: "Pending Follow Up",
+  Pending_Order: "Pending Order",
+  Escalated: "Escalated",
+  Quote_Approved: "Quote Approved",
+  Pending_Quote: "Pending Quote"
+};
 
-  const assignToForm= true;
-  // const assignToForm = statusEnumToLabel.startsWith("NEW_Assign");
+const labelToStatusEnum = Object.fromEntries(
+  Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
+);
 
-  
-
-// const labelToStatusEnum = Object.fromEntries(
-//   Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
-// );
-const labelToStatusEnum = Object.entries(statusEnumToLabel).reduce((acc, [key, val]) => {
-  acc[val] = key;
-  return acc;
-}, {});
-
-
-const fetchUserAssign = async (role) => {
-  try {
-    const res = await ApiCustomer.get(`/api/user?role=${role}`);
-    setRoleAssign(res.data.data);
-  } catch (err) {
-    console.error("Error fetching role: ",err);    
-  }
-}
 
 const fetchCase = async () => {
   try {
@@ -1527,9 +1492,6 @@ const fetchActionLog = async () => {
     fetchCase();
     fetchActionLog();
   }, []);
-  useEffect(() => {
-    fetchUserAssign();
-  }, [assignToForm]);
 
   useEffect(() => {
     if (otcCode.length > 0 && caseDetails?.OTCCode) {
@@ -1737,7 +1699,7 @@ const [endDate, setEndDate] = useState(null);
           <TabsContent value="case_infor">
           </TabsContent>
 
-          <div  className={"p-3 grid grid-cols-2 gap-4 mt-2"}>
+          <div  className={"p-1 grid grid-cols-2 gap-4 mt-2"}>
             <Card className="flex-col">
               <CardHeader>
                 <CardTitle className={"text-lg "}>Case Information</CardTitle>
@@ -1760,55 +1722,15 @@ const [endDate, setEndDate] = useState(null);
                 <CaseField label="Case Status" className={"mt-2"} open span={2}>
                   <SearchCommandBlock
                       value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
-                      onChange={ async (label) => {
+                      onChange={(label) => {
                         const enumValue = labelToStatusEnum[label];
                         onChangeCase("CaseStatus")(enumValue);
-                        console.log("Selected label:", label);
-                        console.log("Mapped enum:", enumValue);
-                        
-                        if(enumValue.startsWith("NEW_Assign")) {
-                          const role = enumValue.endsWith("CE") ? "ce" : enumValue.endsWith("APO") ? "apo" : null;
-                          console.log("Mapped enum:", role);
-                          
-                          if(role) {
-                            try {
-                              fetchUserAssign(role);
-                              console.log("Mapped enum:", roleAssign);
-                            } catch (err) {
-                              console.error("Error fetching role: ", err);
-                            }
-                          }
-                        } else{
-                          setRoleAssign([]);
-                        }
-                        
                       }}
                       placeholder="--Select--"
                       options={Object.values(statusEnumToLabel)}
                     />
 
                 </CaseField>
-                <CaseField label="Assign To" className={"mt-2"} open span={2} hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}>
-                    <SearchCommandBlock
-                      value={caseForm?.Owner}
-                      onChange={(selectedID) => {
-                            if (selectedID === null) {
-                          onChangeCase("AssignTo")(null); // Clear the value!
-                          return;
-                        }
-                        const selectedUser = roleAssign.find(user => user.IDUser === selectedID);
-                        if (selectedUser) {
-                          onChangeCase("Owner")(selectedUser.IDUser);
-                        }
-                      }}
-                      placeholder="--Select--"
-                      options={roleAssign.map(user => ({ label: user.Name, value: user.IDUser }))}
-                      renderLabel={(opt) => opt.label}
-                      getValue={(opt) => opt.value}
-                    />
-                  </CaseField>
-                {/* {assignToForm == true ?? (
-                )} */}
 
                 <CaseField label="Case Type" open className={"mt-2"} span={2}>
                   <SearchCommandBlock
@@ -1858,7 +1780,7 @@ const [endDate, setEndDate] = useState(null);
 
                 <Accordion type="single" collapsible className="w-full col-span-2">
                   <AccordionItem value="more-details" className="pl-5">
-                    <AccordionTrigger className={"decoration-transparent border-1 p-2 cursor-pointer"}>More Details</AccordionTrigger>
+                    <AccordionTrigger className={"decoration-transparent "}>More Details</AccordionTrigger>
                     <AccordionContent className={"m-1"}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <CaseField label="Case Closed Date">
@@ -1995,7 +1917,7 @@ const [endDate, setEndDate] = useState(null);
                 </CaseField>
                 <Accordion type="single" collapsible className="col-span-2">
                   <AccordionItem value="more-details" className={"pl-5 "}>
-                    <AccordionTrigger className={"decoration-transparent border p-2 cursor-pointer"}>More Details</AccordionTrigger>
+                    <AccordionTrigger className={"decoration-transparent"}>More Details</AccordionTrigger>
                     <AccordionContent className="m-1">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
                         <CaseField label="Submitted By">
@@ -2117,7 +2039,7 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
           </Card>   
 
-          <div className="mt-2 p-3">
+          <div className="mt-2 p-1">
             <Card className="flex-col">
               <CardHeader>
                 <CardTitle className="text-lg ">Asset Information</CardTitle>
