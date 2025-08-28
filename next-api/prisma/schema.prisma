@@ -54,6 +54,7 @@ model caseinformation {
   casenotes_casenotes_CaseIDTocaseinformation   casenotes[]          @relation("casenotes_CaseIDTocaseinformation")
   workorder                                     workorder[]
   createdByUser                                 User?                @relation("UserCreatedCases", fields: [CreatedBy], references: [IDUser], onDelete: Restrict, onUpdate: Cascade)
+  ownerUser                                     User?                @relation("UserOwnedCases", fields: [Owner], references: [IDUser], onDelete: Restrict, onUpdate: Cascade)
   ServiceCatalogID                              Int?
   servicecatalog                                servicecatalog?      @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID], onDelete: Restrict)
   global_trade_check                            global_trade_check?  @relation(fields: [id_gtc], references: [id_gtc], onDelete: Restrict)
@@ -412,6 +413,7 @@ model User {
 
 
   caseinformations_created caseinformation[] @relation("UserCreatedCases")
+  caseinformations_owned   caseinformation[] @relation("UserOwnedCases")
   bookings_created         Bookings[]        @relation("UserCreatedBookings")
 
   workorders_owned     workorder[]     @relation("UserWorkOrders")
