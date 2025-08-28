@@ -7,6 +7,9 @@ import { TabsService } from '../pages/services/service-case'
 import { useDraft } from '../components/DraftContext';
 import { useAuth } from '@/context/auth-context';
 import { TabsServiceCaseDetails } from './CaseDetail';
+import { TabsServiceCaseDetailsApo } from './CaseDetailApo';
+
+
 export const Case = () => {
   const { caseId } = useParams(); // Get caseId from URL params
   const { updateDraft } = useDraft(); // Access updateDraft from context
@@ -26,16 +29,16 @@ useEffect(() => {
   updateDraft('caseId', caseId); // Save the visited caseId to drafts
 
   const loadCaseData = async () => {
-    Swal.fire({
-      title: 'Memuat Case Detail...',
-      text: 'Mohon tunggu sebentar',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => Swal.showLoading(),
-      customClass: {
-        popup: 'z-[9999]',
-      }
-    });
+    // Swal.fire({
+    //   title: 'Memuat Case Detail...',
+    //   text: 'Mohon tunggu sebentar',
+    //   allowOutsideClick: false,
+    //   allowEscapeKey: false,
+    //   didOpen: () => Swal.showLoading(),
+    //   customClass: {
+    //     popup: 'z-[9999]',
+    //   }
+    // });
 
     try {
       const response = await ApiCustomer.get(`/api/case-information/${caseId}`);
@@ -88,36 +91,50 @@ useEffect(() => {
 
   if (!caseDetails) {
     return (
-      <div className="p-6 space-y-6">
-        <Skeleton className="h-6 w-1/4" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-40 w-full rounded-lg" />
-        <div className="space-y-2">
+      <div className="p-2 space-y-6">
+        <Skeleton className="h-6 w-1/4"  />
+        <Skeleton className="w-1/1 h-30" />
+        <div className="grid grid-cols-2 gap-4">
+        <Skeleton className="h-116 w-full rounded-lg" />
+        <Skeleton className="h-116 w-full rounded-lg" />
+        </div>
+        <div className="space-y-2" hidden>
           <Skeleton className="h-4 w-3/4" />
           <Skeleton className="h-4 w-2/4" />
           <Skeleton className="h-4 w-full" />
         </div>
+        
       </div>
     );
   }
   const { user } = useAuth();
   return (
     <>
-    {user.role === 'admin' ?
+    {user.role === 'admin' ? (
       <TabsService
         caseDetails={caseDetails}
         setCaseDetails={setCaseDetails}
         caseNote={caseNote}
         caseNoteFormData={caseNoteFormData}
         setCaseNoteFormData={setCaseNoteFormData}
-      /> :
+      /> 
+    ) : user.role === 'apo' ? (
+        <TabsServiceCaseDetailsApo
+          caseDetails={caseDetails}
+          setCaseDetails={setCaseDetails}
+          caseNote={caseNote}
+          caseNoteFormData={caseNoteFormData}
+          setCaseNoteFormData={setCaseNoteFormData}
+        />
+    ) : (
       <TabsServiceCaseDetails
           caseDetails={caseDetails}
           setCaseDetails={setCaseDetails}
           caseNote={caseNote}
           caseNoteFormData={caseNoteFormData}
           setCaseNoteFormData={setCaseNoteFormData}
-      />
+      /> 
+    )
     }
     </>
   );
