@@ -45,21 +45,6 @@ export default function ApoLanding() {
     // const [currentPage, setCurrentPage] = useState(1);
     // const ItemsPerPage = 3;
 
-    // const fetchPart = async() => {
-    //     try {
-    //         const response = await ApiCustomer.get("api/user")
-    //         const allPart = response.data.data;
-    //         const filterPart = allPart.filter(user => user.Role === "ce");
-
-    //         setUsers(filterPart);
-    //     } catch (error) {
-    //         console.error("Error Fetching User Role Customer Enginneering");
-    //     }
-    // }
-    // useEffect(() => {
-    //     fetchPart();
-    // },[]);
-    
     // const indexOfLastItem = currentPage * ItemsPerPage;
     // const indexOfFirstItem = indexOfLastItem - ItemsPerPage;
     // const currentData = parts.slice(indexOfFirstItem, indexOfLastItem);

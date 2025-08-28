@@ -8,6 +8,7 @@ import { useDraft } from '../components/DraftContext';
 import { useAuth } from '@/context/auth-context';
 import { TabsServiceCaseDetails } from './CaseDetail';
 import { TabsServiceCaseDetailsApo } from './CaseDetailApo';
+import { TabsServiceCaseDetailsCe } from './CaseDetailCe';
 
 
 export const Case = () => {
@@ -126,6 +127,14 @@ useEffect(() => {
           caseNoteFormData={caseNoteFormData}
           setCaseNoteFormData={setCaseNoteFormData}
         />
+    ) : user.role === 'ce' ? (
+      <TabsServiceCaseDetailsCe
+         caseDetails={caseDetails}
+          setCaseDetails={setCaseDetails}
+          caseNote={caseNote}
+          caseNoteFormData={caseNoteFormData}
+          setCaseNoteFormData={setCaseNoteFormData}
+      />
     ) : (
       <TabsServiceCaseDetails
           caseDetails={caseDetails}
