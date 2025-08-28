@@ -139,7 +139,6 @@ export const ServiceWork = () => {
     ShipmentCountry: "",
     ShipmentState: ""
   })
-
   const handleSLAChange = (field) => (value) => {
     console.log("Changed:", field, value); 
     setSLA((prev) => ({

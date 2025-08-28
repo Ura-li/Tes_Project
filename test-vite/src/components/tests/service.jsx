@@ -131,6 +131,7 @@ export const ServiceWork = () => {
     return new Date(dateString).toLocaleString();
   };
 
+  // const fetchBookings = async () => {
   //   try {
   //     const response = await ApiCustomer.get('/api/bookings')
   //     setBookings(response.data.data)
