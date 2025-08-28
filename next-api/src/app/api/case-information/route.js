@@ -86,6 +86,7 @@ export async function GET(request) {
         },
       },
       createdByUser: true,
+      ownerUser: true,
       global_trade_check: true,
       caseresolution: true,
       otcCodeTable: true,
@@ -117,8 +118,8 @@ export async function GET(request) {
           caseData.asset_information?.product_information?.ProductName ||
           "No Product Name",
         CreatedName: caseData.createdByUser?.Name, // Replace with the database owned
-        Owner: caseData.createdByUser?.Name, // Replace with the database owned
-        WorkGroup: caseData.createdByUser?.Name, // Replace with the database owned
+        Owner: caseData.ownerUser?.Name, // Replace with the database owned
+        WorkGroup: caseData.ownerUser?.Name, // Replace with the database owned
         CaseStatus: caseData.CaseStatus,
         caseinformation: caseData,
       })),
