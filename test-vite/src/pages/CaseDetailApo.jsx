@@ -101,6 +101,7 @@ export const TabsServiceCaseDetailsApo = ({
     CaseType: "",
     CaseStatus: "",
     CaseSubject: "",
+    Owner: "",
   });
 
   const [gtcForm, setGtcForm] = useState({
@@ -255,10 +256,16 @@ export const TabsServiceCaseDetailsApo = ({
           if (caseFilled) {
               try {
                 const oldStatus = caseDetails.CaseStatus;
-                const newStatus = caseForm.CaseStatus;
+                let newStatus = caseForm.CaseStatus;
+
+                const isNewAssignStatus = newStatus.includes("NEW_Assign");
+                if(isNewAssignStatus) newStatus = "Open";
+
                  Object.assign(dataToUpdate, {
                   CaseType: caseForm.CaseType || "",
                   CaseStatus: newStatus || "",
+                  Owner: caseForm.Owner || caseDetails.Owner
+
                 });
                 savedModules.push("Case");
                 if (oldStatus !== newStatus) {
@@ -1157,6 +1164,8 @@ export const ServiceCase = ({
   const [caseClosedDate, setCaseClosedDate] = useState(null);
   const [submittedToBase, setsubmittedToBase] = useState(null);
 
+  const [roleAssign, setRoleAssign] = useState([]);
+
   const [pendingCustomerAction, setPendingCustomerAction] = useState(null);
   const [customerRequestedCloseDate, setCustomerRequestedCloseDate] =
     useState(null);
@@ -1442,8 +1451,22 @@ const statusEnumToLabel = {
   Pending_Order: "Pending Order",
   Escalated: "Escalated",
   Quote_Approved: "Quote Approved",
-  Pending_Quote: "Pending Quote"
+  Pending_Quote: "Pending Quote",
+  NEW_AssignCE: "New Assign To CE",
+  NEW_AssignAPO: "New Assign To APO",
+  NEW_AssignFD: "New Assign To FD"
 };
+
+
+const fetchUserAssign = async (role) => {
+  try {
+    const res = await ApiCustomer.get(`/api/user?role=${role}`);
+    setRoleAssign(res.data.data);
+  } catch (err) {
+    console.error("Error fetching role: ",err);    
+  }
+}
+
 
 const labelToStatusEnum = Object.fromEntries(
   Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
@@ -1495,7 +1518,11 @@ const fetchActionLog = async () => {
     fetchCsr();
     fetchCase();
     fetchActionLog();
+    
   }, []);
+  // useEffect(() =>{
+    
+  // }, [caseForm?.CaseStatus])
 
   useEffect(() => {
     if (otcCode.length > 0 && caseDetails?.OTCCode) {
@@ -1727,12 +1754,47 @@ const [endDate, setEndDate] = useState(null);
                       onChange={(label) => {
                         const enumValue = labelToStatusEnum[label];
                         onChangeCase("CaseStatus")(enumValue);
+
+                        if(enumValue.startsWith("NEW_Assign")) {
+                          const role = enumValue.endsWith("CE") ? "ce" : enumValue.endsWith("APO") ? "apo" : enumValue.endsWith("FD") ? "fd" : null;
+                          console.log("Mapped enum:", role);
+                          
+                          if(role) {
+                            try {
+                              fetchUserAssign(role);
+                              console.log("Mapped enum:", roleAssign);
+                            } catch (err) {
+                              console.error("Error fetching role: ", err);
+                            }
+                          }
+                        } else{
+                          setRoleAssign([]);
+                        }
                       }}
                       placeholder="--Select--"
                       options={Object.values(statusEnumToLabel)}
                     />
 
                 </CaseField>
+                <CaseField label="Assign To" className={"mt-2"} open span={2} hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}>
+                    <SearchCommandBlock
+                      value={caseForm?.Owner}
+                      onChange={(selectedID) => {
+                            if (selectedID === null) {
+                          onChangeCase("AssignTo")(null); // Clear the value!
+                          return;
+                        }
+                        const selectedUser = roleAssign.find(user => user.IDUser === selectedID);
+                        if (selectedUser) {
+                          onChangeCase("Owner")(selectedUser.IDUser);
+                        }
+                      }}
+                      placeholder="--Select--"
+                      options={roleAssign.map(user => ({ label: user.Name, value: user.IDUser }))}
+                      renderLabel={(opt) => opt.label}
+                      getValue={(opt) => opt.value}
+                    />
+                  </CaseField>
 
                 <CaseField label="Case Type" open className={"mt-2"} span={2}>
                   <SearchCommandBlock

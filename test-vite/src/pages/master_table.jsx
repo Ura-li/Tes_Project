@@ -3782,6 +3782,7 @@ export const User_table = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [goToPageInput, setGoToPageInput] = useState("");
 
+
   // 🔹 sort state
   const [sortConfig, setSortConfig] = useState({
     key: "IDUser",
@@ -3817,6 +3818,7 @@ export const User_table = () => {
       const response = await ApiCustomer.get("/api/user");
       if (response.data.success) {
         setUserData(response.data.data);
+        console.log(response.data.data)
         Swal.close();
       } else {
         setError("Failed to fetch User data");
@@ -4033,8 +4035,9 @@ export const User_table = () => {
                   {/* Tampilkan data Signature di sini */}
                   <td className="p-2 border">{UserItem.Signature}</td>
                   <td className="p-2 border">
-                    {UserItem.ProfilePhoto ? (
-                      <img src={UserItem.ProfilePhoto} alt="Profile" className="w-10 h-10 object-cover rounded-full mx-auto" />
+                    {/* {console.log(preview?.ProfilePhoto)} */}
+                    {UserItem?.ProfilePhoto ? (
+                      <img src={`${import.meta.env.VITE_API_BASE_URL}${UserItem.ProfilePhoto}`} alt="Profile" className="w-10 h-10 object-cover rounded-full mx-auto" />
                     ) : (
                       "No Photo"
                     )}

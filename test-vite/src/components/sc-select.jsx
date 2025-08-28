@@ -143,6 +143,33 @@ useEffect(() => {
     );
   }
 
+export function SelectBarState({ id, onChange, value, options, placeholder, disabled }) {
+  return (
+    <Select 
+      value={value?.id || ""} 
+      onValueChange={(val) => {
+        const obj = options.find((o) => o.id === val);
+        onChange(obj || { id: "", name: "" });
+      }}
+      disabled={disabled}
+    >
+      <SelectTrigger className="w-full border-black">
+        <SelectValue placeholder={placeholder || "Select an option"}>
+          {value?.name || placeholder}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {options.map((opt) => (
+            <SelectItem key={opt.id} value={opt.id}>
+              {opt.name}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+}
 
 
 

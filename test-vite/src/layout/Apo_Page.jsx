@@ -8,41 +8,43 @@ import { Badge } from "@/components/ui/badge";
 
 export default function ApoLanding() {
     const { user } = useAuth();
-      const [loading, setLoading] = useState(false);
+    const [userData, setUserData] = useState([]);
     const [preview, setPreview] = useState({
-          ProfilePhoto: null,
-          Signature: null,
-          Phone: null
-      });
+        ProfilePhoto: null,
+        Signature: null,
+    });
 
     const fetchData = async () => {
-        setLoading(true);
         try {
-            const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`);
-             setPreview({
+            const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
+            const resFetchUserData = fecthUserData.data.data;
+            console.log("Fetch user daya : ", user)
+            setUserData({
+                ...userData,
+                Username: resFetchUserData.Username,
+                Name: resFetchUserData.Name,
+                Email: resFetchUserData.Email,
+                Phone: resFetchUserData.Phone || "",
+                ProfilePhoto: resFetchUserData.ProfilePhoto,
+                Signature: resFetchUserData.Signature,
+            })
+            setPreview({
                 ProfilePhoto: fecthUserData.data.data.ProfilePhoto ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.ProfilePhoto}` : null,
                 Signature: fecthUserData.data.data.Signature ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.Signature}` : null,
-                Phone: fecthUserData.data.data.Phone || null
             });
-        }catch (error) {
+        } catch (err) {
+            console.error(err);
             
-         Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Gagal memuat data. Silakan coba lagi.',
-              });
-              console.error('Error fetching case data:', error);
-              throw error;
-            } finally {
-              setLoading(false);
-            }
+        }
     }
-
-     useEffect(() => {
+    // fetchData();
+    useEffect(() =>{
         fetchData();
-      }, []);
-    
-    
+    },[])
+    // const [parts, setPart] = useState([]);
+    // const [currentPage, setCurrentPage] = useState(1);
+    // const ItemsPerPage = 3;
+
     // const indexOfLastItem = currentPage * ItemsPerPage;
     // const indexOfFirstItem = indexOfLastItem - ItemsPerPage;
     // const currentData = parts.slice(indexOfFirstItem, indexOfLastItem);
@@ -52,25 +54,29 @@ export default function ApoLanding() {
         <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3">
             <Card className={"rounded-sm"}>
                 <CardHeader className={"grid grid-cols-2 items-start"}>
-                   {!preview.ProfilePhoto && (
-                    <div className="flex flex-col items-center">
-                        <div className="w-20 h-20 rounded-full border-4 border-white shadow-md -mb-10">
+                    {!preview.ProfilePhoto && (
+                    <div className="flex justify-start">
+                        <div className="w-30 h-30 rounded-full border-4 border-white shadow-md text-center">
                         <span className="text-3xl font-bold">?</span>
                         </div>
                     </div>
                     )}
                     {preview.ProfilePhoto && (
-                    <div className=" items-center grid grid-cols-2">
-                        <div className="w-25 h-25 [clip-path:inset(0_0_50%_0)]  border-5 absolute rounded-t-full "/>
-                        <div className="w-25 h-25 [clip-path:inset(0_50%_0_0)] border-5 border-blue-400 absolute rounded-t-full "/>
-                        <div className="w-25 h-25 [clip-path:inset(50%_0_0_5%)] border-5 border-blue-400 absolute rounded-r-full "/>
+                    <div className="flex justify-start">
                         <img
                         src={preview.ProfilePhoto}
                         alt="Profile Preview"
-                        className="w-25 h-25 rounded-full border-4 border-white col-span-2"
+                        className="w-30 h-30 rounded-full border-4 border-white shadow-md text-center"
                         />
                     </div>
                     )}
+                    {/* <div className="flex justify-start">
+                        <img  
+                            src={user?.avatar || "/default-avatar.png"}
+                            alt="avatar"
+                            className="w-30 h-30 rounded-full border-4 border-white shadow-md text-center"
+                        />
+                    </div> */}
                     <div className="flex justify-end">
                     <Badge
                         variant={"outline"}
@@ -82,8 +88,8 @@ export default function ApoLanding() {
                 </CardHeader>
                 <CardContent className={"ml-4 flex gap-1 flex-col"}>
                     <CardTitle className={"text-xl"}>{user?.name || "User"}</CardTitle>
-                    <span className="text-gray-400">{user?.email}</span>
-                    <span className="text-sm text-gray-400">{preview?.Phone}</span>
+                    <span className="text-gray-400">{user?.email}</span> 
+                    <span className='text-sm text-gray-500'>{userData.Phone}</span>
                 </CardContent>
                 <span className="text-xs text-center text-gray-500 mt-4">
                     Latest Login: {new Date().toLocaleString()}

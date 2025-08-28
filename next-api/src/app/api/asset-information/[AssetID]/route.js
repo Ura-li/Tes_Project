@@ -18,7 +18,11 @@ export async function GET(request, { params }) {
         include: {
             site_account: true,
             contact_information: true,
-            product_information:true,
+            product_information:{
+                include: {
+                    product_type: true
+                }
+            },
         }
     });
 
