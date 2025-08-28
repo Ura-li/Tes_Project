@@ -4,9 +4,6 @@ import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || '';
 
 const JWT_SECRET =  process.env.JWT_SECRET || '' 
 

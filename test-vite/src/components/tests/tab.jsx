@@ -593,7 +593,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
       label: "",
       onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
     },
-    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now")},
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
     {
       icon: FileSymlink,
