@@ -80,7 +80,7 @@ import ServiceRequestPDF from '@/components/service-request-form'; // adjust pat
 import { Textarea } from "@/components/ui/textarea";
 
 
-export const TabsServiceCaseDetails = ({ 
+export const TabsServiceCaseDetailsApo = ({ 
   caseDetails,
   setCaseDetails, 
   caseNote,
@@ -101,7 +101,6 @@ export const TabsServiceCaseDetails = ({
     CaseType: "",
     CaseStatus: "",
     CaseSubject: "",
-    Owner: "",
   });
 
   const [gtcForm, setGtcForm] = useState({
@@ -152,9 +151,9 @@ export const TabsServiceCaseDetails = ({
     setCsrForm((prev) => ({ ...prev, [field]: value }));
   };
 
+
  const handleSave = async (redirect = true) => {
   console.log("Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
-  console.log("CaseForm Data to Submit:", caseForm);
 
   try {
     Swal.fire({
@@ -255,16 +254,11 @@ export const TabsServiceCaseDetails = ({
           case 'CASE':
           if (caseFilled) {
               try {
-                console.log("CaseForm Data To Update: ", caseForm);
                 const oldStatus = caseDetails.CaseStatus;
-                let newStatus = caseForm.CaseStatus;
-                
-                const isNewAssignStatus = newStatus.includes("NEW_Assign");
-                if(isNewAssignStatus) newStatus = "Open";
+                const newStatus = caseForm.CaseStatus;
                  Object.assign(dataToUpdate, {
                   CaseType: caseForm.CaseType || "",
                   CaseStatus: newStatus || "",
-                  Owner: caseForm.Owner || caseDetails.Owner
                 });
                 savedModules.push("Case");
                 if (oldStatus !== newStatus) {
@@ -296,7 +290,6 @@ export const TabsServiceCaseDetails = ({
       }
 
       if (Object.keys(dataToUpdate).length > 0) {
-        console.log("Data To Update: ", dataToUpdate);
         await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataToUpdate);
       }
     }
@@ -392,8 +385,8 @@ const openPopup = () => {
       document.body.removeChild(link);
     }, },
     { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR"), hidden: true },
-    { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), hidden: true },
-    { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder"), hidden:true },
+    { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder")},
+    { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder"), hidden: true },
     { icon: StepBack, label: "Sales Offer", hidden:true},
     { icon: StepBack, label: "Close Case", hidden:true },
     { icon: StepBack, label: "Pick", hidden:true },
@@ -579,24 +572,20 @@ const spanMap = {
   6: "col-span-6",
 };
 
-export const CaseField = ({ label, children, lock, open,span = 1, className, star, hide }) => {
-  if (hide) return null;
-
-  return (
+export const CaseField = ({ label, children, lock, open,span = 1, className, star, }) => (
   <>
     <CardTitle
       className={twMerge(
         `relative font-medium flex items-center gap-2`,
         lock ? "pl-6" : "", open ? "pl-6" : "",
         className
-
       )}
     >
       {lock && (
         <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
       )}
       {open && (
-        <LockOpen className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
+        <LockOpen className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground"/>
       )}
       {label}
       {star ? <span className="text-red-400">*</span> : ""}
@@ -606,10 +595,7 @@ export const CaseField = ({ label, children, lock, open,span = 1, className, sta
       {children}
     </CardTitle>
   </>
-  )
-
-
-};
+);
 
 // export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
 //   const navigate = useNavigate();
@@ -1174,8 +1160,6 @@ export const ServiceCase = ({
   const [pendingCustomerAction, setPendingCustomerAction] = useState(null);
   const [customerRequestedCloseDate, setCustomerRequestedCloseDate] =
     useState(null);
-  
-  const [roleAssign, setRoleAssign] = useState([]);
   const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
   useEffect(() => {
     if (caseDetails?.CreatedOn) {
@@ -1184,14 +1168,14 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case & Customer", hidden: true},
+    { value: "case_info", label: "Case & Customer"},
+    { value: "ci_orders", label: "Work & Material Orders"},
+    { value: "action_log", label: "Action Log"},
     { value: "customer,add,entitement", label: "Asset & Entitement", hidden: true },
     { value: "ci_notes", label: "Notes & Information", hidden: true },
-    { value: "action_log", label: "Action Log", hidden: true},
     { value: "ci_activitas", label: "Activities", disable: true, hidden: true },
     { value: "ci_actions", label: "Customer Interactions", disable: true, hidden: true},
     { value: "ci_wo", label: "Work Order Validation", disable: true ,hidden: true},
-    { value: "ci_orders", label: "Orders",disable: true ,hidden: true},
     { value: "ci_salles", label: "Sales Offer", disable: true ,hidden: true},
     { value: "ci_knowledge", label: "Knowledge & Attachments", hidden: true},
     // { component: <SelectBarRelated />,},
@@ -1204,6 +1188,11 @@ export const ServiceCase = ({
   //       { component: <SelectBarRelated /> },
   //     ]
   //   : [];
+
+   const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleString();
+  };
 
   const [selected, setSelected] = useState("--Selected--"); 
 
@@ -1309,7 +1298,7 @@ export const ServiceCase = ({
 
   const fetchOwnerUserData = async () => {
     try {
-      const response = await ApiCustomer.get(`/api/user/${caseDetails.Owner}`)
+      const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
       setOwnerUserData(response.data.data)
     } catch (error) {
       
@@ -1440,46 +1429,26 @@ export const ServiceCase = ({
 };
 
 
-  const statusEnumToLabel = {
-    New: "New",
-    Open: "Open",
-    InActive: "Inactive",
-    Close: "Closed",
-    Active: "Active",
-    Monitor: "Monitor",
-    Pending_Customer_Action: "Pending Customer Action",
-    Quote_Requested: "Quote Requested",
-    Pending_Follow_Up: "Pending Follow Up",
-    Pending_Order: "Pending Order",
-    Escalated: "Escalated",
-    Quote_Approved: "Quote Approved",
-    Pending_Quote: "Pending Quote",
-    NEW_AssignCE: "New Assign To CE",
-    NEW_AssignAPO: "New Assign To APO"
-  };
+const statusEnumToLabel = {
+  New: "New",
+  Open: "Open",
+  InActive: "Inactive",
+  Close: "Closed",
+  Active: "Active",
+  Monitor: "Monitor",
+  Pending_Customer_Action: "Pending Customer Action",
+  Quote_Requested: "Quote Requested",
+  Pending_Follow_Up: "Pending Follow Up",
+  Pending_Order: "Pending Order",
+  Escalated: "Escalated",
+  Quote_Approved: "Quote Approved",
+  Pending_Quote: "Pending Quote"
+};
 
-  const assignToForm= true;
-  // const assignToForm = statusEnumToLabel.startsWith("NEW_Assign");
+const labelToStatusEnum = Object.fromEntries(
+  Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
+);
 
-  
-
-// const labelToStatusEnum = Object.fromEntries(
-//   Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
-// );
-const labelToStatusEnum = Object.entries(statusEnumToLabel).reduce((acc, [key, val]) => {
-  acc[val] = key;
-  return acc;
-}, {});
-
-
-const fetchUserAssign = async (role) => {
-  try {
-    const res = await ApiCustomer.get(`/api/user?role=${role}`);
-    setRoleAssign(res.data.data);
-  } catch (err) {
-    console.error("Error fetching role: ",err);    
-  }
-}
 
 const fetchCase = async () => {
   try {
@@ -1527,9 +1496,6 @@ const fetchActionLog = async () => {
     fetchCase();
     fetchActionLog();
   }, []);
-  useEffect(() => {
-    fetchUserAssign();
-  }, [assignToForm]);
 
   useEffect(() => {
     if (otcCode.length > 0 && caseDetails?.OTCCode) {
@@ -1609,9 +1575,9 @@ const [endDate, setEndDate] = useState(null);
       )}
       <Card className="border-0 w-full">
         <Tabs defaultValue="case_info">
-          <CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2 h-22">
+          <CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2">
             <div className="flex justify-between">
-              <CardTitle className="text-2xl pl-1">
+              <CardTitle className="text-2xl pl-2">
                 {caseDetails.CaseID}
                 <span className="flex items-center text-sm">
                   Case .
@@ -1734,10 +1700,8 @@ const [endDate, setEndDate] = useState(null);
             </TabsList>
           </CardHeader>
 
-          <TabsContent value="case_infor">
-          </TabsContent>
-
-          <div  className={"p-3 grid grid-cols-2 gap-4 mt-2"}>
+        <TabsContent value="case_info">
+                  <div className={"p-3 grid grid-cols-2 gap-4 mt-2"}>
             <Card className="flex-col">
               <CardHeader>
                 <CardTitle className={"text-lg "}>Case Information</CardTitle>
@@ -1760,55 +1724,15 @@ const [endDate, setEndDate] = useState(null);
                 <CaseField label="Case Status" className={"mt-2"} open span={2}>
                   <SearchCommandBlock
                       value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
-                      onChange={ async (label) => {
+                      onChange={(label) => {
                         const enumValue = labelToStatusEnum[label];
                         onChangeCase("CaseStatus")(enumValue);
-                        console.log("Selected label:", label);
-                        console.log("Mapped enum:", enumValue);
-                        
-                        if(enumValue.startsWith("NEW_Assign")) {
-                          const role = enumValue.endsWith("CE") ? "ce" : enumValue.endsWith("APO") ? "apo" : null;
-                          console.log("Mapped enum:", role);
-                          
-                          if(role) {
-                            try {
-                              fetchUserAssign(role);
-                              console.log("Mapped enum:", roleAssign);
-                            } catch (err) {
-                              console.error("Error fetching role: ", err);
-                            }
-                          }
-                        } else{
-                          setRoleAssign([]);
-                        }
-                        
                       }}
                       placeholder="--Select--"
                       options={Object.values(statusEnumToLabel)}
                     />
 
                 </CaseField>
-                <CaseField label="Assign To" className={"mt-2"} open span={2} hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}>
-                    <SearchCommandBlock
-                      value={caseForm?.Owner}
-                      onChange={(selectedID) => {
-                            if (selectedID === null) {
-                          onChangeCase("AssignTo")(null); // Clear the value!
-                          return;
-                        }
-                        const selectedUser = roleAssign.find(user => user.IDUser === selectedID);
-                        if (selectedUser) {
-                          onChangeCase("Owner")(selectedUser.IDUser);
-                        }
-                      }}
-                      placeholder="--Select--"
-                      options={roleAssign.map(user => ({ label: user.Name, value: user.IDUser }))}
-                      renderLabel={(opt) => opt.label}
-                      getValue={(opt) => opt.value}
-                    />
-                  </CaseField>
-                {/* {assignToForm == true ?? (
-                )} */}
 
                 <CaseField label="Case Type" open className={"mt-2"} span={2}>
                   <SearchCommandBlock
@@ -2025,99 +1949,9 @@ const [endDate, setEndDate] = useState(null);
                 </Accordion>
               </CardContent>
             </Card>
+        </div>
 
-          </div>
-
-          <Card className="flex-col mt-5" hidden>
-              <CardHeader>
-                <CardTitle className="text-lg ">Global Trade Check</CardTitle>
-                <hr />
-              </CardHeader>
-              
-              <CardContent className="grid gap-10  grid-cols-6 p-3 items-center">
-                <CaseField label="Global Trade Status">
-                  <SearchCommandBlock
-                    value={formGtc.global_trade_status}
-                    onChange={onChangeGtc("global_trade_status")}
-                    placeholder="--Select--"
-                    options={[
-                      "Pass",
-                      "Fail",
-                      "Not Done",
-                      "Not Needed",
-                      "Failed Confirmed",
-                    ]}
-                  />
-                </CaseField>
-
-                <CaseField label="GT Override Reason">
-                  <SearchCommandBlock
-                    value={formGtc.gt_override_reason}
-                    onChange={onChangeGtc("gt_override_reason")}
-                    placeholder="--Select--"
-                    options={[
-                      "Military Keyword False Match",
-                      "Embargo False Match",
-                      "RPL False Match",
-                      "Active Contract",
-                      "United States Government",
-                      "Global Trade Authorization",
-                      "RPL Manual Screening Passed",
-                      "Fail Confirmed by GT",
-                      "Other",
-                    ]}
-                  />
-                </CaseField>
-                <CaseField label="GT Active Listening">
-                  <SearchCommandBlock
-                    value={formGtc.gt_active_listening}
-                    onChange={onChangeGtc("gt_active_listening")}
-                    placeholder="--Select--"
-                    options={["Pass", "Fail"]}
-                  />
-                </CaseField>
-                <CaseField label="Embargoed Country" lock>
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                    value={formGtc.embargoed_country}
-                    onChange={(e) =>
-                      onChangeGtc("embargoed_country")(e.target.value)
-                    }
-                  />
-                </CaseField>
-                <CaseField label="GT Details">
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                    value={formGtc.gt_details}
-                    onChange={(e) => onChangeGtc("gt_details")(e.target.value)}
-                  />
-                </CaseField>
-                <CaseField label="GT All Comments">
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                    value={formGtc.gt_al_comments}
-                    onChange={(e) =>
-                      onChangeGtc("gt_al_comments")(e.target.value)
-                    }
-                  />
-                </CaseField>
-                <CaseField className={"col-start-3"} label="Screening ID">
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                    value={formGtc.screening_id}
-                    onChange={(e) =>
-                      onChangeGtc("screening_id")(e.target.value)
-                    }
-                  />
-                </CaseField>
-              </CardContent>
-          </Card>   
-
-          <div className="mt-2 p-3">
+        <div className="mt-2 p-3">
             <Card className="flex-col">
               <CardHeader>
                 <CardTitle className="text-lg ">Asset Information</CardTitle>
@@ -2219,58 +2053,9 @@ const [endDate, setEndDate] = useState(null);
     </div>
   </div>
             </Card>
-          </div>
+        </div>
 
-          <div className="mt-2 p-1" hidden>
-            <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">
-                  Entitlement Information
-                </CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid items-center grid-cols-9 gap-10">
-                <CaseField label="Case Entitlement" lock span={2}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Start Date" lock span={2}>
-                  {" "}
-                  <DatePicker
-                    value={startDate}
-                    onChange={setstartDate}
-                    readOnly
-                  ></DatePicker>{" "}
-                </CaseField>
-                {console.log(entitlementStatus)}
-
-                <CaseField label="Entitlement Status" lock span={2}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="End Date" lock span={2}>
-                  {" "}
-                  <DatePicker
-                    value={endDate}
-                    onChange={setEndDate}
-                    readOnly
-                  ></DatePicker>
-                </CaseField>
-                <CaseField label="Entitlement Override" lock span={2}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Selected Entitlement Offer" lock span={2}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Days Left" lock span={2}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Authorizing Employee" lock span={2}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-2 p-1">
+        <div className="mt-2 p-1">
               <Card className="flex-col">
               <CardHeader>
                 <CardTitle className="text-lg ">
@@ -2360,9 +2145,9 @@ const [endDate, setEndDate] = useState(null);
                 </div>
               </CardContent>
             </Card>
-          </div>
+        </div>
 
-          <div className="mt-2 p-1">
+        <div className="mt-2 p-1">
             <Card className="flex-col">
               <CardHeader>
                 <CardTitle className="text-lg ">Case Notes</CardTitle>
@@ -2459,52 +2244,193 @@ const [endDate, setEndDate] = useState(null);
                 </div>
               </CardContent>
             </Card>
-          </div>
+        </div>
+        </TabsContent>
 
-          <div className="mt-2 p-1">
-            <Card className="flex-col">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Action Log</CardTitle>
-                    <hr />
-                  </CardHeader>
-                  <CardContent className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[60px]">No</TableHead>
-                          <TableHead>ReferenceId</TableHead>
-                          <TableHead>Change By</TableHead>
-                          <TableHead>Old Status</TableHead>
-                          <TableHead>New Status</TableHead>
-                          <TableHead>Change At</TableHead>
-                          <TableHead>Log Description</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {actionLogs?.length > 0 ? (
-                          actionLogs.map((log, index) => (
-                            <TableRow key={log.id || index}>
-                              <TableCell>{index + 1}</TableCell>
-                              <TableCell>{log.ReferenceId}</TableCell>
-                              <TableCell>{log.changedByUser?.Name}</TableCell>
-                              <TableCell>{log.dataOld}</TableCell>
-                              <TableCell>{log.dataNew}</TableCell>
-                              <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
-                              <TableCell>{log.logDescription}</TableCell>
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={5} className="text-center italic">
-                              No action logs available.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
+        <TabsContent value="action_log">
+                    <div className="mt-2 p-1">
+                        <Card className="flex-col">
+                            <CardHeader>
+                                <CardTitle className="text-lg">Action Log</CardTitle>
+                                <hr />
+                            </CardHeader>
+                            <CardContent className="overflow-x-auto">
+                                <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                    <TableHead className="w-[60px]">No</TableHead>
+                                    <TableHead>ReferenceId</TableHead>
+                                    <TableHead>Change By</TableHead>
+                                    <TableHead>Old Status</TableHead>
+                                    <TableHead>New Status</TableHead>
+                                    <TableHead>Change At</TableHead>
+                                    <TableHead>Log Description</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {actionLogs?.length > 0 ? (
+                                    actionLogs.map((log, index) => (
+                                        <TableRow key={log.id || index}>
+                                        <TableCell>{index + 1}</TableCell>
+                                        <TableCell>{log.ReferenceId}</TableCell>
+                                        <TableCell>{log.changedByUser?.Name}</TableCell>
+                                        <TableCell>{log.dataOld}</TableCell>
+                                        <TableCell>{log.dataNew}</TableCell>
+                                        <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
+                                        <TableCell>{log.logDescription}</TableCell>
+                                        </TableRow>
+                                    ))
+                                    ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center italic">
+                                        No action logs available.
+                                        </TableCell>
+                                    </TableRow>
+                                    )}
+                                </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </div>
+        </TabsContent>
+
+        <div className="mt-2 p-1" hidden>
+            <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className="text-lg ">
+                  Entitlement Information
+                </CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid items-center grid-cols-9 gap-10">
+                <CaseField label="Case Entitlement" lock span={2}>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Start Date" lock span={2}>
+                  {" "}
+                  <DatePicker
+                    value={startDate}
+                    onChange={setstartDate}
+                    readOnly
+                  ></DatePicker>{" "}
+                </CaseField>
+                {console.log(entitlementStatus)}
+
+                <CaseField label="Entitlement Status" lock span={2}>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="End Date" lock span={2}>
+                  {" "}
+                  <DatePicker
+                    value={endDate}
+                    onChange={setEndDate}
+                    readOnly
+                  ></DatePicker>
+                </CaseField>
+                <CaseField label="Entitlement Override" lock span={2}>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Selected Entitlement Offer" lock span={2}>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Days Left" lock span={2}>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+                <CaseField label="Authorizing Employee" lock span={2}>
+                  <Input variant="invisible" placeholder="---" />
+                </CaseField>
+              </CardContent>
             </Card>
-          </div>
+        </div>
+
+          <Card className="flex-col mt-5" hidden>
+              <CardHeader>
+                <CardTitle className="text-lg ">Global Trade Check</CardTitle>
+                <hr />
+              </CardHeader>
+              
+              <CardContent className="grid gap-10  grid-cols-6 p-3 items-center">
+                <CaseField label="Global Trade Status">
+                  <SearchCommandBlock
+                    value={formGtc.global_trade_status}
+                    onChange={onChangeGtc("global_trade_status")}
+                    placeholder="--Select--"
+                    options={[
+                      "Pass",
+                      "Fail",
+                      "Not Done",
+                      "Not Needed",
+                      "Failed Confirmed",
+                    ]}
+                  />
+                </CaseField>
+
+                <CaseField label="GT Override Reason">
+                  <SearchCommandBlock
+                    value={formGtc.gt_override_reason}
+                    onChange={onChangeGtc("gt_override_reason")}
+                    placeholder="--Select--"
+                    options={[
+                      "Military Keyword False Match",
+                      "Embargo False Match",
+                      "RPL False Match",
+                      "Active Contract",
+                      "United States Government",
+                      "Global Trade Authorization",
+                      "RPL Manual Screening Passed",
+                      "Fail Confirmed by GT",
+                      "Other",
+                    ]}
+                  />
+                </CaseField>
+                <CaseField label="GT Active Listening">
+                  <SearchCommandBlock
+                    value={formGtc.gt_active_listening}
+                    onChange={onChangeGtc("gt_active_listening")}
+                    placeholder="--Select--"
+                    options={["Pass", "Fail"]}
+                  />
+                </CaseField>
+                <CaseField label="Embargoed Country" lock>
+                  <Input
+                    variant="invisible"
+                    placeholder="---"
+                    value={formGtc.embargoed_country}
+                    onChange={(e) =>
+                      onChangeGtc("embargoed_country")(e.target.value)
+                    }
+                  />
+                </CaseField>
+                <CaseField label="GT Details">
+                  <Input
+                    variant="invisible"
+                    placeholder="---"
+                    value={formGtc.gt_details}
+                    onChange={(e) => onChangeGtc("gt_details")(e.target.value)}
+                  />
+                </CaseField>
+                <CaseField label="GT All Comments">
+                  <Input
+                    variant="invisible"
+                    placeholder="---"
+                    value={formGtc.gt_al_comments}
+                    onChange={(e) =>
+                      onChangeGtc("gt_al_comments")(e.target.value)
+                    }
+                  />
+                </CaseField>
+                <CaseField className={"col-start-3"} label="Screening ID">
+                  <Input
+                    variant="invisible"
+                    placeholder="---"
+                    value={formGtc.screening_id}
+                    onChange={(e) =>
+                      onChangeGtc("screening_id")(e.target.value)
+                    }
+                  />
+                </CaseField>
+              </CardContent>
+          </Card>   
 
           <TabsContent
             value="customer,add,entitement"
@@ -2749,10 +2675,6 @@ const [endDate, setEndDate] = useState(null);
             </Card> */}
           </TabsContent>
 
-          <TabsContent value="action_log">
-              
-          </TabsContent>
-
           <TabsContent value="ci_activitas">
             <Card className="mt-7">
               <CardHeader>Hello Word</CardHeader>
@@ -2842,7 +2764,7 @@ const [endDate, setEndDate] = useState(null);
           </TabsContent>
 
           <TabsContent value="ci_orders" className={"p-2 flex flex-col gap-4"}>
-            <Card className="flex-col ">
+            <Card className="flex-col " hidden>
               <CardHeader>
                 <CardTitle className="text-lg ">Shipment Information</CardTitle>
                 <hr />
@@ -2883,7 +2805,7 @@ const [endDate, setEndDate] = useState(null);
                 <hr />
               </CardHeader>
               <CardContent className="flex flex-col gap-5 p-3 ">
-                <div className="grid grid-cols-4 gap-5">
+                <div className="grid grid-cols-4 gap-5" hidden>
                   <CaseField label="Incident Type" span={3}>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
@@ -2952,7 +2874,7 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
             </Card>
 
-            <Card className="flex-col ">
+            <Card className="flex-col" hidden>
               <CardHeader>
                 <CardTitle className="text-lg ">Parts Order</CardTitle>
                 <hr />
@@ -2982,7 +2904,7 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
             </Card>
 
-            <Card className="flex-col ">
+            <Card className="flex-col" hidden>
               <CardHeader>
                 <CardTitle className="text-lg ">Service Order</CardTitle>
                 <hr />
@@ -3045,7 +2967,7 @@ const [endDate, setEndDate] = useState(null);
                           </Link>
                         </TableCell>
                         <TableCell>{material.workorder?.CaseID}</TableCell>
-                        <TableCell>{material.CreatedOn}</TableCell>
+                        <TableCell>{formatDate(material.CreatedOn)}</TableCell>
                         <TableCell>{material.OrderStatus}</TableCell>
                         <TableCell>{material.OrderType}</TableCell>
                         <TableCell>{material.owner?.Name}</TableCell>

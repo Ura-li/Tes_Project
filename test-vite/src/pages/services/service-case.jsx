@@ -85,9 +85,9 @@ import { pdf } from '@react-pdf/renderer';
 import ServiceRequestPDF from '../../components/service-request-form'; // adjust path if needed
 
 
-export const TabsService = ({ 
+export const TabsService = ({
   caseDetails,
-  setCaseDetails, 
+  setCaseDetails,
   caseNote,
   caseNoteFormData,
   setCaseNoteFormData
@@ -116,9 +116,9 @@ export const TabsService = ({
     screening_id: "",
     gt_active_listening: "",
     gt_al_comments: "",
-    });
+  });
 
-   const [csrForm, setCsrForm] = useState({
+  const [csrForm, setCsrForm] = useState({
     caseResolutionCode: "",
     autoClose: "",
     caseReadyForClosure: "",
@@ -131,7 +131,7 @@ export const TabsService = ({
   const handleCaseDetails = (field) => (value) => {
     setCaseDetails((prev) => ({ ...prev, [field]: value }));
   }
-  
+
   const handleCaseChange = (field) => (value) => {
     setCaseForm((prev) => ({ ...prev, [field]: value }));
   }
@@ -147,120 +147,122 @@ export const TabsService = ({
   const handleGtcChange = (field) => (value) => {
     setGtcForm((prev) => ({ ...prev, [field]: value }));
   };
-  
+
   const handleEntitlementStatus = (field) => (value) => {
     setEntitlementStatus((prev) => ({ ...prev, [field]: value }));
   };
 
-   const handleCsrChange = (field) => (value) => {
+  const handleCsrChange = (field) => (value) => {
     setCsrForm((prev) => ({ ...prev, [field]: value }));
   };
 
- const handleSave = async (redirect = true) => {
-  console.log("Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
+  const handleSave = async (redirect = true) => {
+    console.log("Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
 
-  try {
-    Swal.fire({
-      title: 'Saving Case...',
-      text: 'Mohon tunggu sebentar',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
+    try {
+      Swal.fire({
+        title: 'Saving Case...',
+        text: 'Mohon tunggu sebentar',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
 
-    const user = getUserFromToken();
-    const timestamp = new Date().toLocaleString();
-    const author = user?.name || user?.email || "Unknown User";
-    const role = user?.role || "Unknown"; 
+      const user = getUserFromToken();
+      const timestamp = new Date().toLocaleString();
+      const author = user?.name || user?.email || "Unknown User";
+      const role = user?.role || "Unknown";
 
-    const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
-    const caseFilled = caseForm.CaseType && caseForm.CaseType.trim() !== "" ;
-    const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
-    const entitlementEdited = entitlementStatus !== undefined;
-    const csrEdited = csrForm && Object.keys(csrForm).length > 0;
+      const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
+      const caseFilled = caseForm.CaseType && caseForm.CaseType.trim() !== "";
+      const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
+      const entitlementEdited = entitlementStatus !== undefined;
+      const csrEdited = csrForm && Object.keys(csrForm).length > 0;
 
-    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseFilled;
+      const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseFilled;
 
-    if (!hasIntentToSave) {
-      alert("Tidak ada data yang disimpan.");
-      return;
-    }
+      if (!hasIntentToSave) {
+        alert("Tidak ada data yang disimpan.");
+        return;
+      }
 
-    let savedModules = [];
-    const dataToUpdate = {};
-    for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE']) {
-      switch (target) {
+      let savedModules = [];
+      const dataToUpdate = {};
+      for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE']) {
+        switch (target) {
 
-       case 'NOTE':
-  if (noteFilled) {
-    const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
+          case 'NOTE':
+            if (noteFilled) {
+              const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
 
-    const response = await ApiCustomer.post("/api/case-information/case-notes", {
-      LogType: caseNoteFormData.LogType,
-      ActionType: caseNoteFormData.ActionType,
-      VisibleExternally: caseNoteFormData.VisibleExternally,
-      Note: modifiedNote,
-      CaseID: caseDetails.CaseID
-    });
-      dataToUpdate.CaseNote = response.data.data.NoteID;
-
-    const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
-    setCaseNotes({ NotesDisplay: NotedDisplay, 
-          ActionType: caseNoteFormData.ActionType,
-          LogType: caseNoteFormData.LogType,
-          VisibleExternally: caseNoteFormData.VisibleExternally,});
-    
-     if (selectedSymptom) {
-      dataToUpdate.SymptomCode = selectedSymptom.SymptomCodeID;
-    }
-
-    savedModules.push("Note");
-  }
-  break;
-
-        case 'GTC':
-          if (gtcEdited) {
-            await ApiCustomer.patch("/api/case-information/global-trade-check", {
-              ...gtcForm,
-              screening_id: gtcForm.screening_id || "",
-              CaseID: caseDetails.CaseID,
-            });
-            savedModules.push("GTC");
-          }
-          break;
-
-        case 'ENTITLEMENT':
-          if (entitlementEdited) {
-            console.log(entitlementStatus);
-            Object.assign(dataToUpdate, entitlementStatus); // includes OTCCo
-            savedModules.push("Entitlement");
-          }
-          break;
-
-        case 'CSR':
-          if (csrEdited) {
-            let response;
-            if (caseDetails.id_csr) {
-              response = await ApiCustomer.patch(`/api/caseResolution/${caseDetails.id_csr}`, {
-                ...csrForm,
-                caseResolutionCode: csrForm.caseResolutionCode || "",
+              const response = await ApiCustomer.post("/api/case-information/case-notes", {
+                LogType: caseNoteFormData.LogType,
+                ActionType: caseNoteFormData.ActionType,
+                VisibleExternally: caseNoteFormData.VisibleExternally,
+                Note: modifiedNote,
+                CaseID: caseDetails.CaseID
               });
-            } else {
-              response = await ApiCustomer.post("/api/caseResolution", {
-                ...csrForm,
-                caseResolutionCode: csrForm.caseResolutionCode || "",
+              dataToUpdate.CaseNote = response.data.data.NoteID;
+
+              const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
+              setCaseNotes({
+                NotesDisplay: NotedDisplay,
+                ActionType: caseNoteFormData.ActionType,
+                LogType: caseNoteFormData.LogType,
+                VisibleExternally: caseNoteFormData.VisibleExternally,
               });
-              dataToUpdate.id_csr = response.data.data.id_csr;
+
+              if (selectedSymptom) {
+                dataToUpdate.SymptomCode = selectedSymptom.SymptomCodeID;
+              }
+
+              savedModules.push("Note");
             }
-            savedModules.push("CSR");
-          }
-          break;
+            break;
+
+          case 'GTC':
+            if (gtcEdited) {
+              await ApiCustomer.patch("/api/case-information/global-trade-check", {
+                ...gtcForm,
+                screening_id: gtcForm.screening_id || "",
+                CaseID: caseDetails.CaseID,
+              });
+              savedModules.push("GTC");
+            }
+            break;
+
+          case 'ENTITLEMENT':
+            if (entitlementEdited) {
+              console.log(entitlementStatus);
+              Object.assign(dataToUpdate, entitlementStatus); // includes OTCCo
+              savedModules.push("Entitlement");
+            }
+            break;
+
+          case 'CSR':
+            if (csrEdited) {
+              let response;
+              if (caseDetails.id_csr) {
+                response = await ApiCustomer.patch(`/api/caseResolution/${caseDetails.id_csr}`, {
+                  ...csrForm,
+                  caseResolutionCode: csrForm.caseResolutionCode || "",
+                });
+              } else {
+                response = await ApiCustomer.post("/api/caseResolution", {
+                  ...csrForm,
+                  caseResolutionCode: csrForm.caseResolutionCode || "",
+                });
+                dataToUpdate.id_csr = response.data.data.id_csr;
+              }
+              savedModules.push("CSR");
+            }
+            break;
 
           case 'CASE':
-         if (caseFilled) {
+            if (caseFilled) {
               try {
                 const oldStatus = caseDetails.CaseStatus;
                 const newStatus = caseForm.CaseStatus;
-                 Object.assign(dataToUpdate, {
+                Object.assign(dataToUpdate, {
                   CaseType: caseForm.CaseType || "",
                   CaseStatus: newStatus || "",
                 });
@@ -289,65 +291,65 @@ export const TabsService = ({
                   allowEscapeKey: false,
                 });
               }
-          }
-          break;
+            }
+            break;
+        }
+
+        if (Object.keys(dataToUpdate).length > 0) {
+          await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataToUpdate);
+        }
       }
 
-      if (Object.keys(dataToUpdate).length > 0) {
-        await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataToUpdate);
+      if (savedModules.length > 0) {
+        if (redirect) {
+          await Swal.fire({
+            icon: "success",
+            title: "Berhasil Disimpan",
+            text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
+            timer: 2500,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+          });
+          window.location.reload();
+        }
+        return true
       }
+
+    } catch (error) {
+      console.error("Save failed:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Something went wrong.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        Swal.close();
+      });
     }
+  };
 
-    if (savedModules.length > 0) {
-      if(redirect){
-        await Swal.fire({
-          icon: "success",
-          title: "Berhasil Disimpan",
-          text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
-          timer: 2500,
-          showConfirmButton: false,
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-        });
-        window.location.reload();
-      }
-      return true
+  const openPopup = () => {
+    console.log("TeSPOP");
+    const popup = window.open(
+      '/auditwindows',
+      'Popup Title',
+      'width=600,height=400'
+    );
+
+    if (popup) {
+      popup.focus();
+    } else {
+      alert('Popup blocked by browser. Please allow popups for this site.');
     }
+  };
 
-  } catch (error) {
-    console.error("Save failed:", error);
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: error.message || "Something went wrong.",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-    }).then(() => {
-      Swal.close();
-    });
-  }
-};
-
-const openPopup = () => {
-  console.log("TeSPOP");
-  const popup = window.open(
-    '/auditwindows',
-    'Popup Title',
-    'width=600,height=400'
-  );
-
-  if (popup) {
-    popup.focus();
-  } else {
-    alert('Popup blocked by browser. Please allow popups for this site.');
-  }
-};
-  
 
   useEffect(() => {
     const loadNote = async () => {
       const noteDetail = caseNote;
-      if(noteDetail ){
+      if (noteDetail) {
         const NotedDisplay = `@Created On : ${noteDetail.CreatedOn}\n${noteDetail.Note}`;
         setCaseNotes({
           NotesDisplay: NotedDisplay,
@@ -355,7 +357,7 @@ const openPopup = () => {
           LogType: noteDetail.LogType,
           VisibleExternally: noteDetail.VisibleExternally,
         })
-      } 
+      }
     }
     loadNote()
   }, [])
@@ -368,7 +370,7 @@ const openPopup = () => {
       label: "",
       onClick: () => navigate(`/app/master/Case_table`),
     },
-    { icon: SquareArrowOutUpRight, label: "",},
+    { icon: SquareArrowOutUpRight, label: "", },
     { icon: Save, label: "Save", onClick: () => handleSave() },
     {
       icon: FileSymlink,
@@ -376,21 +378,23 @@ const openPopup = () => {
       onClick: () => saveAndCloseCase(),
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
-    { icon: StepBack, label: "Complaint",},
-    { icon: StepBack, label: "SRF", onClick: async () => {
-      const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails}  />).toBlob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'Service_Request_Form.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }, },
+    { icon: StepBack, label: "Complaint", },
+    {
+      icon: StepBack, label: "SRF", onClick: async () => {
+        const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails} />).toBlob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'Service_Request_Form.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      },
+    },
     { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR") },
     { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder") },
     { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder") },
-    { icon: StepBack, label: "Sales Offer",},
+    { icon: StepBack, label: "Sales Offer", },
     { icon: StepBack, label: "Close Case", },
     { icon: StepBack, label: "Pick", },
     { icon: StepBack, label: "Queue Details", },
@@ -398,7 +402,7 @@ const openPopup = () => {
     { icon: StepBack, label: "Add to Queue", },
     { icon: StepBack, label: "Audit", onClick: () => openPopup() },
   ];
-  console.log("TES CASE DETAILS VALUE",caseDetails);
+  console.log("TES CASE DETAILS VALUE", caseDetails);
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
   const [serviceCatalogType, setServiceCatalogType] = useState("null");
@@ -409,13 +413,13 @@ const openPopup = () => {
   const saveAndCloseCase = async () => {
 
     if (!csrForm.caseResolutionCode || csrForm.caseResolutionCode.trim() === "") {
-    Swal.fire({
-      icon: "warning",
-      title: "Missing Case Resolution",
-      text: "You must select a Case Resolution Code before closing the case.",
-    });
-    return;
-  }
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Case Resolution",
+        text: "You must select a Case Resolution Code before closing the case.",
+      });
+      return;
+    }
 
     const confirmResult = await Swal.fire({
       title: "Confirm Save",
@@ -428,10 +432,10 @@ const openPopup = () => {
     });
 
     if (!confirmResult.isConfirmed) {
-      return; 
+      return;
     }
     try {
-      
+
       Swal.fire({
         title: "Saving...",
         text: "Please wait while we update the Case.",
@@ -442,19 +446,19 @@ const openPopup = () => {
         },
       });
       const success = await handleSave(false);
-      if (!success) return; 
+      if (!success) return;
       const res = await ApiCustomer.patch(
         `/api/case-information/${caseDetails.CaseID}`,
         {
           CaseStatus: "Close",
-          CaseClosedDate: new Date().toISOString(), 
+          CaseClosedDate: new Date().toISOString(),
         }
       );
       if (res.data.success) {
         const token = {
           user: getUserFromToken()
         }
-        const updateLog = await ApiCustomer.post("/api/actionlog",{
+        const updateLog = await ApiCustomer.post("/api/actionlog", {
           CaseId: `${caseDetails.CaseID}`,
           ReferenceId: ``,
           model: "Case",
@@ -519,36 +523,36 @@ const openPopup = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        <BtnModalsServiceCatalog 
+        <BtnModalsServiceCatalog
           open={openWorkOrder}
           setOpen={setOpenWorkOrder}
           caseDetails={caseDetails}
           serviceCatalogType={serviceCatalogType}
         />
       </div>
-        <div>
-          <ServiceCase
-            caseDetails={caseDetails}
-            formData={caseNoteFormData}
-            setCaseNoteFormData={setCaseNoteFormData}
-            formGtc={gtcForm}
-            setFormGtc={setGtcForm}
-            onChangeCase={handleCaseChange}
-            caseForm={caseForm}
-            setCaseForm={setCaseForm}
-            onChangeGtc={handleGtcChange}
-            onChange={handleCaseNoteChange}
-            handleCaseDetails={handleCaseDetails}
-            caseNotes={caseNotes}
-            setCaseNotes={setCaseNotes}
-            selectedSymptom={selectedSymptom}
-            setSelectedSymptom={setSelectedSymptom}
-            entitlementStatus={entitlementStatus}
-            handleEntitlementStatus={handleEntitlementStatus}
-            csrForm={csrForm}
-            setCsrForm={setCsrForm}
-            onChangeCsr={handleCsrChange}
-          />
+      <div>
+        <ServiceCase
+          caseDetails={caseDetails}
+          formData={caseNoteFormData}
+          setCaseNoteFormData={setCaseNoteFormData}
+          formGtc={gtcForm}
+          setFormGtc={setGtcForm}
+          onChangeCase={handleCaseChange}
+          caseForm={caseForm}
+          setCaseForm={setCaseForm}
+          onChangeGtc={handleGtcChange}
+          onChange={handleCaseNoteChange}
+          handleCaseDetails={handleCaseDetails}
+          caseNotes={caseNotes}
+          setCaseNotes={setCaseNotes}
+          selectedSymptom={selectedSymptom}
+          setSelectedSymptom={setSelectedSymptom}
+          entitlementStatus={entitlementStatus}
+          handleEntitlementStatus={handleEntitlementStatus}
+          csrForm={csrForm}
+          setCsrForm={setCsrForm}
+          onChangeCsr={handleCsrChange}
+        />
       </div>
     </>
   );
@@ -585,7 +589,7 @@ export const CaseField = ({ label, children, icon, span = 1, className, star }) 
   </>
 );
 
-export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
+export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
   const navigate = useNavigate();
   const WOID = workOrders.WOID;
   const handleSave = async () => {
@@ -606,6 +610,12 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
       const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
         //WO GENERAL
         ShipmentCountry: WOGeneral.ShipmentCountry || undefined,
+        IncomingChannel: WOGeneral.IncomingChannel || undefined,
+        Priority: WOGeneral.Priority || undefined,
+        SubStatus: WOGeneral.SubStatus || undefined,
+        RecommendedResource: WOGeneral.RecommendedResource || undefined,
+        WorkOrderDescription: WOGeneral.WorkOrderDescription || undefined,
+        ShipmentState: WOGeneral.ShipmentState || undefined,
         //SLA
         SLAJeopardy: SLA.slaJeopardy || undefined,
         DueDateCustomer: SLA.dueDateCustomer || undefined,
@@ -627,7 +637,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
 
       const result = response.data;
       console.log(response);
-      
+
 
       if (!result.success) {
         return Swal.fire({
@@ -664,24 +674,26 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
       label: "Save & Close",
       onClick: () => saveAndCloseWorkOrder(),
     },
-    { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Refresh", onClick: () => window.location.reload() },
-    { icon: StepBack, label: "Process", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
+    { icon: RotateCw, label: "Book", onClick: () => alert("not now"), hidden: true },
+    { icon: StepBack, label: "Audit", onClick: () => alert("not now"), hidden: true },
+    { icon: StepBack, label: "Pick", onClick: () => alert("not now"), hidden: true },
+    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now"), hidden: true},
+    { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
+    { icon: StepBack, label: "Process", onClick: () => alert("not now"), hidden: true},
+    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now"), hidden: true},
+    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now"), hidden: true },
     {
       icon: UserPen,
       label: "Create Material Order",
       onClick: () => alert("not now"),
+      hidden: true
     },
-    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now"), hidden: true },
   ];
-  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
-  const hiddenButtons = open ? buttons.slice(-3) : [];
+  // const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  // const hiddenButtons = open ? buttons.slice(-3) : [];
   const saveAndCloseWorkOrder = async () => {
+  
     const confirmResult = await Swal.fire({
       title: "Confirm Save",
       text: "This will give the order status as CLOSED. Are you sure you want to save changes?",
@@ -715,7 +727,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
         const token = {
           user: getUserFromToken()
         }
-        const updateLog = await ApiCustomer.post("/api/actionlog",{
+        const updateLog = await ApiCustomer.post("/api/actionlog", {
           CaseId: `${workOrders.CaseID}`,
           ReferenceId: `${workOrders.WOID}`,
           model: "Work Orders",
@@ -751,10 +763,11 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
   return (
     <>
       <div className="flex items-center border-1 ">
-        {visibleButtons.map((btn, index) => (
+        {buttons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
+            hidden={btn.hidden}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
@@ -763,7 +776,8 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
           </Button>
         ))}
 
-        {open && hiddenButtons.length > 0 && (
+
+        {/* {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
@@ -777,11 +791,11 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
-    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-    </div>
-    <div>
-    {/* <ServiceCase 
+        )} */}
+        {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+      </div>
+      <div>
+        {/* <ServiceCase 
       caseDetails={caseDetails}
       formData={caseNoteFormData}
       onChange={handleCaseNoteChange}
@@ -810,16 +824,16 @@ export const TabsServiceMO = ({ materialOrders }) => {
       label: "Save & Close",
       onClick: () => saveAndCloseMaterialOrder(),
     },
-    { icon: RotateCw, label: "ATP", },
-    { icon: StepBack, label: "Cancel Order", },
-    { icon: StepBack, label: "Add To Queue", },
-    { icon: StepBack, label: "Add Parts", },
-    { icon: StepBack, label: "Pick", },
-    { icon: StepBack, label: "Place Order", },
-    { icon: StepBack, label: "Tax", },
-    { icon: StepBack, label: "CustID Search", },
-    { icon: UserPen, label: "PUDO Search", },
-    { icon: StepBack, label: "Audit", },
+    { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
+    { icon: StepBack, label: "Cancel Order", hidden: true},
+    { icon: StepBack, label: "Add To Queue", hidden: true },
+    { icon: StepBack, label: "Add Parts", hidden: true },
+    { icon: StepBack, label: "Pick", hidden: true },
+    { icon: StepBack, label: "Place Order", hidden: true },
+    { icon: StepBack, label: "Tax", hidden: true },
+    { icon: StepBack, label: "CustID Search", hidden: true },
+    { icon: UserPen, label: "PUDO Search", hidden: true },
+    { icon: StepBack, label: "Audit", hidden: true },
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
@@ -843,7 +857,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
         const token = {
           user: getUserFromToken()
         }
-        const updateLog = await ApiCustomer.post("/api/actionlog",{
+        const updateLog = await ApiCustomer.post("/api/actionlog", {
           CaseId: `${materialOrders.workorder?.CaseID}`,
           ReferenceId: `${materialOrders.MOID}`,
           model: "Material Orders",
@@ -879,11 +893,12 @@ export const TabsServiceMO = ({ materialOrders }) => {
   return (
     <>
       <div className="flex items-center border-1 ">
-        {visibleButtons.map((btn, index) => (
+        {buttons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
             variant="link"
+            hidden={btn.hidden}
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
             <btn.icon className="w-4 h-4" />
@@ -891,7 +906,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
           </Button>
         ))}
 
-        {open && hiddenButtons.length > 0 && (
+        {/* {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
@@ -905,11 +920,11 @@ export const TabsServiceMO = ({ materialOrders }) => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
-    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-    </div>
-    <div>
-    {/* <ServiceCase 
+        )} */}
+        {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+      </div>
+      <div>
+        {/* <ServiceCase 
       caseDetails={caseDetails}
       formData={caseNoteFormData}
       onChange={handleCaseNoteChange}
@@ -939,18 +954,18 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
       label: "Save & Close",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
     },
-    { icon: StepBack, label: "Cancel", },
-    { icon: StepBack, label: "Audit", },
-    { icon: RotateCw, label: "Assign", },
+    { icon: StepBack, label: "Cancel", hidden: true },
+    { icon: StepBack, label: "Audit", hidden: true },
+    { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload()},
     {
       icon: StepBack,
       label: "Word Templates",
-      onClick: () => alert("not now"),
+      onClick: () => alert("not now"), hidden: true
     },
-    { icon: StepBack, label: "Run Report", },
-    { icon: StepBack, label: "Geo Code", },
-    { icon: StepBack, label: "Process", },
-    { icon: StepBack, label: "Reset RDT", },
+    { icon: StepBack, label: "Run Report", hidden: true },
+    { icon: StepBack, label: "Geo Code", hidden: true },
+    { icon: StepBack, label: "Process",hidden: true },
+    { icon: StepBack, label: "Reset RDT",hidden: true },
     // { icon: UserPen, label:  "Add To Queue", onClick: () => alert("not now") },
     // { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
   ];
@@ -1032,7 +1047,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
         const token = {
           user: getUserFromToken()
         }
-        const updateLog = await ApiCustomer.post("/api/actionlog",{
+        const updateLog = await ApiCustomer.post("/api/actionlog", {
           CaseId: `${moLineItems.materialorder?.workorder?.CaseID}`,
           ReferenceId: `${moLineItems.MOID}`,
           model: "Material Order Line Item",
@@ -1041,7 +1056,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           changedBy: token.user.id,
           logDescription: `Edit : Change Material Order Line Item ${moLineItems.MOID} - ${moLineItems.LineItemID} Status from ${moLineItems.Status} to Closed`
         })
-       
+
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -1070,19 +1085,20 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
   return (
     <>
       <div className="flex items-center border-1 ">
-        {visibleButtons.map((btn, index) => (
+        {buttons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
             variant="link"
+            hidden={btn.hidden}
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
             <btn.icon className="w-4 h-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
-    {console.log(MOLineDetails)}
-        {open && hiddenButtons.length > 0 && (
+        {console.log(MOLineDetails)}
+        {/* {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
@@ -1096,11 +1112,11 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
-    {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-    </div>
-    <div>
-    {/* <ServiceCase 
+        )} */}
+        {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
+      </div>
+      <div>
+        {/* <ServiceCase 
       caseDetails={caseDetails}
       formData={caseNoteFormData}
       onChange={handleCaseNoteChange}
@@ -1161,7 +1177,7 @@ export const ServiceCase = ({
     { value: "customer,add,entitement", label: "Customer, Asset & Entitement" },
     { value: "ci_notes", label: "Notes & Information" },
     { value: "ci_activitas", label: "Activities", disable: true },
-    { value: "ci_actions", label: "Customer Interactions", disable: true},
+    { value: "ci_actions", label: "Customer Interactions", disable: true },
     { value: "ci_wo", label: "Work Order Validation" },
     { value: "ci_orders", label: "Orders" },
     { value: "ci_salles", label: "Sales Offer", disable: true },
@@ -1172,12 +1188,12 @@ export const ServiceCase = ({
   const visibleTabs = open ? tabs.slice(0, -2) : tabs;
   const hiddenTabs = open
     ? [
-        { value: "ci_knowledge", label: "Knowledge & Attachments" },
-        { component: <SelectBarRelated /> },
-      ]
+      { value: "ci_knowledge", label: "Knowledge & Attachments" },
+      { component: <SelectBarRelated /> },
+    ]
     : [];
 
-  const [selected, setSelected] = useState("--Selected--"); 
+  const [selected, setSelected] = useState("--Selected--");
 
   const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
     MainAccount: null,
@@ -1213,7 +1229,7 @@ export const ServiceCase = ({
       } else {
         setDataFetchCustomerData((prev) => ({
           ...prev,
-          type: "Individual", 
+          type: "Individual",
         }));
       }
     } catch (err) {
@@ -1284,7 +1300,7 @@ export const ServiceCase = ({
       const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
       setOwnerUserData(response.data.data)
     } catch (error) {
-      
+
     }
   }
 
@@ -1315,143 +1331,143 @@ export const ServiceCase = ({
   const fetchGtc = async () => {
     try {
       const gtcData = caseDetails.global_trade_check;
-      setFormGtc(gtcData ?? formGtc); 
+      setFormGtc(gtcData ?? formGtc);
     } catch (err) {
       console.error("Error fetching GTC:", err);
-      setFormGtc(formGtc); 
+      setFormGtc(formGtc);
     }
   };
 
   const [otcCode, setOtcCode] = useState([])
-  
+
   const fetchOTCCode = async () => {
-    try{
+    try {
       const res = await ApiCustomer.get('/api/otc-code')
       setOtcCode(res.data.data)
-    }catch(e){
+    } catch (e) {
       console.error("Failed to fetch OTC Code:", err);
     }
   }
 
   const [caseTipe, setCaseTipe] = useState([
     {
-      CaseType : "Administrative"
+      CaseType: "Administrative"
     },
     {
-      CaseType : "ASP/Reseller/GS1"
+      CaseType: "ASP/Reseller/GS1"
     },
     {
-      CaseType : "Bench"
+      CaseType: "Bench"
     },
     {
-      CaseType : "Call to Repair"
+      CaseType: "Call to Repair"
     },
     {
-      CaseType : "Complex T&M"
+      CaseType: "Complex T&M"
     },
     {
-      CaseType : "Depot Repair"
+      CaseType: "Depot Repair"
     },
     {
-      CaseType : "Electronic"
+      CaseType: "Electronic"
     },
     {
-      CaseType : "HW Delivery"
+      CaseType: "HW Delivery"
     },
     {
-      CaseType : "IMACD"
+      CaseType: "IMACD"
     },
     {
-      CaseType : "Internal Service"
+      CaseType: "Internal Service"
     },
     {
-      CaseType : "Internal Support"
+      CaseType: "Internal Support"
     },
     {
-      CaseType : "Onsite"
+      CaseType: "Onsite"
     },
     {
-      CaseType : "Proactive"
+      CaseType: "Proactive"
     },
     {
-      CaseType : "Remote Services"
+      CaseType: "Remote Services"
     },
     {
-      CaseType : "Services (VAS)"
+      CaseType: "Services (VAS)"
     },
     {
-      CaseType : "SW Delivery"
+      CaseType: "SW Delivery"
     },
     {
-      CaseType : "T&M"
+      CaseType: "T&M"
     },
   ])
 
   const fetchCsr = async () => {
-  try {
-    const csrData = caseDetails.caseresolution;
-    console.log("CSR Data: ", csrData);
+    try {
+      const csrData = caseDetails.caseresolution;
+      console.log("CSR Data: ", csrData);
 
-    if (csrData) {
-      setCsrForm({
-        caseResolutionCode: csrData.caseResolutionCode || "",
-        autoClose: csrData.autoClose || "",
-        caseReadyForClosure: csrData.caseReadyForClosure || "",
-        readyForCloseDays: csrData.readyForCloseDays || "",
-        readyForClosureDate: csrData.readyForClosureDate ? new Date(csrData.readyForClosureDate) : "",
-        pendingCustomerAction: csrData.pendingCustomerAction ? new Date(csrData.pendingCustomerAction) : "",
-        customerRequestedCloseDate: csrData.customerRequestedCloseDate ? new Date(csrData.customerRequestedCloseDate) : "",
-      });
-    } else {
-      setCsrForm(csrForm); 
+      if (csrData) {
+        setCsrForm({
+          caseResolutionCode: csrData.caseResolutionCode || "",
+          autoClose: csrData.autoClose || "",
+          caseReadyForClosure: csrData.caseReadyForClosure || "",
+          readyForCloseDays: csrData.readyForCloseDays || "",
+          readyForClosureDate: csrData.readyForClosureDate ? new Date(csrData.readyForClosureDate) : "",
+          pendingCustomerAction: csrData.pendingCustomerAction ? new Date(csrData.pendingCustomerAction) : "",
+          customerRequestedCloseDate: csrData.customerRequestedCloseDate ? new Date(csrData.customerRequestedCloseDate) : "",
+        });
+      } else {
+        setCsrForm(csrForm);
+      }
+    } catch (err) {
+      console.error("Error fetching CSR:", err);
+      setCsrForm(csrForm);
     }
-  } catch (err) {
-    console.error("Error fetching CSR:", err);
-    setCsrForm(csrForm); 
+  };
+
+
+  const statusEnumToLabel = {
+    New: "New",
+    Open: "Open",
+    InActive: "Inactive",
+    Close: "Closed",
+    Active: "Active",
+    Monitor: "Monitor",
+    Pending_Customer_Action: "Pending Customer Action",
+    Quote_Requested: "Quote Requested",
+    Pending_Follow_Up: "Pending Follow Up",
+    Pending_Order: "Pending Order",
+    Escalated: "Escalated",
+    Quote_Approved: "Quote Approved",
+    Pending_Quote: "Pending Quote"
+  };
+
+  const labelToStatusEnum = Object.fromEntries(
+    Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
+  );
+
+
+  const fetchCase = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`);
+      setCaseForm(res.data.data);
+    } catch (err) {
+      console.error("Error fetching case:", err);
+      setCaseForm(caseForm); // fallback jika error
+    }
+  };
+
+  const fetchActionLog = async () => {
+    try {
+      const actionlog = await ApiCustomer.get(`/api/actionlog?caseId=${caseDetails.CaseID}`)
+      setActionLogs(actionlog.data.data)
+    } catch (error) {
+      console.error("Error fetching ActionLog:", err);
+    }
   }
-};
 
-
-const statusEnumToLabel = {
-  New: "New",
-  Open: "Open",
-  InActive: "Inactive",
-  Close: "Closed",
-  Active: "Active",
-  Monitor: "Monitor",
-  Pending_Customer_Action: "Pending Customer Action",
-  Quote_Requested: "Quote Requested",
-  Pending_Follow_Up: "Pending Follow Up",
-  Pending_Order: "Pending Order",
-  Escalated: "Escalated",
-  Quote_Approved: "Quote Approved",
-  Pending_Quote: "Pending Quote"
-};
-
-const labelToStatusEnum = Object.fromEntries(
-  Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
-);
-
-
-const fetchCase = async () => {
-  try {
-    const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`);
-    setCaseForm(res.data.data);
-  } catch (err) {
-    console.error("Error fetching case:", err);
-    setCaseForm(caseForm); // fallback jika error
-  }
-};
-
-const fetchActionLog = async () => {
-  try {
-    const actionlog = await ApiCustomer.get(`/api/actionlog?caseId=${caseDetails.CaseID}`)
-    setActionLogs(actionlog.data.data)
-  } catch (error) {
-    console.error("Error fetching ActionLog:", err);
-  }
-}
-  
   //handler all case
   useEffect(() => {
     fetchCustomerData();
@@ -1473,7 +1489,7 @@ const fetchActionLog = async () => {
       }
     };
     loadNote();
-    fetchGtc(); 
+    fetchGtc();
     fetchOTCCode();
     fetchCsr();
     fetchCase();
@@ -1522,31 +1538,31 @@ const fetchActionLog = async () => {
     }
   };
 
-useEffect(() =>{
-  console.log("Data Asset Info : ",dataFetchAssetInformation)
-  
-  console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
-  console.log("Fetch Data User ", ownerUserData)
-}, [ownerUserData])
+  useEffect(() => {
+    console.log("Data Asset Info : ", dataFetchAssetInformation)
 
-const fetchSymptomCodes = async (term) => {
-  try {
-    const response = await ApiCustomer.get("/api/symptom-codes");
-    const allCodes = response.data.data;
+    console.log("Fetch Data Customer Success : ", dataFetchCustomerData)
+    console.log("Fetch Data User ", ownerUserData)
+  }, [ownerUserData])
 
-    const filtered = allCodes.filter((sym) =>
-      sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
-    );
+  const fetchSymptomCodes = async (term) => {
+    try {
+      const response = await ApiCustomer.get("/api/symptom-codes");
+      const allCodes = response.data.data;
 
-    setSymptomSuggestions(filtered);
-  } catch (err) {
-    console.error("Error fetching symptom codes", err);
-  }
-};
+      const filtered = allCodes.filter((sym) =>
+        sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+      );
+
+      setSymptomSuggestions(filtered);
+    } catch (err) {
+      console.error("Error fetching symptom codes", err);
+    }
+  };
 
 
-const [startDate, setstartDate] = useState(null);
-const [endDate, setEndDate] = useState(null);
+  const [startDate, setstartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   return (
     <>
@@ -1624,7 +1640,7 @@ const [endDate, setEndDate] = useState(null);
                     variant="underline"
                     value={tab.value}
                     disabled={tab.disable}
-                   
+
                   >
                     {tab.label}
                   </TabsTrigger>
@@ -1654,7 +1670,6 @@ const [endDate, setEndDate] = useState(null);
               )}
             </TabsList>
           </CardHeader>
-
           <TabsContent value="case_info" className={"p-2"}>
             <Card className="flex-row">
               <CardContent className="grid items-center grid-cols-6 gap-10 p-3 ">
@@ -1681,15 +1696,15 @@ const [endDate, setEndDate] = useState(null);
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Case Status">
-                <SearchCommandBlock
-                  value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
-                  onChange={(label) => {
-                    const enumValue = labelToStatusEnum[label];
-                    onChangeCase("CaseStatus")(enumValue);
-                  }}
-                  placeholder="--Select--"
-                  options={Object.values(statusEnumToLabel)}
-                />
+                  <SearchCommandBlock
+                    value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
+                    onChange={(label) => {
+                      const enumValue = labelToStatusEnum[label];
+                      onChangeCase("CaseStatus")(enumValue);
+                    }}
+                    placeholder="--Select--"
+                    options={Object.values(statusEnumToLabel)}
+                  />
                 </CaseField>
                 <CaseField label="Case Type">
                   <SearchCommandBlock
@@ -1697,11 +1712,11 @@ const [endDate, setEndDate] = useState(null);
                     onChange={onChangeCase("CaseType")}
                     placeholder="--Select--"
                     options={[
-                    "Depot Repair",
-                    "Onsite",
-                    "Bench",
+                      "Depot Repair",
+                      "Onsite",
+                      "Bench",
                     ]}
-                    />
+                  />
                 </CaseField>
                 <CaseField label="KCI For Case?">
                   {caseDetails.KCI_Flag ? "Yes" : "No"}
@@ -1763,7 +1778,7 @@ const [endDate, setEndDate] = useState(null);
                 <CardTitle className="text-lg ">Global Trade Check</CardTitle>
                 <hr />
               </CardHeader>
-              
+
               <CardContent className="grid gap-10  grid-cols-6 p-3 items-center">
                 <CaseField label="Global Trade Status">
                   <SearchCommandBlock
@@ -1865,8 +1880,8 @@ const [endDate, setEndDate] = useState(null);
                       dataFetchCustomerData?.Type == "SiteAccount"
                         ? dataFetchCustomerData?.SiteAccount?.Company
                         : dataFetchCustomerData?.MainAccount?.FirstName +
-                          " " +
-                          dataFetchCustomerData?.MainAccount?.LastName
+                        " " +
+                        dataFetchCustomerData?.MainAccount?.LastName
                     }
                     readOnly
                   />
@@ -1879,10 +1894,10 @@ const [endDate, setEndDate] = useState(null);
                   />
                 </CaseField>
                 <CaseField label="Submitted By">
-                  <Input variant="invisible" placeholder="---"  />
+                  <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Is Partner" icon>
-                  <Input variant="invisible" placeholder="---" readOnly/>
+                  <Input variant="invisible" placeholder="---" readOnly />
                 </CaseField>
                 <CaseField label=" Primary Email" icon>
                   <Input
@@ -1893,10 +1908,10 @@ const [endDate, setEndDate] = useState(null);
                   />
                 </CaseField>
                 <CaseField label="Partner & Customer" icon>
-                  <Input variant="invisible" placeholder="---"  readOnly/>
+                  <Input variant="invisible" placeholder="---" readOnly />
                 </CaseField>
                 <CaseField label="HIPAA" icon>
-                  <Input variant="invisible" placeholder="---" readOnly/>
+                  <Input variant="invisible" placeholder="---" readOnly />
                 </CaseField>
                 <CaseField label="Phone" icon>
                   {" "}
@@ -1905,7 +1920,7 @@ const [endDate, setEndDate] = useState(null);
                     : dataFetchCustomerData?.MainAccount?.Phone}
                 </CaseField>
                 <CaseField label="Region" icon>
-                  <Input variant="invisible" placeholder="---" readOnly/>
+                  <Input variant="invisible" placeholder="---" readOnly />
                 </CaseField>
                 <CaseField label="PIN">
                   <Input variant="invisible" placeholder="---" />
@@ -1917,7 +1932,7 @@ const [endDate, setEndDate] = useState(null);
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Customer Time Zone" icon>
-                  <Input variant="invisible" placeholder="---" readOnly/>
+                  <Input variant="invisible" placeholder="---" readOnly />
                 </CaseField>
                 <CaseField label="Country" icon>
                   <Input
@@ -1928,7 +1943,7 @@ const [endDate, setEndDate] = useState(null);
                         : dataFetchCustomerData?.MainAccount?.Country
                     }
                     readOnly
-                  />                  
+                  />
                 </CaseField>
                 <CaseField label="Parent Company Non-Latin">
                   <Input variant="invisible" placeholder="---" />
@@ -1952,7 +1967,7 @@ const [endDate, setEndDate] = useState(null);
                   {
                     dataFetchAssetInformation?.AssetInformation
                       ?.product_information?.ProductNumber
-                  } 
+                  }
                 </CaseField>
                 <CaseField label="Asset Location">
                   <Input variant="invisible" placeholder="---" />
@@ -1986,41 +2001,41 @@ const [endDate, setEndDate] = useState(null);
                 </div>
               </CardContent>
               {/* TABEL ACCESSORY */}
-  <div className="px-6 pb-6">
-    <h3 className="text-md font-semibold mb-2">Accessory</h3>
-    <div className="overflow-x-auto">
-      <table className="min-w-full border text-sm text-left">
-        <thead className="bg-gray-100 text-gray-700">
-          <tr>
-            <th className="border px-4 py-2">Accessories ID</th>
-            <th className="border px-4 py-2">Case ID</th>
-            <th className="border px-4 py-2">Accessories</th>
-            <th className="border px-4 py-2">Note</th>
-            <th className="border px-4 py-2">CT_SNCode</th>
-          </tr>
-        </thead>
-        <tbody>
-          {caseDetails.accessory?.map((item, index) => (
-            <tr key={index} className="hover:bg-gray-50">
-              <td className="border px-4 py-2">{item.id}</td>
-              <td className="border px-4 py-2">{item.CaseID}</td>
-              <td className="border px-4 py-2">{item.Accessories}</td>
-              <td className="border px-4 py-2">{item.Note || "---"}</td>
-              <td className="border px-4 py-2">{item.CT_SNCode || "---"}</td>
-            </tr>
-          ))}
-          {(!caseDetails?.accessory ||
-            caseDetails.accessory.length === 0) && (
-            <tr>
-              <td className="border px-4 py-2 text-center" colSpan={5}>
-                No accessories found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  </div>
+              <div className="px-6 pb-6">
+                <h3 className="text-md font-semibold mb-2">Accessory</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full border text-sm text-left">
+                    <thead className="bg-gray-100 text-gray-700">
+                      <tr>
+                        <th className="border px-4 py-2">Accessories ID</th>
+                        <th className="border px-4 py-2">Case ID</th>
+                        <th className="border px-4 py-2">Accessories</th>
+                        <th className="border px-4 py-2">Note</th>
+                        <th className="border px-4 py-2">CT_SNCode</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {caseDetails.accessory?.map((item, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="border px-4 py-2">{item.id}</td>
+                          <td className="border px-4 py-2">{item.CaseID}</td>
+                          <td className="border px-4 py-2">{item.Accessories}</td>
+                          <td className="border px-4 py-2">{item.Note || "---"}</td>
+                          <td className="border px-4 py-2">{item.CT_SNCode || "---"}</td>
+                        </tr>
+                      ))}
+                      {(!caseDetails?.accessory ||
+                        caseDetails.accessory.length === 0) && (
+                          <tr>
+                            <td className="border px-4 py-2 text-center" colSpan={5}>
+                              No accessories found.
+                            </td>
+                          </tr>
+                        )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </Card>
 
             <Card className="flex-col ">
@@ -2214,7 +2229,7 @@ const [endDate, setEndDate] = useState(null);
               <CardContent className="flex gap-4">
                 <div className="grid flex-1 grid-cols-6 gap-y-7">
                   <CaseField label="Log Type" className={"col-span-2"} span={4}>
-                    <Select  value={formData?.LogType}  onValueChange={(val) => onChange("LogType", val)}>
+                    <Select value={formData?.LogType} onValueChange={(val) => onChange("LogType", val)}>
                       <SelectTrigger
                         className={"w-[100%] hover:shadow-lg border-b-0"}
                       >
@@ -2232,7 +2247,7 @@ const [endDate, setEndDate] = useState(null);
                     className={"col-span-2"}
                     span={4}
                   >
-                      <SearchCommandBlock
+                    <SearchCommandBlock
                       value={formData?.ActionType}
                       onChange={(val) => onChange("ActionType", val)}
                       placeholder="--Select--"
@@ -2258,11 +2273,11 @@ const [endDate, setEndDate] = useState(null);
                     <SelectYN
                       value={
                         formData?.VisibleExternally === undefined ||
-                        formData?.VisibleExternally === null
+                          formData?.VisibleExternally === null
                           ? ""
                           : formData?.VisibleExternally
-                          ? "Yes"
-                          : "No"
+                            ? "Yes"
+                            : "No"
                       }
                       onValueChange={(val) =>
                         onChange("VisibleExternally", val === "Yes")
@@ -2303,49 +2318,49 @@ const [endDate, setEndDate] = useState(null);
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="flex-col mt-6">
-          <CardHeader>
-            <CardTitle className="text-lg">Action Log</CardTitle>
-            <hr />
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[60px]">No</TableHead>
-                  <TableHead>ReferenceId</TableHead>
-                  <TableHead>Change By</TableHead>
-                  <TableHead>Old Status</TableHead>
-                  <TableHead>New Status</TableHead>
-                  <TableHead>Change At</TableHead>
-                  <TableHead>Log Description</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {actionLogs?.length > 0 ? (
-                  actionLogs.map((log, index) => (
-                    <TableRow key={log.id || index}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{log.ReferenceId}</TableCell>
-                      <TableCell>{log.changedByUser?.Name}</TableCell>
-                      <TableCell>{log.dataOld}</TableCell>
-                      <TableCell>{log.dataNew}</TableCell>
-                      <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
-                      <TableCell>{log.logDescription}</TableCell>
+              <CardHeader>
+                <CardTitle className="text-lg">Action Log</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[60px]">No</TableHead>
+                      <TableHead>ReferenceId</TableHead>
+                      <TableHead>Change By</TableHead>
+                      <TableHead>Old Status</TableHead>
+                      <TableHead>New Status</TableHead>
+                      <TableHead>Change At</TableHead>
+                      <TableHead>Log Description</TableHead>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center italic">
-                      No action logs available.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {actionLogs?.length > 0 ? (
+                      actionLogs.map((log, index) => (
+                        <TableRow key={log.id || index}>
+                          <TableCell>{index + 1}</TableCell>
+                          <TableCell>{log.ReferenceId}</TableCell>
+                          <TableCell>{log.changedByUser?.Name}</TableCell>
+                          <TableCell>{log.dataOld}</TableCell>
+                          <TableCell>{log.dataNew}</TableCell>
+                          <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
+                          <TableCell>{log.logDescription}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center italic">
+                          No action logs available.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
 
             <Card className="flex-col ">
               <CardHeader>
@@ -2540,81 +2555,81 @@ const [endDate, setEndDate] = useState(null);
             </Card>
           </TabsContent>
 
-           <TabsContent value="ci_wo">
-                      <div className="flex gap-4">
-                        <Card className="flex-1/3  rounded-md">
-                          <CardHeader>
-                            <CardTitle className=" text-lg">Case Information</CardTitle>
-                            <hr />
-                          </CardHeader>
-                          <CardContent className="grid gap-5 grid-cols-2">
-                          <CaseField label="Case Subject" span={1}>
-                          {caseDetails.CaseSubject}
-                          </CaseField>
-                          <CaseField label="Case Type">{caseDetails.CaseType}</CaseField>
-                            <CaseField label="Businnes Segment">
-                              <Input
-                                variant={"invisible"}
-                                className=""
-                                value={"---"}
-                                readOnly
-                              />
-                            </CaseField>
-                            <CaseField label="HPI Segment">
-                              <Input
-                                variant={"invisible"}
-                                className=""
-                                value={"---"}
-                                readOnly
-                              />
-                            </CaseField>
-          
-                            <CaseField label="Global Trade Status">
-                            {caseDetails.global_trade_check?.global_trade_status || "---"}
-                            </CaseField>
-                            <CaseField label="Global Trade Ovveride Reason">
-                            {caseDetails.global_trade_check?.gt_override_reason || "---"}
-                            </CaseField>
-                            <CaseField label="GT Active Listening">
-                            {caseDetails.global_trade_check?.gt_active_listening || "---"}
-                            </CaseField>
-                            <CaseField label="Security Status" icon>
-                              <Input
-                                variant={"invisible"}
-                                className=""
-                                value={"---"}
-                                readOnly
-                              />
-                            </CaseField>
-                            <CaseField label="Security Ovveride Reason" icon>
-                              <Input
-                                variant={"invisible"}
-                                className=""
-                                value={"---"}
-                                readOnly
-                              />
-                            </CaseField>
-                          </CardContent>
-                        </Card>
-                        <div className="flex-3 flex flex-col gap-4">
-                          <Card className="rounded-md">
-                            <CardHeader>
-                              <CardTitle className="text-lg">Case Notes History</CardTitle>
-                              <hr />
-                            </CardHeader>
-                            <CardContent>
-                              <CaseField label="Notes History" icon>
-                                <textarea
-                                  className="mt-4 resize-none w-full min-h-[400px] p-2 ring-1 ring-gray-300 rounded-md text-md"
-                                  readOnly
-                                  value={caseNotes?.NotesDisplay}
-                                />
-                              </CaseField>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      </div>
-            </TabsContent>
+          <TabsContent value="ci_wo">
+            <div className="flex gap-4">
+              <Card className="flex-1/3  rounded-md">
+                <CardHeader>
+                  <CardTitle className=" text-lg">Case Information</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent className="grid gap-5 grid-cols-2">
+                  <CaseField label="Case Subject" span={1}>
+                    {caseDetails.CaseSubject}
+                  </CaseField>
+                  <CaseField label="Case Type">{caseDetails.CaseType}</CaseField>
+                  <CaseField label="Businnes Segment">
+                    <Input
+                      variant={"invisible"}
+                      className=""
+                      value={"---"}
+                      readOnly
+                    />
+                  </CaseField>
+                  <CaseField label="HPI Segment">
+                    <Input
+                      variant={"invisible"}
+                      className=""
+                      value={"---"}
+                      readOnly
+                    />
+                  </CaseField>
+
+                  <CaseField label="Global Trade Status">
+                    {caseDetails.global_trade_check?.global_trade_status || "---"}
+                  </CaseField>
+                  <CaseField label="Global Trade Ovveride Reason">
+                    {caseDetails.global_trade_check?.gt_override_reason || "---"}
+                  </CaseField>
+                  <CaseField label="GT Active Listening">
+                    {caseDetails.global_trade_check?.gt_active_listening || "---"}
+                  </CaseField>
+                  <CaseField label="Security Status" icon>
+                    <Input
+                      variant={"invisible"}
+                      className=""
+                      value={"---"}
+                      readOnly
+                    />
+                  </CaseField>
+                  <CaseField label="Security Ovveride Reason" icon>
+                    <Input
+                      variant={"invisible"}
+                      className=""
+                      value={"---"}
+                      readOnly
+                    />
+                  </CaseField>
+                </CardContent>
+              </Card>
+              <div className="flex-3 flex flex-col gap-4">
+                <Card className="rounded-md">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Case Notes History</CardTitle>
+                    <hr />
+                  </CardHeader>
+                  <CardContent>
+                    <CaseField label="Notes History" icon>
+                      <textarea
+                        className="mt-4 resize-none w-full min-h-[400px] p-2 ring-1 ring-gray-300 rounded-md text-md"
+                        readOnly
+                        value={caseNotes?.NotesDisplay}
+                      />
+                    </CaseField>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
 
           <TabsContent value="ci_orders" className={"p-2 flex flex-col gap-4"}>
             <Card className="flex-col ">
@@ -2624,12 +2639,12 @@ const [endDate, setEndDate] = useState(null);
               </CardHeader>
               <CardContent className="grid items-center grid-cols-4 gap-10">
                 <CaseField label="Shipment Country">
-                    <SearchCommandBlock 
-                      variant="invisible" 
-                      value={workOrders[0]?.ShipmentCountry ||"---"}
-                      readOnly
-                      options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"] }
-                    />
+                  <SearchCommandBlock
+                    variant="invisible"
+                    value={workOrders[0]?.ShipmentCountry || "---"}
+                    readOnly
+                    options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"]}
+                  />
                 </CaseField>
                 <CaseField label="Exception Order">
                   <Input variant="invisible" placeholder="---" />
@@ -2704,9 +2719,9 @@ const [endDate, setEndDate] = useState(null);
                           {work.caseinformation?.site_account?.Company ||
                             work.caseinformation?.contact_information
                               ?.FirstName +
-                              " " +
-                              work.caseinformation?.contact_information
-                                ?.LastName ||
+                            " " +
+                            work.caseinformation?.contact_information
+                              ?.LastName ||
                             "-"}
                         </TableCell>
 
@@ -2856,4 +2871,3 @@ const [endDate, setEndDate] = useState(null);
     </>
   );
 };
-  

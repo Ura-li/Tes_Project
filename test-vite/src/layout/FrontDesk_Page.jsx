@@ -119,7 +119,7 @@ export default function FrontDesk_Page() {
               <img
                 src={user?.avatar || "/default-avatar.png"}
                 alt="avatar"
-                className="w-20 h-20 rounded-full border-4 border-white shadow-md -mb-10"
+                className="w-20 h-20 rounded-full border-4 border-white shadow-md-mb-10"
               />
             </div> */}
             {!preview.ProfilePhoto && (
@@ -140,11 +140,13 @@ export default function FrontDesk_Page() {
               </div>
             )}
           </CardHeader>
+
           <CardContent className="pt-12 text-center flex-1">
             <CardTitle>{user?.name || "User"}</CardTitle>
             <p className="text-sm text-gray-500">{user?.email}</p>
             <p className='text-sm text-gray-500'>{userData.Phone}</p>
           </CardContent>
+          
           <CardFooter className="flex flex-col gap-2">
             <Badge
               variant="outline"
