@@ -130,7 +130,7 @@ export async function PATCH(request, { params }) {
         email: updatedUser.Email,
         role: updatedUser.Role,
         name: updatedUser.Name,
-        avatar: updatedUser.ProfilePhoto || ""
+        avatar: updatedUser.ProfilePhoto || "",
       },
       JWT_SECRET,
       { expiresIn: "7d" }
