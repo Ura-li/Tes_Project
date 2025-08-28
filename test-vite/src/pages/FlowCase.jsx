@@ -7,7 +7,7 @@ import { Sidebar, SidebarContent, SidebarInset, SidebarProvider, SidebarTrigger 
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/context/auth-context'
 import { se } from 'date-fns/locale'
-import { set } from 'lodash'
+import { filter, set } from 'lodash'
 import { PanelRight } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -28,7 +28,8 @@ export const FlowCase = () => {
     Phone: "",
     Id: "",
     Status: "",  
-    Type: ""     
+    Type: "",
+    Role: "",     
   });
 
   const fetchData = async () => {
@@ -37,7 +38,11 @@ export const FlowCase = () => {
       const response = await ApiCustomer.get('/api/case-information');
       // console.log("Case INFO LOG : ",response.data.data[23].caseinformation.CreatedBy);
       // console.log("Case INFO LOG : ",user.id);
-      const filtercases = response.data.data.filter(c => c.CaseStatus !== 'Close' && c?.caseinformation?.CreatedBy == user.id);
+      const filtercases = response.data.data.filter(c => c.CaseStatus !== 'Close' && (c?.caseinformation?.Owner === user.id || c?.caseinformation?.CreatedBy === user.id));
+      console.log("Filter Case : ",filtercases)
+      console.log("Case Owner : ", filtercases[1]?.caseinformation?.Owner)
+      console.log("Case Created By : ", filtercases[1]?.caseinformation?.CreatedBy)
+      console.log("User ID : ", user.id)
       setCaseData(filtercases);
       setError(false)
       return response.data.data;
@@ -60,7 +65,10 @@ export const FlowCase = () => {
   }, []);
 
   // filter logic
-  const filteredCases = caseData.filter(c => {
+  const filteredCases = caseData
+  .filter(c => {
+    const isCreatedBy = c?.caseinformation?.CreatedBy == user.id;
+    const isOwner = c?.Owner == user.id;
     return (
       (filters.SerialNumber === "" || c.SerialNumber?.toLowerCase().includes(filters.SerialNumber.toLowerCase())) &&
       (filters.Company === "" || c.CustomerAccount?.toLowerCase().includes(filters.Company.toLowerCase())) &&
@@ -68,9 +76,18 @@ export const FlowCase = () => {
       (filters.Phone === "" || c.caseinformation?.contact_information?.Phone?.toLowerCase().includes(filters.Phone.toLowerCase())) &&
       (filters.Id === "" || c.CaseID.toString().includes(filters.Id)) &&
       (filters.Status === "" || c.CaseStatus === filters.Status) &&
-      (filters.Type === "" || c.caseinformation?.CaseType === filters.Type)
+      (filters.Type === "" || c.caseinformation?.CaseType === filters.Type) &&
+      (filters.Role === "" || (filters.Role === "CreatedBy" && isCreatedBy) || (filters.Role === "Owner" && isOwner) )
     );
+  })
+  .sort((a, b) => {
+    const aIsOwner = a.Owner == user.username;
+    const bIsOwner = b.Owner == user.username;
+    if (aIsOwner && !bIsOwner) return -1;
+    if (!aIsOwner && bIsOwner) return 1;
+    return 0;
   });
+  ;
 
   
   console.log(caseData)
@@ -119,6 +136,12 @@ export const FlowCase = () => {
                           <div className="gap-2 flex">
                             <Badge className={c.CaseStatus === "Open" ? "bg-green-500" : c.CaseStatus === "InActive" ? "bg-blue-400" : c.CaseStatus === "On Hold" ? "yellow" : c.CaseStatus === "Escalated" ? "red" : "gray"}>{c.CaseStatus}</Badge>
                             <Badge>{c.caseinformation.CaseType}</Badge>
+                            {c.Owner == user.id ? (
+                              <Badge className="bg-purple-500">Owner</Badge>
+                            ) : (
+                              <Badge className="bg-sky-500">CreatedBy</Badge>
+                            )}
+
                           </div>
                         </CardTitle>
                         <CardDescription className="text-md font-semibold italic">{c.CaseSubject}</CardDescription>

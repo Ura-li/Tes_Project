@@ -93,6 +93,18 @@ export function SearchBar({ filters, setFilters, className }) {
                                     <option value="Warranty">Warranty</option>
                                 </select>
                             </SidebarMenuItem>
+                            <SidebarMenuItem className="flex flex-col gap-3">
+                                <Label className="text-amber-50">Case Holder</Label>
+                                <select
+                                    value={filters.Role}
+                                    onChange={(e) => handleChange("Role", e.target.value)}
+                                    className="p-2 rounded-md"
+                                >
+                                    <option value="">All</option>
+                                    <option value="Owner">Case Owner</option>
+                                    <option value="CreatedBy">Case Created</option>
+                                </select>
+                            </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
