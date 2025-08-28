@@ -19,11 +19,14 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Search } from "lucide-react";
-import { AccountForm } from "@/components/FormCase/AccountForm";
 
 
 import Swal from "sweetalert2";
 import ApiCustomer from "@/api";
+
+import { CompanyForm } from "@/components/FormCase/AccountForm";
+import { ContactForm } from "@/components/FormCase/ContactForm";
+import { AssetForm } from "@/components/FormCase/AssetForm";
 
 /** ----------------------------------------------------------------------
  *  Small utilities
@@ -45,9 +48,14 @@ export function CompanySearchResult({
   formDataSiteAccount,
   handlerInputSiteAccountChange,
   handlerSiteAccountSubmit, 
+  handleCreateCompany,
   loading 
 }) {
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+
+  const [showCreateCompany, setShowCreateCompany] = useState(false);
+
+  
 
   const handleSelect = (company) =>{
     if(selectedCompanyId === company.SiteAccountID){
@@ -68,23 +76,7 @@ export function CompanySearchResult({
             <TableRow>
               <TableCell colSpan={4}>Loading companies…</TableCell>
             </TableRow>
-          ) : companies.length === 0 ? (
-          <div className="p-4 text-gray-600">
-            <p>Tidak ada company yang ditemukan</p>
-            <Tabs defaultValue="Account">
-              <TabsList>
-                <TabsTrigger value="Account">Create Account</TabsTrigger>
-              </TabsList>
-              <TabsContent value="Account">
-                {/* <AccountForm
-                  formData={formDataSiteAccount}
-                  onChange={handlerInputSiteAccountChange}
-                  onSubmit={handlerSiteAccountSubmit}
-                /> */}
-              </TabsContent>
-            </Tabs>
-          </div>
-        ): (
+          ) : (
           <Table>
             <TableHeader>
               <TableRow className="bg-blue-200">
@@ -95,11 +87,7 @@ export function CompanySearchResult({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={4}>Loading companies…</TableCell>
-                </TableRow>
-              ) : companies.length > 0 ? (
+              {companies.length > 0 ? (
                 companies.map((c) => (
                   <TableRow
                     key={c.SiteAccountID}
@@ -119,6 +107,16 @@ export function CompanySearchResult({
                   </TableCell>
                 </TableRow>
               )}
+              <Button 
+                className="mt-2" 
+                onClick={() => { showCreateCompany ? setShowCreateCompany(false) : setShowCreateCompany(true) }}
+              >+ Create Company</Button>
+              {showCreateCompany && (
+                <CompanyForm 
+                  onSubmit={handleCreateCompany}
+                  onCancel={() => setShowCreateCompany(false)}
+                />
+              )}
             </TableBody>
           </Table>
         )}
@@ -127,8 +125,10 @@ export function CompanySearchResult({
   );
 }
 
-export function ContactSearchResult({ contacts = [], onSelectContact, title = "Contacts", loading }) {
+export function ContactSearchResult({ contacts = [], onSelectContact, title = "Contacts", loading, handleCreateContact }) {
   const [selectedContactId, setSelectedContactId] = useState(null);
+
+  const [showCreateContact, setShowCreateContact] = useState(false);
 
   const handleSelect = (contact) => {
     if (selectedContactId === contact.ContactID) {
@@ -182,6 +182,15 @@ export function ContactSearchResult({ contacts = [], onSelectContact, title = "C
                 </TableCell>
               </TableRow>
             )}
+            <Button
+              className="mt-2"
+              onClick={() => {
+                showCreateContact ? setShowCreateContact(false) : setShowCreateContact(true)
+              }}
+            >+ Create COnctac</Button>
+            {showCreateContact && (
+              <ContactForm onSubmit={handleCreateContact} onCancel={() => setShowCreateContact(false)}/>
+            )}
           </TableBody>
         </Table>
       </CardContent>
@@ -189,8 +198,10 @@ export function ContactSearchResult({ contacts = [], onSelectContact, title = "C
   );
 }
 
-export function AssetSearchResult({ assets = [], onSelectAsset, loading }) {
+export function AssetSearchResult({ assets = [], onSelectAsset, loading, handleCreateAsset }) {
   const [selectedAssetId, setSelectedAssetId] = useState(null);
+
+  const [showCreateAsset, setShowCreateAsset] = useState(false);
   const handleSelect = (asset) => {
     console.log(asset)
     if (selectedAssetId === asset.AssetID) {
@@ -245,6 +256,13 @@ export function AssetSearchResult({ assets = [], onSelectAsset, loading }) {
                 </TableCell>
               </TableRow>
             )}
+            <Button
+              className="mt-2"
+              onClick={() => showCreateAsset ? setShowCreateAsset(false) : setShowCreateAsset(true)}
+            > +Create Asset</Button>
+            {showCreateAsset && (
+              <AssetForm onSubmit={handleCreateAsset} onCancel={() => setShowCreateAsset(false)}/>
+            )}
           </TableBody>
         </Table>
       </CardContent>
@@ -281,6 +299,8 @@ export default function CaseSearchRefactor() {
   const [companies, setCompanies] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [assets, setAssets] = useState([]);
+
+  
 
   // derived lists for email/phone mode: split contacts by link
   const contactsLinked = useMemo(
@@ -482,6 +502,45 @@ export default function CaseSearchRefactor() {
     }
   };
 
+
+  /**
+   * API HANDLER
+   */
+
+  // Company
+  const handleCreateCompany = async (data) => {
+    try {
+      const res = await ApiCustomer.post("/api/site_account", data);
+      Swal.fire("Success", "Company berhasil dibuat", "success");
+      setCompanies((prev) => [...prev, res.data.data]);
+    } catch (e) {
+      Swal.fire("Error", "Gagal membuat company", "error");
+    }
+  };
+
+  // Contact
+  const handleCreateContact = async (data) => {
+    try {
+      const res = await ApiCustomer.post("/api/contact-information", data);
+      Swal.fire("Success", "Contact berhasil dibuat", "success");
+      setContacts((prev) => [...prev, res.data.data]);
+    } catch (e) {
+      Swal.fire("Error", "Gagal membuat contact", "error");
+    }
+  };
+
+  // Asset
+  const handleCreateAsset = async (data) => {
+    try {
+      console.log(data);
+      const res = await ApiCustomer.post("/api/asset-information", data);
+      Swal.fire("Success", "Asset berhasil dibuat", "success");
+      setAssets((prev) => [...prev, res.data.data]);
+    } catch (e) {
+      Swal.fire("Error", "Gagal membuat asset", "error");
+    }
+  };
+
   /** --------------------------------------------------------------
    * Render: Search form + Results hub
    * -------------------------------------------------------------- */
@@ -564,11 +623,11 @@ export default function CaseSearchRefactor() {
           {/* A. Company-first flow */}
           {mode === "company" && (
             <>
-              <CompanySearchResult companies={companies} onSelectCompany={onSelectCompany} loading={loadingCompanies} />
+              <CompanySearchResult companies={companies} onSelectCompany={onSelectCompany} loading={loadingCompanies} handleCreateCompany={handleCreateCompany} />
               {selectedCompany && (
                 <>
-                  <ContactSearchResult contacts={contacts} onSelectContact={onSelectContact} loading={loadingContacts} />
-                  <AssetSearchResult assets={assets} onSelectAsset={onSelectAsset} loading={loadingAssets} />
+                  <ContactSearchResult contacts={contacts} onSelectContact={onSelectContact} loading={loadingContacts} handleCreateContact={handleCreateContact} />
+                  <AssetSearchResult assets={assets} onSelectAsset={onSelectAsset} loading={loadingAssets} handleCreateAsset={handleCreateAsset}/>
                 </>
               )}
             </>
@@ -577,14 +636,14 @@ export default function CaseSearchRefactor() {
           {/* B. Asset-first flow */}
           {mode === "asset" && (
             <>
-              <AssetSearchResult assets={assets} onSelectAsset={onSelectAsset} loading={loadingAssets} />
+              <AssetSearchResult assets={assets} onSelectAsset={onSelectAsset} loading={loadingAssets} handleCreateAsset={handleCreateAsset}/>
               {(selectedContact || selectedCompany) && (
                 <>
                   {selectedCompany && (
-                    <CompanySearchResult companies={[selectedCompany]} onSelectCompany={() => {}} />
+                    <CompanySearchResult companies={[selectedCompany]} onSelectCompany={() => {}} handleCreateCompany={handleCreateCompany}/>
                   )}
                   {selectedContact && (
-                    <ContactSearchResult contacts={[selectedContact]} onSelectContact={onSelectContact} />
+                    <ContactSearchResult contacts={[selectedContact]} onSelectContact={onSelectContact} handleCreateContact={handleCreateContact} />
                   )}
                 </>
               )}
@@ -596,22 +655,22 @@ export default function CaseSearchRefactor() {
             <>
               {/* Case 1: email/phone belongs to a company */}
               {companies.length > 0 && (
-                <CompanySearchResult companies={companies} onSelectCompany={onSelectCompany} loading={loadingCompanies} />
+                <CompanySearchResult companies={companies} onSelectCompany={onSelectCompany} loading={loadingCompanies} handleCreateCompany={handleCreateCompany} />
               )}
 
               {/* Case 2: email/phone belongs to contact with company → show companies (if any) and linked contacts */}
               {contactsLinked.length > 0 && (
-                <ContactSearchResult title="Linked Contacts" contacts={contactsLinked} onSelectContact={onSelectContact} loading={loadingContacts} />
+                <ContactSearchResult title="Linked Contacts" contacts={contactsLinked} onSelectContact={onSelectContact} loading={loadingContacts} handleCreateContact={handleCreateContact} />
               )}
 
               {/* Case 3: email/phone belongs to contact w/o company → show the unlinked contacts and their assets on click */}
               {contactsUnlinked.length > 0 && (
-                <ContactSearchResult title="Unlinked Contacts" contacts={contactsUnlinked} onSelectContact={onSelectContact} loading={loadingContacts} />
+                <ContactSearchResult title="Unlinked Contacts" contacts={contactsUnlinked} onSelectContact={onSelectContact} loading={loadingContacts} handleCreateContact={handleCreateContact} />
               )}
 
               {/* If a company/contact is chosen from above, also show their assets */}
               {(selectedCompany || selectedContact) && (
-                <AssetSearchResult assets={assets} onSelectAsset={onSelectAsset} loading={loadingAssets} />)
+                <AssetSearchResult assets={assets} onSelectAsset={onSelectAsset} loading={loadingAssets} handleCreateAsset={handleCreateAsset}/>)
               }
             </>
           )}

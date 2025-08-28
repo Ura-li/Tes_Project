@@ -148,7 +148,7 @@ export const FlowCase = () => {
                             </p>
                             <p className="font-medium">Phone Number</p>
                             <p className="text-md text-gray-500 col-span-2">
-                                {c.CustomerAccount || "No Phone Set"}
+                                {c.caseinformation.contact_information.Phone || "No Phone Set"}
                             </p>
                           </div>
                         </div>

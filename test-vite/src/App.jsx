@@ -31,6 +31,8 @@ import ApiCustomer from './api'
 import {Outlet} from "react-router"
 import debounce from 'lodash.debounce';
 import { SheetProvider } from './context/sheet-context'
+import { Toaster } from 'sonner'
+import { GlobalLogListener } from './components/GlobalLogListener'
 
 export function Breadcrumbs() {
   const location = useLocation();
@@ -98,6 +100,10 @@ export function GlobalSearchBar() {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/socket"); // Initialize the WebSocket server
   }, []);
 
   return (
@@ -174,6 +180,8 @@ const App = () => {
       </SidebarInset>
     </SidebarProvider> 
     </SheetProvider> 
+    <GlobalLogListener />
+    <Toaster/>
     </div>
   )
 }

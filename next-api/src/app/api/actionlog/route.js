@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../prisma/client";
+import { notifySocket } from "../../../../lib/SocketClient";
 
 export async function GET(request) {
     try {
@@ -66,6 +67,9 @@ export async function POST(request) {
                 }
             }
         })
+
+        await notifySocket("log:created", actionLog);
+
         return NextResponse.json({
             success: true,
             message: "ActionLog Created Successfully",

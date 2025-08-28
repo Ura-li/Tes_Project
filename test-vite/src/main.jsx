@@ -98,7 +98,7 @@ createRoot(document.getElementById("root")).render(
           {/* <Route path='/' element={<App />}> */}
           <Route path="/app" element={<GateKeepingRouting />}>
             <Route index element={<Landing />} />
-            <Route path="/app/profiles" element={<UserProfile user={getUserFromToken()} />} />
+            <Route path="/app/profiles" element={<UserProfile />} />
             <Route path="/app/frontdesk" element={<FrontDesk_Page />} />
             <Route path="/app/forbidden" element={<Forbidden />} />
             <Route path="/app/search_case" element={<Search_case />} />
