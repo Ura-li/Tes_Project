@@ -35,12 +35,12 @@ import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Button } from "./components/ui/button";
-import { cn } from "./lib/utils";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
-import { ExportExcel } from "./components/Export-Excel";
+import { ExportExcel } from "@/components/Export-Excel";
 
-import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectValue } from "../components/ui/select";
+import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/context/auth-context";
 // import PDFButton from "./components/PDFButton";
 // import ServiceRequestPDF from "./components/service-request-form";
@@ -476,334 +476,435 @@ export const Contact_table = () => {
 };
 
 export const Company_table = () => {
-  const [companies, setCompanies] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [goToPageInput, setGoToPageInput] = useState("");
+  const [companies, setCompanies] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
 
-  // sort
-  const [sortConfig, setSortConfig] = useState({ key: "Company", direction: "asc" });
+  // sort
+  const [sortConfig, setSortConfig] = useState({ key: "Company", direction: "asc" });
 
-  // filter
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
+  // filter
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedZipCode, setSelectedZipCode] = useState("");
 
-  const uniqueCountries = useMemo(() => {
-    const countries = companies.map((c) => c.Country).filter(Boolean);
-    return ["", ...new Set(countries.sort())];
-  }, [companies]);
+  const uniqueCountries = useMemo(() => {
+    const countries = companies.map((c) => c.Country).filter(Boolean);
+    return ["", ...new Set(countries.sort())];
+  }, [companies]);
 
-  const uniqueCities = useMemo(() => {
-    const cities = companies
-      .filter((c) => !selectedCountry || c.Country === selectedCountry)
-      .map((c) => c.City)
-      .filter(Boolean);
-    return ["", ...new Set(cities.sort())];
-  }, [companies, selectedCountry]);
+  const uniqueStates = useMemo(() => {
+    const states = companies
+      .filter((c) => !selectedCountry || c.Country === selectedCountry)
+      .map((c) => c.StateProvince)
+      .filter(Boolean);
+    return ["", ...new Set(states.sort())];
+  }, [companies, selectedCountry]);
 
-  // debounce search
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1);
-    }, 500);
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
+  const uniqueCities = useMemo(() => {
+    const cities = companies
+      .filter((c) => (!selectedCountry || c.Country === selectedCountry) && (!selectedState || c.StateProvince === selectedState))
+      .map((c) => c.City)
+      .filter(Boolean);
+    return ["", ...new Set(cities.sort())];
+  }, [companies, selectedCountry, selectedState]);
 
-  // fetch
-  const fetchCompanies = async () => {
-    setError(null);
-    setLoading(true);
-    Swal.fire({
-      title: "Memuat Data Company...",
-      text: "Mohon tunggu sebentar",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => Swal.showLoading(),
-    });
-    try {
-      const res = await ApiCustomer.get(`/api/site_account`);
-      setCompanies(res.data.data);
-      Swal.close();
-    } catch (err) {
-      console.error("Error fetching company data:", err);
-      setError("Failed to fetch data");
-      Swal.fire({
-        title: "Error!",
-        text: "Gagal mengambil data perusahaan.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    } finally {
-      setLoading(false);
-      Swal.close();
-    }
-  };
+  const uniqueZipCodes = useMemo(() => {
+    const zipCodes = companies
+      .filter((c) => (!selectedCountry || c.Country === selectedCountry) && (!selectedState || c.StateProvince === selectedState) && (!selectedCity || c.City === selectedCity))
+      .map((c) => c.ZipPostalCode)
+      .filter(Boolean);
+    return ["", ...new Set(zipCodes.sort())];
+  }, [companies, selectedCountry, selectedState, selectedCity]);
 
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
+  // debounce search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
-  // filter + search
-  const filteredData = companies.filter((c) => {
-    const matchesSearch = Object.values(c).some((val) =>
-      val?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-    );
-    const matchesCountry = !selectedCountry || c.Country === selectedCountry;
-    const matchesCity = !selectedCity || c.City === selectedCity;
-    return matchesSearch && matchesCountry && matchesCity;
-  });
+  // fetch
+  const fetchCompanies = async () => {
+    setError(null);
+    setLoading(true);
+    Swal.fire({
+      title: "Memuat Data Company...",
+      text: "Mohon tunggu sebentar",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading(),
+    });
+    try {
+      const res = await ApiCustomer.get(`/api/site_account`);
+      setCompanies(res.data.data);
+      Swal.close();
+    } catch (err) {
+      console.error("Error fetching company data:", err);
+      setError("Failed to fetch data");
+      Swal.fire({
+        title: "Error!",
+        text: "Gagal mengambil data perusahaan.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setLoading(false);
+      Swal.close();
+    }
+  };
 
-  // sorting
-  const sortedData = useMemo(() => {
-    const sorted = [...filteredData];
-    if (sortConfig.key) {
-      sorted.sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
-        if (aVal == null) aVal = "";
-        if (bVal == null) bVal = "";
-        if (typeof aVal === "string") aVal = aVal.toLowerCase();
-        if (typeof bVal === "string") bVal = bVal.toLowerCase();
-        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-      });
-    }
-    return sorted;
-  }, [filteredData, sortConfig]);
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
 
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
-  const currentData = sortedData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // filter + search
+  const filteredData = companies.filter((c) => {
+    const matchesSearch = Object.values(c).some((val) =>
+      val?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    );
+    const matchesCountry = !selectedCountry || c.Country === selectedCountry;
+    const matchesState = !selectedState || c.StateProvince === selectedState;
+    const matchesCity = !selectedCity || c.City === selectedCity;
+    const matchesZipCode = !selectedZipCode || c.ZipPostalCode === selectedZipCode;
+    return matchesSearch && matchesCountry && matchesState && matchesCity && matchesZipCode;
+  });
 
-  const handleSort = (key) => {
-    setSortConfig((prev) => {
-      if (prev.key === key) {
-        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
-      }
-      return { key, direction: "asc" };
-    });
-  };
+  // sorting
+  const sortedData = useMemo(() => {
+    const sorted = [...filteredData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
+        if (aVal == null) aVal = "";
+        if (bVal == null) bVal = "";
+        if (typeof aVal === "string") aVal = aVal.toLowerCase();
+        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return sorted;
+  }, [filteredData, sortConfig]);
 
-  const getSortIcon = (key) => {
-    if (sortConfig.key !== key)
-      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
-    return sortConfig.direction === "asc" ? (
-      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
-    ) : (
-      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
-    );
-  };
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
+  const currentData = sortedData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-  const handleGoToPage = (e) => {
-    e.preventDefault();
-    const page = Number(goToPageInput);
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
-    setGoToPageInput("");
-  };
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+  };
 
-  return (
-    <div className="p-6">
-      <h2 className="mb-6 text-2xl font-bold">📊 Company Management</h2>
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key)
+      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+    );
+  };
 
-      {/* Filters */}
-      <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3">
-        <input
-          type="text"
-          placeholder="🔍 Search companies..."
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-        />
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-          value={selectedCountry}
-          onChange={(e) => {
-            setSelectedCountry(e.target.value);
-            setSelectedCity("");
-            setCurrentPage(1);
-          }}
-        >
-          <option value="">🌍 All Countries</option>
-          {uniqueCountries.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-          value={selectedCity}
-          onChange={(e) => {
-            setSelectedCity(e.target.value);
-            setCurrentPage(1);
-          }}
-          disabled={!selectedCountry && companies.length > 0}
-        >
-          <option value="">🏙 All Cities</option>
-          {uniqueCities.map((city) => (
-            <option key={city} value={city}>{city}</option>
-          ))}
-        </select>
-      </div>
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
 
-      {error && <p className="mb-4 text-red-500">{error}</p>}
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setSelectedCountry("");
+    setSelectedState("");
+    setSelectedCity("");
+    setSelectedZipCode("");
+    setSortConfig({ key: "Company", direction: "asc" });
+    setCurrentPage(1);
+  };
 
-      {/* Table */}
-      <div className=" bg-white rounded-2xl shadow overflow-scroll max-h-150">
-        <table className="w-full relative border-collapse">
-          <thead className="sticky z-10 top-0 bg-gray-100">
-            <tr>
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
-                  onClick={() => handleSort("Company")}>
-                Company {getSortIcon("Company")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
-                  onClick={() => handleSort("Email")}>
-                Email {getSortIcon("Email")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
-                  onClick={() => handleSort("PrimaryPhone")}>
-                Primary Phone {getSortIcon("PrimaryPhone")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
-                  onClick={() => handleSort("WhatsappNo")}>
-                Whatsapp {getSortIcon("WhatsappNo")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
-                  onClick={() => handleSort("City")}>
-                City {getSortIcon("City")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
-                  onClick={() => handleSort("Country")}>
-                Country {getSortIcon("Country")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="">
-            {currentData.length > 0 ? (
-              currentData.map((c, i) => (
-                <tr key={c.SiteAccountID}
-                    className={`hover:bg-blue-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <td className="p-3 text-center border">
-                    {(currentPage - 1) * itemsPerPage + i + 1}
-                  </td>
-                  <td className="p-3 border">{c.Company}</td>
-                  <td className="p-3 border">{c.Email}</td>
-                  <td className="p-3 border">{c.PrimaryPhone}</td>
-                  <td className="p-3 border">{c.WhatsappNo}</td>
-                  <td className="p-3 border">{c.City}</td>
-                  <td className="p-3 border">{c.Country}</td>
-                  <td className="flex items-center justify-center gap-2 p-3 border">
-                    <CompanyEdit siteAccountId={c.SiteAccountID} onUpdate={fetchCompanies}/>
-                    <CompanyDelete siteAccountId={c.SiteAccountID}
-                                   isModalOpen={isModalOpen}
-                                   setIsModalOpen={setIsModalOpen}
-                                   onUpdate={fetchCompanies}/>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="p-6 text-center text-gray-500">No data found 🚫</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+  return (
+    <div className="p-6">
+      <h2 className="mb-6 text-2xl font-bold">📊 Company Management</h2>
 
-      {/* Bottom controls */}
-      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
-        {/* Rows per page */}
-      <div className="flex items-center gap-2">
-        <span className="text-sm">Rows per page:</span>
-        <select
-          className="p-1 text-sm border rounded-lg"
-          value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (value === "all") {
-              setItemsPerPage(sortedData.length);
-              setCurrentPage(1);
-            } else {
-              setItemsPerPage(Number(value));
-              setCurrentPage(1);
-            }
-          }}
-        >
-          <option value={10}>10</option>
-          <option value={25}>25</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-          <option value="all">All</option>
-        </select>
-      </div>
+      {/* Kontainer Flexbox untuk pencarian dan tombol reset */}
+      <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-center sm:justify-between">
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="🔍 Search companies..."
+          className="w-full p-2 border rounded-lg shadow-sm sm:w-1/3 focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+        />
+        {/* Reset Filter Button */}
+        <button 
+          onClick={handleResetFilters}
+          className="px-4 py-2 text-sm font-semibold text-white bg-gray-500 rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+          Reset Filters
+        </button>
+      </div>
+      
+      {/* Filters */}
+      <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-4">
+        <select
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={selectedCountry}
+          onChange={(e) => {
+            setSelectedCountry(e.target.value);
+            setSelectedState("");
+            setSelectedCity("");
+            setSelectedZipCode("");
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">🌍 All Countries</option>
+          {uniqueCountries.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+        <select
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={selectedState}
+          onChange={(e) => {
+            setSelectedState(e.target.value);
+            setSelectedCity("");
+            setSelectedZipCode("");
+            setCurrentPage(1);
+          }}
+          disabled={!selectedCountry && companies.length > 0}
+        >
+          <option value="">🗺 All States</option>
+          {uniqueStates.map((state) => (
+            <option key={state} value={state}>
+              {state}
+            </option>
+          ))}
+        </select>
+        <select
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={selectedCity}
+          onChange={(e) => {
+            setSelectedCity(e.target.value);
+            setSelectedZipCode("");
+            setCurrentPage(1);
+          }}
+          disabled={(!selectedCountry && companies.length > 0) || (!selectedState && companies.length > 0)}
+        >
+          <option value="">🏙 All Cities</option>
+          {uniqueCities.map((city) => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
+        </select>
+        <select
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={selectedZipCode}
+          onChange={(e) => {
+            setSelectedZipCode(e.target.value);
+            setCurrentPage(1);
+          }}
+          disabled={(!selectedCountry && companies.length > 0) || (!selectedState && companies.length > 0) || (!selectedCity && companies.length > 0)}
+        >
+          <option value="">📪 All Zip Codes</option>
+          {uniqueZipCodes.map((zip) => (
+            <option key={zip} value={zip}>
+              {zip}
+            </option>
+          ))}
+        </select>
+      </div>
 
-        {/* Info total data */}
-        <div className="text-sm text-gray-600">
-          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
-          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
-          <b>{sortedData.length}</b> companies
-        </div>
+      {error && <p className="mb-4 text-red-500">{error}</p>}
 
-        {/* Pagination + Go to page */}
-        {totalPages > 1 && (
-          <div className="flex items-center gap-3">
-            <button
-              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              ⬅ Prev
-            </button>
+      {/* Table */}
+      <div className=" bg-white rounded-2xl shadow overflow-scroll max-h-150">
+        <table className="w-full relative border-collapse">
+          <thead className="sticky z-10 top-0 bg-gray-100">
+            <tr>
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("Company")}>
+                Company {getSortIcon("Company")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("Email")}>
+                Email {getSortIcon("Email")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("PrimaryPhone")}>
+                Primary Phone {getSortIcon("PrimaryPhone")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("WhatsappNo")}>
+                Whatsapp {getSortIcon("WhatsappNo")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("AddressLine1")}>
+                Address Line 1 {getSortIcon("AddressLine1")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("AddressLine2")}>
+                Address Line 2 {getSortIcon("AddressLine2")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("Country")}>
+                Country {getSortIcon("Country")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("StateProvince")}>
+                State/Province {getSortIcon("StateProvince")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("City")}>
+                City {getSortIcon("City")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                  onClick={() => handleSort("ZipPostalCode")}>
+                Zip/Postal Code {getSortIcon("ZipPostalCode")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="">
+            {currentData.length > 0 ? (
+              currentData.map((c, i) => (
+                <tr key={c.SiteAccountID}
+                    className={`hover:bg-blue-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <td className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + i + 1}
+                  </td>
+                  <td className="p-3 border">{c.Company}</td>
+                  <td className="p-3 border">{c.Email}</td>
+                  <td className="p-3 border">{c.PrimaryPhone}</td>
+                  <td className="p-3 border">{c.WhatsappNo}</td>
+                  <td className="p-3 border">{c.AddressLine1}</td>
+                  <td className="p-3 border">{c.AddressLine2}</td>
+                  <td className="p-3 border">{c.Country}</td>
+                  <td className="p-3 border">{c.StateProvince}</td>
+                  <td className="p-3 border">{c.City}</td>
+                  <td className="p-3 border">{c.ZipPostalCode}</td>
+                  <td className="flex items-center justify-center gap-2 p-3 border">
+                    <CompanyEdit siteAccountId={c.SiteAccountID} onUpdate={fetchCompanies}/>
+                    <CompanyDelete siteAccountId={c.SiteAccountID}
+                                   isModalOpen={isModalOpen}
+                                   setIsModalOpen={setIsModalOpen}
+                                   onUpdate={fetchCompanies}/>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="12" className="p-6 text-center text-gray-500">No data found 🚫</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
-            <span className="px-3 py-1 text-sm">
-              Page <b>{currentPage}</b> of {totalPages}
-            </span>
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
 
-            <button
-              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Next ➡
-            </button>
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> companies
+        </div>
 
-            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
-              <input
-                type="number"
-                min="1"
-                max={totalPages}
-                placeholder="Go to"
-                className="w-16 p-1 text-sm text-center border rounded-lg"
-                value={goToPageInput}
-                onChange={(e) => setGoToPageInput(e.target.value)}
-              />
-              <button
-                type="submit"
-                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-              >
-                Go
-              </button>
-            </form>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
-
 
 export const Case_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -3877,11 +3978,25 @@ export const User_table = () => {
               >
                 Role {getSortIcon("Role")}
               </th>
+              {/* Tambahkan kolom Phone di sini */}
               <th
                 className="p-3 text-center border cursor-pointer"
-                onClick={() => handleSort("ProfilPhoto")}
+                onClick={() => handleSort("Phone")}
               >
-                Profil Photo {getSortIcon("ProfilPhoto")}
+                Phone {getSortIcon("Phone")}
+              </th>
+              {/* Tambahkan kolom Signature di sini */}
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Signature")}
+              >
+                Signature {getSortIcon("Signature")}
+              </th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ProfilePhoto")}
+              >
+                Profil Photo {getSortIcon("ProfilePhoto")}
               </th>
               <th
                 className="p-3 text-center border cursor-pointer"
@@ -3905,7 +4020,7 @@ export const User_table = () => {
                   key={UserItem.IDUser}
                   className={`text-center text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td> 
+                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
                   <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
                     {UserItem.IDUser}
                   </td>
@@ -3913,7 +4028,17 @@ export const User_table = () => {
                   <td className="p-2 border">{UserItem.Username}</td>
                   <td className="p-2 border">{UserItem.Name}</td>
                   <td className="p-2 border">{UserItem.Role}</td>
-                  <td className="p-2 border">{UserItem.ProfilPhoto}</td>
+                  {/* Tampilkan data Phone di sini */}
+                  <td className="p-2 border">{UserItem.Phone}</td>
+                  {/* Tampilkan data Signature di sini */}
+                  <td className="p-2 border">{UserItem.Signature}</td>
+                  <td className="p-2 border">
+                    {UserItem.ProfilePhoto ? (
+                      <img src={UserItem.ProfilePhoto} alt="Profile" className="w-10 h-10 object-cover rounded-full mx-auto" />
+                    ) : (
+                      "No Photo"
+                    )}
+                  </td>
                   <td className="p-2 border">{UserItem.CreatedAt}</td>
                   <td className="p-2 border">{UserItem.UpdatedAt}</td>
                   <td className="flex items-center justify-center gap-2 p-2 border">
@@ -3932,7 +4057,7 @@ export const User_table = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="9" className="p-6 text-center text-gray-500">
+                <td colSpan="11" className="p-6 text-center text-gray-500">
                   No data found 🚫
                 </td>
               </tr>

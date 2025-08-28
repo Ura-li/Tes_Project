@@ -901,121 +901,239 @@ export function BtnModalAsset({
   )
 };
 
-//? MODAL FOR MASTER SITE
-export function AssetEdit ({ assetId, onUpdate }) {
+//Peoduct Selection
+import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+
+function GenericSelector({ 
+  value, 
+  onChange, 
+  endpoint, 
+  labelKey, 
+  valueKey, 
+  placeholder, 
+  label,
+  helperText 
+}) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+
+  useEffect(() => {
+    if (query.length < 2) return;
+    const fetchData = async () => {
+      try {
+        const res = await ApiCustomer.get(`${endpoint}?search=${query}`);
+        setResults(res.data.data || []);
+      } catch (err) {
+        console.error("Failed to fetch:", err);
+      }
+    };
+    fetchData();
+  }, [query, endpoint]);
+
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <Command className="border rounded-lg">
+        <input
+          className="w-full p-2 border-b"
+          placeholder={placeholder}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <CommandGroup>
+          {results.map((item) => (
+            <CommandItem
+              key={item[valueKey]}
+              onSelect={() => {
+                onChange(item);
+                setQuery(item[labelKey]); // tampilkan label di input
+              }}
+            >
+              {item[labelKey]} ({item[valueKey]})
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      </Command>
+      {helperText && <p className="text-xs text-gray-500">{helperText}</p>}
+    </div>
+  );
+}
+
+export function AssetEdit({ assetId, onUpdate }) {
   const [asset, setAsset] = useState(null);
-  const [serialNumber, setSerialNumber] = useState("");
-  const [productName, setProductName] = useState("");
-  const [productNumber, setProductNumber] = useState("");
-  const [productLine, setProductLine] = useState("");
+  const [formData, setFormData] = useState({
+    SerialNumber: "",
+    ProductName: "",
+    ProductNumber: "",
+    ProductLine: "",
+    SiteAccountID: "",
+    ContactID: "",
+  });
   const [isOpen, setIsOpen] = useState(false);
+
+  const requiredFields = ["SerialNumber", "ProductName", "ProductNumber", "ProductLine"];
 
   const fetchAsset = async () => {
     if (!assetId) return;
     try {
       const response = await ApiCustomer.get(`/api/asset-information/${assetId}`);
-      console.log("Response fetch asset: ", response.data);
       const data = response.data.data;
       setAsset(data);
-      setSerialNumber(data?.SerialNumber || "");
-      setProductName(data?.product_information?.ProductName || "");
-      setProductNumber(data?.ProductNumber || "");
-      setProductLine(data?.product_information?.ProductLine || "");
+      setFormData({
+        SerialNumber: data?.SerialNumber || "",
+        ProductName: data?.product_information?.ProductName || "",
+        ProductNumber: data?.ProductNumber || "",
+        ProductLine: data?.product_information?.ProductLine || "",
+        SiteAccountID: data?.SiteAccountID || "",
+        ContactID: data?.ContactID || "",
+      });
     } catch (error) {
       console.error("Error fetching asset information:", error);
     }
   };
 
   useEffect(() => {
-    if (assetId && isOpen) { 
-      fetchAsset();
-    }
+    if (assetId && isOpen) fetchAsset();
   }, [assetId, isOpen]);
 
-  // Reset state saat modal ditutup
   useEffect(() => {
     if (!isOpen) {
-      setSerialNumber("");
-      setProductName("");
-      setProductNumber("");
-      setProductLine("");
+      setFormData({
+        SerialNumber: "",
+        ProductName: "",
+        ProductNumber: "",
+        ProductLine: "",
+        SiteAccountID: "",
+        ContactID: "",
+      });
+      setAsset(null);
     }
   }, [isOpen]);
 
+  const handleChange = (key, value) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
   const handleUpdate = async () => {
-    if (!serialNumber || !productName || !productNumber) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Warning!',
-        text: 'Please fill in all fields before submitting.',
-        timer: 1100,
-        timerProgressBar: false,
-        showConfirmButton: false,
-        allowEscapeKey: false,
-      });
-      return;
+    // validation
+    for (let field of requiredFields) {
+      if (!formData[field]) {
+        Swal.fire({
+          icon: "warning",
+          title: "Warning!",
+          text: `Field ${field} is required.`,
+          timer: 1200,
+          showConfirmButton: false,
+        });
+        return;
+      }
     }
-  
+
     try {
-      await ApiCustomer.patch(`/api/asset-information/${assetId}`, {
-        SerialNumber: serialNumber,
-        ProductName: productName,
-        ProductNumber: productNumber,
-        ProductLine: productLine,
-      });
-  
+      await ApiCustomer.patch(`/api/asset-information/${assetId}`, formData);
+
       Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'Asset information updated successfully.',
+        icon: "success",
+        title: "Success!",
+        text: "Asset information updated successfully.",
         timer: 1500,
         showConfirmButton: false,
-        allowEscapeKey: false,
       });
-  
-      onUpdate();       
-      setIsOpen(false); 
-  
+
+      onUpdate();
+      setIsOpen(false);
     } catch (error) {
       console.error("Error updating asset:", error);
-  
       Swal.fire({
-        icon: 'error',
-        title: 'Update Failed',
-        text: 'An error occurred while updating the asset.',
-        allowEscapeKey: false,
+        icon: "error",
+        title: "Update Failed",
+        text: "An error occurred while updating the asset.",
       });
     }
   };
-  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button  variant="outline" onClick={() => { setIsOpen(true); fetchAsset(); }}>
-          <Pencil />
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => { setIsOpen(true); fetchAsset(); }}
+        >
+          <Pencil className="w-4 h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-lg w-full">
         <DialogHeader>
           <DialogTitle>Edit Asset Information</DialogTitle>
           <DialogDescription>
             Update the details of the asset. Fields marked with * are required.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
-          <Input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} placeholder="Serial Number*" />
-          <Input value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name*" />
-          <Input value={productNumber} onChange={(e) => setProductNumber(e.target.value)} placeholder="Product Number*" />
-          <Input value={productLine} onChange={(e) => setProductLine(e.target.value)} placeholder="Product Line" />
+
+        <div className="flex flex-col gap-4">
+          {/* Serial Number */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Serial Number*</label>
+            <Input
+              value={formData.SerialNumber}
+              onChange={(e) => handleChange("SerialNumber", e.target.value)}
+              placeholder="Enter Serial Number"
+            />
+            <p className="text-xs text-gray-500">Isi dengan nomor unik asset</p>
+          </div>
+
+          {/* Product */}
+          <GenericSelector
+            value={formData.ProductNumber}
+            onChange={(p) => {
+              handleChange("ProductNumber", p.ProductNumber);
+              handleChange("ProductName", p.ProductName);
+              handleChange("ProductLine", p.ProductLine);
+            }}
+            endpoint="/api/product-information"
+            labelKey="ProductName"
+            valueKey="ProductNumber"
+            placeholder="Search product..."
+            label="Product*"
+            helperText="Minimal 2 huruf untuk mencari produk"
+          />
+
+          {/* Site Account */}
+          <GenericSelector
+            value={formData.SiteAccountID}
+            onChange={(s) => handleChange("SiteAccountID", s.SiteAccountID)}
+            endpoint="/api/site_account"
+            labelKey="Company"
+            valueKey="SiteAccountID"
+            placeholder="Search site account..."
+            label="Site Account"
+            helperText="Minimal 2 huruf untuk mencari site account"
+          />
+
+          {/* Contact */}
+          <GenericSelector
+            value={formData.ContactID}
+            onChange={(c) => handleChange("ContactID", c.ContactID)}
+            endpoint="/api/contact-information"
+            labelKey="FirstName"
+            valueKey="ContactID"
+            placeholder="Search contact..."
+            label="Contact"
+            helperText="Minimal 2 huruf untuk mencari contact"
+          />
         </div>
-        <DialogFooter>
+
+        <DialogFooter className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setIsOpen(false)}>
+            Cancel
+          </Button>
           <Button onClick={handleUpdate}>Update</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export function AssetDelete ({ assetId }) {
   const handleDelete = async () => {
@@ -1096,35 +1214,38 @@ export function AssetDelete ({ assetId }) {
 };
 
 export function CompanyEdit({ siteAccountId, onUpdate }) {
-  const [company, setCompany] = useState(null);
-  const [companyName, setCompanyName] = useState("");
-  const [email, setEmail] = useState("");
-  const [primaryPhone, setPrimaryPhone] = useState("");
-  const [whatsappNo, setWhatsappNo] = useState("");
-  const [addressLine1, setAddressLine1] = useState("");
-  const [addressLine2, setAddressLine2] = useState("");
-  const [city, setCity] = useState("");
-  const [stateProvince, setStateProvince] = useState("");
-  const [country, setCountry] = useState("");
-  const [zipPostalCode, setZipPostalCode] = useState("");
+  const [formData, setFormData] = useState({
+    Company: "",
+    Email: "",
+    PrimaryPhone: "",
+    WhatsappNo: "",
+    AddressLine1: "",
+    AddressLine2: "",
+    City: "",
+    StateProvince: "",
+    Country: "",
+    ZipPostalCode: "",
+  });
   const [isOpen, setIsOpen] = useState(false);
+  const requiredFields = ["Company", "Email", "PrimaryPhone", "AddressLine1", "City", "Country", "ZipPostalCode"];
 
   const fetchCompany = async () => {
     if (!siteAccountId) return;
     try {
       const response = await ApiCustomer.get(`/api/site_account/${siteAccountId}`);
       const data = response.data.data;
-      setCompany(data);
-      setCompanyName(data?.Company || "");
-      setEmail(data?.Email || "");
-      setPrimaryPhone(data?.PrimaryPhone || "");
-      setWhatsappNo(data?.WhatsappNo || "");
-      setAddressLine1(data?.AddressLine1 || "");
-      setAddressLine2(data?.AddressLine2 || "");
-      setCity(data?.City || "");
-      setStateProvince(data?.StateProvince || "");
-      setCountry(data?.Country || "");
-      setZipPostalCode(data?.ZipPostalCode || "");
+      setFormData({
+        Company: data?.Company || "",
+        Email: data?.Email || "",
+        PrimaryPhone: data?.PrimaryPhone || "",
+        WhatsappNo: data?.WhatsappNo || "",
+        AddressLine1: data?.AddressLine1 || "",
+        AddressLine2: data?.AddressLine2 || "",
+        City: data?.City || "",
+        StateProvince: data?.StateProvince || "",
+        Country: data?.Country || "",
+        ZipPostalCode: data?.ZipPostalCode || "",
+      });
     } catch (error) {
       console.error("Error fetching company information:", error);
     }
@@ -1138,24 +1259,36 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
 
   useEffect(() => {
     if (!isOpen) {
-      setCompanyName("");
-      setEmail("");
-      setPrimaryPhone("");
-      setWhatsappNo("");
-      setAddressLine1("");
-      setAddressLine2("");
-      setCity("");
-      setStateProvince("");
-      setCountry("");
-      setZipPostalCode("");
+      setFormData({
+        Company: "",
+        Email: "",
+        PrimaryPhone: "",
+        WhatsappNo: "",
+        AddressLine1: "",
+        AddressLine2: "",
+        City: "",
+        StateProvince: "",
+        Country: "",
+        ZipPostalCode: "",
+      });
     }
   }, [isOpen]);
 
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
   const handleUpdate = async () => {
-    if (!companyName || !email || !primaryPhone || !addressLine1 || !city || !country || !zipPostalCode) {
+    const isFormValid = requiredFields.every(field => formData[field]);
+
+    if (!isFormValid) {
       Swal.fire({
         title: "Incomplete Data",
-        text: "Please fill in all fields before submitting.",
+        text: "Please fill in all required fields before submitting.",
         icon: "warning",
         timer: 1100,
         timerProgressBar: true,
@@ -1174,19 +1307,8 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         },
         showConfirmButton: false,
         allowOutsideClick: false,
-      })
-      await ApiCustomer.patch(`/api/site_account/${siteAccountId}`, {
-        Company: companyName,
-        Email: email,
-        PrimaryPhone: primaryPhone,
-        WhatsappNo: whatsappNo,
-        AddressLine1: addressLine1,
-        AddressLine2: addressLine2,
-        City: city,
-        StateProvince: stateProvince,
-        Country: country,
-        ZipPostalCode: zipPostalCode,
       });
+      await ApiCustomer.patch(`/api/site_account/${siteAccountId}`, formData);
   
       Swal.fire({
         icon: 'success',
@@ -1211,36 +1333,77 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
       });
     }
   };
-  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => { setIsOpen(true); fetchCompany(); }}>
-          <Pencil />
+        <Button 
+          variant="outline" 
+          onClick={() => { setIsOpen(true); }} 
+          className="flex items-center gap-2"
+        >
+          <Pencil className="w-4 h-4" /> Edit
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Company Information</DialogTitle>
+          <DialogTitle className="text-xl font-bold">Edit Company Information</DialogTitle>
           <DialogDescription>
-            Update the details of the company. Fields marked with * are required.
+            Update the details of the company. Fields marked with <span className="text-red-500">*</span> are required.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
-          <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Company Name *" />
-          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email *" />
-          <Input value={primaryPhone} onChange={(e) => setPrimaryPhone(e.target.value)} placeholder="Primary Phone *" />
-          <Input value={whatsappNo} onChange={(e) => setWhatsappNo(e.target.value)} placeholder="Whatsapp No *" />
-          <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} placeholder="Address Line 1 *" />
-          <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Address Line 2" />
-          <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City *" />
-          <Input value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} placeholder="State/Province" />
-          <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country *" />
-          <Input value={zipPostalCode} onChange={(e) => setZipPostalCode(e.target.value)} placeholder="Zip/Postal Code *" />
+
+        {/* Form Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+          <div>
+            <Label htmlFor="Company">Company Name *</Label>
+            <Input id="Company" autoComplete="organization" value={formData.Company} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="Email">Email *</Label>
+            <Input id="Email" type="email" autoComplete="email" value={formData.Email} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="PrimaryPhone">Primary Phone *</Label>
+            <Input id="PrimaryPhone" type="tel" autoComplete="tel" value={formData.PrimaryPhone} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="WhatsappNo">Whatsapp No</Label>
+            <Input id="WhatsappNo" type="tel" value={formData.WhatsappNo} onChange={handleChange} />
+          </div>
+          <div className="sm:col-span-2">
+            <Label htmlFor="AddressLine1">Address Line 1 *</Label>
+            <Input id="AddressLine1" value={formData.AddressLine1} onChange={handleChange} />
+          </div>
+          <div className="sm:col-span-2">
+            <Label htmlFor="AddressLine2">Address Line 2</Label>
+            <Input id="AddressLine2" value={formData.AddressLine2} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="City">City *</Label>
+            <Input id="City" value={formData.City} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="StateProvince">State/Province</Label>
+            <Input id="StateProvince" value={formData.StateProvince} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="Country">Country *</Label>
+            <Input id="Country" value={formData.Country} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="ZipPostalCode">Zip/Postal Code *</Label>
+            <Input id="ZipPostalCode" value={formData.ZipPostalCode} onChange={handleChange} />
+          </div>
         </div>
-        <DialogFooter>
-          <Button onClick={handleUpdate}>Update</Button>
+
+        <DialogFooter className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setIsOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleUpdate} className="bg-blue-600 hover:bg-blue-700 text-white">
+            Update
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -3109,6 +3272,8 @@ export function UserAdd({ onAdd }) {
     Name: "",
     Role: "",
     ProfilePhoto: "",
+    Phone: "",
+    Signature: "",
   });
 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -3181,7 +3346,16 @@ export function UserAdd({ onAdd }) {
 
       onAdd?.();
       setIsOpen(false);
-      setFormData({ Email: "", Username: "", Password: "", Name: "", Role: "", ProfilePhoto: "" });
+      setFormData({
+        Email: "",
+        Username: "",
+        Password: "",
+        Name: "",
+        Role: "",
+        ProfilePhoto: "",
+        Phone: "",
+        Signature: "",
+      });
       setSelectedFile(null);
       setPreviewPhoto(null);
     } catch (err) {
@@ -3200,43 +3374,90 @@ export function UserAdd({ onAdd }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="ml-2 rounded-sm h-11">Tambah User</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">
+          Tambah User
+        </Button>
       </DialogTrigger>
 
       <DialogContent className="h-[550px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Tambah Data User</DialogTitle>
-          <DialogDescription>Isikan semua data pengguna baru dengan benar.</DialogDescription>
+          <DialogDescription>
+            Isikan semua data pengguna baru dengan benar.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div>
             <Label>Email*</Label>
-            <Input type="email" value={formData.Email} onChange={handleChange("Email")} />
+            <Input
+              type="email"
+              value={formData.Email}
+              onChange={handleChange("Email")}
+            />
           </div>
           <div>
             <Label>Username*</Label>
-            <Input type="text" value={formData.Username} onChange={handleChange("Username")} />
+            <Input
+              type="text"
+              value={formData.Username}
+              onChange={handleChange("Username")}
+            />
           </div>
           <div>
             <Label>Password*</Label>
-            <Input type="password" value={formData.Password} onChange={handleChange("Password")} />
+            <Input
+              type="password"
+              value={formData.Password}
+              onChange={handleChange("Password")}
+            />
           </div>
           <div>
             <Label>Nama*</Label>
-            <Input type="text" value={formData.Name} onChange={handleChange("Name")} />
+            <Input
+              type="text"
+              value={formData.Name}
+              onChange={handleChange("Name")}
+            />
           </div>
           <div>
             <Label>Role</Label>
-            <Input type="text" value={formData.Role} onChange={handleChange("Role")} placeholder="Contoh: admin / user" />
+            <Input
+              type="text"
+              value={formData.Role}
+              onChange={handleChange("Role")}
+              placeholder="Contoh: admin / user"
+            />
           </div>
-          {/* <div>
+          <div>
+            <Label>Phone</Label>
+            <Input
+              type="tel"
+              value={formData.Phone}
+              onChange={handleChange("Phone")}
+              placeholder="Contoh: 081234567890"
+            />
+          </div>
+          <div>
+            <Label>Signature</Label>
+            <Input
+              type="text"
+              value={formData.Signature}
+              onChange={handleChange("Signature")}
+              placeholder="Contoh: Tanda tangan digital"
+            />
+          </div>
+          <div>
             <Label>Foto Profil</Label>
             <Input type="file" accept="image/*" onChange={handleFileChange} />
             {previewPhoto && (
-              <img src={previewPhoto} alt="Preview" className="object-cover w-24 h-24 mt-2 rounded-md" />
+              <img
+                src={previewPhoto}
+                alt="Preview"
+                className="object-cover w-24 h-24 mt-2 rounded-md"
+              />
             )}
-          </div> */}
+          </div>
         </div>
 
         <DialogFooter>
@@ -3245,10 +3466,12 @@ export function UserAdd({ onAdd }) {
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export function UserEdit({ IDUser, onUpdate }) {
   const [formData, setFormData] = useState({});
+  const formDataref = new FormData();
+
   const [isOpen, setIsOpen] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -3258,8 +3481,10 @@ export function UserEdit({ IDUser, onUpdate }) {
     Username: "",
     Password: "",
     Name: "",
-    Role: "",
+    Role: "user",
     ProfilePhoto: "",
+    Phone: "",
+    Signature: "",
   };
 
   const fetchUser = async () => {
@@ -3273,8 +3498,10 @@ export function UserEdit({ IDUser, onUpdate }) {
         Username: data.Username || "",
         Password: "",
         Name: data.Name || "",
-        Role: data.Role || "",
+        Role: data.Role || "user",
         ProfilePhoto: data.ProfilePhoto || "",
+        Phone: data.Phone || "",
+        Signature: data.Signature || "",
       });
 
       setPreviewPhoto(data.ProfilePhoto || null);
@@ -3320,15 +3547,15 @@ export function UserEdit({ IDUser, onUpdate }) {
       const res = await ApiCustomer.post("/api/upload", formDataUpload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      return res.data.url; // Asumsikan API mengembalikan URL foto
+      return res.data.url;
     } catch (error) {
       console.error("Image upload failed:", error);
-      return formData.ProfilePhoto; // fallback
+      return formData.ProfilePhoto;
     }
   };
 
   const handleUpdate = async () => {
-    const { Email, Username, Password, Name, Role } = formData;
+    const { Email, Username, Password, Name, Role, Phone, Signature } = formData;
 
     if (!Email || !Username || !Name) {
       Swal.fire({
@@ -3344,19 +3571,39 @@ export function UserEdit({ IDUser, onUpdate }) {
     }
 
     try {
-      const uploadedPhotoURL = await uploadImage();
+      // kalau ada file → pakai FormData
+      if (selectedFile) {
+        const formDataToSend = new FormData();
+        formDataToSend.append("Email", Email);
+        formDataToSend.append("Username", Username);
+        formDataToSend.append("Name", Name);
+        formDataToSend.append("Role", Role);
+        formDataToSend.append("Phone", Phone);
+        formDataToSend.append("Signature", Signature);
 
-      const updatedData = {
-        Email,
-        Username,
-        Name,
-        Role,
-        ProfilePhoto: uploadedPhotoURL,
-      };
+        if (Password) formDataToSend.append("Password", Password);
+        formDataToSend.append("ProfilePhoto", selectedFile);
 
-      if (Password) updatedData.Password = Password;
+        await ApiCustomer.patch(`/api/user/${IDUser}`, formDataToSend, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } else {
+        // kalau tidak ada file → kirim JSON
+        const updatedData = {
+          Email,
+          Username,
+          Name,
+          Role,
+          Phone,
+          Signature,
+        };
 
-      await ApiCustomer.patch(`/api/user/${IDUser}`, updatedData);
+        if (Password) updatedData.Password = Password;
+
+        await ApiCustomer.patch(`/api/user/${IDUser}`, updatedData, {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
 
       Swal.fire({
         title: "Success!",
@@ -3364,7 +3611,7 @@ export function UserEdit({ IDUser, onUpdate }) {
         icon: "success",
         timer: 1500,
         showConfirmButton: false,
-        allowEscapeKey: false,  
+        allowEscapeKey: false,
       });
 
       onUpdate();
@@ -3385,12 +3632,18 @@ export function UserEdit({ IDUser, onUpdate }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => { setIsOpen(true); fetchUser(); }}>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setIsOpen(true);
+            fetchUser();
+          }}
+        >
           <Pencil />
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="h-[500px] overflow-y-auto">
+      <DialogContent className="h-[600px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit User Information</DialogTitle>
           <DialogDescription>
@@ -3401,32 +3654,72 @@ export function UserEdit({ IDUser, onUpdate }) {
         <div className="space-y-3">
           <div>
             <Label>Email*</Label>
-            <Input type="email" value={formData.Email} onChange={handleChange("Email")} />
+            <Input
+              type="email"
+              value={formData.Email}
+              onChange={handleChange("Email")}
+            />
           </div>
           <div>
             <Label>Username*</Label>
-            <Input type="text" value={formData.Username} onChange={handleChange("Username")} />
+            <Input
+              type="text"
+              value={formData.Username}
+              onChange={handleChange("Username")}
+            />
           </div>
-          {/* <div>
+          <div>
             <Label>Password</Label>
-            <Input type="password" value={formData.Password} onChange={handleChange("Password")} placeholder="Kosongkan jika tidak ingin mengubah" />
-          </div> */}
+            <Input
+              type="password"
+              value={formData.Password}
+              onChange={handleChange("Password")}
+              placeholder="Kosongkan jika tidak ingin mengubah"
+            />
+          </div>
           <div>
             <Label>Name*</Label>
-            <Input type="text" value={formData.Name} onChange={handleChange("Name")} />
+            <Input
+              type="text"
+              value={formData.Name}
+              onChange={handleChange("Name")}
+            />
           </div>
           <div>
             <Label>Role</Label>
-            <Input type="text" value={formData.Role} onChange={handleChange("Role")} />
+            <Input
+              type="text"
+              value={formData.Role}
+              onChange={handleChange("Role")}
+            />
           </div>
-
-          {/* <div>
+          <div>
+            <Label>Phone</Label>
+            <Input
+              type="text"
+              value={formData.Phone}
+              onChange={handleChange("Phone")}
+            />
+          </div>
+          <div>
+            <Label>Signature</Label>
+            <Input
+              type="text"
+              value={formData.Signature}
+              onChange={handleChange("Signature")}
+            />
+          </div>
+          <div>
             <Label>Profile Photo</Label>
             <Input type="file" accept="image/*" onChange={handleFileChange} />
             {previewPhoto && (
-              <img src={previewPhoto} alt="Preview" className="object-cover w-24 h-24 mt-2 rounded-md" />
+              <img
+                src={previewPhoto}
+                alt="Preview"
+                className="object-cover w-24 h-24 mt-2 rounded-md"
+              />
             )}
-          </div> */}
+          </div>
         </div>
 
         <DialogFooter>
@@ -3435,7 +3728,7 @@ export function UserEdit({ IDUser, onUpdate }) {
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export function UserDelete ({ IDUser, isModalOpen, setIsModalOpen, onUpdate }) {
  

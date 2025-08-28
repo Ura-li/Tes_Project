@@ -51,52 +51,79 @@ export async function PATCH(request, { params }) {
   }
 
   try {
-    const formData = await request.formData();
-    const Name = formData.get("Name");
-    const Email = formData.get("Email");
-    const Phone = formData.get("Phone");
-    const Password = formData.get("NewPassword");
-    const ProfilePhoto = formData.get("ProfilePhoto");
-    const Signature = formData.get("Signature");
+    const contentType = request.headers.get("content-type") || "";
+    let body = {};
+    let files = {};
 
-    let updateData = { Name, Email, Phone };
+    if (contentType.includes("multipart/form-data")) {
+      // 📌 Kalau dikirim dengan FormData
+      const formData = await request.formData();
 
-    if (Password) {
-      updateData.Password = await bcrypt.hash(Password, 10);
+      body.Name = formData.get("Name");
+      body.Email = formData.get("Email");
+      body.Username = formData.get("Username");
+      body.Role = formData.get("Role");
+      body.Phone = formData.get("Phone");
+      body.Password = formData.get("Password");
+      body.Signature = formData.get("Signature"); // bisa string, bisa file
+      files.ProfilePhoto = formData.get("ProfilePhoto");
+      files.Signature = formData.get("Signature");
+    } else {
+      // 📌 Kalau dikirim dengan JSON biasa
+      body = await request.json();
     }
 
-    // File
-    if (ProfilePhoto && typeof ProfilePhoto === "object") {
-      const bytes = await ProfilePhoto.arrayBuffer();
+
+    let updateData = {};
+
+    if (body.Name) updateData.Name = body.Name;
+    if (body.Email) updateData.Email = body.Email;
+    if (body.Username) updateData.Username = body.Username;
+    if (body.Role) updateData.Role = body.Role;
+    if (body.Phone) updateData.Phone = body.Phone;
+
+    if (body.Password) {
+      updateData.Password = await bcrypt.hash(body.Password, 10);
+    }
+
+    // Simpan file foto profil
+    if (files.ProfilePhoto && typeof files.ProfilePhoto === "object") {
+      const bytes = await files.ProfilePhoto.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      const uploadPath = path.join(process.cwd(), "public/uploads/profiles", ProfilePhoto.name);
+
+      const fileName = `${Date.now()}_${files.ProfilePhoto.name}`;
+      const uploadPath = path.join(process.cwd(), "public/uploads/profiles", fileName);
       fs.writeFileSync(uploadPath, buffer);
-      updateData.ProfilePhoto = `/uploads/profiles/${ProfilePhoto.name}`;
+
+      updateData.ProfilePhoto = `/uploads/profiles/${fileName}`;
     }
 
-    if (Signature && typeof Signature === "object") {
-      const bytes = await Signature.arrayBuffer();
+    // Simpan file signature
+    if (files.Signature && typeof files.Signature === "object") {
+      const bytes = await files.Signature.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      const uploadPath = path.join(process.cwd(), "public/uploads/signatures", Signature.name);
+
+      const fileName = `${Date.now()}_${files.Signature.name}`;
+      const uploadPath = path.join(process.cwd(), "public/uploads/signatures", fileName);
       fs.writeFileSync(uploadPath, buffer);
-      updateData.Signature = `/uploads/signatures/${Signature.name}`;
+
+      updateData.Signature = `/uploads/signatures/${fileName}`;
     }
 
-
-    if (!Email && !Username && !Password && !Name && !Role && !ProfilePhoto && !Phone && !Signature) {
+    // Jika tidak ada field yang dikirim
+    if (Object.keys(updateData).length === 0) {
       return NextResponse.json({
         success: false,
         message: "Minimal satu field harus dikirim untuk diupdate."
       }, { status: 400 });
     }
 
-
     const updatedUser = await prisma.user.update({
       where: { IDUser: idUser },
       data: updateData,
     });
 
-    
+    // Buat token baru dengan data terbaru
     const newToken = jwt.sign(
       {
         id: updatedUser.IDUser,
@@ -108,7 +135,6 @@ export async function PATCH(request, { params }) {
       JWT_SECRET,
       { expiresIn: "7d" }
     );
-
 
     return NextResponse.json({
       success: true,
