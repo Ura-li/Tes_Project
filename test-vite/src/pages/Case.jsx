@@ -7,6 +7,9 @@ import { TabsService } from '../pages/services/service-case'
 import { useDraft } from '../components/DraftContext';
 import { useAuth } from '@/context/auth-context';
 import { TabsServiceCaseDetails } from './CaseDetail';
+import { TabsServiceCaseDetailsApo } from './CaseDetailApo';
+
+
 export const Case = () => {
   const { caseId } = useParams(); // Get caseId from URL params
   const { updateDraft } = useDraft(); // Access updateDraft from context
@@ -107,21 +110,31 @@ useEffect(() => {
   const { user } = useAuth();
   return (
     <>
-    {user.role === 'admin' ?
+    {user.role === 'admin' ? (
       <TabsService
         caseDetails={caseDetails}
         setCaseDetails={setCaseDetails}
         caseNote={caseNote}
         caseNoteFormData={caseNoteFormData}
         setCaseNoteFormData={setCaseNoteFormData}
-      /> :
+      /> 
+    ) : user.role === 'apo' ? (
+        <TabsServiceCaseDetailsApo
+          caseDetails={caseDetails}
+          setCaseDetails={setCaseDetails}
+          caseNote={caseNote}
+          caseNoteFormData={caseNoteFormData}
+          setCaseNoteFormData={setCaseNoteFormData}
+        />
+    ) : (
       <TabsServiceCaseDetails
           caseDetails={caseDetails}
           setCaseDetails={setCaseDetails}
           caseNote={caseNote}
           caseNoteFormData={caseNoteFormData}
           setCaseNoteFormData={setCaseNoteFormData}
-      />
+      /> 
+    )
     }
     </>
   );

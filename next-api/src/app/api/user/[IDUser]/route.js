@@ -3,6 +3,9 @@ import prisma from "../../../../../prisma/client";
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || '';
 
 // GET - Ambil detail user berdasarkan ID
 export async function GET(request, { params }) {

@@ -131,7 +131,6 @@ export const ServiceWork = () => {
     return new Date(dateString).toLocaleString();
   };
 
-  // const fetchBookings = async () => {
   //   try {
   //     const response = await ApiCustomer.get('/api/bookings')
   //     setBookings(response.data.data)
@@ -684,7 +683,7 @@ export const ServiceWork = () => {
                       materialOrders.map((material) => (
                         <TableRow key={material.MOID}>
                           <TableCell className="font-medium">
-                            <Link to={`/material-order/${material.MOID}`}>
+                            <Link to={`/app/material-order/${material.MOID}`}>
                               {material.MOID} on {material.WOID}
                             </Link>
                           </TableCell>

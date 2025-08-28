@@ -6,7 +6,6 @@ import { Card, CardHeader, CardTitle, CardFooter, CardContent, CardDescription }
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/auth-context';
-import { set } from 'lodash';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
 import Swal from 'sweetalert2';
@@ -80,14 +79,16 @@ export default function FrontDesk_Page() {
               <img
                 src={user?.avatar || "/default-avatar.png"}
                 alt="avatar"
-                className="w-20 h-20 rounded-full border-4 border-white shadow-md -mb-10"
+                className="w-20 h-20 rounded-full border-4 border-white shadow-md-mb-10"
               />
             </div>
           </CardHeader>
+
           <CardContent className="pt-12 text-center flex-1">
             <CardTitle>{user?.name || "User"}</CardTitle>
             <p className="text-sm text-gray-500">{user?.email}</p>
           </CardContent>
+          
           <CardFooter className="flex flex-col gap-2">
             <Badge
               variant="outline"

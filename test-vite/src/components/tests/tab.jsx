@@ -593,7 +593,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
       label: "",
       onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
     },
-    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now")},
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
     {
       icon: FileSymlink,
@@ -710,14 +710,14 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
       label: "",
       onClick: () => navigate(`/app/material-order/${MOLineDetails.MOID}`),
     },
-    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now"),hidden: true },
     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
     {
       icon: FileSymlink,
       label: "Save & Close",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
     },
-    { icon: StepBack, label: "Cancl", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Cancel", onClick: () => alert("not now") },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
     { icon: RotateCw, label: "Assign", onClick: () => alert("not now") },
     {
@@ -832,23 +832,23 @@ export const TabsBooking = ({
 
   const buttons = [
     { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/app/work/${bookingData.WOID}`) },
-    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now"), hidden: true },
     { icon: Save, label: "Save", onClick: () => handleUpdate() },
-    { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now")  },
-    { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Refresh", onClick: () => refresh() },
-    { icon: StepBack, label: "Process", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now"), hidden: true  },
+    { icon: RotateCw, label: "Book", onClick: () => alert("not now"), hidden: true },
+    { icon: StepBack, label: "Audit", onClick: () => alert("not now"), hidden: true },
+    { icon: StepBack, label: "Pick", onClick: () => alert("not now"), hidden: true },
+    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now"), hidden: true },
+    { icon: RotateCw, label: "Refresh", onClick: () => refresh() },
+    { icon: StepBack, label: "Process", onClick: () => alert("not now"), hidden: true },
+    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now"), hidden: true },
+    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now"), hidden: true },
     {
       icon: UserPen,
       label: "Create Material Order",
-      onClick: () => alert("not now"),
+      onClick: () => alert("not now"), hidden: true
     },
-    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now"), hidden: true },
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
@@ -932,18 +932,19 @@ export const TabsBooking = ({
   return (
     <>
       <div className="border-1 flex items-center ">
-        {visibleButtons.map((btn, index) => (
+        {buttons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
             variant="link"
+            hidden={btn.hidden}
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
             <btn.icon className="h-4 w-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
-
+{/* 
         {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 rounded-md bg-gray-200">
@@ -958,7 +959,7 @@ export const TabsBooking = ({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
+        )} */}
         {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
@@ -2294,7 +2295,7 @@ export const ServiceCase = ({
                     {materialOrders.map((material) => (
                       <TableRow key={material.MOID}>
                         <TableCell className="font-medium">
-                          <Link to={`/material-order/${material.MOID}`}>
+                          <Link to={`/app/material-order/${material.MOID}`}>
                             {material.MOID} on {material.WOID}
                           </Link>
                         </TableCell>

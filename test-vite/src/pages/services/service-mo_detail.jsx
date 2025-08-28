@@ -36,6 +36,7 @@ import { CaseField } from "../../components/quick-wo-input";
 import { TabsServiceMOLineItems } from "./service-case";
 import { Description } from "@radix-ui/react-dialog";
 import { useDraft } from "../../components/DraftContext";
+
 export const ServiceMoDetail = () => {
   const { updateDraft } = useDraft(); // Access updateDraft from the DraftContext
 

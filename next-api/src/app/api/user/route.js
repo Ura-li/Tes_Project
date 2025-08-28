@@ -18,8 +18,6 @@ export async function GET(request) {
             whereCondition.OR = [...(whereCondition.OR || []), { CaseID: { contains: caseID } }];
         }
 
-
-
         const user = await prisma.user.findMany({
             where: whereCondition,
         });

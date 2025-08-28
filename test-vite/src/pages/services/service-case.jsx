@@ -610,6 +610,12 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
       const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
         //WO GENERAL
         ShipmentCountry: WOGeneral.ShipmentCountry || undefined,
+        IncomingChannel: WOGeneral.IncomingChannel || undefined,
+        Priority: WOGeneral.Priority || undefined,
+        SubStatus: WOGeneral.SubStatus || undefined,
+        RecommendedResource: WOGeneral.RecommendedResource || undefined,
+        WorkOrderDescription: WOGeneral.WorkOrderDescription || undefined,
+        ShipmentState: WOGeneral.ShipmentState || undefined,
         //SLA
         SLAJeopardy: SLA.slaJeopardy || undefined,
         DueDateCustomer: SLA.dueDateCustomer || undefined,
@@ -668,24 +674,26 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
       label: "Save & Close",
       onClick: () => saveAndCloseWorkOrder(),
     },
-    { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Refresh", onClick: () => window.location.reload() },
-    { icon: StepBack, label: "Process", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
-    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
+    { icon: RotateCw, label: "Book", onClick: () => alert("not now"), hidden: true },
+    { icon: StepBack, label: "Audit", onClick: () => alert("not now"), hidden: true },
+    { icon: StepBack, label: "Pick", onClick: () => alert("not now"), hidden: true },
+    { icon: StepBack, label: "Geo Code", onClick: () => alert("not now"), hidden: true},
+    { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
+    { icon: StepBack, label: "Process", onClick: () => alert("not now"), hidden: true},
+    { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now"), hidden: true},
+    { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now"), hidden: true },
     {
       icon: UserPen,
       label: "Create Material Order",
       onClick: () => alert("not now"),
+      hidden: true
     },
-    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now") },
+    { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now"), hidden: true },
   ];
-  const visibleButtons = open ? buttons.slice(0, -3) : buttons;
-  const hiddenButtons = open ? buttons.slice(-3) : [];
+  // const visibleButtons = open ? buttons.slice(0, -3) : buttons;
+  // const hiddenButtons = open ? buttons.slice(-3) : [];
   const saveAndCloseWorkOrder = async () => {
+  
     const confirmResult = await Swal.fire({
       title: "Confirm Save",
       text: "This will give the order status as CLOSED. Are you sure you want to save changes?",
@@ -755,10 +763,11 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
   return (
     <>
       <div className="flex items-center border-1 ">
-        {visibleButtons.map((btn, index) => (
+        {buttons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
+            hidden={btn.hidden}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
@@ -767,7 +776,8 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
           </Button>
         ))}
 
-        {open && hiddenButtons.length > 0 && (
+
+        {/* {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
@@ -781,7 +791,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
+        )} */}
         {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
@@ -814,16 +824,16 @@ export const TabsServiceMO = ({ materialOrders }) => {
       label: "Save & Close",
       onClick: () => saveAndCloseMaterialOrder(),
     },
-    { icon: RotateCw, label: "ATP", },
-    { icon: StepBack, label: "Cancel Order", },
-    { icon: StepBack, label: "Add To Queue", },
-    { icon: StepBack, label: "Add Parts", },
-    { icon: StepBack, label: "Pick", },
-    { icon: StepBack, label: "Place Order", },
-    { icon: StepBack, label: "Tax", },
-    { icon: StepBack, label: "CustID Search", },
-    { icon: UserPen, label: "PUDO Search", },
-    { icon: StepBack, label: "Audit", },
+    { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
+    { icon: StepBack, label: "Cancel Order", hidden: true},
+    { icon: StepBack, label: "Add To Queue", hidden: true },
+    { icon: StepBack, label: "Add Parts", hidden: true },
+    { icon: StepBack, label: "Pick", hidden: true },
+    { icon: StepBack, label: "Place Order", hidden: true },
+    { icon: StepBack, label: "Tax", hidden: true },
+    { icon: StepBack, label: "CustID Search", hidden: true },
+    { icon: UserPen, label: "PUDO Search", hidden: true },
+    { icon: StepBack, label: "Audit", hidden: true },
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
@@ -883,11 +893,12 @@ export const TabsServiceMO = ({ materialOrders }) => {
   return (
     <>
       <div className="flex items-center border-1 ">
-        {visibleButtons.map((btn, index) => (
+        {buttons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
             variant="link"
+            hidden={btn.hidden}
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
             <btn.icon className="w-4 h-4" />
@@ -895,7 +906,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
           </Button>
         ))}
 
-        {open && hiddenButtons.length > 0 && (
+        {/* {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
@@ -909,7 +920,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
+        )} */}
         {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
@@ -943,18 +954,18 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
       label: "Save & Close",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
     },
-    { icon: StepBack, label: "Cancel", },
-    { icon: StepBack, label: "Audit", },
-    { icon: RotateCw, label: "Assign", },
+    { icon: StepBack, label: "Cancel", hidden: true },
+    { icon: StepBack, label: "Audit", hidden: true },
+    { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload()},
     {
       icon: StepBack,
       label: "Word Templates",
-      onClick: () => alert("not now"),
+      onClick: () => alert("not now"), hidden: true
     },
-    { icon: StepBack, label: "Run Report", },
-    { icon: StepBack, label: "Geo Code", },
-    { icon: StepBack, label: "Process", },
-    { icon: StepBack, label: "Reset RDT", },
+    { icon: StepBack, label: "Run Report", hidden: true },
+    { icon: StepBack, label: "Geo Code", hidden: true },
+    { icon: StepBack, label: "Process",hidden: true },
+    { icon: StepBack, label: "Reset RDT",hidden: true },
     // { icon: UserPen, label:  "Add To Queue", onClick: () => alert("not now") },
     // { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
   ];
@@ -1074,11 +1085,12 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
   return (
     <>
       <div className="flex items-center border-1 ">
-        {visibleButtons.map((btn, index) => (
+        {buttons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
             variant="link"
+            hidden={btn.hidden}
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
             <btn.icon className="w-4 h-4" />
@@ -1086,7 +1098,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           </Button>
         ))}
         {console.log(MOLineDetails)}
-        {open && hiddenButtons.length > 0 && (
+        {/* {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
               ...
@@ -1100,7 +1112,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
+        )} */}
         {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
@@ -1658,7 +1670,6 @@ export const ServiceCase = ({
               )}
             </TabsList>
           </CardHeader>
-
           <TabsContent value="case_info" className={"p-2"}>
             <Card className="flex-row">
               <CardContent className="grid items-center grid-cols-6 gap-10 p-3 ">
@@ -2819,7 +2830,7 @@ export const ServiceCase = ({
                     {materialOrders.map((material) => (
                       <TableRow key={material.MOID}>
                         <TableCell className="font-medium">
-                          <Link to={`/material-order/${material.MOID}`}>
+                          <Link to={`/app/material-order/${material.MOID}`}>
                             {material.MOID} on {material.WOID}
                           </Link>
                         </TableCell>

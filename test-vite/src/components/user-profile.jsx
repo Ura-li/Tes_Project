@@ -9,9 +9,11 @@ import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "./ui/dialog";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
 
 
-export function UserProfile({ user }) {
+export function UserProfile() {
+    const {user} = useAuth();   
     const [formData, setFormData] = useState({
         Username: user.Username,
         Name: user.Name,
