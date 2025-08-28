@@ -4410,8 +4410,8 @@ export function BtnModalsServiceCatalog({
        // Close loading after success
       await Swal.fire({
         title: "Success!",
-        text: "Order added successfully!",
-        icon: "success",
+        text:  "Order added successfully!",
+        icon:  "success",
         timer: 1500,
         showConfirmButton: false,
         allowEscapeKey: false,
@@ -4424,7 +4424,7 @@ export function BtnModalsServiceCatalog({
             window.open(`/app/material-order/${MOID}`, '_blank');
             break;
 
-          case "workorder":
+          case "serviceorder":
             window.open(`/app/work/${WOID}`, '_blank');  
             break;
 
@@ -4573,7 +4573,7 @@ export function BtnModalsServiceCatalog({
             >
               <TabsList className={'py-5 px-0 bg-white'}>
                 <TabsTrigger variant={'fullsize'} value="parts" className={'cursor-pointer '}>Parts</TabsTrigger>
-                <TabsTrigger variant={'fullsize'} value="snr" className={'cursor-pointer  text-blue-500'}>SNR</TabsTrigger>
+                <TabsTrigger variant={'fullsize'} value="snr" className={'cursor-pointer  text-blue-500'} hidden>SNR</TabsTrigger>
               </TabsList>
               <TabsContent value="parts"
                 className={'overflow-y-auto'}
