@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Plus, Trash2, Image as ImageIcon, Search } from "lucide-react";
 import { format } from "date-fns";
-import { SelectBar } from "@/components/sc-select";
+import { SelectBarState } from "@/components/sc-select";
 
 
 // ----------------------------
@@ -253,10 +253,13 @@ export default function NewCaseForm() {
   const [contactPhone, setContactPhone] = useState("");
   const [contactMobile, setContactMobile] = useState("");
   const [contactAddressLine1, setContactAddressLine1] = useState("");
+  const [contactStateProvince, setContactStateProvince] = useState("");
   const [contactCity, setContactCity] = useState("");
   const [contactCountry, setContactCountry] = useState("");
-  const [contactStateProvince, setContactStateProvince] = useState("");
   const [contactZipPostalCode, setContactZipPostalCode] = useState("");
+  
+  const [provContact, setProvContact] = useState([]);
+  const [cityContact, setCityContact] = useState([]);
 
   /** @type {[SiteAccount|null, (val: SiteAccount|null) => void]} */
   const [selectedCompany, setSelectedCompany] = useState(null);
@@ -265,10 +268,14 @@ export default function NewCaseForm() {
   const [companyPhone, setCompanyPhone] = useState("");
   const [companyWhatsapp, setCompanyWhatsapp] = useState("");
   const [companyAddressLine1, setCompanyAddressLine1] = useState("");
-  const [companyCity, setCompanyCity] = useState("");
   const [companyStateProvince, setCompanyStateProvince] = useState("");
+  const [companyCity, setCompanyCity] = useState("");
   const [companyCountry, setCompanyCountry] = useState("");
   const [companyZipPostalCode, setCompanyZipPostalCode] = useState("");
+
+  const [provCompany, setProvCompany] = useState([]);
+  const [cityCompany, setCityCompany] = useState([]);
+
 
   // Product fields
   const [productQuery, setProductQuery] = useState("");
@@ -290,6 +297,9 @@ export default function NewCaseForm() {
 
   const [isNewProduct, setIsNewProduct] = useState(false);
   const [isNewAsset, setIsNewAsset] = useState(false);
+  const [isNewContact, setIsNewContact] = useState(false);
+  const [isNewCompany, setIsNewCompany] = useState(false);
+  
 
   
   // Warranty
@@ -425,162 +435,206 @@ export default function NewCaseForm() {
     }
   };
 
-  // ----------------------------
-  // Effects
-  // ----------------------------
+    // ----------------------------
+    // Effects
+    // ----------------------------
 
 
-  // Auto-fill company when company field selected
-  useEffect(() => {
-    if(selectedCompany?.Company){
-      const cm = selectedCompany;
-      setCompanyName(cm.Company);
-      setCompanyEmail(cm.Email);
-      setCompanyPhone(cm.PrimaryPhone);
-      setCompanyWhatsapp(cm.WhatsappNo);
-      setCompanyAddressLine1(cm.AddressLine1);
-      setCompanyCity(cm.City);
-      setCompanyStateProvince(cm.StateProvince);
-      setCompanyCountry(cm.Country);
-      setCompanyZipPostalCode(cm.ZipPostalCode);
-    }
-  },[selectedCompany])
+    // Auto-fill company when company field selected
+    useEffect(() => {
+      if(selectedCompany?.Company){
+        const cm = selectedCompany;
+        setCompanyName(cm.Company);
+        setCompanyEmail(cm.Email);
+        setCompanyPhone(cm.PrimaryPhone);
+        setCompanyWhatsapp(cm.WhatsappNo);
+        setCompanyAddressLine1(cm.AddressLine1);
+        
+        //emsifa reverse engineer
+        // Province (convert string -> object)
+        const provObj = provCompany.find((p) => p.name === cm.StateProvince);
+        setCompanyStateProvince(provObj ? provObj : { id: "", name: cm.StateProvince });
 
-  // Auto-fill Contact when Company field selected 
-  useEffect(() =>{
-    (async () => {
-      if (!selectedCompany) return;
-      try {
-        const resContactAffiliated = await ApiCustomer.get(`/api/contact-information?SiteAccountID=${selectedCompany.SiteAccountID}`);
-        const listContactAffiliated = resContactAffiliated.data.data || []
-        setContactResults(listContactAffiliated); 
-      } catch (err) {
-        console.error(err);
+        // City (convert string -> object) -> city list harus sesuai province id
+        if (provObj?.id) {
+          (async () => {
+            const res = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provObj.id}.json`);
+            const cityList = await res.json();
+            const cityObj = cityList.find((c) => c.name === cm.City);
+            setCompanyCity(cityObj ? cityObj : { id: "", name: cm.City });
+          })();
+        } else {
+          setCompanyCity({ id: "", name: cm.City });
+        }
+
+        setCompanyCountry(cm.Country);
+        setCompanyZipPostalCode(cm.ZipPostalCode);
       }
-    })();
-  },[selectedCompany])
+    },[selectedCompany])
 
-  // Auto-fill product when asset selected
-  useEffect(() => {
-    if (selectedAsset?.product_information) {
-      const p = selectedAsset.product_information;
-      setSelectedProduct(p);
-      setProductNo(p.ProductNumber);
-      setProductName(p.ProductName);
-      setProductLine(p.ProductLine || "");
-      setVendor(p.vendor || "");
-      setProductTypeId(p.ProductTypeID);
-      setShowProductCard(true);
-    }
-  }, [selectedAsset]);
-
-  // Auto-fill customer when asset selected (if asset has owner)
-  useEffect(() => {
-    (async () => {
-      if (!selectedAsset) return;
-      if (selectedAsset?.ContactID) {
+    // Auto-fill Contact when Company field selected 
+    useEffect(() =>{
+      (async () => {
+        if (!selectedCompany) return;
         try {
-          const [cRes] = await Promise.all([
-            ApiCustomer.get(`/api/contact-information/${selectedAsset.ContactID}`),
-          ]);
-          const c = cRes.data?.data;
-          if (c) {
-            setSelectedContact(c);
-            if (c.SiteAccountID) {
-              setShowCompanySection(true);
-              const sa = await ApiCustomer.get(`/api/site_account/${c.SiteAccountID}`);
-              const comp = sa.data?.data;
-              
-              if (comp) setSelectedCompany(comp);
-            }else{
-              setSelectedCompany([]);
+          const resContactAffiliated = await ApiCustomer.get(`/api/contact-information?SiteAccountID=${selectedCompany.SiteAccountID}`);
+          const listContactAffiliated = resContactAffiliated.data.data || []
+          setContactResults(listContactAffiliated); 
+        } catch (err) {
+          console.error(err);
+        }
+      })();
+    },[selectedCompany])
+
+    // Auto-fill product when asset selected
+    useEffect(() => {
+      if (selectedAsset?.product_information) {
+        console.log("selected asset ",selectedAsset)
+        const p = selectedAsset.product_information;
+        setSelectedProduct(p);
+        setProductNo(p.ProductNumber);
+        setProductName(p.ProductName);
+        setProductLine(p.ProductLine || "");
+        setVendor(p.vendor || "");
+        if (p.product_type) {
+          setProductTower(p.product_type.ProductTower || "");
+          setProductGroup(p.product_type.ProductGroup || "");
+          setProductTypeId(p.product_type.ProductTypeID?.toString() || "");
+        } else {
+          setProductTypeId(p.ProductTypeID?.toString() || "");
+        }
+        setShowProductCard(true);
+      }
+    }, [selectedAsset]);
+
+    // Auto-fill customer when asset selected (if asset has owner)
+    useEffect(() => {
+      (async () => {
+        if (!selectedAsset) return;
+        if (selectedAsset?.ContactID) {
+          try {
+            const [cRes] = await Promise.all([
+              ApiCustomer.get(`/api/contact-information/${selectedAsset.ContactID}`),
+            ]);
+            const c = cRes.data?.data;
+            if (c) {
+              setSelectedContact(c);
+              if (c.SiteAccountID) {
+                setShowCompanySection(true);
+                const sa = await ApiCustomer.get(`/api/site_account/${c.SiteAccountID}`);
+                const comp = sa.data?.data;
+                
+                if (comp) setSelectedCompany(comp);
+              }else{
+                setSelectedCompany([]);
+              }
             }
+          } catch (e) {
+            console.error("Autofill customer failed", e);
+          }
+        }
+      })();
+    }, [selectedAsset]);
+
+    // Enforce DOA case-type if another open case exists for the same asset
+    const [mustDOA, setMustDOA] = useState(false);
+    useEffect(() => {
+      (async () => {
+        if (!selectedAsset) return;
+        try {
+          const res = await ApiCustomer.get(`/api/case-information`, {
+            params: { CaseStatus: "Open" },
+          });
+          const list = res.data?.data ?? [];
+          const hasOpen = list.some((c) => c?.caseinformation?.AssetID === selectedAsset.AssetID);
+          if (hasOpen) {
+            setMustDOA(true);
+            setCaseType("DOA");
+          } else {
+            setMustDOA(false);
           }
         } catch (e) {
-          console.error("Autofill customer failed", e);
+          console.error("Check open case failed", e);
         }
-      }
-    })();
-  }, [selectedAsset]);
+      })();
+    }, [selectedAsset]);
+    
 
-  // Enforce DOA case-type if another open case exists for the same asset
-  const [mustDOA, setMustDOA] = useState(false);
-  useEffect(() => {
-    (async () => {
-      if (!selectedAsset) return;
-      try {
-        const res = await ApiCustomer.get(`/api/case-information`, {
-          params: { CaseStatus: "Open" },
-        });
-        const list = res.data?.data ?? [];
-        const hasOpen = list.some((c) => c?.caseinformation?.AssetID === selectedAsset.AssetID);
-        if (hasOpen) {
-          setMustDOA(true);
-          setCaseType("DOA");
+    // Auto-fill customer when customer field selected
+    useEffect(() =>{
+      if(selectedContact?.ContactID){
+        const ct = selectedContact;
+        setContactSalutation(ct.Salutation);
+        setContactFirstName(ct.FirstName);
+        setContactLastName(ct.LastName);
+        setContactEmail(ct.Email);
+        setContactPhone(ct.Phone);
+        setContactMobile(ct.Mobile);
+        setContactAddressLine1(ct.AddressLine1);
+      
+
+        // setContactStateProvince(ct.StateProvince || "");
+        // setContactCity(ct.City || "");
+
+        const provObj = provContact.find((p) => p.name === ct.StateProvince);
+        setContactStateProvince(provObj ? provObj : { id: "", name: ct.StateProvince });
+        console.log(provObj)
+        console.log(ct.StateProvince)
+
+        // City (convert string -> object) -> city list harus sesuai province id
+        if (provObj?.id) {
+          (async () => {
+            const res = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provObj.id}.json`);
+            const cityList = await res.json();
+            const cityObj = cityList.find((c) => c.name === ct.City);
+            setContactCity(cityObj ? cityObj : { id: "", name: ct.City });
+          })();
         } else {
-          setMustDOA(false);
+          setContactCity({ id: "", name: ct.City });
         }
-      } catch (e) {
-        console.error("Check open case failed", e);
-      }
-    })();
-  }, [selectedAsset]);
-  
 
-  // Auto-fill customer when customer field selected
-  useEffect(() =>{
-    if(selectedContact?.ContactID){
-      const ct = selectedContact;
-      setContactSalutation(ct.Salutation);
-      setContactFirstName(ct.FirstName);
-      setContactLastName(ct.LastName);
-      setContactEmail(ct.Email);
-      setContactPhone(ct.Phone);
-      setContactMobile(ct.Mobile);
-      setContactAddressLine1(ct.AddressLine1);
-      setContactCity(ct.City);
-      setContactCountry(ct.Country);
-      setContactStateProvince(ct.StateProvince);
-      setContactZipPostalCode(ct.ZipPostalCode);
-    }
-  },[selectedContact])
-
-
-  // Auto-fill Company when contact selected (if any)
-  useEffect(() => {
-    (async () => {
-      if (!selectedContact) return;
-      try { 
-        if (selectedContact?.SiteAccountID) {
-          setShowCompanySection(true);
-          const sa = await ApiCustomer.get(`/api/site_account/${selectedContact.SiteAccountID}`);
-          const comp = sa.data?.data;
-          
-          if (comp) setSelectedCompany(comp);
-        }else{
-          setSelectedCompany([]);
-        }  
-      } catch (err) {
-        console.error(err);
         
+        setContactCountry(ct.Country);
+        setContactZipPostalCode(ct.ZipPostalCode);
       }
-    })();
-  }, [selectedContact])
+    },[selectedContact])
 
-  // Auto-fill product when contact selected (asset owned by contact)
-  useEffect(() => {
-    (async () => {
-      if (!selectedContact) return;
-      try {
-        const checkAssetAffiliatedContact = await ApiCustomer.get(`/api/asset-information?ContactID=${selectedContact.ContactID}`)
-        const listAffiliatedAsset = checkAssetAffiliatedContact.data.data || [];
-        console.log(selectedContact, listAffiliatedAsset)
-        setAssetResults(listAffiliatedAsset);
-      } catch (err) {
-        console.error(err);
-      }
-    })()
-  }, [selectedContact]);
+
+    // Auto-fill Company when contact selected (if any)
+    useEffect(() => {
+      (async () => {
+        if (!selectedContact) return;
+        try { 
+          if (selectedContact?.SiteAccountID) {
+            setShowCompanySection(true);
+            const sa = await ApiCustomer.get(`/api/site_account/${selectedContact.SiteAccountID}`);
+            const comp = sa.data?.data;
+            
+            if (comp) setSelectedCompany(comp);
+          }else{
+            setSelectedCompany([]);
+          }  
+        } catch (err) {
+          console.error(err);
+          
+        }
+      })();
+    }, [selectedContact])
+
+    // Auto-fill product when contact selected (asset owned by contact)
+    useEffect(() => {
+      (async () => {
+        if (!selectedContact) return;
+        try {
+          const checkAssetAffiliatedContact = await ApiCustomer.get(`/api/asset-information?ContactID=${selectedContact.ContactID}`)
+          const listAffiliatedAsset = checkAssetAffiliatedContact.data.data || [];
+          console.log(selectedContact, listAffiliatedAsset)
+          setAssetResults(listAffiliatedAsset);
+        } catch (err) {
+          console.error(err);
+        }
+      })()
+    }, [selectedContact]);
 
   // ----------------------------
   // EMSIFA Province / City (ID only)
@@ -599,7 +653,8 @@ export default function NewCaseForm() {
       try {
         const res = await fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json");
         const json = await res.json();
-        setProv(json ?? []);
+        setProvContact(json ?? []);
+        setProvCompany(json ?? []);
         console.log("Province :",res)
         console.log("json :",json)
       } catch (e) {
@@ -610,21 +665,41 @@ export default function NewCaseForm() {
   
   useEffect(() => {
     (async () => {
-      console.log(selectedProvId)
-      if (!selectedProvId) return;
+      if (!contactStateProvince?.id) {
+        setCityContact([]);
+        return;
+      }
       try {
         const res = await fetch(
-          `https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${contactStateProvince}.json`
+          `https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${contactStateProvince.id}.json`
         );
         const json = await res.json();
-        setCity(json?.kota_kabupaten ?? []);
-        console.log("State :",res)
-        console.log("json :",json)
-      } catch (e) {
-        console.warn("EMSIFA cities fetch failed");
+        setCityContact(json ?? []);
+      } catch {
+        setCityContact([]);
       }
     })();
-  }, [setContactStateProvince]);
+  }, [contactStateProvince]);
+
+  useEffect(() => {
+    (async () => {
+      if (!companyStateProvince?.id) {
+        setCityCompany([]);
+        return;
+      }
+      try {
+        const res = await fetch(
+          `https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${companyStateProvince.id}.json`
+        );
+        const json = await res.json();
+        setCityCompany(json ?? []);
+      } catch {
+        setCityCompany([]);
+      }
+    })();
+  }, [companyStateProvince]);
+
+
 
   // ----------------------------
   // Accessory handlers
@@ -674,7 +749,7 @@ export default function NewCaseForm() {
    * Performs optional photo upload and action log creation.
    */
   const onCreateCase = async () => {
-    if ((!selectedAsset && !isNewAsset) || (!selectedContact)) {
+    if ((!selectedAsset && !isNewAsset) || (!selectedContact && !isNewContact)) {
       alert("Please select or Create both an Asset and a Contact before creating a case.");
       return;
     }
@@ -689,6 +764,8 @@ export default function NewCaseForm() {
 
       let assetId = selectedAsset?.AssetID;
       let productId = selectedProduct?.ProductNumber;
+      let companyId = selectedCompany?.SiteAccountID;
+      let contactId = selectedContact?.ContactID;
       
       if(isNewProduct){
         const productRes = await ApiCustomer.post("/api/product-information",{
@@ -701,20 +778,66 @@ export default function NewCaseForm() {
         productId = productRes.data?.data?.ProductNumber
       }
 
+      
+
+      if(isNewContact && showCompanySection){
+        const companyRes = await ApiCustomer.post("/api/site_account", {
+          Company: companyName,
+          Email: companyEmail,
+          PrimaryPhone: companyPhone,
+          WhatsappNo: companyWhatsapp,
+          AddressLine1: companyAddressLine1,
+          City: companyCity.name, // --> emsifa
+          StateProvince: companyStateProvince.name, // --> emsifa
+          Country: companyCountry,
+          ZipPostalCode: companyZipPostalCode
+        })
+        companyId = companyRes.data?.data?.SiteAccountID;
+      }
+
+      
+
+      if(isNewContact){
+        const contactRes = await ApiCustomer.post("/api/contact-information",{
+          SiteAccountID: companyId,
+          Salutation: contactSalutation,
+          FirstName: contactFirstName,
+          LastName: contactLastName,
+          Email: contactEmail,
+          Phone: contactPhone,
+          Mobile: contactMobile,
+          AddressLine1: contactAddressLine1,
+          City: contactCity.name, // --> emsifa
+          StateProvince: contactStateProvince.name, // --> emsifa
+          Country: contactCountry,
+          ZipPostalCode: contactZipPostalCode
+        })
+        contactId = contactRes.data?.data?.ContactID;
+      }
+
       if(isNewAsset){
+        // const [assetContactId, setAssetContactId] = useState(null)
+        // const [assetSiteAccountId, setAssetSiteAccountId] = useState(null)
+        // if(showCompanySection && isNewContact) {
+        //   setAssetSiteAccountId(companyId);
+        // } else if(selectedCompany.SiteAccountID) { setAssetSiteAccountId(selectedCompany?.SiteAccountID) }
+
+        // if(isNewContact) { 
+        //   setAssetContactId(contactId); 
+        // } else if(selectedContact.ContactID) { setAssetContactId(selectedContact?.ContactID) }
         const assetRes = await ApiCustomer.post("/api/asset-information", {
           SerialNumber: serialQuery,
           ProductNumber: productId,
-          ContactID: selectedContact.ContactID,
-          SiteAccountID: selectedCompany?.SiteAccountID ?? null
+          ContactID: contactId ?? null ,
+          SiteAccountID: companyId ?? null
         })
         assetId = assetRes.data?.data?.AssetID
       }
 
       const payload = {
         AssetID: assetId,
-        ContactID: selectedContact.ContactID,
-        SiteAccountID: selectedCompany?.SiteAccountID ?? null,
+        ContactID: contactId,
+        SiteAccountID: companyId ?? null,
         CaseSubject: problemDesc?.slice(0, 100) || "New Case",
         CaseType: caseType,
         KCI_Flag: kciFlag,
@@ -907,8 +1030,8 @@ export default function NewCaseForm() {
             <div className="mt-2 flex items-center gap-2">
               <Checkbox
                 id="createCustomer"
-                checked={showCustomerCard}
-                onCheckedChange={(v) => setShowCustomerCard(Boolean(v))}
+                checked={isNewContact}
+                onCheckedChange={(v) => setIsNewContact(Boolean(v))}
               />
               <Label htmlFor="createCustomer">Buat customer baru (jika tidak ditemukan)</Label>
             </div>
@@ -1041,24 +1164,33 @@ export default function NewCaseForm() {
               <div className="grid grid-cols-3 gap-2 items-center">
                 <Label className="col-span-1">Province<Label className="text-red-600">*</Label></Label>
                 <div className="col-span-2">
-                  <SelectBar
-                    id="StateProvince"
+                  <SelectBarState 
+                    id="contactStateProvince"
                     value={contactStateProvince}
+                    onChange={setContactStateProvince}
+                    options={provContact}
+                    placeholder="Select a Province"
+                  />
+                  
+                  {/* <SelectBar
+                    id="StateProvince"
+                    value={contactStateProvince.name}
                     onChange={setContactStateProvince}
                     options={prov}
                     placeholder="Select a Province"
-                  />
+                  /> */}
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2 items-center">
                 <Label className="col-span-1">City<Label className="text-red-600">*</Label></Label>
                 <div className="col-span-2">
-                  <SelectBar
-                    id="City"
+                  <SelectBarState
+                    id="contactCity"
                     value={contactCity}
                     onChange={setContactCity}
-                    options={city}
+                    options={cityContact}
                     placeholder="Select a City"
+                    disabled={!contactStateProvince || cityContact.length === 0}
                   /> 
                 </div>
               </div>
@@ -1107,29 +1239,25 @@ export default function NewCaseForm() {
                   <div className="grid grid-cols-3 gap-2 items-center">
                     <Label className="col-span-1">Province (ID)<Label className="text-red-600">*</Label></Label>
                     <div className="col-span-2">
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select province" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {prov.map((p) => (
-                            <SelectItem key={p.id} value={p.id}>{p.nama}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                       <SelectBarState
+                          id="CompanyStateProvince"
+                          value={companyStateProvince}
+                          onChange={setCompanyStateProvince}
+                          options={provCompany}
+                          placeholder="Select a Province"
+                        />
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 items-center">
                     <Label className="col-span-1">City (ID)<Label className="text-red-600">*</Label></Label>
                     <div className="col-span-2">
-                      <Select disabled>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select city" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="-">-</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <SelectBarState
+                        id="CompanyCity"
+                        value={companyCity}
+                        onChange={setCompanyCity}
+                        options={cityCompany}
+                        placeholder="Select a City"
+                      /> 
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 items-center">
@@ -1376,14 +1504,13 @@ export default function NewCaseForm() {
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>
             Cancel
           </Button>
-          <Button type="button" onClick={onCreateCase} disabled={loading || (!selectedAsset && !isNewAsset) || (!selectedContact)}>
+          <Button type="button" onClick={onCreateCase} disabled={loading || (!selectedAsset && !isNewAsset) || (!selectedContact && !isNewContact)}>
             {loading ? (
               <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Saving...</span>
             ) : (
               "Create Case"
             )}
           </Button>
-          {console.log(loading || (!selectedAsset || !isNewAsset) || (!selectedContact))}
         </div>
       </div>
     </div>

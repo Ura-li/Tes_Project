@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
+import crypto from "crypto"; 
+
 
 const JWT_SECRET =  process.env.JWT_SECRET || '' 
 
@@ -65,13 +67,30 @@ export async function PATCH(request, { params }) {
       updateData.Password = await bcrypt.hash(Password, 10);
     }
 
+    const oldUser = await prisma.user.findUnique({
+      where: { IDUser: idUser }
+    });
+
+
     // File
     if (ProfilePhoto && typeof ProfilePhoto === "object") {
+      if (oldUser?.ProfilePhoto) {
+        const oldPath = path.join(process.cwd(), "public", oldUser.ProfilePhoto);
+        if (fs.existsSync(oldPath)) {
+          fs.unlinkSync(oldPath);
+        }
+      }
+
       const bytes = await ProfilePhoto.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      const uploadPath = path.join(process.cwd(), "public/uploads/profiles", ProfilePhoto.name);
+
+      //generate name
+      const ext = path.extname(ProfilePhoto.name); // ambil ekstensi asli (misal .png/.jpg)
+      const uniqueName = `${crypto.randomUUID()}${ext}`; 
+
+      const uploadPath = path.join(process.cwd(), "public/uploads/profiles", uniqueName);
       fs.writeFileSync(uploadPath, buffer);
-      updateData.ProfilePhoto = `/uploads/profiles/${ProfilePhoto.name}`;
+      updateData.ProfilePhoto = `/uploads/profiles/${uniqueName}`;
     }
 
     if (Signature && typeof Signature === "object") {

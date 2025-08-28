@@ -160,7 +160,7 @@ export const FlowCase = () => {
                           </p>
                         </div>
                         <div className="bg-slate-100 p-2 m-2 grid grid-flow-col">
-                          <p className='flex flex-col items-center'>Created BY <span>{c.CreatedName}</span></p>
+                          <p className='flex flex-col items-center'>Created BY <span>({c.caseinformation?.createdByUser?.Username}) - ({c.CreatedName})</span></p>
                           <p className='flex flex-col items-center'>Repaired BY <span></span></p>
                         </div>
                       </CardContent>
