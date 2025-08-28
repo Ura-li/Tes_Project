@@ -39,10 +39,10 @@ export const FlowCase = () => {
       // console.log("Case INFO LOG : ",response.data.data[23].caseinformation.CreatedBy);
       // console.log("Case INFO LOG : ",user.id);
       const filtercases = response.data.data.filter(c => c.CaseStatus !== 'Close' && (c?.caseinformation?.Owner === user.id || c?.caseinformation?.CreatedBy === user.id));
-      console.log("Filter Case : ",filtercases)
-      console.log("Case Owner : ", filtercases[1]?.caseinformation?.Owner)
-      console.log("Case Created By : ", filtercases[1]?.caseinformation?.CreatedBy)
-      console.log("User ID : ", user.id)
+      // console.log("Filter Case : ",filtercases)
+      // console.log("Case Owner : ", filtercases[1]?.caseinformation?.Owner)
+      // console.log("Case Created By : ", filtercases[1]?.caseinformation?.CreatedBy)
+      // console.log("User ID : ", user.id)
       setCaseData(filtercases);
       setError(false)
       return response.data.data;
@@ -136,7 +136,9 @@ export const FlowCase = () => {
                           <div className="gap-2 flex">
                             <Badge className={c.CaseStatus === "Open" ? "bg-green-500" : c.CaseStatus === "InActive" ? "bg-blue-400" : c.CaseStatus === "On Hold" ? "yellow" : c.CaseStatus === "Escalated" ? "red" : "gray"}>{c.CaseStatus}</Badge>
                             <Badge>{c.caseinformation.CaseType}</Badge>
-                            {c.Owner == user.id ? (
+                            {console.log("Case Info : ",c?.caseinformation.CreatedBy)}
+                            {console.log("User : :",user.id)}
+                            {c?.caseinformation.Owner === user.id ? (
                               <Badge className="bg-purple-500">Owner</Badge>
                             ) : (
                               <Badge className="bg-sky-500">CreatedBy</Badge>
@@ -188,7 +190,7 @@ export const FlowCase = () => {
                         </div>
                       </CardContent>
                       <CardFooter className="justify-between">
-                        <p className="text-sm text-muted-foreground">Case Holder {c.Owner}</p>
+                        <p className="text-sm text-muted-foreground">Case Holder {c.caseinformation?.ownerUser?.Username} - {c.Owner}</p>
                         <p className="text-sm text-muted-foreground">Status Right Now {c.CaseStatus}</p>
                         <Button size="sm" variant="outline" onClick={() => navigate(`/app/case/${c.CaseID}`)}>Details</Button>
                       </CardFooter>
