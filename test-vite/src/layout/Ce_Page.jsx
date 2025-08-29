@@ -172,8 +172,8 @@ export default function Ce_Page() {
         </Card>
       </div>
 
-      <div>
-        <Card>
+      <div className='col-span-2'>
+        <Card className={"rounded-xl shadow-lg h-full"}>
           <CardHeader>
             <CardTitle></CardTitle>
             <CardDescription></CardDescription>

@@ -2979,6 +2979,55 @@ const [endDate, setEndDate] = useState(null);
                 </Table>
               </CardContent>
             </Card>
+
+                          <Card>
+                            <CardHeader className={"text-lg"}>
+                              <CardTitle>Note PartOrder</CardTitle>
+                              <hr />
+                            </CardHeader>
+                            <CardContent className={"grid grid-cols-4 gap-4"}>
+                              <CaseField label={"Vendor part no"} lock>
+                                <Input variant={"invisible"} placeholder="---" readOnly/>
+                              </CaseField>
+                              <CaseField label={"Hp part no"} lock>
+                                <Input variant={"invisible"} placeholder="---" readOnly/>
+                              </CaseField>
+                              <CaseField label={"Part Category"} lock>
+                                <SearchCommandBlock
+                                  options={["Yes", "No"]}
+                                  readOnly
+                                  placeholder="---"
+                                />
+                              </CaseField>
+                              <CaseField label={"Part backup"} lock>
+                                <SearchCommandBlock
+                                  options={["Yes", "No"]}
+                                  readOnly
+                                  placeholder="---"
+                                />
+                              </CaseField>
+                              <CaseField label={"Part status"} lock>
+                                <Input variant={"invisible"} placeholder="---" readOnly/>
+                              </CaseField>
+                              <CaseField label={"Bad CT Code"} lock>
+                                <Input variant={"invisible"} placeholder="---" readOnly/>
+                              </CaseField>
+                              <CaseField label={"New CT Code"} lock>
+                                <Input variant={"invisible"} placeholder="---" readOnly/>
+                              </CaseField>
+                              <CaseField label={"UEFI Code"} lock>
+                                <SearchCommandBlock
+                                  options={["DHU", "FID", "MPS", "PND", "PPR"]}
+                                  placeholder="---"
+                                  readOnly
+                                />
+                              </CaseField>
+                              <CaseField label={"Part Name"} lock>
+                                <Textarea className={"resize-none h-[7em]"} readOnly/>
+                              </CaseField>
+                            </CardContent>
+                          </Card>
+                        
           </TabsContent>
 
           <TabsContent value="ci_salles">
