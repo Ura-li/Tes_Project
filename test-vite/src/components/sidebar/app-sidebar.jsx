@@ -273,8 +273,28 @@ export function AppSidebar({
       {
         name: "My Work",
         title: "My Work",
-        url: "/app/search_case",
+        url: "/app/searchcaseproto2",
         icon: Table,
+      },
+      {
+        name: "View Case",
+        title: "View Case",
+        url: "/app/viewcase",
+        icon: Pin
+      },
+    ],
+    apo: [
+      {
+        name: "Home",
+        title: "Home",
+        url: "/app",
+        icon: Home,
+      },
+      {
+        name: "Your Cases",
+        title: "Your Cases",
+        url: "/app/flowcase",
+        icon: PieChart,
       },
       {
         name: "View Case",
@@ -287,10 +307,11 @@ export function AppSidebar({
 
 
 
-const navrole = data.projects;
+  let navrole ;
   
   let DropNav;
   if (data.user.role === 'admin') {
+    navrole = data.projects;
     DropNav = (
       <NavMain
         className="bg-cyan-700"
@@ -298,6 +319,10 @@ const navrole = data.projects;
         activeClassName="bg-cyan-800 text-white"
       />
     );
+  } else if (data.user.role === 'fd' || data.user.role === 'user') {
+    navrole = data.projects;
+  } else if (data.user.role === 'apo' || data.user.role === 'ce' ){
+    navrole = data.apo;
   } else {
     DropNav = '';
   }

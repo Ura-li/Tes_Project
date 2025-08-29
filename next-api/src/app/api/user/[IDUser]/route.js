@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
+import crypto from "crypto"; 
+
 
 const JWT_SECRET =  process.env.JWT_SECRET || '' 
 
@@ -51,79 +53,69 @@ export async function PATCH(request, { params }) {
   }
 
   try {
-    const contentType = request.headers.get("content-type") || "";
-    let body = {};
-    let files = {};
+    const formData = await request.formData();
+    const Name = formData.get("Name");
+    const Email = formData.get("Email");
+    const Phone = formData.get("Phone");
+    const Password = formData.get("NewPassword");
+    const ProfilePhoto = formData.get("ProfilePhoto");
+    const Signature = formData.get("Signature");
 
-    if (contentType.includes("multipart/form-data")) {
-      // 📌 Kalau dikirim dengan FormData
-      const formData = await request.formData();
+    let updateData = { Name, Email, Phone };
 
-      body.Name = formData.get("Name");
-      body.Email = formData.get("Email");
-      body.Username = formData.get("Username");
-      body.Role = formData.get("Role");
-      body.Phone = formData.get("Phone");
-      body.Password = formData.get("Password");
-      body.Signature = formData.get("Signature"); // bisa string, bisa file
-      files.ProfilePhoto = formData.get("ProfilePhoto");
-      files.Signature = formData.get("Signature");
-    } else {
-      // 📌 Kalau dikirim dengan JSON biasa
-      body = await request.json();
+    if (Password) {
+      updateData.Password = await bcrypt.hash(Password, 10);
     }
 
+    const oldUser = await prisma.user.findUnique({
+      where: { IDUser: idUser }
+    });
 
-    let updateData = {};
 
-    if (body.Name) updateData.Name = body.Name;
-    if (body.Email) updateData.Email = body.Email;
-    if (body.Username) updateData.Username = body.Username;
-    if (body.Role) updateData.Role = body.Role;
-    if (body.Phone) updateData.Phone = body.Phone;
+    // File
+    if (ProfilePhoto && typeof ProfilePhoto === "object") {
+      if (oldUser?.ProfilePhoto) {
+        const oldPath = path.join(process.cwd(), "public", oldUser.ProfilePhoto);
+        if (fs.existsSync(oldPath)) {
+          fs.unlinkSync(oldPath);
+        }
+      }
 
-    if (body.Password) {
-      updateData.Password = await bcrypt.hash(body.Password, 10);
-    }
-
-    // Simpan file foto profil
-    if (files.ProfilePhoto && typeof files.ProfilePhoto === "object") {
-      const bytes = await files.ProfilePhoto.arrayBuffer();
+      const bytes = await ProfilePhoto.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const fileName = `${Date.now()}_${files.ProfilePhoto.name}`;
-      const uploadPath = path.join(process.cwd(), "public/uploads/profiles", fileName);
-      fs.writeFileSync(uploadPath, buffer);
+      //generate name
+      const ext = path.extname(ProfilePhoto.name); // ambil ekstensi asli (misal .png/.jpg)
+      const uniqueName = `${crypto.randomUUID()}${ext}`; 
 
-      updateData.ProfilePhoto = `/uploads/profiles/${fileName}`;
+      const uploadPath = path.join(process.cwd(), "public/uploads/profiles", uniqueName);
+      fs.writeFileSync(uploadPath, buffer);
+      updateData.ProfilePhoto = `/uploads/profiles/${uniqueName}`;
     }
 
-    // Simpan file signature
-    if (files.Signature && typeof files.Signature === "object") {
-      const bytes = await files.Signature.arrayBuffer();
+    if (Signature && typeof Signature === "object") {
+      const bytes = await Signature.arrayBuffer();
       const buffer = Buffer.from(bytes);
-
-      const fileName = `${Date.now()}_${files.Signature.name}`;
-      const uploadPath = path.join(process.cwd(), "public/uploads/signatures", fileName);
+      const uploadPath = path.join(process.cwd(), "public/uploads/signatures", Signature.name);
       fs.writeFileSync(uploadPath, buffer);
-
-      updateData.Signature = `/uploads/signatures/${fileName}`;
+      updateData.Signature = `/uploads/signatures/${Signature.name}`;
     }
 
-    // Jika tidak ada field yang dikirim
-    if (Object.keys(updateData).length === 0) {
+
+    if (!Email && !Username && !Password && !Name && !Role && !ProfilePhoto && !Phone && !Signature) {
       return NextResponse.json({
         success: false,
         message: "Minimal satu field harus dikirim untuk diupdate."
       }, { status: 400 });
     }
 
+
     const updatedUser = await prisma.user.update({
       where: { IDUser: idUser },
       data: updateData,
     });
 
-    // Buat token baru dengan data terbaru
+    
     const newToken = jwt.sign(
       {
         id: updatedUser.IDUser,
@@ -135,6 +127,7 @@ export async function PATCH(request, { params }) {
       JWT_SECRET,
       { expiresIn: "7d" }
     );
+
 
     return NextResponse.json({
       success: true,

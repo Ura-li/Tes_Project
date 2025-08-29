@@ -12,6 +12,7 @@ export async function GET(request) {
         const phone = searchParams.get("phone") || "";
         const country = searchParams.get("country") || "";
 
+        const contactID = searchParams.get("ContactID") || 0;
         const siteAccountID = searchParams.get("SiteAccountID") || "";
         const page = parseInt(searchParams.get("page")) || 1;
         const limit = parseInt(searchParams.get("limit")) || 10;
@@ -57,6 +58,8 @@ export async function GET(request) {
                 ]
             })
          }
+
+         if(contactID) andConditions.push({OR:[{ContactID: parseInt(contactID)}]})
  
          
  
