@@ -2,13 +2,14 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import dotenv from "dotenv";
 
 const app = express();
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
     cors: {
-        origin: ["http://localhost:5173"], // your Vite frontend
+        origin: [process.env.VITE_URL], // your Vite frontend
         methods: ["GET", "POST"]
     }
 });

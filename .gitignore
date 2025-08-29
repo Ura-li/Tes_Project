@@ -2,3 +2,4 @@ test-vite/package-lock.json
 .vscode/settings.json
 test-vite/.env
 /api/node_modules
+server/.env
