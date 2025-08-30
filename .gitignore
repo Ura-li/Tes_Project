@@ -3,3 +3,5 @@ test-vite/package-lock.json
 test-vite/.env
 /api/node_modules
 server/.env
+server/node_modules
+/server/node_modules
