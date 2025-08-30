@@ -1,9 +1,9 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { NotificationCard } from "./FrontDesk_Page";
 import { useState, useEffect} from "react";
 import ApiCustomer from "@/api";
 import { useAuth } from "@/context/auth-context";
 import { Badge } from "@/components/ui/badge";
+import { NotificationCard } from "@/components/NotificationCard";
 
 
 export default function ApoLanding() {
@@ -127,10 +127,10 @@ export default function ApoLanding() {
 
             <Card className={"rounded-sm"}>
                 <CardHeader>
-                    <CardTitle>Norifications</CardTitle>
+                    <CardTitle>Notifications</CardTitle>
                 </CardHeader>
                 <CardContent className={"overflow-y-auto space-y-3"}>
-                    <NotificationCard/>
+                    <NotificationCard />
                 </CardContent>
             </Card> 
         </div>

@@ -33,6 +33,7 @@ import debounce from 'lodash.debounce';
 import { SheetProvider } from './context/sheet-context'
 import { Toaster } from 'sonner'
 import { GlobalLogListener } from './components/GlobalLogListener'
+import { SocketInitializer } from './components/SocketInitializer'
 
 export function Breadcrumbs() {
   const location = useLocation();
@@ -181,6 +182,7 @@ const App = () => {
     </SidebarProvider> 
     </SheetProvider> 
     <GlobalLogListener />
+    <SocketInitializer/>
     <Toaster/>
     </div>
   )

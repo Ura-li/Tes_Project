@@ -67,8 +67,17 @@ export async function POST(request) {
                 }
             }
         })
+        // console.log("WHY NOT JUST APPEAR MEN",actionLog.changedBy,"MAKE IT SIMPLE" ,actionLog.CaseID)
+        const caseInfo = await prisma.caseinformation.findUnique({
+            where: { CaseID: CaseId },
+            select: { Owner: true, CreatedBy: true }
+        });
 
-        await notifySocket("log:created", actionLog);
+        await notifySocket("log:created", actionLog, {
+            createdById: caseInfo?.CreatedBy || null,
+            ownerId: caseInfo?.Owner || null,
+            CaseId: CaseId
+        });
 
         return NextResponse.json({
             success: true,

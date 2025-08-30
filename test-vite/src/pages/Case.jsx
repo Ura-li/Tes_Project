@@ -12,6 +12,7 @@ import { TabsServiceCaseDetailsCe } from './CaseDetailCe';
 
 
 export const Case = () => {
+  const { user } = useAuth();
   const { caseId } = useParams(); // Get caseId from URL params
   const { updateDraft } = useDraft(); // Access updateDraft from context
   const [caseDetails, setCaseDetails] = useState(null);
@@ -108,7 +109,6 @@ useEffect(() => {
       </div>
     );
   }
-  const { user } = useAuth();
   return (
     <>
     {user.role === 'admin' ? (
