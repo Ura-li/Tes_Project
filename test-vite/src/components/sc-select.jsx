@@ -113,35 +113,37 @@ useEffect(() => {
   );
 };
    
-  export function SelectBar({ id, onChange, value, options, placeholder }) {
-    return (
-      <Select value={value} onValueChange={(val) => 
-      {
-        // Case 1: handler expects event-like object (id/value)
-        if (onChange.length === 1 && onChange.toString().includes("e.target")) {
+export function SelectBar({ id, onChange, value, options, placeholder }) {
+  return (
+    <Select
+      value={value}
+      onValueChange={(val) => {
+        // Case 1: handler is event-like (form with multiple fields)
+        if (id) {
           onChange({ target: { id, value: val } });
         }
-        // Case 2: plain setter (just a string)
+        // Case 2: handler is just a plain state setter (single value)
         else {
           onChange(val);
         }
       }}
-      >
-        <SelectTrigger className="w-full border-black">
-          <SelectValue placeholder={placeholder || "Select an option"} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {options.map((opt) => (
-              <SelectItem key={opt.id} value={opt.name}>
-                {opt.name}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-    );
-  }
+    >
+      <SelectTrigger className="w-full border-black">
+        <SelectValue placeholder={placeholder || "Select an option"} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {options.map((opt) => (
+            <SelectItem key={opt.id} value={opt.name}>
+              {opt.name}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+}
+
 
 export function SelectBarState({ id, onChange, value, options, placeholder, disabled }) {
   return (

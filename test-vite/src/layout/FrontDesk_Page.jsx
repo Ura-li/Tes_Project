@@ -1,4 +1,5 @@
 import ApiCustomer from '@/api';
+import { NotificationCard } from '@/components/NotificationCard';
 import { ChartRadialText } from '@/components/sc-chart';
 import ToastTester from '@/components/ToastComponent';
 import { Badge } from '@/components/ui/badge';
@@ -33,7 +34,7 @@ export default function FrontDesk_Page() {
 
   const radialchartdata = [
     { name: "Open", value: casevaluedata || 0, fill: "#3B82F6" },
-    { name: "In Progress", value: inactivecasevaluedata || 0, fill: "#FACC15" },
+    { name: "InActive", value: inactivecasevaluedata || 0, fill: "#FACC15" },
     { name: "Closed", value: closecasevaluedata || 0, fill: "#10B981" },
     // { name: "Pending", value: 5, fill: "#F97316" },
   ];
@@ -203,7 +204,7 @@ export default function FrontDesk_Page() {
               (caseData.map((c) => (
                 <>
                   <Card
-                    key={c.SerialNumber}
+                    key={c.CaseID}
                     className="p-3 border-l-4 hover:scale-95 rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400 bg-white cursor-pointer"
                     onClick={() => navigate(`/app/case/${c.CaseID}`)}
                   >
@@ -227,7 +228,8 @@ export default function FrontDesk_Page() {
                     </div>
                   </Card>
                 </>
-              )))}
+              )))
+              }
               <div className="">
                 {/* <ToastTester/> */}
               </div>
@@ -240,36 +242,3 @@ export default function FrontDesk_Page() {
 }
 
 
-export function NotificationCard({ n }) {
-  const notif = [
-    { id: 1, type: "created", caseId: "C-1023", user: "John Doe", date: "2025-08-24T09:15", description: "New case created" },
-    { id: 2, type: "updated", caseId: "C-1021", user: "Jane Smith", date: "2025-08-24T10:30", description: "Case updated" },
-    { id: 3, type: "assigned", caseId: "C-1018", user: "System", date: "2025-08-24T11:00", description: "Assigned to you" },
-    { id: 4, type: "closed", caseId: "C-1015", user: "Admin", date: "2025-08-24T12:45", description: "Case closed" },
-  ];
-  const typeColors = {
-    created: "bg-blue-100 text-blue-700",
-    updated: "bg-yellow-100 text-yellow-700",
-    assigned: "bg-purple-100 text-purple-700",
-    closed: "bg-green-100 text-green-700",
-  };
-
-  return (
-
-    notif.map((i) => (
-      <Card className="shadow-md border rounded-xl hover:shadow-lg transition" key={i.caseId}>
-        <CardHeader className="flex flex-col gap-1">
-          <div className="flex justify-between items-center gap-2">
-            <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeColors[i.type]}`}>
-              {i.type}
-            </span>
-            <span className="text-xs text-gray-400">{new Date(i.date).toLocaleString()}</span>
-          </div>
-          <CardTitle className="text-sm font-semibold">{i.title || `Case ${i.caseId}`}</CardTitle>
-          <CardDescription>{i.description} by {i.user}</CardDescription>
-        </CardHeader>
-      </Card>
-    ))
-
-  );
-}

@@ -869,8 +869,9 @@ export function BtnModalAsset({
                   key={asset.AssetID}
                   onClick={() => setSelectedAssetForCreatingAsset(asset)}
                   className={`cursor-pointer hover:bg-gray-200 ${
-                    selectedAsset?.AssetID === asset.AssetID ? "bg-blue-300" : ""
+                    selectedAssetForCreatingAsset?.AssetID === asset.AssetID ? "bg-blue-300" : ""
                   }`}
+                  
                 >
                   <TableCell>{asset.SerialNumber}</TableCell>
                   <TableCell className={'whitespace-break-spaces'}>{asset.product_information?.ProductName}</TableCell>
