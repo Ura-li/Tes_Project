@@ -8,7 +8,7 @@ export async function notifySocket(event, payload, caseInfo) {
     console.log("THIS IS THE CASEINFO",caseInfo)
 
     try {
-        await axios.post(`${process.env.WEBSOCKET_URL}/emit`, { event, payload, caseInfo });
+        await axios.post(`${process.env.WEBSOCKET_URL}emit`, { event, payload, caseInfo });
     } catch (e) {
         console.error("Socket notify error:", e.message);
     }
