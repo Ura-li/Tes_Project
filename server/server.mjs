@@ -8,7 +8,7 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
     cors: {
-        origin: ["http://localhost:5173"], // your Vite frontend
+        origin: [process.env.VITE_URL], // your Vite frontend
         methods: ["GET", "POST"]
     }
 });

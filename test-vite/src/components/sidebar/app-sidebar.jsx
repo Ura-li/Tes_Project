@@ -319,9 +319,9 @@ export function AppSidebar({
         activeClassName="bg-cyan-800 text-white"
       />
     );
-  } else if (data.user.role === 'fd' || 'user') {
+  } else if (data.user.role === 'fd' || data.user.role === 'user') {
     navrole = data.projects;
-  } else if (data.user.role === 'apo'){
+  } else if (data.user.role === 'apo' || data.user.role === 'ce' ){
     navrole = data.apo;
   } else {
     DropNav = '';
