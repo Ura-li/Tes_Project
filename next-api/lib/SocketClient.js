@@ -6,7 +6,7 @@ dotenv.config();
 
 export async function notifySocket(event, payload, caseInfo) {
     console.log("THIS IS THE CASEINFO",caseInfo)
-
+    console.log(`${process.env.WEBSOCKET_URL}emit`)
     try {
         await axios.post(`${process.env.WEBSOCKET_URL}emit`, { event, payload, caseInfo });
     } catch (e) {
