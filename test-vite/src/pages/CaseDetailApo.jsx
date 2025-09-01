@@ -258,17 +258,17 @@ export const TabsServiceCaseDetailsApo = ({
                 const oldStatus = caseDetails.CaseStatus;
                 let newStatus = caseForm.CaseStatus;
 
-                const isNewAssignStatus = newStatus.includes("NEW_Assign");
-                if(isNewAssignStatus) newStatus = "Open";
-
-                 Object.assign(dataToUpdate, {
-                  CaseType: caseForm.CaseType || "",
-                  CaseStatus: newStatus || "",
-                  Owner: caseForm.Owner || caseDetails.Owner
-
-                });
                 savedModules.push("Case");
                 if (oldStatus !== newStatus) {
+                  const isNewAssignStatus = newStatus.includes("NEW_Assign");
+                  if(isNewAssignStatus) newStatus = "Open";
+  
+                   Object.assign(dataToUpdate, {
+                    CaseType: caseForm.CaseType || "",
+                    CaseStatus: newStatus || "",
+                    Owner: caseForm.Owner || caseDetails.Owner
+  
+                  });
                   const token = {
                     user: getUserFromToken()
                   }
