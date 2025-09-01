@@ -60,6 +60,10 @@ import {
   Calculator,
   CreditCard,
   Settings,
+  Briefcase,
+  Contact,
+  FileSliders,
+  NotepadText
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -437,7 +441,6 @@ export const TabsServiceCaseDetailsCe = ({
       icon: StepBack,
       label: "Service Order",
       onClick: () => openServiceCatalog("serviceorder"),
-      hidden: true,
     },
     {
       icon: StepBack,
@@ -549,7 +552,7 @@ export const TabsServiceCaseDetailsCe = ({
   };
   return (
     <>
-      <div className="flex items-center border-1 ">
+      <div className="flex" >
         {/* {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -583,7 +586,7 @@ export const TabsServiceCaseDetailsCe = ({
             onClick={btn.onClick}
             hidden={btn.hidden}
             variant="link"
-            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5 `}
           >
             <btn.icon />
             {btn.label && <span className="text-md">{btn.label}</span>}
@@ -1585,7 +1588,6 @@ export const ServiceCase = ({
     fetchCustomerData();
     fetchAssetInformation();
     fetchOwnerUserData();
-
     fetchWorkOrders();
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
@@ -1813,36 +1815,57 @@ export const ServiceCase = ({
           </CardHeader>
 
           <TabsContent value="case_infor">
-            <div className={"p-3 grid grid-cols-2 gap-4 mt-2"}>
-              <Card className="flex-col">
+            <div className={"p-3 grid grid-cols-2 gap-4 mt-2 "}>
+              <Card className="flex-col hover:shadow-gray-400 ">
                 <CardHeader>
-                  <CardTitle className={"text-lg "}>Case Information</CardTitle>
+                  <CardTitle className={"text-xl flex gap-2 "}><Briefcase/>Case Information</CardTitle>
                   <hr />
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-2">
-                  <CaseField label="Case Subject" lock span={3}>
-                    <div className="ml-3">
-                      <Textarea
-                        value={caseDetails.CaseSubject}
-                        className="resize-none border-none"
-                      />
-                    </div>
-                  </CaseField>
+                <CardContent  className={"flex flex-col gap-4"}>
+               
+<div className="grid grid-cols-2 gap-4">
+  <CaseField label="Case Subject" lock className={"col-span-2"} span={2}>
+    <Textarea
+      value={caseDetails.CaseSubject}
+      className="resize-none border-none "
+    />
 
+  </CaseField>
+                    <CaseField label={"Created On"} className={"col-end-2"} lock>
+                     <DatePicker
+                       variant="icon"
+                       value={createdOn}
+                       onChange={setCreatedOn}
+                       readOnly
+                    
+                     />
+                    </CaseField>
+                    <CaseField label="Case Closed Date" lock>
+                          <span className="gap-[5em]" >
+                            {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
+                            <DatePicker
+                      variant="icon"
+                      value={caseClosedDate}
+                      onChange={setCaseClosedDate}
+                     readOnly
+                    ></DatePicker>
+
+                          </span>
+                        </CaseField>
+
+</div>
+                     <hr />
+                  <div className="grid grid-cols-4 gap-4">
                   <CaseField
                     label="Case ID manual"
-                    className={"mt-2"}
-                    lock
-                    span={2}
+                    lock                    
                   >
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
                   <CaseField
                     label="Case Status"
-                    className={"mt-2"}
-                    open
-                    span={2}
+                    className={"ml-6"} 
                   >
                     <SearchCommandBlock
                       value={
@@ -1879,10 +1902,8 @@ export const ServiceCase = ({
                     />
                   </CaseField>
                   <CaseField
-                    label="Assign To"
-                    className={"mt-2"}
-                    open
-                    span={2}
+                    label="Assign To"                   
+                    className={"ml-6"}
                     hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}
                   >
                     <SearchCommandBlock
@@ -1911,7 +1932,7 @@ export const ServiceCase = ({
                   {/* {assignToForm == true ?? (
                 )} */}
 
-                  <CaseField label="Case Type" open className={"mt-2"} span={2}>
+                  <CaseField label="Case Type" className={"ml-6"} >
                     <SearchCommandBlock
                       value={caseForm?.CaseType}
                       onChange={onChangeCase("CaseType")}
@@ -1922,9 +1943,7 @@ export const ServiceCase = ({
 
                   <CaseField
                     label="Case Priority"
-                    className={"mt-2"}
                     lock
-                    span={2}
                   >
                     <Input
                       variant="invisible"
@@ -1934,9 +1953,8 @@ export const ServiceCase = ({
 
                   <CaseField
                     label="Customer Severity"
-                    className={"mt-2"}
+                   
                     lock
-                    span={2}
                   >
                     <Input
                       variant="invisible"
@@ -1946,30 +1964,22 @@ export const ServiceCase = ({
 
                   <CaseField
                     label="Incoming Channel"
-                    className={"mt-2"}
+                    
                     lock
-                    span={2}
                   >
                     <Input
                       variant="invisible"
                       value={caseDetails.IncomingChannel}
                     />
                   </CaseField>
-
-                  <CaseField label="KCI For Case?" lock span={2}>
+ 
+                <CaseField label="KCI For Case?" lock>
                     <Input
                       variant="invisible"
                       value={caseDetails.KCI_Flag ? "Yes" : "No"}
                     />
-                  </CaseField>
-                  <CaseField label="Created ON" span={2} lock>
-                    <DatePicker
-                      variant="icon"
-                      value={createdOn}
-                      onChange={setCreatedOn}
-                      readOnly
-                    ></DatePicker>
-                  </CaseField>
+                </CaseField>
+                  </div>
 
                   <Accordion
                     type="single"
@@ -1986,18 +1996,7 @@ export const ServiceCase = ({
                       </AccordionTrigger>
                       <AccordionContent className={"m-1"}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <CaseField label="Case Closed Date">
-                            <span className="gap-[5em]">
-                              {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
-                              <DatePicker
-                                variant="icon"
-                                value={caseClosedDate}
-                                onChange={setCaseClosedDate}
-                                readOnly
-                              ></DatePicker>
-                            </span>
-                          </CaseField>
-
+                          
                           <CaseField label="Submitted To Base">
                             <span className="gap-[5em]">
                               <DatePicker
@@ -2047,13 +2046,14 @@ export const ServiceCase = ({
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
+                  
                 </CardContent>
               </Card>
 
-              <Card className="flex-col">
+              <Card className="flex-col hover:shadow-gray-400">
                 <CardHeader>
-                  <CardTitle className="text-lg">
-                    Customer Information
+                  <CardTitle className="text-xl flex gap-2">
+                    <Contact/>Customer Information
                   </CardTitle>
                   <hr />
                 </CardHeader>
@@ -2168,113 +2168,112 @@ export const ServiceCase = ({
                 </CardContent>
               </Card>
             </div>
-            <div className="mt-2 p-1">
-              <Card className="flex-col">
+            
+            <div className="grid grid-cols-2 mt-2 p-3 gap-4">
+              <Card className="flex-col hover:shadow-gray-400">
                 <CardHeader>
-                  <CardTitle className="text-lg ">
-                    Customer Issue Description & System Information
+                  <CardTitle className="text-xl flex gap-2 ">
+                    <FileSliders/>Customer Issue Description & System Information
                   </CardTitle>
                   <hr />
                 </CardHeader>
-                <CardContent className="flex p-4 gap-x-5">
-                  <div className="grid items-center flex-1 grid-cols-6 grid-row-7 gap-y-7">
-                    <div className="row-span-4 col-span-full">
+                <CardContent >
+                  <div className="flex flex-col gap-2">
+                    <CaseField span={2}>
                       <textarea
-                        className="border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none"
+                        className=" w-[100%] h-[12em] resize-none border-1 ring-1 ring-gray-500 p-1 text-lg"
                         readOnly
                         value={caseDetails?.CaseProductNote}
                       ></textarea>
-                    </div>
+                    </CaseField>
+
+                    <div className="grid grid-cols-4 gap-4">
                     <CaseField
                       label="Related Device"
-                      className={"col-span-3"}
-                      span={3}
+                      lock
                     >
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
                     <CaseField
                       label="Device Manufacturer"
-                      className={"col-span-3"}
-                      span={3}
+                      lock
+                      
                     >
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
                     <CaseField
                       label="Device Model"
-                      className={"col-span-3"}
-                      span={3}
+                      lock
                     >
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
-                  </div>
-
-                  <div className="grid flex-1 grid-flow-row grid-cols-6 gap-y-7">
+                
                     <CaseField
                       label="Program/Category"
-                      className={"col-span-3"}
-                      span={2}
+                      lock
                     >
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
                     <CaseField
                       label="Operating System"
-                      className={"col-span-3"}
-                      span={3}
+                      lock
                     >
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
                     <CaseField
                       label="Version"
-                      className={"col-span-3"}
-                      span={3}
+                      lock
                     >
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
                     <CaseField
                       label="Remote Diag Code"
-                      className={"col-span-3"}
-                      span={3}
+                      lock
                     >
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
                     <CaseField
                       label="Application Information"
-                      className={"col-span-3"}
-                      span={3}
+                      lock
                     >
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
                     <CaseField
                       label="Provider / Platform"
-                      className={"col-span-3"}
-                      span={3}
+                        lock
                     >
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
                     <CaseField
                       label="Software Version"
-                      className={"col-span-3"}
-                      span={3}
+                        lock
                     >
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            </div>
 
-            <div className="mt-2 p-1">
-              <Card className="flex-col">
+                <Card className=" hover:shadow-gray-400">
                 <CardHeader>
-                  <CardTitle className="text-lg ">Case Notes</CardTitle>
+                  <CardTitle className="text-xl flex gap-2 "><NotepadText/>Case Notes</CardTitle>
                   <hr />
                 </CardHeader>
-                <CardContent className="flex gap-4">
-                  <div className="grid flex-1 grid-cols-6 gap-y-7">
+                <CardContent >
+                  <div className="flex flex-col gap-2">
+                    <CaseField >
+                    <textarea
+                      className="w-[100%] h-[13em] resize-none p-2 ring-1 ring-gray-500"
+                      readOnly
+                      value={formData?.NotesDisplay}
+                    ></textarea>
+                  </CaseField>
+
+                  <div className="grid grid-cols-2 gap-4">
                     <CaseField
                       label="Log Type"
-                      className={"col-span-2"}
-                      span={4}
+           
                     >
                       <Select
                         value={formData?.LogType}
@@ -2294,8 +2293,7 @@ export const ServiceCase = ({
 
                     <CaseField
                       label="Action Type"
-                      className={"col-span-2"}
-                      span={4}
+                      
                     >
                       <SearchCommandBlock
                         value={formData?.ActionType}
@@ -2313,16 +2311,14 @@ export const ServiceCase = ({
 
                     <CaseField
                       label="Template"
-                      className={"col-span-2"}
-                      span={4}
+                   
                     >
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
 
                     <CaseField
                       label="Visible Externally"
-                      className={"col-span-2"}
-                      span={4}
+                   
                     >
                       <SelectYN
                         value={
@@ -2341,16 +2337,15 @@ export const ServiceCase = ({
 
                     <CaseField
                       label="Number of Minutes Spent"
-                      className={"col-span-2"}
-                      span={3}
+                    
                     >
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
 
                     <CaseField
                       label="Notes"
-                      className={"col-span-2 self-start bg-red"}
-                      span={4}
+                    
+                      
                       star
                     >
                       <textarea
@@ -2360,14 +2355,9 @@ export const ServiceCase = ({
                       />
                     </CaseField>
                   </div>
-
-                  <div className="flex flex-1">
-                    <textarea
-                      className="w-[100%] h-[100%] resize-none p-2 ring-1 ring-gray-500"
-                      readOnly
-                      value={formData?.NotesDisplay}
-                    ></textarea>
                   </div>
+
+                 
                 </CardContent>
               </Card>
             </div>
@@ -2472,7 +2462,7 @@ export const ServiceCase = ({
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
                   </div>
-                  <CaseField label="OTC Code" lock span={3}>
+                  <CaseField label="OTC Code" lock span={3} star>
                     <SearchCommandBlock
                       options={otcCode}
                       value={entitlementStatus.OTCCode}
@@ -2542,54 +2532,125 @@ export const ServiceCase = ({
               </Card>
             </div>
 
-            <div className="mt-4 p-2">
-              <Card>
-                <CardHeader className={"text-lg"}>
-                  <CardTitle>Note PartOrder</CardTitle>
-                  <hr />
-                </CardHeader>
-                <CardContent className={"grid grid-cols-4 gap-4"}>
-                  <CaseField label={"Vendor part no"} open>
-                    <Input variant={"invisible"} placeholder="---" />
+          <div className="mt-2 p-3">
+                  <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className="text-lg ">Work Order</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="flex flex-col gap-5 p-3 ">
+                <div className="grid grid-cols-4 gap-5" hidden>
+                  <CaseField label="Incident Type" span={3} >
+                    <Input variant="invisible" placeholder="---" />
                   </CaseField>
-                  <CaseField label={"Hp part no"} open>
-                    <Input variant={"invisible"} placeholder="---" />
+                  <CaseField label="Work Order Description" span={3}>
+                    <Input variant="invisible" placeholder="---" />
                   </CaseField>
-                  <CaseField label={"Part Category"} open>
-                    <SearchCommandBlock
-                      options={["Yes", "No"]}
-                      readOnly
-                      placeholder="---"
-                    />
-                  </CaseField>
-                  <CaseField label={"Part backup"} open>
-                    <SearchCommandBlock
-                      options={["Yes", "No"]}
-                      readOnly
-                      placeholder="---"
-                    />
-                  </CaseField>
-                  <CaseField label={"Part status"} open>
-                    <Input variant={"invisible"} placeholder="---" />
-                  </CaseField>
-                  <CaseField label={"Bad CT Code"} open>
-                    <Input variant={"invisible"} placeholder="---" />
-                  </CaseField>
-                  <CaseField label={"New CT Code"} open>
-                    <Input variant={"invisible"} placeholder="---" />
-                  </CaseField>
-                  <CaseField label={"UEFI Code"} open>
-                    <SearchCommandBlock
-                      options={["DHU", "FID", "MPS", "PND", "PPR"]}
-                      placeholder="---"
-                    />
-                  </CaseField>
-                  <CaseField label={"Part Name"} open>
-                    <Textarea className={"resize-none h-[7em]"} />
-                  </CaseField>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">
+                        Work Order Number
+                      </TableHead>
+                      <TableHead>Case ID</TableHead>
+                      <TableHead>Service Account</TableHead>
+                      <TableHead>Sub-Status</TableHead>
+                      <TableHead>System Status</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Work Order</TableHead>
+                      <TableHead>Primary Incident</TableHead>
+                      <TableHead>Due Date</TableHead>
+                      <TableHead>Orion</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Created By</TableHead>
+                      <TableHead>Created At</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {workOrders.map((work) => (
+                      <TableRow
+                        key={work.WOID}
+                        className="cursor-pointer hover:bg-gray-300"
+                        onClick={handleClick}
+                      >
+                        <TableCell className="font-medium ">
+                          {work.WOID}
+                        </TableCell>
+                        <TableCell>{work.CaseID}</TableCell>
+                        <TableCell>
+                          {work.caseinformation?.site_account?.Company ||
+                            work.caseinformation?.contact_information
+                              ?.FirstName +
+                              " " +
+                              work.caseinformation?.contact_information
+                                ?.LastName ||
+                            "-"}
+                        </TableCell>
+
+                        <TableCell>{work.SubStatus}</TableCell>
+                        <TableCell>{work.SystemStatus}</TableCell>
+                        <TableCell>{work.Priority}</TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell>{work.owner?.Name}</TableCell>
+                        <TableCell>{work.owner?.Name}</TableCell>
+                        <TableCell>{work.CreatedOn}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+      
+<div className="mt-2 p-3">
+  <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className="text-lg ">Material Order</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid gap-5">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Name</TableHead>
+                      <TableHead>Case ID</TableHead>
+                      <TableHead>Created On</TableHead>
+                      <TableHead>Order Status</TableHead>
+                      <TableHead>Order Type</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Work Order</TableHead>
+                      <TableHead>Ready For Closure Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {materialOrders.map((material) => (
+                      <TableRow key={material.MOID}>
+                        <TableCell className="font-medium">
+                          <Link to={`/app/material-order/${material.MOID}`}>
+                            {material.MOID} on {material.WOID}
+                          </Link>
+                        </TableCell>
+                        <TableCell>{material.workorder?.CaseID}</TableCell>
+                        <TableCell>{material.CreatedOn}</TableCell>
+                        <TableCell>{material.OrderStatus}</TableCell>
+                        <TableCell>{material.OrderType}</TableCell>
+                        <TableCell>{material.owner?.Name}</TableCell>
+                        <TableCell>{material.WOID}</TableCell>
+                        <TableCell>{material.ReadyForClosureDate}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+</div>
+          
           </TabsContent>
 
           <Card className="flex-col mt-5" hidden>
@@ -2987,7 +3048,7 @@ export const ServiceCase = ({
                 </CardHeader>
                 <CardContent className="grid gap-5 grid-cols-2">
                   <CaseField label="Case Subject" span={1}>
-                    {caseDetails.CaseSubject}
+                    {caseDetails.CaseSubject} 
                   </CaseField>
                   <CaseField label="Case Type">
                     {caseDetails.CaseType}
@@ -3109,78 +3170,7 @@ export const ServiceCase = ({
               </CardContent>
             </Card>
 
-            <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">Work Order</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="flex flex-col gap-5 p-3 ">
-                <div className="grid grid-cols-4 gap-5">
-                  <CaseField label="Incident Type" span={3}>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField label="Work Order Description" span={3}>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                </div>
-
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">
-                        Work Order Number
-                      </TableHead>
-                      <TableHead>Case ID</TableHead>
-                      <TableHead>Service Account</TableHead>
-                      <TableHead>Sub-Status</TableHead>
-                      <TableHead>System Status</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Work Order</TableHead>
-                      <TableHead>Primary Incident</TableHead>
-                      <TableHead>Due Date</TableHead>
-                      <TableHead>Orion</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead>Created By</TableHead>
-                      <TableHead>Created At</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {workOrders.map((work) => (
-                      <TableRow
-                        key={work.WOID}
-                        className="cursor-pointer hover:bg-gray-300"
-                        onClick={handleClick}
-                      >
-                        <TableCell className="font-medium ">
-                          {work.WOID}
-                        </TableCell>
-                        <TableCell>{work.CaseID}</TableCell>
-                        <TableCell>
-                          {work.caseinformation?.site_account?.Company ||
-                            work.caseinformation?.contact_information
-                              ?.FirstName +
-                              " " +
-                              work.caseinformation?.contact_information
-                                ?.LastName ||
-                            "-"}
-                        </TableCell>
-
-                        <TableCell>{work.SubStatus}</TableCell>
-                        <TableCell>{work.SystemStatus}</TableCell>
-                        <TableCell>{work.Priority}</TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell>{work.owner?.Name}</TableCell>
-                        <TableCell>{work.owner?.Name}</TableCell>
-                        <TableCell>{work.CreatedOn}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          
 
             <Card className="flex-col ">
               <CardHeader>
@@ -3241,48 +3231,6 @@ export const ServiceCase = ({
                         No data available
                       </TableCell>
                     </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">Material Order</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid gap-5">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">Name</TableHead>
-                      <TableHead>Case ID</TableHead>
-                      <TableHead>Created On</TableHead>
-                      <TableHead>Order Status</TableHead>
-                      <TableHead>Order Type</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead>Work Order</TableHead>
-                      <TableHead>Ready For Closure Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-
-                  <TableBody>
-                    {materialOrders.map((material) => (
-                      <TableRow key={material.MOID}>
-                        <TableCell className="font-medium">
-                          <Link to={`/app/material-order/${material.MOID}`}>
-                            {material.MOID} on {material.WOID}
-                          </Link>
-                        </TableCell>
-                        <TableCell>{material.workorder?.CaseID}</TableCell>
-                        <TableCell>{material.CreatedOn}</TableCell>
-                        <TableCell>{material.OrderStatus}</TableCell>
-                        <TableCell>{material.OrderType}</TableCell>
-                        <TableCell>{material.owner?.Name}</TableCell>
-                        <TableCell>{material.WOID}</TableCell>
-                        <TableCell>{material.ReadyForClosureDate}</TableCell>
-                      </TableRow>
-                    ))}
                   </TableBody>
                 </Table>
               </CardContent>

@@ -390,9 +390,9 @@ const openPopup = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }, },
+    },hidden: true },
     { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR"), hidden: true },
-    { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder")},
+    { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), hidden: true},
     { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder"), hidden: true },
     { icon: StepBack, label: "Sales Offer", hidden:true},
     { icon: StepBack, label: "Close Case", hidden:true },
@@ -1163,6 +1163,8 @@ export const ServiceCase = ({
   const [createdOn, setCreatedOn] = useState(null);
   const [caseClosedDate, setCaseClosedDate] = useState(null);
   const [submittedToBase, setsubmittedToBase] = useState(null);
+
+  const [cards, setCards] = useState([{}]);
 
   const [roleAssign, setRoleAssign] = useState([]);
 
@@ -2062,7 +2064,7 @@ const [endDate, setEndDate] = useState(null);
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
                 </div>
-                  <CaseField label="OTC Code" lock span={3}>
+                  <CaseField label="OTC Code" lock span={3} star>
                   <SearchCommandBlock
                     options={otcCode}
                     value={entitlementStatus.OTCCode}

@@ -2166,7 +2166,7 @@ const [endDate, setEndDate] = useState(null);
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
                 </div>
-                  <CaseField label="OTC Code" lock span={3}>
+                <CaseField label="OTC Code" lock span={3} star>
                   <SearchCommandBlock
                     options={otcCode}
                     value={entitlementStatus.OTCCode}
@@ -2181,7 +2181,7 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
               {/* TABEL ACCESSORY */}
   <div className="px-6 pb-6">
-    <h3 className="text-md font-semibold mb-2">Accessory</h3>
+    <h3 className="text-md font-semibold mb-26">Accessory</h3>
     <div className="overflow-x-auto">
       <table className="min-w-full border text-sm text-left">
         <thead className="bg-gray-100 text-gray-700">
