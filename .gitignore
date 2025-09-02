@@ -5,3 +5,4 @@ test-vite/.env
 server/.env
 server/node_modules
 /server/node_modules
+start_dev.bat
