@@ -353,7 +353,7 @@ export function AppSidebar({
         activeClassName="bg-cyan-800 text-white"
       />
     );
-  } else if (data.user.role === 'apo' || data.user.role === 'ce' ){
+  } else if (data.user.role === 'apo' || data.user.role === 'ce' || data.user.role === 'ps' || data.user.role === 'lg' || data.user.role === 'celead'){
     navrole = data.apo;
   } else {
     DropNav = '';
