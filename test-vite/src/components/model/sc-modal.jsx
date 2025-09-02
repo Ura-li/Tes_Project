@@ -5482,6 +5482,7 @@ export function BtnModalsPartAdd({
                 variant={'search'}
                 onClick={(e) => setPartNumberSearch(partNumberInput)}
               >Search</Button>
+              <PartAdd/>
             </span>
             <div className="bg-gray-300 flex gap-x-10 p-2 flex-1 max-w-[10em]">
                 <p>Currency</p><p className="whitespace-nowrap">: </p>

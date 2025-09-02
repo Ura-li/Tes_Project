@@ -26,6 +26,7 @@ export const SearchCommandBlock = ({
   placeholder = "Search...",
   renderLabel = (opt) => opt.label || opt,
   getValue = (opt) => opt.value || opt,
+  readOnly
 }) => {
   const [open, setOpen] = useState(false);
   const [positionAbove, setPositionAbove] = useState(false);
@@ -33,11 +34,11 @@ export const SearchCommandBlock = ({
   const dropdownRef = useRef(null);
   const selectedOption = options.find((opt) => getValue(opt) === value);
 
-useEffect(() => {
+  useEffect(() => {
     if (!open || !inputRef.current) return;
 
     const inputRect = inputRef.current.getBoundingClientRect();
-    const dropdownHeight = 240; // max height (same as tailwind: max-h-60)
+    const dropdownHeight = 240; // max height
     const spaceBelow = window.innerHeight - inputRect.bottom;
     const spaceAbove = inputRect.top;
 
@@ -49,46 +50,45 @@ useEffect(() => {
   }, [open]);
 
   const handleBlur = (e) => {
-  setTimeout(() => {
-    if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(document.activeElement)
-    ) {
-      setOpen(false);
-    }
-  }, 150);
-};
+    setTimeout(() => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(document.activeElement)
+      ) {
+        setOpen(false);
+      }
+    }, 150);
+  };
 
   return (
     <div className="relative w-full">
       {selectedOption ? (
         <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2 ring-1">
-          <Archive color="blue" className=" size-4 shrink-0"></Archive>
+          <Archive color="blue" className="size-4 shrink-0" />
           <span className="pl-1">{renderLabel(selectedOption)}</span>
-          {/* <div className="flex items-center justify-start px-3 py-2 border rounded-md gap-2">
-            <Archive color="blue"></Archive>
-            <span className="text-md text-blue-500 font-black">{renderLabel(selectedOption)}</span> */}
-          <button
-            onClick={() => onChange(null)}
-            className="ml-2  hover:text-red-600"
-          >
-            <X className=" size-4" />
-          </button>
+          {!readOnly && (
+            <button
+              onClick={() => onChange(null)}
+              className="ml-2 hover:text-red-600"
+            >
+              <X className="size-4" />
+            </button>
+          )}
         </div>
       ) : (
         <Command className="w-full">
           <CommandInput
-          ref={inputRef}
+            ref={inputRef}
             placeholder={placeholder}
-            onFocus={() => setOpen(true)}
+            onFocus={() => !readOnly && setOpen(true)}
             onBlur={handleBlur}
+            disabled={readOnly} // 👈 prevent typing if readOnly
           />
-          {open && (
-            <CommandList 
-            ref={dropdownRef}
-            className={`absolute z-50 w-full border rounded-md bg-white shadow-lg max-h-60 overflow-y-auto ${
-              positionAbove ? "bottom-full mb-2" : "top-full mt-2"
-            }`}
+          {open && !readOnly && ( // 👈 don’t open dropdown if readOnly
+            <CommandList
+              ref={dropdownRef}
+              className={`absolute z-50 w-full border rounded-md bg-white shadow-lg max-h-60 overflow-y-auto ${positionAbove ? "bottom-full mb-2" : "top-full mt-2"
+                }`}
             >
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
@@ -96,11 +96,13 @@ useEffect(() => {
                   <CommandItem
                     key={getValue(opt)}
                     onSelect={() => {
-                      onChange(getValue(opt));
-                      setOpen(false);
+                      if (!readOnly) {
+                        onChange(getValue(opt));
+                        setOpen(false);
+                      }
                     }}
                   >
-          <Archive></Archive>
+                    <Archive />
                     {renderLabel(opt)}
                   </CommandItem>
                 ))}
@@ -112,8 +114,9 @@ useEffect(() => {
     </div>
   );
 };
+
    
-export function SelectBar({ id, onChange, value, options, placeholder }) {
+export function SelectBar({ id, onChange, value, options, placeholder,readOnly }) {
   return (
     <Select
       value={value}
@@ -127,6 +130,7 @@ export function SelectBar({ id, onChange, value, options, placeholder }) {
           onChange(val);
         }
       }}
+      disabled={readOnly}
     >
       <SelectTrigger className="w-full border-black p-3 text-md">
         <SelectValue placeholder={placeholder || "Select an option"} />
@@ -312,11 +316,17 @@ export function SelectBarState({ id, onChange, value, options, placeholder, disa
     )
   }
 
-  export function SelectYN({ value, onValueChange }) {
+export function SelectYN({ value, onValueChange, readOnly }) {
   return (
-    <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className="w-full hover:shadow-lg border-b-0 p-3">
-        {/* Menampilkan value terpilih */}
+    <Select
+      value={value}
+      onValueChange={onValueChange}
+      disabled={readOnly}   // 👈 disable dropdown if readOnly
+    >
+      <SelectTrigger
+        className="w-full hover:shadow-lg border-b-0 p-3"
+        disabled={readOnly} // 👈 also disable trigger button
+      >
         <span>{value}</span>
       </SelectTrigger>
       <SelectContent>
@@ -328,3 +338,4 @@ export function SelectBarState({ id, onChange, value, options, placeholder, disa
     </Select>
   );
 }
+

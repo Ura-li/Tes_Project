@@ -60,18 +60,18 @@ app.post("/emit", (req, res) => {
 
 
 function notifyCaseUsers(caseInfo, event, payload) {
-    const targets = new Set();
+    const { createdById, ownerId } = caseInfo;
 
-    if (caseInfo.createdById) {
-        targets.add(caseInfo.createdById);
+    if (createdById && createdById === ownerId) {
+        io.to(`user:${createdById}`).emit(event, payload);
+    } else {
+        if (createdById) {
+            io.to(`user:${createdById}`).emit(event, payload);
+        }
+        if (ownerId) {
+            io.to(`user:${ownerId}`).emit(event, payload);
+        }
     }
-    if (caseInfo.ownerId) {
-        targets.add(caseInfo.ownerId);
-    }
-
-    // Now emit only once per unique user
-    targets.forEach(userId => {
-        io.to(`user:${userId}`).emit(event, payload);
-    });
 }
+
 

@@ -108,8 +108,7 @@ export default function FrontDesk_Page() {
 
   const navigate = useNavigate();
 
-  console.log(caseData)
-  console.log("THe value ", casevaluedata)
+
   return (
     <div className="min-h-[calc(100vh-64px)] w-full grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Left Column - Profile */}
@@ -199,14 +198,14 @@ export default function FrontDesk_Page() {
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge
                       className={`px-2 py-1 rounded-md text-xs font-medium
-                      ${c.CasePriority === "High"
+                      ${c.caseinformation.CasePriority === "High"
                           ? "bg-orange-100 text-orange-700"
-                          : c.CasePriority === "Critical"
+                          : c.caseinformation.CasePriority === "Critical"
                             ? "bg-red-100 text-red-700"
                             : "bg-gray-200 text-gray-700"
                         }`}
                     >
-                      {c?.CasePriority || "Low"}
+                      {c?.caseinformation.CasePriority || "Low"}
                     </Badge>
                     <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
                       {c.CaseStatus}

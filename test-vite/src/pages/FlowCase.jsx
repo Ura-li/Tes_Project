@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Sidebar, SidebarContent, SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/context/auth-context'
 import { se } from 'date-fns/locale'
 import { filter, set } from 'lodash'
@@ -98,17 +99,18 @@ export const FlowCase = () => {
 
       <SidebarInset>
         <div className="min-h-screen flex flex-col w-full ">
+          <Tabs defaultValue="active">
           <div className="sticky top-13  border-t-4 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
             <div className="mx-auto flex h-14 w-full max-w-7xl items-center gap-3 px-4 justify-between">
-              <div className=" flex items-center gap-2">  
-                <Button size="sm" variant="outline">Active Case</Button>
-                <Button size="sm">Ready To Finish</Button>
-              </div>
+              <TabsList className=" flex items-center gap-2">  
+                <TabsTrigger value="active" size="sm" >Active Case</TabsTrigger>
+                <TabsTrigger value="finish" size="sm">Ready To Finish</TabsTrigger>
+              </TabsList>
               <h1 className="lg:text-xl md:text-md font-semibold tracking-tight">Case For You</h1>
               <SidebarTrigger icon={PanelRight} />
             </div>
           </div>
-          <section className="mx-auto w-full max-w-7xl p-4 md:p-6">
+          <TabsContent value="active" className="mx-auto w-full max-w-7xl p-4 md:p-6">
             <div className="grid grid-cols-1 gap-4 ">
               
               {loading ? (
@@ -202,7 +204,11 @@ export const FlowCase = () => {
               {error ? <h1 className='text-center text-destructive' > Something went wrong </h1> : ''}
               {/* {caseData.values == 0 ? <h1 className='text-center text-destructive' > You dont have any case yet </h1>  : 'TEWS'} */}
             </div>
-          </section>
+          </TabsContent>
+          <TabsContent value="finish">
+
+          </TabsContent>
+          </Tabs>
         </div>
         {/* <div class="h-screen flex">
           <aside class="w-64 bg-gradient-to-b from-hp-300 via-hp-400 to-hp-500 text-white p-6">
