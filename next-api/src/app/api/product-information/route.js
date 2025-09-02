@@ -79,56 +79,64 @@ export async function GET(request) {
  * TODO 
  * MAKE CREATE ASSET AND CREATE PRODUCT SEPARATELY
  */
-export async function POST(request) {
-    //get all request
-    const { 
-        ProductNumber,
-        ProductName,
-        ProductLine,
-        ProductTypeID 
-    } = await request.json();
+export async function PATCH(request) {
+  const { oldProductNumber, ProductNumber, ProductLine, ProductName, ProductTypeID } = await request.json();
 
-    
-    try{
+  try {
+    let result;
+    let message = "";
 
-        const existingProduct = await prisma.product_information.findUnique({
-            where: { ProductNumber }
-        });
+    if (oldProductNumber !== ProductNumber) {
+      // cek kalau product baru sudah ada
+      const existingProduct = await prisma.product_information.findUnique({
+        where: { ProductNumber },
+      });
 
-        if (existingProduct) {
-            // ✅ If Product exists, do nothing and return success
-            return NextResponse.json({
-                success: true,
-                message: "Product already exists. No need to create a new entry.",
-                data: existingProduct
-            }, { status: 200 });
-        }
+      if (existingProduct) {
+        return NextResponse.json(
+          {
+            success: true,
+            message: "Product with new ProductNumber already exists. No update performed.",
+            data: existingProduct,
+          },
+          { status: 200 }
+        );
+      }
 
-    //create data 
-    const product_information = await prisma.product_information.create({
-        data:{
-            ProductNumber: ProductNumber,
-            ProductName: ProductName,
-            ProductLine: ProductLine,
-            ProductTypeID: ProductTypeID
-        },
-    });
+      // hapus lama
+      await prisma.product_information.delete({
+        where: { ProductNumber: oldProductNumber },
+      });
+
+      // buat baru
+      result = await prisma.product_information.create({
+        data: { ProductNumber, ProductLine, ProductName, ProductTypeID },
+      });
+
+      message = "Product Information Updated Successfully (ProductNumber changed)!";
+    } else {
+      // update field lain
+      result = await prisma.product_information.update({
+        where: { ProductNumber },
+        data: { ProductLine, ProductName, ProductTypeID },
+      });
+
+      message = "Product Information Updated Successfully!";
+    }
 
     return NextResponse.json(
-        {
-            success: true,
-            message: "Product Information Created Successfully!",
-            data: product_information,
-        },
-        { 
-            status: 201
-        }
+      {
+        success: true,
+        message,
+        data: result,
+      },
+      { status: 200 }
     );
-    } catch (error) {
-        console.error("Database error:", error);
-        return NextResponse.json(
-            { success: false, message: "Internal Server Error" },
-            { status: 500 }
-        );
-    }
+  } catch (error) {
+    console.error("Database error:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }

@@ -4320,22 +4320,22 @@ export const Part_table = () => {
             <tr className="text-sm text-gray-700 uppercase">
               <th className="p-3 text-sm font-semibold text-left border">No</th>
               <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("PartNumber")}>
-                PartNumber {getSortIcon("PartNumber")}
+                Part Number {getSortIcon("PartNumber")}
               </th>
               <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Keyword")}>
                 Keyword {getSortIcon("Keyword")}
               </th>
               <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("PartDescription")}>
-                PartDescription {getSortIcon("PartDescription")}
+                Part Description {getSortIcon("PartDescription")}
               </th>
               <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Orderability")}>
                 Orderability {getSortIcon("Orderability")}
               </th>
               <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("RestrictionReason")}>
-                RestrictionReason {getSortIcon("RestrictionReason")}
+                Restriction Reason {getSortIcon("RestrictionReason")}
               </th>
               <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("CSR_Flag")}>
-                CSR_Flag {getSortIcon("CSR_Flag")}
+                CSR Flag {getSortIcon("CSR_Flag")}
               </th>
               <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ROHS_Flag")}>
                 ROHS Flag {getSortIcon("ROHS_Flag")}
@@ -4362,7 +4362,7 @@ export const Part_table = () => {
                 Price {getSortIcon("Price")}
               </th>
               <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("FreightPrice")}>
-                FreightPrice {getSortIcon("FreightPrice")}
+                Freight Price {getSortIcon("FreightPrice")}
               </th>
               <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Tax")}>
                 Tax {getSortIcon("Tax")}
@@ -4371,7 +4371,7 @@ export const Part_table = () => {
                 Total {getSortIcon("Total")}
               </th>
               <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Shipping_Fee")}>
-                Shipping_Fee {getSortIcon("Shipping_Fee")}
+                Shipping Fee {getSortIcon("Shipping_Fee")}
               </th>
               <th className="p-3 text-center border">Actions</th>
             </tr>
@@ -6142,7 +6142,7 @@ export const BookingsTable = () => {
                   >
                     {item.BookingId}
                   </td>
-                  <td className="p-3 border text-center">{item.WOID}</td>
+                  <td className="p-3 border text-center" onClick={() => navigate(`/app/work/${item.WOID}`)}>{item.WOID}</td>
                   <td className="p-3 border text-center">{item.BookingStatus || "-"}</td>
                   <td className="p-3 border text-center">{item.ScheduleJeopardy ? "Yes" : "No"}</td>
                   <td className="p-3 border text-center">
