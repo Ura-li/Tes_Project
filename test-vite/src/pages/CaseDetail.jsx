@@ -22,7 +22,7 @@ import {
   SelectGroup,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectBarRelated, SelectYN, SearchCommandBlock } from "@/components/sc-select";
+import { SelectBarRelated, SelectYN, SearchCommandBlock, SelectBar } from "@/components/sc-select";
 import {
   Table,
   TableBody,
@@ -51,6 +51,11 @@ import {
   Calculator,
   CreditCard,
   Settings,
+  Computer,
+  NotepadText,
+  FileSliders,
+  Contact,
+  Briefcase,
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -78,6 +83,8 @@ import DatePicker from '@/components/date-picker'
 import { pdf } from '@react-pdf/renderer';
 import ServiceRequestPDF from '@/components/service-request-form'; // adjust path if needed
 import { Textarea } from "@/components/ui/textarea";
+import CaseField from "@/components/CaseField";
+import { Separator } from "@/components/ui/separator";
 
 
 export const TabsServiceCaseDetails = ({ 
@@ -102,6 +109,7 @@ export const TabsServiceCaseDetails = ({
     CaseStatus: "",
     CaseSubject: "",
     Owner: "",
+    CasePriority: "",
   });
 
   const [gtcForm, setGtcForm] = useState({
@@ -570,575 +578,12 @@ const openPopup = () => {
   );
 };
 
-const spanMap = {
-  1: "col-span-1",
-  2: "col-span-2",
-  3: "col-span-3",
-  4: "col-span-4",
-  5: "col-span-5",
-  6: "col-span-6",
-};
-
-export const CaseField = ({ label, children, lock, open,span = 1, className, star, hide }) => {
-  if (hide) return null;
-
-  return (
-  <>
-    <CardTitle
-      className={twMerge(
-        `relative font-medium flex items-center gap-2`,
-        lock ? "pl-6" : "", open ? "pl-6" : "",
-        className
-
-      )}
-    >
-      {lock && (
-        <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
-      )}
-      {open && (
-        <LockOpen className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
-      )}
-      {label}
-      {star ? <span className="text-red-400">*</span> : ""}
-    </CardTitle>
-
-    <CardTitle className={twMerge(spanMap[span], "")}>
-      {children}
-    </CardTitle>
-  </>
-  )
 
 
-};
 
-// export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
-//   const navigate = useNavigate();
-//   const WOID = workOrders.WOID;
-//   const handleSave = async () => {
-//     try {
-//       Swal.fire({
-//         title: "Updating WORK ORDER...",
-//         text: "Please wait",
-//         allowOutsideClick: false,
-//         didOpen: () => {
-//           Swal.showLoading();
-//         },
-//       });
 
-//       /**
-//        * TODO :
-//        * MAKE ANOTHER SAVE FUNCTION *INSIDE* THIS HANDLER
-//        */
-//       const response = await ApiCustomer.patch(`/api/work-order/${WOID}`, {
-//         //WO GENERAL
-//         ShipmentCountry: WOGeneral.ShipmentCountry || undefined,
-//         //SLA
-//         SLAJeopardy: SLA.slaJeopardy || undefined,
-//         DueDateCustomer: SLA.dueDateCustomer || undefined,
-//         CoverageWindow: SLA.coverageWindow || undefined,
-//         Response: SLA.response || undefined,
-//         OTCCode: SLA.otcCode || undefined,
-//         RequestedDateTimeCustomer: SLA.requestedDateTimeCustomer || undefined,
-//         GuaranteedFixTimeCustomer: SLA.guaranteedFixTimeCustomer || undefined,
-//         EarlyStartDateTimeCustomer: SLA.earlyStartDateTimeCustomer || undefined,
-//         LatestStartDateTimeCustomer: SLA.latestStartDateTimeCustomer || undefined,
-//         SLAReschedule: SLA.slaReschedule || undefined,
-//         ActiveScheduleDate: SLA.activeScheduleDate || undefined,
-//         SLAErrorDescription: SLA.slaErrorDescription || undefined,
-//         CasePriorityIndex:
-//           SLA.casePriorityIndex !== ""
-//             ? parseInt(SLA.casePriorityIndex, 10)
-//             : undefined,
-//       });
 
-//       const result = response.data;
-//       console.log(response);
-      
 
-//       if (!result.success) {
-//         return Swal.fire({
-//           icon: "error",
-//           title: "Update Failed",
-//           text: result.message || "Unknown error",
-//         });
-//       }
-
-//       return Swal.fire({
-//         icon: "success",
-//         title: "Success",
-//         text: "SLA updated successfully!",
-//       });
-//     } catch (error) {
-//       return Swal.fire({
-//         icon: "error",
-//         title: "Request Error",
-//         text: error.message || "Something went wrong!",
-//       });
-//     }
-//   };
-
-//   const buttons = [
-//     {
-//       icon: ArrowLeftFromLine,
-//       label: "",
-//       onClick: () => navigate(`/app/case/${workOrders.CaseID}`),
-//     },
-//     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
-//     { icon: Save, label: "Save", onClick: () => handleSave() },
-//     {
-//       icon: FileSymlink,
-//       label: "Save & Close",
-//       onClick: () => saveAndCloseWorkOrder(),
-//     },
-//     { icon: RotateCw, label: "Book", onClick: () => alert("not now") },
-//     { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
-//     { icon: StepBack, label: "Pick", onClick: () => alert("not now") },
-//     { icon: StepBack, label: "Geo Code", onClick: () => alert("not now") },
-//     { icon: StepBack, label: "Refresh", onClick: () => window.location.reload() },
-//     { icon: StepBack, label: "Process", onClick: () => alert("not now") },
-//     { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now") },
-//     { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now") },
-//     {
-//       icon: UserPen,
-//       label: "Create Material Order",
-//       onClick: () => alert("not now"),
-//     },
-//     { icon: StepBack, label: "Show Alerts", onClick: () => alert("not now") },
-//   ];
-//   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
-//   const hiddenButtons = open ? buttons.slice(-3) : [];
-//   const saveAndCloseWorkOrder = async () => {
-//     const confirmResult = await Swal.fire({
-//       title: "Confirm Save",
-//       text: "This will give the order status as CLOSED. Are you sure you want to save changes?",
-//       icon: "warning",
-//       showCancelButton: true,
-//       confirmButtonColor: "#3085d6",
-//       cancelButtonColor: "#d33",
-//       confirmButtonText: "Yes, Save it",
-//     });
-
-//     if (!confirmResult.isConfirmed) {
-//       return;
-//     }
-//     try {
-//       Swal.fire({
-//         title: "Saving...",
-//         text: "Please wait while we update the Work Order.",
-//         allowOutsideClick: false,
-//         didOpen: () => {
-//           Swal.showLoading();
-//         },
-//       });
-
-//       const res = await ApiCustomer.patch(
-//         `/api/work-order/${workOrders.WOID}`,
-//         {
-//           SystemStatus: "CLOSED_POSTED",
-//         }
-//       );
-//       if (res.data.success) {
-//         const token = {
-//           user: getUserFromToken()
-//         }
-//         const updateLog = await ApiCustomer.post("/api/actionlog",{
-//           CaseId: `${workOrders.CaseID}`,
-//           ReferenceId: `${workOrders.WOID}`,
-//           model: "Work Orders",
-//           dataOld: workOrders.SystemStatus,
-//           dataNew: res.data.data.SystemStatus,
-//           changedBy: token.user.id,
-//           logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${workOrders.SystemStatus} to ${res.data.data.SystemStatus}`
-//         })
-//         Swal.fire({
-//           icon: "success",
-//           title: "Updated!",
-//           text: res.data.message,
-//           timer: 2000,
-//           showConfirmButton: false,
-//         }).then(() => {
-//           navigate(`/app/case/${workOrders.CaseID}`);
-//         });
-//       } else {
-//         Swal.fire({
-//           icon: "error",
-//           title: "Error",
-//           text: res.data.message,
-//         });
-//       }
-//     } catch (error) {
-//       Swal.fire({
-//         icon: "error",
-//         title: "Failed to update!",
-//         text: error.message || "Something went wrong.",
-//       });
-//     }
-//   };
-//   return (
-//     <>
-//       <div className="flex items-center border-1 ">
-//         {visibleButtons.map((btn, index) => (
-//           <Button
-//             key={index}
-//             onClick={btn.onClick}
-//             variant="link"
-//             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-//           >
-//             <btn.icon className="w-4 h-4" />
-//             {btn.label && <span className="text-md">{btn.label}</span>}
-//           </Button>
-//         ))}
-
-//         {open && hiddenButtons.length > 0 && (
-//           <DropdownMenu>
-//             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
-//               ...
-//             </DropdownMenuTrigger>
-//             <DropdownMenuContent>
-//               {hiddenButtons.map((btn, index) => (
-//                 <DropdownMenuItem key={index}>
-//                   <btn.icon className="inline-block w-4 h-4 mr-2" />
-//                   {btn.label}
-//                 </DropdownMenuItem>
-//               ))}
-//             </DropdownMenuContent>
-//           </DropdownMenu>
-//         )}
-//     {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-//     </div>
-//     <div>
-//     {/* <ServiceCase 
-//       caseDetails={caseDetails}
-//       formData={caseNoteFormData}
-//       onChange={handleCaseNoteChange}
-//       caseNotes={caseNotes}
-//       setCaseNotes={setCaseNotes}
-//       selectedSymptom={selectedSymptom}
-//       setSelectedSymptom={setSelectedSymptom}
-//       /> */}
-//       </div>
-//     </>
-//   );
-// };
-
-// export const TabsServiceMO = ({ materialOrders }) => {
-//   const navigate = useNavigate();
-//   const buttons = [
-//     {
-//       icon: ArrowLeftFromLine,
-//       label: "",
-//       onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
-//     },
-//     { icon: SquareArrowOutUpRight, label: "", },
-//     { icon: Save, label: "Save", onClick: () => saveCaseNote() },
-//     {
-//       icon: FileSymlink,
-//       label: "Save & Close",
-//       onClick: () => saveAndCloseMaterialOrder(),
-//     },
-//     { icon: RotateCw, label: "ATP", },
-//     { icon: StepBack, label: "Cancel Order", },
-//     { icon: StepBack, label: "Add To Queue", },
-//     { icon: StepBack, label: "Add Parts", },
-//     { icon: StepBack, label: "Pick", },
-//     { icon: StepBack, label: "Place Order", },
-//     { icon: StepBack, label: "Tax", },
-//     { icon: StepBack, label: "CustID Search", },
-//     { icon: UserPen, label: "PUDO Search", },
-//     { icon: StepBack, label: "Audit", },
-//   ];
-//   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
-//   const hiddenButtons = open ? buttons.slice(-3) : [];
-//   const saveAndCloseMaterialOrder = async () => {
-//     try {
-//       Swal.fire({
-//         title: "Saving...",
-//         text: "Please wait while we update the Material Order.",
-//         allowOutsideClick: false,
-//         didOpen: () => {
-//           Swal.showLoading();
-//         },
-//       });
-//       const res = await ApiCustomer.patch(
-//         `/api/material-order/${materialOrders.MOID}`,
-//         {
-//           OrderStatus: "Closed",
-//         }
-//       );
-//       if (res.data.success) {
-//         const token = {
-//           user: getUserFromToken()
-//         }
-//         const updateLog = await ApiCustomer.post("/api/actionlog",{
-//           CaseId: `${materialOrders.workorder?.CaseID}`,
-//           ReferenceId: `${materialOrders.MOID}`,
-//           model: "Material Orders",
-//           dataOld: materialOrders.OrderStatus,
-//           dataNew: res.data.data.OrderStatus,
-//           changedBy: token.user.id,
-//           logDescription: `Edit : Changed Material Order ${materialOrders.MOID} from ${materialOrders.OrderStatus} to ${res.data.data.OrderStatus}`
-//         })
-//         Swal.fire({
-//           icon: "success",
-//           title: "Updated!",
-//           text: res.data.message,
-//           timer: 2000,
-//           showConfirmButton: false,
-//         }).then(() => {
-//           navigate(`/app/work/${materialOrders.WOID}`);
-//         });
-//       } else {
-//         Swal.fire({
-//           icon: "error",
-//           title: "Error",
-//           text: res.data.message,
-//         });
-//       }
-//     } catch (error) {
-//       Swal.fire({
-//         icon: "error",
-//         title: "Failed to update!",
-//         text: error.message || "Something went wrong.",
-//       });
-//     }
-//   };
-//   return (
-//     <>
-//       <div className="flex items-center border-1 ">
-//         {visibleButtons.map((btn, index) => (
-//           <Button
-//             key={index}
-//             onClick={btn.onClick}
-//             variant="link"
-//             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-//           >
-//             <btn.icon className="w-4 h-4" />
-//             {btn.label && <span className="text-md">{btn.label}</span>}
-//           </Button>
-//         ))}
-
-//         {open && hiddenButtons.length > 0 && (
-//           <DropdownMenu>
-//             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
-//               ...
-//             </DropdownMenuTrigger>
-//             <DropdownMenuContent>
-//               {hiddenButtons.map((btn, index) => (
-//                 <DropdownMenuItem key={index}>
-//                   <btn.icon className="inline-block w-4 h-4 mr-2" />
-//                   {btn.label}
-//                 </DropdownMenuItem>
-//               ))}
-//             </DropdownMenuContent>
-//           </DropdownMenu>
-//         )}
-//     {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-//     </div>
-//     <div>
-//     {/* <ServiceCase 
-//       caseDetails={caseDetails}
-//       formData={caseNoteFormData}
-//       onChange={handleCaseNoteChange}
-//       caseNotes={caseNotes}
-//       setCaseNotes={setCaseNotes}
-//       selectedSymptom={selectedSymptom}
-//       setSelectedSymptom={setSelectedSymptom}
-//       /> */}
-//       </div>
-//     </>
-//   );
-// };
-
-// export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems }) => {
-//   const navigate = useNavigate();
-
-//   const buttons = [
-//     {
-//       icon: ArrowLeftFromLine,
-//       label: "",
-//       onClick: () => navigate(`/app/material-order/${MOLineDetails.MOID}`),
-//     },
-//     { icon: SquareArrowOutUpRight, label: "", },
-//     { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
-//     {
-//       icon: FileSymlink,
-//       label: "Save & Close",
-//       onClick: () => saveAndCloseMaterialLineItemsOrder(),
-//     },
-//     { icon: StepBack, label: "Cancel", },
-//     { icon: StepBack, label: "Audit", },
-//     { icon: RotateCw, label: "Assign", },
-//     {
-//       icon: StepBack,
-//       label: "Word Templates",
-//       onClick: () => alert("not now"),
-//     },
-//     { icon: StepBack, label: "Run Report", },
-//     { icon: StepBack, label: "Geo Code", },
-//     { icon: StepBack, label: "Process", },
-//     { icon: StepBack, label: "Reset RDT", },
-//     // { icon: UserPen, label:  "Add To Queue", onClick: () => alert("not now") },
-//     // { icon: StepBack, label: "Audit", onClick: () => alert("not now") },
-//   ];
-//   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
-//   const hiddenButtons = open ? buttons.slice(-3) : [];
-
-//   const saveMOLI = async (LineItemID, shouldRedirect = true) => {
-//     try {
-//       Swal.fire({
-//         title: 'Saving...',
-//         text: 'Please wait while we update the line item.',
-//         allowOutsideClick: false,
-//         didOpen: () => {
-//           Swal.showLoading();
-//         }
-//       });
-//       const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${LineItemID}`, {
-//         Description: MOLineDetails.description,
-//         PickPackInstructions: MOLineDetails.pickPackInstructions,
-//         CollectionInstructions: MOLineDetails.collectionInstructions || "None",
-//         CustomerResponse: MOLineDetails.customerResponse,
-//         RejectedReason: MOLineDetails.rejectedReason,
-//         OtherReason: MOLineDetails.otherReason,
-//         FailureId: MOLineDetails.failureId,
-//         SerialNumber: MOLineDetails.serialNumber,
-//         RemovedPartNumber: MOLineDetails.removedPartNumber,
-//         RemovedSerialNumber: MOLineDetails.removedSerialNumber,
-//         RemovedPartDescription: MOLineDetails.removedPartDescription,
-//       });
-//       if (res.data.success) {
-//         if (shouldRedirect) {
-//           Swal.fire({
-//             icon: 'success',
-//             title: 'Updated!',
-//             text: res.data.message,
-//             timer: 2000,
-//             showConfirmButton: false
-//           }).then(() => {
-//             navigate(`/app/mo_detail/${LineItemID}`);
-//           });
-//         }
-//         return true;
-//       } else {
-//         Swal.fire({
-//           icon: 'error',
-//           title: 'Error',
-//           text: res.data.message
-//         });
-//       }
-//     } catch (error) {
-//       Swal.fire({
-//         icon: 'error',
-//         title: 'Failed to update!',
-//         text: error.message || 'Something went wrong.'
-//       });
-//     }
-//   }
-
-//   const saveAndCloseMaterialLineItemsOrder = async () => {
-//     try {
-//       Swal.fire({
-//         title: "Saving...",
-//         text: "Please wait while we update the line item.",
-//         allowOutsideClick: false,
-//         didOpen: () => {
-//           Swal.showLoading();
-//         },
-//       });
-//       const success = await saveMOLI(LineItemID, false);
-//       if (!success) return; // Stop if saveMOLI failed
-//       const res = await ApiCustomer.patch(
-//         `/api/material-order/material-order-line-items/${LineItemID}`,
-//         {
-//           Status: "Closed",
-//         }
-//       );
-//       if (res.data.success) {
-//         console.log("MATERIAL ORDeR IN CLOSED POSTED : ", moLineItems)
-//         const token = {
-//           user: getUserFromToken()
-//         }
-//         const updateLog = await ApiCustomer.post("/api/actionlog",{
-//           CaseId: `${moLineItems.materialorder?.workorder?.CaseID}`,
-//           ReferenceId: `${moLineItems.MOID}`,
-//           model: "Material Order Line Item",
-//           dataOld: moLineItems.Status,
-//           dataNew: "Closed",
-//           changedBy: token.user.id,
-//           logDescription: `Edit : Change Material Order Line Item ${moLineItems.MOID} - ${moLineItems.LineItemID} Status from ${moLineItems.Status} to Closed`
-//         })
-       
-//         Swal.fire({
-//           icon: "success",
-//           title: "Updated!",
-//           text: res.data.message,
-//           timer: 2000,
-//           showConfirmButton: false,
-//         }).then(() => {
-//           navigate(`/app/material-order/${MOLineDetails.MOID}`);
-//         });
-//       } else {
-//         Swal.fire({
-//           icon: "error",
-//           title: "Error",
-//           text: res.data.message,
-//         });
-//       }
-//     } catch (error) {
-//       Swal.fire({
-//         icon: "error",
-//         title: "Failed to update!",
-//         text: error.message || "Something went wrong.",
-//       });
-//     }
-//   };
-
-//   return (
-//     <>
-//       <div className="flex items-center border-1 ">
-//         {visibleButtons.map((btn, index) => (
-//           <Button
-//             key={index}
-//             onClick={btn.onClick}
-//             variant="link"
-//             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-//           >
-//             <btn.icon className="w-4 h-4" />
-//             {btn.label && <span className="text-md">{btn.label}</span>}
-//           </Button>
-//         ))}
-//     {console.log(MOLineDetails)}
-//         {open && hiddenButtons.length > 0 && (
-//           <DropdownMenu>
-//             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
-//               ...
-//             </DropdownMenuTrigger>
-//             <DropdownMenuContent>
-//               {hiddenButtons.map((btn, index) => (
-//                 <DropdownMenuItem key={index}>
-//                   <btn.icon className="inline-block w-4 h-4 mr-2" />
-//                   {btn.label}
-//                 </DropdownMenuItem>
-//               ))}
-//             </DropdownMenuContent>
-//           </DropdownMenu>
-//         )}
-//     {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
-//     </div>
-//     <div>
-//     {/* <ServiceCase 
-//       caseDetails={caseDetails}
-//       formData={caseNoteFormData}
-//       onChange={handleCaseNoteChange}
-//       caseNotes={caseNotes}
-//       setCaseNotes={setCaseNotes}
-//       selectedSymptom={selectedSymptom}
-//       setSelectedSymptom={setSelectedSymptom}
-//       /> */}
-//       </div>
-//     </>
-//   );
-// };
 
 export const ServiceCase = ({
   caseDetails,
@@ -1184,10 +629,10 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case & Customer", hidden: true},
+    { value: "case_info", label: "Case & Customer", },
     { value: "customer,add,entitement", label: "Asset & Entitement", hidden: true },
     { value: "ci_notes", label: "Notes & Information", hidden: true },
-    { value: "action_log", label: "Action Log", hidden: true},
+    { value: "action_log", label: "Action Log", },
     { value: "ci_activitas", label: "Activities", disable: true, hidden: true },
     { value: "ci_actions", label: "Customer Interactions", disable: true, hidden: true},
     { value: "ci_wo", label: "Work Order Validation", disable: true ,hidden: true},
@@ -1596,20 +1041,18 @@ const fetchSymptomCodes = async (term) => {
 };
 
 
-const [startDate, setstartDate] = useState(null);
-const [endDate, setEndDate] = useState(null);
 
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (
         <div className="p-4 mt-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
-          This Case is <strong>read-only</strong> because it is{" "}
+          This Case is <strong>read-only</strong> because it is
           <strong>Closed</strong>.
         </div>
       )}
       <Card className="border-0 w-full">
         <Tabs defaultValue="case_info">
-          <CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2 h-22">
+          <CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2 ">
             <div className="flex justify-between">
               <CardTitle className="text-2xl pl-1">
                 {caseDetails.CaseID}
@@ -1642,8 +1085,8 @@ const [endDate, setEndDate] = useState(null);
                 </div>
                 <div className="flex flex-col justify-center px-2 border-r-2 item-center">
                   <h1 className="text-blue-500">
-                    {dataFetchCustomerData.MainAccount?.Salutation}{" "}
-                    {dataFetchCustomerData.MainAccount?.FirstName}{" "}
+                    {dataFetchCustomerData.MainAccount?.Salutation}
+                    {dataFetchCustomerData.MainAccount?.FirstName}
                     {dataFetchCustomerData.MainAccount?.LastName}
                   </h1>
                   <p className="text-sm font-light ">Contact</p>
@@ -1684,80 +1127,34 @@ const [endDate, setEndDate] = useState(null);
               )
             ))}
 
-              {/* {visibleTabs.map((tab, index) =>
-                tab.component ? (
-                  <div key={index}>{tab.component}</div> // Ensure SelectBarRelated renders properly
-                ) : (
-                  <TabsTrigger
-                    key={index}
-                    variant="underline"
-                    value={tab.value}
-                    disabled={tab.disable}
-                   
-                  >
-                    {tab.label}
-                  </TabsTrigger>
-                )
-              )} */}
-              {/* <TabsTrigger variant="underline" value="case_info" className="">Case Information</TabsTrigger>
-              <TabsTrigger variant="underline" value="customer,add,entitement" className="">Customer, Asset & Entitement</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_notes" className="">Notes & Information</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_activitas" className="">Activities</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_actions" className="">Costumer Interactions</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_wo" className="">Work Order Validation</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_orders" className="">Orders</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_salles" className="">Sales Offer</TabsTrigger>
-              <TabsTrigger variant="underline" value="ci_knowledge" className="">Knowledge & Attachments</TabsTrigger>
-              <SelectBarRelated></SelectBarRelated> */}
-              {/* {open && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">
-                    ...
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {hiddenTabs.map((tab, index) =>
-                      tab.component ? (
-                        <DropdownMenuItem key={index}>
-                          {tab.component}
-                        </DropdownMenuItem>
-                      ) : (
-                        <DropdownMenuItem key={index}>
-                          <TabsTrigger variant="underline" value={tab.value}>
-                            {tab.label}
-                          </TabsTrigger>
-                        </DropdownMenuItem>
-                      )
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )} */}
+
             </TabsList>
           </CardHeader>
 
-          <TabsContent value="case_infor">
-          </TabsContent>
-
-          <div  className={"p-3 grid grid-cols-2 gap-4 mt-2"}>
+          <TabsContent value="case_info" className={"p-2 flex flex-col gap-5"}>
+          <div  className={" grid lg:grid-cols-2 md:grid-cols-1 gap-4 "}>
             <Card className="flex-col">
               <CardHeader>
-                <CardTitle className={"text-lg "}>Case Information</CardTitle>
+                <CardTitle className={"text-lg  flex gap-3"}><Briefcase/>Case Information</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-2">
                 <CaseField label="Case Subject" lock span={3}>
-                  <div className="ml-3">
                     <Textarea
-                     value={caseDetails.CaseSubject}
-                     className="resize-none border-none"
+                     value={caseDetails?.CaseSubject}
+                      onChange={e => handleCaseDetails("CaseSubject")(e.target.value)}
+                     className="resize-none border-none italic text-2xl"
                     />
-                  </div>
                 </CaseField>
               
                 <CaseField label="Case ID manual" className={"mt-2"} lock span={2}>  
-                    <Input variant="invisible" placeholder="---"/>                    
+                    <Input variant="invisible" placeholder="---"
+                      value={caseDetails.CaseIdManual}
+                      onChange={e => handleCaseDetails("CaseIdManual")(e.target.value)}
+                    />                    
                 </CaseField>
               
-                <CaseField label="Case Status" className={"mt-2"} open span={2}>
+                <CaseField label="Case Status" className={"mt-2"}  span={2}>
                   <SearchCommandBlock
                       value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
                       onChange={ async (label) => {
@@ -1788,7 +1185,7 @@ const [endDate, setEndDate] = useState(null);
                     />
 
                 </CaseField>
-                <CaseField label="Assign To" className={"mt-2"} open span={2} hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}>
+                <CaseField label="Assign To" className={"mt-2"}  span={2} hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}>
                     <SearchCommandBlock
                       value={caseForm?.Owner}
                       onChange={(selectedID) => {
@@ -1824,7 +1221,18 @@ const [endDate, setEndDate] = useState(null);
                 </CaseField>
 
                  <CaseField label="Case Priority" className={"mt-2"} lock span={2}>
-                  <Input variant="invisible" value={caseDetails.CasePriority}/>
+                  {/* <Input variant="invisible" value={caseDetails.CasePriority}/> */}
+                  <SelectBar
+                    id="Country"
+                    value={caseDetails?.CasePriority}
+                    onChange={e => handleCaseDetails("CasePriority")(e.target.value)}
+                    options={[
+                      { id: "low", name: "Low" },
+                      { id: "medium", name: "Medium" },
+                      { id: "important", name: "Important" },
+                    ]}
+                    placeholder="Select a Country"
+                  />
                 </CaseField>
 
                 <CaseField label="Customer Severity" className={"mt-2"} lock span={2}>
@@ -1852,7 +1260,7 @@ const [endDate, setEndDate] = useState(null);
                     variant="icon"
                     value={createdOn}
                     onChange={setCreatedOn}
-                    readOnly
+                    
                   ></DatePicker>
                 </CaseField>
 
@@ -1928,7 +1336,7 @@ const [endDate, setEndDate] = useState(null);
                     
             <Card className="flex-col">
               <CardHeader>
-                <CardTitle className="text-lg">Customer Information</CardTitle>
+                <CardTitle className="text-lg flex gap-3"><Contact/>Customer Information</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid items-center grid-cols-2 gap-3">
@@ -2026,441 +1434,275 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
             </Card>
 
-          </div>
+          </div> 
 
-          <Card className="flex-col mt-5" hidden>
-              <CardHeader>
-                <CardTitle className="text-lg ">Global Trade Check</CardTitle>
-                <hr />
-              </CardHeader>
-              
-              <CardContent className="grid gap-10  grid-cols-6 p-3 items-center">
-                <CaseField label="Global Trade Status">
-                  <SearchCommandBlock
-                    value={formGtc.global_trade_status}
-                    onChange={onChangeGtc("global_trade_status")}
-                    placeholder="--Select--"
-                    options={[
-                      "Pass",
-                      "Fail",
-                      "Not Done",
-                      "Not Needed",
-                      "Failed Confirmed",
-                    ]}
-                  />
-                </CaseField>
-
-                <CaseField label="GT Override Reason">
-                  <SearchCommandBlock
-                    value={formGtc.gt_override_reason}
-                    onChange={onChangeGtc("gt_override_reason")}
-                    placeholder="--Select--"
-                    options={[
-                      "Military Keyword False Match",
-                      "Embargo False Match",
-                      "RPL False Match",
-                      "Active Contract",
-                      "United States Government",
-                      "Global Trade Authorization",
-                      "RPL Manual Screening Passed",
-                      "Fail Confirmed by GT",
-                      "Other",
-                    ]}
-                  />
-                </CaseField>
-                <CaseField label="GT Active Listening">
-                  <SearchCommandBlock
-                    value={formGtc.gt_active_listening}
-                    onChange={onChangeGtc("gt_active_listening")}
-                    placeholder="--Select--"
-                    options={["Pass", "Fail"]}
-                  />
-                </CaseField>
-                <CaseField label="Embargoed Country" lock>
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                    value={formGtc.embargoed_country}
-                    onChange={(e) =>
-                      onChangeGtc("embargoed_country")(e.target.value)
-                    }
-                  />
-                </CaseField>
-                <CaseField label="GT Details">
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                    value={formGtc.gt_details}
-                    onChange={(e) => onChangeGtc("gt_details")(e.target.value)}
-                  />
-                </CaseField>
-                <CaseField label="GT All Comments">
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                    value={formGtc.gt_al_comments}
-                    onChange={(e) =>
-                      onChangeGtc("gt_al_comments")(e.target.value)
-                    }
-                  />
-                </CaseField>
-                <CaseField className={"col-start-3"} label="Screening ID">
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                    value={formGtc.screening_id}
-                    onChange={(e) =>
-                      onChangeGtc("screening_id")(e.target.value)
-                    }
-                  />
-                </CaseField>
-              </CardContent>
-          </Card>   
-
-          <div className="mt-2 p-3">
             <Card className="flex-col">
               <CardHeader>
-                <CardTitle className="text-lg ">Asset Information</CardTitle>
-                <hr />
+                <CardTitle className="text-lg flex gap-3"><Computer/> Asset Information</CardTitle>
+                <Separator />
               </CardHeader>
-              <CardContent className="grid items-center grid-cols-6 gap-10">
-                <CaseField label="Assets" lock>
-                  {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
-                </CaseField>
-                <CaseField label="Product Number" lock>
-                  <span className="pl-3">
-                    {
-                    dataFetchAssetInformation?.AssetInformation
-                      ?.product_information?.ProductNumber
-                  } 
-                    </span>
-                </CaseField>
-                <CaseField label="Asset Location" lock> 
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Serial Number" lock>
-                  {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
-                </CaseField>
-                <CaseField label="HWPC Code" lock>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                  <CaseField label="SNIC - Count" lock>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Product Name" lock>
-                  {
-                    dataFetchAssetInformation?.AssetInformation
-                      ?.product_information?.ProductName
-                  }{" "}
-                </CaseField>
-                <CaseField label="MV Product Description" lock>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-               
-                  <CaseField label="HW Profit Center" lock>
-                  {" "}
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <div className="grid items-center grid-cols-2 col-span-2 gap-2 p-5 ring-1">
-                  <CaseField label="Device Properties" lock>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
+
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* LEFT COLUMN - Fields */}
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
+                      <CaseField label="Assets" lock>
+                        {dataFetchAssetInformation?.AssetInformation?.SerialNumber}
+                      </CaseField>
+
+                      <CaseField label="Product Number" lock>
+                        {
+                          dataFetchAssetInformation?.AssetInformation
+                            ?.product_information?.ProductNumber
+                        }
+                      </CaseField>
+
+                      <CaseField label="Asset Location" lock>
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+
+                      <CaseField label="Serial Number" lock>
+                        {dataFetchAssetInformation?.AssetInformation?.SerialNumber}
+                      </CaseField>
+
+                      <CaseField label="HWPC Code" lock>
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+
+                      <CaseField label="SNIC - Count" lock>
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+
+                      <CaseField label="Product Name" lock>
+                        {
+                          dataFetchAssetInformation?.AssetInformation
+                            ?.product_information?.ProductName
+                        }
+                      </CaseField>
+
+                      <CaseField label="MV Product Description" lock>
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+
+                      <CaseField label="HW Profit Center" lock>
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+
+                      <CaseField label="Device Properties" lock >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+
+                      <CaseField label="OTC Code"  star>
+                        <SearchCommandBlock
+                          options={otcCode}
+                          value={entitlementStatus.OTCCode}
+                          onChange={(value) => handleEntitlementStatus("OTCCode")(value)}
+                          placeholder="---"
+                          renderLabel={(opt) => `${opt.OTCCode} - ${opt.Description}`}
+                          getValue={(opt) => opt.OTCCode}
+                        />
+                      </CaseField>
+                    </div>
+                  </div>
+
+                  {/* RIGHT COLUMN - Accessory */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Accessory</h3>
+                    <Separator className="my-4" />
+                    <div className="overflow-x-auto rounded-lg border">
+                      <table className="min-w-full text-sm text-left">
+                        <thead className="bg-gray-50 text-gray-700">
+                          <tr>
+                            <th className="px-4 py-2 border">No Accessories</th>
+                            <th className="px-4 py-2 border hidden">Case ID</th>
+                            <th className="px-4 py-2 border">Accessories</th>
+                            <th className="px-4 py-2 border">Note</th>
+                            <th className="px-4 py-2 border">CT / SN Code</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {caseDetails.accessory?.length ? (
+                            caseDetails.accessory.map((item, index) => (
+                              <tr key={index} className="hover:bg-gray-50">
+                                <td className="px-4 py-2 border">{item.id}</td>
+                                <td className="px-4 py-2 border hidden">{item.CaseID}</td>
+                                <td className="px-4 py-2 border">{item.Accessories}</td>
+                                <td className="px-4 py-2 border">{item.Note || "---"}</td>
+                                <td className="px-4 py-2 border">{item.CT_SNCode || "---"}</td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td className="px-4 py-2 border text-center" colSpan={5}>
+                                No accessories found.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="mt-2 text-sm text-gray-600">
+                      Total Accessories: {caseDetails.accessory?.length || 0}
+                    </div>
+                  </div>
                 </div>
-                  <CaseField label="OTC Code" lock span={3}>
-                  <SearchCommandBlock
-                    options={otcCode}
-                    value={entitlementStatus.OTCCode}
-                    onChange={(value) =>
-                      handleEntitlementStatus("OTCCode")(value)
-                    }
-                    placeholder="---"
-                    renderLabel={(opt) => `${opt.OTCCode} - ${opt.Description}`}
-                    getValue={(opt) => opt.OTCCode}
-                  />
-                </CaseField>
-              </CardContent>
-              {/* TABEL ACCESSORY */}
-  <div className="px-6 pb-6">
-    <h3 className="text-md font-semibold mb-2">Accessory</h3>
-    <div className="overflow-x-auto">
-      <table className="min-w-full border text-sm text-left">
-        <thead className="bg-gray-100 text-gray-700">
-          <tr>
-            <th className="border px-4 py-2">No Accesories</th>
-            <th className="border px-4 py-2" hidden>Case ID</th>
-            <th className="border px-4 py-2">Accessories</th>
-            <th className="border px-4 py-2">Note</th>
-            <th className="border px-4 py-2">CT / SN code</th>
-          </tr>
-        </thead>
-        <tbody>
-          {caseDetails.accessory?.map((item, index) => (
-            <tr key={index} className="hover:bg-gray-50">
-              <td className="border px-4 py-2">{item.id}</td>
-              <td className="border px-4 py-2" hidden>{item.CaseID}</td>
-              <td className="border px-4 py-2">{item.Accessories}</td>
-              <td className="border px-4 py-2">{item.Note || "---"}</td>
-              <td className="border px-4 py-2">{item.CT_SNCode || "---"}</td>
-            </tr>
-          ))}
-          {(!caseDetails?.accessory ||
-            caseDetails.accessory.length === 0) && (
-            <tr>
-              <td className="border px-4 py-2 text-center" colSpan={5}>
-                No accessories found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-      <div className="mt-2 text-md text-gray-600">
-        Total Accesories: {caseDetails.accessory?.length || 0 }
-      </div>
-    </div>
-  </div>
-            </Card>
-          </div>
-
-          <div className="mt-2 p-1" hidden>
-            <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">
-                  Entitlement Information
-                </CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid items-center grid-cols-9 gap-10">
-                <CaseField label="Case Entitlement" lock span={2}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Start Date" lock span={2}>
-                  {" "}
-                  <DatePicker
-                    value={startDate}
-                    onChange={setstartDate}
-                    readOnly
-                  ></DatePicker>{" "}
-                </CaseField>
-                {console.log(entitlementStatus)}
-
-                <CaseField label="Entitlement Status" lock span={2}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="End Date" lock span={2}>
-                  {" "}
-                  <DatePicker
-                    value={endDate}
-                    onChange={setEndDate}
-                    readOnly
-                  ></DatePicker>
-                </CaseField>
-                <CaseField label="Entitlement Override" lock span={2}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Selected Entitlement Offer" lock span={2}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Days Left" lock span={2}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Authorizing Employee" lock span={2}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
               </CardContent>
             </Card>
-          </div>
 
-          <div className="mt-2 p-1">
-              <Card className="flex-col">
+
+            {/* --- Card 1: Customer Issue & System Info --- */}
+            <Card className="flex-col">
               <CardHeader>
-                <CardTitle className="text-lg ">
+                <CardTitle className="text-lg  flex gap-3">
+                  <FileSliders/>
                   Customer Issue Description & System Information
                 </CardTitle>
-                <hr />
+                <Separator />
               </CardHeader>
-              <CardContent className="flex p-4 gap-x-5">
-                <div className="grid items-center flex-1 grid-cols-6 grid-row-7 gap-y-7">
-                  <div className="row-span-4 col-span-full">
+
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* LEFT COLUMN - Issue Description */}
+                  <div className="space-y-6">
                     <textarea
-                      className="border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none"
+                      className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
                       readOnly
                       value={caseDetails?.CaseProductNote}
-                    ></textarea>
+                    />
+                    <div className="grid grid-cols-2 gap-6">
+                      <CaseField label="Related Device" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                      <CaseField label="Device Manufacturer" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                      <CaseField label="Device Model" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                    </div>
                   </div>
-                  <CaseField
-                    label="Related Device"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Device Manufacturer"
-                    className={"col-span-3"}
-                    span={3}
-                    
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Device Model"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                </div>
 
-                <div className="grid flex-1 grid-flow-row grid-cols-6 gap-y-7">
-                  <CaseField
-                    label="Program/Category"
-                    className={"col-span-3"}
-                    span={2}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Operating System"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField label="Version" className={"col-span-3"} span={3}>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Remote Diag Code"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Application Information"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Provider / Platform"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Software Version"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
+                  {/* RIGHT COLUMN - System Info */}
+                  <div className="grid grid-cols-2 gap-6">
+                    <CaseField label="Program/Category" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Operating System" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Version" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Remote Diag Code" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Application Information" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Provider / Platform" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Software Version" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          <div className="mt-2 p-1">
+            {/* --- Card 2: Case Notes --- */}
             <Card className="flex-col">
               <CardHeader>
-                <CardTitle className="text-lg ">Case Notes</CardTitle>
-                <hr />
+                <CardTitle className="text-lg  flex gap-3"><NotepadText/>Case Notes</CardTitle>
+                <Separator />
               </CardHeader>
-              <CardContent className="flex gap-4">
-                <div className="grid flex-1 grid-cols-6 gap-y-7">
-                  <CaseField label="Log Type" className={"col-span-2"} span={4}>
-                    <Select  value={formData?.LogType}  onValueChange={(val) => onChange("LogType", val)}>
-                      <SelectTrigger
-                        className={"w-[100%] hover:shadow-lg border-b-0 p-3"}
-                      >
-                        <SelectValue placeholder="Log Type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="NotesLog">Notes Log</SelectItem>
-                        <SelectItem value="PhoneLog">Phone Log</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </CaseField>
 
-                  <CaseField
-                    label="Action Type"
-                    className={"col-span-2"}
-                    span={4}
-                  >
-                      <SearchCommandBlock
-                      value={formData?.ActionType}
-                      onChange={(val) => onChange("ActionType", val)}
-                      placeholder="--Select--"
-                      options={[
-                        "Inbound Customer call",
-                        "Action Plan",
-                        "Administrative task",
-                        "CE/Partner Assist",
-                        "Customer Email",
-                      ]}
-                    />
-                  </CaseField>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* LEFT COLUMN - Input Fields */}
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-6">
+                      <CaseField label="Log Type" >
+                        <Select
+                          value={formData?.LogType}
+                          onValueChange={(val) => onChange("LogType", val)}
+                        >
+                          <SelectTrigger className="w-full p-3 border rounded-md hover:shadow">
+                            <SelectValue placeholder="Log Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="NotesLog">Notes Log</SelectItem>
+                            <SelectItem value="PhoneLog">Phone Log</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </CaseField>
 
-                  <CaseField label="Template" className={"col-span-2"} span={4}>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
+                      <CaseField label="Action Type" >
+                        <SearchCommandBlock
+                          value={formData?.ActionType}
+                          onChange={(val) => onChange("ActionType", val)}
+                          placeholder="--Select--"
+                          options={[
+                            "Inbound Customer call",
+                            "Action Plan",
+                            "Administrative task",
+                            "CE/Partner Assist",
+                            "Customer Email",
+                          ]}
+                        />
+                      </CaseField>
 
-                  <CaseField
-                    label="Visible Externally"
-                    className={"col-span-2"}
-                    span={4}
-                  >
-                    <SelectYN 
-                      value={
-                        formData?.VisibleExternally === undefined ||
-                        formData?.VisibleExternally === null
-                          ? ""
-                          : formData?.VisibleExternally
-                          ? "Yes"
-                          : "No"
-                      }
-                      onValueChange={(val) =>
-                        onChange("VisibleExternally", val === "Yes")
-                      }
-                    ></SelectYN>
-                  </CaseField>
+                      <CaseField label="Template" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
 
-                  <CaseField
-                    label="Number of Minutes Spent"
-                    className={"col-span-2"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
+                      <CaseField label="Visible Externally" >
+                        <SelectYN
+                          value={
+                            formData?.VisibleExternally === undefined ||
+                              formData?.VisibleExternally === null
+                              ? ""
+                              : formData?.VisibleExternally
+                                ? "Yes"
+                                : "No"
+                          }
+                          onValueChange={(val) =>
+                            onChange("VisibleExternally", val === "Yes")
+                          }
+                        />
+                      </CaseField>
 
-                  <CaseField
-                    label="Notes"
-                    className={"col-span-2 self-start bg-red"}
-                    span={4}
-                    star
-                  >
+                      <CaseField label="Number of Minutes Spent" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                    </div>
+
+                    <CaseField label="Notes"  star>
+                      <textarea
+                        className="w-full h-40 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300"
+                        value={formData?.Note || ""}
+                        onChange={(e) => onChange("Note", e.target.value)}
+                      />
+                    </CaseField>
+                  </div>
+
+                  {/* RIGHT COLUMN - Display Notes */}
+                  <div>
                     <textarea
-                      className="h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500"
-                      value={formData?.Note || ""}
-                      onChange={(e) => onChange("Note", e.target.value)}
+                      className="w-full h-full min-h-[300px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
+                      readOnly
+                      value={formData?.NotesDisplay}
                     />
-                  </CaseField>
-                </div>
-
-                <div className="flex flex-1">
-                  <textarea
-                    className="w-[100%] h-[100%] resize-none p-2 ring-1 ring-gray-500"
-                    readOnly
-                    value={formData?.NotesDisplay}
-                  >
-                  </textarea>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
 
+
+          </TabsContent>
+
+        <TabsContent value="action_log" >
           <div className="mt-2 p-1">
             <Card className="flex-col">
                   <CardHeader>
@@ -2505,577 +1747,8 @@ const [endDate, setEndDate] = useState(null);
                   </CardContent>
             </Card>
           </div>
+        </TabsContent>
 
-          <TabsContent
-            value="customer,add,entitement"
-            className={"p-1 flex flex-col gap-4"}
-          >
-
-            {/* <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">SLA Information</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid items-center grid-cols-6 gap-10">
-                <CaseField label="Latest Start Date (Cust Time)" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Coverage Window Used" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Response Time Value" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Guaranteed Fix Date (Cust Time)" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Coverage Window Value" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Repair Time Value" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Case Priority Index" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Case Priority Rule" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-              </CardContent>
-            </Card> */}
-
-          
-          </TabsContent>
-
-          <TabsContent value="ci_notes" className={"p-2 flex flex-col gap-4"}>
-          
-
-            {/* <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">
-                  Symptom Description / CardTitle
-                </CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="flex gap-6">
-                <div className="grid flex-1 grid-cols-5 gap-y-7 gap-x-2">
-                  <CaseField
-                    label="Keyword Search"
-                    className={"col-span-2"}
-                    span={3}
-                    star
-                  >
-                    <Input
-                      placeholder="..."
-                      type="search"
-                      className=""
-                      value={symptomSearchTerm}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setSymptomSearchTerm(value);
-                        if (value.length >= 2) fetchSymptomCodes(value);
-                        else setSymptomSuggestions([]);
-                      }}
-                    />
-                  </CaseField>
-
-                  {symptomSuggestions.length > 0 && (
-                    <ul className="absolute z-10 overflow-y-auto bg-white border max-h-40">
-                      {symptomSuggestions.map((sym) => (
-                        <li
-                          key={sym.SymptomCodeID}
-                          className="p-2 cursor-pointer hover:bg-gray-100"
-                          onClick={() => {
-                            setSelectedSymptom(sym);
-                            setSymptomSearchTerm(sym.SymptomCode);
-                            setSymptomSuggestions([]);
-                          }}
-                        >
-                          {sym.SymptomCode}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  <CaseField
-                    label="Top Category"
-                    className={"col-span-2"}
-                    span={3}
-                  >
-                    {selectedSymptom?.TopCategory}
-                  </CaseField>
-                  <CaseField
-                    label="Sub Category"
-                    className={"col-span-2"}
-                    span={3}
-                  >
-                    {selectedSymptom?.SubCategory}
-                  </CaseField>
-                  <CaseField
-                    label="Spesific Symptom"
-                    className={"col-span-2"}
-                    span={3}
-                  >
-                    {selectedSymptom?.SymptomCode}
-                  </CaseField> */}
-
-                  {/* <div className='flex font-bold'>
-                    <span>Top Category</span>
-                    <span className=''>...{selectedSymptom?.TopCategory}</span>
-                  </div>
-                  <div className='flex font-bold'>
-                    <span>Sub Category</span>
-                    <span className=''>...{selectedSymptom?.SubCategory}</span>
-                  </div>
-                  <div className='flex font-bold'>
-                    <span>Spesific Symptom</span>
-                    <span className=''>...{selectedSymptom?.SymptomCode}</span>
-                  </div> */}
-                {/* </div> */}
-
-                {/* <div className="flex flex-1 font-bold">
-                  <Table className="pverflow-auto">
-                    <TableCaption className="caption-top"> */}
-                      {/* Optional caption content here */}
-                    {/* </TableCaption>
-
-                    <TableHeader>
-                      <TableRow className={""}>
-                        <TableHead>Quality Codes</TableHead>
-                        <TableHead className={"text-right"}>
-                          Add Existing QA Code
-                        </TableHead>
-                      </TableRow>
-                      <TableRow>
-                        <TableHead className="">
-                          <div className="flex items-center gap-1">
-                            QA Level 1 <ArrowUp /> <ChevronDown />
-                          </div>
-                        </TableHead>
-                        <TableHead className="">
-                          <div className="flex items-center gap-1">
-                            QA Level 2 <ArrowUp /> <ChevronDown />
-                          </div>
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>Entry</TableCell>
-                        <TableCell>0A - see comments</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card> */}
-
-            {/* <Card className="flex-col mt-5">
-              <CardHeader>
-                <CardTitle className="text-lg ">Case Resolution</CardTitle>
-                <hr />
-              </CardHeader>
-
-              <CardContent className="grid grid-cols-7 gap-5 p-3 ">
-                <CaseField label="Case Resolution Code" star> */}
-                  {/* <Input
-                  variant='invisible'
-                  value={csrForm.caseResolutionCode}
-                  onChange={(e) => onChangeCsr("caseResolutionCode")(e.target.value)}
-                /> */}
-                  {/* <SearchCommandBlock
-                    value={csrForm.caseResolutionCode}
-                    onChange={onChangeCsr("caseResolutionCode")}
-                    placeholder="--Select--"
-                    options={[
-                      "Offsite Solution",
-                      "Cancel per Customer/No Contact",
-                      "Case Voided",
-                      "Cloud Recovery Download",
-                      "Customer Satisfaction",
-                    ]}
-                  />
-                </CaseField>
-                <CaseField label="Case Ready for Closure" icon>
-                  <SelectYN
-                    value={csrForm.caseReadyForClosure}
-                    onValueChange={(val) =>
-                      onChangeCsr("caseReadyForClosure")(val)
-                    }
-                  />
-                </CaseField>
-
-                <CaseField label="Pending Customer Action" icon span={2}>
-                  <DatePicker
-                    value={csrForm.pendingCustomerAction}
-                    onChange={onChangeCsr("pendingCustomerAction")}
-                  />
-                </CaseField>
-                <CaseField label="Auto Close">
-                  <SelectYN
-                    value={csrForm.autoClose}
-                    onValueChange={(val) => onChangeCsr("autoClose")(val)}
-                  />
-                </CaseField>
-                <CaseField label="Ready for Close Days" icon>
-                  <Input
-                    type="number"
-                    variant="invisible"
-                    value={csrForm.readyForCloseDays}
-                    onChange={(e) =>
-                      onChangeCsr("readyForCloseDays")(e.target.value)
-                    }
-                  />
-                </CaseField>
-                <CaseField label="Customer Requested Close Date" icon span={2}>
-                  <DatePicker
-                    value={csrForm.customerRequestedCloseDate}
-                    onChange={onChangeCsr("customerRequestedCloseDate")}
-                  />
-                </CaseField>
-                <CaseField
-                  className={"col-start-3"}
-                  label="Ready for Closure Date"
-                  icon
-                  span={2}
-                >
-                  <DatePicker
-                    value={csrForm.readyForClosureDate}
-                    onChange={onChangeCsr("readyForClosureDate")}
-                  />
-                </CaseField>
-              </CardContent>
-            </Card> */}
-          </TabsContent>
-
-          <TabsContent value="action_log">
-              
-          </TabsContent>
-
-          <TabsContent value="ci_activitas">
-            <Card className="mt-7">
-              <CardHeader>Hello Word</CardHeader>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="ci_actions">
-            <Card className="mt-7">
-              <CardHeader>Hello Word</CardHeader>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="ci_wo">
-                      <div className="flex gap-4">
-                        <Card className="flex-1/3  rounded-md">
-                          <CardHeader>
-                            <CardTitle className=" text-lg">Case Information</CardTitle>
-                            <hr />
-                          </CardHeader>
-                          <CardContent className="grid gap-5 grid-cols-2">
-                          <CaseField label="Case Subject" span={1}>
-                          {caseDetails.CaseSubject}
-                          </CaseField>
-                          <CaseField label="Case Type">{caseDetails.CaseType}</CaseField>
-                            <CaseField label="Businnes Segment">
-                              <Input
-                                variant={"invisible"}
-                                className=""
-                                value={"---"}
-                                readOnly
-                              />
-                            </CaseField>
-                            <CaseField label="HPI Segment">
-                              <Input
-                                variant={"invisible"}
-                                className=""
-                                value={"---"}
-                                readOnly
-                              />
-                            </CaseField>
-          
-                            <CaseField label="Global Trade Status">
-                            {caseDetails.global_trade_check?.global_trade_status || "---"}
-                            </CaseField>
-                            <CaseField label="Global Trade Ovveride Reason">
-                            {caseDetails.global_trade_check?.gt_override_reason || "---"}
-                            </CaseField>
-                            <CaseField label="GT Active Listening">
-                            {caseDetails.global_trade_check?.gt_active_listening || "---"}
-                            </CaseField>
-                            <CaseField label="Security Status" lock>
-                              <Input
-                                variant={"invisible"}
-                                className=""
-                                value={"---"}
-                                readOnly
-                              />
-                            </CaseField>
-                            <CaseField label="Security Ovveride Reason" lock>
-                              <Input
-                                variant={"invisible"}
-                                className=""
-                                value={"---"}
-                                readOnly
-                              />
-                            </CaseField>
-                          </CardContent>
-                        </Card>
-                        <div className="flex-3 flex flex-col gap-4">
-                          <Card className="rounded-md">
-                            <CardHeader>
-                              <CardTitle className="text-lg">Case Notes History</CardTitle>
-                              <hr />
-                            </CardHeader>
-                            <CardContent>
-                              <CaseField label="Notes History" lock>
-                                <textarea
-                                  className="mt-4 resize-none w-full min-h-[400px] p-2 ring-1 ring-gray-300 rounded-md text-md"
-                                  readOnly
-                                  value={caseNotes?.NotesDisplay}
-                                />
-                              </CaseField>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      </div>
-          </TabsContent>
-
-          <TabsContent value="ci_orders" className={"p-2 flex flex-col gap-4"}>
-            <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">Shipment Information</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid items-center grid-cols-4 gap-10">
-                <CaseField label="Shipment Country">
-                    <SearchCommandBlock 
-                      variant="invisible" 
-                      value={workOrders[0]?.ShipmentCountry ||"---"}
-                      readOnly
-                      options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"] }
-                    />
-                </CaseField>
-                <CaseField label="Exception Order">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Shipment State" lock>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="SBD Override">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Major Account Id">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Currency">
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Promo Code" className={"col-start-3"}>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-              </CardContent>
-            </Card>
-
-            <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">Work Order</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="flex flex-col gap-5 p-3 ">
-                <div className="grid grid-cols-4 gap-5">
-                  <CaseField label="Incident Type" span={3}>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField label="Work Order Description" span={3}>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                </div>
-
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">
-                        Work Order Number
-                      </TableHead>
-                      <TableHead>Case ID</TableHead>
-                      <TableHead>Service Account</TableHead>
-                      <TableHead>Sub-Status</TableHead>
-                      <TableHead>System Status</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Work Order</TableHead>
-                      <TableHead>Primary Incident</TableHead>
-                      <TableHead>Due Date</TableHead>
-                      <TableHead>Orion</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead>Created By</TableHead>
-                      <TableHead>Created At</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {workOrders.map((work) => (
-                      <TableRow
-                        key={work.WOID}
-                        className="cursor-pointer hover:bg-gray-300"
-                        onClick={handleClick}
-                      >
-                        <TableCell
-                          className="font-medium "
-                        >
-                          {work.WOID}
-                        </TableCell>
-                        <TableCell>{work.CaseID}</TableCell>
-                        <TableCell>
-                          {work.caseinformation?.site_account?.Company ||
-                            work.caseinformation?.contact_information
-                              ?.FirstName +
-                              " " +
-                              work.caseinformation?.contact_information
-                                ?.LastName ||
-                            "-"}
-                        </TableCell>
-
-                        <TableCell>{work.SubStatus}</TableCell>
-                        <TableCell>{work.SystemStatus}</TableCell>
-                        <TableCell>{work.Priority}</TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell>{work.owner?.Name}</TableCell>
-                        <TableCell>{work.owner?.Name}</TableCell>
-                        <TableCell>{work.CreatedOn}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">Parts Order</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid gap-5">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">Name</TableHead>
-                      <TableHead>Order Status</TableHead>
-                      <TableHead>Work Order</TableHead>
-                      <TableHead>Customer Self Repair (CSR)</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead>Created On</TableHead>
-                      <TableHead>Order Closed Date</TableHead>
-                      <TableHead>Created By</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        No data available
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">Service Order</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid gap-5">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">Name</TableHead>
-                      <TableHead>Order Refere</TableHead>
-                      <TableHead>Case ID</TableHead>
-                      <TableHead>Service Status</TableHead>
-                      <TableHead>Site</TableHead>
-                      <TableHead>Submit</TableHead>
-                      <TableHead>Date and Time</TableHead>
-                      <TableHead>EMEA</TableHead>
-                      <TableHead>Custom Owner</TableHead>
-                      <TableHead>Created By</TableHead>
-                      <TableHead>Created On</TableHead>
-                    </TableRow>
-                  </TableHeader>
-
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        No data available
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">Material Order</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid gap-5">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">Name</TableHead>
-                      <TableHead>Case ID</TableHead>
-                      <TableHead>Created On</TableHead>
-                      <TableHead>Order Status</TableHead>
-                      <TableHead>Order Type</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead>Work Order</TableHead>
-                      <TableHead>Ready For Closure Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-
-                  <TableBody>
-                    {materialOrders.map((material) => (
-                      <TableRow key={material.MOID}>
-                        <TableCell className="font-medium">
-                          <Link to={`/app/material-order/${material.MOID}`}>
-                            {material.MOID} on {material.WOID}
-                          </Link>
-                        </TableCell>
-                        <TableCell>{material.workorder?.CaseID}</TableCell>
-                        <TableCell>{material.CreatedOn}</TableCell>
-                        <TableCell>{material.OrderStatus}</TableCell>
-                        <TableCell>{material.OrderType}</TableCell>
-                        <TableCell>{material.owner?.Name}</TableCell>
-                        <TableCell>{material.WOID}</TableCell>
-                        <TableCell>{material.ReadyForClosureDate}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="ci_salles">
-            <Card className="mt-7">
-              <CardHeader>Hello Word</CardHeader>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="ci_knowledge">
-            <Card className="mt-7">
-              <CardHeader>Hello Word</CardHeader>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="ci_related">
-            <Card className="mt-7">
-              <CardHeader>Hello Word</CardHeader>
-            </Card>
-          </TabsContent>
         </Tabs>
       </Card>
     </>
