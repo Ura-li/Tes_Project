@@ -37,30 +37,24 @@ const spanMap = {
   5: "col-span-5",
   6: "col-span-6",
 };
-export const CaseField = ({ label, children, icon=false , span = 1, className, childClass, star, open=false }) => {
+export const CaseField = ({ label, children, icon = false, span = 1, className, childClass, star }) => {
   // Determine which icon to use
-  const IconComponent = icon === true ? Lock : icon  || null;
-  const LockOpenComponent = open === true ? LockOpen : open || null;
+  const IconComponent = icon === true ? Lock : icon || null;
   const readOnly = icon === "lock";
   return (
     <>
       <CardTitle className={twMerge(
-        `relative font-medium flex items-center gap-4 ${className}`
+        `font-medium flex  items-center gap-4 ${className}`
       )}>
         {IconComponent ? (
-          <IconComponent className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
+          <IconComponent className="size-4" />
         ) : (
-          <div className="pl-2"/>
-        )}
-        {LockOpenComponent ? (
-          <LockOpenComponent className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground"/>
-        ) : ( 
-          <div className="pl-2"/>
+          <div className="w-5" />
         )}
         {label}
         {star ? <span className="text-red-400">*</span> : ""}
       </CardTitle>
-      <CardTitle className={twMerge(spanMap[span],childClass)}>
+      <CardTitle className={twMerge(spanMap[span], childClass)}>
         {children}
       </CardTitle>
     </>
