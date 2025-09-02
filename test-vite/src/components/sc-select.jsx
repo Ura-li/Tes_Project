@@ -62,8 +62,8 @@ useEffect(() => {
   return (
     <div className="relative w-full">
       {selectedOption ? (
-        <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2">
-          <Archive color="blue" hidden></Archive>
+        <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2 ring-1">
+          <Archive color="blue" className=" size-4 shrink-0"></Archive>
           <span className="pl-1">{renderLabel(selectedOption)}</span>
           {/* <div className="flex items-center justify-start px-3 py-2 border rounded-md gap-2">
             <Archive color="blue"></Archive>
@@ -72,7 +72,7 @@ useEffect(() => {
             onClick={() => onChange(null)}
             className="ml-2  hover:text-red-600"
           >
-            <X className="w-4 h-4" />
+            <X className=" size-4" />
           </button>
         </div>
       ) : (
@@ -128,7 +128,7 @@ export function SelectBar({ id, onChange, value, options, placeholder }) {
         }
       }}
     >
-      <SelectTrigger className="w-full border-black">
+      <SelectTrigger className="w-full border-black p-3 text-md">
         <SelectValue placeholder={placeholder || "Select an option"} />
       </SelectTrigger>
       <SelectContent>

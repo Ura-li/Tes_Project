@@ -257,6 +257,31 @@ export function AppSidebar({
         ],
       },  
     ],
+    navMasterFD: [
+      {
+        title: "MasterFD",
+        url: "#",
+        icon: Bot,
+        isActive: true,
+        items: [
+          {
+            title: "Company",
+            url: "/app/master/Company_table",
+            icon: Building
+          },
+          {
+            title: "Assets",
+            url: "/app/master/Assets_table",
+            icon: Briefcase
+          },
+          {
+            title: "Contact",
+            url: "/app/master/Contact_table",
+            icon: Phone
+          },
+        ],
+      },
+    ],
     projects: [
       {
         name: "Home",
@@ -321,7 +346,14 @@ export function AppSidebar({
     );
   } else if (data.user.role === 'fd' || data.user.role === 'user') {
     navrole = data.projects;
-  } else if (data.user.role === 'apo' || data.user.role === 'ce' ){
+    DropNav = (
+      <NavMain
+        className="bg-cyan-700"
+        items={data.navMasterFD}
+        activeClassName="bg-cyan-800 text-white"
+      />
+    );
+  } else if (data.user.role === 'apo' || data.user.role === 'ce' || data.user.role === 'ps' || data.user.role === 'lg' || data.user.role === 'celead'){
     navrole = data.apo;
   } else {
     DropNav = '';

@@ -120,7 +120,7 @@ createRoot(document.getElementById("root")).render(
             <Route
               path="/app/master/Company_table"
               element={
-                <MasterGateKeeping allow={["admin"]}>
+                <MasterGateKeeping allow={["admin", "fd"]}>
                   <Company_table />
                 </MasterGateKeeping>
               }
@@ -128,7 +128,7 @@ createRoot(document.getElementById("root")).render(
             <Route
               path="/app/master/Assets_table"
               element={
-                <MasterGateKeeping allow={["admin"]}>
+                <MasterGateKeeping allow={["admin", "fd"]}>
                   <Assets_table />
                 </MasterGateKeeping>
               }
@@ -136,7 +136,7 @@ createRoot(document.getElementById("root")).render(
             <Route
               path="/app/master/Contact_table"
               element={
-                <MasterGateKeeping allow={["admin"]}>
+                <MasterGateKeeping allow={["admin", "fd"]}>
                   <Contact_table />
                 </MasterGateKeeping>
               }

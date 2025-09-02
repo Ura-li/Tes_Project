@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import Swal from 'sweetalert2';
 
-export default function Ce_Page() {
+export default function CeLead_Page() {
   const { user } = useAuth();
   const [userData, setUserData] = useState([]);
   const [caseData, setCaseData] = useState([]);
