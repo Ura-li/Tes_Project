@@ -11,7 +11,12 @@ import {
 import { Link } from "react-router";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Accordion, AccordionItem, AccordionContent, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionContent,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   Select,
   SelectContent,
@@ -22,7 +27,11 @@ import {
   SelectGroup,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectBarRelated, SelectYN, SearchCommandBlock } from "@/components/sc-select";
+import {
+  SelectBarRelated,
+  SelectYN,
+  SearchCommandBlock,
+} from "@/components/sc-select";
 import {
   Table,
   TableBody,
@@ -51,6 +60,10 @@ import {
   Calculator,
   CreditCard,
   Settings,
+  Briefcase,
+  Contact,
+  FileSliders,
+  NotepadText
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -73,19 +86,19 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import Swal from "sweetalert2";
-import { BtnModalsServiceCatalog } from '@/components/model/sc-modal'
-import DatePicker from '@/components/date-picker'
-import { pdf } from '@react-pdf/renderer';
-import ServiceRequestPDF from '@/components/service-request-form'; // adjust path if needed
+import { BtnModalsServiceCatalog } from "@/components/model/sc-modal";
+import DatePicker from "@/components/date-picker";
+import { pdf } from "@react-pdf/renderer";
+import ServiceRequestPDF from "@/components/service-request-form"; // adjust path if needed
 import { Textarea } from "@/components/ui/textarea";
+import CaseField from "@/components/CaseField";
 
-
-export const TabsServiceCaseDetailsApo = ({ 
+export const TabsServiceCaseDetailsLg = ({
   caseDetails,
-  setCaseDetails, 
+  setCaseDetails,
   caseNote,
   caseNoteFormData,
-  setCaseNoteFormData
+  setCaseNoteFormData,
 }) => {
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
@@ -94,8 +107,8 @@ export const TabsServiceCaseDetailsApo = ({
 
   const { open } = useSidebar();
   const [entitlementStatus, setEntitlementStatus] = useState({
-    OTCCode: ''
-  })
+    OTCCode: "",
+  });
 
   const [caseForm, setCaseForm] = useState({
     CaseType: "",
@@ -112,9 +125,9 @@ export const TabsServiceCaseDetailsApo = ({
     screening_id: "",
     gt_active_listening: "",
     gt_al_comments: "",
-    });
+  });
 
-   const [csrForm, setCsrForm] = useState({
+  const [csrForm, setCsrForm] = useState({
     caseResolutionCode: "",
     autoClose: "",
     caseReadyForClosure: "",
@@ -126,11 +139,11 @@ export const TabsServiceCaseDetailsApo = ({
 
   const handleCaseDetails = (field) => (value) => {
     setCaseDetails((prev) => ({ ...prev, [field]: value }));
-  }
-  
+  };
+
   const handleCaseChange = (field) => (value) => {
     setCaseForm((prev) => ({ ...prev, [field]: value }));
-  }
+  };
 
   const handleCaseNoteChange = (key, value) => {
     setCaseNoteFormData((prev) => {
@@ -143,135 +156,151 @@ export const TabsServiceCaseDetailsApo = ({
   const handleGtcChange = (field) => (value) => {
     setGtcForm((prev) => ({ ...prev, [field]: value }));
   };
-  
+
   const handleEntitlementStatus = (field) => (value) => {
     setEntitlementStatus((prev) => ({ ...prev, [field]: value }));
   };
 
-   const handleCsrChange = (field) => (value) => {
+  const handleCsrChange = (field) => (value) => {
     setCsrForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleSave = async (redirect = true) => {
+    console.log(
+      "Form Data to Submit:",
+      caseNoteFormData,
+      gtcForm,
+      entitlementStatus
+    );
+    console.log("CaseForm Data to Submit:", caseForm);
 
- const handleSave = async (redirect = true) => {
-  console.log("Form Data to Submit:", caseNoteFormData, gtcForm, entitlementStatus);
+    try {
+      Swal.fire({
+        title: "Saving Case...",
+        text: "Mohon tunggu sebentar",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
 
-  try {
-    Swal.fire({
-      title: 'Saving Case...',
-      text: 'Mohon tunggu sebentar',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
+      const user = getUserFromToken();
+      const timestamp = new Date().toLocaleString();
+      const author = user?.name || user?.email || "Unknown User";
+      const role = user?.role || "Unknown";
 
-    const user = getUserFromToken();
-    const timestamp = new Date().toLocaleString();
-    const author = user?.name || user?.email || "Unknown User";
-    const role = user?.role || "Unknown"; 
+      const noteFilled =
+        caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
+      const caseFilled = caseForm.CaseType && caseForm.CaseType.trim() !== "";
+      const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
+      const entitlementEdited = entitlementStatus !== undefined;
+      const csrEdited = csrForm && Object.keys(csrForm).length > 0;
 
-    const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
-    const caseFilled = caseForm.CaseType && caseForm.CaseType.trim() !== "" ;
-    const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
-    const entitlementEdited = entitlementStatus !== undefined;
-    const csrEdited = csrForm && Object.keys(csrForm).length > 0;
+      const hasIntentToSave =
+        noteFilled || gtcEdited || entitlementEdited || csrEdited || caseFilled;
 
-    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseFilled;
+      if (!hasIntentToSave) {
+        alert("Tidak ada data yang disimpan.");
+        return;
+      }
 
-    if (!hasIntentToSave) {
-      alert("Tidak ada data yang disimpan.");
-      return;
-    }
+      let savedModules = [];
+      const dataToUpdate = {};
+      for (const target of ["NOTE", "GTC", "ENTITLEMENT", "CSR", "CASE"]) {
+        switch (target) {
+          case "NOTE":
+            if (noteFilled) {
+              const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
 
-    let savedModules = [];
-    const dataToUpdate = {};
-    for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE']) {
-      switch (target) {
+              const response = await ApiCustomer.post(
+                "/api/case-information/case-notes",
+                {
+                  LogType: caseNoteFormData.LogType,
+                  ActionType: caseNoteFormData.ActionType,
+                  VisibleExternally: caseNoteFormData.VisibleExternally,
+                  Note: modifiedNote,
+                  CaseID: caseDetails.CaseID,
+                }
+              );
+              dataToUpdate.CaseNote = response.data.data.NoteID;
 
-       case 'NOTE':
-  if (noteFilled) {
-    const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
-
-    const response = await ApiCustomer.post("/api/case-information/case-notes", {
-      LogType: caseNoteFormData.LogType,
-      ActionType: caseNoteFormData.ActionType,
-      VisibleExternally: caseNoteFormData.VisibleExternally,
-      Note: modifiedNote,
-      CaseID: caseDetails.CaseID
-    });
-      dataToUpdate.CaseNote = response.data.data.NoteID;
-
-    const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
-    setCaseNotes({ NotesDisplay: NotedDisplay, 
-          ActionType: caseNoteFormData.ActionType,
-          LogType: caseNoteFormData.LogType,
-          VisibleExternally: caseNoteFormData.VisibleExternally,});
-    
-     if (selectedSymptom) {
-      dataToUpdate.SymptomCode = selectedSymptom.SymptomCodeID;
-    }
-
-    savedModules.push("Note");
-  }
-  break;
-
-        case 'GTC':
-          if (gtcEdited) {
-            await ApiCustomer.patch("/api/case-information/global-trade-check", {
-              ...gtcForm,
-              screening_id: gtcForm.screening_id || "",
-              CaseID: caseDetails.CaseID,
-            });
-            savedModules.push("GTC");
-          }
-          break;
-
-        case 'ENTITLEMENT':
-          if (entitlementEdited) {
-            console.log(entitlementStatus);
-            Object.assign(dataToUpdate, entitlementStatus); // includes OTCCo
-            savedModules.push("Entitlement");
-          }
-          break;
-
-        case 'CSR':
-          if (csrEdited) {
-            let response;
-            if (caseDetails.id_csr) {
-              response = await ApiCustomer.patch(`/api/caseResolution/${caseDetails.id_csr}`, {
-                ...csrForm,
-                caseResolutionCode: csrForm.caseResolutionCode || "",
+              const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
+              setCaseNotes({
+                NotesDisplay: NotedDisplay,
+                ActionType: caseNoteFormData.ActionType,
+                LogType: caseNoteFormData.LogType,
+                VisibleExternally: caseNoteFormData.VisibleExternally,
               });
-            } else {
-              response = await ApiCustomer.post("/api/caseResolution", {
-                ...csrForm,
-                caseResolutionCode: csrForm.caseResolutionCode || "",
-              });
-              dataToUpdate.id_csr = response.data.data.id_csr;
+
+              if (selectedSymptom) {
+                dataToUpdate.SymptomCode = selectedSymptom.SymptomCodeID;
+              }
+
+              savedModules.push("Note");
             }
-            savedModules.push("CSR");
-          }
-          break;
+            break;
 
-          case 'CASE':
-          if (caseFilled) {
+          case "GTC":
+            if (gtcEdited) {
+              await ApiCustomer.patch(
+                "/api/case-information/global-trade-check",
+                {
+                  ...gtcForm,
+                  screening_id: gtcForm.screening_id || "",
+                  CaseID: caseDetails.CaseID,
+                }
+              );
+              savedModules.push("GTC");
+            }
+            break;
+
+          case "ENTITLEMENT":
+            if (entitlementEdited) {
+              console.log(entitlementStatus);
+              Object.assign(dataToUpdate, entitlementStatus); // includes OTCCo
+              savedModules.push("Entitlement");
+            }
+            break;
+
+          case "CSR":
+            if (csrEdited) {
+              let response;
+              if (caseDetails.id_csr) {
+                response = await ApiCustomer.patch(
+                  `/api/caseResolution/${caseDetails.id_csr}`,
+                  {
+                    ...csrForm,
+                    caseResolutionCode: csrForm.caseResolutionCode || "",
+                  }
+                );
+              } else {
+                response = await ApiCustomer.post("/api/caseResolution", {
+                  ...csrForm,
+                  caseResolutionCode: csrForm.caseResolutionCode || "",
+                });
+                dataToUpdate.id_csr = response.data.data.id_csr;
+              }
+              savedModules.push("CSR");
+            }
+            break;
+
+          case "CASE":
+            if (caseFilled) {
               try {
+                console.log("CaseForm Data To Update: ", caseForm);
                 const oldStatus = caseDetails.CaseStatus;
                 let newStatus = caseForm.CaseStatus;
 
+                const isNewAssignStatus = newStatus.includes("NEW_Assign");
+                if (isNewAssignStatus) newStatus = "Open";
+                Object.assign(dataToUpdate, {
+                  CaseType: caseForm.CaseType || "",
+                  CaseStatus: newStatus || "",
+                  Owner: caseForm.Owner || caseDetails.Owner,
+                });
                 savedModules.push("Case");
                 if (oldStatus !== newStatus) {
-                  const isNewAssignStatus = newStatus.includes("NEW_Assign");
-                  if(isNewAssignStatus) newStatus = "Open";
-  
-                   Object.assign(dataToUpdate, {
-                    CaseType: caseForm.CaseType || "",
-                    CaseStatus: newStatus || "",
-                    Owner: caseForm.Owner || caseDetails.Owner
-  
-                  });
                   const token = {
-                    user: getUserFromToken()
-                  }
+                    user: getUserFromToken(),
+                  };
                   await ApiCustomer.post("/api/actionlog", {
                     CaseId: `${caseDetails.CaseID}`,
                     ReferenceId: ``,
@@ -292,77 +321,79 @@ export const TabsServiceCaseDetailsApo = ({
                   allowEscapeKey: false,
                 });
               }
-          }
-          break;
+            }
+            break;
+        }
+
+        if (Object.keys(dataToUpdate).length > 0) {
+          console.log("Data To Update: ", dataToUpdate);
+          await ApiCustomer.patch(
+            `/api/case-information/${caseDetails.CaseID}`,
+            dataToUpdate
+          );
+        }
       }
 
-      if (Object.keys(dataToUpdate).length > 0) {
-        await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataToUpdate);
+      if (savedModules.length > 0) {
+        if (redirect) {
+          await Swal.fire({
+            icon: "success",
+            title: "Berhasil Disimpan",
+            // text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
+            text: "Data berhasil disimpan",
+            timer: 2500,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+          });
+          window.location.reload();
+        }
+        return true;
       }
+    } catch (error) {
+      console.error("Save failed:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Something went wrong.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        Swal.close();
+      });
     }
+  };
 
-    if (savedModules.length > 0) {
-      if(redirect){
-        await Swal.fire({
-          icon: "success",
-          title: "Berhasil Disimpan",
-          // text: `Data berhasil disimpan: ${savedModules.join(", ")}`,
-          text: "Data berhasil disimpan",
-          timer: 2500,
-          showConfirmButton: false,
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-        });
-        window.location.reload();
-      }
-      return true
+  const openPopup = () => {
+    console.log("TeSPOP");
+    const popup = window.open(
+      "/auditwindows",
+      "Popup Title",
+      "width=600,height=400"
+    );
+
+    if (popup) {
+      popup.focus();
+    } else {
+      alert("Popup blocked by browser. Please allow popups for this site.");
     }
-
-  } catch (error) {
-    console.error("Save failed:", error);
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: error.message || "Something went wrong.",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-    }).then(() => {
-      Swal.close();
-    });
-  }
-};
-
-const openPopup = () => {
-  console.log("TeSPOP");
-  const popup = window.open(
-    '/auditwindows',
-    'Popup Title',
-    'width=600,height=400'
-  );
-
-  if (popup) {
-    popup.focus();
-  } else {
-    alert('Popup blocked by browser. Please allow popups for this site.');
-  }
-};
-  
+  };
 
   useEffect(() => {
     const loadNote = async () => {
       const noteDetail = caseNote;
-      if(noteDetail ){
+      if (noteDetail) {
         const NotedDisplay = `@Created On : ${noteDetail.CreatedOn}\n${noteDetail.Note}`;
         setCaseNotes({
           NotesDisplay: NotedDisplay,
           ActionType: noteDetail.ActionType,
           LogType: noteDetail.LogType,
           VisibleExternally: noteDetail.VisibleExternally,
-        })
-      } 
-    }
-    loadNote()
-  }, [])
+        });
+      }
+    };
+    loadNote();
+  }, []);
 
   const [caseNotes, setCaseNotes] = useState([]);
 
@@ -372,54 +403,82 @@ const openPopup = () => {
       label: "",
       onClick: () => navigate(`/app/viewcase`),
     },
-    { icon: SquareArrowOutUpRight, label: "",},
+    { icon: SquareArrowOutUpRight, label: "" },
     { icon: Save, label: "Save", onClick: () => handleSave() },
     {
       icon: FileSymlink,
       label: "Save & Close",
       onClick: () => saveAndCloseCase(),
     },
-    { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
+    {
+      icon: RotateCw,
+      label: "Refresh",
+      onClick: () => window.location.reload(),
+    },
     // { icon: StepBack, label: "Complaint",},
-    { icon: StepBack, label: "SRF", onClick: async () => {
-      const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails}  />).toBlob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'Service_Request_Form.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    },hidden: true },
-    { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR"), hidden: true },
-    { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), hidden: true},
-    { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder"), hidden: true },
-    { icon: StepBack, label: "Sales Offer", hidden:true},
-    { icon: StepBack, label: "Close Case", hidden:true },
-    { icon: StepBack, label: "Pick", hidden:true },
-    { icon: StepBack, label: "Queue Details", hidden:true},
-    { icon: UserPen, label: "Assign", hidden:true },
-    { icon: StepBack, label: "Add to Queue", hidden:true },
-    { icon: StepBack, label: "Audit", onClick: () => openPopup(), hidden:true },
+    {
+      icon: StepBack,
+      label: "SRF",
+      onClick: async () => {
+        const blob = await pdf(
+          <ServiceRequestPDF caseDetails={caseDetails} />
+        ).toBlob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "Service_Request_Form.pdf";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }, hidden: true
+    },
+    {
+      icon: StepBack,
+      label: "CSR",
+      onClick: () => openServiceCatalog("CSR"),
+      hidden: true,
+    },
+    {
+      icon: StepBack,
+      label: "Service Order",
+      onClick: () => openServiceCatalog("serviceorder"),
+    },
+    {
+      icon: StepBack,
+      label: "Work Order",
+      onClick: () => openServiceCatalog("workorder"),
+      hidden: true,
+    },
+    { icon: StepBack, label: "Sales Offer", hidden: true },
+    { icon: StepBack, label: "Close Case", hidden: true },
+    { icon: StepBack, label: "Pick", hidden: true },
+    { icon: StepBack, label: "Queue Details", hidden: true },
+    { icon: UserPen, label: "Assign", hidden: true },
+    { icon: StepBack, label: "Add to Queue", hidden: true },
+    {
+      icon: StepBack,
+      label: "Audit",
+      onClick: () => openPopup(),
+      hidden: true,
+    },
   ];
-  console.log("TES CASE DETAILS VALUE",caseDetails);
+  console.log("TES CASE DETAILS VALUE", caseDetails);
   // const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   // const hiddenButtons = open ? buttons.slice(-3) : [];
   const [serviceCatalogType, setServiceCatalogType] = useState("null");
   const openServiceCatalog = async (type) => {
     setOpenWorkOrder(true);
-    setServiceCatalogType(type)
+    setServiceCatalogType(type);
   };
   const saveAndCloseCase = async () => {
-
-  //   if (!csrForm.caseResolutionCode || csrForm.caseResolutionCode.trim() === "") {
-  //   Swal.fire({
-  //     icon: "warning",
-  //     title: "Missing Case Resolution",
-  //     text: "You must select a Case Resolution Code before closing the case.",
-  //   });
-  //   return;
-  // }
+    //   if (!csrForm.caseResolutionCode || csrForm.caseResolutionCode.trim() === "") {
+    //   Swal.fire({
+    //     icon: "warning",
+    //     title: "Missing Case Resolution",
+    //     text: "You must select a Case Resolution Code before closing the case.",
+    //   });
+    //   return;
+    // }
 
     const confirmResult = await Swal.fire({
       title: "Confirm Save",
@@ -432,10 +491,9 @@ const openPopup = () => {
     });
 
     if (!confirmResult.isConfirmed) {
-      return; 
+      return;
     }
     try {
-      
       Swal.fire({
         title: "Saving...",
         text: "Please wait while we update the Case.",
@@ -446,27 +504,27 @@ const openPopup = () => {
         },
       });
       const success = await handleSave(false);
-      if (!success) return; 
+      if (!success) return;
       const res = await ApiCustomer.patch(
         `/api/case-information/${caseDetails.CaseID}`,
         {
           CaseStatus: "Close",
-          CaseClosedDate: new Date().toISOString(), 
+          CaseClosedDate: new Date().toISOString(),
         }
       );
       if (res.data.success) {
         const token = {
-          user: getUserFromToken()
-        }
-        const updateLog = await ApiCustomer.post("/api/actionlog",{
+          user: getUserFromToken(),
+        };
+        const updateLog = await ApiCustomer.post("/api/actionlog", {
           CaseId: `${caseDetails.CaseID}`,
           ReferenceId: ``,
           model: "Case",
           dataOld: caseDetails.CaseStatus,
           dataNew: res.data.data.CaseStatus,
           changedBy: token.user.id,
-          logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${caseDetails.CaseStatus} to ${res.data.data.CaseStatus}`
-        })
+          logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${caseDetails.CaseStatus} to ${res.data.data.CaseStatus}`,
+        });
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -495,7 +553,7 @@ const openPopup = () => {
   };
   return (
     <>
-      <div className="flex items-center border-1 ">
+      <div className="flex" >
         {/* {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -529,80 +587,48 @@ const openPopup = () => {
             onClick={btn.onClick}
             hidden={btn.hidden}
             variant="link"
-            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5 `}
           >
-            <btn.icon/>
+            <btn.icon />
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
-        ))  }
-        <BtnModalsServiceCatalog 
+        ))}
+        <BtnModalsServiceCatalog
           open={openWorkOrder}
           setOpen={setOpenWorkOrder}
           caseDetails={caseDetails}
           serviceCatalogType={serviceCatalogType}
         />
       </div>
-        <div>
-          <ServiceCase
-            caseDetails={caseDetails}
-            formData={caseNoteFormData}
-            setCaseNoteFormData={setCaseNoteFormData}
-            formGtc={gtcForm}
-            setFormGtc={setGtcForm}
-            onChangeCase={handleCaseChange}
-            caseForm={caseForm}
-            setCaseForm={setCaseForm}
-            onChangeGtc={handleGtcChange}
-            onChange={handleCaseNoteChange}
-            handleCaseDetails={handleCaseDetails}
-            caseNotes={caseNotes}
-            setCaseNotes={setCaseNotes}
-            selectedSymptom={selectedSymptom}
-            setSelectedSymptom={setSelectedSymptom}
-            entitlementStatus={entitlementStatus}
-            handleEntitlementStatus={handleEntitlementStatus}
-            csrForm={csrForm}
-            setCsrForm={setCsrForm}
-            onChangeCsr={handleCsrChange}
-          />
+      <div>
+        <ServiceCase
+          caseDetails={caseDetails}
+          formData={caseNoteFormData}
+          setCaseNoteFormData={setCaseNoteFormData}
+          formGtc={gtcForm}
+          setFormGtc={setGtcForm}
+          onChangeCase={handleCaseChange}
+          caseForm={caseForm}
+          setCaseForm={setCaseForm}
+          onChangeGtc={handleGtcChange}
+          onChange={handleCaseNoteChange}
+          handleCaseDetails={handleCaseDetails}
+          caseNotes={caseNotes}
+          setCaseNotes={setCaseNotes}
+          selectedSymptom={selectedSymptom}
+          setSelectedSymptom={setSelectedSymptom}
+          entitlementStatus={entitlementStatus}
+          handleEntitlementStatus={handleEntitlementStatus}
+          csrForm={csrForm}
+          setCsrForm={setCsrForm}
+          onChangeCsr={handleCsrChange}
+        />
       </div>
     </>
   );
 };
 
-const spanMap = {
-  1: "col-span-1",
-  2: "col-span-2",
-  3: "col-span-3",
-  4: "col-span-4",
-  5: "col-span-5",
-  6: "col-span-6",
-};
 
-export const CaseField = ({ label, children, lock, open,span = 1, className, star, }) => (
-  <>
-    <CardTitle
-      className={twMerge(
-        `relative font-medium flex items-center gap-2`,
-        lock ? "pl-6" : "", open ? "pl-6" : "",
-        className
-      )}
-    >
-      {lock && (
-        <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
-      )}
-      {open && (
-        <LockOpen className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground"/>
-      )}
-      {label}
-      {star ? <span className="text-red-400">*</span> : ""}
-    </CardTitle>
-
-    <CardTitle className={twMerge(spanMap[span], "")}>
-      {children}
-    </CardTitle>
-  </>
-);
 
 // export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
 //   const navigate = useNavigate();
@@ -646,7 +672,6 @@ export const CaseField = ({ label, children, lock, open,span = 1, className, sta
 
 //       const result = response.data;
 //       console.log(response);
-      
 
 //       if (!result.success) {
 //         return Swal.fire({
@@ -800,7 +825,7 @@ export const CaseField = ({ label, children, lock, open,span = 1, className, sta
 //     {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
 //     </div>
 //     <div>
-//     {/* <ServiceCase 
+//     {/* <ServiceCase
 //       caseDetails={caseDetails}
 //       formData={caseNoteFormData}
 //       onChange={handleCaseNoteChange}
@@ -928,7 +953,7 @@ export const CaseField = ({ label, children, lock, open,span = 1, className, sta
 //     {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
 //     </div>
 //     <div>
-//     {/* <ServiceCase 
+//     {/* <ServiceCase
 //       caseDetails={caseDetails}
 //       formData={caseNoteFormData}
 //       onChange={handleCaseNoteChange}
@@ -1060,7 +1085,7 @@ export const CaseField = ({ label, children, lock, open,span = 1, className, sta
 //           changedBy: token.user.id,
 //           logDescription: `Edit : Change Material Order Line Item ${moLineItems.MOID} - ${moLineItems.LineItemID} Status from ${moLineItems.Status} to Closed`
 //         })
-       
+
 //         Swal.fire({
 //           icon: "success",
 //           title: "Updated!",
@@ -1119,7 +1144,7 @@ export const CaseField = ({ label, children, lock, open,span = 1, className, sta
 //     {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
 //     </div>
 //     <div>
-//     {/* <ServiceCase 
+//     {/* <ServiceCase
 //       caseDetails={caseDetails}
 //       formData={caseNoteFormData}
 //       onChange={handleCaseNoteChange}
@@ -1164,14 +1189,13 @@ export const ServiceCase = ({
   const [caseClosedDate, setCaseClosedDate] = useState(null);
   const [submittedToBase, setsubmittedToBase] = useState(null);
 
-  const [cards, setCards] = useState([{}]);
+  const [pendingCustomerAction, setPendingCustomerAction] = useState(null);
+  const [customerRequestedCloseDate, setCustomerRequestedCloseDate] = useState(null);
 
   const [roleAssign, setRoleAssign] = useState([]);
-
-  const [pendingCustomerAction, setPendingCustomerAction] = useState(null);
-  const [customerRequestedCloseDate, setCustomerRequestedCloseDate] =
-    useState(null);
   const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
+
+  
   useEffect(() => {
     if (caseDetails?.CreatedOn) {
       setCreatedOn(new Date(caseDetails.CreatedOn)); // includes date + time
@@ -1179,16 +1203,30 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case & Customer"},
-    { value: "ci_orders", label: "Work & Material Orders"},
-    { value: "action_log", label: "Action Log"},
-    { value: "customer,add,entitement", label: "Asset & Entitement", hidden: true },
+    { value: "case_infor", label: "Case & Customer" },
+    { value: "ci_asset", label: "Asset & Part Request" },
+    { value: "action_log", label: "Action Log" },
+    {
+      value: "customer,add,entitement",
+      label: "Asset & Entitement",
+      hidden: true,
+    },
     { value: "ci_notes", label: "Notes & Information", hidden: true },
     { value: "ci_activitas", label: "Activities", disable: true, hidden: true },
-    { value: "ci_actions", label: "Customer Interactions", disable: true, hidden: true},
-    { value: "ci_wo", label: "Work Order Validation", disable: true ,hidden: true},
-    { value: "ci_salles", label: "Sales Offer", disable: true ,hidden: true},
-    { value: "ci_knowledge", label: "Knowledge & Attachments", hidden: true},
+    {
+      value: "ci_actions",
+      label: "Customer Interactions",
+      disable: true,
+      hidden: true,
+    },
+    {
+      value: "ci_wo",
+      label: "Work Order Validation",
+      disable: true,
+      hidden: true,
+    },
+    { value: "ci_orders", label: "Orders", disable: true, hidden: true },
+    { value: "ci_salles", label: "Sales Offer", disable: true, hidden: true },
     // { component: <SelectBarRelated />,},
   ];
 
@@ -1200,12 +1238,7 @@ export const ServiceCase = ({
   //     ]
   //   : [];
 
-   const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    return new Date(dateString).toLocaleString();
-  };
-
-  const [selected, setSelected] = useState("--Selected--"); 
+  const [selected, setSelected] = useState("--Selected--");
 
   const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
     MainAccount: null,
@@ -1241,7 +1274,7 @@ export const ServiceCase = ({
       } else {
         setDataFetchCustomerData((prev) => ({
           ...prev,
-          type: "Individual", 
+          type: "Individual",
         }));
       }
     } catch (err) {
@@ -1309,12 +1342,10 @@ export const ServiceCase = ({
 
   const fetchOwnerUserData = async () => {
     try {
-      const response = await ApiCustomer.get(`/api/user/${caseDetails.Owner}`)
-      setOwnerUserData(response.data.data)
-    } catch (error) {
-      
-    }
-  }
+      const response = await ApiCustomer.get(`/api/user/${caseDetails.Owner}`);
+      setOwnerUserData(response.data.data);
+    } catch (error) {}
+  };
 
   const fetchWorkOrders = async () => {
     try {
@@ -1343,163 +1374,177 @@ export const ServiceCase = ({
   const fetchGtc = async () => {
     try {
       const gtcData = caseDetails.global_trade_check;
-      setFormGtc(gtcData ?? formGtc); 
+      setFormGtc(gtcData ?? formGtc);
     } catch (err) {
       console.error("Error fetching GTC:", err);
-      setFormGtc(formGtc); 
+      setFormGtc(formGtc);
     }
   };
 
-  const [otcCode, setOtcCode] = useState([])
-  
+  const [otcCode, setOtcCode] = useState([]);
+
   const fetchOTCCode = async () => {
-    try{
-      const res = await ApiCustomer.get('/api/otc-code')
-      setOtcCode(res.data.data)
-    }catch(e){
+    try {
+      const res = await ApiCustomer.get("/api/otc-code");
+      setOtcCode(res.data.data);
+    } catch (e) {
       console.error("Failed to fetch OTC Code:", err);
     }
-  }
+  };
 
   const [caseTipe, setCaseTipe] = useState([
     {
-      CaseType : "Administrative"
+      CaseType: "Administrative",
     },
     {
-      CaseType : "ASP/Reseller/GS1"
+      CaseType: "ASP/Reseller/GS1",
     },
     {
-      CaseType : "Bench"
+      CaseType: "Bench",
     },
     {
-      CaseType : "Call to Repair"
+      CaseType: "Call to Repair",
     },
     {
-      CaseType : "Complex T&M"
+      CaseType: "Complex T&M",
     },
     {
-      CaseType : "Depot Repair"
+      CaseType: "Depot Repair",
     },
     {
-      CaseType : "Electronic"
+      CaseType: "Electronic",
     },
     {
-      CaseType : "HW Delivery"
+      CaseType: "HW Delivery",
     },
     {
-      CaseType : "IMACD"
+      CaseType: "IMACD",
     },
     {
-      CaseType : "Internal Service"
+      CaseType: "Internal Service",
     },
     {
-      CaseType : "Internal Support"
+      CaseType: "Internal Support",
     },
     {
-      CaseType : "Onsite"
+      CaseType: "Onsite",
     },
     {
-      CaseType : "Proactive"
+      CaseType: "Proactive",
     },
     {
-      CaseType : "Remote Services"
+      CaseType: "Remote Services",
     },
     {
-      CaseType : "Services (VAS)"
+      CaseType: "Services (VAS)",
     },
     {
-      CaseType : "SW Delivery"
+      CaseType: "SW Delivery",
     },
     {
-      CaseType : "T&M"
+      CaseType: "T&M",
     },
-  ])
+  ]);
 
   const fetchCsr = async () => {
-  try {
-    const csrData = caseDetails.caseresolution;
-    console.log("CSR Data: ", csrData);
+    try {
+      const csrData = caseDetails.caseresolution;
+      console.log("CSR Data: ", csrData);
 
-    if (csrData) {
-      setCsrForm({
-        caseResolutionCode: csrData.caseResolutionCode || "",
-        autoClose: csrData.autoClose || "",
-        caseReadyForClosure: csrData.caseReadyForClosure || "",
-        readyForCloseDays: csrData.readyForCloseDays || "",
-        readyForClosureDate: csrData.readyForClosureDate ? new Date(csrData.readyForClosureDate) : "",
-        pendingCustomerAction: csrData.pendingCustomerAction ? new Date(csrData.pendingCustomerAction) : "",
-        customerRequestedCloseDate: csrData.customerRequestedCloseDate ? new Date(csrData.customerRequestedCloseDate) : "",
-      });
-    } else {
-      setCsrForm(csrForm); 
+      if (csrData) {
+        setCsrForm({
+          caseResolutionCode: csrData.caseResolutionCode || "",
+          autoClose: csrData.autoClose || "",
+          caseReadyForClosure: csrData.caseReadyForClosure || "",
+          readyForCloseDays: csrData.readyForCloseDays || "",
+          readyForClosureDate: csrData.readyForClosureDate
+            ? new Date(csrData.readyForClosureDate)
+            : "",
+          pendingCustomerAction: csrData.pendingCustomerAction
+            ? new Date(csrData.pendingCustomerAction)
+            : "",
+          customerRequestedCloseDate: csrData.customerRequestedCloseDate
+            ? new Date(csrData.customerRequestedCloseDate)
+            : "",
+        });
+      } else {
+        setCsrForm(csrForm);
+      }
+    } catch (err) {
+      console.error("Error fetching CSR:", err);
+      setCsrForm(csrForm);
     }
-  } catch (err) {
-    console.error("Error fetching CSR:", err);
-    setCsrForm(csrForm); 
-  }
-};
+  };
 
+  const statusEnumToLabel = {
+    New: "New",
+    Open: "Open",
+    InActive: "Inactive",
+    Close: "Closed",
+    Active: "Active",
+    Monitor: "Monitor",
+    Pending_Customer_Action: "Pending Customer Action",
+    Quote_Requested: "Quote Requested",
+    Pending_Follow_Up: "Pending Follow Up",
+    Pending_Order: "Pending Order",
+    Escalated: "Escalated",
+    Quote_Approved: "Quote Approved",
+    Pending_Quote: "Pending Quote",
+    NEW_AssignCE: "New Assign To CE",
+    NEW_AssignAPO: "New Assign To APO",
+  };
 
-const statusEnumToLabel = {
-  New: "New",
-  Open: "Open",
-  InActive: "Inactive",
-  Close: "Closed",
-  Active: "Active",
-  Monitor: "Monitor",
-  Pending_Customer_Action: "Pending Customer Action",
-  Quote_Requested: "Quote Requested",
-  Pending_Follow_Up: "Pending Follow Up",
-  Pending_Order: "Pending Order",
-  Escalated: "Escalated",
-  Quote_Approved: "Quote Approved",
-  Pending_Quote: "Pending Quote",
-  NEW_AssignCE: "New Assign To CE",
-  NEW_AssignAPO: "New Assign To APO",
-  NEW_AssignFD: "New Assign To FD"
-};
+  const assignToForm = true;
+  // const assignToForm = statusEnumToLabel.startsWith("NEW_Assign");
 
+  // const labelToStatusEnum = Object.fromEntries(
+  //   Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
+  // );
+  const labelToStatusEnum = Object.entries(statusEnumToLabel).reduce(
+    (acc, [key, val]) => {
+      acc[val] = key;
+      return acc;
+    },
+    {}
+  );
 
-const fetchUserAssign = async (role) => {
-  try {
-    const res = await ApiCustomer.get(`/api/user?role=${role}`);
-    setRoleAssign(res.data.data);
-  } catch (err) {
-    console.error("Error fetching role: ",err);    
-  }
-}
+  const fetchUserAssign = async (role) => {
+    try {
+      const res = await ApiCustomer.get(`/api/user?role=${role}`);
+      setRoleAssign(res.data.data);
+    } catch (err) {
+      console.error("Error fetching role: ", err);
+    }
+  };
 
+  const fetchCase = async () => {
+    try {
+      const res = await ApiCustomer.get(
+        `/api/case-information/${caseDetails.CaseID}`
+      );
+      setCaseForm(res.data.data);
+    } catch (err) {
+      console.error("Error fetching case:", err);
+      setCaseForm(caseForm); // fallback jika error
+    }
+  };
 
-const labelToStatusEnum = Object.fromEntries(
-  Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
-);
-
-
-const fetchCase = async () => {
-  try {
-    const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`);
-    setCaseForm(res.data.data);
-  } catch (err) {
-    console.error("Error fetching case:", err);
-    setCaseForm(caseForm); // fallback jika error
-  }
-};
-
-const fetchActionLog = async () => {
-  try {
-    const actionlog = await ApiCustomer.get(`/api/actionlog?caseId=${caseDetails.CaseID}`)
-    setActionLogs(actionlog.data.data)
-  } catch (error) {
-    console.error("Error fetching ActionLog:", err);
-  }
-}
+  const fetchActionLog = async () => {
+    try {
+      const actionlog = await ApiCustomer.get(
+        `/api/actionlog?caseId=${caseDetails.CaseID}`
+      );
+      setActionLogs(actionlog.data.data);
+    } catch (error) {
+      console.error("Error fetching ActionLog:", err);
+    }
+  };
 
   //handler all case
   useEffect(() => {
     fetchCustomerData();
     fetchAssetInformation();
     fetchOwnerUserData();
-
     fetchWorkOrders();
     const loadNote = async () => {
       const noteDetail = await fetchCaseNotes();
@@ -1515,20 +1560,19 @@ const fetchActionLog = async () => {
       }
     };
     loadNote();
-    fetchGtc(); 
+    fetchGtc();
     fetchOTCCode();
     fetchCsr();
     fetchCase();
     fetchActionLog();
-    
   }, []);
-  // useEffect(() =>{
-    
-  // }, [caseForm?.CaseStatus])
+  useEffect(() => {
+    fetchUserAssign();
+  }, [assignToForm]);
 
   useEffect(() => {
     if (otcCode.length > 0 && caseDetails?.OTCCode) {
-      handleEntitlementStatus("OTCCode")(caseDetails.OTCCode)
+      handleEntitlementStatus("OTCCode")(caseDetails.OTCCode);
     }
   }, [otcCode, caseDetails]);
 
@@ -1568,31 +1612,30 @@ const fetchActionLog = async () => {
     }
   };
 
-useEffect(() =>{
-  console.log("Data Asset Info : ",dataFetchAssetInformation)
-  
-  console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
-  console.log("Fetch Data User ", ownerUserData)
-}, [ownerUserData])
+  useEffect(() => {
+    console.log("Data Asset Info : ", dataFetchAssetInformation);
 
-const fetchSymptomCodes = async (term) => {
-  try {
-    const response = await ApiCustomer.get("/api/symptom-codes");
-    const allCodes = response.data.data;
+    console.log("Fetch Data Customer Success : ", dataFetchCustomerData);
+    console.log("Fetch Data User ", ownerUserData);
+  }, [ownerUserData]);
 
-    const filtered = allCodes.filter((sym) =>
-      sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
-    );
+  const fetchSymptomCodes = async (term) => {
+    try {
+      const response = await ApiCustomer.get("/api/symptom-codes");
+      const allCodes = response.data.data;
 
-    setSymptomSuggestions(filtered);
-  } catch (err) {
-    console.error("Error fetching symptom codes", err);
-  }
-};
+      const filtered = allCodes.filter((sym) =>
+        sym.SymptomCode.toLowerCase().includes(term.toLowerCase())
+      );
 
+      setSymptomSuggestions(filtered);
+    } catch (err) {
+      console.error("Error fetching symptom codes", err);
+    }
+  };
 
-const [startDate, setstartDate] = useState(null);
-const [endDate, setEndDate] = useState(null);
+  const [startDate, setstartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   return (
     <>
@@ -1603,10 +1646,10 @@ const [endDate, setEndDate] = useState(null);
         </div>
       )}
       <Card className="border-0 w-full">
-        <Tabs defaultValue="case_info">
+        <Tabs defaultValue="case_infor">
           <CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2">
             <div className="flex justify-between">
-              <CardTitle className="text-2xl pl-2">
+              <CardTitle className="text-2xl pl-1">
                 {caseDetails.CaseID}
                 <span className="flex items-center text-sm">
                   Case .
@@ -1658,26 +1701,25 @@ const [endDate, setEndDate] = useState(null);
                   </Select>
                   <p className="text-sm font-light ">Site Account</p>
                 </div>
-                
               </CardTitle>
             </div>
             <TabsList className="bg-white">
-            {tabs.map((tab,index) => (
-              tab.component ? (
-                <div key={index}>{tab.component}</div> 
-              ) : (
-                <TabsTrigger
-                  key={index}
-                  variant="underline"
-                  value={tab.value}
-                  disabled={tab.disable}
-                  hidden={tab.hidden}
-                  className="text-sm font-normal"
-                >
-                  {tab.label}
-                </TabsTrigger>
-              )
-            ))}
+              {tabs.map((tab, index) =>
+                tab.component ? (
+                  <div key={index}>{tab.component}</div>
+                ) : (
+                  <TabsTrigger
+                    key={index}
+                    variant="underline"
+                    value={tab.value}
+                    disabled={tab.disable}
+                    hidden={tab.hidden}
+                    className="text-sm font-normal"
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                )
+              )}
 
               {/* {visibleTabs.map((tab, index) =>
                 tab.component ? (
@@ -1729,587 +1771,555 @@ const [endDate, setEndDate] = useState(null);
             </TabsList>
           </CardHeader>
 
-        <TabsContent value="case_info">
-                  <div className={"p-3 grid grid-cols-2 gap-4 mt-2"}>
-            <Card className="flex-col">
-              <CardHeader>
-                <CardTitle className={"text-lg "}>Case Information</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-2">
-                <CaseField label="Case Subject" lock span={3}>
-                  <div className="ml-3">
-                    <Textarea
-                     value={caseDetails.CaseSubject}
-                     className="resize-none border-none"
-                    />
-                  </div>
-                </CaseField>
-              
-                <CaseField label="Case ID manual" className={"mt-2"} lock span={2}>  
-                    <Input variant="invisible" placeholder="---"/>                    
-                </CaseField>
-              
-                <CaseField label="Case Status" className={"mt-2"} open span={2}>
-                  <SearchCommandBlock
-                      value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
-                      onChange={(label) => {
-                        const enumValue = labelToStatusEnum[label];
-                        onChangeCase("CaseStatus")(enumValue);
+          <TabsContent value="case_infor">
+            <div className={"p-3 grid grid-cols-2 gap-4 mt-2 "}>
+              <Card className="flex-col hover:shadow-gray-400 ">
+                <CardHeader>
+                  <CardTitle className={"text-xl flex gap-2 "}><Briefcase/>Case Information</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent className={"flex flex-col gap-4"}>
 
-                        if(enumValue.startsWith("NEW_Assign")) {
-                          const role = enumValue.endsWith("CE") ? "ce" : enumValue.endsWith("APO") ? "apo" : enumValue.endsWith("FD") ? "fd" : null;
-                          console.log("Mapped enum:", role);
-                          
-                          if(role) {
-                            try {
-                              fetchUserAssign(role);
-                              console.log("Mapped enum:", roleAssign);
-                            } catch (err) {
-                              console.error("Error fetching role: ", err);
-                            }
-                          }
-                        } else{
-                          setRoleAssign([]);
-                        }
-                      }}
-                      placeholder="--Select--"
-                      options={Object.values(statusEnumToLabel)}
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <CaseField label="Case Subject" lock className={"col-span-2"} span={2}>
+                      <Textarea
+                        value={caseDetails.CaseSubject}
+                        className="resize-none border-none "
+                      />
 
-                </CaseField>
-                <CaseField label="Assign To" className={"mt-2"} open span={2} hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}>
-                    <SearchCommandBlock
-                      value={caseForm?.Owner}
-                      onChange={(selectedID) => {
-                            if (selectedID === null) {
-                          onChangeCase("AssignTo")(null); // Clear the value!
-                          return;
-                        }
-                        const selectedUser = roleAssign.find(user => user.IDUser === selectedID);
-                        if (selectedUser) {
-                          onChangeCase("Owner")(selectedUser.IDUser);
-                        }
-                      }}
-                      placeholder="--Select--"
-                      options={roleAssign.map(user => ({ label: user.Name, value: user.IDUser }))}
-                      renderLabel={(opt) => opt.label}
-                      getValue={(opt) => opt.value}
-                    />
-                  </CaseField>
+                    </CaseField>
+                    <CaseField label={"Created On"} className={"col-end-2"} lock>
+                      <DatePicker
+                        variant="icon"
+                        value={createdOn}
+                        onChange={setCreatedOn}
+                        readOnly
 
-                <CaseField label="Case Type" open className={"mt-2"} span={2}>
-                  <SearchCommandBlock
-                    value={caseForm?.CaseType}
-                    onChange={onChangeCase("CaseType")}
-                    placeholder="--Select--"
-                    options={[
-                    "Depot Repair",
-                    "Onsite",
-                    "Bench",
-                    ]}
-                    />
-                </CaseField>
-
-                 <CaseField label="Case Priority" className={"mt-2"} lock span={2}>
-                  <Input variant="invisible" value={caseDetails.CasePriority}/>
-                </CaseField>
-
-                <CaseField label="Customer Severity" className={"mt-2"} lock span={2}>
-                  <Input
-                    variant="invisible"
-                    value={caseDetails.CustomerSeverity}
-                  />
-                </CaseField>
-
-                  <CaseField label="Incoming Channel" className={"mt-2"} lock span={2}>
-                  <Input
-                    variant="invisible"
-                    value={caseDetails.IncomingChannel}
-                  />
-                </CaseField>
-
-                <CaseField label="KCI For Case?" lock span={2}>
-                     <Input 
-                      variant="invisible"
-                      value={caseDetails.KCI_Flag ? "Yes" : "No"}
-                     />
-                </CaseField>               
-                <CaseField label="Created ON" span={2} lock>
-                  <DatePicker
-                    variant="icon"
-                    value={createdOn}
-                    onChange={setCreatedOn}
-                    readOnly
-                  ></DatePicker>
-                </CaseField>
-
-                <Accordion type="single" collapsible className="w-full col-span-2">
-                  <AccordionItem value="more-details" className="pl-5">
-                    <AccordionTrigger className={"decoration-transparent border-1 p-2 cursor-pointer"}>More Details</AccordionTrigger>
-                    <AccordionContent className={"m-1"}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <CaseField label="Case Closed Date">
-                        <span className="gap-[5em]">
-                          {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
-                          <DatePicker
-                            variant="icon"
-                            value={caseClosedDate}
-                            onChange={setCaseClosedDate}
-                            readOnly
-                          ></DatePicker>
-                        </span>
-                      </CaseField>
-
-                      <CaseField label="Submitted To Base">
-                        <span className="gap-[5em]">
-                          <DatePicker
-                            variant="icon"
-                            value={submittedToBase}
-                            onChange={setsubmittedToBase}
-                            readOnly  
-                          ></DatePicker>
-                        </span>
-                      </CaseField>
-                      <CaseField label="Business Segment" >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>          
-                
-                      <CaseField label="HPI Segment" >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>
-                  
-                      <CaseField label="Customer Tracking Number" >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>
-                    
-                      <CaseField label="Update Customer Tracking Number">
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                      <CaseField label="Alternate Customer Tracking Number" >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>
-                    
-                      <CaseField label="Irrelevant" >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                    
-                        
-                      <CaseField label="Email Status"  >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>
-
-                        <CaseField label="Case ID" lock  className={"hidden"}>
-                        <Input
-                          variant="invisible"
-                          value={caseDetails.CaseID}
+                      />
+                    </CaseField>
+                    <CaseField label="Case Closed Date" lock>
+                      <span className="gap-[5em]" >
+                        {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
+                        <DatePicker
+                          variant="icon"
+                          value={caseClosedDate}
+                          onChange={setCaseClosedDate}
                           readOnly
-                          hidden
-                        />
-                      </CaseField>
-                    </div>
-                  </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </CardContent>
-            </Card>
-                    
-            <Card className="flex-col">
-              <CardHeader>
-                <CardTitle className="text-lg">Customer Information</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid items-center grid-cols-2 gap-3">
-                <CaseField label="Customer Account"  lock>
-                  <Input
-                    variant="invisible"
-                    value={
-                      dataFetchCustomerData?.Type == "SiteAccount"
-                        ? dataFetchCustomerData?.SiteAccount?.Company
-                        : dataFetchCustomerData?.MainAccount?.FirstName +
-                          " " +
-                          dataFetchCustomerData?.MainAccount?.LastName
-                    }
-                    readOnly
-                  />
-                </CaseField>
-                <CaseField label="Primary Contact" lock>
-                  <Input
-                    variant="invisible"
-                    value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
-                    readOnly
-                  />
-                </CaseField>
-                 <CaseField label="Secondary Contact" lock>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label=" Primary Email" lock>
-                  <Input
-                    variant="invisible"
-                    value={dataFetchCustomerData.MainAccount?.Email}
-                    placeholder="---"
-                    readOnly
-                  />
-                </CaseField>
-                <CaseField label="Country" lock>
-                  <Input
-                    variant="invisible"
-                    value={
-                      dataFetchCustomerData?.Type == "SiteAccount"
-                        ? dataFetchCustomerData?.SiteAccount?.Country
-                        : dataFetchCustomerData?.MainAccount?.Country
-                    }
-                    readOnly
-                  />                  
-                </CaseField>
-                <CaseField label="Phone" lock>
-                  <span className="pl-3">
-                  {dataFetchCustomerData?.Type == "SiteAccount"
-                    ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone
-                    : dataFetchCustomerData?.MainAccount?.Phone}
-                  </span>
-                </CaseField>
-                <CaseField label="Region" lock>
-                  <Input 
-                  variant="invisible" 
-                  placeholder="---" readOnly 
-                  value={dataFetchCustomerData.SiteAccount?.City}/>
-                </CaseField>
-                <CaseField label="Is Partner" lock>
-                  <Input variant="invisible" placeholder="---" readOnly/>
-                </CaseField>
-                <CaseField label="Partner & Customer" lock>
-                  <Input variant="invisible" placeholder="---"  readOnly/>
-                </CaseField>
-                <Accordion type="single" collapsible className="col-span-2">
-                  <AccordionItem value="more-details" className={"pl-5 "}>
-                    <AccordionTrigger className={"decoration-transparent border p-2 cursor-pointer"}>More Details</AccordionTrigger>
-                    <AccordionContent className="m-1">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
-                        <CaseField label="Submitted By">
-                          <Input variant="invisible" placeholder="---"  />
-                        </CaseField>
-                        <CaseField label="HIPAA" >
-                          <Input variant="invisible" placeholder="---" readOnly/>
-                        </CaseField>
-                        <CaseField label="PIN">
-                          <Input variant="invisible" placeholder="---" />
-                        </CaseField>              
-                        <CaseField label="Parent Company">
-                          <Input variant="invisible" placeholder="---" />
-                        </CaseField>
-                        <CaseField label="Parent Company Non-Latin">
-                          <Input variant="invisible" placeholder="---" />
-                        </CaseField>
-                        <CaseField label="Customer Time Zone">
-                          <Input variant="invisible" placeholder="---" readOnly/>
-                        </CaseField>
-                        <CaseField label="Account Tier">
-                          <Input variant="invisible" placeholder="---"/>
-                        </CaseField>
-                      </div>
-                    </AccordionContent>
-                </AccordionItem>
-                </Accordion>
-              </CardContent>
-            </Card>
-        </div>
+                        ></DatePicker>
 
-        <div className="mt-2 p-3">
-            <Card className="flex-col">
-              <CardHeader>
-                <CardTitle className="text-lg ">Asset Information</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid items-center grid-cols-6 gap-10">
-                <CaseField label="Assets" lock>
-                  {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
-                </CaseField>
-                <CaseField label="Product Number" lock>
-                  <span className="pl-3">
-                    {
-                    dataFetchAssetInformation?.AssetInformation
-                      ?.product_information?.ProductNumber
-                  } 
-                    </span>
-                </CaseField>
-                <CaseField label="Asset Location" lock> 
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Serial Number" lock>
-                  {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
-                </CaseField>
-                <CaseField label="HWPC Code" lock>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                  <CaseField label="SNIC - Count" lock>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Product Name" lock>
-                  {
-                    dataFetchAssetInformation?.AssetInformation
-                      ?.product_information?.ProductName
-                  }{" "}
-                </CaseField>
-                <CaseField label="MV Product Description" lock>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-               
-                  <CaseField label="HW Profit Center" lock>
-                  {" "}
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <div className="grid items-center grid-cols-2 col-span-2 gap-2 p-5 ring-1">
-                  <CaseField label="Device Properties" lock>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                </div>
-                  <CaseField label="OTC Code" lock span={3} star>
-                  <SearchCommandBlock
-                    options={otcCode}
-                    value={entitlementStatus.OTCCode}
-                    onChange={(value) =>
-                      handleEntitlementStatus("OTCCode")(value)
-                    }
-                    placeholder="---"
-                    renderLabel={(opt) => `${opt.OTCCode} - ${opt.Description}`}
-                    getValue={(opt) => opt.OTCCode}
-                  />
-                </CaseField>
-              </CardContent>
-              {/* TABEL ACCESSORY */}
-                <div className="px-6 pb-6">
-                  <h3 className="text-md font-semibold mb-2">Accessory</h3>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full border text-sm text-left">
-                      <thead className="bg-gray-100 text-gray-700">
-                        <tr>
-                          <th className="border px-4 py-2">No Accesories</th>
-                          <th className="border px-4 py-2" hidden>Case ID</th>
-                          <th className="border px-4 py-2">Accessories</th>
-                          <th className="border px-4 py-2">Note</th>
-                          <th className="border px-4 py-2">CT / SN code</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {caseDetails.accessory?.map((item, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="border px-4 py-2">{item.id}</td>
-                            <td className="border px-4 py-2" hidden>{item.CaseID}</td>
-                            <td className="border px-4 py-2">{item.Accessories}</td>
-                            <td className="border px-4 py-2">{item.Note || "---"}</td>
-                            <td className="border px-4 py-2">{item.CT_SNCode || "---"}</td>
-                          </tr>
-                        ))}
-                        {(!caseDetails?.accessory ||
-                          caseDetails.accessory.length === 0) && (
-                            <tr>
-                              <td className="border px-4 py-2 text-center" colSpan={5}>
-                                No accessories found.
-                              </td>
-                            </tr>
-                          )}
-                      </tbody>
-                    </table>
-                    <div className="mt-2 text-md text-gray-600">
-                      Total Accesories: {caseDetails.accessory?.length || 0}
-                    </div>
+                      </span>
+                    </CaseField>
+
                   </div>
-                </div>
-            </Card>
-        </div>
+                  <hr />
+                  <div className="grid grid-cols-4 gap-4">
+                    <CaseField
+                      label="Case ID manual"
+                      lock
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
 
-        <div className="mt-2 p-1">
-              <Card className="flex-col">
-              <CardHeader>
-                <CardTitle className="text-lg ">
-                  Customer Issue Description & System Information
-                </CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="flex p-4 gap-x-5">
-                <div className="grid items-center flex-1 grid-cols-6 grid-row-7 gap-y-7">
-                  <div className="row-span-4 col-span-full">
-                    <textarea
-                      className="border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none"
-                      readOnly
-                      value={caseDetails?.CaseProductNote}
-                    ></textarea>
-                  </div>
-                  <CaseField
-                    label="Related Device"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Device Manufacturer"
-                    className={"col-span-3"}
-                    span={3}
-                    
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Device Model"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                </div>
-
-                <div className="grid flex-1 grid-flow-row grid-cols-6 gap-y-7">
-                  <CaseField
-                    label="Program/Category"
-                    className={"col-span-3"}
-                    span={2}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Operating System"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField label="Version" className={"col-span-3"} span={3}>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Remote Diag Code"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Application Information"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Provider / Platform"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Software Version"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                </div>
-              </CardContent>
-            </Card>
-        </div>
-
-        <div className="mt-2 p-1">
-            <Card className="flex-col">
-              <CardHeader>
-                <CardTitle className="text-lg ">Case Notes</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="flex gap-4">
-                <div className="grid flex-1 grid-cols-6 gap-y-7">
-                  <CaseField label="Log Type" className={"col-span-2"} span={4}>
-                    <Select  value={formData?.LogType}  onValueChange={(val) => onChange("LogType", val)}>
-                      <SelectTrigger
-                        className={"w-[100%] hover:shadow-lg border-b-0 p-3"}
-                      >
-                        <SelectValue placeholder="Log Type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="NotesLog">Notes Log</SelectItem>
-                        <SelectItem value="PhoneLog">Phone Log</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </CaseField>
-
-                  <CaseField
-                    label="Action Type"
-                    className={"col-span-2"}
-                    span={4}
-                  >
+                    <CaseField
+                      label="Case Status"
+                      
+                    >
                       <SearchCommandBlock
-                      value={formData?.ActionType}
-                      onChange={(val) => onChange("ActionType", val)}
-                      placeholder="--Select--"
-                      options={[
-                        "Inbound Customer call",
-                        "Action Plan",
-                        "Administrative task",
-                        "CE/Partner Assist",
-                        "Customer Email",
-                      ]}
-                    />
-                  </CaseField>
+                        value={
+                          statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"
+                        }
+                        onChange={async (label) => {
+                          const enumValue = labelToStatusEnum[label];
+                          onChangeCase("CaseStatus")(enumValue);
+                          console.log("Selected label:", label);
+                          console.log("Mapped enum:", enumValue);
 
-                  <CaseField label="Template" className={"col-span-2"} span={4}>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
+                          if (enumValue.startsWith("NEW_Assign")) {
+                            const role = enumValue.endsWith("CE")
+                              ? "ce"
+                              : enumValue.endsWith("APO")
+                                ? "apo"
+                                : null;
+                            console.log("Mapped enum:", role);
 
-                  <CaseField
-                    label="Visible Externally"
-                    className={"col-span-2"}
-                    span={4}
+                            if (role) {
+                              try {
+                                fetchUserAssign(role);
+                                console.log("Mapped enum:", roleAssign);
+                              } catch (err) {
+                                console.error("Error fetching role: ", err);
+                              }
+                            }
+                          } else {
+                            setRoleAssign([]);
+                          }
+                        }}
+                        placeholder="--Select--"
+                        options={Object.values(statusEnumToLabel)}
+                      />
+                    </CaseField>
+                    <CaseField
+                      label="Assign To"
+                      
+                      hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}
+                    >
+                      <SearchCommandBlock
+                        value={caseForm?.Owner}
+                        onChange={(selectedID) => {
+                          if (selectedID === null) {
+                            onChangeCase("AssignTo")(null); // Clear the value!
+                            return;
+                          }
+                          const selectedUser = roleAssign.find(
+                            (user) => user.IDUser === selectedID
+                          );
+                          if (selectedUser) {
+                            onChangeCase("Owner")(selectedUser.IDUser);
+                          }
+                        }}
+                        placeholder="--Select--"
+                        options={roleAssign.map((user) => ({
+                          label: user.Name,
+                          value: user.IDUser,
+                        }))}
+                        renderLabel={(opt) => opt.label}
+                        getValue={(opt) => opt.value}
+                      />
+                    </CaseField>
+                    {/* {assignToForm == true ?? (
+                )} */}
+
+                    <CaseField label="Case Type"  >
+                      <SearchCommandBlock
+                        value={caseForm?.CaseType}
+                        onChange={onChangeCase("CaseType")}
+                        placeholder="--Select--"
+                        options={["Depot Repair", "Onsite", "Bench"]}
+                      />
+                    </CaseField>
+
+                    <CaseField
+                      label="Case Priority"
+                      lock
+                    >
+                      <Input
+                        variant="invisible"
+                        value={caseDetails.CasePriority}
+                      />
+                    </CaseField>
+
+                    <CaseField
+                      label="Customer Severity"
+
+                      lock
+                    >
+                      <Input
+                        variant="invisible"
+                        value={caseDetails.CustomerSeverity}
+                      />
+                    </CaseField>
+
+                    <CaseField
+                      label="Incoming Channel"
+
+                      lock
+                    >
+                      <Input
+                        variant="invisible"
+                        value={caseDetails.IncomingChannel}
+                      />
+                    </CaseField>
+
+                    <CaseField label="KCI For Case?" lock>
+                      <Input
+                        variant="invisible"
+                        value={caseDetails.KCI_Flag ? "Yes" : "No"}
+                      />
+                    </CaseField>
+                  </div>
+
+                  <Accordion
+                    type="single"
+                    collapsible
+                    className="w-full col-span-2"
                   >
-                    <SelectYN 
+                    <AccordionItem value="more-details" className="pl-5">
+                      <AccordionTrigger
+                        className={
+                          "decoration-transparent border-1 p-2 cursor-pointer"
+                        }
+                      >
+                        More Details
+                      </AccordionTrigger>
+                      <AccordionContent className={"m-1"}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                          <CaseField label="Submitted To Base">
+                            <span className="gap-[5em]">
+                              <DatePicker
+                                variant="icon"
+                                value={submittedToBase}
+                                onChange={setsubmittedToBase}
+                                readOnly
+                              ></DatePicker>
+                            </span>
+                          </CaseField>
+                          <CaseField label="Business Segment">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField label="HPI Segment">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField label="Customer Tracking Number">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField label="Update Customer Tracking Number">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+                          <CaseField label="Alternate Customer Tracking Number">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField label="Irrelevant">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField label="Email Status">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField label="Case ID" lock className={"hidden"}>
+                            <Input
+                              variant="invisible"
+                              value={caseDetails.CaseID}
+                              readOnly
+                              hidden
+                            />
+                          </CaseField>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+
+                </CardContent>
+              </Card>
+
+              <Card className="flex-col hover:shadow-gray-400">
+                <CardHeader>
+                  <CardTitle className="text-xl flex gap-2">
+                    <Contact/>Customer Information
+                  </CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent className="grid items-center grid-cols-2 gap-3">
+                  <CaseField label="Customer Account" lock>
+                    <Input
+                      variant="invisible"
                       value={
-                        formData?.VisibleExternally === undefined ||
-                        formData?.VisibleExternally === null
-                          ? ""
-                          : formData?.VisibleExternally
-                          ? "Yes"
-                          : "No"
+                        dataFetchCustomerData?.Type == "SiteAccount"
+                          ? dataFetchCustomerData?.SiteAccount?.Company
+                          : dataFetchCustomerData?.MainAccount?.FirstName +
+                            " " +
+                            dataFetchCustomerData?.MainAccount?.LastName
                       }
-                      onValueChange={(val) =>
-                        onChange("VisibleExternally", val === "Yes")
-                      }
-                    ></SelectYN>
-                  </CaseField>
-
-                  <CaseField
-                    label="Number of Minutes Spent"
-                    className={"col-span-2"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-
-                  <CaseField
-                    label="Notes"
-                    className={"col-span-2 self-start bg-red"}
-                    span={4}
-                    star
-                  >
-                    <textarea
-                      className="h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500"
-                      value={formData?.Note || ""}
-                      onChange={(e) => onChange("Note", e.target.value)}
+                      readOnly
                     />
                   </CaseField>
-                </div>
+                  <CaseField label="Primary Contact" lock>
+                    <Input
+                      variant="invisible"
+                      value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
+                      readOnly
+                    />
+                  </CaseField>
+                  <CaseField label="Secondary Contact" lock>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField label=" Primary Email" lock>
+                    <Input
+                      variant="invisible"
+                      value={dataFetchCustomerData.MainAccount?.Email}
+                      placeholder="---"
+                      readOnly
+                    />
+                  </CaseField>
+                  <CaseField label="Country" lock>
+                    <Input
+                      variant="invisible"
+                      value={
+                        dataFetchCustomerData?.Type == "SiteAccount"
+                          ? dataFetchCustomerData?.SiteAccount?.Country
+                          : dataFetchCustomerData?.MainAccount?.Country
+                      }
+                      readOnly
+                    />
+                  </CaseField>
+                  <CaseField label="Phone" lock>
+                    <span className="pl-3">
+                      {dataFetchCustomerData?.Type == "SiteAccount"
+                        ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone
+                        : dataFetchCustomerData?.MainAccount?.Phone}
+                    </span>
+                  </CaseField>
+                  <CaseField label="Region" lock>
+                    <Input
+                      variant="invisible"
+                      placeholder="---"
+                      readOnly
+                      value={dataFetchCustomerData.SiteAccount?.City}
+                    />
+                  </CaseField>
+                  <CaseField label="Is Partner" lock>
+                    <Input variant="invisible" placeholder="---" readOnly />
+                  </CaseField>
+                  <CaseField label="Partner & Customer" lock>
+                    <Input variant="invisible" placeholder="---" readOnly />
+                  </CaseField>
+                  <Accordion type="single" collapsible className="col-span-2">
+                    <AccordionItem value="more-details" className={"pl-5 "}>
+                      <AccordionTrigger
+                        className={
+                          "decoration-transparent border p-2 cursor-pointer"
+                        }
+                      >
+                        More Details
+                      </AccordionTrigger>
+                      <AccordionContent className="m-1">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
+                          <CaseField label="Submitted By">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+                          <CaseField label="HIPAA">
+                            <Input
+                              variant="invisible"
+                              placeholder="---"
+                              readOnly
+                            />
+                          </CaseField>
+                          <CaseField label="PIN">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+                          <CaseField label="Parent Company">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+                          <CaseField label="Parent Company Non-Latin">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+                          <CaseField label="Customer Time Zone">
+                            <Input
+                              variant="invisible"
+                              placeholder="---"
+                              readOnly
+                            />
+                          </CaseField>
+                          <CaseField label="Account Tier">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="grid grid-cols-2 mt-2 p-3 gap-4">
+              <Card className="flex-col hover:shadow-gray-400">
+                <CardHeader>
+                  <CardTitle className="text-xl flex gap-2 ">
+                    <FileSliders/>Customer Issue Description & System Information
+                  </CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent >
+                  <div className="flex flex-col gap-2">
+                    <CaseField span={2}>
+                      <textarea
+                        className=" w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
+                        readOnly
+                        value={caseDetails?.CaseProductNote}
+                      ></textarea>
+                    </CaseField>
 
-                <div className="flex flex-1">
-                  <textarea
-                    className="w-[100%] h-[100%] resize-none p-2 ring-1 ring-gray-500"
-                    readOnly
-                    value={formData?.NotesDisplay}
-                  >
-                  </textarea>
-                </div>
-              </CardContent>
-            </Card>
-        </div>
-        </TabsContent>
+                    <div className="grid grid-cols-4 gap-4">
+                    <CaseField
+                      label="Related Device"
+                      lock
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField
+                      label="Device Manufacturer"
+                      lock
+                      
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField
+                      label="Device Model"
+                      lock
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                
+                    <CaseField
+                      label="Program/Category"
+                      lock
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField
+                      label="Operating System"
+                      lock
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField
+                      label="Version"
+                      lock
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField
+                      label="Remote Diag Code"
+                      lock
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField
+                      label="Application Information"
+                      lock
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField
+                      label="Provider / Platform"
+                        lock
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField
+                      label="Software Version"
+                        lock
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+                <Card className=" hover:shadow-gray-400">
+                <CardHeader>
+                  <CardTitle className="text-xl flex gap-2 "><NotepadText/>Case Notes</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent >
+                  <div className="flex flex-col gap-2">
+                    <CaseField >
+                    <textarea
+                        className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
+                      readOnly
+                      value={formData?.NotesDisplay}
+                    ></textarea>
+                  </CaseField>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <CaseField
+                      label="Log Type"
+           
+                    >
+                      <Select
+                        value={formData?.LogType}
+                        onValueChange={(val) => onChange("LogType", val)}
+                      >
+                        <SelectTrigger
+                          className={"w-[100%] hover:shadow-lg border-b-0 p-3"}
+                        >
+                          <SelectValue placeholder="Log Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="NotesLog">Notes Log</SelectItem>
+                          <SelectItem value="PhoneLog">Phone Log</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </CaseField>
+
+                    <CaseField
+                      label="Action Type"
+                      
+                    >
+                      <SearchCommandBlock
+                        value={formData?.ActionType}
+                        onChange={(val) => onChange("ActionType", val)}
+                        placeholder="--Select--"
+                        options={[
+                          "Inbound Customer call",
+                          "Action Plan",
+                          "Administrative task",
+                          "CE/Partner Assist",
+                          "Customer Email",
+                        ]}
+                      />
+                    </CaseField>
+
+                    <CaseField
+                      label="Template"
+                   
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+
+                    <CaseField
+                      label="Visible Externally"
+                   
+                    >
+                      <SelectYN
+                        value={
+                          formData?.VisibleExternally === undefined ||
+                          formData?.VisibleExternally === null
+                            ? ""
+                            : formData?.VisibleExternally
+                            ? "Yes"
+                            : "No"
+                        }
+                        onValueChange={(val) =>
+                          onChange("VisibleExternally", val === "Yes")
+                        }
+                      ></SelectYN>
+                    </CaseField>
+
+                    <CaseField
+                      label="Number of Minutes Spent"
+                    
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+
+                    <CaseField
+                      label="Notes"
+                    
+                      
+                      star
+                    >
+                      <textarea
+                          className="w-full h-full min-h-[300px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300"
+                        value={formData?.Note || ""}
+                        onChange={(e) => onChange("Note", e.target.value)}
+                        placeholder="Write your note"
+                      />
+                    </CaseField>
+                  </div>
+                  </div>
+
+                 
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
           <TabsContent value="action_log">
             <div className="mt-2 p-1">
@@ -2340,7 +2350,9 @@ const [endDate, setEndDate] = useState(null);
                             <TableCell>{log.changedByUser?.Name}</TableCell>
                             <TableCell>{log.dataOld}</TableCell>
                             <TableCell>{log.dataNew}</TableCell>
-                            <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
+                            <TableCell>
+                              {new Date(log.ChangeAt).toLocaleString()}
+                            </TableCell>
                             <TableCell>{log.logDescription}</TableCell>
                           </TableRow>
                         ))
@@ -2358,7 +2370,335 @@ const [endDate, setEndDate] = useState(null);
             </div>
           </TabsContent>
 
-        <div className="mt-2 p-1" hidden>
+          <TabsContent value="ci_asset">
+            <div className="mt-2 p-3">
+              <Card className="flex-col">
+                <CardHeader>
+                  <CardTitle className="text-lg ">Asset Information</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent className="grid items-center grid-cols-6 gap-10">
+                  <CaseField label="Assets" lock>
+                    {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
+                  </CaseField>
+                  <CaseField label="Product Number" lock>
+                    <span className="pl-3">
+                      {
+                        dataFetchAssetInformation?.AssetInformation
+                          ?.product_information?.ProductNumber
+                      }
+                    </span>
+                  </CaseField>
+                  <CaseField label="Asset Location" lock>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField label="Serial Number" lock>
+                    {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
+                  </CaseField>
+                  <CaseField label="HWPC Code" lock>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField label="SNIC - Count" lock>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField label="Product Name" lock>
+                    {
+                      dataFetchAssetInformation?.AssetInformation
+                        ?.product_information?.ProductName
+                    }{" "}
+                  </CaseField>
+                  <CaseField label="MV Product Description" lock>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+
+                  <CaseField label="HW Profit Center" lock>
+                    {" "}
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <div className="grid items-center grid-cols-2 col-span-2 gap-2 p-5 ring-1">
+                    <CaseField label="Device Properties" lock>
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                  </div>
+                  <CaseField label="OTC Code" lock span={3} star>
+                    <SearchCommandBlock
+                      options={otcCode}
+                      value={entitlementStatus.OTCCode}
+                      onChange={(value) =>
+                        handleEntitlementStatus("OTCCode")(value)
+                      }
+                      placeholder="---"
+                      renderLabel={(opt) =>
+                        `${opt.OTCCode} - ${opt.Description}`
+                      }
+                      getValue={(opt) => opt.OTCCode}
+                    />
+                  </CaseField>
+                </CardContent>
+                {/* TABEL ACCESSORY */}
+                <div className="px-6 pb-6">
+                  <h3 className="text-md font-semibold mb-2">Accessory</h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full border text-sm text-left">
+                      <thead className="bg-gray-100 text-gray-700">
+                        <tr>
+                          <th className="border px-4 py-2">No Accesories</th>
+                          <th className="border px-4 py-2" hidden>
+                            Case ID
+                          </th>
+                          <th className="border px-4 py-2">Accessories</th>
+                          <th className="border px-4 py-2">Note</th>
+                          <th className="border px-4 py-2">CT / SN code</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {caseDetails.accessory?.map((item, index) => (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="border px-4 py-2">{item.id}</td>
+                            <td className="border px-4 py-2" hidden>
+                              {item.CaseID}
+                            </td>
+                            <td className="border px-4 py-2">
+                              {item.Accessories}
+                            </td>
+                            <td className="border px-4 py-2">
+                              {item.Note || "---"}
+                            </td>
+                            <td className="border px-4 py-2">
+                              {item.CT_SNCode || "---"}
+                            </td>
+                          </tr>
+                        ))}
+                        {(!caseDetails?.accessory ||
+                          caseDetails.accessory.length === 0) && (
+                          <tr>
+                            <td
+                              className="border px-4 py-2 text-center"
+                              colSpan={5}
+                            >
+                              No accessories found.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                    <div className="mt-2 text-md text-gray-600">
+                      Total Accesories: {caseDetails.accessory?.length || 0}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+          <div className="mt-2 p-3">
+                  <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className="text-lg ">Work Order</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="flex flex-col gap-5 p-3 ">
+                <div className="grid grid-cols-4 gap-5" hidden>
+                  <CaseField label="Incident Type" span={3} >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField label="Work Order Description" span={3}>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+                </div>
+
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">
+                        Work Order Number
+                      </TableHead>
+                      <TableHead>Case ID</TableHead>
+                      <TableHead>Service Account</TableHead>
+                      <TableHead>Sub-Status</TableHead>
+                      <TableHead>System Status</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Work Order</TableHead>
+                      <TableHead>Primary Incident</TableHead>
+                      <TableHead>Due Date</TableHead>
+                      <TableHead>Orion</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Created By</TableHead>
+                      <TableHead>Created At</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {workOrders.map((work) => (
+                      <TableRow
+                        key={work.WOID}
+                        className="cursor-pointer hover:bg-gray-300"
+                        onClick={handleClick}
+                      >
+                        <TableCell className="font-medium ">
+                          {work.WOID}
+                        </TableCell>
+                        <TableCell>{work.CaseID}</TableCell>
+                        <TableCell>
+                          {work.caseinformation?.site_account?.Company ||
+                            work.caseinformation?.contact_information
+                              ?.FirstName +
+                              " " +
+                              work.caseinformation?.contact_information
+                                ?.LastName ||
+                            "-"}
+                        </TableCell>
+
+                        <TableCell>{work.SubStatus}</TableCell>
+                        <TableCell>{work.SystemStatus}</TableCell>
+                        <TableCell>{work.Priority}</TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell>{work.owner?.Name}</TableCell>
+                        <TableCell>{work.owner?.Name}</TableCell>
+                        <TableCell>{work.CreatedOn}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+      
+<div className="mt-2 p-3">
+  <Card className="flex-col ">
+              <CardHeader>
+                <CardTitle className="text-lg ">Material Order</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className="grid gap-5">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Name</TableHead>
+                      <TableHead>Case ID</TableHead>
+                      <TableHead>Created On</TableHead>
+                      <TableHead>Order Status</TableHead>
+                      <TableHead>Order Type</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Work Order</TableHead>
+                      <TableHead>Ready For Closure Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {materialOrders.map((material) => (
+                      <TableRow key={material.MOID}>
+                        <TableCell className="font-medium">
+                          <Link to={`/app/material-order/${material.MOID}`}>
+                            {material.MOID} on {material.WOID}
+                          </Link>
+                        </TableCell>
+                        <TableCell>{material.workorder?.CaseID}</TableCell>
+                        <TableCell>{material.CreatedOn}</TableCell>
+                        <TableCell>{material.OrderStatus}</TableCell>
+                        <TableCell>{material.OrderType}</TableCell>
+                        <TableCell>{material.owner?.Name}</TableCell>
+                        <TableCell>{material.WOID}</TableCell>
+                        <TableCell>{material.ReadyForClosureDate}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+</div>
+          
+          </TabsContent>
+
+          <Card className="flex-col mt-5" hidden>
+            <CardHeader>
+              <CardTitle className="text-lg ">Global Trade Check</CardTitle>
+              <hr />
+            </CardHeader>
+
+            <CardContent className="grid gap-10  grid-cols-6 p-3 items-center">
+              <CaseField label="Global Trade Status">
+                <SearchCommandBlock
+                  value={formGtc.global_trade_status}
+                  onChange={onChangeGtc("global_trade_status")}
+                  placeholder="--Select--"
+                  options={[
+                    "Pass",
+                    "Fail",
+                    "Not Done",
+                    "Not Needed",
+                    "Failed Confirmed",
+                  ]}
+                />
+              </CaseField>
+
+              <CaseField label="GT Override Reason">
+                <SearchCommandBlock
+                  value={formGtc.gt_override_reason}
+                  onChange={onChangeGtc("gt_override_reason")}
+                  placeholder="--Select--"
+                  options={[
+                    "Military Keyword False Match",
+                    "Embargo False Match",
+                    "RPL False Match",
+                    "Active Contract",
+                    "United States Government",
+                    "Global Trade Authorization",
+                    "RPL Manual Screening Passed",
+                    "Fail Confirmed by GT",
+                    "Other",
+                  ]}
+                />
+              </CaseField>
+              <CaseField label="GT Active Listening">
+                <SearchCommandBlock
+                  value={formGtc.gt_active_listening}
+                  onChange={onChangeGtc("gt_active_listening")}
+                  placeholder="--Select--"
+                  options={["Pass", "Fail"]}
+                />
+              </CaseField>
+              <CaseField label="Embargoed Country" lock>
+                <Input
+                  variant="invisible"
+                  placeholder="---"
+                  value={formGtc.embargoed_country}
+                  onChange={(e) =>
+                    onChangeGtc("embargoed_country")(e.target.value)
+                  }
+                />
+              </CaseField>
+              <CaseField label="GT Details">
+                <Input
+                  variant="invisible"
+                  placeholder="---"
+                  value={formGtc.gt_details}
+                  onChange={(e) => onChangeGtc("gt_details")(e.target.value)}
+                />
+              </CaseField>
+              <CaseField label="GT All Comments">
+                <Input
+                  variant="invisible"
+                  placeholder="---"
+                  value={formGtc.gt_al_comments}
+                  onChange={(e) =>
+                    onChangeGtc("gt_al_comments")(e.target.value)
+                  }
+                />
+              </CaseField>
+              <CaseField className={"col-start-3"} label="Screening ID">
+                <Input
+                  variant="invisible"
+                  placeholder="---"
+                  value={formGtc.screening_id}
+                  onChange={(e) => onChangeGtc("screening_id")(e.target.value)}
+                />
+              </CaseField>
+            </CardContent>
+          </Card>
+
+          <div className="mt-2 p-1" hidden>
             <Card className="flex-col ">
               <CardHeader>
                 <CardTitle className="text-lg ">
@@ -2405,102 +2745,12 @@ const [endDate, setEndDate] = useState(null);
                 </CaseField>
               </CardContent>
             </Card>
-        </div>
-
-          <Card className="flex-col mt-5" hidden>
-              <CardHeader>
-                <CardTitle className="text-lg ">Global Trade Check</CardTitle>
-                <hr />
-              </CardHeader>
-              
-              <CardContent className="grid gap-10  grid-cols-6 p-3 items-center">
-                <CaseField label="Global Trade Status">
-                  <SearchCommandBlock
-                    value={formGtc.global_trade_status}
-                    onChange={onChangeGtc("global_trade_status")}
-                    placeholder="--Select--"
-                    options={[
-                      "Pass",
-                      "Fail",
-                      "Not Done",
-                      "Not Needed",
-                      "Failed Confirmed",
-                    ]}
-                  />
-                </CaseField>
-
-                <CaseField label="GT Override Reason">
-                  <SearchCommandBlock
-                    value={formGtc.gt_override_reason}
-                    onChange={onChangeGtc("gt_override_reason")}
-                    placeholder="--Select--"
-                    options={[
-                      "Military Keyword False Match",
-                      "Embargo False Match",
-                      "RPL False Match",
-                      "Active Contract",
-                      "United States Government",
-                      "Global Trade Authorization",
-                      "RPL Manual Screening Passed",
-                      "Fail Confirmed by GT",
-                      "Other",
-                    ]}
-                  />
-                </CaseField>
-                <CaseField label="GT Active Listening">
-                  <SearchCommandBlock
-                    value={formGtc.gt_active_listening}
-                    onChange={onChangeGtc("gt_active_listening")}
-                    placeholder="--Select--"
-                    options={["Pass", "Fail"]}
-                  />
-                </CaseField>
-                <CaseField label="Embargoed Country" lock>
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                    value={formGtc.embargoed_country}
-                    onChange={(e) =>
-                      onChangeGtc("embargoed_country")(e.target.value)
-                    }
-                  />
-                </CaseField>
-                <CaseField label="GT Details">
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                    value={formGtc.gt_details}
-                    onChange={(e) => onChangeGtc("gt_details")(e.target.value)}
-                  />
-                </CaseField>
-                <CaseField label="GT All Comments">
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                    value={formGtc.gt_al_comments}
-                    onChange={(e) =>
-                      onChangeGtc("gt_al_comments")(e.target.value)
-                    }
-                  />
-                </CaseField>
-                <CaseField className={"col-start-3"} label="Screening ID">
-                  <Input
-                    variant="invisible"
-                    placeholder="---"
-                    value={formGtc.screening_id}
-                    onChange={(e) =>
-                      onChangeGtc("screening_id")(e.target.value)
-                    }
-                  />
-                </CaseField>
-              </CardContent>
-          </Card>   
+          </div>
 
           <TabsContent
             value="customer,add,entitement"
             className={"p-1 flex flex-col gap-4"}
           >
-
             {/* <Card className="flex-col ">
               <CardHeader>
                 <CardTitle className="text-lg ">SLA Information</CardTitle>
@@ -2533,13 +2783,9 @@ const [endDate, setEndDate] = useState(null);
                 </CaseField>
               </CardContent>
             </Card> */}
-
-          
           </TabsContent>
 
           <TabsContent value="ci_notes" className={"p-2 flex flex-col gap-4"}>
-          
-
             {/* <Card className="flex-col ">
               <CardHeader>
                 <CardTitle className="text-lg ">
@@ -2609,7 +2855,7 @@ const [endDate, setEndDate] = useState(null);
                     {selectedSymptom?.SymptomCode}
                   </CaseField> */}
 
-                  {/* <div className='flex font-bold'>
+            {/* <div className='flex font-bold'>
                     <span>Top Category</span>
                     <span className=''>...{selectedSymptom?.TopCategory}</span>
                   </div>
@@ -2621,13 +2867,13 @@ const [endDate, setEndDate] = useState(null);
                     <span>Spesific Symptom</span>
                     <span className=''>...{selectedSymptom?.SymptomCode}</span>
                   </div> */}
-                {/* </div> */}
+            {/* </div> */}
 
-                {/* <div className="flex flex-1 font-bold">
+            {/* <div className="flex flex-1 font-bold">
                   <Table className="pverflow-auto">
                     <TableCaption className="caption-top"> */}
-                      {/* Optional caption content here */}
-                    {/* </TableCaption>
+            {/* Optional caption content here */}
+            {/* </TableCaption>
 
                     <TableHeader>
                       <TableRow className={""}>
@@ -2669,12 +2915,12 @@ const [endDate, setEndDate] = useState(null);
 
               <CardContent className="grid grid-cols-7 gap-5 p-3 ">
                 <CaseField label="Case Resolution Code" star> */}
-                  {/* <Input
+            {/* <Input
                   variant='invisible'
                   value={csrForm.caseResolutionCode}
                   onChange={(e) => onChangeCsr("caseResolutionCode")(e.target.value)}
                 /> */}
-                  {/* <SearchCommandBlock
+            {/* <SearchCommandBlock
                     value={csrForm.caseResolutionCode}
                     onChange={onChangeCsr("caseResolutionCode")}
                     placeholder="--Select--"
@@ -2752,95 +2998,114 @@ const [endDate, setEndDate] = useState(null);
           </TabsContent>
 
           <TabsContent value="ci_wo">
-                      <div className="flex gap-4">
-                        <Card className="flex-1/3  rounded-md">
-                          <CardHeader>
-                            <CardTitle className=" text-lg">Case Information</CardTitle>
-                            <hr />
-                          </CardHeader>
-                          <CardContent className="grid gap-5 grid-cols-2">
-                          <CaseField label="Case Subject" span={1}>
-                          {caseDetails.CaseSubject}
-                          </CaseField>
-                          <CaseField label="Case Type">{caseDetails.CaseType}</CaseField>
-                            <CaseField label="Businnes Segment">
-                              <Input
-                                variant={"invisible"}
-                                className=""
-                                value={"---"}
-                                readOnly
-                              />
-                            </CaseField>
-                            <CaseField label="HPI Segment">
-                              <Input
-                                variant={"invisible"}
-                                className=""
-                                value={"---"}
-                                readOnly
-                              />
-                            </CaseField>
-          
-                            <CaseField label="Global Trade Status">
-                            {caseDetails.global_trade_check?.global_trade_status || "---"}
-                            </CaseField>
-                            <CaseField label="Global Trade Ovveride Reason">
-                            {caseDetails.global_trade_check?.gt_override_reason || "---"}
-                            </CaseField>
-                            <CaseField label="GT Active Listening">
-                            {caseDetails.global_trade_check?.gt_active_listening || "---"}
-                            </CaseField>
-                            <CaseField label="Security Status" lock>
-                              <Input
-                                variant={"invisible"}
-                                className=""
-                                value={"---"}
-                                readOnly
-                              />
-                            </CaseField>
-                            <CaseField label="Security Ovveride Reason" lock>
-                              <Input
-                                variant={"invisible"}
-                                className=""
-                                value={"---"}
-                                readOnly
-                              />
-                            </CaseField>
-                          </CardContent>
-                        </Card>
-                        <div className="flex-3 flex flex-col gap-4">
-                          <Card className="rounded-md">
-                            <CardHeader>
-                              <CardTitle className="text-lg">Case Notes History</CardTitle>
-                              <hr />
-                            </CardHeader>
-                            <CardContent>
-                              <CaseField label="Notes History" lock>
-                                <textarea
-                                  className="mt-4 resize-none w-full min-h-[400px] p-2 ring-1 ring-gray-300 rounded-md text-md"
-                                  readOnly
-                                  value={caseNotes?.NotesDisplay}
-                                />
-                              </CaseField>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      </div>
+            <div className="flex gap-4">
+              <Card className="flex-1/3  rounded-md">
+                <CardHeader>
+                  <CardTitle className=" text-lg">Case Information</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent className="grid gap-5 grid-cols-2">
+                  <CaseField label="Case Subject" span={1}>
+                    {caseDetails.CaseSubject} 
+                  </CaseField>
+                  <CaseField label="Case Type">
+                    {caseDetails.CaseType}
+                  </CaseField>
+                  <CaseField label="Businnes Segment">
+                    <Input
+                      variant={"invisible"}
+                      className=""
+                      value={"---"}
+                      readOnly
+                    />
+                  </CaseField>
+                  <CaseField label="HPI Segment">
+                    <Input
+                      variant={"invisible"}
+                      className=""
+                      value={"---"}
+                      readOnly
+                    />
+                  </CaseField>
+
+                  <CaseField label="Global Trade Status">
+                    {caseDetails.global_trade_check?.global_trade_status ||
+                      "---"}
+                  </CaseField>
+                  <CaseField label="Global Trade Ovveride Reason">
+                    {caseDetails.global_trade_check?.gt_override_reason ||
+                      "---"}
+                  </CaseField>
+                  <CaseField label="GT Active Listening">
+                    {caseDetails.global_trade_check?.gt_active_listening ||
+                      "---"}
+                  </CaseField>
+                  <CaseField label="Security Status" lock>
+                    <Input
+                      variant={"invisible"}
+                      className=""
+                      value={"---"}
+                      readOnly
+                    />
+                  </CaseField>
+                  <CaseField label="Security Ovveride Reason" lock>
+                    <Input
+                      variant={"invisible"}
+                      className=""
+                      value={"---"}
+                      readOnly
+                    />
+                  </CaseField>
+                </CardContent>
+              </Card>
+              <div className="flex-3 flex flex-col gap-4">
+                <Card className="rounded-md">
+                  <CardHeader>
+                    <CardTitle className="text-lg">
+                      Case Notes History
+                    </CardTitle>
+                    <hr />
+                  </CardHeader>
+                  <CardContent>
+                    <CaseField label="Notes History" lock>
+                      <textarea
+                        className="mt-4 resize-none w-full min-h-[400px] p-2 ring-1 ring-gray-300 rounded-md text-md"
+                        readOnly
+                        value={caseNotes?.NotesDisplay}
+                      />
+                    </CaseField>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="ci_orders" className={"p-2 flex flex-col gap-4"}>
-            <Card className="flex-col " hidden>
+            <Card className="flex-col ">
               <CardHeader>
                 <CardTitle className="text-lg ">Shipment Information</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid items-center grid-cols-4 gap-10">
                 <CaseField label="Shipment Country">
-                    <SearchCommandBlock 
-                      variant="invisible" 
-                      value={workOrders[0]?.ShipmentCountry ||"---"}
-                      readOnly
-                      options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"] }
-                    />
+                  <SearchCommandBlock
+                    variant="invisible"
+                    value={workOrders[0]?.ShipmentCountry || "---"}
+                    readOnly
+                    options={[
+                      "USA",
+                      "Canada",
+                      "Indonesia",
+                      "UK",
+                      "Germany",
+                      "France",
+                      "Japan",
+                      "China",
+                      "India",
+                      "Australia",
+                      "Brazil",
+                    ]}
+                  />
                 </CaseField>
                 <CaseField label="Exception Order">
                   <Input variant="invisible" placeholder="---" />
@@ -2863,82 +3128,9 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
             </Card>
 
+          
+
             <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">Work Order</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="flex flex-col gap-5 p-3 ">
-                <div className="grid grid-cols-4 gap-5" hidden>
-                  <CaseField label="Incident Type" span={3}>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField label="Work Order Description" span={3}>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                </div>
-
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">
-                        Work Order Number
-                      </TableHead>
-                      <TableHead>Case ID</TableHead>
-                      <TableHead>Service Account</TableHead>
-                      <TableHead>Sub-Status</TableHead>
-                      <TableHead>System Status</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Work Order</TableHead>
-                      <TableHead>Primary Incident</TableHead>
-                      <TableHead>Due Date</TableHead>
-                      <TableHead>Orion</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead>Created By</TableHead>
-                      <TableHead>Created At</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {workOrders.map((work) => (
-                      <TableRow
-                        key={work.WOID}
-                        className="cursor-pointer hover:bg-gray-300"
-                        onClick={handleClick}
-                      >
-                        <TableCell
-                          className="font-medium "
-                        >
-                          {work.WOID}
-                        </TableCell>
-                        <TableCell>{work.CaseID}</TableCell>
-                        <TableCell>
-                          {work.caseinformation?.site_account?.Company ||
-                            work.caseinformation?.contact_information
-                              ?.FirstName +
-                              " " +
-                              work.caseinformation?.contact_information
-                                ?.LastName ||
-                            "-"}
-                        </TableCell>
-
-                        <TableCell>{work.SubStatus}</TableCell>
-                        <TableCell>{work.SystemStatus}</TableCell>
-                        <TableCell>{work.Priority}</TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell>{work.owner?.Name}</TableCell>
-                        <TableCell>{work.owner?.Name}</TableCell>
-                        <TableCell>{work.CreatedOn}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            <Card className="flex-col" hidden>
               <CardHeader>
                 <CardTitle className="text-lg ">Parts Order</CardTitle>
                 <hr />
@@ -2968,7 +3160,7 @@ const [endDate, setEndDate] = useState(null);
               </CardContent>
             </Card>
 
-            <Card className="flex-col" hidden>
+            <Card className="flex-col ">
               <CardHeader>
                 <CardTitle className="text-lg ">Service Order</CardTitle>
                 <hr />
@@ -3001,57 +3193,9 @@ const [endDate, setEndDate] = useState(null);
                 </Table>
               </CardContent>
             </Card>
-
-            <Card className="flex-col ">
-              <CardHeader>
-                <CardTitle className="text-lg ">Material Order</CardTitle>
-                <hr />
-              </CardHeader>
-              <CardContent className="grid gap-5">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">Name</TableHead>
-                      <TableHead>Case ID</TableHead>
-                      <TableHead>Created On</TableHead>
-                      <TableHead>Order Status</TableHead>
-                      <TableHead>Order Type</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead>Work Order</TableHead>
-                      <TableHead>Ready For Closure Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-
-                  <TableBody>
-                    {materialOrders.map((material) => (
-                      <TableRow key={material.MOID}>
-                        <TableCell className="font-medium">
-                          <Link to={`/app/material-order/${material.MOID}`}>
-                            {material.MOID} on {material.WOID}
-                          </Link>
-                        </TableCell>
-                        <TableCell>{material.workorder?.CaseID}</TableCell>
-                        <TableCell>{formatDate(material.CreatedOn)}</TableCell>
-                        <TableCell>{material.OrderStatus}</TableCell>
-                        <TableCell>{material.OrderType}</TableCell>
-                        <TableCell>{material.owner?.Name}</TableCell>
-                        <TableCell>{material.WOID}</TableCell>
-                        <TableCell>{material.ReadyForClosureDate}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="ci_salles">
-            <Card className="mt-7">
-              <CardHeader>Hello Word</CardHeader>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="ci_knowledge">
             <Card className="mt-7">
               <CardHeader>Hello Word</CardHeader>
             </Card>
@@ -3067,4 +3211,3 @@ const [endDate, setEndDate] = useState(null);
     </>
   );
 };
-  
