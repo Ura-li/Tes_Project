@@ -104,7 +104,7 @@ export const FlowCase = () => {
                 <Button size="sm" variant="outline">Active Case</Button>
                 <Button size="sm">Ready To Finish</Button>
               </div>
-              <h1 className="text-xl font-semibold tracking-tight">Case For You</h1>
+              <h1 className="lg:text-xl md:text-md font-semibold tracking-tight">Case For You</h1>
               <SidebarTrigger icon={PanelRight} />
             </div>
           </div>
@@ -133,7 +133,7 @@ export const FlowCase = () => {
                         <CardTitle className="flex items-center justify-between">
                           <p className='text-lg '>#{c.CaseID}</p>
                           <p>{c.CreatedOn}</p>
-                          <div className="gap-2 flex">
+                          <div className="gap-2 flex flex-col lg:flex-row">
                             <Badge className={c.CaseStatus === "Open" ? "bg-green-500" : c.CaseStatus === "InActive" ? "bg-blue-400" : c.CaseStatus === "On Hold" ? "yellow" : c.CaseStatus === "Escalated" ? "red" : "gray"}>{c.CaseStatus}</Badge>
                             <Badge>{c.caseinformation.CaseType}</Badge>
                             {console.log("Case Info : ",c?.caseinformation.CreatedBy)}
@@ -149,8 +149,8 @@ export const FlowCase = () => {
                         <CardDescription className="text-md font-semibold italic">{c.CaseSubject}</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex gap-4 mb-4">
-                          <div className="grid grid-cols-3 rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
+                        <div className="flex flex-col lg:flex-row gap-4 mb-4">
+                          <div className="grid grid-cols-3  rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
                             <p className="font-medium">Serial Number</p>
                             <p className="text-md text-gray-500 col-span-2"> {c.SerialNumber}</p>
                             <p className="font-medium">Product Name</p>

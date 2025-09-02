@@ -63,7 +63,7 @@ useEffect(() => {
     <div className="relative w-full">
       {selectedOption ? (
         <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2 ring-1">
-          <Archive color="blue" className=" size-4"></Archive>
+          <Archive color="blue" className=" size-4 shrink-0"></Archive>
           <span className="pl-1">{renderLabel(selectedOption)}</span>
           {/* <div className="flex items-center justify-start px-3 py-2 border rounded-md gap-2">
             <Archive color="blue"></Archive>

@@ -51,6 +51,11 @@ import {
   Calculator,
   CreditCard,
   Settings,
+  Computer,
+  NotepadText,
+  FileSliders,
+  Contact,
+  Briefcase,
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -78,6 +83,8 @@ import DatePicker from '@/components/date-picker'
 import { pdf } from '@react-pdf/renderer';
 import ServiceRequestPDF from '@/components/service-request-form'; // adjust path if needed
 import { Textarea } from "@/components/ui/textarea";
+import CaseField from "@/components/CaseField";
+import { Separator } from "@/components/ui/separator";
 
 
 export const TabsServiceCaseDetails = ({ 
@@ -571,70 +578,10 @@ const openPopup = () => {
   );
 };
 
-const spanMap = {
-  1: "col-span-1",
-  2: "col-span-2",
-  3: "col-span-3",
-  4: "col-span-4",
-  5: "col-span-5",
-  6: "col-span-6",
-};
-
-// export const CaseField = ({ label, children, lock, open,span = 1, className, star, hide }) => {
-//   if (hide) return null;
-
-//   return (
-//   <>
-//     <CardTitle
-//       className={twMerge(
-//         `relative font-medium flex items-center gap-2`,
-//         lock ? "pl-6" : "", open ? "pl-6" : "",
-//         className
-
-//       )}
-//     >
-//       {lock && (
-//         <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
-//       )}
-//       {open && (
-//         <LockOpen className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
-//       )}
-//       {label}
-//       {star ? <span className="text-red-400">*</span> : ""}
-//     </CardTitle>
-
-//     <CardTitle className={twMerge(spanMap[span], "")}>
-//       {children}
-//     </CardTitle>
-//   </>
-//   )
 
 
-// };
 
-export const CaseField = ({ label, children, icon = false, span = 1, className, childClass, star }) => {
-  // Determine which icon to use
-  const IconComponent = icon === true ? Lock : icon || null;
-  const readOnly = icon === "lock";
-  return (
-    <>
-      <CardTitle className={twMerge(
-        `font-medium flex  items-center gap-4 ${className}`
-      )}>
-        {IconComponent ? (
-          <IconComponent className="size-4" />
-        ) : (
-          <div className="w-5" />
-        )}
-        {label}
-        {star ? <span className="text-red-400">*</span> : ""}
-      </CardTitle>
-      <CardTitle className={twMerge(spanMap[span], childClass)}>
-        {children}
-      </CardTitle>
-    </>
-  );
-};
+
 
 
 
@@ -682,10 +629,10 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case & Customer", hidden: true},
+    { value: "case_info", label: "Case & Customer", },
     { value: "customer,add,entitement", label: "Asset & Entitement", hidden: true },
     { value: "ci_notes", label: "Notes & Information", hidden: true },
-    { value: "action_log", label: "Action Log", hidden: true},
+    { value: "action_log", label: "Action Log", },
     { value: "ci_activitas", label: "Activities", disable: true, hidden: true },
     { value: "ci_actions", label: "Customer Interactions", disable: true, hidden: true},
     { value: "ci_wo", label: "Work Order Validation", disable: true ,hidden: true},
@@ -1105,7 +1052,7 @@ const fetchSymptomCodes = async (term) => {
       )}
       <Card className="border-0 w-full">
         <Tabs defaultValue="case_info">
-          <CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2 h-22">
+          <CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2 ">
             <div className="flex justify-between">
               <CardTitle className="text-2xl pl-1">
                 {caseDetails.CaseID}
@@ -1184,34 +1131,30 @@ const fetchSymptomCodes = async (term) => {
             </TabsList>
           </CardHeader>
 
-
-          <div  className={"p-3 grid grid-cols-2 gap-4 mt-2"}>
+          <TabsContent value="case_info" className={"p-2 flex flex-col gap-5"}>
+          <div  className={" grid lg:grid-cols-2 md:grid-cols-1 gap-4 "}>
             <Card className="flex-col">
               <CardHeader>
-                <CardTitle className={"text-lg "}>Case Information</CardTitle>
+                <CardTitle className={"text-lg  flex gap-3"}><Briefcase/>Case Information</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-2">
-                <CaseField label="Case Subject" icon span={3}>
-                  <div className="ml-3">
+                <CaseField label="Case Subject" lock span={3}>
                     <Textarea
                      value={caseDetails?.CaseSubject}
                       onChange={e => handleCaseDetails("CaseSubject")(e.target.value)}
-                     className="resize-none border-none"
+                     className="resize-none border-none italic text-2xl"
                     />
-                  </div>
                 </CaseField>
               
-                <CaseField label="Case ID manual" className={"mt-2"} icon span={2}>  
-                  {console.log("DATA CASE DETAIL 1207 : ",caseDetails)}
-                  {console.log("DATA CASE DETAIL 1207 : ",caseDetails.CaseIdManual)}
+                <CaseField label="Case ID manual" className={"mt-2"} lock span={2}>  
                     <Input variant="invisible" placeholder="---"
                       value={caseDetails.CaseIdManual}
                       onChange={e => handleCaseDetails("CaseIdManual")(e.target.value)}
                     />                    
                 </CaseField>
               
-                <CaseField label="Case Status" className={"mt-2"} open span={2}>
+                <CaseField label="Case Status" className={"mt-2"}  span={2}>
                   <SearchCommandBlock
                       value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
                       onChange={ async (label) => {
@@ -1242,7 +1185,7 @@ const fetchSymptomCodes = async (term) => {
                     />
 
                 </CaseField>
-                <CaseField label="Assign To" className={"mt-2"} open span={2} hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}>
+                <CaseField label="Assign To" className={"mt-2"}  span={2} hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}>
                     <SearchCommandBlock
                       value={caseForm?.Owner}
                       onChange={(selectedID) => {
@@ -1277,7 +1220,7 @@ const fetchSymptomCodes = async (term) => {
                     />
                 </CaseField>
 
-                 <CaseField label="Case Priority" className={"mt-2"} icon span={2}>
+                 <CaseField label="Case Priority" className={"mt-2"} lock span={2}>
                   {/* <Input variant="invisible" value={caseDetails.CasePriority}/> */}
                   <SelectBar
                     id="Country"
@@ -1292,32 +1235,32 @@ const fetchSymptomCodes = async (term) => {
                   />
                 </CaseField>
 
-                <CaseField label="Customer Severity" className={"mt-2"} icon span={2}>
+                <CaseField label="Customer Severity" className={"mt-2"} lock span={2}>
                   <Input
                     variant="invisible"
                     value={caseDetails.CustomerSeverity}
                   />
                 </CaseField>
 
-                  <CaseField label="Incoming Channel" className={"mt-2"} icon span={2}>
+                  <CaseField label="Incoming Channel" className={"mt-2"} lock span={2}>
                   <Input
                     variant="invisible"
                     value={caseDetails.IncomingChannel}
                   />
                 </CaseField>
 
-                <CaseField label="KCI For Case?" icon span={2}>
+                <CaseField label="KCI For Case?" lock span={2}>
                      <Input 
                       variant="invisible"
                       value={caseDetails.KCI_Flag ? "Yes" : "No"}
                      />
                 </CaseField>               
-                <CaseField label="Created ON" span={2} icon>
+                <CaseField label="Created ON" span={2} lock>
                   <DatePicker
                     variant="icon"
                     value={createdOn}
                     onChange={setCreatedOn}
-                    readOnly
+                    
                   ></DatePicker>
                 </CaseField>
 
@@ -1376,7 +1319,7 @@ const fetchSymptomCodes = async (term) => {
                         <Input variant="invisible" placeholder="---"/>
                       </CaseField>
 
-                        <CaseField label="Case ID" icon  className={"hidden"}>
+                        <CaseField label="Case ID" lock  className={"hidden"}>
                         <Input
                           variant="invisible"
                           value={caseDetails.CaseID}
@@ -1393,11 +1336,11 @@ const fetchSymptomCodes = async (term) => {
                     
             <Card className="flex-col">
               <CardHeader>
-                <CardTitle className="text-lg">Customer Information</CardTitle>
+                <CardTitle className="text-lg flex gap-3"><Contact/>Customer Information</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className="grid items-center grid-cols-2 gap-3">
-                <CaseField label="Customer Account"  icon>
+                <CaseField label="Customer Account"  lock>
                   <Input
                     variant="invisible"
                     value={
@@ -1410,17 +1353,17 @@ const fetchSymptomCodes = async (term) => {
                     readOnly
                   />
                 </CaseField>
-                <CaseField label="Primary Contact" icon>
+                <CaseField label="Primary Contact" lock>
                   <Input
                     variant="invisible"
                     value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
                     readOnly
                   />
                 </CaseField>
-                 <CaseField label="Secondary Contact" icon>
+                 <CaseField label="Secondary Contact" lock>
                   <Input variant="invisible" placeholder="---" />
                 </CaseField>
-                <CaseField label=" Primary Email" icon>
+                <CaseField label=" Primary Email" lock>
                   <Input
                     variant="invisible"
                     value={dataFetchCustomerData.MainAccount?.Email}
@@ -1428,7 +1371,7 @@ const fetchSymptomCodes = async (term) => {
                     readOnly
                   />
                 </CaseField>
-                <CaseField label="Country" icon>
+                <CaseField label="Country" lock>
                   <Input
                     variant="invisible"
                     value={
@@ -1439,23 +1382,23 @@ const fetchSymptomCodes = async (term) => {
                     readOnly
                   />                  
                 </CaseField>
-                <CaseField label="Phone" icon>
+                <CaseField label="Phone" lock>
                   <span className="pl-3">
                   {dataFetchCustomerData?.Type == "SiteAccount"
                     ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone
                     : dataFetchCustomerData?.MainAccount?.Phone}
                   </span>
                 </CaseField>
-                <CaseField label="Region" icon>
+                <CaseField label="Region" lock>
                   <Input 
                   variant="invisible" 
                   placeholder="---" readOnly 
                   value={dataFetchCustomerData.SiteAccount?.City}/>
                 </CaseField>
-                <CaseField label="Is Partner" icon>
+                <CaseField label="Is Partner" lock>
                   <Input variant="invisible" placeholder="---" readOnly/>
                 </CaseField>
-                <CaseField label="Partner & Customer" icon>
+                <CaseField label="Partner & Customer" lock>
                   <Input variant="invisible" placeholder="---"  readOnly/>
                 </CaseField>
                 <Accordion type="single" collapsible className="col-span-2">
@@ -1493,301 +1436,273 @@ const fetchSymptomCodes = async (term) => {
 
           </div> 
 
-          <div className="mt-2 p-3">
             <Card className="flex-col">
               <CardHeader>
-                <CardTitle className="text-lg ">Asset Information</CardTitle>
-                <hr />
+                <CardTitle className="text-lg flex gap-3"><Computer/> Asset Information</CardTitle>
+                <Separator />
               </CardHeader>
-              <CardContent className="grid items-center grid-cols-6 gap-10">
-                <CaseField label="Assets" icon>
-                  {dataFetchAssetInformation?.AssetInformation?.SerialNumber}
-                </CaseField>
-                <CaseField label="Product Number" icon>
-                  <span className="pl-3">
-                    {
-                    dataFetchAssetInformation?.AssetInformation
-                      ?.product_information?.ProductNumber
-                  } 
-                    </span>
-                </CaseField>
-                <CaseField label="Asset Location" icon> 
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Serial Number" icon>
-                  {dataFetchAssetInformation?.AssetInformation?.SerialNumber}
-                </CaseField>
-                <CaseField label="HWPC Code" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                  <CaseField label="SNIC - Count" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <CaseField label="Product Name" icon>
-                  {
-                    dataFetchAssetInformation?.AssetInformation
-                      ?.product_information?.ProductName
-                  }
-                </CaseField>
-                <CaseField label="MV Product Description" icon>
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-               
-                  <CaseField label="HW Profit Center" icon>
-                  
-                  <Input variant="invisible" placeholder="---" />
-                </CaseField>
-                <div className="grid items-center grid-cols-2 col-span-2 gap-2 p-5 ring-1">
-                  <CaseField label="Device Properties" icon>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                </div>
-                  <CaseField label="OTC Code" icon span={3}>
-                  <SearchCommandBlock
-                    options={otcCode}
-                    value={entitlementStatus.OTCCode}
-                    onChange={(value) =>
-                      handleEntitlementStatus("OTCCode")(value)
-                    }
-                    placeholder="---"
-                    renderLabel={(opt) => `${opt.OTCCode} - ${opt.Description}`}
-                    getValue={(opt) => opt.OTCCode}
-                  />
-                </CaseField>
-              </CardContent>
-              {/* TABEL ACCESSORY */}
-              <div className="px-6 pb-6">
-                <h3 className="text-md font-semibold mb-2">Accessory</h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full border text-sm text-left">
-                    <thead className="bg-gray-100 text-gray-700">
-                      <tr>
-                        <th className="border px-4 py-2">No Accesories</th>
-                        <th className="border px-4 py-2" hidden>Case ID</th>
-                        <th className="border px-4 py-2">Accessories</th>
-                        <th className="border px-4 py-2">Note</th>
-                        <th className="border px-4 py-2">CT / SN code</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {caseDetails.accessory?.map((item, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="border px-4 py-2">{item.id}</td>
-                          <td className="border px-4 py-2" hidden>{item.CaseID}</td>
-                          <td className="border px-4 py-2">{item.Accessories}</td>
-                          <td className="border px-4 py-2">{item.Note || "---"}</td>
-                          <td className="border px-4 py-2">{item.CT_SNCode || "---"}</td>
-                        </tr>
-                      ))}
-                      {(!caseDetails?.accessory ||
-                        caseDetails.accessory.length === 0) && (
+
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* LEFT COLUMN - Fields */}
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
+                      <CaseField label="Assets" lock>
+                        {dataFetchAssetInformation?.AssetInformation?.SerialNumber}
+                      </CaseField>
+
+                      <CaseField label="Product Number" lock>
+                        {
+                          dataFetchAssetInformation?.AssetInformation
+                            ?.product_information?.ProductNumber
+                        }
+                      </CaseField>
+
+                      <CaseField label="Asset Location" lock>
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+
+                      <CaseField label="Serial Number" lock>
+                        {dataFetchAssetInformation?.AssetInformation?.SerialNumber}
+                      </CaseField>
+
+                      <CaseField label="HWPC Code" lock>
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+
+                      <CaseField label="SNIC - Count" lock>
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+
+                      <CaseField label="Product Name" lock>
+                        {
+                          dataFetchAssetInformation?.AssetInformation
+                            ?.product_information?.ProductName
+                        }
+                      </CaseField>
+
+                      <CaseField label="MV Product Description" lock>
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+
+                      <CaseField label="HW Profit Center" lock>
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+
+                      <CaseField label="Device Properties" lock >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+
+                      <CaseField label="OTC Code"  star>
+                        <SearchCommandBlock
+                          options={otcCode}
+                          value={entitlementStatus.OTCCode}
+                          onChange={(value) => handleEntitlementStatus("OTCCode")(value)}
+                          placeholder="---"
+                          renderLabel={(opt) => `${opt.OTCCode} - ${opt.Description}`}
+                          getValue={(opt) => opt.OTCCode}
+                        />
+                      </CaseField>
+                    </div>
+                  </div>
+
+                  {/* RIGHT COLUMN - Accessory */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Accessory</h3>
+                    <Separator className="my-4" />
+                    <div className="overflow-x-auto rounded-lg border">
+                      <table className="min-w-full text-sm text-left">
+                        <thead className="bg-gray-50 text-gray-700">
                           <tr>
-                            <td className="border px-4 py-2 text-center" colSpan={5}>
-                              No accessories found.
-                            </td>
+                            <th className="px-4 py-2 border">No Accessories</th>
+                            <th className="px-4 py-2 border hidden">Case ID</th>
+                            <th className="px-4 py-2 border">Accessories</th>
+                            <th className="px-4 py-2 border">Note</th>
+                            <th className="px-4 py-2 border">CT / SN Code</th>
                           </tr>
-                        )}
-                    </tbody>
-                  </table>
-                  <div className="mt-2 text-md text-gray-600">
-                    Total Accesories: {caseDetails.accessory?.length || 0}
+                        </thead>
+                        <tbody>
+                          {caseDetails.accessory?.length ? (
+                            caseDetails.accessory.map((item, index) => (
+                              <tr key={index} className="hover:bg-gray-50">
+                                <td className="px-4 py-2 border">{item.id}</td>
+                                <td className="px-4 py-2 border hidden">{item.CaseID}</td>
+                                <td className="px-4 py-2 border">{item.Accessories}</td>
+                                <td className="px-4 py-2 border">{item.Note || "---"}</td>
+                                <td className="px-4 py-2 border">{item.CT_SNCode || "---"}</td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td className="px-4 py-2 border text-center" colSpan={5}>
+                                No accessories found.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="mt-2 text-sm text-gray-600">
+                      Total Accessories: {caseDetails.accessory?.length || 0}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </CardContent>
             </Card>
-          </div>
 
-          <div className="mt-2 p-1">
+
+            {/* --- Card 1: Customer Issue & System Info --- */}
             <Card className="flex-col">
               <CardHeader>
-                <CardTitle className="text-lg ">
+                <CardTitle className="text-lg  flex gap-3">
+                  <FileSliders/>
                   Customer Issue Description & System Information
                 </CardTitle>
-                <hr />
+                <Separator />
               </CardHeader>
-              <CardContent className="flex p-4 gap-x-5">
-                <div className="grid items-center flex-1 grid-cols-6 grid-row-7 gap-y-7">
-                  <div className="row-span-4 col-span-full">
+
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* LEFT COLUMN - Issue Description */}
+                  <div className="space-y-6">
                     <textarea
-                      className="border-2 ring-1 ring-gray-400 w-[100%] h-[12em] resize-none"
+                      className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
                       readOnly
                       value={caseDetails?.CaseProductNote}
-                    ></textarea>
+                    />
+                    <div className="grid grid-cols-2 gap-6">
+                      <CaseField label="Related Device" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                      <CaseField label="Device Manufacturer" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                      <CaseField label="Device Model" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                    </div>
                   </div>
-                  <CaseField
-                    label="Related Device"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Device Manufacturer"
-                    className={"col-span-3"}
-                    span={3}
 
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Device Model"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                </div>
-
-                <div className="grid flex-1 grid-flow-row grid-cols-6 gap-y-7">
-                  <CaseField
-                    label="Program/Category"
-                    className={"col-span-3"}
-                    span={2}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Operating System"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField label="Version" className={"col-span-3"} span={3}>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Remote Diag Code"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Application Information"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Provider / Platform"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-                  <CaseField
-                    label="Software Version"
-                    className={"col-span-3"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
+                  {/* RIGHT COLUMN - System Info */}
+                  <div className="grid grid-cols-2 gap-6">
+                    <CaseField label="Program/Category" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Operating System" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Version" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Remote Diag Code" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Application Information" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Provider / Platform" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Software Version" >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          <div className="mt-2 p-1">
+            {/* --- Card 2: Case Notes --- */}
             <Card className="flex-col">
               <CardHeader>
-                <CardTitle className="text-lg ">Case Notes</CardTitle>
-                <hr />
+                <CardTitle className="text-lg  flex gap-3"><NotepadText/>Case Notes</CardTitle>
+                <Separator />
               </CardHeader>
-              <CardContent className="flex gap-4">
-                <div className="grid flex-1 grid-cols-6 gap-y-7">
-                  <CaseField label="Log Type" className={"col-span-2"} span={4}>
-                    <Select  value={formData?.LogType}  onValueChange={(val) => onChange("LogType", val)}>
-                      <SelectTrigger
-                        className={"w-[100%] hover:shadow-lg border-b-0 p-3"}
-                      >
-                        <SelectValue placeholder="Log Type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="NotesLog">Notes Log</SelectItem>
-                        <SelectItem value="PhoneLog">Phone Log</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </CaseField>
 
-                  <CaseField
-                    label="Action Type"
-                    className={"col-span-2"}
-                    span={4}
-                  >
-                      <SearchCommandBlock
-                      value={formData?.ActionType}
-                      onChange={(val) => onChange("ActionType", val)}
-                      placeholder="--Select--"
-                      options={[
-                        "Inbound Customer call",
-                        "Action Plan",
-                        "Administrative task",
-                        "CE/Partner Assist",
-                        "Customer Email",
-                      ]}
-                    />
-                  </CaseField>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* LEFT COLUMN - Input Fields */}
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-6">
+                      <CaseField label="Log Type" >
+                        <Select
+                          value={formData?.LogType}
+                          onValueChange={(val) => onChange("LogType", val)}
+                        >
+                          <SelectTrigger className="w-full p-3 border rounded-md hover:shadow">
+                            <SelectValue placeholder="Log Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="NotesLog">Notes Log</SelectItem>
+                            <SelectItem value="PhoneLog">Phone Log</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </CaseField>
 
-                  <CaseField label="Template" className={"col-span-2"} span={4}>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
+                      <CaseField label="Action Type" >
+                        <SearchCommandBlock
+                          value={formData?.ActionType}
+                          onChange={(val) => onChange("ActionType", val)}
+                          placeholder="--Select--"
+                          options={[
+                            "Inbound Customer call",
+                            "Action Plan",
+                            "Administrative task",
+                            "CE/Partner Assist",
+                            "Customer Email",
+                          ]}
+                        />
+                      </CaseField>
 
-                  <CaseField
-                    label="Visible Externally"
-                    className={"col-span-2"}
-                    span={4}
-                  >
-                    <SelectYN 
-                      value={
-                        formData?.VisibleExternally === undefined ||
-                        formData?.VisibleExternally === null
-                          ? ""
-                          : formData?.VisibleExternally
-                          ? "Yes"
-                          : "No"
-                      }
-                      onValueChange={(val) =>
-                        onChange("VisibleExternally", val === "Yes")
-                      }
-                    ></SelectYN>
-                  </CaseField>
+                      <CaseField label="Template" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
 
-                  <CaseField
-                    label="Number of Minutes Spent"
-                    className={"col-span-2"}
-                    span={3}
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
+                      <CaseField label="Visible Externally" >
+                        <SelectYN
+                          value={
+                            formData?.VisibleExternally === undefined ||
+                              formData?.VisibleExternally === null
+                              ? ""
+                              : formData?.VisibleExternally
+                                ? "Yes"
+                                : "No"
+                          }
+                          onValueChange={(val) =>
+                            onChange("VisibleExternally", val === "Yes")
+                          }
+                        />
+                      </CaseField>
 
-                  <CaseField
-                    label="Notes"
-                    className={"col-span-2 self-start bg-red"}
-                    span={4}
-                    star
-                  >
+                      <CaseField label="Number of Minutes Spent" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                    </div>
+
+                    <CaseField label="Notes"  star>
+                      <textarea
+                        className="w-full h-40 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300"
+                        value={formData?.Note || ""}
+                        onChange={(e) => onChange("Note", e.target.value)}
+                      />
+                    </CaseField>
+                  </div>
+
+                  {/* RIGHT COLUMN - Display Notes */}
+                  <div>
                     <textarea
-                      className="h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500"
-                      value={formData?.Note || ""}
-                      onChange={(e) => onChange("Note", e.target.value)}
+                      className="w-full h-full min-h-[300px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
+                      readOnly
+                      value={formData?.NotesDisplay}
                     />
-                  </CaseField>
-                </div>
-
-                <div className="flex flex-1">
-                  <textarea
-                    className="w-[100%] h-[100%] resize-none p-2 ring-1 ring-gray-500"
-                    readOnly
-                    value={formData?.NotesDisplay}
-                  >
-                  </textarea>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
 
+
+          </TabsContent>
+
+        <TabsContent value="action_log" >
           <div className="mt-2 p-1">
             <Card className="flex-col">
                   <CardHeader>
@@ -1832,6 +1747,7 @@ const fetchSymptomCodes = async (term) => {
                   </CardContent>
             </Card>
           </div>
+        </TabsContent>
 
         </Tabs>
       </Card>

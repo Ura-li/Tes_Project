@@ -91,6 +91,7 @@ import DatePicker from "@/components/date-picker";
 import { pdf } from "@react-pdf/renderer";
 import ServiceRequestPDF from "@/components/service-request-form"; // adjust path if needed
 import { Textarea } from "@/components/ui/textarea";
+import CaseField from "@/components/CaseField";
 
 export const TabsServiceCaseDetailsCe = ({
   caseDetails,
@@ -627,51 +628,7 @@ export const TabsServiceCaseDetailsCe = ({
   );
 };
 
-const spanMap = {
-  1: "col-span-1",
-  2: "col-span-2",
-  3: "col-span-3",
-  4: "col-span-4",
-  5: "col-span-5",
-  6: "col-span-6",
-};
 
-export const CaseField = ({
-  label,
-  children,
-  lock,
-  open,
-  span = 1,
-  className,
-  star,
-  hide,
-}) => {
-  if (hide) return null;
-
-  return (
-    <>
-      <CardTitle
-        className={twMerge(
-          `relative font-medium flex items-center gap-2`,
-          lock ? "pl-6" : "",
-          open ? "pl-6" : "",
-          className
-        )}
-      >
-        {lock && (
-          <Lock className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
-        )}
-        {open && (
-          <LockOpen className="absolute left-0 -translate-y-1/2 top-1/2 size-4 text-muted-foreground" />
-        )}
-        {label}
-        {star ? <span className="text-red-400">*</span> : ""}
-      </CardTitle>
-
-      <CardTitle className={twMerge(spanMap[span], "")}>{children}</CardTitle>
-    </>
-  );
-};
 
 // export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral}) => {
 //   const navigate = useNavigate();
@@ -1821,164 +1778,164 @@ export const ServiceCase = ({
                   <CardTitle className={"text-xl flex gap-2 "}><Briefcase/>Case Information</CardTitle>
                   <hr />
                 </CardHeader>
-                <CardContent  className={"flex flex-col gap-4"}>
-               
-<div className="grid grid-cols-2 gap-4">
-  <CaseField label="Case Subject" lock className={"col-span-2"} span={2}>
-    <Textarea
-      value={caseDetails.CaseSubject}
-      className="resize-none border-none "
-    />
+                <CardContent className={"flex flex-col gap-4"}>
 
-  </CaseField>
+                  <div className="grid grid-cols-2 gap-4">
+                    <CaseField label="Case Subject" lock className={"col-span-2"} span={2}>
+                      <Textarea
+                        value={caseDetails.CaseSubject}
+                        className="resize-none border-none "
+                      />
+
+                    </CaseField>
                     <CaseField label={"Created On"} className={"col-end-2"} lock>
-                     <DatePicker
-                       variant="icon"
-                       value={createdOn}
-                       onChange={setCreatedOn}
-                       readOnly
-                    
-                     />
+                      <DatePicker
+                        variant="icon"
+                        value={createdOn}
+                        onChange={setCreatedOn}
+                        readOnly
+
+                      />
                     </CaseField>
                     <CaseField label="Case Closed Date" lock>
-                          <span className="gap-[5em]" >
-                            {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
-                            <DatePicker
-                      variant="icon"
-                      value={caseClosedDate}
-                      onChange={setCaseClosedDate}
-                     readOnly
-                    ></DatePicker>
+                      <span className="gap-[5em]" >
+                        {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
+                        <DatePicker
+                          variant="icon"
+                          value={caseClosedDate}
+                          onChange={setCaseClosedDate}
+                          readOnly
+                        ></DatePicker>
 
-                          </span>
-                        </CaseField>
+                      </span>
+                    </CaseField>
 
-</div>
-                     <hr />
+                  </div>
+                  <hr />
                   <div className="grid grid-cols-4 gap-4">
-                  <CaseField
-                    label="Case ID manual"
-                    lock                    
-                  >
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
+                    <CaseField
+                      label="Case ID manual"
+                      lock
+                    >
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
 
-                  <CaseField
-                    label="Case Status"
-                    className={"ml-6"} 
-                  >
-                    <SearchCommandBlock
-                      value={
-                        statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"
-                      }
-                      onChange={async (label) => {
-                        const enumValue = labelToStatusEnum[label];
-                        onChangeCase("CaseStatus")(enumValue);
-                        console.log("Selected label:", label);
-                        console.log("Mapped enum:", enumValue);
+                    <CaseField
+                      label="Case Status"
+                      
+                    >
+                      <SearchCommandBlock
+                        value={
+                          statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"
+                        }
+                        onChange={async (label) => {
+                          const enumValue = labelToStatusEnum[label];
+                          onChangeCase("CaseStatus")(enumValue);
+                          console.log("Selected label:", label);
+                          console.log("Mapped enum:", enumValue);
 
-                        if (enumValue.startsWith("NEW_Assign")) {
-                          const role = enumValue.endsWith("CE")
-                            ? "ce"
-                            : enumValue.endsWith("APO")
-                            ? "apo"
-                            : null;
-                          console.log("Mapped enum:", role);
+                          if (enumValue.startsWith("NEW_Assign")) {
+                            const role = enumValue.endsWith("CE")
+                              ? "ce"
+                              : enumValue.endsWith("APO")
+                                ? "apo"
+                                : null;
+                            console.log("Mapped enum:", role);
 
-                          if (role) {
-                            try {
-                              fetchUserAssign(role);
-                              console.log("Mapped enum:", roleAssign);
-                            } catch (err) {
-                              console.error("Error fetching role: ", err);
+                            if (role) {
+                              try {
+                                fetchUserAssign(role);
+                                console.log("Mapped enum:", roleAssign);
+                              } catch (err) {
+                                console.error("Error fetching role: ", err);
+                              }
                             }
+                          } else {
+                            setRoleAssign([]);
                           }
-                        } else {
-                          setRoleAssign([]);
-                        }
-                      }}
-                      placeholder="--Select--"
-                      options={Object.values(statusEnumToLabel)}
-                    />
-                  </CaseField>
-                  <CaseField
-                    label="Assign To"                   
-                    className={"ml-6"}
-                    hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}
-                  >
-                    <SearchCommandBlock
-                      value={caseForm?.Owner}
-                      onChange={(selectedID) => {
-                        if (selectedID === null) {
-                          onChangeCase("AssignTo")(null); // Clear the value!
-                          return;
-                        }
-                        const selectedUser = roleAssign.find(
-                          (user) => user.IDUser === selectedID
-                        );
-                        if (selectedUser) {
-                          onChangeCase("Owner")(selectedUser.IDUser);
-                        }
-                      }}
-                      placeholder="--Select--"
-                      options={roleAssign.map((user) => ({
-                        label: user.Name,
-                        value: user.IDUser,
-                      }))}
-                      renderLabel={(opt) => opt.label}
-                      getValue={(opt) => opt.value}
-                    />
-                  </CaseField>
-                  {/* {assignToForm == true ?? (
+                        }}
+                        placeholder="--Select--"
+                        options={Object.values(statusEnumToLabel)}
+                      />
+                    </CaseField>
+                    <CaseField
+                      label="Assign To"
+                      
+                      hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}
+                    >
+                      <SearchCommandBlock
+                        value={caseForm?.Owner}
+                        onChange={(selectedID) => {
+                          if (selectedID === null) {
+                            onChangeCase("AssignTo")(null); // Clear the value!
+                            return;
+                          }
+                          const selectedUser = roleAssign.find(
+                            (user) => user.IDUser === selectedID
+                          );
+                          if (selectedUser) {
+                            onChangeCase("Owner")(selectedUser.IDUser);
+                          }
+                        }}
+                        placeholder="--Select--"
+                        options={roleAssign.map((user) => ({
+                          label: user.Name,
+                          value: user.IDUser,
+                        }))}
+                        renderLabel={(opt) => opt.label}
+                        getValue={(opt) => opt.value}
+                      />
+                    </CaseField>
+                    {/* {assignToForm == true ?? (
                 )} */}
 
-                  <CaseField label="Case Type" className={"ml-6"} >
-                    <SearchCommandBlock
-                      value={caseForm?.CaseType}
-                      onChange={onChangeCase("CaseType")}
-                      placeholder="--Select--"
-                      options={["Depot Repair", "Onsite", "Bench"]}
-                    />
-                  </CaseField>
+                    <CaseField label="Case Type"  >
+                      <SearchCommandBlock
+                        value={caseForm?.CaseType}
+                        onChange={onChangeCase("CaseType")}
+                        placeholder="--Select--"
+                        options={["Depot Repair", "Onsite", "Bench"]}
+                      />
+                    </CaseField>
 
-                  <CaseField
-                    label="Case Priority"
-                    lock
-                  >
-                    <Input
-                      variant="invisible"
-                      value={caseDetails.CasePriority}
-                    />
-                  </CaseField>
+                    <CaseField
+                      label="Case Priority"
+                      lock
+                    >
+                      <Input
+                        variant="invisible"
+                        value={caseDetails.CasePriority}
+                      />
+                    </CaseField>
 
-                  <CaseField
-                    label="Customer Severity"
-                   
-                    lock
-                  >
-                    <Input
-                      variant="invisible"
-                      value={caseDetails.CustomerSeverity}
-                    />
-                  </CaseField>
+                    <CaseField
+                      label="Customer Severity"
 
-                  <CaseField
-                    label="Incoming Channel"
-                    
-                    lock
-                  >
-                    <Input
-                      variant="invisible"
-                      value={caseDetails.IncomingChannel}
-                    />
-                  </CaseField>
- 
-                <CaseField label="KCI For Case?" lock>
-                    <Input
-                      variant="invisible"
-                      value={caseDetails.KCI_Flag ? "Yes" : "No"}
-                    />
-                </CaseField>
+                      lock
+                    >
+                      <Input
+                        variant="invisible"
+                        value={caseDetails.CustomerSeverity}
+                      />
+                    </CaseField>
+
+                    <CaseField
+                      label="Incoming Channel"
+
+                      lock
+                    >
+                      <Input
+                        variant="invisible"
+                        value={caseDetails.IncomingChannel}
+                      />
+                    </CaseField>
+
+                    <CaseField label="KCI For Case?" lock>
+                      <Input
+                        variant="invisible"
+                        value={caseDetails.KCI_Flag ? "Yes" : "No"}
+                      />
+                    </CaseField>
                   </div>
 
                   <Accordion
@@ -1996,7 +1953,7 @@ export const ServiceCase = ({
                       </AccordionTrigger>
                       <AccordionContent className={"m-1"}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          
+
                           <CaseField label="Submitted To Base">
                             <span className="gap-[5em]">
                               <DatePicker
@@ -2046,7 +2003,7 @@ export const ServiceCase = ({
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
-                  
+
                 </CardContent>
               </Card>
 
@@ -2181,7 +2138,7 @@ export const ServiceCase = ({
                   <div className="flex flex-col gap-2">
                     <CaseField span={2}>
                       <textarea
-                        className=" w-[100%] h-[12em] resize-none border-1 ring-1 ring-gray-500 p-1 text-lg"
+                        className=" w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
                         readOnly
                         value={caseDetails?.CaseProductNote}
                       ></textarea>
@@ -2264,7 +2221,7 @@ export const ServiceCase = ({
                   <div className="flex flex-col gap-2">
                     <CaseField >
                     <textarea
-                      className="w-[100%] h-[13em] resize-none p-2 ring-1 ring-gray-500"
+                        className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
                       readOnly
                       value={formData?.NotesDisplay}
                     ></textarea>
@@ -2349,9 +2306,10 @@ export const ServiceCase = ({
                       star
                     >
                       <textarea
-                        className="h-[10em] w-[100%] resize-none p-2 border-2 ring-1 ring-gray-500"
+                          className="w-full h-full min-h-[300px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300"
                         value={formData?.Note || ""}
                         onChange={(e) => onChange("Note", e.target.value)}
+                        placeholder="Write your note"
                       />
                     </CaseField>
                   </div>
