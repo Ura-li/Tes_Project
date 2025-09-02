@@ -268,6 +268,7 @@ export const TabsServiceCaseDetails = ({
                     CaseStatus: newStatus || "",
                     Owner: caseForm.Owner || caseDetails.Owner
                   });
+                  
                   const token = {
                     user: getUserFromToken()
                   }
@@ -322,8 +323,8 @@ export const TabsServiceCaseDetails = ({
     console.error("Save failed:", error);
     Swal.fire({
       icon: "error",
-      title: "Error",
-      text: error.message || "Something went wrong.",
+      title: error.message,
+      text: error.response.data.message || "Something went wrong.",
       allowOutsideClick: false,
       allowEscapeKey: false,
     }).then(() => {
@@ -1484,6 +1485,7 @@ const fetchUserAssign = async (role) => {
 const fetchCase = async () => {
   try {
     const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`);
+    console.log("DAta Case : ",res)
     setCaseForm(res.data.data);
   } catch (err) {
     console.error("Error fetching case:", err);
@@ -1756,6 +1758,23 @@ const [endDate, setEndDate] = useState(null);
                 <CaseField label="Case ID manual" className={"mt-2"} lock span={2}>  
                     <Input variant="invisible" placeholder="---"/>                    
                 </CaseField>
+
+                {/* detail owner */}
+                <CaseField label="Created By" className={"mt-2"} lock span={2}>  
+                {/* {console.log("Bool to check wo owner aaliabe : ", caseDetails?.workorder[0]?.owner?.IDUser)} */}
+                    <Input variant="invisible" placeholder="---" value={caseDetails.createdByUser.Name} readOnly/>                    
+                </CaseField>
+                {caseDetails?.workorder[0]?.owner?.IDUser && (
+                  <CaseField label="Engineer name" className={"mt-2"} lock span={2}>  
+                      <Input variant="invisible" placeholder="---" value={caseDetails.workorder[0].owner.Name} readOnly/>                    
+                  </CaseField>
+                )}
+                {caseDetails?.workorder[0]?.materialorder[0]?.owner?.IDUser && (
+                  <CaseField label="APO name" className={"mt-2"} lock span={2}>  
+                      <Input variant="invisible" placeholder="---" value={caseDetails.workorder[0].materialorder[0].owner.Name} readOnly/>                    
+                  </CaseField>
+                )}
+                
               
                 <CaseField label="Case Status" className={"mt-2"} open span={2}>
                   <SearchCommandBlock

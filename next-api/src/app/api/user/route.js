@@ -78,6 +78,48 @@ export async function POST(req) {
   } = await req.json();
 
   try {
+
+    //validasi 
+    const requiredFields = { Email, Username, Password, Name };
+    for (const [key, value] of Object.entries(requiredFields)) {
+      if (!value || value.trim() === "") {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `${key} is required and cannot be empty`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    const existingEmail = await prisma.user.findUnique({
+      where: { Email },
+    });
+    if (existingEmail) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Email is already registered",
+        },
+        { status: 409 } // Conflict
+      );
+    }
+
+    // 3️⃣ Cek apakah Username sudah dipakai
+    const existingUsername = await prisma.user.findUnique({
+      where: { Username },
+    });
+    if (existingUsername) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Username is already taken",
+        },
+        { status: 409 } // Conflict
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(Password, 10);
 
     const newUser = await prisma.user.create({

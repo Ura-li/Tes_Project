@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import prisma from "../../../../../prisma/client";
 import { notifySocket } from "../../../../../lib/SocketClient";
+import { Prisma } from "@prisma/client";
 
 export async function GET(request, { params }) {
     //get params id
@@ -46,10 +47,21 @@ export async function GET(request, { params }) {
                     }
                 }
             }, 
+            workorder: {
+                include: {
+                    materialorder : {
+                        include : {
+                            owner: true
+                        }
+                    },
+                    owner: true
+                }
+            },
             global_trade_check: true,
             caseresolution: true,
             accessory: true,
             otcCodeTable: true,
+            createdByUser: true
             // casenotes_casenotes_CaseIDTocaseinformation: true,
         }
     });
@@ -81,62 +93,89 @@ export async function GET(request, { params }) {
 
 // update data
 export async function PATCH(request, { params }) {
-    const { CaseID } = await params;
-    const caseID = CaseID;
-    const body = await request.json();
-
-    // Build data object dynamically
-    const updatableFields = [
-        'SiteAccountID',
-        'ContactID',
-        'AssetID',
-        'CaseSubject',
-        'CaseType',
-        'KCI_Flag',
-        'IncomingChannel',
-        'CaseStatus',
-        'Owner',
-        'CasePriority',
-        'CustomerSeverity',
-        'CaseClosedDate',
-        'CaseNote',
-        'SymptomCode',
-        'CaseResolution',
-        'OTCCode',
-        'id_csr',
-    ];
-
-    const dataToUpdate = {};
-
-    const existing = await prisma.caseinformation.findUnique({ where: { CaseID: caseID } });
-
-    for (const field of updatableFields) {
-        if (
-            body[field] !== undefined &&
-            body[field] !== null &&
-            body[field] !== existing[field]
-        ) {
-            dataToUpdate[field] = body[field];
+    try {
+        
+        const { CaseID } = await params;
+        const caseID = CaseID;
+        const body = await request.json();
+    
+        // Build data object dynamically
+        const updatableFields = [
+            'SiteAccountID',
+            'ContactID',
+            'AssetID',
+            'CaseSubject',
+            'CaseType',
+            'KCI_Flag',
+            'IncomingChannel',
+            'CaseStatus',
+            'Owner',
+            'CasePriority',
+            'CustomerSeverity',
+            'CaseClosedDate',
+            'CaseNote',
+            'SymptomCode',
+            'CaseResolution',
+            'OTCCode',
+            'id_csr',
+        ];
+    
+        const dataToUpdate = {};
+    
+        const existing = await prisma.caseinformation.findUnique({ where: { CaseID: caseID } });
+    
+        for (const field of updatableFields) {
+            if (
+                body[field] !== undefined &&
+                body[field] !== null &&
+                body[field] !== existing[field]
+            ) {
+                dataToUpdate[field] = body[field];
+            }
         }
+    
+        const case_information = await prisma.caseinformation.update({
+            where: { CaseID: caseID },
+            data: dataToUpdate,
+        });
+    
+        await notifySocket("case:updated", case_information);
+    
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Case Information Updated!",
+                data: case_information,
+            },
+            {
+                status: 200,
+            }
+        )
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2003') {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: 'Data yang kamu kirim tidak valid. Ada nilai yang tidak sesuai (OTCCode tidak ditemukan).',
+                        errorCode: error.code,
+                        meta: error.meta,
+                    },
+                    { status: 400 }
+                );
+            }
+        }
+
+        // Fallback untuk error lainnya
+        console.error('Unexpected Error:', error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: 'Terjadi kesalahan pada server.',
+            },
+            { status: 500 }
+        );
     }
-
-    const case_information = await prisma.caseinformation.update({
-        where: { CaseID: caseID },
-        data: dataToUpdate,
-    });
-
-    await notifySocket("case:updated", case_information);
-
-    return NextResponse.json(
-        {
-            success: true,
-            message: "Case Information Updated!",
-            data: case_information,
-        },
-        {
-            status: 200,
-        }
-    )
 }
 
 

@@ -3362,8 +3362,8 @@ export function UserAdd({ onAdd }) {
     } catch (err) {
       console.error("Gagal tambah user:", err);
       Swal.fire({
-        title: "Error!",
-        text: "Gagal menambahkan user.",
+        title: "Error! Gagal menambahkan user.",
+        text: err.response.data.error,
         icon: "error",
         timer: 1500,
         showConfirmButton: false,

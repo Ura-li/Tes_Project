@@ -27,6 +27,8 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, Plus, Trash2, Image as ImageIcon, Search } from "lucide-react";
 import { format } from "date-fns";
 import { SelectBarState } from "@/components/sc-select";
+import { toast } from "sonner";
+
 
 
 // ----------------------------
@@ -216,6 +218,7 @@ export default function NewCaseForm() {
   const [receivedDate, setReceivedDate] = useState(
     format(new Date(), "yyyy-MM-dd")
   );
+  const [caseSubject, setCaseSubject] = useState("");
   const [caseIdManual, setCaseIdManual] = useState("");
   const [caseIdManualDate, setCaseIdManualDate] = useState("");
   const [referenceCase, setReferenceCase] = useState("");
@@ -232,6 +235,8 @@ export default function NewCaseForm() {
   /** @type {[AssetInfo[], (val: AssetInfo[]) => void]} */
   const [assetResults, setAssetResults] = useState([]);
 
+  const [assetNotFound, setAssetNotFound] = useState(false);
+
   /** @type {[AssetInfo|null, (val: AssetInfo|null) => void]} */
   const [selectedAsset, setSelectedAsset] = useState(null);
 
@@ -241,8 +246,11 @@ export default function NewCaseForm() {
   /** @type {[ContactInfo[], (val: ContactInfo[]) => void]} */
   const [contactResults, setContactResults] = useState([]);
 
+  const [contactNotFound, setContactNotFound] = useState(false);
+  
   /** @type {[SiteAccount[], (val: SiteAccount[]) => void]} */
   const [companyResults, setCompanyResults] = useState([]);
+  const [companyNotFound, setCompanyNotFound] = useState(false);
 
   /** @type {[ContactInfo|null, (val: ContactInfo|null) => void]} */
   const [selectedContact, setSelectedContact] = useState(null);
@@ -332,8 +340,9 @@ export default function NewCaseForm() {
   const searchAsset = useMemo(
     () =>
       debounce(async (q) => {
-        if (!q || q.length < 3) {
+        if (!q || q.length < 2) {
           setAssetResults([]);
+          setAssetNotFound(false);
           return;
         }
         try {
@@ -342,10 +351,12 @@ export default function NewCaseForm() {
           });
           const list = res.data?.data || [];
           setAssetResults(list);
+          setAssetNotFound(list.length === 0);
           setShowProductCard(true);
         } catch (e) {
-          console.error("Search asset failed", e);
+          console.error("Search asset failed",   e);
           setAssetResults([]);
+          setAssetNotFound(true);
         }
       }, 400),
     []
@@ -361,6 +372,9 @@ export default function NewCaseForm() {
         if (!q || q.length < 2) {
           setContactResults([]);
           setCompanyResults([]);
+
+          setContactNotFound(false);
+          setCompanyNotFound(false);
           return;
         }
         try {
@@ -371,10 +385,21 @@ export default function NewCaseForm() {
           ]);
           setContactResults(contacts.data?.data || []);
           setCompanyResults(companies.data?.data || []);
+
+          const contactList = contacts.data?.data || [];
+          const companyList = companies.data?.data || [];
+
+          setContactResults(contactList);
+          setCompanyResults(companyList);
+          setContactNotFound(contactList.length === 0 && companyList.length === 0);
+          setCompanyNotFound(companyList.length === 0);
         } catch (e) {
           console.error("Search customer failed", e);
           setContactResults([]);
           setCompanyResults([]);
+
+          setContactNotFound(true);
+          setCompanyNotFound(true);
         }
       }, 400),
     []
@@ -838,7 +863,7 @@ export default function NewCaseForm() {
         AssetID: assetId,
         ContactID: contactId,
         SiteAccountID: companyId ?? null,
-        CaseSubject: problemDesc?.slice(0, 100) || "New Case",
+        CaseSubject: caseSubject,
         CaseType: caseType,
         KCI_Flag: kciFlag,
         IncomingChannel: "Email",
@@ -892,7 +917,10 @@ export default function NewCaseForm() {
       navigate(`/app/case/${caseId}`);
     } catch (e) {
       console.error(e);
-      alert("There was an error creating the case.");
+      toast.warning(e.response.data.message, {
+        position: "top-center",
+        // className: "p-5"
+      })
     } finally {
       setLoading(false);
     }
@@ -938,7 +966,7 @@ export default function NewCaseForm() {
                 <Search className="w-4 h-4" />
               </Button>
             </div>
-            {assetResults.length > 0 && (
+            {assetResults.length > 0 ? (
               <div className="mt-2 rounded-xl border p-2 max-h-40 overflow-auto">
                 {assetResults.map((a) => (
                   <button
@@ -957,7 +985,11 @@ export default function NewCaseForm() {
                   </button>
                 ))}
               </div>
-            )}
+            ): assetNotFound ? (
+              <div className="mt-2 text-sm text-muted-foreground">
+                ❌ Data asset tidak ditemukan
+              </div>
+            ): null}
             <div className="mt-2 flex items-center gap-2">
               <Checkbox
                 id="isNewAsset"
@@ -984,7 +1016,7 @@ export default function NewCaseForm() {
                 <Search className="w-4 h-4" />
               </Button>
             </div>
-            {(contactResults.length > 0 || companyResults.length > 0) && (
+            {(contactResults.length > 0 || companyResults.length > 0) ? (
               <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
                 <div className="rounded-xl border p-2 max-h-40 overflow-auto">
                   <div className="text-xs font-medium mb-1">Contacts</div>
@@ -1026,7 +1058,11 @@ export default function NewCaseForm() {
                   ))}
                 </div>
               </div>
-            )}
+            ) : contactNotFound ? (
+              <div className="mt-2 text-sm text-muted-foreground">
+                ❌ Customer / Company tidak ditemukan
+              </div>
+            ) : null }
             <div className="mt-2 flex items-center gap-2">
               <Checkbox
                 id="createCustomer"
@@ -1046,6 +1082,10 @@ export default function NewCaseForm() {
           <CardDescription>Diisi setelah pilih serial/customer.</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <Label>Case Subject<Label className="text-red-600">*</Label></Label>
+            <Input value={caseSubject} onChange={(e) => setCaseSubject(e.target.value)} />
+          </div>
           <div>
             <Label>Received Date <Label className="text-red-600">*</Label></Label>
             <Input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} />
@@ -1286,6 +1326,16 @@ export default function NewCaseForm() {
             <div>
               <Label>Serial No.<Label className="text-red-600">*</Label></Label>
               <Input value={selectedAsset?.SerialNumber || serialQuery} readOnly={!!selectedAsset} onChange={(e) => setSerialQuery(e.target.value)} />
+
+              <Button variant="link" asChild>
+                <a
+                  href="https://support.hp.com/id-en/check-warranty"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Check Warranty
+                </a>
+              </Button>
             </div>
             <div className="md:col-span-2">
               <Label>Check Product (Number/Name)</Label>
