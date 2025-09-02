@@ -10,6 +10,7 @@ import { TabsServiceCaseDetails } from './CaseDetail';
 import { TabsServiceCaseDetailsApo } from './CaseDetailApo';
 import { TabsServiceCaseDetailsCe } from './CaseDetailCe';
 import { TabsServiceCaseDetailsCeLead } from './CaseDetailCeLead';
+import { TabsServiceCaseDetailsLg } from './CaseDetailLg';
 
 
 export const Case = () => {
@@ -144,8 +145,8 @@ useEffect(() => {
           caseNoteFormData={caseNoteFormData}
           setCaseNoteFormData={setCaseNoteFormData}
       />
-    ) : user.role === 'ps' ? (
-       <TabsServiceCaseDetailsPs
+    ) : user.role === 'lg' ? (
+        <TabsServiceCaseDetailsLg
          caseDetails={caseDetails}
           setCaseDetails={setCaseDetails}
           caseNote={caseNote}

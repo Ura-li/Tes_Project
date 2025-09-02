@@ -93,7 +93,7 @@ import ServiceRequestPDF from "@/components/service-request-form"; // adjust pat
 import { Textarea } from "@/components/ui/textarea";
 import CaseField from "@/components/CaseField";
 
-export const TabsServiceCaseDetailsPs = ({
+export const TabsServiceCaseDetailsLg = ({
   caseDetails,
   setCaseDetails,
   caseNote,
