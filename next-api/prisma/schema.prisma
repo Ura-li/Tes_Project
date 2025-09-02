@@ -16,12 +16,21 @@ model asset_information {
   site_account        site_account?        @relation(fields: [SiteAccountID], references: [SiteAccountID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_1")
   contact_information contact_information? @relation(fields: [ContactID], references: [ContactID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_2")
   product_information product_information  @relation(fields: [ProductNumber], references: [ProductNumber], onUpdate: Restrict, map: "asset_information_ibfk_3")
+  asset_waranty       asset_warranty[]
   caseinformation     caseinformation[]
   servicecatalog      servicecatalog[]
 
   @@index([ContactID], map: "ContactID")
   @@index([ProductNumber], map: "ProductNumber")
   @@index([SiteAccountID], map: "SiteAccountID")
+}
+
+model asset_warranty {
+  WarrantyID  Int @id @default(autoincrement())
+  AssetID     Int? 
+  asset_information asset_information? @relation(fields: [AssetID], references: [AssetID], onDelete: Restrict, onUpdate: Cascade, map: "asset_warranty_ibfk_1")
+
+  @@index([AssetID], map:"AssetID")
 }
 
 model caseinformation {
