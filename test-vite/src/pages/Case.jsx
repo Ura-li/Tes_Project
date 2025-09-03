@@ -9,6 +9,8 @@ import { useAuth } from '@/context/auth-context';
 import { TabsServiceCaseDetails } from './CaseDetail';
 import { TabsServiceCaseDetailsApo } from './CaseDetailApo';
 import { TabsServiceCaseDetailsCe } from './CaseDetailCe';
+import { TabsServiceCaseDetailsCeLead } from './CaseDetailCeLead';
+import { TabsServiceCaseDetailsLg } from './CaseDetailLg';
 
 
 export const Case = () => {
@@ -129,6 +131,22 @@ useEffect(() => {
         />
     ) : user.role === 'ce' ? (
       <TabsServiceCaseDetailsCe
+         caseDetails={caseDetails}
+          setCaseDetails={setCaseDetails}
+          caseNote={caseNote}
+          caseNoteFormData={caseNoteFormData}
+          setCaseNoteFormData={setCaseNoteFormData}
+      />
+    ) : user.role === 'celead' ? (
+       <TabsServiceCaseDetailsCeLead
+         caseDetails={caseDetails}
+          setCaseDetails={setCaseDetails}
+          caseNote={caseNote}
+          caseNoteFormData={caseNoteFormData}
+          setCaseNoteFormData={setCaseNoteFormData}
+      />
+    ) : user.role === 'lg' ? (
+        <TabsServiceCaseDetailsLg
          caseDetails={caseDetails}
           setCaseDetails={setCaseDetails}
           caseNote={caseNote}
