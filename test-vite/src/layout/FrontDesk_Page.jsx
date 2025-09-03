@@ -58,11 +58,10 @@ export default function FrontDesk_Page() {
   const fetchData = async () => {
     setLoading(true);
     try {
-
       const response = await ApiCustomer.get('/api/case-information');
       const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`);
       const resFetchUserData = fecthUserData.data.data;
-      console.log("Fetch user daya : ", user)
+      console.log("Fetch user data : ", user)
       setUserData({
         ...userData,
         Username: resFetchUserData.Username,
