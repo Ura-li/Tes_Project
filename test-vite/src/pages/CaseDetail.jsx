@@ -161,6 +161,7 @@ export const TabsServiceCaseDetails = ({
   }
   
   const handleCaseChange = (field) => (value) => {
+    console.log("caseChange ",field, value)
     setCaseForm((prev) => ({ ...prev, [field]: value }));
   }
 
@@ -202,12 +203,24 @@ export const TabsServiceCaseDetails = ({
     const role = user?.role || "Unknown"; 
 
     const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
-    const caseFilled = caseForm.CaseType && caseForm.CaseType.trim() !== "" ;
+    // Consider CASE edited if any field has a non-empty value
+    const caseEdited = Object.entries({
+      CaseType: caseForm.CaseType,
+      CaseStatus: caseForm.CaseStatus,
+      CaseSubject: caseForm.CaseSubject,
+      Owner: caseForm.Owner,
+      CasePriority: caseForm.CasePriority,
+    }).some(([_, v]) => v !== undefined && v !== null && String(v).trim() !== "");
     const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
-    const entitlementEdited = entitlementStatus !== undefined;
+    // Only treat entitlement as edited if it has any non-empty value
+    const entitlementEdited =
+      entitlementStatus &&
+      Object.values(entitlementStatus).some(
+        (v) => v !== undefined && v !== null && String(v).trim() !== ""
+      );
     const csrEdited = csrForm && Object.keys(csrForm).length > 0;
 
-    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseFilled;
+    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseEdited;
 
     if (!hasIntentToSave) {
       alert("Tidak ada data yang disimpan.");
@@ -217,6 +230,7 @@ export const TabsServiceCaseDetails = ({
     let savedModules = [];
     const dataToUpdate = {};
     for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE']) {
+      console.log(target);
       switch (target) {
 
        case 'NOTE':
@@ -285,7 +299,7 @@ export const TabsServiceCaseDetails = ({
           break;
 
           case 'CASE':
-          if (caseFilled) {
+          if (caseEdited) {
               try {
                 console.log("CaseForm Data To Update: ", caseForm);
                 const oldStatus = caseDetails.CaseStatus;
@@ -293,17 +307,34 @@ export const TabsServiceCaseDetails = ({
                 
                 // const isNewAssignStatus = newStatus.includes("NEW_Assign");
                 savedModules.push("Case");
-                if (oldStatus !== newStatus) {
-                  // if(isNewAssignStatus) newStatus = "Open";
-                   Object.assign(dataToUpdate, {
-                    CaseType: caseForm.CaseType || "",
-                    CaseStatus: newStatus || "",
-                    Owner: caseForm.Owner || caseDetails.Owner
-                  });
-                  
-                  const token = {
-                    user: getUserFromToken()
-                  }
+                // console.log(caseFor)
+                // Build updates only for fields provided (avoid blanking with empty strings)
+                const caseUpdates = {};
+                if (caseForm.CaseType && caseForm.CaseType.trim() !== "") {
+                  caseUpdates.CaseType = caseForm.CaseType;
+                }
+                if (newStatus && String(newStatus).trim() !== "") {
+                  caseUpdates.CaseStatus = newStatus;
+                }
+                if (caseForm.Owner && String(caseForm.Owner).trim() !== "") {
+                  caseUpdates.Owner = caseForm.Owner;
+                }
+                if (caseForm.CaseSubject && String(caseForm.CaseSubject).trim() !== "") {
+                  caseUpdates.CaseSubject = caseForm.CaseSubject;
+                }
+                if (caseForm.CasePriority && String(caseForm.CasePriority).trim() !== "") {
+                  caseUpdates.CasePriority = caseForm.CasePriority;
+                }
+
+                Object.assign(dataToUpdate, caseUpdates);
+
+                // Log status change if it actually changed
+                if (
+                  newStatus &&
+                  String(newStatus).trim() !== "" &&
+                  oldStatus !== newStatus
+                ) {
+                  const token = { user: getUserFromToken() };
                   await ApiCustomer.post("/api/actionlog", {
                     CaseId: `${caseDetails.CaseID}`,
                     ReferenceId: ``,
@@ -328,10 +359,16 @@ export const TabsServiceCaseDetails = ({
           break;
       }
 
-      if (Object.keys(dataToUpdate).length > 0) {
-        console.log("Data To Update: ", dataToUpdate);
-        await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, dataToUpdate);
-      }
+    }
+
+    // After collecting all updates, patch once if needed
+    console.log("Data To Update: ", dataToUpdate);
+    if (Object.keys(dataToUpdate).length > 0) {
+      console.log("Data To Update: ", dataToUpdate);
+      await ApiCustomer.patch(
+        `/api/case-information/${caseDetails.CaseID}`,
+        dataToUpdate
+      );
     }
 
     if (savedModules.length > 0) {
@@ -450,10 +487,9 @@ const openPopup = () => {
     // { icon: StepBack, label: "Audit", onClick: () => openPopup(), hidden:true },
   ];
 
-  const visibleButtons = useMemo(
-    () => buttons.filter(button => button.roles.includes(user.role)),
-    [user.role]
-  );
+  // Do not memoize with only user.role; it freezes onClick closures
+  // causing handleSave to capture stale state. Compute each render.
+  const visibleButtons = buttons.filter(button => button.roles.includes(user.role));
   console.log("TES CASE DETAILS VALUE",caseDetails);
   // const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   // const hiddenButtons = open ? buttons.slice(-3) : [];
@@ -673,9 +709,9 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce"]},
-    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce"]},
-    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce"]},
+    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg"]},
+    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg"]},
+    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg"]},
     // { value: "customer,add,entitement", label: "Asset & Entitement", roles:["admin"]},
     // { value: "ci_notes", label: "Notes & Information", roles:["admin"]},
     // { value: "ci_activitas", label: "Activities", disable: true, roles:["admin"]},
@@ -955,7 +991,13 @@ export const ServiceCase = ({
     NEW_AssignAPO: "New Assign To APO",
     NEW_AssignPS: "New Assign To Product Store",
     NEW_POPDoc: "New Needed POP Document",
-    NEW_Warranty: "New Warranty Approval"
+    NEW_Warranty: "New Warranty Approval",
+    PartRequest: "Part Request",
+    PartRequestLog: "Part Request Logistic",
+    PartOrder: "Part Order",
+    PartAvailable: "Part Available",
+    RepairProgress: "Repair Progress",
+    FinishRepair: "Finish Repair",
   };
 
   const assignToForm= true;
@@ -1737,7 +1779,7 @@ return (
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
                     </div>
-                    <CaseField label="OTC Code" lock span={3} star>
+                    <CaseField label="OTC Code" lock={!canEdit} span={3} star>
                       <SearchCommandBlock
                         options={otcCode}
                         value={entitlementStatus.OTCCode}
