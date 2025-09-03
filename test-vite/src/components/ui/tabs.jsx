@@ -16,7 +16,9 @@ const tabsVariants = cva(
         underline:
           "data-[state=active]: data-[state=active]:border-b-4 border-b-blue-500 px-1.5 py-3 font-semibold text-black",
         fullsize:
-          "rounded-none data-[state=active]:bg-gray-300 p-5 hover:bg-gray-100"
+          "rounded-none data-[state=active]:bg-gray-300 p-5 hover:bg-gray-100",
+        simple:
+          " data-[state=active]:border-b-4 border-b-blue-500 px-1.5 py-3 font-semibold text-black text-center justify-center"
         },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
