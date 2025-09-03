@@ -42,8 +42,8 @@ export async function GET(request) {
         // Ambil data dengan filter & pagination
         const OTCCodeData = await prisma.OTCCodeTable.findMany({
             where: whereCondition,
-            skip: skip,
-            take: limit,
+            // skip: skip,
+              // take: limit,
             orderBy: { OTCCode: "asc" }
         });
 

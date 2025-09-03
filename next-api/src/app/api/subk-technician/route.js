@@ -28,8 +28,8 @@ export async function GET(request) {
 
         const subkTechnicians = await prisma.subkTechnician.findMany({
             where: whereCondition,
-            skip: skip,
-            take: limit,
+            // skip: skip,
+            // take: limit,
             orderBy: { Name: "asc" },
             include: {
                 resourceAccount: true, // include relation to ResourceAccount

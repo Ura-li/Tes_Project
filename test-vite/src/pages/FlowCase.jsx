@@ -126,6 +126,79 @@ export const FlowCase = () => {
                     </CardContent>
                   </Card>
                 ))
+              ) : user.role === 'lg' ? (
+                 filteredCases.map((c) => (
+                  <>
+                    <Card key={c.CaseID} className="shadow-sm hover:shadow-md transition border-l-5 border-gray-200">
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          <p className='text-lg '>#{c.caseinformation?.[0]?.workorder?.[0]?.WOID}</p>
+                          <p>{c.CreatedOn}</p>
+                          <div className="gap-2 flex flex-col lg:flex-row">
+                            <Badge className={c.CaseStatus === "Open" ? "bg-green-500" : c.CaseStatus === "InActive" ? "bg-blue-400" : c.CaseStatus === "On Hold" ? "yellow" : c.CaseStatus === "Escalated" ? "red" : "gray"}>{c.CaseStatus}</Badge>
+                            <Badge>{c.caseinformation.CaseType}</Badge>
+                            {console.log("Case Info : ",c?.caseinformation.CreatedBy)}
+                            {console.log("User : :",user.id)}
+                            {c?.caseinformation.Owner === user.id ? (
+                              <Badge className="bg-purple-500">Owner</Badge>
+                            ) : (
+                              <Badge className="bg-sky-500">CreatedBy</Badge>
+                            )}
+
+                          </div>
+                        </CardTitle>
+                        <CardDescription className="text-md font-semibold italic">{c.CaseSubject}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-col lg:flex-row gap-4 mb-4">
+                          <div className="grid grid-cols-3  rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
+                            <p className="font-medium">Serial Number</p>
+                            <p className="text-md text-gray-500 col-span-2"> {c.SerialNumber}</p>
+                            <p className="font-medium">Product Name</p>
+                            <p className="text-md text-gray-500 col-span-2"> {c.ProductName}</p>
+                            <p className="font-medium">Product Number</p>
+                            <p className="text-md text-gray-500 col-span-2"> {c.ProductNumber}</p>
+                            
+                          </div>
+                          <div className="grid grid-cols-3 rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
+                            <p className="font-medium">Customer</p>
+                            <p className="text-md text-gray-500 col-span-2">
+                               {c.caseinformation.contact_information.FirstName}{" "}
+                              {c.caseinformation.contact_information.LastName}
+                            </p>
+                            <p className="font-medium">Email</p>
+                            <p className="text-md text-gray-500 col-span-2">
+                               {c.caseinformation.contact_information?.Email || "No Email"}
+                            </p>
+                            <p className="font-medium">Company</p>
+                            <p className="text-md text-gray-500 col-span-2">
+                                {c.CustomerAccount || "No Company"}
+                            </p>
+                            <p className="font-medium">Phone Number</p>
+                            <p className="text-md text-gray-500 col-span-2">
+                                {c.caseinformation.contact_information.Phone || "No Phone Set"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-muted/50">
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {c.caseinformation.ProblemDescription}
+                          </p>
+                        </div>
+                        <div className="bg-slate-100 p-2 m-2 grid grid-flow-col">
+                          <p className='flex flex-col items-center'>Created BY <span>({c.caseinformation?.createdByUser?.Username}) - ({c.CreatedName})</span></p>
+                          <p className='flex flex-col items-center'>Repaired BY <span></span></p>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="justify-between">
+                        <p className="text-sm text-muted-foreground">Case Holder {c.caseinformation?.ownerUser?.Username} - {c.Owner}</p>
+                        <p className="text-sm text-muted-foreground">Status Right Now {c.CaseStatus}</p>
+                        <Button size="sm" variant="outline" onClick={() => navigate(`/app/case/${c.CaseID}`)}>Details</Button>
+                      </CardFooter>
+                    </Card>
+
+                  </>
+                ))                
               ) : (
                 // Render real data
                 filteredCases.map((c) => (
@@ -138,8 +211,7 @@ export const FlowCase = () => {
                           <div className="gap-2 flex flex-col lg:flex-row">
                             <Badge className={c.CaseStatus === "Open" ? "bg-green-500" : c.CaseStatus === "InActive" ? "bg-blue-400" : c.CaseStatus === "On Hold" ? "yellow" : c.CaseStatus === "Escalated" ? "red" : "gray"}>{c.CaseStatus}</Badge>
                             <Badge>{c.caseinformation.CaseType}</Badge>
-                            {console.log("Case Info : ",c?.caseinformation.CreatedBy)}
-                            {console.log("User : :",user.id)}
+                  
                             {c?.caseinformation.Owner === user.id ? (
                               <Badge className="bg-purple-500">Owner</Badge>
                             ) : (

@@ -441,23 +441,23 @@ const openPopup = () => {
       icon: CircleChevronLeft,
       label: "",
       onClick: () => navigate(`/app/viewcase`),
-      roles: ["admin", "fd", "apo", "ce","lg","celead","spv","ps"]
+      roles: ["admin", "fd","user", "apo", "ce","lg","celead","spv","ps"]
     },
     // { icon: SquareArrowOutUpRight, label: "",},
     { icon: Save, label: "Save", 
       onClick: () => handleSave(), 
-      roles: ["admin", "fd", "apo", "ce", "lg", "celead", "ps"],
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
     },
     
     {
       icon: FileSymlink,
       label: "Save & Close",
       onClick: () => saveAndCloseCase(),
-      roles: ["admin", "fd", "apo", "ce", "lg", "celead", "ps"],
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
     },
     { icon: RotateCw, label: "Refresh", 
       onClick: () => window.location.reload(),
-      roles: ["admin", "fd", "apo", "ce", "lg", "celead", "spv", "ps"],
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps"],
     },
     // { icon: StepBack, label: "Complaint",},
     { icon: StepBack, label: "SRF", 
@@ -471,7 +471,7 @@ const openPopup = () => {
       link.click();
       document.body.removeChild(link);
     }, 
-    roles: ["admin", "fd", "spv"]
+    roles: ["admin", "fd","user", "spv"]
   },
   { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), 
     roles: ["admin",   "ce", "celead", ],
@@ -1153,84 +1153,81 @@ return (
       )}
       <Card className="border-0 w-full">
         <Tabs defaultValue="case_info">
-          <CardHeader className="sticky flex flex-col w-full gap-3 p-2 border-2 ">
-            <div className="flex justify-between">
-              <CardTitle className="text-2xl pl-1">
-                {caseDetails.CaseID}
-                <span className="flex items-center text-sm">
-                  Case .
-                  <Select
-                    onValueChange={setSelected}
-                    defaultValue="case"
-                    className="shadow-xl"
-                  >
-                    <SelectTrigger className="border-none shadow-none">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="case">Case</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </span>
-              </CardTitle>
-              <CardTitle className="flex">
-                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
-                  <h1 className="text-blue-500">{ownerUserData.Name}</h1>
-                  <p className="text-sm font-light ">Owner</p>
-                </div>
-                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
-                  <h1 className="text-blue-500">---</h1>
-                  <p className="text-sm font-light ">Queue</p>
-                </div>
-                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
-                  <h1 className="text-blue-500">
-                    {dataFetchCustomerData.MainAccount?.Salutation}
-                    {dataFetchCustomerData.MainAccount?.FirstName}
-                    {dataFetchCustomerData.MainAccount?.LastName}
-                  </h1>
-                  <p className="text-sm font-light ">Contact</p>
-                </div>
-                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
-                  <Select onValueChange={setSelected} defaultValue="first">
-                    <SelectTrigger className="p-0 text-blue-500 border-none shadow-none">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="p-0">
-                      <SelectGroup className="p-0">
-                        <SelectItem value="first" className="p-0">
-                          {dataFetchCustomerData.SiteAccount?.Company}
-                        </SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-sm font-light ">Site Account</p>
-                </div>
-                
-              </CardTitle>
+        <CardHeader className="sticky top-22 z-10 w-full border-b bg-white shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
+
+            {/* LEFT SIDE - Case Info */}
+            <div>
+              <h1 className="text-2xl font-semibold">{caseDetails.CaseID}</h1>
+              <p className="text-sm text-muted-foreground">{caseDetails.CaseSubject}</p>
             </div>
-            <TabsList className="bg-white">
-            {visibleTabs.map((tab,index) => (
-              tab.component ? (
-                <div key={index}>{tab.component}</div> 
-              ) : (
-                <TabsTrigger
-                  key={index}
-                  variant="underline"
-                  value={tab.value}
-                  disabled={tab.disable}
-                  hidden={tab.hidden}
-                  className="text-sm font-normal"
-                >
-                  {tab.label}
-                </TabsTrigger>
-              )
-            ))}
 
+            {/* RIGHT SIDE - Quick Info */}
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              {/* Owner */}
+              <div className="flex flex-col">
+                <span className="text-blue-600 font-medium">{ownerUserData.Name}</span>
+                <span className="text-muted-foreground">Owner</span>
+              </div>
 
+              {/* Queue */}
+              <div className="flex flex-col">
+                <span className="text-blue-600 font-medium">---</span>
+                <span className="text-muted-foreground">Queue</span>
+              </div>
+
+              {/* Contact */}
+              <div className="flex flex-col">
+                <span className="text-blue-600 font-medium">
+                  {dataFetchCustomerData.MainAccount?.Salutation}
+                  {dataFetchCustomerData.MainAccount?.FirstName}{" "}
+                  {dataFetchCustomerData.MainAccount?.LastName}
+                </span>
+                <span className="text-muted-foreground">Contact</span>
+              </div>
+
+              {/* Site Account */}
+              <div className="flex flex-col">
+                <Select onValueChange={setSelected} defaultValue="first">
+                  <SelectTrigger className="h-auto p-0 text-blue-600 font-medium border-none shadow-none focus:ring-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="first">
+                        {dataFetchCustomerData.SiteAccount?.Company}
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <span className="text-muted-foreground">Site Account</span>
+              </div>
+            </div>
+          </div>
+
+          {/* TABS */}
+          <div className="px-4 border-t bg-gray-50">
+            <TabsList className="w-full flex gap-4">
+              {visibleTabs.map((tab, index) =>
+                tab.component ? (
+                  <div key={index}>{tab.component}</div>
+                ) : (
+                  <TabsTrigger
+                    key={index}
+                    variant="simple"
+                    value={tab.value}
+                    disabled={tab.disable}
+                    hidden={tab.hidden}
+                    className="text-sm font-medium"
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                )
+              )}
             </TabsList>
-          </CardHeader>
+          </div>
+        </CardHeader>
+
 
           <TabsContent value="case_info" className={"p-2 flex flex-col gap-5"}>
           <div  className={" grid lg:grid-cols-2 md:grid-cols-1 gap-4 "}>
@@ -1239,12 +1236,12 @@ return (
                 <CardTitle className={"text-lg  flex gap-3"}><Briefcase/>Case Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-2">
+              <CardContent className="grid grid-cols-2 gap-2 ">
                 <CaseField label="Case Subject" lock span={3}>
                     <Textarea
                      value={caseDetails?.CaseSubject}
                       onChange={e => handleCaseDetails("CaseSubject")(e.target.value)}
-                     className="resize-none border-none italic text-2xl"
+                     className="resize-none border-none italic "
                     />
                 </CaseField>
               
@@ -1272,7 +1269,7 @@ return (
                 )}
                 
               
-                <CaseField label="Case Status" className={"mt-2"}  span={2}>
+                <CaseField label="Case Status" className={"mt-2"} lock={!canEdit}  span={2}>
                   <SearchCommandBlock
                       value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
                       onChange={ async (label) => {
@@ -1329,7 +1326,7 @@ return (
                 {/* {assignToForm == true ?? (
                 )} */}
 
-                <CaseField label="Case Type" open className={"mt-2"} span={2}>
+                <CaseField label="Case Type" open className={"mt-2"} lock={!canEdit} span={2}>
                   <SearchCommandBlock
                     value={caseForm?.CaseType}
                     onChange={onChangeCase("CaseType")}
@@ -1568,7 +1565,7 @@ return (
                   <Separator />
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
                     {/* LEFT COLUMN - Issue Description */}
                     <div className="space-y-6">
                       <textarea
@@ -1576,39 +1573,37 @@ return (
                         readOnly
                         value={caseDetails?.CaseProductNote}
                       />
-                      <div className="grid grid-cols-2 gap-6">
-                        <CaseField label="Related Device" >
-                          <Input variant="invisible" placeholder="---" />
-                        </CaseField>
-                        <CaseField label="Device Manufacturer" >
-                          <Input variant="invisible" placeholder="---" />
-                        </CaseField>
-                        <CaseField label="Device Model" >
-                          <Input variant="invisible" placeholder="---" />
-                        </CaseField>
-                      </div>
                     </div>
                     {/* RIGHT COLUMN - System Info */}
-                    <div className="grid grid-cols-2 gap-6">
-                      <CaseField label="Program/Category" >
+                    <div className="grid grid-cols-4 gap-6">
+                        <CaseField label="Related Device" lock >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                        <CaseField label="Device Manufacturer" lock >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                        <CaseField label="Device Model" lock >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                      <CaseField label="Program / Category" lock >
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
-                      <CaseField label="Operating System" >
+                      <CaseField label="Operating System" lock >
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
-                      <CaseField label="Version" >
+                      <CaseField label="Version" lock >
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
-                      <CaseField label="Remote Diag Code" >
+                      <CaseField label="Remote Diag Code" lock >
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
-                      <CaseField label="Application Information" >
+                      <CaseField label="Application Information" lock >
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
-                      <CaseField label="Provider / Platform" >
+                      <CaseField label="Provider / Platform" lock >
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
-                      <CaseField label="Software Version" >
+                      <CaseField label="Software Version" lock >
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
                     </div>

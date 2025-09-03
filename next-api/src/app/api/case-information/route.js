@@ -92,7 +92,16 @@ export async function GET(request) {
       caseresolution: true,
       otcCodeTable: true,
       casenotes_caseinformation_CaseNoteTocasenotes: true,
-      workorder: true,
+      workorder: {
+        include: {
+          materialorder: {
+            include: {
+              materialorderlineitems: true
+            }
+          }
+        }
+        
+      },
       accessory: true,
     },
   });
