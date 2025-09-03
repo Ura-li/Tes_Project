@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -85,6 +85,7 @@ import ServiceRequestPDF from '@/components/service-request-form'; // adjust pat
 import { Textarea } from "@/components/ui/textarea";
 import CaseField from "@/components/CaseField";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/context/auth-context";
 
 /**
  * TODO : 
@@ -119,7 +120,7 @@ export const TabsServiceCaseDetails = ({
   
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
-
+  const { user } = useAuth();
   const [selectedSymptom, setSelectedSymptom] = useState(null);
 
   const { open } = useSidebar();
@@ -403,17 +404,27 @@ const openPopup = () => {
       icon: CircleChevronLeft,
       label: "",
       onClick: () => navigate(`/app/viewcase`),
+      roles: ["admin", "fd", "apo", "ce","lg","celead","spv","ps"]
     },
-    { icon: SquareArrowOutUpRight, label: "",},
-    { icon: Save, label: "Save", onClick: () => handleSave() },
+    // { icon: SquareArrowOutUpRight, label: "",},
+    { icon: Save, label: "Save", 
+      onClick: () => handleSave(), 
+      roles: ["admin", "fd", "apo", "ce", "lg", "celead", "ps"],
+    },
+    
     {
       icon: FileSymlink,
       label: "Save & Close",
       onClick: () => saveAndCloseCase(),
+      roles: ["admin", "fd", "apo", "ce", "lg", "celead", "ps"],
     },
-    { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
+    { icon: RotateCw, label: "Refresh", 
+      onClick: () => window.location.reload(),
+      roles: ["admin", "fd", "apo", "ce", "lg", "celead", "spv", "ps"],
+    },
     // { icon: StepBack, label: "Complaint",},
-    { icon: StepBack, label: "SRF", onClick: async () => {
+    { icon: StepBack, label: "SRF", 
+      onClick: async () => {
       const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails}  />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -422,18 +433,27 @@ const openPopup = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }, },
-    { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR"), hidden: true },
-    { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), hidden: true },
-    { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder"), hidden:true },
-    { icon: StepBack, label: "Sales Offer", hidden:true},
-    { icon: StepBack, label: "Close Case", hidden:true },
-    { icon: StepBack, label: "Pick", hidden:true },
-    { icon: StepBack, label: "Queue Details", hidden:true},
-    { icon: UserPen, label: "Assign", hidden:true },
-    { icon: StepBack, label: "Add to Queue", hidden:true },
-    { icon: StepBack, label: "Audit", onClick: () => openPopup(), hidden:true },
+    }, 
+    roles: ["admin", "fd", "spv"]
+  },
+  { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), 
+    roles: ["admin",   "ce", "celead", ],
+  },
+    // { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR"), hidden: true },
+    // { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder"), hidden:true },
+    // { icon: StepBack, label: "Sales Offer", hidden:true},
+    // { icon: StepBack, label: "Close Case", hidden:true },
+    // { icon: StepBack, label: "Pick", hidden:true },
+    // { icon: StepBack, label: "Queue Details", hidden:true},
+    // { icon: UserPen, label: "Assign", hidden:true },
+    // { icon: StepBack, label: "Add to Queue", hidden:true },
+    // { icon: StepBack, label: "Audit", onClick: () => openPopup(), hidden:true },
   ];
+
+  const visibleButtons = useMemo(
+    () => buttons.filter(button => button.roles.includes(user.role)),
+    [user.role]
+  );
   console.log("TES CASE DETAILS VALUE",caseDetails);
   // const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   // const hiddenButtons = open ? buttons.slice(-3) : [];
@@ -527,7 +547,7 @@ const openPopup = () => {
   };
   return (
     <>
-      <div className="flex items-center border-1 ">
+      <div className="flex items-center border-1 sticky top-13 z-10 bg-gray-50">
         {/* {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -555,7 +575,7 @@ const openPopup = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )} */}
-        {buttons.map((btn, index) => (
+        {visibleButtons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
@@ -653,18 +673,25 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case & Customer", },
-    { value: "customer,add,entitement", label: "Asset & Entitement", hidden: true },
-    { value: "ci_notes", label: "Notes & Information", hidden: true },
-    { value: "action_log", label: "Action Log", },
-    { value: "ci_activitas", label: "Activities", disable: true, hidden: true },
-    { value: "ci_actions", label: "Customer Interactions", disable: true, hidden: true},
-    { value: "ci_wo", label: "Work Order Validation", disable: true ,hidden: true},
-    { value: "ci_orders", label: "Orders",disable: true ,hidden: true},
-    { value: "ci_salles", label: "Sales Offer", disable: true ,hidden: true},
-    { value: "ci_knowledge", label: "Knowledge & Attachments", hidden: true},
+    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce"]},
+    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce"]},
+    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce"]},
+    // { value: "customer,add,entitement", label: "Asset & Entitement", roles:["admin"]},
+    // { value: "ci_notes", label: "Notes & Information", roles:["admin"]},
+    // { value: "ci_activitas", label: "Activities", disable: true, roles:["admin"]},
+    // { value: "ci_actions", label: "Customer Interactions", disable: true, roles:["admin"]},
+    // { value: "ci_wo", label: "Work Order Validation", disable: true ,roles:["admin"]},
+    // { value: "ci_salles", label: "Sales Offer", disable: true ,roles:["admin"]},
+    // { value: "ci_knowledge", label: "Knowledge & Attachments", roles:["admin"]},
     // { component: <SelectBarRelated />,},
   ];
+
+  const { user } = useAuth();
+
+  const visibleTabs = useMemo(
+    () => tabs.filter(tab => tab.roles.includes(user.role)),
+    [user.role]
+  );
 
   // const visibleTabs = open ? tabs.slice(0, -2) : tabs;
   // const hiddenTabs = open
@@ -1070,9 +1097,11 @@ const fetchSymptomCodes = async (term) => {
   }
 };
 
+const [hideAsignTo, setHideAsignTo] = useState(null)
+  const canEdit = caseDetails?.Owner === user?.id;
+  console.log("OI",canEdit)
 
-
-  return (
+return (
     <>
       {caseDetails.CaseStatus === "Close" && (
         <div className="p-4 mt-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
@@ -1140,7 +1169,7 @@ const fetchSymptomCodes = async (term) => {
               </CardTitle>
             </div>
             <TabsList className="bg-white">
-            {tabs.map((tab,index) => (
+            {visibleTabs.map((tab,index) => (
               tab.component ? (
                 <div key={index}>{tab.component}</div> 
               ) : (
@@ -1211,6 +1240,7 @@ const fetchSymptomCodes = async (term) => {
                         onChangeCase("CaseStatus")(enumValue);
                         console.log("Selected label:", label);
                         console.log("Mapped enum:", enumValue);
+                        setHideAsignTo(enumValue?.startsWith("NEW_Assign"))
                         
                         if(enumValue.startsWith("NEW_Assign")) {
                           const role = extractRoleFromStatus(enumValue);
@@ -1235,12 +1265,12 @@ const fetchSymptomCodes = async (term) => {
                     />
 
                 </CaseField>
-                <CaseField label="Assign To" className={"mt-2"}  span={2} hide={!caseForm?.CaseStatus?.startsWith("NEW_Assign")}>
+                <CaseField label="Assign To" className={"mt-2"}  span={2} hide={!hideAsignTo}>
                     <SearchCommandBlock
                       value={caseForm?.Owner}
                       onChange={(selectedID) => {
                             if (selectedID === null) {
-                          onChangeCase("AssignTo")(null); // Clear the value!
+                          onChangeCase("Owner")(null); // Clear the value!
                           return;
                         }
                         const selectedUser = roleAssign.find(user => user.IDUser === selectedID);
@@ -1484,202 +1514,93 @@ const fetchSymptomCodes = async (term) => {
               </CardContent>
             </Card>
 
-          </div> 
 
-            <Card className="flex-col">
-              <CardHeader>
-                <CardTitle className="text-lg flex gap-3"><Computer/> Asset Information</CardTitle>
-                <Separator />
-              </CardHeader>
-
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* LEFT COLUMN - Fields */}
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
-                      <CaseField label="Assets" lock>
-                        {dataFetchAssetInformation?.AssetInformation?.SerialNumber}
-                      </CaseField>
-
-                      <CaseField label="Product Number" lock>
-                        {
-                          dataFetchAssetInformation?.AssetInformation
-                            ?.product_information?.ProductNumber
-                        }
-                      </CaseField>
-
-                      <CaseField label="Asset Location" lock>
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-
-                      <CaseField label="Serial Number" lock>
-                        {dataFetchAssetInformation?.AssetInformation?.SerialNumber}
-                      </CaseField>
-
-                      <CaseField label="HWPC Code" lock>
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-
-                      <CaseField label="SNIC - Count" lock>
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-
-                      <CaseField label="Product Name" lock>
-                        {
-                          dataFetchAssetInformation?.AssetInformation
-                            ?.product_information?.ProductName
-                        }
-                      </CaseField>
-
-                      <CaseField label="MV Product Description" lock>
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-
-                      <CaseField label="HW Profit Center" lock>
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-
-                      <CaseField label="Device Properties" lock >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-
-                      <CaseField label="OTC Code"  star>
-                        <SearchCommandBlock
-                          options={otcCode}
-                          value={entitlementStatus.OTCCode}
-                          onChange={(value) => handleEntitlementStatus("OTCCode")(value)}
-                          placeholder="---"
-                          renderLabel={(opt) => `${opt.OTCCode} - ${opt.Description}`}
-                          getValue={(opt) => opt.OTCCode}
-                        />
-                      </CaseField>
+            {/* --- Card 1: Customer Issue & System Info --- */}
+                         
+              <Card className="flex-col">
+                <CardHeader>
+                  <CardTitle className="text-lg  flex gap-3">
+                    <FileSliders/>
+                    Customer Issue Description & System Information
+                  </CardTitle>
+                  <Separator />
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* LEFT COLUMN - Issue Description */}
+                    <div className="space-y-6">
+                      <textarea
+                        className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
+                        readOnly
+                        value={caseDetails?.CaseProductNote}
+                      />
+                      <div className="grid grid-cols-2 gap-6">
+                        <CaseField label="Related Device" >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                        <CaseField label="Device Manufacturer" >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                        <CaseField label="Device Model" >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                      </div>
                     </div>
-                  </div>
-
-                  {/* RIGHT COLUMN - Accessory */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Accessory</h3>
-                    <Separator className="my-4" />
-                    <div className="overflow-x-auto rounded-lg border">
-                      <table className="min-w-full text-sm text-left">
-                        <thead className="bg-gray-50 text-gray-700">
-                          <tr>
-                            <th className="px-4 py-2 border">No Accessories</th>
-                            <th className="px-4 py-2 border hidden">Case ID</th>
-                            <th className="px-4 py-2 border">Accessories</th>
-                            <th className="px-4 py-2 border">Note</th>
-                            <th className="px-4 py-2 border">CT / SN Code</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {caseDetails.accessory?.length ? (
-                            caseDetails.accessory.map((item, index) => (
-                              <tr key={index} className="hover:bg-gray-50">
-                                <td className="px-4 py-2 border">{item.id}</td>
-                                <td className="px-4 py-2 border hidden">{item.CaseID}</td>
-                                <td className="px-4 py-2 border">{item.Accessories}</td>
-                                <td className="px-4 py-2 border">{item.Note || "---"}</td>
-                                <td className="px-4 py-2 border">{item.CT_SNCode || "---"}</td>
-                              </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td className="px-4 py-2 border text-center" colSpan={5}>
-                                No accessories found.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div className="mt-2 text-sm text-gray-600">
-                      Total Accessories: {caseDetails.accessory?.length || 0}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-
-            {/* --- Card 23 
-            `` Customer Issue & System Info --- */}
-            <Card className="flex-col">
-              <CardHeader>
-                <CardTitle className="text-lg  flex gap-3">
-                  <FileSliders/>
-                  Customer Issue Description & System Information
-                </CardTitle>
-                <Separator />
-              </CardHeader>
-
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* LEFT COLUMN - Issue Description */}
-                  <div className="space-y-6">
-                    <textarea
-                      className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
-                      readOnly
-                      value={caseDetails?.CaseProductNote}
-                    />
+                    {/* RIGHT COLUMN - System Info */}
                     <div className="grid grid-cols-2 gap-6">
-                      <CaseField label="Related Device" >
+                      <CaseField label="Program/Category" >
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
-                      <CaseField label="Device Manufacturer" >
+                      <CaseField label="Operating System" >
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
-                      <CaseField label="Device Model" >
+                      <CaseField label="Version" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                      <CaseField label="Remote Diag Code" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                      <CaseField label="Application Information" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                      <CaseField label="Provider / Platform" >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                      <CaseField label="Software Version" >
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+              {/* --- Card 2: Case Notes --- */}
+              <Card className=" hover:shadow-gray-400">
+                <CardHeader>
+                  <CardTitle className="text-xl flex gap-2 "><NotepadText />Case Notes</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent >
+                  <div className="flex flex-col gap-2">
+                    <CaseField >
+                      <textarea
+                        className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
+                        readOnly
+                        value={formData?.NotesDisplay}
+                      ></textarea>
+                    </CaseField>
 
-                  {/* RIGHT COLUMN - System Info */}
-                  <div className="grid grid-cols-2 gap-6">
-                    <CaseField label="Program/Category" >
-                      <Input variant="invisible" placeholder="---" />
-                    </CaseField>
-                    <CaseField label="Operating System" >
-                      <Input variant="invisible" placeholder="---" />
-                    </CaseField>
-                    <CaseField label="Version" >
-                      <Input variant="invisible" placeholder="---" />
-                    </CaseField>
-                    <CaseField label="Remote Diag Code" >
-                      <Input variant="invisible" placeholder="---" />
-                    </CaseField>
-                    <CaseField label="Application Information" >
-                      <Input variant="invisible" placeholder="---" />
-                    </CaseField>
-                    <CaseField label="Provider / Platform" >
-                      <Input variant="invisible" placeholder="---" />
-                    </CaseField>
-                    <CaseField label="Software Version" >
-                      <Input variant="invisible" placeholder="---" />
-                    </CaseField>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                    <div className="grid grid-cols-2 gap-4">
+                      <CaseField
+                        label="Log Type"
 
-            {/* --- Card 3: Case Notes --- */}
-            <Card className="flex-col">
-              <CardHeader>
-                <CardTitle className="text-lg  flex gap-3"><NotepadText/>Case Notes</CardTitle>
-                <Separator />
-              </CardHeader>
-
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* LEFT COLUMN - Input Fields */}
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-6">
-                      <CaseField label="Log Type" >
+                      >
                         <Select
                           value={formData?.LogType}
                           onValueChange={(val) => onChange("LogType", val)}
                         >
-                          <SelectTrigger className="w-full p-3 border rounded-md hover:shadow">
+                          <SelectTrigger
+                            className={"w-[100%] hover:shadow-lg border-b-0 p-3"}
+                          >
                             <SelectValue placeholder="Log Type" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1689,7 +1610,10 @@ const fetchSymptomCodes = async (term) => {
                         </Select>
                       </CaseField>
 
-                      <CaseField label="Action Type" >
+                      <CaseField
+                        label="Action Type"
+
+                      >
                         <SearchCommandBlock
                           value={formData?.ActionType}
                           onChange={(val) => onChange("ActionType", val)}
@@ -1704,11 +1628,17 @@ const fetchSymptomCodes = async (term) => {
                         />
                       </CaseField>
 
-                      <CaseField label="Template" >
+                      <CaseField
+                        label="Template"
+
+                      >
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
 
-                      <CaseField label="Visible Externally" >
+                      <CaseField
+                        label="Visible Externally"
+
+                      >
                         <SelectYN
                           value={
                             formData?.VisibleExternally === undefined ||
@@ -1721,84 +1651,328 @@ const fetchSymptomCodes = async (term) => {
                           onValueChange={(val) =>
                             onChange("VisibleExternally", val === "Yes")
                           }
-                        />
+                        ></SelectYN>
                       </CaseField>
 
-                      <CaseField label="Number of Minutes Spent" >
+                      <CaseField
+                        label="Number of Minutes Spent"
+
+                      >
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
+
+                      <CaseField
+                        label="Notes"
+
+
+                        star
+                      >
+                        <textarea
+                          className="w-full h-full min-h-[100px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300"
+                          value={formData?.Note || ""}
+                          onChange={(e) => onChange("Note", e.target.value)}
+                          placeholder="Write your note"
+                        />
+                      </CaseField>
                     </div>
-
-                    <CaseField label="Notes"  star>
-                      <textarea
-                        className="w-full h-40 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300"
-                        value={formData?.Note || ""}
-                        onChange={(e) => onChange("Note", e.target.value)}
-                      />
-                    </CaseField>
                   </div>
 
-                  {/* RIGHT COLUMN - Display Notes */}
-                  <div>
-                    <textarea
-                      className="w-full h-full min-h-[300px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
-                      readOnly
-                      value={formData?.NotesDisplay}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
+                </CardContent>
+              </Card>
+
+            </div>
 
 
           </TabsContent>
 
-        <TabsContent value="action_log" >
-          <div className="mt-2 p-1">
-            <Card className="flex-col">
+          <TabsContent value="ci_asset">
+<div className="grid grid-cols-1 p-3 gap-3">
+  
+                <Card className="flex-col">
                   <CardHeader>
-                    <CardTitle className="text-lg">Action Log</CardTitle>
+                    <CardTitle className="text-lg ">Asset Information</CardTitle>
                     <hr />
                   </CardHeader>
-                  <CardContent className="overflow-x-auto">
-                    <Table>
+                  <CardContent className="grid items-center grid-cols-6 gap-10">
+                    <CaseField label="Assets" lock>
+                      {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
+                    </CaseField>
+                    <CaseField label="Product Number" lock>
+                      <span className="pl-3">
+                        {
+                          dataFetchAssetInformation?.AssetInformation
+                            ?.product_information?.ProductNumber
+                        }
+                      </span>
+                    </CaseField>
+                    <CaseField label="Asset Location" lock>
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Serial Number" lock>
+                      {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
+                    </CaseField>
+                    <CaseField label="HWPC Code" lock>
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="SNIC - Count" lock>
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <CaseField label="Product Name" lock>
+                      {
+                        dataFetchAssetInformation?.AssetInformation
+                          ?.product_information?.ProductName
+                      }{" "}
+                    </CaseField>
+                    <CaseField label="MV Product Description" lock>
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+  
+                    <CaseField label="HW Profit Center" lock>
+                      {" "}
+                      <Input variant="invisible" placeholder="---" />
+                    </CaseField>
+                    <div className="grid items-center grid-cols-2 col-span-2 gap-2 p-5 ring-1">
+                      <CaseField label="Device Properties" lock>
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                    </div>
+                    <CaseField label="OTC Code" lock span={3} star>
+                      <SearchCommandBlock
+                        options={otcCode}
+                        value={entitlementStatus.OTCCode}
+                        onChange={(value) =>
+                          handleEntitlementStatus("OTCCode")(value)
+                        }
+                        placeholder="---"
+                        renderLabel={(opt) =>
+                          `${opt.OTCCode} - ${opt.Description}`
+                        }
+                        getValue={(opt) => opt.OTCCode}
+                      />
+                    </CaseField>
+                  </CardContent>
+                  {/* TABEL ACCESSORY */}
+                  <div className="px-6 pb-6">
+                    <h3 className="text-md font-semibold mb-2">Accessory</h3>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full border text-sm text-left">
+                        <thead className="bg-gray-100 text-gray-700">
+                          <tr>
+                            <th className="border px-4 py-2">No Accesories</th>
+                            <th className="border px-4 py-2" hidden>
+                              Case ID
+                            </th>
+                            <th className="border px-4 py-2">Accessories</th>
+                            <th className="border px-4 py-2">Note</th>
+                            <th className="border px-4 py-2">CT / SN code</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {caseDetails.accessory?.map((item, index) => (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="border px-4 py-2">{item.id}</td>
+                              <td className="border px-4 py-2" hidden>
+                                {item.CaseID}
+                              </td>
+                              <td className="border px-4 py-2">
+                                {item.Accessories}
+                              </td>
+                              <td className="border px-4 py-2">
+                                {item.Note || "---"}
+                              </td>
+                              <td className="border px-4 py-2">
+                                {item.CT_SNCode || "---"}
+                              </td>
+                            </tr>
+                          ))}
+                          {(!caseDetails?.accessory ||
+                            caseDetails.accessory.length === 0) && (
+                              <tr>
+                                <td
+                                  className="border px-4 py-2 text-center"
+                                  colSpan={5}
+                                >
+                                  No accessories found.
+                                </td>
+                              </tr>
+                            )}
+                        </tbody>
+                      </table>
+                      <div className="mt-2 text-md text-gray-600">
+                        Total Accesories: {caseDetails.accessory?.length || 0}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+  
+  
+                <Card className="flex-col  ">
+                  <CardHeader>
+                    <CardTitle className="text-lg ">Work Order</CardTitle>
+                    <hr />
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-5 p-3 ">
+                    <div className="grid grid-cols-4 gap-5" hidden>
+                      <CaseField label="Incident Type" span={3} >
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                      <CaseField label="Work Order Description" span={3}>
+                        <Input variant="invisible" placeholder="---" />
+                      </CaseField>
+                    </div>
+  
+                    <Table className={'max-w-100'}>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-[60px]">No</TableHead>
-                          <TableHead>ReferenceId</TableHead>
-                          <TableHead>Change By</TableHead>
-                          <TableHead>Old Status</TableHead>
-                          <TableHead>New Status</TableHead>
-                          <TableHead>Change At</TableHead>
-                          <TableHead>Log Description</TableHead>
+                          <TableHead className="">
+                            Work Order Number
+                          </TableHead>
+                          <TableHead>Case ID</TableHead>
+                          <TableHead>Service Account</TableHead>
+                          <TableHead>Sub-Status</TableHead>
+                          <TableHead>System Status</TableHead>
+                          <TableHead>Priority</TableHead>
+                          <TableHead>Work Order</TableHead>
+                          <TableHead>Primary Incident</TableHead>
+                          <TableHead>Due Date</TableHead>
+                          <TableHead>Orion</TableHead>
+                          <TableHead>Owner</TableHead>
+                          <TableHead>Created By</TableHead>
+                          <TableHead>Created At</TableHead>
                         </TableRow>
                       </TableHeader>
-                      <TableBody>
-                        {actionLogs?.length > 0 ? (
-                          actionLogs.map((log, index) => (
-                            <TableRow key={log.id || index}>
-                              <TableCell>{index + 1}</TableCell>
-                              <TableCell>{log.ReferenceId}</TableCell>
-                              <TableCell>{log.changedByUser?.Name}</TableCell>
-                              <TableCell>{log.dataOld}</TableCell>
-                              <TableCell>{log.dataNew}</TableCell>
-                              <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
-                              <TableCell>{log.logDescription}</TableCell>
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={5} className="text-center italic">
-                              No action logs available.
+                      <TableBody className={'max-w-100'}>
+                        {workOrders.map((work) => (
+                          <TableRow
+                            key={work.WOID}
+                            className="cursor-pointer hover:bg-gray-300"
+                            onClick={handleClick}
+                          >
+                            <TableCell className="font-medium ">
+                              {work.WOID}
                             </TableCell>
+                            <TableCell>{work.CaseID}</TableCell>
+                            <TableCell>
+                              {work.caseinformation?.site_account?.Company ||
+                                work.caseinformation?.contact_information
+                                  ?.FirstName +
+                                " " +
+                                work.caseinformation?.contact_information
+                                  ?.LastName ||
+                                "-"}
+                            </TableCell>
+  
+                            <TableCell>{work.SubStatus}</TableCell>
+                            <TableCell>{work.SystemStatus}</TableCell>
+                            <TableCell>{work.Priority}</TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell>{work.owner?.Name}</TableCell>
+                            <TableCell>{work.owner?.Name}</TableCell>
+                            <TableCell>{work.CreatedOn}</TableCell>
                           </TableRow>
-                        )}
+                        ))}
                       </TableBody>
                     </Table>
                   </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+                </Card>
+  
+                <Card className="flex-col ">
+                  <CardHeader>
+                    <CardTitle className="text-lg ">Material Order</CardTitle>
+                    <hr />
+                  </CardHeader>
+                  <CardContent className="grid gap-5">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[100px]">Name</TableHead>
+                          <TableHead>Case ID</TableHead>
+                          <TableHead>Created On</TableHead>
+                          <TableHead>Order Status</TableHead>
+                          <TableHead>Order Type</TableHead>
+                          <TableHead>Owner</TableHead>
+                          <TableHead>Work Order</TableHead>
+                          <TableHead>Ready For Closure Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+  
+                      <TableBody>
+                        {materialOrders.map((material) => (
+                          <TableRow key={material.MOID}>
+                            <TableCell className="font-medium">
+                              <Link to={`/app/material-order/${material.MOID}`}>
+                                {material.MOID} on {material.WOID}
+                              </Link>
+                            </TableCell>
+                            <TableCell>{material.workorder?.CaseID}</TableCell>
+                            <TableCell>{material.CreatedOn}</TableCell>
+                            <TableCell>{material.OrderStatus}</TableCell>
+                            <TableCell>{material.OrderType}</TableCell>
+                            <TableCell>{material.owner?.Name}</TableCell>
+                            <TableCell>{material.WOID}</TableCell>
+                            <TableCell>{material.ReadyForClosureDate}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+</div>
+            
+
+          </TabsContent>
+
+          <TabsContent value="action_log" >
+            <div className="mt-2 p-1">
+              <Card className="flex-col">
+                <CardHeader>
+                  <CardTitle className="text-lg">Action Log</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[60px]">No</TableHead>
+                        <TableHead>ReferenceId</TableHead>
+                        <TableHead>Change By</TableHead>
+                        <TableHead>Old Status</TableHead>
+                        <TableHead>New Status</TableHead>
+                        <TableHead>Change At</TableHead>
+                        <TableHead>Log Description</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {actionLogs?.length > 0 ? (
+                        actionLogs.map((log, index) => (
+                          <TableRow key={log.id || index}>
+                            <TableCell>{index + 1}</TableCell>
+                            <TableCell>{log.ReferenceId}</TableCell>
+                            <TableCell>{log.changedByUser?.Name}</TableCell>
+                            <TableCell>{log.dataOld}</TableCell>
+                            <TableCell>{log.dataNew}</TableCell>
+                            <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
+                            <TableCell>{log.logDescription}</TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center italic">
+                            No action logs available.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
 
         </Tabs>
       </Card>

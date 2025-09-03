@@ -1329,7 +1329,7 @@ export const ServiceCase = ({
 
   const fetchOwnerUserData = async () => {
     try {
-      const response = await ApiCustomer.get(`/api/user/${caseDetails.CreatedBy}`)
+      const response = await ApiCustomer.get(`/api/user/${caseDetails.Owner}`)
       setOwnerUserData(response.data.data)
     } catch (error) {
       

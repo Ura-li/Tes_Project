@@ -25,7 +25,7 @@ import { Link } from "react-router";
   
     return (
       <SidebarGroup>
-        <SidebarGroupLabel>Platform</SidebarGroupLabel>
+        <SidebarGroupLabel className={'font-bold text-gray-100'}>Master Table</SidebarGroupLabel>
         <SidebarMenu>
           {items.map((item) => (
             <Collapsible

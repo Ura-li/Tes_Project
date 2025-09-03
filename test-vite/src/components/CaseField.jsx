@@ -12,7 +12,9 @@ const spanMap = {
     6: "col-span-6",
 };
 
-const CaseField = ({ label, children, lock = false, span = 1, className, childClass, star }) => {
+const CaseField = ({ label, children, lock = false, span = 1, className, childClass, star, hide}) => {
+    if (hide) return null;
+    
     // Determine which lock to use
     const IconComponent = lock === true ? Lock : lock || null;
     const modifiedChildren = React.Children.map(children, (child) => {

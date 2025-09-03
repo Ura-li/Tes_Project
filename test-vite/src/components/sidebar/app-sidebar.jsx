@@ -328,6 +328,20 @@ export function AppSidebar({
         icon: Pin
       },
     ],
+    lg: [
+      {
+        name: "Home",
+        title: "Home",
+        url: "/app",
+        icon: Home,
+      },
+      {
+        name: "Your Cases",
+        title: "Your Cases",
+        url: "/app/flowcase",
+        icon: PieChart,
+      },
+    ]
   }
 
 
@@ -353,9 +367,10 @@ export function AppSidebar({
         activeClassName="bg-cyan-800 text-white"
       />
     );
-  } else if (data.user.role === 'apo' || data.user.role === 'ce' || data.user.role === 'ps' || data.user.role === 'lg' || data.user.role === 'celead'){
+  } else if (data.user.role === 'apo' || data.user.role === 'ce' || data.user.role === 'ps' ||  data.user.role === 'celead'){
     navrole = data.apo;
   } else {
+    navrole = data.lg;
     DropNav = '';
   }
 

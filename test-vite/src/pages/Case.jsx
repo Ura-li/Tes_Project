@@ -121,39 +121,7 @@ useEffect(() => {
         caseNoteFormData={caseNoteFormData}
         setCaseNoteFormData={setCaseNoteFormData}
       /> 
-    ) : user.role === 'apo' ? (
-        <TabsServiceCaseDetailsApo
-          caseDetails={caseDetails}
-          setCaseDetails={setCaseDetails}
-          caseNote={caseNote}
-          caseNoteFormData={caseNoteFormData}
-          setCaseNoteFormData={setCaseNoteFormData}
-        />
-    ) : user.role === 'ce' ? (
-      <TabsServiceCaseDetailsCe
-         caseDetails={caseDetails}
-          setCaseDetails={setCaseDetails}
-          caseNote={caseNote}
-          caseNoteFormData={caseNoteFormData}
-          setCaseNoteFormData={setCaseNoteFormData}
-      />
-    ) : user.role === 'celead' ? (
-       <TabsServiceCaseDetailsCeLead
-         caseDetails={caseDetails}
-          setCaseDetails={setCaseDetails}
-          caseNote={caseNote}
-          caseNoteFormData={caseNoteFormData}
-          setCaseNoteFormData={setCaseNoteFormData}
-      />
-    ) : user.role === 'lg' ? (
-        <TabsServiceCaseDetailsLg
-         caseDetails={caseDetails}
-          setCaseDetails={setCaseDetails}
-          caseNote={caseNote}
-          caseNoteFormData={caseNoteFormData}
-          setCaseNoteFormData={setCaseNoteFormData}
-      />
-    ) : (
+    )  : (
       <TabsServiceCaseDetails
           caseDetails={caseDetails}
           setCaseDetails={setCaseDetails}

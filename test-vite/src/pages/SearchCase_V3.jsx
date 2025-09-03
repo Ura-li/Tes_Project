@@ -931,10 +931,10 @@ export default function NewCaseForm() {
   // ----------------------------
 
   return (
-    <div className="bg-blue-100 mx-auto  p-6 space-y-8">
+    <div className="bg-[#F8F9FA] mx-auto  p-6 space-y-8">
       {/* Header */}
       {/* <div className="flex items-center justify-between pb-4 border-b"> */}
-      <div className="sticky top-[3.25rem] z-30  bg-cyan-100 rounded-b-xl border-b p-3 flex flex-wrap gap-2 justify-between">
+      <div className="sticky top-[3.25rem] z-30  bg-[#0077B6] rounded-b-xl border-b p-3 flex flex-wrap gap-2 justify-between">
         <h1 className="text-2xl font-bold ">Create Case </h1>
           <div className="flex gap-4">
             <a href="#case"><Badge className={'p-2 hover:bg-secondary  rounded-lg border border-cyan-400 px-4 py-2 font-semibold text-cyan-400'} variant="outline">Case</Badge></a>
