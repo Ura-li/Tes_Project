@@ -305,10 +305,8 @@ export function ServiceBooking ({BookingId , woid}) {
     }
   
     try {
-      const response = await ApiCustomer.get(`/api/subktechnicians`, {
-        params: { keyword }
-      });
-      console.log("SubukTech : ",response.data);
+      const response = await ApiCustomer.get(`/api/user?resource=${resourceId}`);
+      console.log("SubukTechl : ",response.data);
       setSearchResultsSubkTechnician(response.data.data);
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
@@ -867,6 +865,29 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
         user: getUserFromToken()
       }
       const response = await ApiCustomer.post('/api/bookings', data);
+
+      //getLogistic
+      const getCaseDetail = await ApiCustomer.get(`/api/case-information/${CaseID}`)
+      const getLogistic = await ApiCustomer.get(`/api/user?role=lg`)
+      /**
+       * TODO : CHANGE TIS HIST
+       */
+      const firstLogistic = getLogistic.data.data[0]
+      const caseDetails = getCaseDetail.data.data
+      //update case
+      const updateCaseStatus = await ApiCustomer.patch(`/api/case-information/${CaseID}`, {
+        CaseStatus: "PartOrder",
+        Owner: firstLogistic.IDUser
+      })
+
+      const updateLogCase = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseDetails.CaseID}`,
+        model: "Case",
+        dataOld: caseDetails.CaseStatus,
+        dataNew: "PartOrder",
+        changedBy: data.user.id,
+        logDescription: `Edit: change status from ${caseDetails.CaseStatus} to PartOrder`
+      })
       const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
         CaseId: `${CaseID}`,
         ReferenceId: `${data.WOID}`,

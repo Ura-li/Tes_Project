@@ -60,11 +60,18 @@ app.post("/emit", (req, res) => {
 
 
 function notifyCaseUsers(caseInfo, event, payload) {
-    if (caseInfo.createdById) {
-        io.to(`user:${caseInfo.createdById}`).emit(event, payload);
-    }
-    if (caseInfo.ownerId) {
-        io.to(`user:${caseInfo.ownerId}`).emit(event, payload);
+    const { createdById, ownerId } = caseInfo;
+
+    if (createdById && createdById === ownerId) {
+        io.to(`user:${createdById}`).emit(event, payload);
+    } else {
+        if (createdById) {
+            io.to(`user:${createdById}`).emit(event, payload);
+        }
+        if (ownerId) {
+            io.to(`user:${ownerId}`).emit(event, payload);
+        }
     }
 }
+
 

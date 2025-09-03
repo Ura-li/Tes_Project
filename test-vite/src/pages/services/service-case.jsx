@@ -83,6 +83,7 @@ import { SearchCommandBlock } from "../../components/sc-select";
 
 import { pdf } from '@react-pdf/renderer';
 import ServiceRequestPDF from '../../components/service-request-form'; // adjust path if needed
+import { useAuth } from "@/context/auth-context";
 
 
 export const TabsService = ({
@@ -727,6 +728,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
         const token = {
           user: getUserFromToken()
         }
+        //updateLog
         const updateLog = await ApiCustomer.post("/api/actionlog", {
           CaseId: `${workOrders.CaseID}`,
           ReferenceId: `${workOrders.WOID}`,
@@ -735,6 +737,22 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
           dataNew: res.data.data.SystemStatus,
           changedBy: token.user.id,
           logDescription: `Edit : Changed Work Order ${workOrders.WOID} from ${workOrders.SystemStatus} to ${res.data.data.SystemStatus}`
+        })
+        // console.log("wololo",workOrders)
+        //update log customer
+        const caseLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${workOrders.CaseID}`,
+          ReferenceId: `${workOrders.CaseID}`,
+          model: "Case",
+          dataOld: workOrders?.caseinformation?.CaseStatus,
+          dataNew: "Finish Repair",
+          changedBy: token.user.id,
+          logDescription: `Edit : Changed Case Status ${workOrders.CaseID} from ${workOrders?.caseinformation?.CaseStatus} to Finish Repair`
+        })
+        //update Case status
+        const caseChangeStatus = await ApiCustomer.patch(`/api/case-information/${workOrders.CaseID}`,{
+          Owner: workOrders?.caseinformation?.CreatedBy,
+          CaseStatus: "FinishRepair"
         })
         Swal.fire({
           icon: "success",
@@ -809,7 +827,8 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
   );
 };
 
-export const TabsServiceMO = ({ materialOrders }) => {
+export const TabsServiceMO = ({ materialOrders, updatedLineItems }) => {
+  const {user} = useAuth();
   const navigate = useNavigate();
   const buttons = [
     {
@@ -818,7 +837,7 @@ export const TabsServiceMO = ({ materialOrders }) => {
       onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", },
-    { icon: Save, label: "Save", onClick: () => saveCaseNote() },
+    { icon: Save, label: "Save", onClick: () => saveMaterialOrder() },
     {
       icon: FileSymlink,
       label: "Save & Close",
@@ -837,6 +856,51 @@ export const TabsServiceMO = ({ materialOrders }) => {
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
+  const saveMaterialOrder = async () => {
+    if(updatedLineItems === null || Object.keys(updatedLineItems).length === 0) return
+    try {
+      Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update the Material Order.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      console.log("updateok",updatedLineItems);
+      // for(const [lineItemID, status] of Object.entries(updatedLineItems)){
+      // console.log("user", user);
+      const res = await ApiCustomer.patch(`/api/material-order/batch-update`, {
+        updates: updatedLineItems,
+        MOID: materialOrders.MOID,
+        WOID: materialOrders.WOID,
+        userId: user.id
+      })
+
+      if(res.data) {
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate(`/app/work/${materialOrders.WOID}`);
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: res.data.message,
+        });
+      }
+      // }
+      console.log("Semua line item berhasil diupdate.");
+
+    } catch (error) {
+      
+    }
+  }
   const saveAndCloseMaterialOrder = async () => {
     try {
       Swal.fire({

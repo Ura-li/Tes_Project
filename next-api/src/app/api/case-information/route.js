@@ -14,6 +14,7 @@ export async function GET(request) {
 
   //extract query parameter
   const CaseStatus = searchParams.get("CaseStatus");
+  const Owner = searchParams.get("IDUser");
 
   //prisma query filter
   const filters = {};

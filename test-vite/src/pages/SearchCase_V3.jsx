@@ -27,6 +27,8 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, Plus, Trash2, Image as ImageIcon, Search } from "lucide-react";
 import { format } from "date-fns";
 import { SelectBarState } from "@/components/sc-select";
+import { toast } from "sonner";
+
 
 
 // ----------------------------
@@ -216,6 +218,7 @@ export default function NewCaseForm() {
   const [receivedDate, setReceivedDate] = useState(
     format(new Date(), "yyyy-MM-dd")
   );
+  const [caseSubject, setCaseSubject] = useState("");
   const [caseIdManual, setCaseIdManual] = useState("");
   const [caseIdManualDate, setCaseIdManualDate] = useState("");
   const [referenceCase, setReferenceCase] = useState("");
@@ -232,6 +235,8 @@ export default function NewCaseForm() {
   /** @type {[AssetInfo[], (val: AssetInfo[]) => void]} */
   const [assetResults, setAssetResults] = useState([]);
 
+  const [assetNotFound, setAssetNotFound] = useState(false);
+
   /** @type {[AssetInfo|null, (val: AssetInfo|null) => void]} */
   const [selectedAsset, setSelectedAsset] = useState(null);
 
@@ -241,8 +246,11 @@ export default function NewCaseForm() {
   /** @type {[ContactInfo[], (val: ContactInfo[]) => void]} */
   const [contactResults, setContactResults] = useState([]);
 
+  const [contactNotFound, setContactNotFound] = useState(false);
+  
   /** @type {[SiteAccount[], (val: SiteAccount[]) => void]} */
   const [companyResults, setCompanyResults] = useState([]);
+  const [companyNotFound, setCompanyNotFound] = useState(false);
 
   /** @type {[ContactInfo|null, (val: ContactInfo|null) => void]} */
   const [selectedContact, setSelectedContact] = useState(null);
@@ -332,8 +340,9 @@ export default function NewCaseForm() {
   const searchAsset = useMemo(
     () =>
       debounce(async (q) => {
-        if (!q || q.length < 3) {
+        if (!q || q.length < 2) {
           setAssetResults([]);
+          setAssetNotFound(false);
           return;
         }
         try {
@@ -342,10 +351,12 @@ export default function NewCaseForm() {
           });
           const list = res.data?.data || [];
           setAssetResults(list);
+          setAssetNotFound(list.length === 0);
           setShowProductCard(true);
         } catch (e) {
-          console.error("Search asset failed", e);
+          console.error("Search asset failed",   e);
           setAssetResults([]);
+          setAssetNotFound(true);
         }
       }, 400),
     []
@@ -361,6 +372,9 @@ export default function NewCaseForm() {
         if (!q || q.length < 2) {
           setContactResults([]);
           setCompanyResults([]);
+
+          setContactNotFound(false);
+          setCompanyNotFound(false);
           return;
         }
         try {
@@ -371,10 +385,21 @@ export default function NewCaseForm() {
           ]);
           setContactResults(contacts.data?.data || []);
           setCompanyResults(companies.data?.data || []);
+
+          const contactList = contacts.data?.data || [];
+          const companyList = companies.data?.data || [];
+
+          setContactResults(contactList);
+          setCompanyResults(companyList);
+          setContactNotFound(contactList.length === 0 && companyList.length === 0);
+          setCompanyNotFound(companyList.length === 0);
         } catch (e) {
           console.error("Search customer failed", e);
           setContactResults([]);
           setCompanyResults([]);
+
+          setContactNotFound(true);
+          setCompanyNotFound(true);
         }
       }, 400),
     []
@@ -838,7 +863,7 @@ export default function NewCaseForm() {
         AssetID: assetId,
         ContactID: contactId,
         SiteAccountID: companyId ?? null,
-        CaseSubject: problemDesc?.slice(0, 100) || "New Case",
+        CaseSubject: caseSubject,
         CaseType: caseType,
         KCI_Flag: kciFlag,
         IncomingChannel: "Email",
@@ -892,7 +917,10 @@ export default function NewCaseForm() {
       navigate(`/app/case/${caseId}`);
     } catch (e) {
       console.error(e);
-      alert("There was an error creating the case.");
+      toast.warning(e.response.data.message, {
+        position: "top-center",
+        // className: "p-5"
+      })
     } finally {
       setLoading(false);
     }
@@ -903,10 +931,10 @@ export default function NewCaseForm() {
   // ----------------------------
 
   return (
-    <div className="bg-blue-100 mx-auto  p-6 space-y-8">
+    <div className="bg-[#F8F9FA] mx-auto  p-6 space-y-8">
       {/* Header */}
       {/* <div className="flex items-center justify-between pb-4 border-b"> */}
-      <div className="sticky top-[3.25rem] z-30  bg-cyan-100 rounded-b-xl border-b p-3 flex flex-wrap gap-2 justify-between">
+      <div className="sticky top-[3.25rem] z-30  bg-[#0077B6] rounded-b-xl border-b p-3 flex flex-wrap gap-2 justify-between">
         <h1 className="text-2xl font-bold ">Create Case </h1>
           <div className="flex gap-4">
             <a href="#case"><Badge className={'p-2 hover:bg-secondary  rounded-lg border border-cyan-400 px-4 py-2 font-semibold text-cyan-400'} variant="outline">Case</Badge></a>
@@ -953,7 +981,7 @@ export default function NewCaseForm() {
                 </div>
 
                 {/* Results */}
-                {assetResults.length > 0 && (
+                {assetResults.length > 0 ? (
                   <div className="mt-2 divide-y rounded-md border bg-card max-h-40 overflow-auto">
                     {assetResults.map((a) => (
                       <button
@@ -972,7 +1000,11 @@ export default function NewCaseForm() {
                       </button>
                     ))}
                   </div>
-                )}
+                ) : assetNotFound ? (
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    ❌ Data asset tidak ditemukan
+                  </div>
+                ) : null}
 
                 {/* Checkbox */}
                 <div className="flex items-center gap-2 mt-2">
@@ -1004,7 +1036,7 @@ export default function NewCaseForm() {
                 </div>
 
                 {/* Results */}
-                {(contactResults.length > 0 || companyResults.length > 0) && (
+                {(contactResults.length > 0 || companyResults.length > 0) ? (
                   <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
                     {/* Contacts */}
                     <div className="rounded-md border bg-card max-h-40 overflow-auto divide-y">
@@ -1049,7 +1081,11 @@ export default function NewCaseForm() {
                       ))}
                     </div>
                   </div>
-                )}
+                ): contactNotFound ? (
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    ❌ Customer / Company tidak ditemukan
+                  </div>
+                ): null}
 
                 <div className="flex items-center gap-2 mt-2">
                   <Checkbox
@@ -1070,6 +1106,10 @@ export default function NewCaseForm() {
               <CardDescription>Diisi setelah pilih serial/customer.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>Case Subject <Label className="text-red-600">*</Label></Label>
+                <Input type="text" value={caseSubject} onChange={(e) => setCaseSubject(e.target.value)} />
+              </div>
               <div>
                 <Label>Received Date <Label className="text-red-600">*</Label></Label>
                 <Input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} />
@@ -1308,6 +1348,16 @@ export default function NewCaseForm() {
                 <div>
                   <Label>Serial No.<Label className="text-red-600">*</Label></Label>
                   <Input value={selectedAsset?.SerialNumber || serialQuery} readOnly={!!selectedAsset} onChange={(e) => setSerialQuery(e.target.value)} />
+                  <Button variant="link" asChild>
+                    <a
+                      href="https://support.hp.com/id-en/check-warranty"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Check Warranty
+                    </a>
+                  </Button>
+
                 </div>
                 <div className="md:col-span-2">
                   <Label>Check Product (Number/Name)</Label>
@@ -1519,12 +1569,12 @@ export default function NewCaseForm() {
         {/* RIGHT SUMMARY PANEL */}
         <aside className="hidden lg:block col-span-3 sticky top-30 h-fit space-y-4">
             {/* Show compact summary cards after selection */}
-            {selectedAsset && (
+            {selectedCompany && (
               <Card>
-                <CardHeader><CardTitle>Selected Asset</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Selected Company</CardTitle></CardHeader>
                 <CardContent>
-                  <p className="font-medium">{selectedAsset.SerialNumber}</p>
-                  <p className="text-xs text-muted-foreground">{selectedAsset.product_information?.ProductName}</p>
+                  <p className="font-medium">{selectedCompany.Company}</p>
+                  <p className="text-xs text-muted-foreground">{selectedCompany.Email || selectedCompany.PrimaryPhone}</p>
                 </CardContent>
               </Card>
             )}
@@ -1534,6 +1584,15 @@ export default function NewCaseForm() {
                 <CardContent>
                   <p className="font-medium">{selectedContact.FirstName} {selectedContact.LastName}</p>
                   <p className="text-xs text-muted-foreground">{selectedContact.Email || selectedContact.Phone}</p>
+                </CardContent>
+              </Card>
+            )}
+            {selectedAsset && (
+              <Card>
+                <CardHeader><CardTitle>Selected Asset</CardTitle></CardHeader>
+                <CardContent>
+                  <p className="font-medium">{selectedAsset.SerialNumber}</p>
+                  <p className="text-xs text-muted-foreground">{selectedAsset.product_information?.ProductName}</p>
                 </CardContent>
               </Card>
             )}

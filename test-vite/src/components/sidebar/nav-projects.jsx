@@ -36,7 +36,7 @@ export function NavProjects({
 
   return (
     <SidebarGroup >
-      <SidebarGroupLabel className={'font-bold text-gray-100'}>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel className={'font-bold text-gray-100'}>Main Menu</SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}
