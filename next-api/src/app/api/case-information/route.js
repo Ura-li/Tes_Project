@@ -14,6 +14,7 @@ export async function GET(request) {
 
   //extract query parameter
   const CaseStatus = searchParams.get("CaseStatus");
+  const Owner = searchParams.get("IDUser");
 
   //prisma query filter
   const filters = {};
@@ -91,7 +92,16 @@ export async function GET(request) {
       caseresolution: true,
       otcCodeTable: true,
       casenotes_caseinformation_CaseNoteTocasenotes: true,
-      workorder: true,
+      workorder: {
+        include: {
+          materialorder: {
+            include: {
+              materialorderlineitems: true
+            }
+          }
+        }
+        
+      },
       accessory: true,
     },
   });

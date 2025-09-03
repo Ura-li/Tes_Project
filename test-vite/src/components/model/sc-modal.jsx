@@ -25,7 +25,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"
 import { Plus,PhoneCall, Copy, ExternalLink, XIcon, ArchiveIcon, User } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
-import { SelectBar3, SelectBarContact4, SelectYN } from "../sc-select";
+import { SearchCommandBlock, SelectBar3, SelectBarContact4, SelectYN } from "../sc-select";
 import { 
   SelectBarContact,
   SelectBarContact2,
@@ -71,11 +71,14 @@ import {
 } from "@/components/ui/pagination"
 
 import { getUserFromToken } from "@/lib/utils/auth";
-import { Card, CardContent, CardTitle } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import ServiceRequestPDF from "../service-request-form";
 import { pdf } from '@react-pdf/renderer';
 
 import { cn } from "@/lib/utils";
+
+import { useAuth } from "@/context/auth-context";
+
 
 export function BtnModal({
   handleCreateCase,
@@ -904,6 +907,7 @@ export function BtnModalAsset({
 
 //Peoduct Selection
 import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+
 
 function GenericSelector({ 
   value, 
@@ -3310,6 +3314,7 @@ export function UserAdd({ onAdd }) {
     Password: "",
     Name: "",
     Role: "",
+    ResourceId: "",
     ProfilePhoto: "",
     Phone: "",
     Signature: "",
@@ -3318,14 +3323,35 @@ export function UserAdd({ onAdd }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewPhoto, setPreviewPhoto] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
-
+  
+  useEffect(() => {
+    fetchDataResource();
+  }, []);
+  
   const handleChange = (field) => (e) => {
     setFormData((prev) => ({
       ...prev,
       [field]: e.target.value,
     }));
   };
+  
+  const [resource, setResource] = useState(null);
+  const [resourceOptions, setResourceOptions] = useState([]);
+  const fetchDataResource = async() => {
+    try{
+      const res = await ApiCustomer.get(`/api/resources`)
+      const options = res.data.data.map((res) => ({
+        label: res.Name,
+        value: res.ResourceId,
+        accounts: res.resourceAccounts, // kamu bisa pakai ini nanti kalau mau tampilkan info akun juga
+      }));
+      console.log(options)
+      setResourceOptions(options);
+    }catch(error){
+      console.error("Failed to fetch resources:", err);
+    }
 
+  } 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
@@ -3391,6 +3417,7 @@ export function UserAdd({ onAdd }) {
         Password: "",
         Name: "",
         Role: "",
+        ResourceId: "",
         ProfilePhoto: "",
         Phone: "",
         Signature: "",
@@ -3400,8 +3427,8 @@ export function UserAdd({ onAdd }) {
     } catch (err) {
       console.error("Gagal tambah user:", err);
       Swal.fire({
-        title: "Error!",
-        text: "Gagal menambahkan user.",
+        title: "Error! Gagal menambahkan user.",
+        text: err.response.data.error,
         icon: "error",
         timer: 1500,
         showConfirmButton: false,
@@ -3469,6 +3496,23 @@ export function UserAdd({ onAdd }) {
             />
           </div>
           <div>
+            <Label>
+              Resource
+            </Label>
+              <SearchCommandBlock
+                options={resourceOptions}
+                value={formData.ResourceId}
+                onChange={(val) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    ResourceId: val,
+                  }))
+                }
+                placeholder="Cari Resource..."
+                renderLabel={(opt) => `${opt.label}`} // atau bisa tambah info akun di sini
+              />
+          </div>
+          <div>
             <Label>Phone</Label>
             <Input
               type="tel"
@@ -3515,12 +3559,31 @@ export function UserEdit({ IDUser, onUpdate }) {
   const [previewPhoto, setPreviewPhoto] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
 
+  const [resource, setResource] = useState(null);
+  const [resourceOptions, setResourceOptions] = useState([]);
+  const fetchDataResource = async() => {
+    try{
+      const res = await ApiCustomer.get(`/api/resources`)
+      const options = res.data.data.map((res) => ({
+        label: res.Name,
+        value: res.ResourceId,
+        accounts: res.resourceAccounts, // kamu bisa pakai ini nanti kalau mau tampilkan info akun juga
+      }));
+      console.log(options)
+      setResourceOptions(options);
+    }catch(error){
+      console.error("Failed to fetch resources:", err);
+    }
+
+  } 
+
   const defaultFormData = {
     Email: "",
     Username: "",
     Password: "",
     Name: "",
     Role: "user",
+    ResourceId: "",
     ProfilePhoto: "",
     Phone: "",
     Signature: "",
@@ -3540,6 +3603,7 @@ export function UserEdit({ IDUser, onUpdate }) {
         Role: data.Role || "user",
         ProfilePhoto: data.ProfilePhoto || "",
         Phone: data.Phone || "",
+        ResourceId: data.ResourceId || "",
         Signature: data.Signature || "",
       });
 
@@ -3557,6 +3621,7 @@ export function UserEdit({ IDUser, onUpdate }) {
 
   useEffect(() => {
     if (IDUser && isOpen) fetchUser();
+    fetchDataResource();
   }, [IDUser, isOpen]);
 
   useEffect(() => {
@@ -3594,7 +3659,7 @@ export function UserEdit({ IDUser, onUpdate }) {
   };
 
   const handleUpdate = async () => {
-    const { Email, Username, Password, Name, Role, Phone, Signature } = formData;
+    const { Email, Username, Password, Name, Role, ResourceId, Phone, Signature } = formData;
 
     if (!Email || !Username || !Name) {
       Swal.fire({
@@ -3611,38 +3676,27 @@ export function UserEdit({ IDUser, onUpdate }) {
 
     try {
       // kalau ada file → pakai FormData
+      const formDataToSend = new FormData();
+      formDataToSend.append("Email", Email);
+      formDataToSend.append("Username", Username);
+      formDataToSend.append("Name", Name);
+      formDataToSend.append("Role", Role);
+      formDataToSend.append("ResourceId", ResourceId);
+      formDataToSend.append("Phone", Phone);
+      formDataToSend.append("Signature", Signature);
+
+      if (Password) formDataToSend.append("NewPassword", Password);
+
+      // File upload (baru)
       if (selectedFile) {
-        const formDataToSend = new FormData();
-        formDataToSend.append("Email", Email);
-        formDataToSend.append("Username", Username);
-        formDataToSend.append("Name", Name);
-        formDataToSend.append("Role", Role);
-        formDataToSend.append("Phone", Phone);
-        formDataToSend.append("Signature", Signature);
-
-        if (Password) formDataToSend.append("Password", Password);
         formDataToSend.append("ProfilePhoto", selectedFile);
-
-        await ApiCustomer.patch(`/api/user/${IDUser}`, formDataToSend, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-      } else {
-        // kalau tidak ada file → kirim JSON
-        const updatedData = {
-          Email,
-          Username,
-          Name,
-          Role,
-          Phone,
-          Signature,
-        };
-
-        if (Password) updatedData.Password = Password;
-
-        await ApiCustomer.patch(`/api/user/${IDUser}`, updatedData, {
-          headers: { "Content-Type": "application/json" },
-        });
       }
+
+      await ApiCustomer.patch(`/api/user/${IDUser}`, formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       Swal.fire({
         title: "Success!",
@@ -3653,7 +3707,7 @@ export function UserEdit({ IDUser, onUpdate }) {
         allowEscapeKey: false,
       });
 
-      onUpdate();
+      onUpdate?.();
       setIsOpen(false);
     } catch (error) {
       console.error("Error updating user:", error);
@@ -3731,6 +3785,23 @@ export function UserEdit({ IDUser, onUpdate }) {
               value={formData.Role}
               onChange={handleChange("Role")}
             />
+          </div>
+          <div>
+            <Label>
+              Resource
+            </Label>
+              <SearchCommandBlock
+                options={resourceOptions}
+                value={formData.ResourceId}
+                onChange={(val) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    ResourceId: val,
+                  }))
+                }
+                placeholder="Cari Resource..."
+                renderLabel={(opt) => `${opt.label}`} // atau bisa tambah info akun di sini
+              />
           </div>
           <div>
             <Label>Phone</Label>
@@ -4516,6 +4587,10 @@ export function BtnModalsServiceCatalog({
   caseDetails,
   serviceCatalogType
 }) {
+  const {user} = useAuth();
+
+  // console.log("USer", user)
+  // console.log("USer", caseDetails)
   useEffect(() => {
     // Resetting modal state when serviceCatalogType changes
     setCurrentStep(1);
@@ -4537,6 +4612,8 @@ export function BtnModalsServiceCatalog({
   const [currentStep, setCurrentStep] = useState(1);
   const [assetForWorkOrderCreation, setAssetForWorkOrderCreation] = useState([]);
   const [modalPart, setModalPart] = useState(false);
+  const [roleAssign, setRoleAssign] = useState([]);
+  const [assignApo, setAssignApo] = useState(null);
   //product information
   const fetchDataAssets = async () => {
     try {
@@ -4547,6 +4624,17 @@ export function BtnModalsServiceCatalog({
       console.error("error fetching Asset: ", e)
     }
   }
+
+  const fetchUserAssign = async (role) => {
+    try {
+      const res = await ApiCustomer.get(`/api/user?role=${role}`);
+      setRoleAssign(res.data.data);
+    } catch (err) {
+      console.error("Error fetching role: ", err);
+    }
+  };
+
+
   //waranty
   //warranty state
   const [warrantyOffer, setWarrantyOffer] = useState([])
@@ -4574,6 +4662,7 @@ export function BtnModalsServiceCatalog({
       if (data) setAssetForWorkOrderCreation(data);
     });
     fetchDataPartCatalog();
+    fetchUserAssign('apo');
   }, [])
 
   const [selected, setSelected] = useState("DepotRepair"); 
@@ -4707,13 +4796,14 @@ export function BtnModalsServiceCatalog({
         selectedPartCatalog,
         IncidentType: selected,
         OwnerID: data.user.id,
+        assignApo: assignApo
       });
       console.log(res)
       const updateLogCase = await ApiCustomer.post("/api/actionlog",{
         CaseId: `${caseDetails.CaseID}`,
         model: "Case",
         dataOld: caseDetails.CaseStatus,
-        dataNew: "InActive",
+        dataNew: "Part Request",
         changedBy: data.user.id,
         logDescription: `Edit: change status from ${caseDetails.CaseStatus} to InActive`
       })
@@ -5175,6 +5265,30 @@ export function BtnModalsServiceCatalog({
                   </SelectGroup>
                 </SelectContent>
               </Select>
+              <Label htmlFor="Assign_APO" className={'font-bold'}>SELECT APO : </Label>
+              <SearchCommandBlock 
+                value={assignApo}
+                onChange={(selectedID) =>{
+                  if(selectedID === null) {
+                    setAssignApo(null);
+                    return;
+                  }
+                  const selectedUser = roleAssign.find(
+                    (user) => user.IDUser === selectedID
+                  );
+                  if (selectedUser) {
+                    setAssignApo(selectedUser.IDUser);
+                  }
+                }}
+                placeholder="--Select--"
+                options={roleAssign.map((user) =>({
+                  label: user.Name,
+                  value: user.IDUser,
+                }))}
+                renderLabel={(opt) => opt.label}
+                getValue={(opt) => opt.value}
+                
+              />
               
             </DialogFooter>
           </DialogContent>
@@ -5520,6 +5634,7 @@ export function BtnModalsPartAdd({
                 variant={'search'}
                 onClick={(e) => setPartNumberSearch(partNumberInput)}
               >Search</Button>
+              <PartAdd/>
             </span>
             <div className="bg-gray-300 flex gap-x-10 p-2 flex-1 max-w-[10em]">
                 <p>Currency</p><p className="whitespace-nowrap">: </p>
@@ -9096,24 +9211,156 @@ export function CrsDelete({ id_csr, onDelete }) {
 
 //! Home Page Modals
 
-export function FindCase({}){
-const [openInfo, setOpenInfo] = useState(false);
-const [findingCase, setFindingCase] = useState({
-  Caseid: '',
-  Phoneno: '',
-})
+// export function FindCase({}){
+// const [openInfo, setOpenInfo] = useState(false);
+// const [findingCase, setFindingCase] = useState({
+//   Caseid: '',
+//   Phoneno: '',
+// })
 
-const handleInputChange = (e) => {
+// const handleInputChange = (e) => {
+//     const { id, value } = e.target;
+//     setFindingCase((prev) => ({
+//       ...prev,
+//       [id]: value,
+//     }));
+//   };
+
+// const [caseData, setCaseData] = useState({})
+// console.log(caseData);
+//     const findcase = async () => {
+//     const baseurl = `/api/case-information/${findingCase.Caseid}`;
+//     Swal.fire({
+//       title: "Memuat Data Case....",
+//       text: "Mohon Tunggu Sebentar",
+//       allowOutsideClick: false,
+//       allowEscapeKey: false,
+//       didOpen: () => {
+//         Swal.showLoading();
+//       },
+//     });
+    
+//     try {
+//       const response = await ApiCustomer.get(baseurl);
+//       console.log("TJEdata",response.data.data.site_account.Company);
+//       console.log("DAta",response.data.data);
+//       if (response.data.success && response.data.data.contact_information.Mobile === findingCase.Phoneno) {
+//         setCaseData(response.data.data);
+//         setOpenInfo(true);
+//       Swal.close(); 
+//       } else {
+//         Swal.fire({
+//         title: "Error!",
+//         text: "Case Tidak Ditemukan",
+//         icon: "error",
+//         timer:2000,
+//         timerProgressBar: true,
+        
+//       });
+//       }
+
+//     } catch (err) {
+//       console.error("Error fetching case data:", err);
+//       setError("Error fetching data");
+
+//       Swal.close(); 
+
+//       Swal.fire({
+//         title: "Error!",
+//         text: "Gagal mengambil data Case.",
+//         icon: "error",
+//         confirmButtonText: "OK",
+//       });
+//     }
+//   };
+//   return(
+//     <>
+//     <Dialog>
+//       <DialogTrigger asChild>
+//         <Button variant={'outline'} className={'text-white bg-green-600 hover:bg-emerald-700 hover:text-green-300'} >Search Case</Button>
+//       </DialogTrigger>
+//       <DialogContent className={'flex   max-w-screen min-w-[60%] h-[fit]'}>
+//         <DialogHeader className={'flex flex-1 flex-col'}>
+//           <DialogTitle className={'text-2xl'}>Search The Case</DialogTitle>
+//           <DialogDescription>Input Case ID and Phone Number To search Case</DialogDescription>
+//           <div className="flex gap-10">
+//             <Label htmlFor='Caseid'> Case ID</Label>
+//             <Input variant={'outline'} className={'flex-1/2'} id='Caseid'value={findingCase.Caseid} onChange={handleInputChange} placeholder={'example : C-0000'}/>
+//           </div>
+//           <div className="flex gap-10">
+//             <Label htmlFor='Phoneno'> Phone Number</Label>
+//             <Input variant={'outline'} className={'flex-1/2'} id='Phoneno' value={findingCase.Phoneno} onChange={handleInputChange} />
+//           </div>
+//           <Button variant={'search'} onClick={findcase}>Find Case</Button>
+//           {openInfo? <Card>
+//             <CardContent className={'flex flex-col justify-center items-center gap-4'}>
+//               <CardTitle className={'flex items-center gap-6'} >Print Into PDF <ArchiveIcon/> </CardTitle>
+//               <Button onClick={async() => {
+//                       const blob = await pdf(<ServiceRequestPDF caseDetails={caseData}  />).toBlob();
+//                       const url = URL.createObjectURL(blob);
+//                       const link = document.createElement('a');
+//                       link.href = url;
+//                       link.download = 'Service_Request_Form.pdf';
+//                       document.body.appendChild(link);
+//                       link.click();
+//                       document.body.removeChild(link);
+//               }} > Download </Button>
+//             </CardContent>
+//           </Card> : ''}
+//         </DialogHeader>
+//            <DialogFooter className={'grid grid-cols-2 w-full flex-1'}>
+//             <CardTitle className={'text-2xl col-span-2'}>Case Information</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>Case status </CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseStatus || 'N/A'}</CardTitle>
+
+//             {/* <CardTitle className={'p-2 bg-gray-100'}>Bench Start Repair, Onsite Repair</CardTitle> */}
+
+//             <CardTitle className={'p-2 bg-gray-100'}>Case ID 	</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseID || 'N/A'} </CardTitle>
+
+//             <CardTitle className={'p-2 bg-gray-100'}>Reference case 	</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseSubject || 'N/A'} </CardTitle>
+
+//             <CardTitle className={'p-2 bg-gray-100'}>Warranty status 	 	</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>Out Warranty</CardTitle>
+
+//             <CardTitle className={'p-2 bg-gray-100'}>Customer company 	</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.site_account?.Company || 'N/A'}</CardTitle>
+
+//             <CardTitle className={'p-2 bg-gray-100'}>Customer name 	    </CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.contact_information?.FirstName || caseData?.contact_information?.LastName
+//               ? `${caseData?.contact_information?.FirstName || ''} ${caseData?.contact_information?.LastName || ''}`.trim()
+//               : 'N/A'}	</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>Received date 	 </CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CreatedOn ? new Date(caseData.CreatedOn).toLocaleDateString() : 'N/A'}</CardTitle>
+
+//             <CardTitle className={'text-2xl col-span-2 whitespace-nowrap'}>Product Information</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>Serial no. 	 	</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.SerialNumber ?? 'N/A'}</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>Product type 	 	</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.product_information?.product_type?.ProductType ?? 'N/A'}</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>Product no. 	 </CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.ProductNumber ?? 'N/A'}</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>Product name 	 	</CardTitle>
+//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.product_information?.ProductName ?? 'N/A'}</CardTitle>
+//           </DialogFooter> 
+//       </DialogContent>
+//     </Dialog>
+//     </>
+//   )
+// }
+
+export function FindCase() {
+  const [openInfo, setOpenInfo] = useState(false);
+  const [findingCase, setFindingCase] = useState({ Caseid: "", Phoneno: "" });
+  const [caseData, setCaseData] = useState({});
+
+  const handleInputChange = (e) => {
     const { id, value } = e.target;
-    setFindingCase((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+    setFindingCase((prev) => ({ ...prev, [id]: value }));
   };
 
-const [caseData, setCaseData] = useState({})
-console.log(caseData);
-    const findcase = async () => {
+  const findcase = async () => {
     const baseurl = `/api/case-information/${findingCase.Caseid}`;
     Swal.fire({
       title: "Memuat Data Case....",
@@ -9124,31 +9371,31 @@ console.log(caseData);
         Swal.showLoading();
       },
     });
-    
+
     try {
       const response = await ApiCustomer.get(baseurl);
-      console.log("TJEdata",response.data.data.site_account.Company);
-      console.log("DAta",response.data.data);
+      console.log("TJEdata", response.data.data.site_account.Company);
+      console.log("DAta", response.data.data);
+      console.log("check the condition", response.data.data.contact_information.Mobile )
       if (response.data.success && response.data.data.contact_information.Mobile === findingCase.Phoneno) {
         setCaseData(response.data.data);
         setOpenInfo(true);
-      Swal.close(); 
+        Swal.close();
       } else {
         Swal.fire({
-        title: "Error!",
-        text: "Case Tidak Ditemukan",
-        icon: "error",
-        timer:2000,
-        timerProgressBar: true,
-        
-      });
+          title: "Error!",
+          text: "Case Tidak Ditemukan",
+          icon: "error",
+          timer: 2000,
+          timerProgressBar: true,
+
+        });
       }
 
     } catch (err) {
       console.error("Error fetching case data:", err);
-      setError("Error fetching data");
 
-      Swal.close(); 
+      Swal.close();
 
       Swal.fire({
         title: "Error!",
@@ -9158,82 +9405,149 @@ console.log(caseData);
       });
     }
   };
-  return(
-    <>
-    <Dialog>
+
+  return (
+    <Dialog className={''}>
       <DialogTrigger asChild>
-        <Button variant={'outline'} className={'text-white bg-green-600 hover:bg-emerald-700 hover:text-green-300'} >Search Case</Button>
+        <Button className="bg-green-600 text-white hover:bg-emerald-700 ">
+          🔍 Search Case
+        </Button>
       </DialogTrigger>
-      <DialogContent className={'flex   max-w-screen min-w-[60%] h-[fit]'}>
-        <DialogHeader className={'flex flex-1 flex-col'}>
-          <DialogTitle className={'text-2xl'}>Search The Case</DialogTitle>
-          <DialogDescription>Input Case ID and Phone Number To search Case</DialogDescription>
-          <div className="flex gap-10">
-            <Label htmlFor='Caseid'> Case ID</Label>
-            <Input variant={'outline'} className={'flex-1/2'} id='Caseid'value={findingCase.Caseid} onChange={handleInputChange} placeholder={'example : C-0000'}/>
-          </div>
-          <div className="flex gap-10">
-            <Label htmlFor='Phoneno'> Phone Number</Label>
-            <Input variant={'outline'} className={'flex-1/2'} id='Phoneno' value={findingCase.Phoneno} onChange={handleInputChange} />
-          </div>
-          <Button variant={'search'} onClick={findcase}>Find Case</Button>
-          {openInfo? <Card>
-            <CardContent className={'flex flex-col justify-center items-center gap-4'}>
-              <CardTitle className={'flex items-center gap-6'} >Print Into PDF <ArchiveIcon/> </CardTitle>
-              <Button onClick={async() => {
-                      const blob = await pdf(<ServiceRequestPDF caseDetails={caseData}  />).toBlob();
-                      const url = URL.createObjectURL(blob);
-                      const link = document.createElement('a');
-                      link.href = url;
-                      link.download = 'Service_Request_Form.pdf';
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-              }} > Download </Button>
-            </CardContent>
-          </Card> : ''}
+      
+      <DialogContent className="rounded-lg shadow-lg max-h-4/6 overflow-auto min-w-4/6">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold">
+            Search for a Case
+          </DialogTitle>
+          <DialogDescription>
+            Enter the Case ID and Phone Number to find your case.
+          </DialogDescription>
         </DialogHeader>
-           <DialogFooter className={'grid grid-cols-2 w-full flex-1'}>
-            <CardTitle className={'text-2xl col-span-2'}>Case Information</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>Case status </CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseStatus || 'N/A'}</CardTitle>
 
-            {/* <CardTitle className={'p-2 bg-gray-100'}>Bench Start Repair, Onsite Repair</CardTitle> */}
+        {/* 🔎 Search Form */}
+        <div className="space-y-4 py-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="Caseid">Case ID</Label>
+            <Input
+              id="Caseid"
+              value={findingCase.Caseid}
+              onChange={handleInputChange}
+              placeholder="e.g. C-0000"
+            />
+          </div>
 
-            <CardTitle className={'p-2 bg-gray-100'}>Case ID 	</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseID || 'N/A'} </CardTitle>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="Phoneno">Phone Number</Label>
+            <Input
+              id="Phoneno"
+              value={findingCase.Phoneno}
+              onChange={handleInputChange}
+              placeholder="e.g. +628123456789"
+            />
+          </div>
 
-            <CardTitle className={'p-2 bg-gray-100'}>Reference case 	</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseSubject || 'N/A'} </CardTitle>
+          <Button onClick={findcase} className="w-full bg-blue-600 hover:bg-blue-700">
+            Find Case
+          </Button>
+        </div>
 
-            <CardTitle className={'p-2 bg-gray-100'}>Warranty status 	 	</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>Out Warranty</CardTitle>
+        {/* 📄 Case Info (only after found) */}
+        {openInfo && (
+          <div className="space-y-6 mt-6">
+            {/* PDF Download */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  📑 Export
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                  onClick={async () => {
+                    const blob = await pdf(
+                      <ServiceRequestPDF caseDetails={caseData} />
+                    ).toBlob();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = "Service_Request_Form.pdf";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                >
+                  Download PDF
+                </Button>
+              </CardContent>
+            </Card>
 
-            <CardTitle className={'p-2 bg-gray-100'}>Customer company 	</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.site_account?.Company || 'N/A'}</CardTitle>
-
-            <CardTitle className={'p-2 bg-gray-100'}>Customer name 	    </CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.contact_information?.FirstName || caseData?.contact_information?.LastName
-              ? `${caseData?.contact_information?.FirstName || ''} ${caseData?.contact_information?.LastName || ''}`.trim()
-              : 'N/A'}	</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>Received date 	 </CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CreatedOn ? new Date(caseData.CreatedOn).toLocaleDateString() : 'N/A'}</CardTitle>
-
-            <CardTitle className={'text-2xl col-span-2 whitespace-nowrap'}>Product Information</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>Serial no. 	 	</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.SerialNumber ?? 'N/A'}</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>Product type 	 	</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.product_information?.product_type?.ProductType ?? 'N/A'}</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>Product no. 	 </CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.ProductNumber ?? 'N/A'}</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>Product name 	 	</CardTitle>
-            <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.product_information?.ProductName ?? 'N/A'}</CardTitle>
-          </DialogFooter> 
+            <div className="grid grid-cols-2 gap-4">
+              {/* Case Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>📂 Case Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="font-semibold">Case Status</div>
+                    <div>{caseData?.CaseStatus || "N/A"}</div>
+                    <div className="font-semibold">Case ID</div>
+                    <div>{caseData?.CaseID || "N/A"}</div>
+                    <div className="font-semibold">Reference Case</div>
+                    <div>{caseData?.CaseSubject || "N/A"}</div>
+                    <div className="font-semibold">Warranty</div>
+                    <div>Out Warranty</div>
+                    <div className="font-semibold">Customer Company</div>
+                    <div>{caseData?.site_account?.Company || "N/A"}</div>
+                    <div className="font-semibold">Customer Name</div>
+                    <div>
+                      {caseData?.contact_information
+                        ? `${caseData?.contact_information?.FirstName ?? ""} ${caseData?.contact_information?.LastName ?? ""
+                          }`.trim()
+                        : "N/A"}
+                    </div>
+                    <div className="font-semibold">Received Date</div>
+                    <div>
+                      {caseData?.CreatedOn
+                        ? new Date(caseData.CreatedOn).toLocaleDateString()
+                        : "N/A"}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              {/* Product Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>🛠️ Product Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="font-semibold">Serial No.</div>
+                    <div>{caseData?.asset_information?.SerialNumber ?? "N/A"}</div>
+                    <div className="font-semibold">Product Type</div>
+                    <div>
+                      {caseData?.asset_information?.product_information?.product_type
+                        ?.ProductType ?? "N/A"}
+                    </div>
+                    <div className="font-semibold">Product No.</div>
+                    <div>{caseData?.asset_information?.ProductNumber ?? "N/A"}</div>
+                    <div className="font-semibold">Product Name</div>
+                    <div>
+                      {caseData?.asset_information?.product_information
+                        ?.ProductName ?? "N/A"}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
-    </>
-  )
+  );
 }
+
 
 // export function Profile({
 //   className

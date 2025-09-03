@@ -93,6 +93,27 @@ import ServiceRequestPDF from "@/components/service-request-form"; // adjust pat
 import { Textarea } from "@/components/ui/textarea";
 import CaseField from "@/components/CaseField";
 
+/**
+ * TODO : 
+ * ADDING THIS FUNCTION GLOBALLY
+ */
+const suffixToRoleMap = {
+  CE: "ce",
+  APO: "apo",
+  Leader: "celead",
+  PS: "ps",
+  // Tambah sesuai kebutuhan
+};
+
+function extractRoleFromStatus(status) {
+  const match = status.match(/^(NEW_Assign|Assign)([A-Za-z]+)/);
+  if (match) {
+    const suffix = match[2];
+    return suffixToRoleMap[suffix] || null;
+  }
+  return null;
+}
+
 export const TabsServiceCaseDetailsCeLead = ({
   caseDetails,
   setCaseDetails,
@@ -288,13 +309,14 @@ export const TabsServiceCaseDetailsCeLead = ({
                 console.log("CaseForm Data To Update: ", caseForm);
                 const oldStatus = caseDetails.CaseStatus;
                 let newStatus = caseForm.CaseStatus;
-
-                const isNewAssignStatus = newStatus.includes("NEW_Assign");
-                if (isNewAssignStatus) newStatus = "Open";
+                let Owner = caseForm.Owner || caseDetails.Owner;
+                if(newStatus === "FinishRepair") Owner = caseDetails.CreatedBy
+                // const isNewAssignStatus = newStatus.includes("NEW_Assign");
+                // if (isNewAssignStatus) newStatus = "Open";
                 Object.assign(dataToUpdate, {
                   CaseType: caseForm.CaseType || "",
                   CaseStatus: newStatus || "",
-                  Owner: caseForm.Owner || caseDetails.Owner,
+                  Owner: Owner,
                 });
                 savedModules.push("Case");
                 if (oldStatus !== newStatus) {
@@ -1491,7 +1513,15 @@ export const ServiceCase = ({
     Quote_Approved: "Quote Approved",
     Pending_Quote: "Pending Quote",
     NEW_AssignCE: "New Assign To CE",
+    NEW_AssignLeader: "New Assign To Leader",
+    NEW_AssignPS: "New Assign To Product Store",
     NEW_AssignAPO: "New Assign To APO",
+    PartRequest: "Part Request",
+    PartRequestLog: "Part Request Logistic",
+    PartOrder: "Part Order",
+    PartAvailable: "Part Available",
+    RepairProgress: "Repair Progress",
+    FinishRepair: "Finish Repair",
   };
 
   const assignToForm = true;
@@ -1835,11 +1865,7 @@ export const ServiceCase = ({
                           console.log("Mapped enum:", enumValue);
 
                           if (enumValue.startsWith("NEW_Assign")) {
-                            const role = enumValue.endsWith("CE")
-                              ? "ce"
-                              : enumValue.endsWith("APO")
-                                ? "apo"
-                                : null;
+                            const role = extractRoleFromStatus(enumValue);
                             console.log("Mapped enum:", role);
 
                             if (role) {
