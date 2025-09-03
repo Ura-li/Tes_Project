@@ -1546,16 +1546,16 @@ export function ContactEdit({ contactID, onUpdate }) {
     if (!firstName || !lastName || !email || !phone || !city || !country) {
       Swal.fire({
         title: "Incomplete Data",
-        text: "Please fill in all fields before submitting.",
+        text: "Please fill in all required fields.",
         icon: "warning",
-        timer: 1100,
+        timer: 1200,
         timerProgressBar: true,
         showConfirmButton: false,
         allowEscapeKey: false,
-      });  
+      });
       return;
     }
-  
+
     try {
       await ApiCustomer.patch(`/api/contact-information/${contactID}`, {
         Salutation: salutation,
@@ -1574,70 +1574,123 @@ export function ContactEdit({ contactID, onUpdate }) {
         Country: country,
         ZipPostalCode: zipPostalCode,
       });
-  
+
       Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'Contact information updated successfully.',
+        icon: "success",
+        title: "Success!",
+        text: "Contact information updated successfully.",
         timer: 1500,
         showConfirmButton: false,
         allowEscapeKey: false,
       });
-  
-      onUpdate();       
-      setIsOpen(false); 
-  
+
+      onUpdate();
+      setIsOpen(false);
     } catch (error) {
       console.error("Error updating contact:", error);
-  
       Swal.fire({
-        icon: 'error',
-        title: 'Update Failed',
-        text: 'An error occurred while updating contact information.',
+        icon: "error",
+        title: "Update Failed",
+        text: "An error occurred while updating contact information.",
         allowEscapeKey: false,
       });
     }
   };
-  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => { setIsOpen(true); fetchContact(); }}>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setIsOpen(true);
+            fetchContact();
+          }}
+        >
           <Pencil />
         </Button>
       </DialogTrigger>
-      <DialogContent >
+      <DialogContent className="max-w-3xl w-full">
         <DialogHeader>
           <DialogTitle>Edit Contact Information</DialogTitle>
           <DialogDescription>
             Update the details of the contact. Fields marked with * are required.
           </DialogDescription>
         </DialogHeader>
-        <div classname="h-[500px]">
-          <Input value={salutation} onChange={(e) => setSalutation(e.target.value)} placeholder="Salutation" />
-          <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name *" />
-          <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name *" />
-          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email *" />
-          <Input value={preferredLanguage} onChange={(e) => setPreferredLanguage(e.target.value)} placeholder="Preferred Language" />
-          <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone *" />
-          <Input value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="Mobile" />
-          <Input value={workPhone} onChange={(e) => setWorkPhone(e.target.value)} placeholder="Work Phone" />
-          <Input value={workExtension} onChange={(e) => setWorkExtension(e.target.value)} placeholder="Work Extension" />
-          <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} placeholder="Address Line 1" />
-          <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Address Line 2" />
-          <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City *" />
-          <Input value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} placeholder="State/Province" />
-          <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country *" />
-          <Input value={zipPostalCode} onChange={(e) => setZipPostalCode(e.target.value)} placeholder="Zip/Postal Code *" />
+
+        {/* Scrollable + Responsive Grid */}
+        <div className="max-h-[70vh] overflow-y-auto p-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Salutation</label>
+              <Input value={salutation} onChange={(e) => setSalutation(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">First Name *</label>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Last Name *</label>
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Email *</label>
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Preferred Language</label>
+              <Input value={preferredLanguage} onChange={(e) => setPreferredLanguage(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Phone *</label>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Mobile</label>
+              <Input value={mobile} onChange={(e) => setMobile(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Work Phone</label>
+              <Input value={workPhone} onChange={(e) => setWorkPhone(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Work Extension</label>
+              <Input value={workExtension} onChange={(e) => setWorkExtension(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Address Line 1</label>
+              <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Address Line 2</label>
+              <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">City *</label>
+              <Input value={city} onChange={(e) => setCity(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">State / Province</label>
+              <Input value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Country *</label>
+              <Input value={country} onChange={(e) => setCountry(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Zip / Postal Code *</label>
+              <Input value={zipPostalCode} onChange={(e) => setZipPostalCode(e.target.value)} />
+            </div>
+          </div>
         </div>
+
         <DialogFooter>
           <Button onClick={handleUpdate}>Update</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export function ContactDelete ({ contactID }) {
   const handleDelete = async () => {

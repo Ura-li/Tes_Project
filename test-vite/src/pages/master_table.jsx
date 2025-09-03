@@ -244,15 +244,17 @@ export const Contact_table = () => {
       <h2 className="mb-6 text-2xl font-bold">📊 Contact Management</h2>
 
       {/* Search + Filters */}
-      <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between w-full">
         <input
           type="text"
           placeholder="🔍 Search contacts..."
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          className="w-full sm:w-1/3 lg:w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+      </div>
         {/* Dropdown filters */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-6 w-full">
         <select value={selectedCompany} onChange={(e) => setSelectedCompany(e.target.value)} className="p-2 border rounded-lg shadow-sm">
           <option value="">All Companies</option>
           {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
@@ -282,13 +284,12 @@ export const Contact_table = () => {
           {uniqueZipCodes.map(z => <option key={z} value={z}>{z}</option>)}
         </select>
       </div>
-
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[70vh]">
-        <table className="w-full relative border-collapse">
-          <thead className="sticky z-10 top-0 bg-gray-100">
+      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[70vh] w-full">
+        <table className="w-full border-collapse min-w-[1000px]">
+          <thead className="sticky z-10 top-0 bg-gray-100 text-xs sm:text-sm">
             <tr>
               <th className="p-3 text-sm font-semibold text-left border">No</th>
               <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ContactID")}>
@@ -354,7 +355,7 @@ export const Contact_table = () => {
               <th className="p-3 text-sm font-semibold text-center border">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-xs sm:text-sm">
             {currentData.length > 0 ? (
               currentData.map((contact, index) => (
                 <tr key={contact.ContactID} className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
@@ -395,7 +396,7 @@ export const Contact_table = () => {
       </div>
 
       {/* Bottom controls */}
-      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 mt-6 sm:flex-row sm:items-center sm:justify-between w-full">
         {/* Rows per page */}
         <div className="flex items-center gap-2">
           <span className="text-sm">Rows per page:</span>
@@ -422,7 +423,7 @@ export const Contact_table = () => {
         </div>
 
         {/* Info total data */}
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600 text-center sm:text-left">
           Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
           <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
           <b>{sortedData.length}</b> contacts
@@ -657,16 +658,10 @@ export const Company_table = () => {
             setCurrentPage(1);
           }}
         />
-        {/* Reset Filter Button */}
-        <button 
-          onClick={handleResetFilters}
-          className="px-4 py-2 text-sm font-semibold text-white bg-gray-500 rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
-          Reset Filters
-        </button>
       </div>
       
       {/* Filters */}
-      <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <select
           className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
           value={selectedCountry}
@@ -736,6 +731,15 @@ export const Company_table = () => {
             </option>
           ))}
         </select>
+        {/* Reset Filter Button */}
+        <div className="flex items-center">
+        <button
+          onClick={handleResetFilters}
+          className="px-4 py-2 text-sm font-semibold text-white bg-gray-500 rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+        >
+          Reset Filters
+        </button>
+        </div>
       </div>
 
       {error && <p className="mb-4 text-red-500">{error}</p>}
@@ -1438,6 +1442,7 @@ export const Assets_table = () => {
         all = first.data;
       }
 
+      console.log("All assets fetched:", all);
       setAssets(all);
       setFilteredAssets(all);
     } catch (err) {
@@ -1481,7 +1486,10 @@ export const Assets_table = () => {
       if (!(fName && fNumber && fLine)) return false;
 
       if (!q) return true;
-      const haystack = [a?.AssetID, a?.SerialNumber, a?.SiteAccountID, a?.ContactID, pn, pl, num]
+      const haystack = [a?.AssetID, a?.SerialNumber, a?.SiteAccountID, a?.ContactID,       a?.product_information?.ProductName,
+      a?.product_information?.ProductLine,
+      a?.ProductNumber,
+      a?.site_account?.Company, `${a?.contact_information?.FirstName ?? ""} ${a?.contact_information?.LastName ?? ""}` ,pn, pl, num]
         .map(v => (v ?? "").toString().toLowerCase()).join(" ");
       return haystack.includes(q);
     });
@@ -1643,8 +1651,8 @@ export const Assets_table = () => {
                   <td className="p-2 border">{a?.product_information?.ProductName}</td>
                   <td className="p-2 border">{a?.ProductNumber}</td>
                   <td className="p-2 border">{a?.product_information?.ProductLine}</td>
-                  <td className="p-2 border">{a.SiteAccountID}</td>
-                  <td className="p-2 border">{a.ContactID}</td>
+                  <td className="p-2 border">{a?.site_account?.Company}</td>
+                  <td className="p-2 border">{a?.contact_information?.FirstName} {a?.contact_information?.LastName}</td>
                   <td className="flex p-2 gap-2 border">
                     <AssetEdit assetId={a.AssetID} onUpdate={fetchAllAssets} />
                     <AssetDelete assetId={a.AssetID} />
