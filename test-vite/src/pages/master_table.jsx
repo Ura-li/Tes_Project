@@ -4030,6 +4030,7 @@ export const User_table = () => {
                   <td className="p-2 border">{UserItem.Username}</td>
                   <td className="p-2 border">{UserItem.Name}</td>
                   <td className="p-2 border">{UserItem.Role}</td>
+                  <td className="p-2 border">{UserItem.resource?.Name}</td>
                   {/* Tampilkan data Phone di sini */}
                   <td className="p-2 border">{UserItem.Phone}</td>
                   {/* Tampilkan data Signature di sini */}

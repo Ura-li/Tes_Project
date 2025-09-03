@@ -34,7 +34,10 @@ export async function GET(request) {
         : undefined,
       skip: skip,
       take: limit,
-      orderBy: { Name: 'asc' }  // Sorting berdasarkan nama
+      orderBy: { Name: 'asc' },  // Sorting berdasarkan nama
+      include: {
+        resourceAccounts: true
+      }
     });
 
     return NextResponse.json({

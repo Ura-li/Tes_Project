@@ -86,6 +86,27 @@ import { Textarea } from "@/components/ui/textarea";
 import CaseField from "@/components/CaseField";
 import { Separator } from "@/components/ui/separator";
 
+/**
+ * TODO : 
+ * ADDING THIS FUNCTION GLOBALLY OR MAKE THE CASE DETAIL INTO ONE
+ */
+const suffixToRoleMap = {
+  CE: "ce",
+  APO: "apo",
+  Leader: "celead",
+  PS: "ps",
+  // Tambah sesuai kebutuhan
+};
+
+function extractRoleFromStatus(status) {
+  const match = status.match(/^(NEW_Assign|Assign)([A-Za-z]+)/);
+  if (match) {
+    const suffix = match[2];
+    return suffixToRoleMap[suffix] || null;
+  }
+  return null;
+}
+
 
 export const TabsServiceCaseDetails = ({ 
   caseDetails,
@@ -94,6 +115,8 @@ export const TabsServiceCaseDetails = ({
   caseNoteFormData,
   setCaseNoteFormData
 }) => {
+  
+  
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
 
@@ -267,10 +290,10 @@ export const TabsServiceCaseDetails = ({
                 const oldStatus = caseDetails.CaseStatus;
                 let newStatus = caseForm.CaseStatus;
                 
-                const isNewAssignStatus = newStatus.includes("NEW_Assign");
+                // const isNewAssignStatus = newStatus.includes("NEW_Assign");
                 savedModules.push("Case");
                 if (oldStatus !== newStatus) {
-                  if(isNewAssignStatus) newStatus = "Open";
+                  // if(isNewAssignStatus) newStatus = "Open";
                    Object.assign(dataToUpdate, {
                     CaseType: caseForm.CaseType || "",
                     CaseStatus: newStatus || "",
@@ -901,7 +924,11 @@ export const ServiceCase = ({
     Quote_Approved: "Quote Approved",
     Pending_Quote: "Pending Quote",
     NEW_AssignCE: "New Assign To CE",
-    NEW_AssignAPO: "New Assign To APO"
+    NEW_AssignLeader: "New Assign To Leader",
+    NEW_AssignAPO: "New Assign To APO",
+    NEW_AssignPS: "New Assign To Product Store",
+    NEW_POPDoc: "New Needed POP Document",
+    NEW_Warranty: "New Warranty Approval"
   };
 
   const assignToForm= true;
@@ -927,10 +954,11 @@ const fetchUserAssign = async (role) => {
   }
 }
 
+
+
 const fetchCase = async () => {
   try {
     const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`);
-    console.log("DAta Case : ",res)
     setCaseForm(res.data.data);
   } catch (err) {
     console.error("Error fetching case:", err);
@@ -1177,13 +1205,16 @@ const fetchSymptomCodes = async (term) => {
                   <SearchCommandBlock
                       value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
                       onChange={ async (label) => {
+                        
+
                         const enumValue = labelToStatusEnum[label];
                         onChangeCase("CaseStatus")(enumValue);
                         console.log("Selected label:", label);
                         console.log("Mapped enum:", enumValue);
                         
                         if(enumValue.startsWith("NEW_Assign")) {
-                          const role = enumValue.endsWith("CE") ? "ce" : enumValue.endsWith("APO") ? "apo" : null;
+                          const role = extractRoleFromStatus(enumValue);
+  // console.log("Extracted role:", role)
                           console.log("Mapped enum:", role);
                           
                           if(role) {
@@ -1570,7 +1601,8 @@ const fetchSymptomCodes = async (term) => {
             </Card>
 
 
-            {/* --- Card 1: Customer Issue & System Info --- */}
+            {/* --- Card 23 
+            `` Customer Issue & System Info --- */}
             <Card className="flex-col">
               <CardHeader>
                 <CardTitle className="text-lg  flex gap-3">
@@ -1630,7 +1662,7 @@ const fetchSymptomCodes = async (term) => {
               </CardContent>
             </Card>
 
-            {/* --- Card 2: Case Notes --- */}
+            {/* --- Card 3: Case Notes --- */}
             <Card className="flex-col">
               <CardHeader>
                 <CardTitle className="text-lg  flex gap-3"><NotepadText/>Case Notes</CardTitle>

@@ -8,6 +8,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
     const role = searchParams.get("role") || "";
+    const resource = searchParams.get("resource") || "";
 
     const page = parseInt(searchParams.get("page")) || 1;
     const limit = parseInt(searchParams.get("limit")) || 10;
@@ -28,6 +29,7 @@ export async function GET(request) {
     if (role) {
       whereCondition.Role = role;
     }
+    if(resource) whereCondition.ResourceId = resource;
 
     const [users, total] = await Promise.all([
       prisma.user.findMany({
@@ -35,6 +37,14 @@ export async function GET(request) {
         skip,
         take: limit,
         orderBy: { CreatedAt: "desc" },
+        include: {
+          resource: {
+            // Name: true,
+            include : {
+              resourceAccounts: true
+            }
+          }
+        }
       }),
       prisma.user.count({ where: whereCondition }),
     ]);

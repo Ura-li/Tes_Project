@@ -6,7 +6,10 @@ import { generateID } from "@/utils/generateID";
 export async function POST(request) {
     try{
         const body = await request.json()
-        const { AssetID, CaseID, selectedWarrantyServices, selectedPartCatalog, IncidentType, OwnerID } = body;
+        const { AssetID, CaseID, selectedWarrantyServices, selectedPartCatalog, IncidentType, OwnerID, assignApo } = body;
+
+        //validate owner
+        const materialOrderOwnerID = assignApo ?? OwnerID;
 
          // 1. Create Work Order
         const WOID = await generateID("WO-", "workorder", "WOID"); 
@@ -41,7 +44,7 @@ export async function POST(request) {
             WOID,
             OrderStatus: "New",
             OrderType: "Repair",
-            OwnerID: OwnerID
+            OwnerID: materialOrderOwnerID
             }
         });
 
@@ -68,13 +71,18 @@ export async function POST(request) {
         }
 
         // 5. Change Case Status to InActive
-        const caseUpdate = await prisma.caseinformation.update({
-            where: { CaseID: CaseID },
-            data: {
-                CaseStatus: "InActive"
-            }
-        });
+        const caseUpdateData = {
+            CaseStatus: "InActive"
+        };
 
+        if (assignApo !== null && assignApo !== undefined) {
+            caseUpdateData["Owner"] = assignApo;
+        }
+
+        await prisma.caseinformation.update({
+            where: { CaseID: CaseID },
+            data: caseUpdateData
+        });
         return NextResponse.json({ 
             success: true, 
             message: "Order created successfully", 

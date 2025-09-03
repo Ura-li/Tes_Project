@@ -1108,7 +1108,7 @@ export default function NewCaseForm() {
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label>Case Subject <Label className="text-red-600">*</Label></Label>
-                <Input type="date" value={caseSubject} onChange={(e) => setCaseSubject(e.target.value)} />
+                <Input type="text" value={caseSubject} onChange={(e) => setCaseSubject(e.target.value)} />
               </div>
               <div>
                 <Label>Received Date <Label className="text-red-600">*</Label></Label>
@@ -1569,12 +1569,12 @@ export default function NewCaseForm() {
         {/* RIGHT SUMMARY PANEL */}
         <aside className="hidden lg:block col-span-3 sticky top-30 h-fit space-y-4">
             {/* Show compact summary cards after selection */}
-            {selectedAsset && (
+            {selectedCompany && (
               <Card>
-                <CardHeader><CardTitle>Selected Asset</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Selected Company</CardTitle></CardHeader>
                 <CardContent>
-                  <p className="font-medium">{selectedAsset.SerialNumber}</p>
-                  <p className="text-xs text-muted-foreground">{selectedAsset.product_information?.ProductName}</p>
+                  <p className="font-medium">{selectedCompany.Company}</p>
+                  <p className="text-xs text-muted-foreground">{selectedCompany.Email || selectedCompany.PrimaryPhone}</p>
                 </CardContent>
               </Card>
             )}
@@ -1584,6 +1584,15 @@ export default function NewCaseForm() {
                 <CardContent>
                   <p className="font-medium">{selectedContact.FirstName} {selectedContact.LastName}</p>
                   <p className="text-xs text-muted-foreground">{selectedContact.Email || selectedContact.Phone}</p>
+                </CardContent>
+              </Card>
+            )}
+            {selectedAsset && (
+              <Card>
+                <CardHeader><CardTitle>Selected Asset</CardTitle></CardHeader>
+                <CardContent>
+                  <p className="font-medium">{selectedAsset.SerialNumber}</p>
+                  <p className="text-xs text-muted-foreground">{selectedAsset.product_information?.ProductName}</p>
                 </CardContent>
               </Card>
             )}

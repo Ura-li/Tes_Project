@@ -79,6 +79,26 @@ import { pdf } from '@react-pdf/renderer';
 import ServiceRequestPDF from '@/components/service-request-form'; // adjust path if needed
 import { Textarea } from "@/components/ui/textarea";
 
+/**
+ * TODO : 
+ * ADDING THIS FUNCTION GLOBALLY OR MAKE THE CASE DETAIL INTO ONE
+ */
+const suffixToRoleMap = {
+  CE: "ce",
+  APO: "apo",
+  Leader: "celead",
+  PS: "ps",
+  // Tambah sesuai kebutuhan
+};
+
+function extractRoleFromStatus(status) {
+  const match = status.match(/^(NEW_Assign|Assign)([A-Za-z]+)/);
+  if (match) {
+    const suffix = match[2];
+    return suffixToRoleMap[suffix] || null;
+  }
+  return null;
+}
 
 export const TabsServiceCaseDetailsApo = ({ 
   caseDetails,
