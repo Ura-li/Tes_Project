@@ -32,8 +32,8 @@ export async function GET(request) {
             Name: { contains: search }  // Sesuaikan dengan field nama pada tabel Resource
           }
         : undefined,
-      skip: skip,
-      take: limit,
+      // skip: skip,
+      // take: limit,
       orderBy: { Name: 'asc' }  // Sorting berdasarkan nama
     });
 

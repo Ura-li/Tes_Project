@@ -24,8 +24,8 @@ export async function GET(request) {
 
         const repairClassCodes = await prisma.repairClassCode.findMany({
             where: whereCondition,
-            skip: skip,
-            take: limit,
+            // skip: skip,
+            // take: limit,
             orderBy: { Code: "asc" },
         });
 

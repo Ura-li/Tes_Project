@@ -1013,6 +1013,18 @@ export const Case_table = () => {
     .filter((item) =>
       selectedWorkGroup === "All" ? true : item.WorkGroup === selectedWorkGroup
     );
+  
+    // 🔹 Parser khusus tanggal format "dd/MM/yyyy, HH.mm.ss"
+  const parseCustomDate = (dateStr) => {
+    if (!dateStr) return null;
+    const [datePart, timePart] = dateStr.split(", ");
+    if (!datePart || !timePart) return null;
+
+    const [day, month, year] = datePart.split("/").map(Number);
+    const [hours, minutes, seconds] = timePart.split(".").map(Number);
+
+    return new Date(year, month - 1, day, hours, minutes, seconds);
+  };
 
   // 🔹 Sorting
   const sortedData = useMemo(() => {
@@ -1024,6 +1036,15 @@ export const Case_table = () => {
 
         if (aVal === null || aVal === undefined) aVal = "";
         if (bVal === null || bVal === undefined) bVal = "";
+
+        // ✅ Khusus CreatedOn: parse manual
+        if (sortConfig.key === "CreatedOn") {
+          const dateA = parseCustomDate(aVal);
+          const dateB = parseCustomDate(bVal);
+          if (dateA && dateB) {
+            return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
+          }
+        }
 
         // coba numeric dulu
         const numA = parseFloat(aVal);
