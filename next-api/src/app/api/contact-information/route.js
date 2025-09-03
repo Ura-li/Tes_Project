@@ -80,8 +80,8 @@ export async function GET(request) {
         // Ambil data dengan filter & pagination
         const contact_information = await prisma.contact_information.findMany({
             where: whereCondition,
-            skip: (page - 1) * limit,
-            take: limit,
+            // skip: (page - 1) * limit,
+            // take: limit,
             orderBy: { FirstName: "asc" },
             include: { site_account: { select: { Company: true } } }
         });

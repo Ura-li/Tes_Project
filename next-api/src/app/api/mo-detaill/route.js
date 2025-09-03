@@ -48,8 +48,8 @@ export async function GET(request) {
         // Ambil data dengan filter & pagination
         const materialorder = await prisma.materialorder.findMany({
             where: whereCondition,
-            skip: skip,
-            take: limit,
+            // skip: skip,
+            // take: limit,
             orderBy: { workorder: { WOID: "asc" } },
             include:
             {

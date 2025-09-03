@@ -1550,16 +1550,16 @@ export function ContactEdit({ contactID, onUpdate }) {
     if (!firstName || !lastName || !email || !phone || !city || !country) {
       Swal.fire({
         title: "Incomplete Data",
-        text: "Please fill in all fields before submitting.",
+        text: "Please fill in all required fields.",
         icon: "warning",
-        timer: 1100,
+        timer: 1200,
         timerProgressBar: true,
         showConfirmButton: false,
         allowEscapeKey: false,
-      });  
+      });
       return;
     }
-  
+
     try {
       await ApiCustomer.patch(`/api/contact-information/${contactID}`, {
         Salutation: salutation,
@@ -1578,70 +1578,123 @@ export function ContactEdit({ contactID, onUpdate }) {
         Country: country,
         ZipPostalCode: zipPostalCode,
       });
-  
+
       Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'Contact information updated successfully.',
+        icon: "success",
+        title: "Success!",
+        text: "Contact information updated successfully.",
         timer: 1500,
         showConfirmButton: false,
         allowEscapeKey: false,
       });
-  
-      onUpdate();       
-      setIsOpen(false); 
-  
+
+      onUpdate();
+      setIsOpen(false);
     } catch (error) {
       console.error("Error updating contact:", error);
-  
       Swal.fire({
-        icon: 'error',
-        title: 'Update Failed',
-        text: 'An error occurred while updating contact information.',
+        icon: "error",
+        title: "Update Failed",
+        text: "An error occurred while updating contact information.",
         allowEscapeKey: false,
       });
     }
   };
-  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => { setIsOpen(true); fetchContact(); }}>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setIsOpen(true);
+            fetchContact();
+          }}
+        >
           <Pencil />
         </Button>
       </DialogTrigger>
-      <DialogContent >
+      <DialogContent className="max-w-3xl w-full">
         <DialogHeader>
           <DialogTitle>Edit Contact Information</DialogTitle>
           <DialogDescription>
             Update the details of the contact. Fields marked with * are required.
           </DialogDescription>
         </DialogHeader>
-        <div classname="h-[500px]">
-          <Input value={salutation} onChange={(e) => setSalutation(e.target.value)} placeholder="Salutation" />
-          <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name *" />
-          <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name *" />
-          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email *" />
-          <Input value={preferredLanguage} onChange={(e) => setPreferredLanguage(e.target.value)} placeholder="Preferred Language" />
-          <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone *" />
-          <Input value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="Mobile" />
-          <Input value={workPhone} onChange={(e) => setWorkPhone(e.target.value)} placeholder="Work Phone" />
-          <Input value={workExtension} onChange={(e) => setWorkExtension(e.target.value)} placeholder="Work Extension" />
-          <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} placeholder="Address Line 1" />
-          <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Address Line 2" />
-          <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City *" />
-          <Input value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} placeholder="State/Province" />
-          <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country *" />
-          <Input value={zipPostalCode} onChange={(e) => setZipPostalCode(e.target.value)} placeholder="Zip/Postal Code *" />
+
+        {/* Scrollable + Responsive Grid */}
+        <div className="max-h-[70vh] overflow-y-auto p-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Salutation</label>
+              <Input value={salutation} onChange={(e) => setSalutation(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">First Name *</label>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Last Name *</label>
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Email *</label>
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Preferred Language</label>
+              <Input value={preferredLanguage} onChange={(e) => setPreferredLanguage(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Phone *</label>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Mobile</label>
+              <Input value={mobile} onChange={(e) => setMobile(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Work Phone</label>
+              <Input value={workPhone} onChange={(e) => setWorkPhone(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Work Extension</label>
+              <Input value={workExtension} onChange={(e) => setWorkExtension(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Address Line 1</label>
+              <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Address Line 2</label>
+              <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">City *</label>
+              <Input value={city} onChange={(e) => setCity(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">State / Province</label>
+              <Input value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Country *</label>
+              <Input value={country} onChange={(e) => setCountry(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Zip / Postal Code *</label>
+              <Input value={zipPostalCode} onChange={(e) => setZipPostalCode(e.target.value)} />
+            </div>
+          </div>
         </div>
+
         <DialogFooter>
           <Button onClick={handleUpdate}>Update</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export function ContactDelete ({ contactID }) {
   const handleDelete = async () => {
@@ -1802,133 +1855,118 @@ export function ProductAdd() {
 };
 
 export function ProductEdit({ ProductNumber, onUpdate }) {
-  const [products, setProducts] = useState(null);
-  const [productLine, setProductLine] = useState("");
-  const [productName, setProductName] = useState("");
-  const [productTypeID, setProductTypeID] = useState("");
+  const [open, setOpen] = useState(false);
+  const [formDataProduct, setFormDataProduct] = useState({
+    oldProductNumber: "",
+    ProductNumber: "",
+    ProductLine: "",
+    ProductName: "",
+    ProductTypeID: "",
+  });
+
   const [productTypes, setProductTypes] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
 
-  const fetchProducts = async () => {
-    if (!ProductNumber) return;
-    try {
-      const response = await ApiCustomer.get(`/api/product-information/${ProductNumber}`);
-      const data = response.data.data;
-      setProducts(data);
-      setProductLine(data?.ProductLine || "");
-      setProductName(data?.ProductName || "");
-      setProductTypeID(data?.ProductTypeID || "");
-    } catch (error) {
-      console.error("Error fetching product:", error);
-    }
+  // ambil product detail saat modal dibuka
+  useEffect(() => {
+    if (!open) return;
+    const fetchDetail = async () => {
+      try {
+        const res = await ApiCustomer.get(`/api/product-information/${ProductNumber}`);
+        const data = res.data.data;
+        setFormDataProduct({
+          oldProductNumber: data.ProductNumber,
+          ProductNumber: data.ProductNumber,
+          ProductLine: data.ProductLine,
+          ProductName: data.ProductName,
+          ProductTypeID: data.ProductTypeID,
+        });
+      } catch (err) {
+        console.error("Error fetch product:", err);
+      }
+    };
+
+    const fetchTypes = async () => {
+      try {
+        const res = await ApiCustomer.get("/api/product-type");
+        setProductTypes(res.data.data || []);
+      } catch (err) {
+        console.error("Error fetch product types:", err);
+      }
+    };
+
+    fetchDetail();
+    fetchTypes();
+  }, [open, ProductNumber]);
+
+  const handlerInputProduct = (e) => {
+    const { id, value } = e.target;
+    setFormDataProduct((prev) => ({ ...prev, [id]: value }));
   };
 
-  const fetchProductTypes = async () => {
-    try {
-      const response = await ApiCustomer.get("/api/product-type");
-      setProductTypes(response.data.data);
-    } catch (error) {
-      console.error("Error fetching product types:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchProducts();
-      fetchProductTypes();
-    }
-  }, [ProductNumber, isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setProductLine("");
-      setProductName("");
-      setProductTypeID("");
-    }
-  }, [isOpen]);
-
-  const handleUpdate = async () => {
-    if (!productLine || !productName || !productTypeID) {
-      Swal.fire({
-        title: "Incomplete Data",
-        text: "Please fill in all fields before submitting.",
-        icon: "warning",
-        timer: 1200,
-        timerProgressBar: true,
-        showConfirmButton: false,
-        allowEscapeKey: false,
-      });
+  const handlerSave = async () => {
+    const { ProductNumber, ProductLine, ProductName, ProductTypeID } = formDataProduct;
+    if (!ProductNumber || !ProductLine || !ProductName || !ProductTypeID) {
+      Swal.fire({ icon: "warning", title: "Incomplete", text: "Please fill all fields" });
       return;
     }
-  
+
     try {
-      await ApiCustomer.patch(`/api/product-information/${ProductNumber}`, {
-        ProductLine: productLine,
-        ProductName: productName,
-        ProductTypeID: parseInt(productTypeID),
-      });
-  
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'Product information updated successfully.',
-        timer: 1500,
-        showConfirmButton: false,
-        allowEscapeKey: false,  
-      });
-  
-      onUpdate();     
-      setIsOpen(false); 
-  
-    } catch (error) {
-      console.error("Error updating product:", error);
-  
-      Swal.fire({
-        icon: 'error',
-        title: 'Update Failed',
-        text: 'An error occurred while updating product information.',
-        allowEscapeKey: false,
-        timer: 1500,
-      });
+      await ApiCustomer.patch("/api/product-information", formDataProduct);
+      Swal.fire({ icon: "success", title: "Updated", text: "Product updated successfully", timer: 1200, showConfirmButton: false });
+      setOpen(false);
+      onUpdate?.();
+    } catch (err) {
+      console.error("Error update:", err);
+      Swal.fire({ icon: "error", title: "Failed", text: "Update failed, please try again." });
     }
   };
-  
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => setIsOpen(true)}>
-          <Pencil />
-        </Button>
+        <Button variant="outline" size="sm">Edit</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Product Information</DialogTitle>
-          <DialogDescription>Update the details of the product. Fields marked with * are required.</DialogDescription>
+          <DialogTitle>Edit Product</DialogTitle>
+          <DialogDescription>Update product fields below.</DialogDescription>
         </DialogHeader>
+
         <div className="space-y-3">
-          <Input value={productLine} onChange={(e) => setProductLine(e.target.value)} placeholder="Product Line*" />
-          <Input value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name*" />
-          <Select value={productTypeID} onValueChange={setProductTypeID}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select Product Type" />
-          </SelectTrigger>
-          <SelectContent>
-            {productTypes.map((type) => (
-              <SelectItem key={type.ProductTypeID} value={String(type.ProductTypeID)}>
-                {type.ProductType}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <Label>Product Number *</Label>
+          <Input type="text" id="ProductNumber" value={formDataProduct.ProductNumber} onChange={handlerInputProduct} />
+
+          <Label>Product Line *</Label>
+          <Input type="text" id="ProductLine" value={formDataProduct.ProductLine} onChange={handlerInputProduct} />
+
+          <Label>Product Name *</Label>
+          <Input type="text" id="ProductName" value={formDataProduct.ProductName} onChange={handlerInputProduct} />
+
+          <Label>Product Type *</Label>
+          <Select
+            value={formDataProduct.ProductTypeID?.toString() || ""}
+            onValueChange={(value) => setFormDataProduct((prev) => ({ ...prev, ProductTypeID: parseInt(value) }))}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select Product Type" />
+            </SelectTrigger>
+            <SelectContent>
+              {productTypes.map((t) => (
+                <SelectItem key={t.ProductTypeID} value={t.ProductTypeID.toString()}>
+                  {t.ProductType}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+
         <DialogFooter>
-          <Button onClick={handleUpdate}>Update</Button>
+          <Button onClick={handlerSave}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export function ProductDelete ({ ProductNumber, isModalOpen, setIsModalOpen, onUpdate }) {
   //set modal
