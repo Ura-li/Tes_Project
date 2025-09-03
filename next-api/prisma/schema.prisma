@@ -417,8 +417,10 @@ model User {
   ProfilePhoto String?  @db.VarChar(500)
   CreatedAt    DateTime @default(now())
   UpdatedAt    DateTime @updatedAt
-  Phone        String?   @db.VarChar(20)
-  Signature    String?   @db.VarChar(500)
+  Phone        String?  @db.VarChar(20)
+  Signature    String?  @db.VarChar(500)
+  ResourceId   String?  @db.VarChar(255)
+  resource     Resource? @relation(fields: [ResourceId], references: [ResourceId]) 
 
 
   caseinformations_created caseinformation[] @relation("UserCreatedCases")
@@ -526,6 +528,7 @@ model workorder {
   ShipmentCountry String?         @db.VarChar(50)
   ShipmentState   String?         @db.VarChar(50)
   CreatedOn       DateTime?       @default(now()) @db.DateTime(0)
+  ChangedDate     DateTime?       @default(now()) @db.DateTime(0)
   OwnerID         Int?
   owner           User?           @relation("UserWorkOrders", fields: [OwnerID], references: [IDUser], onDelete: Restrict)
 
@@ -561,6 +564,7 @@ model Resource {
   // Relations
   resourceAccounts ResourceAccount[] // <-- 1 Resource has many ResourceAccounts
   bookingDetails   BookingDetails[]
+  users           User[]
 }
 
 model ResourceAccount {
@@ -663,6 +667,7 @@ enum MaterialOrderLineItemStatus {
   Ordered
   Shipped
   Closed
+  Cancelled
   EMPTY_ENUM_VALUE @map("")
 }
 
@@ -672,12 +677,14 @@ enum MaterialOrderStatus {
   Ordered
   Shipped
   Closed
+  Cancelled
 }
 
 enum WorkOrderStatus {
   OPEN_UNSCHEDULED
   OPEN_SCHEDULED
   OPEN_COMPLETED
+  REPAIR_PROGRESS
   CLOSED_POSTED
 }
 
@@ -699,6 +706,18 @@ enum CaseStatus {
   NEW_AssignAPO
   NEW_AssignLeader
   NEW_AssignPS
+  NEW_POPDoc
+  NEW_Warranty
+  AssignCE
+  AssignAPO
+  AssignLeader
+  AssignPS
+  PartOrder
+  PartRequest
+  PartRequestLog
+  PartAvailable
+  RepairProgress
+  FinishRepair
 }
 
 enum ShippingPriority {
