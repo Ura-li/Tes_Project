@@ -138,8 +138,7 @@ export const FlowCase = () => {
                           <div className="gap-2 flex flex-col lg:flex-row">
                             <Badge className={c.CaseStatus === "Open" ? "bg-green-500" : c.CaseStatus === "InActive" ? "bg-blue-400" : c.CaseStatus === "On Hold" ? "yellow" : c.CaseStatus === "Escalated" ? "red" : "gray"}>{c.CaseStatus}</Badge>
                             <Badge>{c.caseinformation.CaseType}</Badge>
-                            {console.log("Case Info : ",c?.caseinformation.CreatedBy)}
-                            {console.log("User : :",user.id)}
+                  
                             {c?.caseinformation.Owner === user.id ? (
                               <Badge className="bg-purple-500">Owner</Badge>
                             ) : (

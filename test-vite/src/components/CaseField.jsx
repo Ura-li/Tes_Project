@@ -25,7 +25,7 @@ const CaseField = ({ label, children, lock = false, span = 1, className, childCl
     return (
         <>
             <CardTitle className={twMerge(
-                `font-medium flex  items-center gap-4 ${className}`
+                `font-semibold flex  items-center gap-4 ${className}`
             )}>
                 {IconComponent ? (
                     <IconComponent className="size-4 shrink-0" />
@@ -35,7 +35,7 @@ const CaseField = ({ label, children, lock = false, span = 1, className, childCl
                 {label}
                 {star ? <span className="text-red-400">*</span> : ""}
             </CardTitle>
-            <CardTitle className={twMerge(spanMap[span], childClass)}>
+            <CardTitle className={twMerge(spanMap[span], childClass, "font-medium")}>
                 {modifiedChildren}
             </CardTitle>
         </>

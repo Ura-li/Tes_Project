@@ -1196,7 +1196,7 @@ const { user } = useAuth();
       {/* Toggle status */}
       <div className="flex items-center gap-3 mb-4">
         <Label htmlFor="status">Toggle Status Of Case :</Label>
-        <Select defaultValue="Open" value={openClose} onValueChange={setOpenClose}>
+        <Select defaultValue="All" value={openClose} onValueChange={setOpenClose}>
           <SelectTrigger id="status">
             <SelectValue>{openClose}</SelectValue>
           </SelectTrigger>
