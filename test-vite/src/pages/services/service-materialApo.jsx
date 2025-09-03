@@ -38,12 +38,12 @@ import Swal from "sweetalert2";
 import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
-import { CaseField } from "../../components/quick-wo-input";
 import DatePicker from "../../components/date-picker";
 import { Case } from "@/pages/Case";
 import { useDraft } from "../../components/DraftContext";
 import { Accordion, AccordionContent } from "@/components/ui/accordion";
 import { AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion";
+import CaseField from "@/components/CaseField";
 
 export const ServiceMaterialApo = () => {
   const { moid } = useParams();
