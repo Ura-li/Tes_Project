@@ -82,6 +82,18 @@ export const ServiceMaterialApo = () => {
   const [readyForClosureDate, setReadyForClosureDate] = useState(null);
   const [error, setError] = useState(null);
 
+  const [updatedLineItems, setUpdatedLineItems] = useState({}); 
+
+  const handleStatusChange = (lineItemID, newStatus) => {
+    setUpdatedLineItems((prev) => ({
+      ...prev,
+      [lineItemID]: newStatus
+    }));
+    console.log("Handle Status Change ",lineItemID)
+    console.log("Handle Status Change ",newStatus)
+  };
+
+
   const formatDateForInput = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -206,7 +218,10 @@ export const ServiceMaterialApo = () => {
           <strong>Closed</strong>.
         </div>
       )}
-      <TabsServiceMO materialOrders={materialOrders} />
+      <TabsServiceMO 
+        materialOrders={materialOrders} 
+        updatedLineItems={updatedLineItems}
+      />
       <Card className="mt-2 rounded-none">
         <CardContent className="p-0">
           <Tabs defaultValue="mo_info">
@@ -435,7 +450,8 @@ export const ServiceMaterialApo = () => {
                 </CardContent>
               </Card>
             </div>
-
+            
+            {/* Booking */}
             <Card className="flex-col mt-5">
               <span className="ml-5 text-xl font-bold">Booking</span>
               <CardContent className="grid">
@@ -465,6 +481,8 @@ export const ServiceMaterialApo = () => {
               </CardContent>
             </Card>
 
+            
+            {/* Material Order Line Items */}
             <Card className="flex-col mt-7">
               <span className="ml-5 text-xl font-bold">
                 Material Order Line Items
@@ -496,7 +514,24 @@ export const ServiceMaterialApo = () => {
                             {lineitem.MOID} - {lineitem.LineNumber}
                           </Link>
                         </TableCell>
-                        <TableCell>{lineitem.Status}</TableCell>
+                        <TableCell>
+                          <Select
+                            defaultValue={lineitem.Status}
+                            onValueChange={(newStatus) => handleStatusChange(lineitem.LineItemID, newStatus)}
+                          >
+                            <SelectTrigger className="w-[120px]">
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="New">New</SelectItem>
+                              <SelectItem value="Ordered">Ordered</SelectItem>
+                              <SelectItem value="Shipped">Shipped</SelectItem>
+                              <SelectItem value="Closed">Closed</SelectItem>
+                              <SelectItem value="Cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        {/* <TableCell>{lineitem.Status}</TableCell> */}
                         <TableCell>{lineitem.ATPStatus}</TableCell>
                         <TableCell>{lineitem.PartNumber}</TableCell>
                         <TableCell>{lineitem.Description}</TableCell>

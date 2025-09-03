@@ -8,6 +8,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
     const role = searchParams.get("role") || "";
+    const resource = searchParams.get("resource") || "";
 
     const page = parseInt(searchParams.get("page")) || 1;
     const limit = parseInt(searchParams.get("limit")) || 10;
@@ -28,6 +29,7 @@ export async function GET(request) {
     if (role) {
       whereCondition.Role = role;
     }
+    if(resource) whereCondition.ResourceId = resource;
 
     const [users, total] = await Promise.all([
       prisma.user.findMany({
@@ -35,6 +37,14 @@ export async function GET(request) {
         skip,
         take: limit,
         orderBy: { CreatedAt: "desc" },
+        include: {
+          resource: {
+            // Name: true,
+            include : {
+              resourceAccounts: true
+            }
+          }
+        }
       }),
       prisma.user.count({ where: whereCondition }),
     ]);
@@ -78,6 +88,48 @@ export async function POST(req) {
   } = await req.json();
 
   try {
+
+    //validasi 
+    const requiredFields = { Email, Username, Password, Name };
+    for (const [key, value] of Object.entries(requiredFields)) {
+      if (!value || value.trim() === "") {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `${key} is required and cannot be empty`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    const existingEmail = await prisma.user.findUnique({
+      where: { Email },
+    });
+    if (existingEmail) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Email is already registered",
+        },
+        { status: 409 } // Conflict
+      );
+    }
+
+    // 3️⃣ Cek apakah Username sudah dipakai
+    const existingUsername = await prisma.user.findUnique({
+      where: { Username },
+    });
+    if (existingUsername) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Username is already taken",
+        },
+        { status: 409 } // Conflict
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(Password, 10);
 
     const newUser = await prisma.user.create({

@@ -2,6 +2,7 @@ import React from "react";
 import { Lock } from "lucide-react";
 import { CardTitle } from "./ui/card";
 import { twMerge } from "tailwind-merge";
+
 const spanMap = {
     1: "col-span-1",
     2: "col-span-2",

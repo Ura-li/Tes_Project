@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 export function UserProfile() {
     const {user} = useAuth();
+
     const [formData, setFormData] = useState({
         Username: '',
         Name: '',

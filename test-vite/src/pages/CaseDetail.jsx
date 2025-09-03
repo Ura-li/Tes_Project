@@ -87,6 +87,27 @@ import CaseField from "@/components/CaseField";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
 
+/**
+ * TODO : 
+ * ADDING THIS FUNCTION GLOBALLY OR MAKE THE CASE DETAIL INTO ONE
+ */
+const suffixToRoleMap = {
+  CE: "ce",
+  APO: "apo",
+  Leader: "celead",
+  PS: "ps",
+  // Tambah sesuai kebutuhan
+};
+
+function extractRoleFromStatus(status) {
+  const match = status.match(/^(NEW_Assign|Assign)([A-Za-z]+)/);
+  if (match) {
+    const suffix = match[2];
+    return suffixToRoleMap[suffix] || null;
+  }
+  return null;
+}
+
 
 export const TabsServiceCaseDetails = ({ 
   caseDetails,
@@ -95,6 +116,8 @@ export const TabsServiceCaseDetails = ({
   caseNoteFormData,
   setCaseNoteFormData
 }) => {
+  
+  
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
   const { user } = useAuth();
@@ -268,15 +291,16 @@ export const TabsServiceCaseDetails = ({
                 const oldStatus = caseDetails.CaseStatus;
                 let newStatus = caseForm.CaseStatus;
                 
-                const isNewAssignStatus = newStatus.includes("NEW_Assign");
+                // const isNewAssignStatus = newStatus.includes("NEW_Assign");
                 savedModules.push("Case");
                 if (oldStatus !== newStatus) {
-                  if(isNewAssignStatus) newStatus = "Open";
+                  // if(isNewAssignStatus) newStatus = "Open";
                    Object.assign(dataToUpdate, {
                     CaseType: caseForm.CaseType || "",
                     CaseStatus: newStatus || "",
                     Owner: caseForm.Owner || caseDetails.Owner
                   });
+                  
                   const token = {
                     user: getUserFromToken()
                   }
@@ -331,8 +355,8 @@ export const TabsServiceCaseDetails = ({
     console.error("Save failed:", error);
     Swal.fire({
       icon: "error",
-      title: "Error",
-      text: error.message || "Something went wrong.",
+      title: error.message,
+      text: error.response.data.message || "Something went wrong.",
       allowOutsideClick: false,
       allowEscapeKey: false,
     }).then(() => {
@@ -927,8 +951,11 @@ export const ServiceCase = ({
     Quote_Approved: "Quote Approved",
     Pending_Quote: "Pending Quote",
     NEW_AssignCE: "New Assign To CE",
+    NEW_AssignLeader: "New Assign To Leader",
     NEW_AssignAPO: "New Assign To APO",
-    NEW_AssignPS: "New Assign TO PS"
+    NEW_AssignPS: "New Assign To Product Store",
+    NEW_POPDoc: "New Needed POP Document",
+    NEW_Warranty: "New Warranty Approval"
   };
 
   const assignToForm= true;
@@ -953,6 +980,8 @@ const fetchUserAssign = async (role) => {
     console.error("Error fetching role: ",err);    
   }
 }
+
+
 
 const fetchCase = async () => {
   try {
@@ -1180,11 +1209,30 @@ return (
                       onChange={e => handleCaseDetails("CaseIdManual")(e.target.value)}
                     />                    
                 </CaseField>
+
+                {/* detail owner */}
+                <CaseField label="Created By" className={"mt-2"} lock span={2}>  
+                {/* {console.log("Bool to check wo owner aaliabe : ", caseDetails?.workorder[0]?.owner?.IDUser)} */}
+                    <Input variant="invisible" placeholder="---" value={caseDetails.createdByUser.Name} readOnly/>                    
+                </CaseField>
+                {caseDetails?.workorder[0]?.owner?.IDUser && (
+                  <CaseField label="Engineer name" className={"mt-2"} lock span={2}>  
+                      <Input variant="invisible" placeholder="---" value={caseDetails.workorder[0].owner.Name} readOnly/>                    
+                  </CaseField>
+                )}
+                {caseDetails?.workorder[0]?.materialorder[0]?.owner?.IDUser && (
+                  <CaseField label="APO name" className={"mt-2"} lock span={2}>  
+                      <Input variant="invisible" placeholder="---" value={caseDetails.workorder[0].materialorder[0].owner.Name} readOnly/>                    
+                  </CaseField>
+                )}
+                
               
                 <CaseField label="Case Status" className={"mt-2"} lock={!canEdit}  span={2}>
                   <SearchCommandBlock
                       value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
                       onChange={ async (label) => {
+                        
+
                         const enumValue = labelToStatusEnum[label];
                         onChangeCase("CaseStatus")(enumValue);
                         console.log("Selected label:", label);
@@ -1192,7 +1240,8 @@ return (
                         setHideAsignTo(enumValue?.startsWith("NEW_Assign"))
                         
                         if(enumValue.startsWith("NEW_Assign")) {
-                          const role = enumValue.endsWith("CE") ? "ce" : enumValue.endsWith("APO") ? "apo" : enumValue.endsWith("PS") ? "ps"  : null;
+                          const role = extractRoleFromStatus(enumValue);
+  // console.log("Extracted role:", role)
                           console.log("Mapped enum:", role);
                           
                           if(role) {

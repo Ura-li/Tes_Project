@@ -54,14 +54,19 @@ export async function PATCH(request, { params }) {
 
   try {
     const formData = await request.formData();
+    const Username = formData.get("Username"); // ⬅️ HARUS ADA
     const Name = formData.get("Name");
     const Email = formData.get("Email");
     const Phone = formData.get("Phone");
     const Password = formData.get("NewPassword");
     const ProfilePhoto = formData.get("ProfilePhoto");
     const Signature = formData.get("Signature");
+    const Role = formData.get("Role")
+    const ResourceId = formData.get("ResourceId")
 
-    let updateData = { Name, Email, Phone };
+    
+    let updateData = { Name, Email, Phone, Role, ResourceId };
+    updateData.Username = Username;
 
     if (Password) {
       updateData.Password = await bcrypt.hash(Password, 10);
@@ -102,12 +107,13 @@ export async function PATCH(request, { params }) {
     }
 
 
-    if (!Email && !Username && !Password && !Name && !Role && !ProfilePhoto && !Phone && !Signature) {
+    if (Object.keys(updateData).length === 0) {
       return NextResponse.json({
         success: false,
         message: "Minimal satu field harus dikirim untuk diupdate."
       }, { status: 400 });
     }
+
 
 
     const updatedUser = await prisma.user.update({

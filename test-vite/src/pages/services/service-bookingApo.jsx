@@ -107,6 +107,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
   const [changedBy, setChangedBy] = useState(1);
 
   
+  
 
   useEffect(() => {
     async function fetchBooking() {
@@ -150,6 +151,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
         
         setStartTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.StartTimeUserTime || ""));
         setEndTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.EndTimeUserTime || ""));
+        // console.log("kontol ",formatDateForInput(data?.bookingDetails?.[0]?.EndTimeUserTime || ""))
         setDurationInMinutesUserTime(data?.bookingDetails?.[0]?.DurationInMinutesUserTime || 0);
         setEstimatedArrivalTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime || ""));
         setActualArrivalTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.ActualArrivalTimeUserTime || ""));
@@ -305,10 +307,8 @@ export function ServiceBookingApo ({BookingId , woid}) {
     }
   
     try {
-      const response = await ApiCustomer.get(`/api/subktechnicians`, {
-        params: { keyword }
-      });
-      console.log("SubukTech : ",response.data);
+      const response = await ApiCustomer.get(`/api/user?resource=${resourceId}`);
+      console.log("SubukTechl : ",response.data);
       setSearchResultsSubkTechnician(response.data.data);
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
@@ -330,6 +330,26 @@ export function ServiceBookingApo ({BookingId , woid}) {
       console.error("Error fetching Subk Technician search:", error);
     }
   }, 500); // 500ms delay
+
+  useEffect(() =>{
+    console.log("sfsfssf",endTimeUserTime); 
+    console.log("sjhit statrt",startTimeUserTime); 
+    if(startTimeUserTime !== "" && endTimeUserTime !== ""){
+      const endTime = new Date(endTimeCustomerTime)
+      const startTime = new Date(startTimeCustomerTime)
+      const diffMs = endTime.getTime() - startTime.getTime();
+      const diffDays = Math.max(diffMs / (1000 * 60 * 60 * 24), 0); // convert ms to minutes, minimal 0
+      setDurationInMinutesUserTime(diffDays);
+      console.log("INI JALAN")
+      console.log("Start Time : ",startTimeUserTime)
+      console.log("End Time : ",endTimeUserTime)
+      // console.log("Difference Time : ",diffDays)
+      // setDurationInMinutesUserTime(endTimeCustomerTime)
+    }else{
+
+      setDurationInMinutesUserTime(null);
+    }
+  }, [startTimeUserTime, endTimeUserTime])
 
   return (
     <div>
@@ -639,6 +659,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                 ></DatePicker>
               </CaseField>
               <CaseField label={"End Time"} span={2} star open>
+                {/* {console.log("END TIME IN RETURN LOOPING", endTimeUserTime)} */}
                 <DatePicker
                   value={endTimeUserTime ? new Date(endTimeUserTime) : ""}
                   onChange={
@@ -647,11 +668,14 @@ export function ServiceBookingApo ({BookingId , woid}) {
                 ></DatePicker>
               </CaseField>
               <CaseField label={"Duration"} span={2} star open>
+                <div className='flex flex-row'>
                 <Input
                   type="number"
                   value={durationInMinutesUserTime}
-                  onChange={(e) => setDurationInMinutesUserTime(e.target.value ? parseInt(e.target.value, 10) : null)}
+                  onChange={(e) => {setDurationInMinutesUserTime(e.target.value ? parseInt(e.target.value, 10) : null)}}
                 />
+                <Label>Hari</Label>
+                </div>
               </CaseField>
               <CaseField label={"Estimated Arrival Time"} span={2} star open>
                 <DatePicker

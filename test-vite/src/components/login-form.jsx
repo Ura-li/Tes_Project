@@ -1,19 +1,15 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useState } from "react"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useState } from "react";
 
-import ApiCustomer from "@/api"
-import Swal from "sweetalert2"
-import { setToken } from "@/lib/utils/auth"
+import ApiCustomer from "@/api";
+import Swal from "sweetalert2";
+import { setToken } from "@/lib/utils/auth";
 
-export function LoginForm({
-  className,
-  ...props
-}) {
-
+export function LoginForm({ className, ...props }) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
 
@@ -21,36 +17,59 @@ export function LoginForm({
     e.preventDefault();
     try {
       Swal.fire({
-      title: 'Logging in...',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-      const res = await ApiCustomer.post('/api/auth/login',{
+        title: "Logging in...",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      const res = await ApiCustomer.post("/api/auth/login", {
         identifier,
-        password
-      })
-      console.log('Login success:', res.data);
+        password,
+      });
+      console.log("Login success:", res.data);
       const { token } = res.data;
       setToken(token);
 
       Swal.fire({
-      title: "Success",
-      icon: "success",
-      allowOutsideClick: false,
-      timer: 1500, 
-      showConfirmButton: false,
-      allowEscapeKey: false,
+        title: "Success",
+        icon: "success",
+        allowOutsideClick: false,
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
       }).then((result) => {
-        window.location.href = '/app';
+        window.location.href = "/app";
       });
     } catch (error) {
-      console.error('Login failed:', error);
-      Swal.fire('Error', 'Login Failed', 'error');
+      console.error("Login failed:", error);
+      if (error.response?.data?.errors) {
+        // Gabungkan semua pesan error jadi satu string (atau bisa tampilkan satu per satu juga)
+        const messages = error.response.data.errors
+          .map((err) => `${err.field}: ${err.message}`)
+          .join("\n");
+
+        Swal.fire({
+          title: "Validation Error",
+          icon: "error",
+          text: messages,
+          allowOutsideClick: false,
+        });
+      } else if (error.response?.data?.message) {
+        // Kalau error lain yang ada message (misal user not found, password salah)
+        Swal.fire({
+          title: "Error",
+          icon: "error",
+          text: error.response.data.message,
+          allowOutsideClick: false,
+        });
+      } else {
+        // Error fallback
+        Swal.fire("Error", "Login Failed", "error");
+      }
     }
-  }
+  };
 
   /**
    * TODO :
@@ -68,33 +87,46 @@ export function LoginForm({
                 </p>
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required />
+                {/* <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" placeholder="m@example.com" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required /> */}
+                <Label htmlFor="identifier">Username or Email</Label>
+                <Input
+                  id="identifier"
+                  type="text"
+                  placeholder="Enter your username or email"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  required
+                />
               </div>
               <div className="grid gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <a href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
+                  <a
+                    href="#"
+                    className="ml-auto text-sm underline-offset-2 hover:underline"
+                  >
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
               </div>
               <Button type="submit" className="w-full">
                 Login
               </Button>
-
             </div>
           </form>
           <div className="bg-muted relative hidden md:block">
-            <img
-              src="/hp.png"
-              alt="Image"
-              className="p-10 mt-5" />
+            <img src="/hp.png" alt="Image" className="p-10 mt-5" />
           </div>
         </CardContent>
       </Card>
-
     </div>
   );
 }
