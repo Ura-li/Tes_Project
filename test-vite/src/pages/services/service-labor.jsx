@@ -12,7 +12,7 @@ import {
     TabsList, 
     TabsTrigger
 } from '../../components/ui/tabs'
-import { CaseField } from '../../components/CaseField'
+import CaseField from '../../components/CaseField'
 import { Input } from '../../components/ui/input'
 import { KeyRound } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from '../../components/ui/select'
