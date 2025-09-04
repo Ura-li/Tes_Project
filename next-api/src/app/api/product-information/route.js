@@ -79,53 +79,54 @@ export async function GET(request) {
  * TODO 
  * MAKE CREATE ASSET AND CREATE PRODUCT SEPARATELY
  */
+
+
+
 export async function POST(request) {
-    //get all request
-    const { 
-        ProductNumber,
-        ProductName,
-        ProductLine,
-        ProductTypeID 
-    } = await request.json();
+    const { ProductNumber, ProductName, ProductLine, ProductTypeID } = await request.json();
 
-    
-    try{
+    try {
+        if (!ProductNumber || !ProductName) {
+            return NextResponse.json({
+                success: false,
+                message: "ProductNumber and ProductName are required"
+            }, { status: 400 });
+        }
 
+        
         const existingProduct = await prisma.product_information.findUnique({
             where: { ProductNumber }
         });
 
         if (existingProduct) {
-            // ✅ If Product exists, do nothing and return success
             return NextResponse.json({
-                success: true,
-                message: "Product already exists. No need to create a new entry.",
-                data: existingProduct
-            }, { status: 200 });
+                success: false,
+                message: `Product with ProductNumber ${ProductNumber} already exists.`,
+            }, { status: 409 });
         }
 
-    //create data 
-    const product_information = await prisma.product_information.create({
-        data:{
-            ProductNumber: ProductNumber,
-            ProductName: ProductName,
-            ProductLine: ProductLine,
-            ProductTypeID: ProductTypeID
-        },
-    });
 
-    return NextResponse.json(
-        {
+        const product_information = await prisma.product_information.create({
+            data: {
+                ProductNumber,
+                ProductName,
+                ProductLine,
+                ProductTypeID
+            },
+        });
+
+        return NextResponse.json({
             success: true,
             message: "Product Information Created Successfully!",
             data: product_information,
-        },
-        { 
-            status: 201
-        }
-    );
+        }, { status: 201 });
     } catch (error) {
-        console.error("Database error:", error);
+        if (error?.code === 'P2002') {
+            return NextResponse.json({
+                success: false,
+                message: `Product with ProductNumber ${ProductNumber} already exists.`,
+            }, { status: 409 });
+        }
         return NextResponse.json(
             { success: false, message: "Internal Server Error" },
             { status: 500 }

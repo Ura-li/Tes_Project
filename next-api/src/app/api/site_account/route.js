@@ -127,8 +127,8 @@ export async function POST(request) {
         if(availableCompanyEmailPhoneDuplicate !== 0){
             return NextResponse.json({
                 success: false,
-                message: "A company wit dis email or phone is alredy eksis",
-                error: "A company wit dis email or phone is alredy eksis"
+                message: "A Company with this email or phone already exists.",
+                error: "A Company with this email or phone already exists."
             }, { status: 409 });
         }
         // Simpan ke database
@@ -154,6 +154,13 @@ export async function POST(request) {
         }, { status: 201 });
 
     } catch (error) {
+        if (error?.code === 'P2002') {
+            return NextResponse.json({
+                success: false,
+                message: "A Company with this email or phone already exists.",
+                error: "Unique constraint violation"
+            }, { status: 409 });
+        }
         return NextResponse.json({
             success: false,
             message: "Failed to create site account",
