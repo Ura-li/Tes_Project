@@ -110,7 +110,6 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-    //get all request
     const { 
         SiteAccountID,  
         Salutation,
@@ -133,60 +132,68 @@ export async function POST(request) {
         ZipPostalCode
     } = await request.json();
 
-    let orConditions = [];
+    try {
+        const orConditions = [];
 
-    if (Email) orConditions.push({ Email: { contains: Email } });
-    if (Phone) orConditions.push({ Phone: { contains: Phone } });
-    if (Mobile) orConditions.push({ Mobile: { contains: Mobile } });
+        if (Email) orConditions.push({ Email: { contains: Email } });
+        if (Phone) orConditions.push({ Phone: { contains: Phone } });
+        if (Mobile) orConditions.push({ Mobile: { contains: Mobile } });
 
-    if (orConditions.length === 0) {
+        if (orConditions.length === 0) {
+            return NextResponse.json({
+                success: false,
+                message: "At least one of Email, Phone, or Mobile must be provided."
+            }, { status: 400 });
+        }
+
+        const dupCount = await prisma.contact_information.count({ where: { OR: orConditions } });
+        if (dupCount !== 0) {
+            return NextResponse.json({
+                success: false,
+                message: "A Contact with this email or phone already exists."
+            }, { status: 409 });
+        }
+
+        const contact_information = await prisma.contact_information.create({
+            data: {
+                SiteAccountID,
+                Salutation,
+                FirstName,
+                LastName,
+                Email,
+                PreferredLanguage,
+                Phone,
+                Mobile,
+                WorkPhone,
+                WorkExtension,
+                OtherPhone,
+                OtherExtension,
+                Fax,
+                AddressLine1,
+                AddressLine2,
+                City,
+                StateProvince,
+                Country,
+                ZipPostalCode
+            },
+        });
+
         return NextResponse.json({
-            success: false,
-            message: "At least one of Email, Phone, or Mobile must be provided."
-        }, { status: 400 });
-    }
-
-    const availableContactEmailPhoneDuplicate = await prisma.contact_information.count({
-        where: { OR: orConditions }
-    });
-    
-    if (availableContactEmailPhoneDuplicate !== 0) {
-        return NextResponse.json({
-            success: false,
-            message: "A Contact with this email or phone already exists."
-        }, { status: 409 });
-    }
-
-    //create data 
-    const contact_information = await prisma.contact_information.create({
-        data:{
-            SiteAccountID: SiteAccountID,  
-            Salutation: Salutation,
-            FirstName: FirstName,
-            LastName: LastName,
-            Email: Email,
-            PreferredLanguage: PreferredLanguage,
-            Phone: Phone,
-            Mobile: Mobile,
-            WorkPhone: WorkPhone,
-            WorkExtension: WorkExtension,
-            OtherPhone: OtherPhone,
-            OtherExtension: OtherExtension,
-            Fax: Fax,
-            AddressLine1: AddressLine1,
-            AddressLine2: AddressLine2,
-            City: City,
-            StateProvince: StateProvince,
-            Country: Country,
-            ZipPostalCode: ZipPostalCode
-        },
-    });
-
-    return NextResponse.json(
-        {
             success: true,
             message: "Contact Information Created Successfully!",
             data: contact_information,
-        },
-    )
+        }, { status: 201 });
+    } catch (error) {
+        if (error?.code === 'P2002') {
+            return NextResponse.json({
+                success: false,
+                message: "A Contact with this email or phone already exists."
+            }, { status: 409 });
+        }
+        return NextResponse.json({
+            success: false,
+            message: "Failed to create contact",
+            error: error.message
+        }, { status: 500 });
+    }
 }
