@@ -1613,7 +1613,7 @@ return (
               {/* --- Card 2: Case Notes --- */}
               <Card className=" hover:shadow-gray-400">
                 <CardHeader>
-                  <CardTitle className="text-xl flex gap-2 "><NotepadText />Case Notes</CardTitle>
+                  <CardTitle className="text-xl flex gap-2 "><NotepadText />Log Notes</CardTitle>
                   <hr />
                 </CardHeader>
                 <CardContent >
