@@ -4,8 +4,11 @@ import { useSocket } from "@/hooks/useSocket";
 import { toast } from "sonner";
 
 export function GlobalLogListener() {
-  const { user } = useAuth();
-  console.log("the id of the user",user.id)
+  const { user, loading } = useAuth();
+
+  if (loading || !user) {
+    return null; // don’t render listener until auth is ready
+  }
   const { addNotification } = useNotifications(user.id);
 
   useSocket("log:created", (log) => {

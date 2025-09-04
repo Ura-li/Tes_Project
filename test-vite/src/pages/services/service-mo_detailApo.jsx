@@ -41,8 +41,6 @@ import { useParams } from "react-router";
 import debounce from "lodash.debounce";
 import ApiCustomer from "@/api";
 
-import { CaseField } from "../../components/quick-wo-input";
-
 import { TabsServiceMOLineItems } from "./service-case";
 import { Description } from "@radix-ui/react-dialog";
 import { useDraft } from "../../components/DraftContext";
@@ -52,6 +50,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import CaseField from "@/components/CaseField";
 
 export const ServiceMoDetailApo = () => {
   const { updateDraft } = useDraft(); // Access updateDraft from the DraftContext

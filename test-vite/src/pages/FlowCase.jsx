@@ -132,7 +132,7 @@ export const FlowCase = () => {
                     <Card key={c.CaseID} className="shadow-sm hover:shadow-md transition border-l-5 border-gray-200">
                       <CardHeader>
                         <CardTitle className="flex items-center justify-between">
-                          <p className='text-lg '>#{c.caseinformation?.[0]?.workorder?.[0]?.WOID}</p>
+                          <p className='text-lg '>#{c.caseinformation?.workorder?.[0]?.WOID}</p>
                           <p>{c.CreatedOn}</p>
                           <div className="gap-2 flex flex-col lg:flex-row">
                             <Badge className={c.CaseStatus === "Open" ? "bg-green-500" : c.CaseStatus === "InActive" ? "bg-blue-400" : c.CaseStatus === "On Hold" ? "yellow" : c.CaseStatus === "Escalated" ? "red" : "gray"}>{c.CaseStatus}</Badge>
@@ -161,22 +161,18 @@ export const FlowCase = () => {
                             
                           </div>
                           <div className="grid grid-cols-3 rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
-                            <p className="font-medium">Customer</p>
+                            <p className="font-medium">Material Order </p>
                             <p className="text-md text-gray-500 col-span-2">
-                               {c.caseinformation.contact_information.FirstName}{" "}
-                              {c.caseinformation.contact_information.LastName}
+                               {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID}
                             </p>
-                            <p className="font-medium">Email</p>
+                            <p className="font-medium">Part Description</p>
                             <p className="text-md text-gray-500 col-span-2">
-                               {c.caseinformation.contact_information?.Email || "No Email"}
+                               {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.materialorderlineitems?.[0]?.Description || "Uknown"}
                             </p>
-                            <p className="font-medium">Company</p>
+                           
+                            <p className="font-medium">Part Number</p>
                             <p className="text-md text-gray-500 col-span-2">
-                                {c.CustomerAccount || "No Company"}
-                            </p>
-                            <p className="font-medium">Phone Number</p>
-                            <p className="text-md text-gray-500 col-span-2">
-                                {c.caseinformation.contact_information.Phone || "No Phone Set"}
+                                {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.materialorderlineitems?.[0]?.PartNumber || "Uknown"}
                             </p>
                           </div>
                         </div>
@@ -194,7 +190,7 @@ export const FlowCase = () => {
                       <CardFooter className="justify-between">
                         <p className="text-sm text-muted-foreground">Case Holder {c.caseinformation?.ownerUser?.Username} - {c.Owner}</p>
                         <p className="text-sm text-muted-foreground">Status Right Now {c.CaseStatus}</p>
-                        <Button size="sm" variant="outline" onClick={() => navigate(`/app/case/${c.CaseID}`)}>Details</Button>
+                        <Button size="sm" variant="outline" onClick={() => navigate(`/app/work/${c.caseinformation?.workorder?.[0]?.WOID}`)}>Details</Button>
                       </CardFooter>
                     </Card>
 
