@@ -1011,7 +1011,16 @@ export default function NewCaseForm() {
                   <Checkbox
                     id="isNewAsset"
                     checked={isNewAsset}
-                    onCheckedChange={(v) => setIsNewAsset(Boolean(v))}
+                    onCheckedChange={(v) => {
+                      setIsNewAsset(Boolean(v));
+                      if (v) {
+                        document.getElementById("product")?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
+                      }
+                    }
+                    }
                   />
                   <Label htmlFor="isNewAsset">Buat Asset Baru</Label>
                 </div>
@@ -1091,7 +1100,17 @@ export default function NewCaseForm() {
                   <Checkbox
                     id="createCustomer"
                     checked={isNewContact}
-                    onCheckedChange={(v) => setIsNewContact(Boolean(v))}
+                    onCheckedChange={(v) => 
+                    {
+                      setIsNewContact(Boolean(v));
+                      if (v) {
+                        document.getElementById("customer")?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
+                      }
+  }
+                    }
                   />
                   <Label htmlFor="createCustomer">Buat customer baru (jika tidak ditemukan)</Label>
                 </div>

@@ -17,7 +17,11 @@ export async function GET(request, { params }) {
     const booking = await prisma.bookings.findUnique({
       where: { BookingId: bookingId },
       include: {
-        workorder: true, // Relasi ke tabel workorder
+        workorder: {
+          include: {
+            caseinformation: true,
+          }
+        }, // Relasi ke tabel workorder
         bookingDetails: {
           orderBy: { ChangedAt: 'desc' }, // Urutkan ChangedAt terbaru
           take: 1, // Ambil hanya 1 record
@@ -27,6 +31,7 @@ export async function GET(request, { params }) {
             subkTechnician: true,
           }
         }
+        
       }
     })
 

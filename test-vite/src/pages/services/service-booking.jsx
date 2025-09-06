@@ -33,12 +33,11 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import ApiCustomer from "@/api";
 import debounce from 'lodash.debounce';
 import Swal from 'sweetalert2';
-import { CaseField } from '../../components/quick-wo-input';
 import DatePicker from '../../components/date-picker';
 import { TabsBooking } from '../../components/tests/tab';
 
 import { getUserFromToken } from "@/lib/utils/auth";
-
+import CaseField from '@/components/CaseField';
 
 function formatDateForInput(dateString) {
   if (!dateString) return "";
