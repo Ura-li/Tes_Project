@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Plus, Trash2, Image as ImageIcon, Search } from "lucide-react";
 import { format } from "date-fns";
-import { SelectBarState } from "@/components/sc-select";
+import { SearchCommandBlock, SelectBarState } from "@/components/sc-select";
 import { toast } from "sonner";
 
 
@@ -1514,7 +1514,15 @@ export default function NewCaseForm() {
                       value={row.name}
                       onChange={(e) => updateAccessory(row.id, "name", e.target.value)}
                       placeholder={`Accessory #${idx + 1}`}
+                      hidden
                     />
+                    <SearchCommandBlock
+                      value={row.name}
+                      onChange={(v) => updateAccessory(row.id, "name", v)}
+                      placeholder="Type to search accessory..."
+                      options={["Cable","Adapter","Other"]}
+                    >
+                    </SearchCommandBlock>
                   </div>
                   <div className="col-span-12 md:col-span-6">
                     <Label className="text-xs">Note</Label>

@@ -644,14 +644,20 @@ const FailureSelect = ({ failureId, setMODetailInput }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [isFocused, setIsFocused] = useState(false); // Track if input is focused
 
-  useEffect(() => {
-    // Fetch default options once
-    ApiCustomer.get("/api/failure/options").then((res) => {
-      const defaultOptions = res.data.map((f) => ({
-        value: f.FailureId.toString(),
-        label: `${f.Name} — ${f.Description ?? ""}`,
-      }));
-      setSearchResults(defaultOptions);
+ useEffect(() => {
+  ApiCustomer.get("/api/failure/options").then((res) => {
+    const defaultOptions = res.data.map((f, index) => ({
+      value: f.FailureId.toString(),
+      label: (
+        <div className="flex flex-col">
+          <span className="font-medium">
+            {`${index === 0 ? "55" : index === 1 ? "72" : index === 2 ? "73" : index + 1}`} - {f.Name}
+          </span>
+          <span className="text-xs text-gray-500">{f.Description ?? ""}</span>
+        </div>
+      ),
+    }));
+    setSearchResults(defaultOptions);
     });
     if (failureId) {
       // Ambil data failure berdasarkan ID yang sudah ada

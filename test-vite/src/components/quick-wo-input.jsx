@@ -291,7 +291,7 @@ export function QuickWOInput ({
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-6 gap-5 m-1">
-                <CaseField label="Choose Address" className={''} icon ><Input value="Site Account address"/></CaseField>
+                <CaseField label="Choose Address" className={''} icon ><Input variant={'invisible'} value="Site Account address"/></CaseField>
                 <CaseField label="Address Line1" className={''}  icon> <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.addressLine1} readOnly/> </CaseField>
                 <CaseField label="Postal Code" className={''}  icon> <Input variant={'invisible'}  className="" value={ServiceDeliveryAddress.postalCode} readOnly/> </CaseField>
                 <CaseField label="Company Name" className={''} icon > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.companyName} readOnly/> </CaseField>

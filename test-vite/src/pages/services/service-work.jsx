@@ -147,6 +147,14 @@ export const ServiceWork = () => {
     }));
   };
 
+ const statusEnumToLabelWO = {
+  OPEN_UNSCHEDULED: 'Open - Unscheduled',
+  OPEN_SCHEDULED: 'Open - Scheduled',
+  OPEN_INPROGRES: 'Open - In Progress',
+  OPEN_COMPLETED: 'Open - Completed',
+  CLOSED_POSTED: 'Closed - Posted'
+  };
+
   const handleWOGeneral = (field) => (eOrValue) => {
     const value = eOrValue?.target ? eOrValue.target.value :eOrValue;
     console.log("Changed:", field, value); 
@@ -469,7 +477,7 @@ export const ServiceWork = () => {
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={WOGeneral.SystemStatus || "---"}
+                      value={statusEnumToLabelWO[WOGeneral.SystemStatus] || "---"}
                       readOnly
                     />
                   </CaseField>
