@@ -363,9 +363,12 @@ export function ServiceBookingApo ({BookingId , woid}) {
     canEditlg = true;
     canEditce = true;
   } else if (bookingData?.workorder?.caseinformation?.Owner) {
-    canEditapo = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "apo";
-    canEditlg = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "lg";
-    canEditce = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "ce";
+    canEditapo = true;
+    canEditlg = true;
+    canEditce = true;
+    // canEditapo = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "apo" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "lg" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "ce";
+    // canEditlg = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "lg" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "ce" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "apo";
+    // canEditce = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "ce" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "apo" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "lg";
   }
 
   return (

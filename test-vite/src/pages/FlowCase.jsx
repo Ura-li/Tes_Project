@@ -91,7 +91,7 @@ export const FlowCase = () => {
   ;
 
   
-  console.log(caseData)
+  // console.log(caseData)
 
   const navigate = useNavigate();
   return (
@@ -183,7 +183,8 @@ export const FlowCase = () => {
                         </div>
                         <div className="bg-slate-100 p-2 m-2 grid grid-flow-col">
                           <p className='flex flex-col items-center'>Created BY <span>({c.caseinformation?.createdByUser?.Username}) - ({c.CreatedName})</span></p>
-                           <p className='flex flex-col items-center'>Repaired BY <span>{c?.workorder[0].owner.Name}</span></p>
+                          
+                          <p className='flex flex-col items-center'>Repaired BY <span>({c.caseinformation?.workorder?.[0]?.owner?.Username}) - ({c.caseinformation?.workorder?.[0]?.owner?.Name})</span></p>
                         </div>
                       </CardContent>
                       <CardFooter className="justify-between">
@@ -256,7 +257,7 @@ export const FlowCase = () => {
                         </div>
                         <div className="bg-slate-100 p-2 m-2 grid grid-flow-col">
                           <p className='flex flex-col items-center'>Created BY <span>({c.caseinformation?.createdByUser?.Username}) - ({c.CreatedName})</span></p>
-                          <p className='flex flex-col items-center'>Repaired BY <span></span></p>
+                          <p className='flex flex-col items-center'>Repaired BY <span>({c.caseinformation?.workorder?.[0]?.owner?.Username}) - ({c.caseinformation?.workorder?.[0]?.owner?.Name})</span></p>
                         </div>
                       </CardContent>
                       <CardFooter className="justify-between">

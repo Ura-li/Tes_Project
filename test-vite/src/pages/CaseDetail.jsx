@@ -2011,6 +2011,7 @@ return (
                       <TableRow>
                         <TableHead className="w-[60px]">No</TableHead>
                         <TableHead>ReferenceId</TableHead>
+                        <TableHead>Case ID</TableHead>
                         <TableHead>Change By</TableHead>
                         <TableHead>Old Status</TableHead>
                         <TableHead>New Status</TableHead>
@@ -2023,8 +2024,9 @@ return (
                         actionLogs.map((log, index) => (
                           <TableRow key={log.id || index}>
                             <TableCell>{index + 1}</TableCell>
+                            <TableCell>{log.CaseId}</TableCell>
                             <TableCell>{log.ReferenceId}</TableCell>
-                            <TableCell>{log.changedByUser?.Name}</TableCell>
+                            <TableCell>{log.changedByUser?.Role} - {log.changedByUser?.Name} ({log.changedByUser?.Username})</TableCell>
                             <TableCell>{log.dataOld}</TableCell>
                             <TableCell>{log.dataNew}</TableCell>
                             <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
