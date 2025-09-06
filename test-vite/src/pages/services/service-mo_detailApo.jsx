@@ -90,6 +90,8 @@ export const ServiceMoDetailApo = () => {
     removedPartDescription: "",
   });
 
+  const [modata, setModata] = useState([])
+
   const fetchMoLineItems = async () => {
     try {
       // Tampilkan loading SweetAlert
@@ -108,7 +110,11 @@ export const ServiceMoDetailApo = () => {
         `/api/material-order/material-order-line-items/${lineItemID}`
       );
       const data = res.data.data;
-
+      const resmo = await ApiCustomer.get(
+        `/api/material-order/${moLineItems.MOID}`
+      );
+      const datamo = resmo.data.data;
+      setModata(datamo)
       setMoLineItems(data);
       console.log(data);
 
@@ -200,6 +206,8 @@ export const ServiceMoDetailApo = () => {
     { value: "mo_attachments", label: "Attachments" },
   ];
 
+
+  console.log("tES DaTA MO",modata)
   return (
     <>
       {moLineItems.Status === "Closed" && (
@@ -257,7 +265,7 @@ export const ServiceMoDetailApo = () => {
                   <hr />
                 </CardHeader>
                 <CardContent className="grid grid-cols-4 gap-5">
-                  <CaseField label={"MO Order Name"} icon>
+                  <CaseField label={"MO Order Name"} lock>
                     <Input
                       variant={"invisible"}
                       value={MODetailInput.moOrderName}
@@ -265,7 +273,7 @@ export const ServiceMoDetailApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Part/Product Number"} icon>
+                  <CaseField label={"Part/Product Number"} lock>
                     <Input
                       variant={"invisible"}
                       value={MODetailInput.partNumber}
@@ -280,7 +288,7 @@ export const ServiceMoDetailApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Sales Order Number"} icon>
+                  <CaseField label={"Sales Order Number"} lock>
                     <Input
                       variant={"invisible"}
                       value={MODetailInput.salesOrderNumber}
@@ -299,14 +307,14 @@ export const ServiceMoDetailApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"RoHS"} icon>
+                  <CaseField label={"RoHS"} lock>
                     <Input
                       value={MODetailInput.rohs ? "Yes" : "No"}
                       variant={"invisible"}
                     />
                   </CaseField>
 
-                  <CaseField label={"Returnability Flag"} icon>
+                  <CaseField label={"Returnability Flag"} lock>
                     <Input
                       value={MODetailInput.returnabilityFlag ? "Yes" : "No"}
                       variant={"invisible"}
@@ -318,7 +326,7 @@ export const ServiceMoDetailApo = () => {
                       <AccordionTrigger className={"decoration-transparent cursor-pointer pl-6"}>More Details</AccordionTrigger>
                       <AccordionContent>
                         <div className="grid grid-cols-6 gap-4 p-4">
-                          <CaseField label={"Media Handling Part"} icon>
+                          <CaseField label={"Media Handling Part"} lock>
                             <Input
                               value={MODetailInput.mediaHandlingPart}
                               variant={"invisible"}
@@ -326,7 +334,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Functional Equivalence"} icon>
+                          <CaseField label={"Functional Equivalence"} lock>
                             <Input
                               value={MODetailInput.functionalEquivalence}
                               variant="invisible"
@@ -334,7 +342,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Line Number"} icon>
+                          <CaseField label={"Line Number"} lock>
                             <Input
                               value={MODetailInput.lineNumber}
                               variant={"invisible"}
@@ -382,7 +390,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Part Authorization Reason"} icon>
+                          <CaseField label={"Part Authorization Reason"} lock>
                             <Input
                               value={MODetailInput.partAuthorizationReason}
                               variant={"invisible"}
@@ -390,7 +398,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Part Authorization Detail"} icon>
+                          <CaseField label={"Part Authorization Detail"} lock>
                             <Input
                               value={MODetailInput.partAuthorizationDetail}
                               variant={"invisible"}
@@ -398,7 +406,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Functional Equivalent"} icon>
+                          <CaseField label={"Functional Equivalent"} lock>
                             <Input
                               variant={"invisible"}
                               value={MODetailInput.functionalEquivalence}
@@ -406,7 +414,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Original Part Number"} icon>
+                          <CaseField label={"Original Part Number"} lock>
                             <Input
                               variant={"invisible"}
                               value={MODetailInput.originalPartNumber}
@@ -414,7 +422,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Offered Part Number"} icon>
+                          <CaseField label={"Offered Part Number"} lock>
                             <Input
                               value={MODetailInput.offeredPartNumber}
                               variant={"invisible"}
@@ -422,7 +430,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Offered Part Description"} icon>
+                          <CaseField label={"Offered Part Description"} lock>
                             <Input
                               value={MODetailInput.offeredPartDescription}
                               variant={"invisible"}
@@ -430,7 +438,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Main Component"} icon>
+                          <CaseField label={"Main Component"} lock>
                             <Input
                               value={MODetailInput.mainComponent}
                               variant={"invisible"}
@@ -438,14 +446,14 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Gratis Flag"} icon>
+                          <CaseField label={"Gratis Flag"} lock>
                             <Input
                               variant={"invisible"}
                               value={MODetailInput.gratisFlag ? "Yes" : "No"}
                             />
                           </CaseField>
 
-                          <CaseField label={"ATP Status"} icon>
+                          <CaseField label={"ATP Status"} lock>
                             <Input
                               variant={"invisible"}
                               value={MODetailInput.atpStatus}

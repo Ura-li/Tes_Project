@@ -17,10 +17,15 @@ import Swal from 'sweetalert2'
 
 
 export const FlowCase = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading || !user) {
+    return null; // don’t render listener until auth is ready
+  }
 
   const [caseData, setCaseData] = useState([]);
-  const [loading, setLoading] = useState(false)
+  console.log(caseData)
+  const [renderer, setRenderer] = useState(false)
   const [error, setError] = useState(false)
   const [filters, setFilters] = useState({
     SerialNumber: "",
@@ -34,12 +39,14 @@ export const FlowCase = () => {
   });
 
   const fetchData = async () => {
-    setLoading(true);
+    setRenderer(true);
     try {
       const response = await ApiCustomer.get('/api/case-information');
       // console.log("Case INFO LOG : ",response.data.data[23].caseinformation.CreatedBy);
       // console.log("Case INFO LOG : ",user.id);
       const filtercases = response.data.data.filter(c => c.CaseStatus !== 'Close' && (c?.caseinformation?.Owner === user.id || c?.caseinformation?.CreatedBy === user.id));
+      console.log(filtercases.length);
+
       // console.log("Filter Case : ",filtercases)
       // console.log("Case Owner : ", filtercases[1]?.caseinformation?.Owner)
       // console.log("Case Created By : ", filtercases[1]?.caseinformation?.CreatedBy)
@@ -57,7 +64,7 @@ export const FlowCase = () => {
       setError(true);
       throw error;
     } finally {
-      setLoading(false);
+      setRenderer(false);
     }
   };
 
@@ -89,6 +96,7 @@ export const FlowCase = () => {
     return 0;
   });
   ;
+  const finishedCases = caseData.filter(c => c.CaseStatus === "FinishRepair");
 
   
   // console.log(caseData)
@@ -111,9 +119,9 @@ export const FlowCase = () => {
             </div>
           </div>
           <TabsContent value="active" className="mx-auto w-full max-w-7xl p-4 md:p-6">
-            <div className="grid grid-cols-1 gap-4 ">
+            <div className="grid grid-cols-2 gap-4 ">
               
-              {loading ? (
+              {renderer ? (
                 // Show skeletons while waiting
                 Array.from({ length: 3 }).map((_, i) => (
                   <Card key={i} className="shadow-sm">
@@ -126,7 +134,7 @@ export const FlowCase = () => {
                     </CardContent>
                   </Card>
                 ))
-              ) : user.role === 'lg' ? (
+              ) : user?.role === 'lg' ? (
                  filteredCases.map((c) => (
                   <>
                     <Card key={c.CaseID} className="shadow-sm hover:shadow-md transition border-l-5 border-gray-200">
@@ -200,70 +208,55 @@ export const FlowCase = () => {
                 // Render real data
                 filteredCases.map((c) => (
                   <>
-                    <Card key={c.CaseID} className="shadow-sm hover:shadow-md transition border-l-5 border-gray-200">
+                    <Card key={c.CaseID} className="shadow-sm hover:shadow-xl transition border-l-5 border-gray-500 cursor-pointer" onClick={() => navigate(`/app/case/${c.CaseID}`)}>
                       <CardHeader>
                         <CardTitle className="flex items-center justify-between">
                           <p className='text-lg '>#{c.CaseID}</p>
-                          <p>{c.CreatedOn}</p>
+                          
                           <div className="gap-2 flex flex-col lg:flex-row">
-                            <Badge className={c.CaseStatus === "Open" ? "bg-green-500" : c.CaseStatus === "InActive" ? "bg-blue-400" : c.CaseStatus === "On Hold" ? "yellow" : c.CaseStatus === "Escalated" ? "red" : "gray"}>{c.CaseStatus}</Badge>
+                            <Badge className="bg-green-600">{c.CaseStatus}</Badge>
                             <Badge>{c.caseinformation.CaseType}</Badge>
-                  
                             {c?.caseinformation.Owner === user.id ? (
                               <Badge className="bg-purple-500">Owner</Badge>
                             ) : (
                               <Badge className="bg-sky-500">CreatedBy</Badge>
                             )}
-
                           </div>
                         </CardTitle>
-                        <CardDescription className="text-md font-semibold italic">{c.CaseSubject}</CardDescription>
+                        <CardDescription className="text-md font-semibold italic"> Created ON {c.CreatedOn}</CardDescription>
+                        <CardDescription className="text-md font-semibold italic"> Updated ON </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex flex-col lg:flex-row gap-4 mb-4">
-                          <div className="grid grid-cols-3  rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
-                            <p className="font-medium">Serial Number</p>
+                        <div className="grid grid-cols-2">
+                         
+                           
                             <p className="text-md text-gray-500 col-span-2"> {c.SerialNumber}</p>
-                            <p className="font-medium">Product Name</p>
+                           
                             <p className="text-md text-gray-500 col-span-2"> {c.ProductName}</p>
-                            <p className="font-medium">Product Number</p>
+                           
                             <p className="text-md text-gray-500 col-span-2"> {c.ProductNumber}</p>
+
+                         
+                         
                             
-                          </div>
-                          <div className="grid grid-cols-3 rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
-                            <p className="font-medium">Customer</p>
                             <p className="text-md text-gray-500 col-span-2">
-                               {c.caseinformation.contact_information.FirstName}{" "}
+                              {c.caseinformation.contact_information.FirstName}{" "}
                               {c.caseinformation.contact_information.LastName}
                             </p>
-                            <p className="font-medium">Email</p>
+
+                          
                             <p className="text-md text-gray-500 col-span-2">
-                               {c.caseinformation.contact_information?.Email || "No Email"}
+                              {c.CustomerAccount || "No Company"}
                             </p>
-                            <p className="font-medium">Company</p>
-                            <p className="text-md text-gray-500 col-span-2">
-                                {c.CustomerAccount || "No Company"}
-                            </p>
-                            <p className="font-medium">Phone Number</p>
-                            <p className="text-md text-gray-500 col-span-2">
-                                {c.caseinformation.contact_information.Phone || "No Phone Set"}
-                            </p>
-                          </div>
+
+                         
                         </div>
-                        <div className="p-3 rounded-lg bg-muted/50">
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {c.caseinformation.ProblemDescription}
-                          </p>
-                        </div>
-                        <div className="bg-slate-100 p-2 m-2 grid grid-flow-col">
-                          <p className='flex flex-col items-center'>Created BY <span>({c.caseinformation?.createdByUser?.Username}) - ({c.CreatedName})</span></p>
-                          <p className='flex flex-col items-center'>Repaired BY <span>({c.caseinformation?.workorder?.[0]?.owner?.Username}) - ({c.caseinformation?.workorder?.[0]?.owner?.Name})</span></p>
-                        </div>
+
                       </CardContent>
                       <CardFooter className="justify-between">
                         <p className="text-sm text-muted-foreground">Case Holder {c.caseinformation?.ownerUser?.Username} - {c.Owner}</p>
-                        <p className="text-sm text-muted-foreground">Status Right Now {c.CaseStatus}</p>
-                        <Button size="sm" variant="outline" onClick={() => navigate(`/app/case/${c.CaseID}`)}>Details</Button>
+                        {/* <p className="text-sm text-muted-foreground">Status Right Now {c.CaseStatus}</p> */}
+                        {/* <Button size="sm" variant="outline" >Details</Button> */}
                       </CardFooter>
                     </Card>
 
@@ -274,39 +267,61 @@ export const FlowCase = () => {
               {/* {caseData.values == 0 ? <h1 className='text-center text-destructive' > You dont have any case yet </h1>  : 'TEWS'} */}
             </div>
           </TabsContent>
-          <TabsContent value="finish">
+            <TabsContent value="finish" className="mx-auto w-full max-w-7xl p-4 md:p-6">
+              <div className="grid grid-cols-1 gap-4 ">
+                {renderer ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <Card key={i} className="shadow-sm">
+                      <CardHeader>
+                        <Skeleton className="h-6 w-32" />
+                      </CardHeader>
+                      <CardContent className="flex gap-4">
+                        <Skeleton className="h-20 w-full" />
+                        <Skeleton className="h-20 w-full" />
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : finishedCases.length > 0 ? (
+                  finishedCases.map((c) => (
+                    <Card key={c.CaseID} className="shadow-sm hover:shadow-md transition border-l-5 border-green-500">
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          <p className='text-lg '>#{c.CaseID}</p>
+                          <p>{c.CreatedOn}</p>
+                          <div className="gap-2 flex flex-col lg:flex-row">
+                            <Badge className="bg-green-600">{c.CaseStatus}</Badge>
+                            <Badge>{c.caseinformation.CaseType}</Badge>
+                            {c?.caseinformation.Owner === user.id ? (
+                              <Badge className="bg-purple-500">Owner</Badge>
+                            ) : (
+                              <Badge className="bg-sky-500">CreatedBy</Badge>
+                            )}
+                          </div>
+                        </CardTitle>
+                        <CardDescription className="text-md font-semibold italic">{c.CaseSubject}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="p-3 rounded-lg bg-muted/50">
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {c.caseinformation.ProblemDescription}
+                          </p>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="justify-between">
+                        <p className="text-sm text-muted-foreground">Case Holder {c.caseinformation?.ownerUser?.Username} - {c.Owner}</p>
+                        <p className="text-sm text-muted-foreground">Status Right Now {c.CaseStatus}</p>
+                        <Button size="sm" variant="outline" onClick={() => navigate(`/app/case/${c.CaseID}`)}>Details</Button>
+                      </CardFooter>
+                    </Card>
+                  ))
+                ) : (
+                  <h1 className="text-center text-gray-500">No finished cases yet.</h1>
+                )}
+              </div>
+            </TabsContent>
 
-          </TabsContent>
           </Tabs>
         </div>
-        {/* <div class="h-screen flex">
-          <aside class="w-64 bg-gradient-to-b from-hp-300 via-hp-400 to-hp-500 text-white p-6">
-            <h2 class="text-xl font-bold">Dashboard</h2>
-          </aside>
-
-          <main class="flex-1 bg-slate-50 p-8">
-            <header class="p-6 rounded-2xl bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300 text-white shadow-md">
-              <h1 class="text-2xl font-bold">Welcome Back!</h1>
-            </header>
-
-            <section class="grid grid-cols-3 gap-6 mt-6">
-              <div class="p-6 rounded-2xl bg-gradient-to-br from-hp-50 to-hp-200 text-white shadow-md">
-                <h3 class="font-medium">Latest Login</h3>
-                <p class="text-3xl font-bold">14:23</p>
-              </div>
-
-              <div class="p-6 rounded-2xl bg-gradient-to-br from-hp-100 to-hp-300 text-white shadow-md">
-                <h3 class="font-medium">Active Users</h3>
-                <p class="text-3xl font-bold">127</p>
-              </div>
-
-              <div class="p-6 rounded-2xl bg-gradient-to-br from-hp-200 to-hp-400 text-white shadow-md">
-                <h3 class="font-medium">Revenue</h3>
-                <p class="text-3xl font-bold">$12,450</p>
-              </div>
-            </section>
-          </main>
-        </div> */}
 
       </SidebarInset>
         <SearchBar filters={filters} setFilters={setFilters} />
@@ -315,77 +330,4 @@ export const FlowCase = () => {
   )
 }
 
-export function LargeCaseCard({ caseInfo }) {
-  return (
-    <Card className="w-full max-w-2xl shadow-lg">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg font-bold">
-            #{c.CaseID} — {c.CaseSubject}
-          </CardTitle>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium 
-            ${c.CasePriority === "Critical" ? "bg-red-100 text-red-700" :
-              c.CasePriority === "High" ? "bg-orange-100 text-orange-700" :
-                "bg-gray-100 text-gray-700"}`}>
-            {c.CasePriority}
-          </span>
-        </div>
-        <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-          <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs">
-            {c.CaseStatus}
-          </span>
-          <span>Opened: {new Date(c.CreatedOn).toLocaleString()}</span>
-          {c.CaseClosedDate && (
-            <span>Closed: {new Date(c.CaseClosedDate).toLocaleString()}</span>
-          )}
-        </div>
-      </CardHeader>
 
-      <CardContent className="space-y-4">
-        <section>
-          <h3 className="font-semibold">Problem</h3>
-          <p className="text-sm">{c.ProblemDescription}</p>
-        </section>
-
-        {c.CaseResolution && (
-          <section>
-            <h3 className="font-semibold">Resolution</h3>
-            <p className="text-sm">{c.CaseResolution}</p>
-          </section>
-        )}
-
-        <section>
-          <h3 className="font-semibold">Customer</h3>
-          <p className="text-sm">
-            {c.contact_information?.FirstName} {c.contact_information?.LastName}
-            ({c.contact_information?.Email})
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {c.site_account?.Company}, {c.site_account?.Country}
-          </p>
-        </section>
-
-        <section>
-          <h3 className="font-semibold">Asset</h3>
-          <p className="text-sm">
-            Serial: {c.asset_information?.SerialNumber}
-            Product: {c.asset_information?.ProductNumber}
-          </p>
-        </section>
-
-        {c.casenotes_casenotes_CaseIDTocaseinformation?.length > 0 && (
-          <section>
-            <h3 className="font-semibold">Recent Notes</h3>
-            <ul className="list-disc list-inside text-sm">
-              {c.casenotes_casenotes_CaseIDTocaseinformation
-                .slice(0, 2)
-                .map((note, i) => (
-                  <li key={i}>{note.content}</li>
-                ))}
-            </ul>
-          </section>
-        )}
-      </CardContent>
-    </Card>
-  )
-}

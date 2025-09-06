@@ -62,18 +62,19 @@ export const SearchCommandBlock = ({
 
   return (
     <div className="relative w-full">
-      {selectedOption ? (
-        <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2 ring-1">
+      {selectedOption  ? (
+        <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2 ring-1" 
+          onClick={() => 
+            !readOnly ?
+            onChange(null)
+            :
+            ""
+          }
+          
+          
+        >
           <Archive color="blue" className="size-4 shrink-0" />
           <span className="pl-1">{renderLabel(selectedOption)}</span>
-          {!readOnly && (
-            <button
-              onClick={() => onChange(null)}
-              className="ml-2 hover:text-red-600"
-            >
-              <X className="size-4" />
-            </button>
-          )}
         </div>
       ) : (
         <Command className="w-full">
