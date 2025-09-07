@@ -22,7 +22,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { SelectBarRelated } from '../../components/sc-select'
+import { SearchCommandBlock, SelectBarRelated } from '../../components/sc-select'
 import { CalendarDays,  Lock, PlusCircle } from 'lucide-react'
 
 'use client'
@@ -332,23 +332,23 @@ export function ServiceBookingApo ({BookingId , woid}) {
   }, 500); // 500ms delay
 
   useEffect(() =>{
-    console.log("sfsfssf",endTimeUserTime); 
-    console.log("sjhit statrt",startTimeUserTime); 
-    if(startTimeUserTime !== "" && endTimeUserTime !== ""){
-      const endTime = new Date(endTimeCustomerTime)
-      const startTime = new Date(startTimeCustomerTime)
-      const diffMs = endTime.getTime() - startTime.getTime();
-      const diffDays = Math.max(diffMs / (1000 * 60 * 60 * 24), 0); // convert ms to minutes, minimal 0
-      setDurationInMinutesUserTime(diffDays);
-      console.log("INI JALAN")
-      console.log("Start Time : ",startTimeUserTime)
-      console.log("End Time : ",endTimeUserTime)
-      // console.log("Difference Time : ",diffDays)
-      // setDurationInMinutesUserTime(endTimeCustomerTime)
-    }else{
+   if (startTimeUserTime && endTimeUserTime) {
+  const startTime = new Date(startTimeUserTime);
+  const endTime = new Date(endTimeUserTime);
 
-      setDurationInMinutesUserTime(null);
-    }
+  if (!isNaN(startTime) && !isNaN(endTime)) {   // pastikan valid date
+    const diffMs = endTime.getTime() - startTime.getTime();
+    const diffMinutes = Math.max(diffMs / (1000 * 60), 0);
+
+    setDurationInMinutesUserTime(diffMinutes);
+
+    console.log("Start Time : ", startTime);
+    console.log("End Time   : ", endTime);
+    console.log("Duration   : ", diffMinutes, "menit");
+  } else {
+    console.warn("Invalid Date:", startTimeUserTime, endTimeUserTime);
+  }
+}
   }, [startTimeUserTime, endTimeUserTime])
 
   console.log("booking data is ther ",bookingData?.workorder?.caseinformation)
@@ -422,6 +422,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
               <CaseField label={"Name"} lock span={2}>
                 <Input
                   variant={"invisible"}
+                  placeholder="---"
                   value={
                     resourceId !== "" ||
                     bookingData?.bookingDetails?.[0]?.resource?.resourceId !==
@@ -434,6 +435,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
               <CaseField label={"Resource"} span={2} lock={!canEditapo} star>
                 <Input
                   variant={"invisible"}
+                  placeholder="---"
                   value={resourceName}
                   onChange={(e) => {
                     setResourceName(e.target.value);
@@ -441,7 +443,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }}
                 />
                 {searchResultsResource.length > 0 && (
-                  <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg max-h-60">
+                  <ul className="absolute z-10 w-[21em] mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg max-h-60">
                     {searchResultsResource.map((res) => (
                       <li
                         key={res.ResourceId}
@@ -467,11 +469,13 @@ export function ServiceBookingApo ({BookingId , woid}) {
                 <CaseField label={"Account"} lock span={2}>
                   <Input
                     variant={"invisible"}
+                    placeholder="---"
                     value={accountName}
                     onChange={(e) => {
                       setAccountName(e.target.value);
                       // handleSearchAccount(e.target.value);
                     }}
+                    readOnly
                   />
                   {searchResultsAccount.length > 0 && (
                     <ul className="absolute z-10 w-full mt-1 bg-white border">
@@ -499,6 +503,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
               <CaseField label={"Subk Technician Name"} span={2} lock={!canEditapo} star>
                 <Input
                   variant={"invisible"}
+                  placeholder="---"
                   value={subkTechnicianName}
                   onChange={(e) => {
                     setSubkTechnicianName(e.target.value);
@@ -527,6 +532,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                 <Input
                   variant={"invisible"}
                   value={subkTechnicianId}
+                  placeholder="---"
                   onChange={(e) => setSubkTechnicianId(e.target.value)}
                 />
                 {searchResultsSubkTechnicianLearner.length > 0 && (
@@ -552,7 +558,19 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   variant={"invisible"}
                   value={bookingStatus}
                   onChange={(e) => setBookingStatus(e.target.value)}
-                />
+                  hidden
+                /> 
+                <SearchCommandBlock
+                  value={bookingStatus}          
+                  onChange={setBookingStatus}
+                  options={[
+                    "A",
+                    "B",
+                    "C"
+                  ]}
+                >
+
+                </SearchCommandBlock>
               </CaseField>
               <CaseField label={"Work Order"} lock span={2}>
                 <Input variant={"invisible"} value={workOrderNumber} readOnly />
@@ -694,7 +712,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   value={durationInMinutesUserTime}
                   onChange={(e) => {setDurationInMinutesUserTime(e.target.value ? parseInt(e.target.value, 10) : null)}}
                 />
-                <Label>Hari</Label>
+                <Label>Minutes</Label>
                 </div>
               </CaseField>
               <CaseField label={"Estimated Arrival Time"} span={2} star lock={!canEditapo}>

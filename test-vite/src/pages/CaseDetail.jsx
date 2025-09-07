@@ -56,6 +56,7 @@ import {
   FileSliders,
   Contact,
   Briefcase,
+  CopyX,
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -134,6 +135,8 @@ export const TabsServiceCaseDetails = ({
     CaseSubject: "",
     Owner: "",
     CasePriority: "",
+    ProblemDescription:"",
+    CaseProductNote: "",
   });
 
   const [gtcForm, setGtcForm] = useState({
@@ -210,6 +213,8 @@ export const TabsServiceCaseDetails = ({
       CaseSubject: caseForm.CaseSubject,
       Owner: caseForm.Owner,
       CasePriority: caseForm.CasePriority,
+      CaseProductNote: caseForm.CaseProductNote,
+      ProblemDescription: caseForm.ProblemDescription
     }).some(([_, v]) => v !== undefined && v !== null && String(v).trim() !== "");
     const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
     // Only treat entitlement as edited if it has any non-empty value
@@ -324,6 +329,12 @@ export const TabsServiceCaseDetails = ({
                 }
                 if (caseForm.CasePriority && String(caseForm.CasePriority).trim() !== "") {
                   caseUpdates.CasePriority = caseForm.CasePriority;
+                } 
+                if (caseForm.CaseProductNote && String(caseForm.CaseProductNote).trim() !== "") {
+                  caseUpdates.CaseProductNote = caseForm.CaseProductNote;
+                }
+                if (caseForm.ProblemDescription && String(caseForm.ProblemDescription).trim() !== "") {
+                  caseUpdates.ProblemDescription = caseForm.ProblemDescription;
                 }
 
                 Object.assign(dataToUpdate, caseUpdates);
@@ -448,10 +459,15 @@ const openPopup = () => {
       onClick: () => handleSave(), 
       roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
     },
-    
     {
       icon: FileSymlink,
       label: "Save & Close",
+      onClick: () => handleSave().then(() => navigate(`/app/viewcase`)),
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
+    },
+    {
+      icon: CopyX,
+      label: "Close",
       onClick: () => saveAndCloseCase(),
       roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
     },
@@ -709,9 +725,10 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg"]},
-    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg"]},
-    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg"]},
+    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg","celead"]},
+    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg","celead"]},
+    { value: "note_part", label: "Sparepart" , roles:["admin", "apo","ce","celead","fd","lg"]},
+    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg","celead"]},
     // { value: "customer,add,entitement", label: "Asset & Entitement", roles:["admin"]},
     // { value: "ci_notes", label: "Notes & Information", roles:["admin"]},
     // { value: "ci_activitas", label: "Activities", disable: true, roles:["admin"]},
@@ -1000,6 +1017,14 @@ export const ServiceCase = ({
     FinishRepair: "Finish Repair",
   };
 
+   const statusEnumToLabelWO = {
+  OPEN_UNSCHEDULED: 'Open - Unscheduled',
+  OPEN_SCHEDULED: 'Open - Scheduled',
+  OPEN_INPROGRES: 'Open - In Progress',
+  OPEN_COMPLETED: 'Open - Completed',
+  CLOSED_POSTED: 'Closed - Posted'
+  };
+
   const assignToForm= true;
   // const assignToForm = statusEnumToLabel.startsWith("NEW_Assign");
 
@@ -1029,6 +1054,7 @@ const fetchCase = async () => {
   try {
     const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`);
     setCaseForm(res.data.data);
+    console.log("Case Infomation",res.data.data)
   } catch (err) {
     console.error("Error fetching case:", err);
     setCaseForm(caseForm); // fallback jika error
@@ -1237,11 +1263,11 @@ return (
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-2 ">
-                <CaseField label="Case Subject" lock span={3}>
+                <CaseField label="Case Subject" lock  span={3}>
                     <Textarea
                      value={caseDetails?.CaseSubject}
                       onChange={e => handleCaseDetails("CaseSubject")(e.target.value)}
-                     className="resize-none border-none italic "
+                     className="resize-none border-none italic ring-1 ring-gray-400 bg-gray-50"
                     />
                 </CaseField>
               
@@ -1336,6 +1362,14 @@ return (
                     "Onsite",
                     "Bench",
                     ]}
+                    />
+                </CaseField>
+
+                <CaseField label="Problem Description" span={2}>
+                    <Textarea
+                     value={caseForm?.ProblemDescription}
+                     onChange={(e) => onChangeCase("ProblemDescription") (e.target.value)}
+                     className="resize-none ring-1 ring-gray-300 bg-gray-50 italic"
                     />
                 </CaseField>
 
@@ -1570,8 +1604,8 @@ return (
                     <div className="space-y-6">
                       <textarea
                         className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
-                        readOnly
-                        value={caseDetails?.CaseProductNote}
+                        value={caseForm?.CaseProductNote}
+                           onChange={(e) => onChangeCase("CaseProductNote") (e.target.value)}
                       />
                     </div>
                     {/* RIGHT COLUMN - System Info */}
@@ -1774,7 +1808,7 @@ return (
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
                     </div>
-                    <CaseField label="OTC Code" lock={!canEdit} span={3} star>
+                    <CaseField label="Warranty Status"  span={3} star>
                       <SearchCommandBlock
                         options={otcCode}
                         value={entitlementStatus.OTCCode}
@@ -1796,7 +1830,7 @@ return (
                       <table className="min-w-full border text-sm text-left">
                         <thead className="bg-gray-100 text-gray-700">
                           <tr>
-                            <th className="border px-4 py-2">No Accesories</th>
+                            <th className="border px-4 py-2" hidden>No Accesories</th>
                             <th className="border px-4 py-2" hidden>
                               Case ID
                             </th>
@@ -1808,7 +1842,7 @@ return (
                         <tbody>
                           {caseDetails.accessory?.map((item, index) => (
                             <tr key={index} className="hover:bg-gray-50">
-                              <td className="border px-4 py-2">{item.id}</td>
+                              <td className="border px-4 py-2" hidden>{item.id}</td>
                               <td className="border px-4 py-2" hidden>
                                 {item.CaseID}
                               </td>
@@ -1901,7 +1935,7 @@ return (
                             </TableCell>
   
                             <TableCell>{work.SubStatus}</TableCell>
-                            <TableCell>{work.SystemStatus}</TableCell>
+                            <TableCell>{statusEnumToLabelWO[work.SystemStatus]}</TableCell>
                             <TableCell>{work.Priority}</TableCell>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
@@ -2011,7 +2045,103 @@ return (
               </Card>
             </div>
           </TabsContent>
-
+          
+          <TabsContent value="note_part">
+         
+              {caseDetails?.workorder?.[0]?.materialorder?.map((mo, index) => (
+              <div key={index} className={"flex flex-col p-3 space-y-5"}>
+                {mo?.materialorderlineitems.map((moli, i) => (
+                  <Card key={i} >
+                  <CardHeader>
+                  <CardTitle className={"text-lg"}>Sparepart {i + 1}</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent className={"grid grid-cols-6 gap-3"}>
+                  <CaseField label={"Part Category"}>
+                    <Input value={moli?.servicecatalog_parts?.Keyword}
+                    variant={"invisible"}
+                    />
+                  </CaseField>
+                <CaseField label={"Vendor Part No"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Hp Part No"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Part From HP ?"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Part Name"}>
+                    <Input value={moli?.servicecatalog_parts?.PartDescription}
+                    variant={"invisible"}
+                    />
+                </CaseField>
+                <CaseField label={"Qty"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Qty Use"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Qty unused"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Part Backup"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Price"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Part Status"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Part Return Status"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Bad CT Code"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"CT Validation"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"UEFI Code"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"SO Number"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"RMA Number"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"RMA Status"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"AWB no. in"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Part Request date"}>
+                  <Input variant="invisible" value={mo?.CreatedOn ? new Date(mo.CreatedOn).toLocaleString("id-ID", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit"
+                }) : ""}/>
+                </CaseField>
+                <CaseField label={"AWB no. out"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"ETA date"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Part Return SC date"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+              </CardContent>
+                  </Card>
+                ))}
+              </div>
+              ))}
+          </TabsContent>
 
         </Tabs>
       </Card>

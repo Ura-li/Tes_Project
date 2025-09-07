@@ -51,7 +51,12 @@ export async function GET(request, { params }) {
                 include: {
                     materialorder : {
                         include : {
-                            owner: true
+                            owner: true,
+                            materialorderlineitems: {
+                                include: {
+                                    servicecatalog_parts: true
+                                }
+                            }
                         }
                     },
                     owner: true
@@ -118,6 +123,8 @@ export async function PATCH(request, { params }) {
             'CaseResolution',
             'OTCCode',
             'id_csr',
+            'ProblemDescription',
+            'CaseProductNote',
         ];
     
         const dataToUpdate = {};

@@ -4891,7 +4891,7 @@ export function BtnModalsServiceCatalog({
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: </p>
+                <p>Warranty Status</p><p>: {caseDetails?.OTCCode} - {caseDetails?.otcCodeTable?.Description} </p>
                 <p>Currency</p><p>: </p>
               </div>
             </div>
@@ -4980,11 +4980,11 @@ export function BtnModalsServiceCatalog({
                 <Label htmlFor="orderability">Orderability</Label>
                 <Switch id="orderability" />
               </div>
-              <div className="grid flex-1 grid-cols-2 p-2 bg-gray-300 gap-x-2">
+              <div className="grid  grid-cols-2 p-2 bg-gray-300 gap-x-2">
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: </p>
+                <p>Warranty Status</p><p>: {caseDetails?.OTCCode} - {caseDetails?.otcCodeTable?.Description}</p>
                 <p>Currency</p><p>: </p>
               </div>
             </div>
@@ -5147,7 +5147,7 @@ export function BtnModalsServiceCatalog({
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: </p>
+                <p>Warranty Status</p><p>: {caseDetails?.OTCCode} - {caseDetails?.otcCodeTable?.Description} </p>
                 <p>Currency</p><p>: </p>
               </div>
             </div>
@@ -5207,8 +5207,9 @@ export function BtnModalsServiceCatalog({
                         <TableCell>
                         <Input
                           placeholder="QTY"
+                          min={1}
                           type="number"
-                          value={part.qty || ''}
+                          value={part.qty ?? 1}
                           onChange={(e) => handleQtyChangePartsCatalog(part.PartNumber, e.target.value)}
                           className="w-16"
                         />

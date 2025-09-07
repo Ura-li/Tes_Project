@@ -47,7 +47,7 @@ import CaseField from "@/components/CaseField";
 
 export const ServiceMaterialApo = () => {
   const { moid } = useParams();
-  const { updateDraft } = useDraft(); // Access updateDraft from the DraftContext
+  const {updateDraft } = useDraft(); // Access updateDraft from the DraftContext
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
   const [MaterialOrder, setMaterialOrder] = useState([]);
