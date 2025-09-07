@@ -2084,7 +2084,7 @@ const [endDate, setEndDate] = useState(null);
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
                 </div>
-                  <CaseField label="OTC Code" lock span={3} star>
+                  <CaseField label="Warranty Status" lock span={3} star>
                   <SearchCommandBlock
                     options={otcCode}
                     value={entitlementStatus.OTCCode}

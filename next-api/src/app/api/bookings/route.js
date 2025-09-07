@@ -95,7 +95,7 @@ export async function POST(request) {
       const booking = await tx.bookings.create({
         data: {
           WOID: woid,
-          BookingStatus: 'Schedule',
+          BookingStatus: '',
           CreatedBy: createdBy,
         },
       });

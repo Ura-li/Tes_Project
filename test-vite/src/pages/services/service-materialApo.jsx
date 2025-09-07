@@ -50,7 +50,7 @@ export const ServiceMaterialApo = () => {
   const { user } = useAuth();
 
   const { moid } = useParams();
-  const { updateDraft } = useDraft(); // Access updateDraft from the DraftContext
+  const {updateDraft } = useDraft(); // Access updateDraft from the DraftContext
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
   const [MaterialOrder, setMaterialOrder] = useState([]);

@@ -49,6 +49,8 @@ import {
   Calculator,
   CreditCard,
   Settings,
+  CopyX,
+  CopyXIcon,
 } from "lucide-react";
 
 import { SelectYN } from "../../components/sc-select";
@@ -671,8 +673,13 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => handleSave() },
     {
-      icon: FileSymlink,
+      icon: FileSymlink ,
       label: "Save & Close",
+      onClick: () => handleSave().then(() => navigate(`/app/case/${workOrders.CaseID}`)),
+    },
+    {
+      icon: CopyX,
+      label: "Close",
       onClick: () => saveAndCloseWorkOrder(),
     },
     { icon: RotateCw, label: "Book", onClick: () => alert("not now"), hidden: true },
@@ -840,7 +847,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems }) => {
     { icon: Save, label: "Save", onClick: () => saveMaterialOrder() },
     {
       icon: FileSymlink,
-      label: "Save & Close",
+      label: "Close",
       onClick: () => saveAndCloseMaterialOrder(),
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
@@ -867,7 +874,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems }) => {
           Swal.showLoading();
         },
       });
-      console.log("updateok",updatedLineItems);
+      console.log("update ok",updatedLineItems);
       // for(const [lineItemID, status] of Object.entries(updatedLineItems)){
       // console.log("user", user);
       const res = await ApiCustomer.patch(`/api/material-order/batch-update`, {
@@ -1014,8 +1021,8 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
     { icon: SquareArrowOutUpRight, label: "", },
     { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
     {
-      icon: FileSymlink,
-      label: "Save & Close",
+      icon: CopyXIcon,
+      label: "Close",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
     },
     { icon: StepBack, label: "Cancel", hidden: true },
