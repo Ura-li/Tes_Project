@@ -125,8 +125,7 @@ export const TabsServiceCaseDetails = ({
   const [selectedSymptom, setSelectedSymptom] = useState(null);
 
   const { open } = useSidebar();
-  const [
-    entitlementStatus, setEntitlementStatus] = useState({
+  const [entitlementStatus, setEntitlementStatus] = useState({
     OTCCode: ''
   })
 
