@@ -44,8 +44,11 @@ import { useDraft } from "../../components/DraftContext";
 import { Accordion, AccordionContent } from "@/components/ui/accordion";
 import { AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion";
 import CaseField from "@/components/CaseField";
+import { useAuth } from "@/context/auth-context";
 
 export const ServiceMaterialApo = () => {
+  const { user } = useAuth();
+
   const { moid } = useParams();
   const {updateDraft } = useDraft(); // Access updateDraft from the DraftContext
   const [materialOrders, setMaterialOrders] = useState([]);
@@ -223,6 +226,16 @@ export const ServiceMaterialApo = () => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleString();
   };
+
+  let canEditapo;
+  const allowedRoles = ["apo", "lg", "ce"];
+
+  console.log("tw", materialOrders?.workorder?.caseinformation?.Owner)
+  if (user?.role === "admin") {
+    canEditapo = true;
+  } else if (materialOrders?.workorder?.caseinformation?.Owner) {
+    canEditapo = materialOrders?.workorder?.caseinformation?.Owner === user?.id && allowedRoles.includes(user?.role); ;
+  }
 
   return (
     <div>
@@ -535,6 +548,7 @@ export const ServiceMaterialApo = () => {
                           <Select
                             defaultValue={lineitem.Status}
                             onValueChange={(newStatus) => handleStatusChange(lineitem.LineItemID, newStatus)}
+                            disabled={!canEditapo}
                           >
                             <SelectTrigger className="w-[120px]">
                               <SelectValue placeholder="Select status" />

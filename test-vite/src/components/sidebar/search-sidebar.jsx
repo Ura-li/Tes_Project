@@ -88,9 +88,8 @@ export function SearchBar({ filters, setFilters, className }) {
                                     className="p-2 rounded-md"
                                 >
                                     <option value="">All</option>
-                                    <option value="Hardware">Hardware</option>
-                                    <option value="Software">Software</option>
-                                    <option value="Warranty">Warranty</option>
+                                    <option value="Bench">Hardware</option>
+                                    <option value="Onsite">Software</option>
                                 </select>
                             </SidebarMenuItem>
                             <SidebarMenuItem className="flex flex-col gap-3">

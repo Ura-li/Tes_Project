@@ -105,6 +105,7 @@ export async function GET(request) {
         
       },
       accessory: true,
+      ActionLog: true
     },
   });
 
