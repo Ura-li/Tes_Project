@@ -834,7 +834,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
   );
 };
 
-export const TabsServiceMO = ({ materialOrders, updatedLineItems }) => {
+export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
   const {user} = useAuth();
   const navigate = useNavigate();
   const buttons = [
@@ -863,26 +863,31 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems }) => {
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
+
   const saveMaterialOrder = async () => {
-    if(updatedLineItems === null || Object.keys(updatedLineItems).length === 0) return
+   // if(updatedLineItems === null || Object.keys(updatedLineItems).length === 0) return
     try {
       Swal.fire({
         title: "Saving...",
-        text: "Please wait while we update the Material Order.",
+        text: "Please wait while we save the Material Order.",
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
         },
       });
-      console.log("update ok",updatedLineItems);
+
+      const res = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`,{
+        SalesOrderNumber: moForm.SalesOrderNumber || undefined,
+      })
+      // console.log("update ok",updatedLineItems);
       // for(const [lineItemID, status] of Object.entries(updatedLineItems)){
       // console.log("user", user);
-      const res = await ApiCustomer.patch(`/api/material-order/batch-update`, {
-        updates: updatedLineItems,
-        MOID: materialOrders.MOID,
-        WOID: materialOrders.WOID,
-        userId: user.id
-      })
+      // const res = await ApiCustomer.patch(`/api/material-order/batch-update`, {
+      //   updates: updatedLineItems,
+      //   MOID: materialOrders.MOID,
+      //   WOID: materialOrders.WOID,
+      //   userId: user.id
+      // })
 
       if(res.data) {
         Swal.fire({
@@ -892,7 +897,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems }) => {
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-          navigate(`/app/work/${materialOrders.WOID}`);
+          navigate(`/app/material-order/${materialOrders.MOID}`);
         });
       } else {
         Swal.fire({
@@ -902,12 +907,17 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems }) => {
         });
       }
       // }
-      console.log("Semua line item berhasil diupdate.");
+      // console.log("Semua line item berhasil diupdate.");
 
     } catch (error) {
-      
+         return Swal.fire({
+        icon: "error",
+        title: "Request Error",
+        text: error.message || "Something went wrong!",
+      });
     }
   }
+
   const saveAndCloseMaterialOrder = async () => {
     try {
       Swal.fire({
@@ -1168,7 +1178,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
-        {console.log(MOLineDetails)}
+        {console.log("Mo lIne Details ",MOLineDetails)}
         {/* {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">

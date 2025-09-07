@@ -338,13 +338,13 @@ export function ServiceBookingApo ({BookingId , woid}) {
 
   if (!isNaN(startTime) && !isNaN(endTime)) {   // pastikan valid date
     const diffMs = endTime.getTime() - startTime.getTime();
-    const diffMinutes = Math.max(diffMs / (1000 * 60), 0);
+    const diffHours = Math.max(diffMs / (1000 * 60 * 60), 0);
 
-    setDurationInMinutesUserTime(diffMinutes);
+    setDurationInMinutesUserTime(diffHours);
 
     console.log("Start Time : ", startTime);
     console.log("End Time   : ", endTime);
-    console.log("Duration   : ", diffMinutes, "menit");
+    console.log("Duration   : ", diffHours, "menit");
   } else {
     console.warn("Invalid Date:", startTimeUserTime, endTimeUserTime);
   }
@@ -696,7 +696,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"End Time"} span={2} star lock={!canEditapo}>
+              <CaseField label={"End Time"} span={2}  lock={!canEditapo}>
                 {/* {console.log("END TIME IN RETURN LOOPING", endTimeUserTime)} */}
                 <DatePicker
                   value={endTimeUserTime ? new Date(endTimeUserTime) : ""}
@@ -705,17 +705,17 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"Duration"} span={2} star lock={!canEditapo}>
-                <div className='flex flex-row'>
+              <CaseField label={"Duration"} span={2}  lock={!canEditapo}>
+                <div className='flex flex-row gap-2'>
                 <Input
                   type="number"
                   value={durationInMinutesUserTime}
                   onChange={(e) => {setDurationInMinutesUserTime(e.target.value ? parseInt(e.target.value, 10) : null)}}
                 />
-                <Label>Minutes</Label>
+                <Label>Hours</Label>
                 </div>
               </CaseField>
-              <CaseField label={"Estimated Arrival Time"} span={2} star lock={!canEditapo}>
+              <CaseField label={"Estimated Arrival Time"} span={2} lock={!canEditapo}>
                 <DatePicker
                   value={
                     estimatedArrivalTimeUserTime
@@ -727,7 +727,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"Actual Arrival Time"} span={2} star lock={!canEditlg}>
+              <CaseField label={"Actual Arrival Time"} span={2}  lock={!canEditlg}>
                 <DatePicker
                   
                   value={
@@ -759,25 +759,25 @@ export function ServiceBookingApo ({BookingId , woid}) {
               <hr />
             </CardHeader>
             <CardContent className="grid items-center grid-cols-3 gap-6">
-              <CaseField label={'Start Time (Customer)'} span={2} star lock={!canEditapo}>
+              <CaseField label={'Start Time (Customer)'} span={2}  lock={!canEditapo}>
                 <DatePicker 
                   value={startTimeCustomerTime ? new Date(startTimeCustomerTime) : ""}
                   onChange={setStartTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'End TIme (Customer)'} span={2} star lock={!canEditapo}>
+              <CaseField label={'End TIme (Customer)'} span={2}  lock={!canEditapo}>
                 <DatePicker 
                   value={endTimeCustomerTime ? new Date(endTimeCustomerTime) : ""}
                   onChange={setEndTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'Estimated Arrival Time (Customer)'} span={2} star  lock={!canEditapo}>
+              <CaseField label={'Estimated Arrival Time (Customer)'} span={2}   lock={!canEditapo}>
                 <DatePicker 
                   value={estimatedArrivalTimeCustomerTime ? new Date(estimatedArrivalTimeCustomerTime) : ""}
                   onChange={setEstimatedArrivalTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'Actual Arrival Time (Customer)'} span={2} star lock={!canEditlg}>
+              <CaseField label={'Actual Arrival Time (Customer)'} span={2}  lock={!canEditlg}>
                 <DatePicker 
                   value={actualArrivalTimeCustomerTime ? new Date(actualArrivalTimeCustomerTime) : ""}
                   onChange={setActualArrivalTimeCustomerTime}

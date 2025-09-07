@@ -51,6 +51,9 @@ export const ServiceMaterialApo = () => {
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
   const [MaterialOrder, setMaterialOrder] = useState([]);
+  const [moForm, setMoForm] = useState({
+    SalesOrderNumber: ""
+  })
   const [materialOrderInformation, setMaterialOrderInformation] = useState({
     MOID: "",
     orderNumber: "",
@@ -102,6 +105,12 @@ export const ServiceMaterialApo = () => {
     return localDate.toISOString().slice(0, 16); // Get 'YYYY-MM-DDTHH:MM'
   };
 
+  const handleMoFormChange = (field) => (e) => {
+  const value = e.target.value;
+  setMoForm((prev) => ({ ...prev, [field]: value }));
+};
+
+
   // Fetch Material Order
   const fetchMaterialOrder = async () => {
     try {
@@ -143,6 +152,11 @@ export const ServiceMaterialApo = () => {
         materialOrderType: data.MaterialOrderType || "",
         eotOrderNumber: data.EOTOrderNumber || "",
       });
+
+      setMoForm((prev) => ({
+      ...prev,
+      SalesOrderNumber: data.SalesOrderNumber || "",
+    }));
 
       console.log("Fetched Material Order:", data);
 
@@ -205,7 +219,7 @@ export const ServiceMaterialApo = () => {
     );
   }
 
-    const formatDate = (dateString) => {
+  const formatDate = (dateString) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleString();
   };
@@ -221,6 +235,8 @@ export const ServiceMaterialApo = () => {
       <TabsServiceMO 
         materialOrders={materialOrders} 
         updatedLineItems={updatedLineItems}
+        moForm={moForm}
+        setMoForm={setMoForm}
       />
       <Card className="mt-2 rounded-none">
         <CardContent className="p-0">
@@ -330,8 +346,9 @@ export const ServiceMaterialApo = () => {
                     <Input
                       variant={"invisible"}
                       type="text"
-                      className=""
-                      value={"---"}
+                      value={moForm?.SalesOrderNumber || ""}
+                      placeholder="---"
+                      onChange={handleMoFormChange("SalesOrderNumber")}
                     />
                   </CaseField>
 

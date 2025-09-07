@@ -1451,7 +1451,7 @@ export default function NewCaseForm() {
                 </div>
                 {productTower && productGroup && (
                   <div>
-                    <Label>Product Type *</Label>
+                    <span>Product Type <label className="text-red-600">*</label></span>
                     <Select
                       value={productTypeId || null}
                       onValueChange={setProductTypeId}
