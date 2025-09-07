@@ -119,153 +119,39 @@ export const FlowCase = () => {
             </div>
           </div>
           <TabsContent value="active" className="mx-auto w-full max-w-7xl p-4 md:p-6">
-            <div className="grid grid-cols-2 gap-4 ">
-              
-              {renderer ? (
-                // Show skeletons while waiting
-                Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="shadow-sm">
-                    <CardHeader>
+              <div className="space-y-2">
+                {renderer ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <Card key={i} className="p-4 shadow-sm">
                       <Skeleton className="h-6 w-32" />
-                    </CardHeader>
-                    <CardContent className="flex gap-4">
-                      <Skeleton className="h-20 w-full" />
-                      <Skeleton className="h-20 w-full" />
-                    </CardContent>
-                  </Card>
-                ))
-              ) : user?.role === 'lg' ? (
-                 filteredCases.map((c) => (
-                  <>
-                    <Card key={c.CaseID} className="shadow-sm hover:shadow-md transition border-l-5 border-gray-200">
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                          <p className='text-lg '>#{c.caseinformation?.workorder?.[0]?.WOID}</p>
-                          <p>{c.CreatedOn}</p>
-                          <div className="gap-2 flex flex-col lg:flex-row">
-                            <Badge className={c.CaseStatus === "Open" ? "bg-green-500" : c.CaseStatus === "InActive" ? "bg-blue-400" : c.CaseStatus === "On Hold" ? "yellow" : c.CaseStatus === "Escalated" ? "red" : "gray"}>{c.CaseStatus}</Badge>
-                            <Badge>{c.caseinformation.CaseType}</Badge>
-                            {console.log("Case Info : ",c?.caseinformation.CreatedBy)}
-                            {console.log("User : :",user.id)}
-                            {c?.caseinformation.Owner === user.id ? (
-                              <Badge className="bg-purple-500">Owner</Badge>
-                            ) : (
-                              <Badge className="bg-sky-500">CreatedBy</Badge>
-                            )}
-
-                          </div>
-                        </CardTitle>
-                        <CardDescription className="text-md font-semibold italic">{c.CaseSubject}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-col lg:flex-row gap-4 mb-4">
-                          <div className="grid grid-cols-3  rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
-                            <p className="font-medium">Serial Number</p>
-                            <p className="text-md text-gray-500 col-span-2"> {c.SerialNumber}</p>
-                            <p className="font-medium">Product Name</p>
-                            <p className="text-md text-gray-500 col-span-2"> {c.ProductName}</p>
-                            <p className="font-medium">Product Number</p>
-                            <p className="text-md text-gray-500 col-span-2"> {c.ProductNumber}</p>
-                            
-                          </div>
-                          <div className="grid grid-cols-3 rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
-                            <p className="font-medium">Material Order </p>
-                            <p className="text-md text-gray-500 col-span-2">
-                               {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID}
-                            </p>
-                            <p className="font-medium">Part Description</p>
-                            <p className="text-md text-gray-500 col-span-2">
-                               {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.materialorderlineitems?.[0]?.Description || "Uknown"}
-                            </p>
-                           
-                            <p className="font-medium">Part Number</p>
-                            <p className="text-md text-gray-500 col-span-2">
-                                {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.materialorderlineitems?.[0]?.PartNumber || "Uknown"}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="p-3 rounded-lg bg-muted/50">
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {c.caseinformation.ProblemDescription}
-                          </p>
-                        </div>
-                        <div className="bg-slate-100 p-2 m-2 grid grid-flow-col">
-                          <p className='flex flex-col items-center'>Created BY <span>({c.caseinformation?.createdByUser?.Username}) - ({c.CreatedName})</span></p>
-                          
-                          <p className='flex flex-col items-center'>Repaired BY <span>({c.caseinformation?.workorder?.[0]?.owner?.Username}) - ({c.caseinformation?.workorder?.[0]?.owner?.Name})</span></p>
-                        </div>
-                      </CardContent>
-                      <CardFooter className="justify-between">
-                        <p className="text-sm text-muted-foreground">Case Holder {c.caseinformation?.ownerUser?.Username} - {c.Owner}</p>
-                        <p className="text-sm text-muted-foreground">Status Right Now {c.CaseStatus}</p>
-                        <Button size="sm" variant="outline" onClick={() => navigate(`/app/work/${c.caseinformation?.workorder?.[0]?.WOID}`)}>Details</Button>
-                      </CardFooter>
                     </Card>
-
-                  </>
-                ))                
-              ) : (
-                // Render real data
-                filteredCases.map((c) => (
-                  <>
-                    <Card key={c.CaseID} className="shadow-sm hover:shadow-xl transition border-l-5 border-gray-500 cursor-pointer" onClick={() => navigate(`/app/case/${c.CaseID}`)}>
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                          <p className='text-lg '>#{c.CaseID}</p>
-                          
-                          <div className="gap-2 flex flex-col lg:flex-row">
-                            <Badge className="bg-green-600">{c.CaseStatus}</Badge>
-                            <Badge>{c.caseinformation.CaseType}</Badge>
-                            {c?.caseinformation.Owner === user.id ? (
-                              <Badge className="bg-purple-500">Owner</Badge>
-                            ) : (
-                              <Badge className="bg-sky-500">CreatedBy</Badge>
-                            )}
-                          </div>
-                        </CardTitle>
-                        <CardDescription className="text-md font-semibold italic"> Created ON {c.CreatedOn}</CardDescription>
-                        <CardDescription className="text-md font-semibold italic"> Updated ON </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-2">
-                         
-                           
-                            <p className="text-md text-gray-500 col-span-2"> {c.SerialNumber}</p>
-                           
-                            <p className="text-md text-gray-500 col-span-2"> {c.ProductName}</p>
-                           
-                            <p className="text-md text-gray-500 col-span-2"> {c.ProductNumber}</p>
-
-                         
-                         
-                            
-                            <p className="text-md text-gray-500 col-span-2">
-                              {c.caseinformation.contact_information.FirstName}{" "}
-                              {c.caseinformation.contact_information.LastName}
-                            </p>
-
-                          
-                            <p className="text-md text-gray-500 col-span-2">
-                              {c.CustomerAccount || "No Company"}
-                            </p>
-
-                         
-                        </div>
-
-                      </CardContent>
-                      <CardFooter className="justify-between">
-                        <p className="text-sm text-muted-foreground">Case Holder {c.caseinformation?.ownerUser?.Username} - {c.Owner}</p>
-                        {/* <p className="text-sm text-muted-foreground">Status Right Now {c.CaseStatus}</p> */}
-                        {/* <Button size="sm" variant="outline" >Details</Button> */}
-                      </CardFooter>
+                  ))
+                ) : (
+                  filteredCases.map((c) => (
+                    <Card
+                      key={c.CaseID}
+                      className="flex-row justify-between items-center p-4 shadow-sm hover:shadow-md transition cursor-pointer border-l-4"
+                      onClick={() => navigate(`/app/case/${c.CaseID}`)}
+                    >
+                      <div>
+                        <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
+                        <p className="text-sm text-gray-500">{c.SerialNumber} | {c.Primary} | {c.CustomerAccount || "No Company"}</p>
+                      </div>
+                      {c.CreatedOn}
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-600">{c.CaseStatus}</Badge>
+                        <Badge>{c.caseinformation.CaseType}</Badge>
+                        {c?.caseinformation.Owner === user.id ? (
+                          <Badge className="bg-purple-500">Owner</Badge>
+                        ) : (
+                          <Badge className="bg-sky-500">CreatedBy</Badge>
+                        )}
+                      </div>
                     </Card>
-
-                  </>
-                ))
-              )}
-              {error ? <h1 className='text-center text-destructive' > Something went wrong </h1> : ''}
-              {/* {caseData.values == 0 ? <h1 className='text-center text-destructive' > You dont have any case yet </h1>  : 'TEWS'} */}
-            </div>
+                  ))
+                )}
+                {error ? <h1 className="text-center text-destructive">Something went wrong</h1> : ""}
+              </div>
           </TabsContent>
             <TabsContent value="finish" className="mx-auto w-full max-w-7xl p-4 md:p-6">
               <div className="grid grid-cols-1 gap-4 ">

@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Plus, Trash2, Image as ImageIcon, Search, Building, User, File, LucideLaptop } from "lucide-react";
 import { format } from "date-fns";
-import { SelectBarState } from "@/components/sc-select";
+import { ComboboxDemo, SelectBarState } from "@/components/sc-select";
 import { toast } from "sonner";
 
 
@@ -1189,11 +1189,19 @@ export default function NewCaseForm() {
           <CardHeader>
             <CardTitle>2) Customer / Company</CardTitle>
             <CardDescription>Isi data customer baru. Centang untuk include ke Company.</CardDescription>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="incCompany"
+                checked={showCompanySection}
+                onCheckedChange={(v) => setShowCompanySection(Boolean(v))}
+              />
+              <Label htmlFor="incCompany">Termasuk dalam company</Label>
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex gap-4">
               {/* Customer */}
-              <div className="space-y-2">
+              <div className="space-y-2 flex-2/3">
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Salutation<Label className="text-red-600">*</Label></Label>
                   <div className="col-span-2">
@@ -1227,7 +1235,6 @@ export default function NewCaseForm() {
                   <Label className="col-span-1">Email<Label className="text-red-600">*</Label></Label>
                   <Input className="col-span-2" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
                 </div>
-                <Separator className="my-2" />
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Alamat<Label className="text-red-600">*</Label></Label>
                   <Input className="col-span-2" value={contactAddressLine1} onChange={(e) => setContactAddressLine1(e.target.value)} />
@@ -1240,14 +1247,20 @@ export default function NewCaseForm() {
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Province<Label className="text-red-600">*</Label></Label>
                   <div className="col-span-2">
-                    <SelectBarState
+                    {/* <SelectBarState
                       id="contactStateProvince"
                       value={contactStateProvince}
                       onChange={setContactStateProvince}
                       options={provContact}
                       placeholder="Select a Province"
-                    />
-
+                    /> */}
+                    <ComboboxDemo
+                      id="contactStateProvince"
+                      value={contactStateProvince}
+                      setValue={setContactStateProvince}
+                      options={provContact}
+                      placeholder="Select a Province"
+                      />
                     {/* <SelectBar
                             id="StateProvince"
                             value={contactStateProvince.name}
@@ -1259,15 +1272,23 @@ export default function NewCaseForm() {
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">City<Label className="text-red-600">*</Label></Label>
-                  <div className="col-span-2">
-                    <SelectBarState
+                  <div className="col-span-2 overflow-hidden">
+                    <ComboboxDemo
+                      id="contactCity"
+                      value={contactCity}
+                      setValue={setContactCity}
+                      options={cityContact}
+                      placeholder="Select a City"
+                      disabled={!contactStateProvince || cityContact.length === 0}
+                    />
+                    {/* <SelectBarState
                       id="contactCity"
                       value={contactCity}
                       onChange={setContactCity}
                       options={cityContact}
                       placeholder="Select a City"
                       disabled={!contactStateProvince || cityContact.length === 0}
-                    />
+                    /> */}
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
@@ -1276,16 +1297,9 @@ export default function NewCaseForm() {
                 </div>
               </div>
               {/* Company (optional) */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="incCompany"
-                    checked={showCompanySection}
-                    onCheckedChange={(v) => setShowCompanySection(Boolean(v))}
-                  />
-                  <Label htmlFor="incCompany">Termasuk dalam company</Label>
-                </div>
                 {showCompanySection && (
+              <div className="space-y-2">
+                
                   <div className="space-y-2">
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Nama Company<Label className="text-red-600">*</Label></Label>
@@ -1314,10 +1328,17 @@ export default function NewCaseForm() {
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Province (ID)<Label className="text-red-600">*</Label></Label>
                       <div className="col-span-2">
-                        <SelectBarState
+                        {/* <SelectBarState
                           id="CompanyStateProvince"
                           value={companyStateProvince}
                           onChange={setCompanyStateProvince}
+                          options={provCompany}
+                          placeholder="Select a Province"
+                        /> */}
+                        <ComboboxDemo
+                          id="CompanyStateProvince"
+                          value={companyStateProvince}
+                          setValue={setCompanyStateProvince}
                           options={provCompany}
                           placeholder="Select a Province"
                         />
@@ -1326,10 +1347,17 @@ export default function NewCaseForm() {
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">City (ID)<Label className="text-red-600">*</Label></Label>
                       <div className="col-span-2">
-                        <SelectBarState
+                        {/* <SelectBarState
                           id="CompanyCity"
                           value={companyCity}
                           onChange={setCompanyCity}
+                          options={cityCompany}
+                          placeholder="Select a City"
+                        /> */}
+                        <ComboboxDemo
+                          id="CompanyCity"
+                          value={companyCity}
+                          setValue={setCompanyCity}
                           options={cityCompany}
                           placeholder="Select a City"
                         />
@@ -1340,8 +1368,8 @@ export default function NewCaseForm() {
                       <Input className="col-span-2" value={companyZipPostalCode} onChange={(e) => setCompanyZipPostalCode(e.target.value)} />
                     </div>
                   </div>
-                )}
               </div>
+                )}
             </div>
           </CardContent>
         </Card>

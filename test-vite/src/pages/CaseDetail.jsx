@@ -86,6 +86,7 @@ import { Textarea } from "@/components/ui/textarea";
 import CaseField from "@/components/CaseField";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
+import EquipmentReciptForm from "@/components/Equipment-Recipt-Form";
 
 /**
  * TODO : 
@@ -471,6 +472,14 @@ const openPopup = () => {
       link.click();
       document.body.removeChild(link);
     }, 
+    roles: ["admin", "fd","user", "spv"]
+  },
+    { icon: StepBack, label: "ERF", 
+      onClick: async () => {
+        const blob = await pdf(<EquipmentReciptForm caseDetails={caseDetails} />).toBlob();
+        const url = URL.createObjectURL(blob);
+        window.open(url); // opens PDF in a new tab
+      },
     roles: ["admin", "fd","user", "spv"]
   },
   { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), 

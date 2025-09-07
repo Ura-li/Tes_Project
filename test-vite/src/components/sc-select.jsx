@@ -8,7 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
   } from "@/components/ui/select"
-import { Archive, X } from "lucide-react";
+import { Archive, Check, CircleChevronDown, X } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -18,6 +18,9 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import React, { useEffect, useRef, useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
 
 export const SearchCommandBlock = ({
   options = [],
@@ -178,7 +181,64 @@ export function SelectBarState({ id, onChange, value, options, placeholder, disa
   );
 }
 
-
+export function ComboboxDemo({
+  id,
+  value,
+  setValue,
+  options,
+  placeholder,
+  disabled
+}) {
+  const [open, setOpen] = useState(false)
+  console.log("WHY NOT SHOWN", options.find((province) => province.name === value.name)?.name)
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between overflow-hidden"
+          disabled={disabled}
+        >
+          {value
+            ? options.find((province) => province.name === value.name)?.name
+            : placeholder}
+          <CircleChevronDown className="opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0">
+        <Command>
+          <CommandInput placeholder={placeholder} className="h-9" />
+          <CommandList>
+            <CommandEmpty>No state found.</CommandEmpty>
+            <CommandGroup>
+              {options.map((province) => (
+                <CommandItem
+                  key={province.id}
+                  value={province.name}
+                  onSelect={(currentValue) => {
+                    const obj = options.find((o) => o.name === currentValue);
+                    setValue(obj || { id: "", name: ""})
+                    setOpen(false)
+                  }}
+                >
+                  {province.name}
+                  <Check
+                    className={cn(
+                      "ml-auto",
+                      value === province.name ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
 
   
 
