@@ -62,7 +62,7 @@ export const ServiceMoDetailApo = () => {
   const [MODetailInput, setMODetailInput] = useState({
     MOID: "",
     moOrderName: "",
-    salesOrderNumber: "",
+    SalesOrderNumber: "",
     lineNumber: "",
     partNumber: "",
     description: "",
@@ -116,13 +116,13 @@ export const ServiceMoDetailApo = () => {
       const datamo = resmo.data.data;
       setModata(datamo)
       setMoLineItems(data);
-      console.log(data);
+      console.log("Data lIne Items",data);
 
       // Isi state MODetailInput berdasarkan data yang diambil
       setMODetailInput({
         MOID: data.MOID,
         moOrderName: data ? `${data.MOID} - ${data.LineNumber}` : null,
-        salesOrderNumber: data.SalesOrderNumber || "",
+        SalesOrderNumber: data.SalesOrderNumber || "",
         lineNumber: data.LineNumber?.toString() || "",
         partNumber: data.PartNumber || "",
         description: data.Description || "",
@@ -291,7 +291,7 @@ export const ServiceMoDetailApo = () => {
                   <CaseField label={"Sales Order Number"} lock>
                     <Input
                       variant={"invisible"}
-                      value={MODetailInput.salesOrderNumber}
+                      value={moLineItems?.materialorder?.SalesOrderNumber}
                       placeholder= "---"
                       readOnly
                     />
@@ -530,25 +530,25 @@ export const ServiceMoDetailApo = () => {
                     <Input variant="invisible" placeholder="---" readOnly/>
                   </CaseField>
 
-                  <CaseField label="Removed Part Number " icon>
+                  <CaseField label="Removed Part Number (BAD CT CODE)" icon>
                     <Input
                       variant="invisible"
                       name="removedPartNumber"
                       value={MODetailInput.removedPartNumber}
-                      onChange={handleChange}
+                      onChange={handleChange('removedPartNumber')}
                       placeholder="---"
-                      readOnly
+                      
                     />
                   </CaseField>
 
-                  <CaseField label="Removed Serial Number " icon>
+                  <CaseField label="Removed Serial Number (NEW CT CODE)">
                     <Input
                       variant="invisible"
                       name="removedSerialNumber"
                       value={MODetailInput.removedSerialNumber}
-                      onChange={handleChange}
+                      onChange={handleChange('removedSerialNumber')}
                       placeholder="---"
-                      readOnly
+                     
                     />
                   </CaseField>
 

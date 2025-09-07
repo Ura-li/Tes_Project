@@ -1272,10 +1272,10 @@ return (
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-2 ">
-                <CaseField label="Case Subject" lock  span={3}>
+                <CaseField label="Case Subject" span={3} >
                     <Textarea
-                     value={caseDetails?.CaseSubject}
-                      onChange={e => handleCaseDetails("CaseSubject")(e.target.value)}
+                     value={caseForm?.CaseSubject}
+                      onChange={e => onChangeCase("CaseSubject")(e.target.value)}
                      className="resize-none border-none italic ring-1 ring-gray-400 bg-gray-50"
                     />
                 </CaseField>
@@ -2075,7 +2075,7 @@ return (
                   <Input variant="invisible"/>
                 </CaseField>
                 <CaseField label={"Hp Part No"}>
-                  <Input variant="invisible"/>
+                  <Input variant="invisible" value={moli?.servicecatalog_parts?.PartNumber}/>
                 </CaseField>
                 <CaseField label={"Part From HP ?"}>
                   <Input variant="invisible"/>
@@ -2107,7 +2107,10 @@ return (
                   <Input variant="invisible"/>
                 </CaseField>
                 <CaseField label={"Bad CT Code"}>
-                  <Input variant="invisible"/>
+                  <Input variant="invisible" value={moli?.RemovedPartNumber}/>
+                </CaseField>
+                <CaseField label={"CT Code New"}>
+                  <Input variant="invisible" value={moli?.RemovedSerialNumber}/>
                 </CaseField>
                 <CaseField label={"CT Validation"}>
                   <Input variant="invisible"/>
@@ -2116,7 +2119,7 @@ return (
                   <Input variant="invisible"/>
                 </CaseField>
                 <CaseField label={"SO Number"}>
-                  <Input variant="invisible"/>
+                  <Input variant="invisible" value={mo?.SalesOrderNumber}/>
                 </CaseField>
                 <CaseField label={"RMA Number"}>
                   <Input variant="invisible"/>
@@ -2140,7 +2143,15 @@ return (
                   <Input variant="invisible"/>
                 </CaseField>
                 <CaseField label={"ETA date"}>
-                  <Input variant="invisible"/>
+                  <Input variant="invisible" 
+                  value={caseDetails?.workorder?.[0]?.bookings?.[0]?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime ? new Date(
+                    caseDetails?.workorder?.[0]?.bookings?.[0]?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime) .toLocaleString("id-ID", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  }) : ""} />
                 </CaseField>
                 <CaseField label={"Part Return SC date"}>
                   <Input variant="invisible"/>

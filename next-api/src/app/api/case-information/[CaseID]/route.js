@@ -49,6 +49,11 @@ export async function GET(request, { params }) {
             }, 
             workorder: {
                 include: {
+                    bookings:{
+                        include: {
+                            bookingDetails: true,
+                        }
+                    },
                     materialorder : {
                         include : {
                             owner: true,
