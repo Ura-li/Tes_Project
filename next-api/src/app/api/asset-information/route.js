@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 
 import prisma  from "../../../../prisma/client";
 
+const toDateOrNull = (value) => {
+    if (!value) return null;
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
 export async function GET(request) {
     try{
         // Ambil parameter pencarian & pagination
@@ -108,15 +114,17 @@ export async function POST(request) {
         ProductName,
         SiteAccountID,
         ProductTypeID,
-        ContactID
+        ContactID,
+        Warranty_Status,
+        EOW_Date
     } = await request.json();
 
-    // if (!ContactID) {
-    //     return NextResponse.json({
-    //         success: false,
-    //         message: "Asset must be linked to a Contact."
-    //     }, { status: 400 });
-    // }
+    if (!ContactID) {
+        return NextResponse.json({
+            success: false,
+            message: "Asset must be linked to a Contact."
+        }, { status: 400 });
+    }
 
     let productInfo = await prisma.product_information.findUnique({
         where: { ProductNumber }
@@ -128,7 +136,7 @@ export async function POST(request) {
                 ProductNumber,
                 ProductLine,
                 ProductName,
-                ProductTypeID
+                ProductTypeID,
             }
         });
     }
@@ -140,7 +148,9 @@ export async function POST(request) {
             ProductNumber: productInfo.ProductNumber,
             ProductTypeID,
             SiteAccountID,
-            ContactID
+            ContactID,
+            Warranty_Status,
+            EOW_Date: toDateOrNull(EOW_Date)
         },
         include: {
             product_information: true,
