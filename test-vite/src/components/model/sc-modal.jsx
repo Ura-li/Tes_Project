@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -4717,7 +4717,14 @@ export function BtnModalsServiceCatalog({
   const [selectedPartCatalog, setSelectedPartCatalog] = useState([])
   const handlerPartCatalog = (part, checked) => {
     if(checked){
-      setSelectedPartCatalog((prev) => [...prev, part])
+      setSelectedPartCatalog((prev) => [
+        ...prev,
+        {
+          ...part,
+          qty: 1,
+          Total: part.Price,
+        }
+      ])
     }else{
       setSelectedPartCatalog((prev) => 
         prev.filter((item) => item.PartNumber !== part.PartNumber)
@@ -4868,6 +4875,27 @@ export function BtnModalsServiceCatalog({
   };
   
   function renderStepContent() {
+    const [currentPage, setCurrentPage] = useState(1);
+    const PAGE_SIZE = 6;
+    const filteredPartCatalog = partCatalog.filter(part => {
+      return (
+        part.PartNumber?.toLowerCase().includes(partNumberSearch.toLowerCase()) &&
+        part.Keyword?.toLowerCase().includes(keywordSearch.toLowerCase()) &&
+        part.PartDescription?.toLowerCase().includes(descriptionSearch.toLowerCase())
+      );
+    });
+    const totalPages = Math.ceil(filteredPartCatalog.length / PAGE_SIZE);
+    const currentPageData = useMemo(() => {
+      const start = (currentPage - 1) * PAGE_SIZE;
+      return filteredPartCatalog.slice(start, start + PAGE_SIZE);
+    }, [filteredPartCatalog, currentPage]);
+
+    const handlePageChange = (page) => {
+      if (page >= 1 && page <= totalPages) {
+        setCurrentPage(page);
+      }
+    };
+
     switch (currentStep) {
       case 1:
         return (
@@ -4891,58 +4919,73 @@ export function BtnModalsServiceCatalog({
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: </p>
+                <p>Warranty Status</p><p>: {caseDetails?.OTCCode} - {caseDetails?.otcCodeTable?.Description} </p>
                 <p>Currency</p><p>: </p>
               </div>
             </div>
   
             <Table>
-              <TableCaption className={'caption-top bg-blue-500 p-2 text-2xl text-left text-black'}>Warranty Services</TableCaption>
+              <TableCaption className="caption-top bg-blue-500 p-2 text-2xl text-left text-black">
+                Warranty Services
+              </TableCaption>
+
               <TableHeader>
-                <TableRow className={'bg-gray-300'}>
-                  <TableHead className={'font-black text-black'}>Select</TableHead>
-                  <TableHead className={'font-black text-black'}>Service OfferID</TableHead>
-                  <TableHead className={'font-black text-black'}>Service Description</TableHead>
-                  <TableHead className={'font-black text-black'}>Customer TAT</TableHead>
-                  <TableHead className={'font-black text-black'}>Price</TableHead>
-                  <TableHead className={'font-black text-black'}>Tax</TableHead>
-                  <TableHead className={'font-black text-black'}>Total</TableHead>
+                <TableRow className="bg-gray-300">
+                  <TableHead className="font-black text-black">Select</TableHead>
+                  <TableHead className="font-black text-black">Service OfferID</TableHead>
+                  <TableHead className="font-black text-black">Service Description</TableHead>
+                  <TableHead className="font-black text-black">Customer TAT</TableHead>
+                  <TableHead className="font-black text-black">Price</TableHead>
+                  <TableHead className="font-black text-black">Tax</TableHead>
+                  <TableHead className="font-black text-black">Total</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
                 {warrantyOffer.map((service, index) => {
-                  const isSelected = selectedWarrantyServices?.Service_offerID === service.Service_offerID;
-
+                  const selected =
+                    selectedWarrantyServices?.Service_offerID === service.Service_offerID;
 
                   return (
-                  <TableRow 
-                    key={index}
-                    className={`cursor-pointer ${isSelected ? "bg-blue-100" : ""}`} // kasih highlight row aktif
-                    onClick={() => handlerWarrantyService(service)}
-                  >
-                    <TableCell>
-                    <RadioGroup 
-                      className={"w-5 h-5 rounded-full checked:bg-blue-600 border-2 border-gray-600"}
-                      value={selectedWarrantyServices?.Service_offerID}
-                      onValueChange={(value) => {
-                        const service = warrantyOffer.find((item) => item.Service_offerID === value);
-                        handlerWarrantyService(service);
+                    <TableRow
+                      key={service.Service_offerID ?? index}
+                      onClick={() => handlerWarrantyService(service)}
+                      onKeyDown={(e) => {
+                        // allow Enter or Space to select row for keyboard users
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handlerWarrantyService(service);
+                        }
                       }}
+                      tabIndex={0} // make TR focusable for keyboard users
+                      aria-selected={selected}
+                      className={`cursor-pointer ${selected ? "bg-blue-100" : ""}`}
                     >
-                      <RadioGroupItem value={service.Service_offerID} id={`service-${index}`} />
-                      </RadioGroup>
-                    </TableCell>
-                    <TableCell>{service.Service_offerID}</TableCell>
-                    <TableCell>{service.Service_description}</TableCell>
-                    <TableCell>{service.CTat_RTime}</TableCell>
-                    <TableCell>{service.Price}</TableCell>
-                    <TableCell>{service.Tax}</TableCell>
-                    <TableCell>{service.Total}</TableCell>
-                  </TableRow>
-                )})}
+                      <TableCell>
+                        <input
+                          type="radio"
+                          name="warrantyService" // same name groups radios
+                          id={`service-${index}`}
+                          value={service.Service_offerID}
+                          checked={selected}
+                          onChange={() => handlerWarrantyService(service)}
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label={`Select service ${service.Service_offerID}`}
+                        />
+                      </TableCell>
 
+                      <TableCell>{service.Service_offerID}</TableCell>
+                      <TableCell>{service.Service_description}</TableCell>
+                      <TableCell>{service.CTat_RTime}</TableCell>
+                      <TableCell>{service.Price}</TableCell>
+                      <TableCell>{service.Tax}</TableCell>
+                      <TableCell>{service.Total}</TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
+
   
             <DialogFooter className={'p-4'}>
              <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
@@ -4959,13 +5002,8 @@ export function BtnModalsServiceCatalog({
         );
   
       case 2:
-        const filteredPartCatalog = partCatalog.filter(part => {
-          return (
-            part.PartNumber?.toLowerCase().includes(partNumberSearch.toLowerCase()) &&
-            part.Keyword?.toLowerCase().includes(keywordSearch.toLowerCase()) &&
-            part.PartDescription?.toLowerCase().includes(descriptionSearch.toLowerCase())
-          );
-        });
+       
+       
         return (
           <DialogContent className="sm:max-w-[fit] sm:max-h-[fit] flex flex-col  gap-0 p-0 bg-white [&>button]:hidden ">
             <DialogHeader className={'gap-0'}>
@@ -4989,11 +5027,11 @@ export function BtnModalsServiceCatalog({
                 <Label htmlFor="orderability">Orderability</Label>
                 <Switch id="orderability" />
               </div>
-              <div className="grid flex-1 grid-cols-2 p-2 bg-gray-300 gap-x-2">
+              <div className="grid  grid-cols-2 p-2 bg-gray-300 gap-x-2">
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: </p>
+                <p>Warranty Status</p><p>: {caseDetails?.OTCCode} - {caseDetails?.otcCodeTable?.Description}</p>
                 <p>Currency</p><p>: </p>
               </div>
             </div>
@@ -5017,7 +5055,7 @@ export function BtnModalsServiceCatalog({
                         Parts #
                         <span className="flex items-center">
                           <Input
-                            className={'bg-white'}
+                            className={'bg-white font-medium'}
                             value={partNumberSearch}
                             onChange={(e) => setPartNumberSearch(e.target.value)}
                           />
@@ -5028,7 +5066,7 @@ export function BtnModalsServiceCatalog({
                         Keyword
                         <span className="flex items-center">
                           <Input
-                            className={'bg-white'}
+                            className={'bg-white font-medium'}
                             value={keywordSearch}
                             onChange={(e) => setKeywordSearch(e.target.value)}
                           />
@@ -5039,7 +5077,7 @@ export function BtnModalsServiceCatalog({
                         Part Description
                         <span className="flex items-center">
                           <Input
-                            className={'bg-white'}
+                            className={'bg-white font-medium'}
                             value={descriptionSearch}
                             onChange={(e) => setDescriptionSearch(e.target.value)}
                           />
@@ -5063,64 +5101,96 @@ export function BtnModalsServiceCatalog({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPartCatalog.map((part, index) => {
-                      const isChecked = selectedPartCatalog.some((item) => item.PartNumber === part.PartNumber)
+                    {currentPageData.map((part, index) => {
+                      const isChecked = selectedPartCatalog.some(
+                        (item) => item.PartNumber === part.PartNumber
+                      );
+
+                      const toggleRow = () => {
+                        handlerPartCatalog(part, !isChecked);
+                      };
+
                       return (
-                        <TableRow key={index}>
+                        <TableRow
+                          key={index}
+                          onClick={toggleRow}
+                          className={`cursor-pointer ${isChecked ? "bg-blue-100" : ""
+                            }`}
+                        >
                           <TableCell>
                             <Checkbox
                               checked={isChecked}
-                              onCheckedChange={(checked) => handlerPartCatalog(part, checked)}
+                              onCheckedChange={(checked) =>
+                                handlerPartCatalog(part, checked)
+                              }
+                              onClick={(e) => e.stopPropagation()} // prevent double toggle
                             />
                           </TableCell>
                           <TableCell>{part.PartNumber}</TableCell>
                           <TableCell>{part.Keyword}</TableCell>
                           <TableCell>{part.PartDescription}</TableCell>
-                          <TableCell>{part.Orderability ? 'Yes' : 'No'}</TableCell>
+                          <TableCell>{part.Orderability ? "Yes" : "No"}</TableCell>
                           <TableCell>{part.ResistrictionReason}</TableCell>
-                          <TableCell>{part.Csr ? 'Y' : 'N'}</TableCell>
+                          <TableCell>{part.Csr ? "Y" : "N"}</TableCell>
                           <TableCell>{part.Rohs}</TableCell>
-                          <TableCell>{part.Returnable_Flag ? 'true' : 'false'}</TableCell>
+                          <TableCell>{part.Returnable_Flag ? "true" : "false"}</TableCell>
                           <TableCell>{part.Hardrolls}</TableCell>
-                          <TableCell>{part.Dangerousgoods ? 'true' : 'false'}</TableCell>
-                          <TableCell>{part.Lithiumbattry ? 'true' : 'false'}</TableCell>
-                          <TableCell>{part.Oversize ? 'true' : 'false'}</TableCell>
-                          <TableCell>{part.Heavy ? 'true' : 'false'}</TableCell>
+                          <TableCell>{part.Dangerousgoods ? "true" : "false"}</TableCell>
+                          <TableCell>{part.Lithiumbattry ? "true" : "false"}</TableCell>
+                          <TableCell>{part.Oversize ? "true" : "false"}</TableCell>
+                          <TableCell>{part.Heavy ? "true" : "false"}</TableCell>
                           <TableCell>{part.Price}</TableCell>
                           <TableCell>{part.Freightprice}</TableCell>
                           <TableCell>{part.Tax}</TableCell>
                           <TableCell>{part.Total}</TableCell>
                         </TableRow>
-                      )
+                      );
                     })}
+
+                    {/* pagination row */}
                     <TableRow>
-                      <TableCell colSpan={'100%'}>
-                        <Pagination className={'flex justify-start'}>
+                      <TableCell colSpan="100%">
+                        <Pagination className="flex justify-start">
                           <PaginationContent>
                             <PaginationItem>
-                              <PaginationPrevious href="#" />
+                              <PaginationPrevious
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handlePageChange(currentPage - 1);
+                                }}
+                              />
                             </PaginationItem>
+
+                            {Array.from({ length: totalPages }, (_, i) => (
+                              <PaginationItem key={i}>
+                                <PaginationLink
+                                  href="#"
+                                  isActive={currentPage === i + 1}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handlePageChange(i + 1);
+                                  }}
+                                >
+                                  {i + 1}
+                                </PaginationLink>
+                              </PaginationItem>
+                            ))}
+
                             <PaginationItem>
-                              <PaginationLink href="#">1</PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                              <PaginationLink href="#" isActive>
-                                2
-                              </PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                              <PaginationLink href="#">3</PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                              <PaginationEllipsis />
-                            </PaginationItem>
-                            <PaginationItem>
-                              <PaginationNext href="#" />
+                              <PaginationNext
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handlePageChange(currentPage + 1);
+                                }}
+                              />
                             </PaginationItem>
                           </PaginationContent>
                         </Pagination>
                       </TableCell>
                     </TableRow>
+
                   </TableBody>
                 </Table>
               </TabsContent>
@@ -5156,7 +5226,7 @@ export function BtnModalsServiceCatalog({
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: </p>
+                <p>Warranty Status</p><p>: {caseDetails?.OTCCode} - {caseDetails?.otcCodeTable?.Description} </p>
                 <p>Currency</p><p>: </p>
               </div>
             </div>
@@ -5216,8 +5286,9 @@ export function BtnModalsServiceCatalog({
                         <TableCell>
                         <Input
                           placeholder="QTY"
+                          min={1}
                           type="number"
-                          value={part.qty || ''}
+                          value={part.qty}
                           onChange={(e) => handleQtyChangePartsCatalog(part.PartNumber, e.target.value)}
                           className="w-16"
                         />
@@ -5249,10 +5320,10 @@ export function BtnModalsServiceCatalog({
               <Button variant={'search'} className="" onClick={() => setModalPart(true)}>Add Part</Button>
               <Button variant={'search'} className="" onClick={createOrder}>Create Order</Button>
               
-              <Label htmlFor="incident" className={'font-bold '}>Incident Type</Label>
+              <Label htmlFor="incident" className={'font-bold whitespace-nowrap'}>Incident Type</Label>
               
               <Select value={selected} onValueChange={setSelected} defaultValue="DepotRepair">
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-fit">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -5274,7 +5345,7 @@ export function BtnModalsServiceCatalog({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <Label htmlFor="Assign_APO" className={'font-bold'}>SELECT APO : </Label>
+              <Label htmlFor="Assign_APO" className={'font-bold whitespace-nowrap'}>SELECT APO : </Label>
               <SearchCommandBlock 
                 value={assignApo}
                 onChange={(selectedID) =>{
@@ -5296,7 +5367,7 @@ export function BtnModalsServiceCatalog({
                 }))}
                 renderLabel={(opt) => opt.label}
                 getValue={(opt) => opt.value}
-                
+                className={'border-2 ring-1 ring-gray-200 bg-slate-100'}
               />
               
             </DialogFooter>

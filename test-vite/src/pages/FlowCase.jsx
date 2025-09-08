@@ -3,6 +3,7 @@ import { SearchBar } from '@/components/sidebar/search-sidebar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { Sidebar, SidebarContent, SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -10,17 +11,22 @@ import { useAuth } from '@/context/auth-context'
 import { se } from 'date-fns/locale'
 import { filter, set } from 'lodash'
 import { PanelRight } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import Swal from 'sweetalert2'
 
 
 
 export const FlowCase = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading || !user) {
+    return null; // don’t render listener until auth is ready
+  }
 
   const [caseData, setCaseData] = useState([]);
-  const [loading, setLoading] = useState(false)
+  console.log(caseData)
+  const [renderer, setRenderer] = useState(false)
   const [error, setError] = useState(false)
   const [filters, setFilters] = useState({
     SerialNumber: "",
@@ -34,17 +40,27 @@ export const FlowCase = () => {
   });
 
   const fetchData = async () => {
-    setLoading(true);
+    setRenderer(true);
     try {
       const response = await ApiCustomer.get('/api/case-information');
       // console.log("Case INFO LOG : ",response.data.data[23].caseinformation.CreatedBy);
       // console.log("Case INFO LOG : ",user.id);
       const filtercases = response.data.data.filter(c => c.CaseStatus !== 'Close' && (c?.caseinformation?.Owner === user.id || c?.caseinformation?.CreatedBy === user.id));
+      const sortedCases = filtercases.sort((a, b) => {
+        const dateAraw = a.caseinformation.ActionLog[0]?.ChangeAt;
+        const dateBraw = b.caseinformation.ActionLog[0]?.ChangeAt;
+
+        const dateA = dateAraw ? (dateAraw instanceof Date ? dateAraw : new Date(dateAraw)) : new Date(0);
+        const dateB = dateBraw ? (dateBraw instanceof Date ? dateBraw : new Date(dateBraw)) : new Date(0);
+
+        return dateB - dateA; // newest first
+      });
+
       // console.log("Filter Case : ",filtercases)
       // console.log("Case Owner : ", filtercases[1]?.caseinformation?.Owner)
       // console.log("Case Created By : ", filtercases[1]?.caseinformation?.CreatedBy)
       // console.log("User ID : ", user.id)
-      setCaseData(filtercases);
+      setCaseData(sortedCases);
       setError(false)
       return response.data.data;
     } catch (error) {
@@ -57,7 +73,7 @@ export const FlowCase = () => {
       setError(true);
       throw error;
     } finally {
-      setLoading(false);
+      setRenderer(false);
     }
   };
 
@@ -87,305 +103,187 @@ export const FlowCase = () => {
     if (aIsOwner && !bIsOwner) return -1;
     if (!aIsOwner && bIsOwner) return 1;
     return 0;
-  });
+  })
+    .map(c => {
+      // Grab the raw CreatedOn
+      const rawCreated = c.caseinformation?.ActionLog[0].ChangeAt;
+      const createdDate = rawCreated ? (rawCreated instanceof Date ? rawCreated : new Date(rawCreated)) : null;
+
+      return {
+        ...c,
+        FormattedCreatedOn: createdDate ? createdDate.toLocaleString("id-ID") : null,
+      };
+    })
   ;
+
+  ;
+  const finishedCases = caseData.filter(c => c.CaseStatus === "FinishRepair");
 
   
   // console.log(caseData)
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 6;
+  const totalPages = Math.ceil(filteredCases.length / PAGE_SIZE);
+  const currentPageData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredCases.slice(start, start + PAGE_SIZE);
+  }, [filteredCases, currentPage]);
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   const navigate = useNavigate();
   return (
-    <SidebarProvider defaultOpen>
+    <>
+    <SidebarProvider defaultOpen className={'min-h-0'}>
 
       <SidebarInset>
-        <div className="min-h-screen flex flex-col w-full ">
+        <div className="max-h-screen flex flex-col w-full ">
           <Tabs defaultValue="active">
-          <div className="sticky top-13  border-t-4 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
-            <div className="mx-auto flex h-14 w-full max-w-7xl items-center gap-3 px-4 justify-between">
-              <TabsList className=" flex items-center gap-2">  
-                <TabsTrigger value="active" size="sm" >Active Case</TabsTrigger>
-                <TabsTrigger value="finish" size="sm">Ready To Finish</TabsTrigger>
-              </TabsList>
-              <h1 className="lg:text-xl md:text-md font-semibold tracking-tight">Case For You</h1>
-              <SidebarTrigger icon={PanelRight} />
+            <div className="sticky top-13  border-t-4 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
+              <div className="mx-auto flex h-14 w-full max-w-7xl items-center gap-3 px-4 justify-between">
+                <TabsList className=" flex items-center gap-2">
+                  <TabsTrigger value="active" size="sm" >Active Case</TabsTrigger>
+                  <TabsTrigger value="finish" size="sm">Ready To Finish</TabsTrigger>
+                </TabsList>
+                <h1 className="lg:text-xl md:text-md font-semibold tracking-tight">Case For You</h1>
+                <SidebarTrigger icon={PanelRight} />
+              </div>
             </div>
-          </div>
-          <TabsContent value="active" className="mx-auto w-full max-w-7xl p-4 md:p-6">
-            <div className="grid grid-cols-1 gap-4 ">
-              
-              {loading ? (
-                // Show skeletons while waiting
-                Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="shadow-sm">
-                    <CardHeader>
+            <TabsContent value="active" className="mx-auto w-full max-w-7xl p-1 md:p-2">
+              <div className="space-y-3 ">
+                {renderer ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <Card key={i} className="p-4 shadow-sm">
                       <Skeleton className="h-6 w-32" />
-                    </CardHeader>
-                    <CardContent className="flex gap-4">
-                      <Skeleton className="h-20 w-full" />
-                      <Skeleton className="h-20 w-full" />
-                    </CardContent>
-                  </Card>
-                ))
-              ) : user.role === 'lg' ? (
-                 filteredCases.map((c) => (
-                  <>
-                    <Card key={c.CaseID} className="shadow-sm hover:shadow-md transition border-l-5 border-gray-200">
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                          <p className='text-lg '>#{c.caseinformation?.workorder?.[0]?.WOID}</p>
-                          <p>{c.CreatedOn}</p>
-                          <div className="gap-2 flex flex-col lg:flex-row">
-                            <Badge className={c.CaseStatus === "Open" ? "bg-green-500" : c.CaseStatus === "InActive" ? "bg-blue-400" : c.CaseStatus === "On Hold" ? "yellow" : c.CaseStatus === "Escalated" ? "red" : "gray"}>{c.CaseStatus}</Badge>
-                            <Badge>{c.caseinformation.CaseType}</Badge>
-                            {console.log("Case Info : ",c?.caseinformation.CreatedBy)}
-                            {console.log("User : :",user.id)}
-                            {c?.caseinformation.Owner === user.id ? (
-                              <Badge className="bg-purple-500">Owner</Badge>
-                            ) : (
-                              <Badge className="bg-sky-500">CreatedBy</Badge>
-                            )}
-
-                          </div>
-                        </CardTitle>
-                        <CardDescription className="text-md font-semibold italic">{c.CaseSubject}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-col lg:flex-row gap-4 mb-4">
-                          <div className="grid grid-cols-3  rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
-                            <p className="font-medium">Serial Number</p>
-                            <p className="text-md text-gray-500 col-span-2"> {c.SerialNumber}</p>
-                            <p className="font-medium">Product Name</p>
-                            <p className="text-md text-gray-500 col-span-2"> {c.ProductName}</p>
-                            <p className="font-medium">Product Number</p>
-                            <p className="text-md text-gray-500 col-span-2"> {c.ProductNumber}</p>
-                            
-                          </div>
-                          <div className="grid grid-cols-3 rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
-                            <p className="font-medium">Material Order </p>
-                            <p className="text-md text-gray-500 col-span-2">
-                               {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID}
-                            </p>
-                            <p className="font-medium">Part Description</p>
-                            <p className="text-md text-gray-500 col-span-2">
-                               {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.materialorderlineitems?.[0]?.Description || "Uknown"}
-                            </p>
-                           
-                            <p className="font-medium">Part Number</p>
-                            <p className="text-md text-gray-500 col-span-2">
-                                {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.materialorderlineitems?.[0]?.PartNumber || "Uknown"}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="p-3 rounded-lg bg-muted/50">
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {c.caseinformation.ProblemDescription}
-                          </p>
-                        </div>
-                        <div className="bg-slate-100 p-2 m-2 grid grid-flow-col">
-                          <p className='flex flex-col items-center'>Created BY <span>({c.caseinformation?.createdByUser?.Username}) - ({c.CreatedName})</span></p>
-                          
-                          <p className='flex flex-col items-center'>Repaired BY <span>({c.caseinformation?.workorder?.[0]?.owner?.Username}) - ({c.caseinformation?.workorder?.[0]?.owner?.Name})</span></p>
-                        </div>
-                      </CardContent>
-                      <CardFooter className="justify-between">
-                        <p className="text-sm text-muted-foreground">Case Holder {c.caseinformation?.ownerUser?.Username} - {c.Owner}</p>
-                        <p className="text-sm text-muted-foreground">Status Right Now {c.CaseStatus}</p>
-                        <Button size="sm" variant="outline" onClick={() => navigate(`/app/work/${c.caseinformation?.workorder?.[0]?.WOID}`)}>Details</Button>
-                      </CardFooter>
                     </Card>
-
-                  </>
-                ))                
-              ) : (
-                // Render real data
-                filteredCases.map((c) => (
-                  <>
-                    <Card key={c.CaseID} className="shadow-sm hover:shadow-md transition border-l-5 border-gray-200">
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                          <p className='text-lg '>#{c.CaseID}</p>
-                          <p>{c.CreatedOn}</p>
-                          <div className="gap-2 flex flex-col lg:flex-row">
-                            <Badge className={c.CaseStatus === "Open" ? "bg-green-500" : c.CaseStatus === "InActive" ? "bg-blue-400" : c.CaseStatus === "On Hold" ? "yellow" : c.CaseStatus === "Escalated" ? "red" : "gray"}>{c.CaseStatus}</Badge>
-                            <Badge>{c.caseinformation.CaseType}</Badge>
-                  
-                            {c?.caseinformation.Owner === user.id ? (
-                              <Badge className="bg-purple-500">Owner</Badge>
-                            ) : (
-                              <Badge className="bg-sky-500">CreatedBy</Badge>
-                            )}
-
-                          </div>
-                        </CardTitle>
-                        <CardDescription className="text-md font-semibold italic">{c.CaseSubject}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-col lg:flex-row gap-4 mb-4">
-                          <div className="grid grid-cols-3  rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
-                            <p className="font-medium">Serial Number</p>
-                            <p className="text-md text-gray-500 col-span-2"> {c.SerialNumber}</p>
-                            <p className="font-medium">Product Name</p>
-                            <p className="text-md text-gray-500 col-span-2"> {c.ProductName}</p>
-                            <p className="font-medium">Product Number</p>
-                            <p className="text-md text-gray-500 col-span-2"> {c.ProductNumber}</p>
-                            
-                          </div>
-                          <div className="grid grid-cols-3 rounded-xl bg-muted/50 items-center justify-center flex-1 gap-1 p-3">
-                            <p className="font-medium">Customer</p>
-                            <p className="text-md text-gray-500 col-span-2">
-                               {c.caseinformation.contact_information.FirstName}{" "}
-                              {c.caseinformation.contact_information.LastName}
-                            </p>
-                            <p className="font-medium">Email</p>
-                            <p className="text-md text-gray-500 col-span-2">
-                               {c.caseinformation.contact_information?.Email || "No Email"}
-                            </p>
-                            <p className="font-medium">Company</p>
-                            <p className="text-md text-gray-500 col-span-2">
-                                {c.CustomerAccount || "No Company"}
-                            </p>
-                            <p className="font-medium">Phone Number</p>
-                            <p className="text-md text-gray-500 col-span-2">
-                                {c.caseinformation.contact_information.Phone || "No Phone Set"}
-                            </p>
-                          </div>
+                  ))
+                ) : (
+                  currentPageData.map((c) => (
+                    <Card
+                      key={c.CaseID}
+                      className="flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4"
+                      onClick={() => navigate(`/app/case/${c.CaseID}`)}
+                    >
+                      <div>
+                        <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
+                        <p className="text-sm text-gray-500">{c.SerialNumber} | {c.Primary} | {c.CustomerAccount || "No Company"} | {c.CreatedOn}</p>
+                      </div>
+                      {console.log(c.caseinformation.ActionLog[0])}
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="space-x-2">
+                          <Badge className="bg-green-600">{c.CaseStatus}</Badge>
+                          <Badge>{c.caseinformation.CaseType}</Badge>
+                          {c?.caseinformation.Owner === user.id ? (
+                            <Badge className="bg-purple-500">Owner</Badge>
+                          ) : (
+                            <Badge className="bg-sky-500">CreatedBy</Badge>
+                          )}
                         </div>
-                        <div className="p-3 rounded-lg bg-muted/50">
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {c.caseinformation.ProblemDescription}
-                          </p>
-                        </div>
-                        <div className="bg-slate-100 p-2 m-2 grid grid-flow-col">
-                          <p className='flex flex-col items-center'>Created BY <span>({c.caseinformation?.createdByUser?.Username}) - ({c.CreatedName})</span></p>
-                          <p className='flex flex-col items-center'>Repaired BY <span>({c.caseinformation?.workorder?.[0]?.owner?.Username}) - ({c.caseinformation?.workorder?.[0]?.owner?.Name})</span></p>
-                        </div>
-                      </CardContent>
-                      <CardFooter className="justify-between">
-                        <p className="text-sm text-muted-foreground">Case Holder {c.caseinformation?.ownerUser?.Username} - {c.Owner}</p>
-                        <p className="text-sm text-muted-foreground">Status Right Now {c.CaseStatus}</p>
-                        <Button size="sm" variant="outline" onClick={() => navigate(`/app/case/${c.CaseID}`)}>Details</Button>
-                      </CardFooter>
+                        {c.FormattedCreatedOn}
+                      </div>
                     </Card>
+                  ))
+                )}
+                <Pagination className="flex justify-start">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage - 1);
+                        }}
+                      />
+                    </PaginationItem>
 
-                  </>
-                ))
-              )}
-              {error ? <h1 className='text-center text-destructive' > Something went wrong </h1> : ''}
-              {/* {caseData.values == 0 ? <h1 className='text-center text-destructive' > You dont have any case yet </h1>  : 'TEWS'} */}
-            </div>
-          </TabsContent>
-          <TabsContent value="finish">
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          href="#"
+                          isActive={currentPage === i + 1}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(i + 1);
+                          }}
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
 
-          </TabsContent>
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage + 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+                {error ? <h1 className="text-center text-destructive">Something went wrong</h1> : ""}
+              </div>
+            </TabsContent>
+            <TabsContent value="finish" className="mx-auto w-full max-w-7xl p-4 md:p-6">
+              <div className="grid grid-cols-1 gap-4 ">
+                {renderer ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <Card key={i} className="shadow-sm">
+                      <CardHeader>
+                        <Skeleton className="h-6 w-32" />
+                      </CardHeader>
+                      <CardContent className="flex gap-4">
+                        <Skeleton className="h-20 w-full" />
+                        <Skeleton className="h-20 w-full" />
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : finishedCases.length > 0 ? (
+                  finishedCases.map((c) => (
+                    <Card
+                      key={c.CaseID}
+                      className="flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4 border-green-300"
+                      onClick={() => navigate(`/app/case/${c.CaseID}`)}
+                    >
+                      <div>
+                        <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
+                        <p className="text-sm text-gray-500">{c.SerialNumber} | {c.Primary} | {c.CustomerAccount || "No Company"} | {c.CreatedOn}</p>
+                      </div>
+                      {console.log(c.caseinformation.ActionLog[0])}
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="space-x-2">
+                          <Badge className="bg-green-600">{c.CaseStatus}</Badge>
+                          <Badge>{c.caseinformation.CaseType}</Badge>
+                          {c?.caseinformation.Owner === user.id ? (
+                            <Badge className="bg-purple-500">Owner</Badge>
+                          ) : (
+                            <Badge className="bg-sky-500">CreatedBy</Badge>
+                          )}
+                        </div>
+                        {c.FormattedCreatedOn}
+                      </div>
+                    </Card>
+                  ))
+                ) : (
+                  <h1 className="text-center text-gray-500">No finished cases yet.</h1>
+                )}
+              </div>
+            </TabsContent>
+
           </Tabs>
         </div>
-        {/* <div class="h-screen flex">
-          <aside class="w-64 bg-gradient-to-b from-hp-300 via-hp-400 to-hp-500 text-white p-6">
-            <h2 class="text-xl font-bold">Dashboard</h2>
-          </aside>
-
-          <main class="flex-1 bg-slate-50 p-8">
-            <header class="p-6 rounded-2xl bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300 text-white shadow-md">
-              <h1 class="text-2xl font-bold">Welcome Back!</h1>
-            </header>
-
-            <section class="grid grid-cols-3 gap-6 mt-6">
-              <div class="p-6 rounded-2xl bg-gradient-to-br from-hp-50 to-hp-200 text-white shadow-md">
-                <h3 class="font-medium">Latest Login</h3>
-                <p class="text-3xl font-bold">14:23</p>
-              </div>
-
-              <div class="p-6 rounded-2xl bg-gradient-to-br from-hp-100 to-hp-300 text-white shadow-md">
-                <h3 class="font-medium">Active Users</h3>
-                <p class="text-3xl font-bold">127</p>
-              </div>
-
-              <div class="p-6 rounded-2xl bg-gradient-to-br from-hp-200 to-hp-400 text-white shadow-md">
-                <h3 class="font-medium">Revenue</h3>
-                <p class="text-3xl font-bold">$12,450</p>
-              </div>
-            </section>
-          </main>
-        </div> */}
 
       </SidebarInset>
         <SearchBar filters={filters} setFilters={setFilters} />
 
-    </SidebarProvider>
+    </SidebarProvider>    
+    </>
   )
 }
 
-export function LargeCaseCard({ caseInfo }) {
-  return (
-    <Card className="w-full max-w-2xl shadow-lg">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg font-bold">
-            #{c.CaseID} — {c.CaseSubject}
-          </CardTitle>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium 
-            ${c.CasePriority === "Critical" ? "bg-red-100 text-red-700" :
-              c.CasePriority === "High" ? "bg-orange-100 text-orange-700" :
-                "bg-gray-100 text-gray-700"}`}>
-            {c.CasePriority}
-          </span>
-        </div>
-        <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-          <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs">
-            {c.CaseStatus}
-          </span>
-          <span>Opened: {new Date(c.CreatedOn).toLocaleString()}</span>
-          {c.CaseClosedDate && (
-            <span>Closed: {new Date(c.CaseClosedDate).toLocaleString()}</span>
-          )}
-        </div>
-      </CardHeader>
 
-      <CardContent className="space-y-4">
-        <section>
-          <h3 className="font-semibold">Problem</h3>
-          <p className="text-sm">{c.ProblemDescription}</p>
-        </section>
-
-        {c.CaseResolution && (
-          <section>
-            <h3 className="font-semibold">Resolution</h3>
-            <p className="text-sm">{c.CaseResolution}</p>
-          </section>
-        )}
-
-        <section>
-          <h3 className="font-semibold">Customer</h3>
-          <p className="text-sm">
-            {c.contact_information?.FirstName} {c.contact_information?.LastName}
-            ({c.contact_information?.Email})
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {c.site_account?.Company}, {c.site_account?.Country}
-          </p>
-        </section>
-
-        <section>
-          <h3 className="font-semibold">Asset</h3>
-          <p className="text-sm">
-            Serial: {c.asset_information?.SerialNumber}
-            Product: {c.asset_information?.ProductNumber}
-          </p>
-        </section>
-
-        {c.casenotes_casenotes_CaseIDTocaseinformation?.length > 0 && (
-          <section>
-            <h3 className="font-semibold">Recent Notes</h3>
-            <ul className="list-disc list-inside text-sm">
-              {c.casenotes_casenotes_CaseIDTocaseinformation
-                .slice(0, 2)
-                .map((note, i) => (
-                  <li key={i}>{note.content}</li>
-                ))}
-            </ul>
-          </section>
-        )}
-      </CardContent>
-    </Card>
-  )
-}

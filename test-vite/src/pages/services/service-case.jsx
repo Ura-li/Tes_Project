@@ -49,6 +49,8 @@ import {
   Calculator,
   CreditCard,
   Settings,
+  CopyX,
+  CopyXIcon,
 } from "lucide-react";
 
 import { SelectYN } from "../../components/sc-select";
@@ -671,8 +673,13 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => handleSave() },
     {
-      icon: FileSymlink,
+      icon: FileSymlink ,
       label: "Save & Close",
+      onClick: () => handleSave().then(() => navigate(`/app/case/${workOrders.CaseID}`)),
+    },
+    {
+      icon: CopyX,
+      label: "Close",
       onClick: () => saveAndCloseWorkOrder(),
     },
     { icon: RotateCw, label: "Book", onClick: () => alert("not now"), hidden: true },
@@ -827,7 +834,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
   );
 };
 
-export const TabsServiceMO = ({ materialOrders, updatedLineItems }) => {
+export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
   const {user} = useAuth();
   const navigate = useNavigate();
   const buttons = [
@@ -840,7 +847,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems }) => {
     { icon: Save, label: "Save", onClick: () => saveMaterialOrder() },
     {
       icon: FileSymlink,
-      label: "Save & Close",
+      label: "Close",
       onClick: () => saveAndCloseMaterialOrder(),
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
@@ -856,26 +863,31 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems }) => {
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
+
   const saveMaterialOrder = async () => {
-    if(updatedLineItems === null || Object.keys(updatedLineItems).length === 0) return
+   // if(updatedLineItems === null || Object.keys(updatedLineItems).length === 0) return
     try {
       Swal.fire({
         title: "Saving...",
-        text: "Please wait while we update the Material Order.",
+        text: "Please wait while we save the Material Order.",
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
         },
       });
-      console.log("updateok",updatedLineItems);
+
+      const res = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`,{
+        SalesOrderNumber: moForm.SalesOrderNumber || undefined,
+      })
+      // console.log("update ok",updatedLineItems);
       // for(const [lineItemID, status] of Object.entries(updatedLineItems)){
       // console.log("user", user);
-      const res = await ApiCustomer.patch(`/api/material-order/batch-update`, {
-        updates: updatedLineItems,
-        MOID: materialOrders.MOID,
-        WOID: materialOrders.WOID,
-        userId: user.id
-      })
+      // const res = await ApiCustomer.patch(`/api/material-order/batch-update`, {
+      //   updates: updatedLineItems,
+      //   MOID: materialOrders.MOID,
+      //   WOID: materialOrders.WOID,
+      //   userId: user.id
+      // })
 
       if(res.data) {
         Swal.fire({
@@ -885,7 +897,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems }) => {
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-          navigate(`/app/work/${materialOrders.WOID}`);
+          navigate(`/app/material-order/${materialOrders.MOID}`);
         });
       } else {
         Swal.fire({
@@ -895,12 +907,17 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems }) => {
         });
       }
       // }
-      console.log("Semua line item berhasil diupdate.");
+      // console.log("Semua line item berhasil diupdate.");
 
     } catch (error) {
-      
+         return Swal.fire({
+        icon: "error",
+        title: "Request Error",
+        text: error.message || "Something went wrong!",
+      });
     }
   }
+
   const saveAndCloseMaterialOrder = async () => {
     try {
       Swal.fire({
@@ -1014,8 +1031,8 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
     { icon: SquareArrowOutUpRight, label: "", },
     { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
     {
-      icon: FileSymlink,
-      label: "Save & Close",
+      icon: CopyXIcon,
+      label: "Close",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
     },
     { icon: StepBack, label: "Cancel", hidden: true },
@@ -1161,7 +1178,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
         ))}
-        {console.log(MOLineDetails)}
+        {console.log("Mo lIne Details ",MOLineDetails)}
         {/* {open && hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md">

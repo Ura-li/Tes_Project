@@ -39,7 +39,6 @@ export default function FrontDesk_Page() {
     // { name: "Pending", value: 5, fill: "#F97316" },
   ];
 
-  console.log(radialchartdata, "the data")
 
   useSocket("case:created", (newCase) => {
     console.log("case Created",newCase);
@@ -80,9 +79,27 @@ export default function FrontDesk_Page() {
       const valueFilterInActiveCase = response.data.data.filter(c => c?.CaseStatus == 'InActive' && c?.caseinformation?.CreatedBy == user.id)
       const valueFilterCloseCase = response.data.data.filter(c => c?.CaseStatus == 'Close' && c?.caseinformation?.CreatedBy == user.id)
       const filtercases = response.data.data.filter(c => c?.CaseStatus !== 'Close' && c?.caseinformation?.Owner == user.id);
-      const sortedCases = filtercases.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
+      const rawDate = filtercases[0].caseinformation.ActionLog[0]?.ChangeAt;
+      let newdate;
+      if (rawDate) {
+        const dateObj = rawDate instanceof Date ? rawDate : new Date(rawDate);
+        console.log("Readable:", dateObj.toLocaleString("id-ID"));
+        newdate = dateObj.toLocaleString("id-ID");
+      } else {
+        console.log("No date available");
+      }
+      const sortedCases = filtercases.sort((a, b) => {
+        const dateAraw = a.caseinformation.ActionLog[0]?.ChangeAt;
+        const dateBraw = b.caseinformation.ActionLog[0]?.ChangeAt;
+
+        const dateA = dateAraw ? (dateAraw instanceof Date ? dateAraw : new Date(dateAraw)) : new Date(0);
+        const dateB = dateBraw ? (dateBraw instanceof Date ? dateBraw : new Date(dateBraw)) : new Date(0);
+
+        return dateB - dateA; // newest first
+      });
       const recentCases = sortedCases.slice(0, 4);
       console.log("Length of the arrays", valuefiltercases);
+      
       setCaseData(recentCases);
       setCasevaluedata(valueFilterOpenCase?.length);
       setInactivecasevaluedata(valueFilterInActiveCase?.length)

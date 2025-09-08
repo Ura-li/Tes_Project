@@ -44,13 +44,19 @@ import { useDraft } from "../../components/DraftContext";
 import { Accordion, AccordionContent } from "@/components/ui/accordion";
 import { AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion";
 import CaseField from "@/components/CaseField";
+import { useAuth } from "@/context/auth-context";
 
 export const ServiceMaterialApo = () => {
+  const { user } = useAuth();
+
   const { moid } = useParams();
-  const { updateDraft } = useDraft(); // Access updateDraft from the DraftContext
+  const {updateDraft } = useDraft(); // Access updateDraft from the DraftContext
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
   const [MaterialOrder, setMaterialOrder] = useState([]);
+  const [moForm, setMoForm] = useState({
+    SalesOrderNumber: ""
+  })
   const [materialOrderInformation, setMaterialOrderInformation] = useState({
     MOID: "",
     orderNumber: "",
@@ -102,6 +108,12 @@ export const ServiceMaterialApo = () => {
     return localDate.toISOString().slice(0, 16); // Get 'YYYY-MM-DDTHH:MM'
   };
 
+  const handleMoFormChange = (field) => (e) => {
+  const value = e.target.value;
+  setMoForm((prev) => ({ ...prev, [field]: value }));
+};
+
+
   // Fetch Material Order
   const fetchMaterialOrder = async () => {
     try {
@@ -143,6 +155,11 @@ export const ServiceMaterialApo = () => {
         materialOrderType: data.MaterialOrderType || "",
         eotOrderNumber: data.EOTOrderNumber || "",
       });
+
+      setMoForm((prev) => ({
+      ...prev,
+      SalesOrderNumber: data.SalesOrderNumber || "",
+    }));
 
       console.log("Fetched Material Order:", data);
 
@@ -205,10 +222,20 @@ export const ServiceMaterialApo = () => {
     );
   }
 
-    const formatDate = (dateString) => {
+  const formatDate = (dateString) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleString();
   };
+
+  let canEditapo;
+  const allowedRoles = ["apo", "lg", "ce"];
+
+  console.log("tw", materialOrders?.workorder?.caseinformation?.Owner)
+  if (user?.role === "admin") {
+    canEditapo = true;
+  } else if (materialOrders?.workorder?.caseinformation?.Owner) {
+    canEditapo = materialOrders?.workorder?.caseinformation?.Owner === user?.id && allowedRoles.includes(user?.role); ;
+  }
 
   return (
     <div>
@@ -221,6 +248,8 @@ export const ServiceMaterialApo = () => {
       <TabsServiceMO 
         materialOrders={materialOrders} 
         updatedLineItems={updatedLineItems}
+        moForm={moForm}
+        setMoForm={setMoForm}
       />
       <Card className="mt-2 rounded-none">
         <CardContent className="p-0">
@@ -330,8 +359,9 @@ export const ServiceMaterialApo = () => {
                     <Input
                       variant={"invisible"}
                       type="text"
-                      className=""
-                      value={"---"}
+                      value={moForm?.SalesOrderNumber || ""}
+                      placeholder="---"
+                      onChange={handleMoFormChange("SalesOrderNumber")}
                     />
                   </CaseField>
 
@@ -518,6 +548,7 @@ export const ServiceMaterialApo = () => {
                           <Select
                             defaultValue={lineitem.Status}
                             onValueChange={(newStatus) => handleStatusChange(lineitem.LineItemID, newStatus)}
+                            disabled={!canEditapo}
                           >
                             <SelectTrigger className="w-[120px]">
                               <SelectValue placeholder="Select status" />
