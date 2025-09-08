@@ -42,10 +42,10 @@ export function SearchBar({ filters, setFilters, className }) {
     };
 
     return (
-        <Sidebar side="right" variant="sidebar" className={cn("z-0", className)}>
+        <Sidebar side="right" variant="sidebar" className={cn("z-10 fixed top-13", className)}>
             {/* <SidebarHeader className="bg-cyan-700 h-14" /> */}
 
-            <SidebarContent className="mt-10 bg-gradient-to-br from-hp-200 to-hp-400">
+            <SidebarContent className=" bg-gradient-to-br from-hp-200 to-hp-400">
                 <SidebarGroup>
                     <SidebarGroupContent>
                         <SidebarMenu className="flex flex-col gap-5 p-3">

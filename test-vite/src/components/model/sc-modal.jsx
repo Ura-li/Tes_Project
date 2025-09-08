@@ -907,6 +907,7 @@ export function BtnModalAsset({
 
 //Peoduct Selection
 import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import { toast } from "sonner";
 
 
 function GenericSelector({ 
@@ -4786,92 +4787,99 @@ export function BtnModalsServiceCatalog({
 
   //createorder
   const createOrder = async () => {
-    try {
-       Swal.fire({
-        title: "Creating Order...",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: () => Swal.showLoading()
-      });
-      const data = {
-        user: getUserFromToken()
-      }
-      const res = await ApiCustomer.post("/api/service-log/create-order", {
-        AssetID: assetForWorkOrderCreation.AssetID,
-        CaseID: caseDetails.CaseID,
-        selectedWarrantyServices,
-        selectedPartCatalog,
-        IncidentType: selected,
-        OwnerID: data.user.id,
-        assignApo: assignApo
-      });
-      console.log(res)
-      const updateLogCase = await ApiCustomer.post("/api/actionlog",{
-        CaseId: `${caseDetails.CaseID}`,
-        model: "Case",
-        dataOld: caseDetails.CaseStatus,
-        dataNew: "Part Request",
-        changedBy: data.user.id,
-        logDescription: `Edit: change status from ${caseDetails.CaseStatus} to InActive`
+    if (!assignApo)
+      {
+      toast.warning("APO IS NOT ASSIGN YET", {
+        description: "PLEASE CHOOSE THE APO PATNER BEFORE CREATING ORDER",
+        position: 'top-center'
       })
-      const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
-        CaseId: `${caseDetails.CaseID}`,
-        ReferenceId: `${res.data.WOID}`,
-        model: "Work",
-        dataOld: "OPEN_UNSCHEDULED",
-        dataNew: "OPEN_UNSCHEDULED",
-        changedBy: data.user.id,
-        logDescription: `New Work Order : ${res.data.WOID}`
-      })
-      const updateMaterialLog = await ApiCustomer.post("/api/actionlog",{
-        CaseId: `${caseDetails.CaseID}`,
-        ReferenceId: `${res.data.MOID}`,
-        model: "Material Order",
-        dataOld: "New",
-        dataNew: "New",
-        changedBy: data.user.id,
-        logDescription: `New Material Order : ${res.data.MOID}`
-      })
-  
-      
-      Swal.close(); 
-      
-       // Close loading after success
-      await Swal.fire({
-        title: "Success!",
-        text:  "Order added successfully!",
-        icon:  "success",
-        timer: 1500,
-        showConfirmButton: false,
-        allowEscapeKey: false,
-      }).then(()=>{
-        setOpen(false);
-        const WOID = res.data.WOID
-        const MOID = res.data.MOID
-        switch (serviceCatalogType) {
-          case "CSR":
-            window.open(`/app/material-order/${MOID}`, '_blank');
-            break;
-
-          case "serviceorder":
-            window.open(`/app/work/${WOID}`, '_blank');  
-            break;
-
-          default:
-            break;
+      } else{
+      try {
+        Swal.fire({
+          title: "Creating Order...",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => Swal.showLoading()
+        });
+        const data = {
+          user: getUserFromToken()
         }
-      });
-    } catch (err) {
-      console.error(" Order Creation Failed:", err);
-      Swal.fire({
-        title: "Error!",
-        text: "Failed to create order",
-        icon: "error",
-        timer: 1500,
-        showConfirmButton: false,
-        allowEscapeKey: false,
-      });
-    }
+        const res = await ApiCustomer.post("/api/service-log/create-order", {
+          AssetID: assetForWorkOrderCreation.AssetID,
+          CaseID: caseDetails.CaseID,
+          selectedWarrantyServices,
+          selectedPartCatalog,
+          IncidentType: selected,
+          OwnerID: data.user.id,
+          assignApo: assignApo
+        });
+        console.log(res)
+        const updateLogCase = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${caseDetails.CaseID}`,
+          model: "Case",
+          dataOld: caseDetails.CaseStatus,
+          dataNew: "Part Request",
+          changedBy: data.user.id,
+          logDescription: `Edit: change status from ${caseDetails.CaseStatus} to InActive`
+        })
+        const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${caseDetails.CaseID}`,
+          ReferenceId: `${res.data.WOID}`,
+          model: "Work",
+          dataOld: "OPEN_UNSCHEDULED",
+          dataNew: "OPEN_UNSCHEDULED",
+          changedBy: data.user.id,
+          logDescription: `New Work Order : ${res.data.WOID}`
+        })
+        const updateMaterialLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${caseDetails.CaseID}`,
+          ReferenceId: `${res.data.MOID}`,
+          model: "Material Order",
+          dataOld: "New",
+          dataNew: "New",
+          changedBy: data.user.id,
+          logDescription: `New Material Order : ${res.data.MOID}`
+        })
+    
+        
+        Swal.close(); 
+        
+        // Close loading after success
+        await Swal.fire({
+          title: "Success!",
+          text:  "Order added successfully!",
+          icon:  "success",
+          timer: 1500,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        }).then(()=>{
+          setOpen(false);
+          const WOID = res.data.WOID
+          const MOID = res.data.MOID
+          switch (serviceCatalogType) {
+            case "CSR":
+              window.open(`/app/material-order/${MOID}`, '_blank');
+              break;
+
+            case "serviceorder":
+              window.open(`/app/work/${WOID}`, '_blank');  
+              break;
+
+            default:
+              break;
+          }
+        });
+      } catch (err) {
+        console.error(" Order Creation Failed:", err);
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to create order",
+          icon: "error",
+          timer: 1500,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        });
+      }}
   };
   
   function renderStepContent() {
@@ -5689,11 +5697,25 @@ export function BtnModalsPartAdd({
   const [partNumberInput, setPartNumberInput] = useState("");
   const [partNumberSearch, setPartNumberSearch] = useState("");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 6;
   const filteredPartCatalog = partCatalog.filter(part => {
     return (
       part.PartNumber?.toLowerCase().includes(partNumberSearch.toLowerCase())
     );
   });
+
+  const totalPages = Math.ceil(filteredPartCatalog.length / PAGE_SIZE);
+  const currentPageData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredPartCatalog.slice(start, start + PAGE_SIZE);
+  }, [filteredPartCatalog, currentPage]);
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
   
   return(
     <>
@@ -5746,7 +5768,7 @@ export function BtnModalsPartAdd({
               </TableHeader>
               <TableBody>
               {
-              filteredPartCatalog
+              currentPageData
               .filter(part => !selectedPartCatalog.some(selected => selected.PartNumber === part.PartNumber))
               .map((part, index) => {
                   const isChecked = tempSelectedParts.some((item) => item.PartNumber === part.PartNumber)
@@ -5780,30 +5802,44 @@ export function BtnModalsPartAdd({
                 })}
                 <TableRow>
                     <TableCell colSpan={'100%'}>
-                      <Pagination className={'flex justify-start'}>
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious href="#" />
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">1</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#" isActive>
-                              2
+                    <Pagination className="flex justify-start">
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(currentPage - 1);
+                            }}
+                          />
+                        </PaginationItem>
+
+                        {Array.from({ length: totalPages }, (_, i) => (
+                          <PaginationItem key={i}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === i + 1}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePageChange(i + 1);
+                              }}
+                            >
+                              {i + 1}
                             </PaginationLink>
                           </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink href="#">3</PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationNext href="#" />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
+                        ))}
+
+                        <PaginationItem>
+                          <PaginationNext
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlePageChange(currentPage + 1);
+                            }}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
                     </TableCell>
                   </TableRow>
               </TableBody>

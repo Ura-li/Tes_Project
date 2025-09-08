@@ -21,9 +21,9 @@ export default function Landing() {
       {user?.role === "fd" && <WorkerLanding />}
       {user?.role === "ce" && <WorkerLanding/>}
       {user?.role === "apo" && <ApoLanding/>}
-      {user?.role === "ps" && <ProductStorageLanding/>}
+      {user?.role === "ps" && <WorkerLanding/>}
       {user?.role === "lg" && <LogistikLanding/>}
-      {user?.role === "celead" && <CeLeadLanding/>}
+      {user?.role === "celead" && <WorkerLanding/>}
     </Suspense>
   );
 }
