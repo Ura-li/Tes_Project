@@ -29,7 +29,8 @@ export const SearchCommandBlock = ({
   placeholder = "Search...",
   renderLabel = (opt) => opt.label || opt,
   getValue = (opt) => opt.value || opt,
-  readOnly
+  readOnly,
+  className
 }) => {
   const [open, setOpen] = useState(false);
   const [positionAbove, setPositionAbove] = useState(false);
@@ -80,7 +81,7 @@ export const SearchCommandBlock = ({
           <span className="pl-1">{renderLabel(selectedOption)}</span>
         </div>
       ) : (
-        <Command className="w-full">
+        <Command className={cn(className,"w-full")}>
           <CommandInput
             ref={inputRef}
             placeholder={placeholder}

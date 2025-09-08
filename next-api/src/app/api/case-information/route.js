@@ -105,7 +105,12 @@ export async function GET(request) {
         
       },
       accessory: true,
-      ActionLog: true
+      ActionLog: {
+        orderBy: {
+          ChangeAt: 'desc'
+        },
+        take: 1,
+      }
     },
   });
 

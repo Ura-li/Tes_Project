@@ -44,7 +44,7 @@ export function NavProjects({
             <SidebarMenuButton asChild tooltip={item.title}    isActive={isActive(item.url)} >
               <Link to={item.url} >
                 <item.icon className=''/>
-                <span className="font-medium text-lg">{item.name}</span>
+                <span className="font-medium text-[1rem]">{item.name}</span>
               </Link>
             </SidebarMenuButton>
             {/* <DropdownMenu>

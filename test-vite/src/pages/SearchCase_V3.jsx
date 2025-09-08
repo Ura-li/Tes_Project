@@ -956,12 +956,7 @@ export default function NewCaseForm() {
 
         {/* Quick Search */}
         <Card>
-          <CardHeader className="flex items-center border-b ">
 
-            <CardTitle></CardTitle>
-            <CardDescription></CardDescription>
-
-          </CardHeader>
           <CardContent className="pt-4 grid md:grid-cols-2 gap-6">
             {/* Serial Number Search */}
             <div className="space-y-2">
@@ -1119,10 +1114,6 @@ export default function NewCaseForm() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label>Case Subject <Label className="text-red-600">*</Label></Label>
-              <Input type="text" value={caseSubject} onChange={(e) => setCaseSubject(e.target.value)} />
-            </div>
-            <div>
               <Label>Received Date <Label className="text-red-600">*</Label></Label>
               <Input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} />
             </div>
@@ -1174,11 +1165,15 @@ export default function NewCaseForm() {
                 <Label htmlFor="kci">KCI Flag</Label>
               </div>
             </div>
-            <div className="md:col-span-3">
+            <div className="md:col-span-3 space-y-2">
+              <Label>Case Subject <Label className="text-red-600">*</Label></Label>
+              <Textarea type="text" value={caseSubject} onChange={(e) => setCaseSubject(e.target.value)} />
+            </div>
+            <div className="md:col-span-3 space-y-2">
               <Label>Problem Description <Label className="text-red-600">*</Label></Label>
               <Textarea rows={3} value={problemDesc} onChange={(e) => setProblemDesc(e.target.value)} />
             </div>
-            <div className="md:col-span-3">
+            <div className="md:col-span-3 space-y-2">
               <Label>Case Note <Label className="text-red-600">*</Label></Label>
               <Textarea rows={3} value={caseNote} onChange={(e) => setCaseNote(e.target.value)} />
             </div>
@@ -1199,9 +1194,9 @@ export default function NewCaseForm() {
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex gap-4">
+            <div className="grid grid-flow-row  gap-4 ">
               {/* Customer */}
-              <div className="space-y-2 flex-2/3">
+              <div className="space-y-2 border-2 p-2 ">
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Salutation<Label className="text-red-600">*</Label></Label>
                   <div className="col-span-2">
@@ -1298,8 +1293,8 @@ export default function NewCaseForm() {
               </div>
               {/* Company (optional) */}
                 {showCompanySection && (
-              <div className="space-y-2">
-                
+                <div className="space-y-2 border-2 p-2">
+
                   <div className="space-y-2">
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Nama Company<Label className="text-red-600">*</Label></Label>
@@ -1368,7 +1363,7 @@ export default function NewCaseForm() {
                       <Input className="col-span-2" value={companyZipPostalCode} onChange={(e) => setCompanyZipPostalCode(e.target.value)} />
                     </div>
                   </div>
-              </div>
+                </div>
                 )}
             </div>
           </CardContent>
@@ -1385,10 +1380,10 @@ export default function NewCaseForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
+              <div className="space-y-2">
                 <Label>Serial No.<Label className="text-red-600">*</Label></Label>
                 <Input value={selectedAsset?.SerialNumber || serialQuery} readOnly={!!selectedAsset} onChange={(e) => setSerialQuery(e.target.value)} />
-                <Button variant="link" asChild>
+                <Button variant="outline" asChild>
                   <a
                     href="https://support.hp.com/id-en/check-warranty"
                     target="_blank"
@@ -1398,52 +1393,52 @@ export default function NewCaseForm() {
                   </a>
                 </Button>
 
-                </div>
-                <div className="md:col-span-2">
-                  <Label>Check Product (Number/Name)</Label>
-                  <Input
-                    placeholder="Type product number or name..."
-                    value={productQuery}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setProductQuery(v);
-                      searchProduct(v);
-                    }}
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <Label>Check Product (Number/Name)</Label>
+                <Input
+                  placeholder="Type product number or name..."
+                  value={productQuery}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setProductQuery(v);
+                    searchProduct(v);
+                  }}
+                />
+                <div className="mt-2 flex items-center gap-2">
+                  <Checkbox
+                    id="isNewProduct"
+                    checked={isNewProduct}
+                    onCheckedChange={(v) => setIsNewProduct(Boolean(v))}
                   />
-                  <div className="mt-2 flex items-center gap-2">
-                    <Checkbox
-                      id="isNewProduct"
-                      checked={isNewProduct}
-                      onCheckedChange={(v) => setIsNewProduct(Boolean(v))}
-                    />
-                    <Label htmlFor="isNewProduct">Buat Product Baru</Label>
-                  </div>
-                  {productResults.length > 0 && (
-                    <div className="mt-2 rounded-xl border p-2 max-h-40 overflow-auto">
-                      {productResults.map((p) => (
-                        <button
-                          key={p.ProductNumber}
-                          type="button"
-                          className={classNames(
-                            "w-full text-left px-2 py-1.5 rounded hover:bg-muted",
-                            selectedProduct?.ProductNumber === p.ProductNumber && "bg-muted"
-                          )}
-                          onClick={() => {
-                            setSelectedProduct(p);
-                            setProductNo(p.ProductNumber);
-                            setProductName(p.ProductName);
-                            setProductLine(p.ProductLine || "");
-                            setVendor(p.vendor || "");
-                            setProductTypeId(p.ProductTypeID);
-                          }}
-                        >
-                          <div className="font-medium">{p.ProductName}</div>
-                          <div className="text-xs text-muted-foreground">PN {p.ProductNumber} · {p.ProductLine || "-"}</div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  <Label htmlFor="isNewProduct">Buat Product Baru</Label>
                 </div>
+                {productResults.length > 0 && (
+                  <div className="mt-2 rounded-xl border p-2 max-h-40 overflow-auto">
+                    {productResults.map((p) => (
+                      <button
+                        key={p.ProductNumber}
+                        type="button"
+                        className={classNames(
+                          "w-full text-left px-2 py-1.5 rounded hover:bg-muted",
+                          selectedProduct?.ProductNumber === p.ProductNumber && "bg-muted"
+                        )}
+                        onClick={() => {
+                          setSelectedProduct(p);
+                          setProductNo(p.ProductNumber);
+                          setProductName(p.ProductName);
+                          setProductLine(p.ProductLine || "");
+                          setVendor(p.vendor || "");
+                          setProductTypeId(p.ProductTypeID);
+                        }}
+                      >
+                        <div className="font-medium">{p.ProductName}</div>
+                        <div className="text-xs text-muted-foreground">PN {p.ProductNumber} · {p.ProductLine || "-"}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -1503,10 +1498,6 @@ export default function NewCaseForm() {
                 <div>
                   <Label>Product Name<Label className="text-red-600">*</Label></Label>
                   <Input value={productName} onChange={(e) => setProductName(e.target.value)} />
-                </div>
-                <div>
-                  <Label>Vendor</Label>
-                  <Input value={vendor} onChange={(e) => setVendor(e.target.value)} />
                 </div>
               </div>
             </CardContent>

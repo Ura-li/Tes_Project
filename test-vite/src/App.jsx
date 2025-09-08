@@ -159,7 +159,7 @@ const App = () => {
     <div>
       <SheetProvider >
       <SidebarProvider style={{
-    "--sidebar-width": "13rem",
+    "--sidebar-width": "11rem",
     "--sidebar-width-mobile": "20rem",
   }}>
       <AppSidebar  />
