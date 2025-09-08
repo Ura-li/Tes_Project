@@ -96,11 +96,11 @@ const styles = StyleSheet.create({
     fontSize: 9,
   },
   value: {
-    width: '60%',
+    width: '68%',
     fontSize: 9,
   },
   colon: {
-    width: '10%',
+    width: '2%',
     fontSize: 9,
   },
   value2: {
