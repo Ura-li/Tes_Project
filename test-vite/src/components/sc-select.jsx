@@ -27,6 +27,7 @@ export const SearchCommandBlock = ({
   value,
   onChange,
   placeholder = "Search...",
+  onSearchInputChange = undefined,
   renderLabel = (opt) => opt.label || opt,
   getValue = (opt) => opt.value || opt,
   readOnly,
@@ -87,6 +88,11 @@ export const SearchCommandBlock = ({
             placeholder={placeholder}
             onFocus={() => !readOnly && setOpen(true)}
             onBlur={handleBlur}
+            onValueChange={(val) => {
+              if (onSearchInputChange) {
+                onSearchInputChange(val); // 👈 call if exist
+              }
+            }}
             disabled={readOnly} // 👈 prevent typing if readOnly
           />
           {open && !readOnly && ( // 👈 don’t open dropdown if readOnly

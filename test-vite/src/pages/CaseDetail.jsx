@@ -844,20 +844,21 @@ export const ServiceCase = ({
       if (existingNote) {
         noteID = existingNote.NoteID;
       } else {
-        const createResponse = await ApiCustomer.post(
-          `/api/case-information/case-notes`,
-          {
-            LogType: "NotesLog",
-            ActionType: "",
-            Template: "",
-            VisibleExternally: false,
-            MinutesSpent: 0,
-            Note: "",
-            CaseID: caseID,
-          }
-        );
+        console.log("error")
+        // const createResponse = await ApiCustomer.post(
+        //   `/api/case-information/case-notes`,
+        //   {
+        //     LogType: "NotesLog",
+        //     ActionType: "",
+        //     Template: "",
+        //     VisibleExternally: false,
+        //     MinutesSpent: 0,
+        //     Note: "",
+        //     CaseID: caseID,
+        //   }
+        // );
 
-        noteID = createResponse.data.data.NoteID;
+        // noteID = createResponse.data.data.NoteID;
       }
 
       const detailRes = await ApiCustomer.get(

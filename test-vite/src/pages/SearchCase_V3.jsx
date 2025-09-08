@@ -185,7 +185,9 @@ function getUserFromTokenSafe() {
     const raw = localStorage.getItem("token");
     if (!raw) return null;
     const payload = JSON.parse(atob(raw.split(".")[1]));
-    return { id: payload?.id ?? payload?.userId };
+    return { id: payload?.id ?? payload?.userId,
+      user: payload
+     };
   } catch {
     return null;
   }
@@ -266,6 +268,11 @@ export default function NewCaseForm() {
   const [contactCountry, setContactCountry] = useState("");
   const [contactZipPostalCode, setContactZipPostalCode] = useState("");
 
+  const [usePIC, setUsePIC] = useState(false);
+  const [contactPICName, setContactPICName] = useState("");
+  const [contactPICEmail, setContactPICEmail] = useState("");
+  const [contactPICPhone, setContactPICPhone] = useState("");
+
   const [provContact, setProvContact] = useState([]);
   const [cityContact, setCityContact] = useState([]);
 
@@ -311,6 +318,11 @@ export default function NewCaseForm() {
 
 
   // Warranty
+  const [warrantySearchValue, setWarrantySearchValue] = useState("");
+  const [warrantyOptions, setWarrantyOptions] = useState([]);
+
+  const [selectWarrantyCodeStatus, setSelectWarrantyCodeStatus] = useState("")
+  const [selectWarrantyStatus, setSelectWarrantyStatus] = useState("")
   const [warrantyStatus, setWarrantyStatus] = useState("");
   const [eowDate, setEowDate] = useState("");
 
@@ -431,6 +443,32 @@ export default function NewCaseForm() {
   );
 
   /**
+   * Search Warranty OTC Code (debounced).
+   * @param {string} q
+   */
+  const fetchWarrantyStatus = useMemo(
+    () =>
+      debounce(async (q) => {
+        try {
+          const response = await ApiCustomer.get(`/api/otc-code`,{
+            params: { search: q}
+          })
+          const list = response.data?.data || []
+          console.log("WArranty Lis : ", list)
+          const option = response.data?.data.map((res)=>({
+            label: res.Description,
+            value: res.OTCCode
+          }))
+          console.log("warranry List map : ",option)
+          setWarrantyOptions(option);
+        } catch (error) {
+          console.error("Failed fetch warranty:", error);
+          setWarrantyOptions([]);
+        }
+      }, 400)
+  )
+
+  /**
    * Search products type.
    * @param {string} q
    */
@@ -460,14 +498,18 @@ export default function NewCaseForm() {
     }
   };
 
+  
+
   // ----------------------------
   // Effects
   // ----------------------------
 
+  
 
   // Auto-fill company when company field selected
   useEffect(() => {
     if (selectedCompany?.Company) {
+      setShowCompanySection(true);
       const cm = selectedCompany;
       setCompanyName(cm.Company);
       setCompanyEmail(cm.Email);
@@ -529,6 +571,8 @@ export default function NewCaseForm() {
         setProductTypeId(p.ProductTypeID?.toString() || "");
       }
       setShowProductCard(true);
+      setEowDate(new Date(p.EOW_Date))
+      setWarrantyStatus(p.warrantyStatus);
     }
   }, [selectedAsset]);
 
@@ -596,6 +640,11 @@ export default function NewCaseForm() {
       setContactPhone(ct.Phone);
       setContactMobile(ct.Mobile);
       setContactAddressLine1(ct.AddressLine1);
+
+      console.log("DATA CT : ",ct)
+      setContactPICName(ct.PIC_Name)
+      setContactPICEmail(ct.PIC_Email)
+      setContactPICPhone(ct.PIC_Phone)
 
 
       // setContactStateProvince(ct.StateProvince || "");
@@ -686,6 +735,7 @@ export default function NewCaseForm() {
         console.warn("EMSIFA provinces fetch failed");
       }
     })();
+    fetchWarrantyStatus();
   }, []);
 
   useEffect(() => {
@@ -766,6 +816,34 @@ export default function NewCaseForm() {
   };
 
   // ----------------------------
+  // Company <- Contact copier
+  // ----------------------------
+  const copyCompanyFromContact = () => {
+    // Basic fields
+    setCompanyEmail(contactEmail || "");
+    setCompanyPhone(contactPhone || "");
+    setCompanyWhatsapp(contactMobile || "");
+    setCompanyAddressLine1(contactAddressLine1 || "");
+    setCompanyCountry(contactCountry || "");
+    setCompanyZipPostalCode(contactZipPostalCode || "");
+
+    // Province/City are objects used by ComboboxDemo; reuse the selected contact objects
+    // This also triggers city list fetch effect for company when province has an id
+    setCompanyStateProvince(contactStateProvince || { id: "", name: "" });
+    setCompanyCity(contactCity || { id: "", name: "" });
+  };
+
+  // ----------------------------
+  // PIC <- Contact copier
+  // ----------------------------
+  const copyPICFromContact = () => {
+    setContactPICName(`${contactFirstName} ${contactLastName}`.trim());
+    setContactPICEmail(contactEmail || "");
+    setContactPICPhone(contactPhone || "");
+  };
+
+
+  // ----------------------------
   // Create Case
   // ----------------------------
 
@@ -776,6 +854,14 @@ export default function NewCaseForm() {
   const onCreateCase = async () => {
     if ((!selectedAsset && !isNewAsset) || (!selectedContact && !isNewContact)) {
       alert("Please select or Create both an Asset and a Contact before creating a case.");
+      return;
+    }
+    if(isNewAsset && (!isNewProduct && !selectedProduct)){
+      toast.warning("Please select or Create Product No before creating new asset")
+      return
+    }
+    if (usePIC && (!contactPICName || !contactPICEmail || !contactPICPhone)) {
+      toast.warning("Mohon lengkapi data PIC jika checkbox 'Gunakan PIC' dicentang.");
       return;
     }
     if (!problemDesc || !caseSubject) {
@@ -790,6 +876,29 @@ export default function NewCaseForm() {
       return;
     }
 
+    //failsafe is warranty
+    if(!warrantySearchValue) {
+      toast("Warranty tidak valid")
+      return;
+    }
+
+    console.log(warrantySearchValue);
+    console.log("EOW Date:", eowDate);
+
+    /**
+     * TODO : (FOR SLAMET)
+     * ADDING A In Warranty Group
+     */
+    if(warrantySearchValue === "02N"){
+      const today = new Date();
+      const eow = new Date(eowDate);
+
+      if (eow < today.setHours(0, 0, 0, 0)) {
+        toast.warning("Warranty tidak valid: EOW date sudah lewat.");
+        return;
+      }
+    }
+    
     setLoading(true);
     try {
       const user = getUserFromTokenSafe();
@@ -814,27 +923,31 @@ export default function NewCaseForm() {
         })
         productId = productRes.data?.data?.ProductNumber
       }
-
-
-
-      if (isNewContact && showCompanySection) {
-        const companyRes = await ApiCustomer.post("/api/site_account", {
-          Company: companyName,
-          Email: companyEmail,
-          PrimaryPhone: companyPhone,
-          WhatsappNo: companyWhatsapp,
-          AddressLine1: companyAddressLine1,
-          City: companyCity.name, // --> emsifa
-          StateProvince: companyStateProvince.name, // --> emsifa
-          Country: companyCountry,
-          ZipPostalCode: companyZipPostalCode
-        })
-        companyId = companyRes.data?.data?.SiteAccountID;
+      if (isNewContact && (showCompanySection)) {
+        if(selectedCompany) {
+          companyId = companyId;
+        }else{
+          console.log("TIS IS A NEW COMPANY")
+          const companyRes = await ApiCustomer.post("/api/site_account", {
+            Company: companyName,
+            Email: companyEmail,
+            PrimaryPhone: companyPhone,
+            WhatsappNo: companyWhatsapp,
+            AddressLine1: companyAddressLine1,
+            City: companyCity.name, // --> emsifa
+            StateProvince: companyStateProvince.name, // --> emsifa
+            Country: companyCountry,
+            ZipPostalCode: companyZipPostalCode
+          })
+          companyId = companyRes.data?.data?.SiteAccountID;
+        };
       }
 
 
 
       if (isNewContact) {
+        console.log("TIS IS A NEW Contact")
+        if(usePIC) console.log("TIS IS A PIC")
         const contactRes = await ApiCustomer.post("/api/contact-information", {
           SiteAccountID: companyId,
           Salutation: contactSalutation,
@@ -847,30 +960,31 @@ export default function NewCaseForm() {
           City: contactCity.name, // --> emsifa
           StateProvince: contactStateProvince.name, // --> emsifa
           Country: contactCountry,
-          ZipPostalCode: contactZipPostalCode
+          ZipPostalCode: contactZipPostalCode,
+          PIC_Name: contactPICName,
+          PIC_Email: contactPICEmail,
+          PIC_Phone: contactPICPhone
         })
         contactId = contactRes.data?.data?.ContactID;
       }
 
       if (isNewAsset) {
-        // const [assetContactId, setAssetContactId] = useState(null)
-        // const [assetSiteAccountId, setAssetSiteAccountId] = useState(null)
-        // if(showCompanySection && isNewContact) {
-        //   setAssetSiteAccountId(companyId);
-        // } else if(selectedCompany.SiteAccountID) { setAssetSiteAccountId(selectedCompany?.SiteAccountID) }
-
-        // if(isNewContact) { 
-        //   setAssetContactId(contactId); 
-        // } else if(selectedContact.ContactID) { setAssetContactId(selectedContact?.ContactID) }
+        console.log(warrantySearchValue)
+        console.log(eowDate)
         const assetRes = await ApiCustomer.post("/api/asset-information", {
           SerialNumber: serialQuery,
           ProductNumber: productId,
           ContactID: contactId ?? null ,
           SiteAccountID: companyId ?? null,
+          Warranty_Status: warrantySearchValue,
+          EOW_Date: eowDate ?? null
           
         })
         assetId = assetRes.data?.data?.AssetID
       }
+
+
+      
 
       const payload = {
         AssetID: assetId,
@@ -880,7 +994,7 @@ export default function NewCaseForm() {
         CaseType: caseType,
         KCI_Flag: kciFlag,
         IncomingChannel: "Email",
-        CaseStatus: "Open",
+        CaseStatus: "New",
         CasePriority: "Medium",
         CustomerSeverity: "Normal",
         CaseClosedDate: null,
@@ -893,6 +1007,8 @@ export default function NewCaseForm() {
         ...(filteredAccessories.length > 0 && { accessories: filteredAccessories }),
       };
 
+      
+      console.log(payload);
 
       const res = await ApiCustomer.post("/api/case-information", payload);
       const caseId = res.data?.data?.CaseID;
@@ -926,8 +1042,26 @@ export default function NewCaseForm() {
         console.warn("ActionLog failed", e);
       }
 
+      //case note
+      try {
+        const userData = user?.user;
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          CaseId: `${caseId}`,
+          LogTye: 'NotesLog',
+          ActionType: 'Initial',
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `${problemDesc}`,
+          CreatedBy: user?.id
+        })
+      } catch (error) {
+        console.warn("Case Note failed, ", error)
+      }
+      // console.log(user);
+
+      toast("succcess");
       // Navigate detail
-      navigate(`/app/case/${caseId}`);
+      // navigate(`/app/case/${caseId}`);
     } catch (e) {
       console.error(e);
       toast.warning(e.response.data.message, {
@@ -1291,10 +1425,62 @@ export default function NewCaseForm() {
                   <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
                   <Input className="col-span-2" value={contactZipPostalCode} onChange={(e) => setContactZipPostalCode(e.target.value)} />
                 </div>
+
+                {/* PIC Information */}
+                
+                <div className="space-y-2 border-2 p-2 rounded">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="usePIC"
+                        checked={usePIC}
+                        onCheckedChange={(v) => setUsePIC(Boolean(v))}
+                      />
+                      <Label htmlFor="usePIC">Gunakan PIC</Label>
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={copyPICFromContact} disabled={!usePIC}>
+                      Same as Contact Information
+                    </Button>
+                  </div>
+                </div>
+                
+                {usePIC && (
+                  <>  
+                    <div className="grid grid-cols-3 gap-2 items-center pt-4 border-t">
+                      <Label className="col-span-1">Nama PIC<Label className="text-red-600">*</Label></Label>
+                      <Input
+                        className="col-span-2"
+                        placeholder="Nama PIC"
+                        value={contactPICName}
+                        onChange={(e) => setContactPICName(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">Email PIC<Label className="text-red-600">*</Label></Label>
+                      <Input
+                        className="col-span-2"
+                        placeholder="Email PIC"
+                        type="email"
+                        value={contactPICEmail}
+                        onChange={(e) => setContactPICEmail(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">No. Telepon PIC<Label className="text-red-600">*</Label></Label>
+                      <Input className="col-span-2" value={contactPICPhone} onChange={(e) => setContactPICPhone(e.target.value)} />
+                    </div>
+                  </>
+                )}
+
               </div>
               {/* Company (optional) */}
                 {showCompanySection && (
                 <div className="space-y-2 border-2 p-2">
+                  <div className="flex justify-end">
+                    <Button type="button" variant="outline" size="sm" onClick={copyCompanyFromContact}>
+                      Same as contact information
+                    </Button>
+                  </div>
 
                   <div className="space-y-2">
                     <div className="grid grid-cols-3 gap-2 items-center">
@@ -1514,16 +1700,17 @@ export default function NewCaseForm() {
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label>Warranty Status</Label>
-                <Select value={warrantyStatus} onValueChange={setWarrantyStatus}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select warranty status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {WARRANTY_STATUS.map((w) => (
-                      <SelectItem key={w} value={w}>{w}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchCommandBlock
+                  options={warrantyOptions}
+                  value={warrantySearchValue}
+                  onChange={(val) => setWarrantySearchValue(val)}
+                  onSearchInputChange={(val) => {
+                    setWarrantySearchValue(val);   // update field search
+                    fetchWarrantyStatus(val); // trigger fetch API
+                  }}
+
+                  placeholder="Warranty Option..."
+                />
               </div>
               <div>
                 <Label>EOW Date</Label>
