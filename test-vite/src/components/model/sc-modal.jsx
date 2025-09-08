@@ -4805,7 +4805,7 @@ export function BtnModalsServiceCatalog({
         dataOld: caseDetails.CaseStatus,
         dataNew: "Part Request",
         changedBy: data.user.id,
-        logDescription: `Edit: change status from ${caseDetails.CaseStatus} to InActive`
+        logDescription: `Edit: change status from ${caseDetails.CaseStatus} to Part Request`
       })
       const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
         CaseId: `${caseDetails.CaseID}`,
@@ -4910,10 +4910,19 @@ export function BtnModalsServiceCatalog({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {warrantyOffer.map((service, index) => (
-                  <TableRow key={index}>
+                {warrantyOffer.map((service, index) => {
+                  const isSelected = selectedWarrantyServices?.Service_offerID === service.Service_offerID;
+
+
+                  return (
+                  <TableRow 
+                    key={index}
+                    className={`cursor-pointer ${isSelected ? "bg-blue-100" : ""}`} // kasih highlight row aktif
+                    onClick={() => handlerWarrantyService(service)}
+                  >
                     <TableCell>
                     <RadioGroup 
+                      className={"w-5 h-5 rounded-full checked:bg-blue-600 border-2 border-gray-600"}
                       value={selectedWarrantyServices?.Service_offerID}
                       onValueChange={(value) => {
                         const service = warrantyOffer.find((item) => item.Service_offerID === value);
@@ -4930,7 +4939,7 @@ export function BtnModalsServiceCatalog({
                     <TableCell>{service.Tax}</TableCell>
                     <TableCell>{service.Total}</TableCell>
                   </TableRow>
-                ))}
+                )})}
 
               </TableBody>
             </Table>

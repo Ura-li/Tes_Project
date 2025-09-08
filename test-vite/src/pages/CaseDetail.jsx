@@ -235,7 +235,15 @@ export const TabsServiceCaseDetails = ({
 
        case 'NOTE':
   if (noteFilled) {
-    const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
+    const modifiedNote =
+`🗒️ Note Created
+────────────────────────
+⏱️ ${timestamp}  
+👤 ${author} (${role})  
+📄 ${caseNoteFormData.LogType}  
+────────────────────────
+${caseNoteFormData.Note}`;
+
 
     const response = await ApiCustomer.post("/api/case-information/case-notes", {
       LogType: caseNoteFormData.LogType,

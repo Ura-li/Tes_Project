@@ -788,7 +788,7 @@ export default function NewCaseForm() {
       );
 
       let assetId = selectedAsset?.AssetID;
-      let productId = selectedProduct?.ProductNumber;
+      let productId = selectedProduct?.ProductNumber || productNo;
       let companyId = selectedCompany?.SiteAccountID;
       let contactId = selectedContact?.ContactID;
       
@@ -854,7 +854,8 @@ export default function NewCaseForm() {
           SerialNumber: serialQuery,
           ProductNumber: productId,
           ContactID: contactId ?? null ,
-          SiteAccountID: companyId ?? null
+          SiteAccountID: companyId ?? null,
+          
         })
         assetId = assetRes.data?.data?.AssetID
       }
