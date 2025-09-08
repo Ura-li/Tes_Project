@@ -13,6 +13,10 @@ model asset_information {
   ProductNumber       String               @db.VarChar(11)
   SiteAccountID       Int?
   ContactID           Int?
+  Warranty_Status     String?
+  EOW_Date            DateTime?            @db.DateTime(0)
+  WarrantyOTCCode     OTCCodeTable?        @relation(fields: [Warranty_Status], references: [OTCCode])
+
   site_account        site_account?        @relation(fields: [SiteAccountID], references: [SiteAccountID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_1")
   contact_information contact_information? @relation(fields: [ContactID], references: [ContactID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_2")
   product_information product_information  @relation(fields: [ProductNumber], references: [ProductNumber], onUpdate: Restrict, map: "asset_information_ibfk_3")
@@ -40,6 +44,9 @@ model caseinformation {
   AssetID                                       Int?
   id_gtc                                        Int?
   id_csr                                        Int?
+  CaseID_Manual                                 String?
+  CaseID_Manual_Date                            DateTime?            @db.DateTime(0)
+  ReferenceCase                                 String?
   CaseSubject                                   String?              @db.VarChar(255)
   CaseType                                      String?              @db.VarChar(100)
   KCI_Flag                                      Boolean?             @default(false)
@@ -92,6 +99,7 @@ model OTCCodeTable {
   CreatedOn   DateTime? @default(now()) @db.DateTime(0)
 
   cases caseinformation[]
+  asset asset_information[]
 }
 
 model accessory {
@@ -118,6 +126,7 @@ model casenotes {
   MinutesSpent      Int?
   Note              String?   @db.Text
   CreatedOn         DateTime? @default(now()) @db.DateTime(0)
+  CreatedBy         Int?
 
   caseinformation_caseinformation_CaseNoteTocasenotes caseinformation[] @relation("caseinformation_CaseNoteTocasenotes")
   caseinformation_casenotes_CaseIDTocaseinformation   caseinformation?  @relation("casenotes_CaseIDTocaseinformation", fields: [CaseID], references: [CaseID], onDelete: Restrict, onUpdate: Restrict, map: "casenotes_ibfk_1")
@@ -171,6 +180,10 @@ model contact_information {
   StateProvince     String?             @db.VarChar(100)
   Country           String?             @db.VarChar(100)
   ZipPostalCode     String?             @db.VarChar(20)
+
+  PIC_Name          String?             @db.VarChar(100)
+  PIC_Email          String?             @db.VarChar(100)
+  PIC_Phone          String?             @db.VarChar(100)
   asset_information asset_information[]
   caseinformation   caseinformation[]
   site_account      site_account?       @relation(fields: [SiteAccountID], references: [SiteAccountID], onDelete: Restrict, onUpdate: Restrict, map: "contact_information_ibfk_1")
