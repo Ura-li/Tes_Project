@@ -137,7 +137,7 @@ export async function POST(request) {
 
     if (Email) orConditions.push({ Email: { contains: Email } });
     if (Phone) orConditions.push({ Phone: { contains: Phone } });
-    if (Mobile) orConditions.push({ Mobile: { contains: Mobile } });
+    // if (Mobile) orConditions.push({ Mobile: { contains: Mobile } });
 
     if (orConditions.length === 0) {
         return NextResponse.json({

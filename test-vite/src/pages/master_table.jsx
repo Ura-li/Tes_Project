@@ -240,11 +240,11 @@ export const Contact_table = () => {
   };
 
   return (
-    <div className="p-6">
-      <h2 className="mb-6 text-2xl font-bold">📊 Contact Management</h2>
+    <div className="p-4 sm:p-6 w-full">
+      <h2 className="mb-4 text-xl sm:text-2xl font-bold">📊 Contact Management</h2>
 
       {/* Search + Filters */}
-      <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between w-full">
+      <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between w-full">
         <input
           type="text"
           placeholder="🔍 Search contacts..."
@@ -288,7 +288,7 @@ export const Contact_table = () => {
 
       {/* Table */}
       <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[70vh] w-full">
-        <table className="w-full border-collapse min-w-[1000px]">
+        <table className="w-full border-collapse min-w-[1200px]">
           <thead className="sticky z-10 top-0 bg-gray-100 text-xs sm:text-sm">
             <tr>
               <th className="p-3 text-sm font-semibold text-left border">No</th>
@@ -3888,33 +3888,36 @@ export const User_table = () => {
   }, [UserData, debouncedSearchTerm]);
 
   // 🔹 Sorting logic
-  const sortedData = useMemo(() => {
-    let sortableItems = [...filteredUserTable];
-    if (sortConfig.key !== null) {
-      sortableItems.sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
-        
-        // Handle null or undefined values
-        if (aVal === null || aVal === undefined) aVal = "";
-        if (bVal === null || bVal === undefined) bVal = "";
-        
-        // Case-insensitive sorting for strings
-        if (typeof aVal === "string") aVal = aVal.toLowerCase();
-        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+const sortedData = useMemo(() => {
+  let sortableItems = [...filteredUserTable];
+  if (sortConfig.key !== null) {
+    sortableItems.sort((a, b) => {
+      let aVal, bVal;
 
-        if (aVal < bVal) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (aVal > bVal) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableItems;
-  }, [filteredUserTable, sortConfig]);
+      // ✅ khusus untuk field nested Resources
+      if (sortConfig.key === "Resources") {
+        aVal = a.resource?.Name || "";
+        bVal = b.resource?.Name || "";
+      } else {
+        aVal = a[sortConfig.key];
+        bVal = b[sortConfig.key];
+      }
 
+      // Handle null/undefined
+      if (aVal === null || aVal === undefined) aVal = "";
+      if (bVal === null || bVal === undefined) bVal = "";
+
+      // Case-insensitive untuk string
+      if (typeof aVal === "string") aVal = aVal.toLowerCase();
+      if (typeof bVal === "string") bVal = bVal.toLowerCase();
+
+      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
+  return sortableItems;
+}, [filteredUserTable, sortConfig]);  
   // 🔹 Calculate total pages
   const totalPages = Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
 
@@ -4008,6 +4011,12 @@ export const User_table = () => {
                 onClick={() => handleSort("Role")}
               >
                 Role {getSortIcon("Role")}
+              </th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Resources")}
+              >
+                Resources {getSortIcon("Resources")}
               </th>
               {/* Tambahkan kolom Phone di sini */}
               <th
@@ -5684,21 +5693,19 @@ export const SymptomCodeTable = () => {
 
   return (
     <div className="p-6">
-      <h2 className="mb-6 text-2xl font-bold">Symptom Code Table</h2>
+      <h2 className="mb-6 text-xl font-bold">Symptom Code Table</h2>
 
       {/* Search + Add Button (row 1) */}
-      <div className="flex flex-col items-center justify-between gap-4 mb-4 sm:flex-row">
-        <div className="flex w-full gap-2">
-          <input
-            type="text"
-            placeholder="🔍 Search symptom codes..."
-            className="w-full p-2 border rounded-lg shadow-sm sm:w-1/3 focus:ring-2 focus:ring-blue-400"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+    <div className="flex flex-wrap items-center gap-2 mb-4">
+      <input
+        type="text"
+        placeholder="🔍 Search symptom codes..."
+        className="w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
         <SymptomCodeAdd onUpdate={fetchSymptomCodeData} />
-      </div>
+    </div>
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}

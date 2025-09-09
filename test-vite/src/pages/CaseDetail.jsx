@@ -709,9 +709,9 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg"]},
-    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg"]},
-    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg"]},
+    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","celead","lg","ps"]},
+    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","celead","lg","ps"]},
+    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","celead","lg","ps"]},
     // { value: "customer,add,entitement", label: "Asset & Entitement", roles:["admin"]},
     // { value: "ci_notes", label: "Notes & Information", roles:["admin"]},
     // { value: "ci_activitas", label: "Activities", disable: true, roles:["admin"]},

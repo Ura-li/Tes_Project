@@ -6558,7 +6558,7 @@ export function SymptomCodeAdd({ onUpdate }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="mb-4 rounded-sm h-11">Add Symptom Code</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Add Symptom Code</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -6851,7 +6851,7 @@ export function BookingsAdd({ onUpdate }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="mb-4 rounded-sm h-11">Add Booking</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Add Booking</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
