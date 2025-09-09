@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma, { setUserIdProvider } from "../../../../../prisma/client";
-import { getTokenUserId } from "@/app/middleware/auth";
+import prisma from "../../../../../prisma/client";
 
 export async function GET(request) {
   try {
