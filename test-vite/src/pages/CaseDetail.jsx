@@ -736,8 +736,8 @@ export const ServiceCase = ({
   const tabs = [
     { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg","celead"]},
     { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg","celead"]},
-    { value: "note_part", label: "Sparepart" , roles:["admin", "apo","ce","celead","fd","lg"]},
     { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg","celead"]},
+    { value: "note_part", label: "Sparepart" , roles:["admin", "apo","ce","celead","fd","lg"], hidden:true},
     // { value: "customer,add,entitement", label: "Asset & Entitement", roles:["admin"]},
     // { value: "ci_notes", label: "Notes & Information", roles:["admin"]},
     // { value: "ci_activitas", label: "Activities", disable: true, roles:["admin"]},
@@ -1833,7 +1833,7 @@ return (
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
                     </div>
-                    <CaseField label="Warranty Status"  span={3} star>
+                    <CaseField label="Warranty Status"  span={3} star className={"whitespace-nowrap"}>
                       <SearchCommandBlock
                         options={otcCode}
                         value={entitlementStatus.OTCCode}
@@ -2071,8 +2071,7 @@ return (
             </div>
           </TabsContent>
           
-          <TabsContent value="note_part">
-         
+          <TabsContent value="note_part" hidden>         
               {caseDetails?.workorder?.[0]?.materialorder?.map((mo, index) => (
               <div key={index} className={"flex flex-col p-3 space-y-5"}>
                 {mo?.materialorderlineitems.map((moli, i) => (

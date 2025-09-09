@@ -17,7 +17,7 @@ export default function Logistik() {
         Signature: null,
     });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 3;
 
     const fetchData = async () => {
         try {
@@ -108,44 +108,42 @@ export default function Logistik() {
                     <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
                     <hr />
                 </CardHeader>
-                <CardContent className={"grid grid-cols-2 gap-4"}>
+                <CardContent className={"grid gap-2"}>
                  {currentData.length > 0 ? (
             currentData.map((c) => (
               <Card
                 key={c.caseinformation.CaseID}
-                className="border-3 rounded-sm hover:bg-gray-200"
+                className="border-3 rounded-sm hover:bg-gray-200 cursor-pointer"
                 onClick={() =>
                   navigate(
                     `/app/material-order/${c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID}`
                   )
                 }
               >
-                <CardHeader className={"flex justify-between"}>
+                <CardHeader className={"gap-2"}>
+                  <div className="flex flex-row justify-between">
                   <CardTitle>
                     {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID}
                   </CardTitle>
-                  <hr />
-                </CardHeader>
-                <CardContent className="flex flex-col gap-2">
-                  <div className="flex flex-row gap-2">
-                  <CaseField label={"PART : "}>
-                    {
-                      c.caseinformation?.workorder?.[0]?.materialorder?.[0]
-                        ?.materialorderlineitems?.[0]?.Description
-                    }
-                  </CaseField>
-
-                  </div>
-
-                  <div className="flex flex-row gap-2">
-                  <CaseField label={"PARTNUMBER : "}>
+                  <CardTitle className={"text-sm text-gray-400"}>
                     {
                       c.caseinformation?.workorder?.[0]?.materialorder?.[0]
                         ?.materialorderlineitems?.[0]?.PartNumber
                     }
-                  </CaseField>
-
+                  </CardTitle>          
                   </div>
+                  <hr />
+                </CardHeader>
+                <CardContent className="flex flex-col">
+                  <CaseField label={"Part Description"} className={"text-md"}>
+                   <hr className="w-[8em] border-1 border-gray-500 rounded-md"/>
+                   <span className="text-gray-600 text-sm">
+                    {
+                      c.caseinformation?.workorder?.[0]?.materialorder?.[0]
+                        ?.materialorderlineitems?.[0]?.Description
+                    }
+                   </span>
+                  </CaseField>
                 </CardContent>
               </Card>
             ))
