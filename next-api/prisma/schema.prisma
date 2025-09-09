@@ -96,6 +96,7 @@ model caseinformation {
 model OTCCodeTable {
   OTCCode     String    @id @db.VarChar(5)
   Description String    @db.VarChar(100)
+  WarrantyCondition WarrantyCondition?  
   CreatedOn   DateTime? @default(now()) @db.DateTime(0)
 
   cases caseinformation[]
@@ -128,10 +129,14 @@ model casenotes {
   CreatedOn         DateTime? @default(now()) @db.DateTime(0)
   CreatedBy         Int?
 
+  // Relation to User who created the note
+  createdByUser User? @relation("UserCreatedCaseNotes", fields: [CreatedBy], references: [IDUser])
+
   caseinformation_caseinformation_CaseNoteTocasenotes caseinformation[] @relation("caseinformation_CaseNoteTocasenotes")
   caseinformation_casenotes_CaseIDTocaseinformation   caseinformation?  @relation("casenotes_CaseIDTocaseinformation", fields: [CaseID], references: [CaseID], onDelete: Restrict, onUpdate: Restrict, map: "casenotes_ibfk_1")
 
   @@index([CaseID], map: "CaseID")
+  @@index([CreatedBy])
 }
 
 model AuditLog {
@@ -443,6 +448,9 @@ model User {
   workorders_owned     workorder[]     @relation("UserWorkOrders")
   materialorders_owned materialorder[] @relation("UserMaterialOrders")
   ActionLog            ActionLog[]
+
+  // Case notes created by this user
+  caseNotes_created    casenotes[]     @relation("UserCreatedCaseNotes")
 }
 
 model warranty_services {
@@ -701,6 +709,10 @@ enum WorkOrderStatus {
   CLOSED_POSTED
 }
 
+enum WarrantyCondition {
+  InWarranty
+  OutWarranty
+}
 enum CaseStatus {
   New
   Open

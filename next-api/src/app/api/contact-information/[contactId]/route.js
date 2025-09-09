@@ -41,8 +41,9 @@ export async function GET(request, { params }) {
 // PATCH - Update Contact Information
 export async function PATCH(request, { params }) {
     try {
-        const contactId = parseInt(params.contactId);
-        if (isNaN(contactId)) {
+        const {contactId} = await params;
+        const contactID = parseInt(contactId);
+        if (isNaN(contactID)) {
             return NextResponse.json(
                 { success: false, message: "Invalid Contact ID" },
                 { status: 400 }
@@ -50,7 +51,7 @@ export async function PATCH(request, { params }) {
         }
 
         const existingContact = await prisma.contact_information.findUnique({
-            where: { ContactID: contactId },
+            where: { ContactID: contactID },
         });
 
         if (!existingContact) {
@@ -63,7 +64,7 @@ export async function PATCH(request, { params }) {
         const data = await request.json();
 
         const updatedContact = await prisma.contact_information.update({
-            where: { ContactID: contactId },
+            where: { ContactID: contactID },
             data,
         });
 

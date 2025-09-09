@@ -28,6 +28,7 @@ import { Loader2, Plus, Trash2, Image as ImageIcon, Search, Building, User, File
 import { format } from "date-fns";
 import { ComboboxDemo, SearchCommandBlock, SelectBarState } from "@/components/sc-select";
 import { toast } from "sonner";
+import { formatDateForInput } from "@/lib/utils";
 
 
 
@@ -505,6 +506,17 @@ export default function NewCaseForm() {
   // ----------------------------
 
   
+  useEffect(() => {
+    if (warrantyOptions.length > 0 && warrantySearchValue) {
+      const matched = warrantyOptions.find(
+        (opt) => opt.value === warrantySearchValue
+      );
+      if (!matched) {
+        // Option tidak ditemukan, bisa auto-add atau log warning
+        console.warn("Warranty option not found:", warrantySearchValue);
+      }
+    }
+  }, [warrantyOptions, warrantySearchValue]);
 
   // Auto-fill company when company field selected
   useEffect(() => {
@@ -571,10 +583,25 @@ export default function NewCaseForm() {
         setProductTypeId(p.ProductTypeID?.toString() || "");
       }
       setShowProductCard(true);
-      setEowDate(new Date(p.EOW_Date))
-      setWarrantyStatus(p.warrantyStatus);
     }
   }, [selectedAsset]);
+
+  //auto fill waranty when asset selected
+  useEffect(() => {
+    if(selectedAsset?.Warranty_Status){
+      console.log("EOW DATE :",selectedAsset.EOW_Date)
+      if (selectedAsset.EOW_Date) {
+        console.log("EOW DATE :",selectedAsset.EOW_Date)
+        console.log("FORMATTED EOW DATE :",formatDateForInput(selectedAsset.EOW_Date))
+        setEowDate(formatDateForInput(selectedAsset.EOW_Date));
+      }
+
+      // Fetch warranty options, lalu set value
+      const warrantyCode = selectedAsset.Warranty_Status;
+      fetchWarrantyStatus(warrantyCode); // << fetch list berdasarkan kode yang sudah ada
+      setWarrantySearchValue(warrantyCode);
+    }
+  }, [selectedAsset])
 
   // Auto-fill customer when asset selected (if asset has owner)
   useEffect(() => {
@@ -641,10 +668,13 @@ export default function NewCaseForm() {
       setContactMobile(ct.Mobile);
       setContactAddressLine1(ct.AddressLine1);
 
-      console.log("DATA CT : ",ct)
-      setContactPICName(ct.PIC_Name)
-      setContactPICEmail(ct.PIC_Email)
-      setContactPICPhone(ct.PIC_Phone)
+      if(ct.PIC_Name){
+        setUsePIC(true);
+        console.log("DATA CT : ",ct)
+        setContactPICName(ct.PIC_Name)
+        setContactPICEmail(ct.PIC_Email)
+        setContactPICPhone(ct.PIC_Phone)
+      }
 
 
       // setContactStateProvince(ct.StateProvince || "");
@@ -882,8 +912,6 @@ export default function NewCaseForm() {
       return;
     }
 
-    console.log(warrantySearchValue);
-    console.log("EOW Date:", eowDate);
 
     /**
      * TODO : (FOR SLAMET)
@@ -968,6 +996,15 @@ export default function NewCaseForm() {
         contactId = contactRes.data?.data?.ContactID;
       }
 
+      if(!isNewContact && usePIC) {
+        console.log("UPDATE PIC")
+        await ApiCustomer.patch(`/api/contact-information/${contactId}`, {
+          PIC_Name: contactPICName,
+          PIC_Email: contactPICEmail,
+          PIC_Phone: contactPICPhone
+        })
+      }
+
       if (isNewAsset) {
         console.log(warrantySearchValue)
         console.log(eowDate)
@@ -977,10 +1014,19 @@ export default function NewCaseForm() {
           ContactID: contactId ?? null ,
           SiteAccountID: companyId ?? null,
           Warranty_Status: warrantySearchValue,
-          EOW_Date: eowDate ?? null
+          EOW_Date: eowDate ? new Date(eowDate).toISOString() : null
           
         })
+        
         assetId = assetRes.data?.data?.AssetID
+      }
+
+      if(!isNewAsset && warrantySearchValue) {
+        console.log("UPDATE WARRANTY")
+        await ApiCustomer.patch(`/api/asset-information/${assetId}`, {
+          Warranty_Status: warrantySearchValue,
+          EOW_Date: eowDate ? new Date(eowDate).toISOString() : null
+        })
       }
 
 
@@ -1045,8 +1091,9 @@ export default function NewCaseForm() {
       //case note
       try {
         const userData = user?.user;
+        console.log("CASE NOT RUNNING")
         await ApiCustomer.post("/api/case-information/case-notes", {
-          CaseId: `${caseId}`,
+          CaseID: `${caseId}`,
           LogTye: 'NotesLog',
           ActionType: 'Initial',
           VisibleExternally: false,
@@ -1061,7 +1108,7 @@ export default function NewCaseForm() {
 
       toast("succcess");
       // Navigate detail
-      // navigate(`/app/case/${caseId}`);
+      navigate(`/app/case/${caseId}`);
     } catch (e) {
       console.error(e);
       toast.warning(e.response.data.message, {
