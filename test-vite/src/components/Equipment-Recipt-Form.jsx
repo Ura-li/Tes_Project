@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-const ServiceRequestPDF = ({ nama, caseDetails }) =>
+const EquipmentReciptForm = ({ nama, caseDetails }) =>
 
 (
   <Document>
@@ -152,7 +152,7 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
           <Text style={styles.textSmall}>Jakarta Selatan, 12870, Indonesia</Text>
           <Text style={styles.textSmall}>Telp : (+6221) 081318521007 / 081318521006 - HP : 0811970666</Text>
         </View>
-        <Text style={[styles.sectionHeader]}>SERVICE REQUEST FORM</Text>
+        <Text style={[styles.sectionHeader]}>EQUIPMENT RECIPT FORM</Text>
       </View>
 
       <View style={{ display: 'flex', flexDirection: 'row' }}>
@@ -316,11 +316,11 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
         </View>
       </View>
 
-<View style={[styles.tableRow, styles.tableHeader, {marginTop: 20}]}>
-          <Text style={styles.tableHeaderCell}>Accessories</Text>
-          <Text style={styles.tableHeaderCell}>Note</Text>
-          <Text style={styles.tableHeaderCell}>CT/ SN Code</Text>
-        </View>
+      <View style={[styles.tableRow, styles.tableHeader, { marginTop: 20 }]}>
+        <Text style={styles.tableHeaderCell}>Accessories</Text>
+        <Text style={styles.tableHeaderCell}>Note</Text>
+        <Text style={styles.tableHeaderCell}>CT/ SN Code</Text>
+      </View>
       {caseDetails?.accessory?.length > 0 ? (
         caseDetails.accessory.map((item, index) => (
           <View style={styles.tableRow} key={index}>
@@ -337,9 +337,39 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
         </View>
       )}
 
+      <View style={[styles.tableRow, styles.tableHeader, { marginTop: 20 }]}>
+        <Text style={styles.tableHeaderCell}>NO</Text>
+        <Text style={styles.tableHeaderCell}>Vendor part NO</Text>
+        <Text style={styles.tableHeaderCell}>HP Part NO</Text>
+        <Text style={styles.tableHeaderCell}>Part Name</Text>
+        <Text style={styles.tableHeaderCell}>NEW CT Code</Text>
+        <Text style={styles.tableHeaderCell}>QTY</Text>
+      </View>
+      {caseDetails?.accessory?.length > 0 ? (
+        caseDetails.accessory.map((item, index) => (
+          <View style={styles.tableRow} key={index}>
+            <Text style={styles.tableCell}>{index}</Text>
+            <Text style={styles.tableCell}>{item.Accessories ?? 'N/A'}</Text>
+            <Text style={styles.tableCell}>{item.Note ?? 'N/A'}</Text>
+            <Text style={styles.tableCell}>{item.CT_SNCode ?? 'N/A'}</Text>
+            <Text style={styles.tableCell}></Text>  
+            <Text style={styles.tableCell}></Text>
+          </View>
+        ))
+      ) : (
+        <View style={styles.tableRow}>
+          <Text style={[styles.tableCell,{textAlign: 'center'}]}>0</Text>
+          <Text style={styles.tableCell}>No Data</Text>
+          <Text style={styles.tableCell}>-</Text>
+          <Text style={styles.tableCell}>-</Text>
+          <Text style={styles.tableCell}>-</Text>
+          <Text style={styles.tableCell}>-</Text>
+        </View>
+      )}
 
-      <Text style={[styles.textSmall, { fontWeight: 'bold' }]}>Notification and confirmation</Text>
-      <View style={{ display: 'flex', flexDirection: 'row' }}>
+
+      <Text style={[styles.textSmall, { fontWeight: 'bold', color: 'black' }]}>Repair Action : </Text>
+      {/* <View style={{ display: 'flex', flexDirection: 'row' }}>
 
         <View style={styles.leftSection}>
           <Text style={styles.label2}>Unit Garansi</Text>
@@ -350,8 +380,8 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
           <Text style={[styles.value2]}>• Surat Penawaran Perbaikan akan dikirim sekitar 3 hari kerja setelah peralatan diterima. Lamanya pengerjaan perbaikan sekitar 3
             hari kerja setelah persetujuan atas Surat Penawaran Perbaikan (tergantung tersedianya suku cadang)</Text>
         </View>
-      </View>
-      <Text style={[styles.sectionHeader, styles.textCenter]}>Disclaimer Statement</Text>
+      </View> */}
+      {/* <Text style={[styles.sectionHeader, styles.textCenter]}>Disclaimer Statement</Text>
 
       <View style={{}}>
         <Text style={[styles.bold, styles.textSmall]}>Informasi Untuk Pelanggan :</Text>
@@ -371,7 +401,7 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
           HP tidak memberikan jaminan proteksi Data pelanggan dan HP tidak bertanggungjawab jika terjadi kerusakan pada Data atau terhapusnya Data dari peralatan
           pelanggan.
         </Text>
-      </View>
+      </View> */}
 
 
       {/* Signature section */}
@@ -381,10 +411,7 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
           <Text style={styles.textSmall}>--------------------------------------------</Text>
           <Text style={styles.textSmall}>frondesk-1</Text>
         </View>
-        <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-          <Image src="/random_qr.png" style={styles.qrCode} />
-          <Text style={[styles.textSmall, styles.bold]}>Check Repair Status</Text>
-        </View>
+
         <View style={{ flexDirection: 'column', alignItems: 'center' }}>
           <Text style={[styles.textSmall, { marginBottom: 30 }]}>Received By</Text>
           <Text style={styles.textSmall}>--------------------------------------------</Text>
@@ -412,4 +439,4 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
 
 
 
-export default ServiceRequestPDF;
+export default EquipmentReciptForm;

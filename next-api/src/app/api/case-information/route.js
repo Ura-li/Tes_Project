@@ -96,13 +96,21 @@ export async function GET(request) {
         include: {
           materialorder: {
             include: {
-              materialorderlineitems: true
+              materialorderlineitems: true,
+              owner: true
             }
-          }
+          },
+          owner: true
         }
         
       },
       accessory: true,
+      ActionLog: {
+        orderBy: {
+          ChangeAt: 'desc'
+        },
+        take: 1,
+      }
     },
   });
 
@@ -168,52 +176,65 @@ export async function POST(request) {
         accessories,
     } = await request.json();
 
-    const CaseID = await generateID("C-", "caseinformation", "CaseID")
-    console.log("Generated ID:", CaseNoteProduct);
-    //validation
-    if (!AssetID && !ContactID ) {
-        return NextResponse.json(
-            {
-                success: false,
-                message: "Asset/Contact selection is required to create a case.",
-            },
-            { status: 400 }
-        );
-    }
-    
-    //create data 
-    const case_information = await prisma.caseinformation.create({
-        data:{
-          CaseID: CaseID,
-          SiteAccountID: SiteAccountID,
-          ContactID: ContactID,
-          AssetID: AssetID,
-          CaseSubject: CaseSubject,
-          CaseType: CaseType,
-          KCI_Flag: KCI_Flag,
-          IncomingChannel: IncomingChannel,
-          CaseStatus: CaseStatus,
-          CasePriority: CasePriority,
-          CustomerSeverity: CustomerSeverity,
-          CaseClosedDate: CaseClosedDate,
-          CaseNote: CaseNote,
-          SymptomCode: SymptomCode,
-          CaseResolution: CaseResolution,
-          Owner: parseInt(CreatedBy),
-          CreatedBy: parseInt(CreatedBy),
-          ProblemDescription: ProblemDescription,
-          CaseProductNote : CaseNoteProduct,
-          ...(Array.isArray(accessories) && accessories.length > 0 && {
-            accessory: {
-              create: accessories.map((acc) => ({
-                Accessories: acc.name,
-                Note: acc.note,
-                CT_SNCode: acc.code,
-              })),
-            },
-          }),
-        },
-    });
+    try {
+      const CaseID = await generateID("C-", "caseinformation", "CaseID")
+      //validation
+      if (!AssetID && !ContactID ) {
+          return NextResponse.json(
+              {
+                  success: false,
+                  message: "Asset/Contact selection is required to create a case.",
+              },
+              { status: 400 }
+          );
+      }
+
+      // Conflict rule: only one open case per Asset
+      if (AssetID) {
+        const openExisting = await prisma.caseinformation.findFirst({
+          where: { AssetID: AssetID, CaseStatus: 'Open' },
+          select: { CaseID: true }
+        });
+        if (openExisting) {
+          return NextResponse.json({
+            success: false,
+            message: `An OPEN case for this asset already exists (${openExisting.CaseID}).`,
+          }, { status: 409 });
+        }
+      }
+
+      const case_information = await prisma.caseinformation.create({
+          data:{
+            CaseID: CaseID,
+            SiteAccountID: SiteAccountID,
+            ContactID: ContactID,
+            AssetID: AssetID,
+            CaseSubject: CaseSubject,
+            CaseType: CaseType,
+            KCI_Flag: KCI_Flag,
+            IncomingChannel: IncomingChannel,
+            CaseStatus: CaseStatus,
+            CasePriority: CasePriority,
+            CustomerSeverity: CustomerSeverity,
+            CaseClosedDate: CaseClosedDate,
+            CaseNote: CaseNote,
+            SymptomCode: SymptomCode,
+            CaseResolution: CaseResolution,
+            Owner: parseInt(CreatedBy),
+            CreatedBy: parseInt(CreatedBy),
+            ProblemDescription: ProblemDescription,
+            CaseProductNote : CaseNoteProduct,
+            ...(Array.isArray(accessories) && accessories.length > 0 && {
+              accessory: {
+                create: accessories.map((acc) => ({
+                  Accessories: acc.name,
+                  Note: acc.note,
+                  CT_SNCode: acc.code,
+                })),
+              },
+            }),
+          },
+      });
 
   await notifySocket("case:created", {
     message: `Case ${case_information.CaseID} created`,
@@ -225,14 +246,16 @@ export async function POST(request) {
 
 
 
-    return NextResponse.json(
-        {
-            success: true,
-            message: "Case Created Successfully!",
-            data: case_information,
-        },
-        { 
-            status: 201
-        }
-    )
+      return NextResponse.json({
+          success: true,
+          message: "Case Created Successfully!",
+          data: case_information,
+      }, { status: 201 })
+    } catch (error) {
+      return NextResponse.json({
+        success: false,
+        message: "Failed to create case",
+        error: error.message
+      }, { status: 500 });
+    }
 }

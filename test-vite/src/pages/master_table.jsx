@@ -919,7 +919,7 @@ export const Case_table = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [caseData, setCaseData] = useState([]);
-  const [openClose, setOpenClose] = useState("Open");
+  const [openClose, setOpenClose] = useState("All");
 
   // 🔹 Filter states
   const [selectedHW, setSelectedHW] = useState("All");

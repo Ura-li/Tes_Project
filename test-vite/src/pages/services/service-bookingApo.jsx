@@ -22,7 +22,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { SelectBarRelated } from '../../components/sc-select'
+import { SearchCommandBlock, SelectBarRelated } from '../../components/sc-select'
 import { CalendarDays,  Lock, PlusCircle } from 'lucide-react'
 
 'use client'
@@ -33,11 +33,12 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import ApiCustomer from "@/api";
 import debounce from 'lodash.debounce';
 import Swal from 'sweetalert2';
-import { CaseField } from '../../components/quick-wo-input';
 import DatePicker from '../../components/date-picker';
 import { TabsBooking } from '../../components/tests/tab';
 
 import { getUserFromToken } from "@/lib/utils/auth";
+import CaseField from '@/components/CaseField';
+import { useAuth } from '@/context/auth-context';
 
 
 function formatDateForInput(dateString) {
@@ -53,7 +54,7 @@ function formatDateForInput(dateString) {
 
 
 export function ServiceBookingApo ({BookingId , woid}) {  
-  
+  const { user } = useAuth();
   const { bookingid } = useParams();
   const [tab, setTab] = useState("book_info");
   const [bookingData, setBookingData] = useState(null);
@@ -331,24 +332,44 @@ export function ServiceBookingApo ({BookingId , woid}) {
   }, 500); // 500ms delay
 
   useEffect(() =>{
-    console.log("sfsfssf",endTimeUserTime); 
-    console.log("sjhit statrt",startTimeUserTime); 
-    if(startTimeUserTime !== "" && endTimeUserTime !== ""){
-      const endTime = new Date(endTimeCustomerTime)
-      const startTime = new Date(startTimeCustomerTime)
-      const diffMs = endTime.getTime() - startTime.getTime();
-      const diffDays = Math.max(diffMs / (1000 * 60 * 60 * 24), 0); // convert ms to minutes, minimal 0
-      setDurationInMinutesUserTime(diffDays);
-      console.log("INI JALAN")
-      console.log("Start Time : ",startTimeUserTime)
-      console.log("End Time : ",endTimeUserTime)
-      // console.log("Difference Time : ",diffDays)
-      // setDurationInMinutesUserTime(endTimeCustomerTime)
-    }else{
+   if (startTimeUserTime && endTimeUserTime) {
+  const startTime = new Date(startTimeUserTime);
+  const endTime = new Date(endTimeUserTime);
 
-      setDurationInMinutesUserTime(null);
-    }
+  if (!isNaN(startTime) && !isNaN(endTime)) {   // pastikan valid date
+    const diffMs = endTime.getTime() - startTime.getTime();
+    const diffHours = Math.max(diffMs / (1000 * 60 * 60), 0);
+
+    setDurationInMinutesUserTime(diffHours);
+
+    console.log("Start Time : ", startTime);
+    console.log("End Time   : ", endTime);
+    console.log("Duration   : ", diffHours, "menit");
+  } else {
+    console.warn("Invalid Date:", startTimeUserTime, endTimeUserTime);
+  }
+}
   }, [startTimeUserTime, endTimeUserTime])
+
+  console.log("booking data is ther ",bookingData?.workorder?.caseinformation)
+
+
+  let canEditapo;
+  let canEditlg;
+  let canEditce;
+
+  if (user?.role === "admin") {
+    canEditapo = true;
+    canEditlg = true;
+    canEditce = true;
+  } else if (bookingData?.workorder?.caseinformation?.Owner) {
+    canEditapo = true;
+    canEditlg = true;
+    canEditce = true;
+    // canEditapo = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "apo" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "lg" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "ce";
+    // canEditlg = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "lg" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "ce" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "apo";
+    // canEditce = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "ce" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "apo" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "lg";
+  }
 
   return (
     <div>
@@ -398,9 +419,10 @@ export function ServiceBookingApo ({BookingId , woid}) {
         <TabsContent value="book_info" className="columns-2 space-y-4">
           <Card className="">
             <CardContent className="grid grid-cols-2 gap-3">
-              <CaseField label={"Name"} icon span={2}>
+              <CaseField label={"Name"} lock span={2}>
                 <Input
                   variant={"invisible"}
+                  placeholder="---"
                   value={
                     resourceId !== "" ||
                     bookingData?.bookingDetails?.[0]?.resource?.resourceId !==
@@ -410,9 +432,10 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 />
               </CaseField>
-              <CaseField label={"Resource"} span={2} open star>
+              <CaseField label={"Resource"} span={2} lock={!canEditapo} star>
                 <Input
                   variant={"invisible"}
+                  placeholder="---"
                   value={resourceName}
                   onChange={(e) => {
                     setResourceName(e.target.value);
@@ -420,7 +443,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }}
                 />
                 {searchResultsResource.length > 0 && (
-                  <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg max-h-60">
+                  <ul className="absolute z-10 w-[21em] mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg max-h-60">
                     {searchResultsResource.map((res) => (
                       <li
                         key={res.ResourceId}
@@ -443,14 +466,16 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   </ul>
                 )}
               </CaseField>
-                <CaseField label={"Account"} icon span={2}>
+                <CaseField label={"Account"} lock span={2}>
                   <Input
                     variant={"invisible"}
+                    placeholder="---"
                     value={accountName}
                     onChange={(e) => {
                       setAccountName(e.target.value);
                       // handleSearchAccount(e.target.value);
                     }}
+                    readOnly
                   />
                   {searchResultsAccount.length > 0 && (
                     <ul className="absolute z-10 w-full mt-1 bg-white border">
@@ -475,9 +500,10 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   )}
                 </CaseField>
               
-              <CaseField label={"Subk Technician Name"} span={2} open star>
+              <CaseField label={"Subk Technician Name"} span={2} lock={!canEditapo} star>
                 <Input
                   variant={"invisible"}
+                  placeholder="---"
                   value={subkTechnicianName}
                   onChange={(e) => {
                     setSubkTechnicianName(e.target.value);
@@ -502,10 +528,11 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   </ul>
                 )}
               </CaseField>
-              <CaseField label={"Subk Technician Learner ID"} open span={2}>
+              <CaseField label={"Subk Technician Learner ID"} lock={!canEditapo} span={2}>
                 <Input
                   variant={"invisible"}
                   value={subkTechnicianId}
+                  placeholder="---"
                   onChange={(e) => setSubkTechnicianId(e.target.value)}
                 />
                 {searchResultsSubkTechnicianLearner.length > 0 && (
@@ -526,20 +553,32 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   </ul>
                 )}
               </CaseField>
-              <CaseField label={"Booking Status"} icon span={2} star>
+              <CaseField label={"Booking Status"} lock span={2} star>
                 <Input
                   variant={"invisible"}
                   value={bookingStatus}
                   onChange={(e) => setBookingStatus(e.target.value)}
-                />
+                  hidden
+                /> 
+                <SearchCommandBlock
+                  value={bookingStatus}          
+                  onChange={setBookingStatus}
+                  options={[
+                    "A",
+                    "B",
+                    "C"
+                  ]}
+                >
+
+                </SearchCommandBlock>
               </CaseField>
-              <CaseField label={"Work Order"} icon span={2}>
+              <CaseField label={"Work Order"} lock span={2}>
                 <Input variant={"invisible"} value={workOrderNumber} readOnly />
               </CaseField>
               <div className="grid items-center grid-cols-3 col-span-3 p-3 ring-1 gap-2">
                 <CaseField
                   label={"Requested Date Time (costumer)"}
-                  icon
+                  lock
                   span={2}
                 >
                   <DatePicker
@@ -551,7 +590,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                 </CaseField>
                 <CaseField
                   label={"Guaranteed Fix Time (costumer)"}
-                  icon
+                  lock
                   span={2}
                 >
                   <DatePicker
@@ -564,7 +603,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                 label={"Do not Distrub"}
                 span={2}
                 childClass={" justify-center place-content-center flex"}
-                open
+                lock
               >
                 <Select
                   className=""
@@ -584,7 +623,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                 label={"Ce Schedule Change"}
                 span={2}
                 childClass={" justify-center place-content-center flex"}
-                open
+                lock
               >
                 <Select
                   className=""
@@ -609,7 +648,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
               <hr />
             </CardHeader>
             <CardContent className="grid items-center grid-cols-3 gap-5">
-              <CaseField label={'Total Duration'} span={2} open>
+              <CaseField label={'Total Duration'} span={2} lock={!canEditce}>
                 <Input
                     type="number"
                     value={totalBillableDurationInMinutes}
@@ -618,7 +657,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                     }
                   />
               </CaseField>
-              <CaseField label={'Total Duration in Progress'} span={2} open>
+              <CaseField label={'Total Duration in Progress'} span={2} lock={!canEditce}>
                 <Input
                   type="number"
                   value={totalInProgressDurationInMinutes}
@@ -627,7 +666,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 />
               </CaseField>
-              <CaseField label={'Total Break Duration'} span={2} open>
+              <CaseField label={'Total Break Duration'} span={2} lock={!canEditce}>
                 <Input
                   type="number"
                   value={totalBreakDurationInMinutes}
@@ -647,7 +686,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
               <hr />
             </CardHeader>
             <CardContent className="grid grid-cols-3 gap-6">
-              <CaseField label={"Start Time"} span={2} star open>
+              <CaseField label={"Start Time"} span={2} star lock={!canEditapo}>
                 <DatePicker
                   value={
                     startTimeUserTime ? new Date(startTimeUserTime) : ""
@@ -657,7 +696,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"End Time"} span={2} star open>
+              <CaseField label={"End Time"} span={2}  lock={!canEditapo}>
                 {/* {console.log("END TIME IN RETURN LOOPING", endTimeUserTime)} */}
                 <DatePicker
                   value={endTimeUserTime ? new Date(endTimeUserTime) : ""}
@@ -666,17 +705,17 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"Duration"} span={2} star open>
-                <div className='flex flex-row'>
+              <CaseField label={"Duration"} span={2}  lock={!canEditapo}>
+                <div className='flex flex-row gap-2'>
                 <Input
                   type="number"
                   value={durationInMinutesUserTime}
                   onChange={(e) => {setDurationInMinutesUserTime(e.target.value ? parseInt(e.target.value, 10) : null)}}
                 />
-                <Label>Hari</Label>
+                <Label>Hours</Label>
                 </div>
               </CaseField>
-              <CaseField label={"Estimated Arrival Time"} span={2} star open>
+              <CaseField label={"Estimated Arrival Time"} span={2} lock={!canEditapo}>
                 <DatePicker
                   value={
                     estimatedArrivalTimeUserTime
@@ -688,7 +727,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"Actual Arrival Time"} span={2} star open>
+              <CaseField label={"Actual Arrival Time"} span={2}  lock={!canEditlg}>
                 <DatePicker
                   
                   value={
@@ -720,25 +759,25 @@ export function ServiceBookingApo ({BookingId , woid}) {
               <hr />
             </CardHeader>
             <CardContent className="grid items-center grid-cols-3 gap-6">
-              <CaseField label={'Start Time (Customer)'} span={2} star open>
+              <CaseField label={'Start Time (Customer)'} span={2}  lock={!canEditapo}>
                 <DatePicker 
                   value={startTimeCustomerTime ? new Date(startTimeCustomerTime) : ""}
                   onChange={setStartTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'End TIme (Customer)'} span={2} star open>
+              <CaseField label={'End TIme (Customer)'} span={2}  lock={!canEditapo}>
                 <DatePicker 
                   value={endTimeCustomerTime ? new Date(endTimeCustomerTime) : ""}
                   onChange={setEndTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'Estimated Arrival Time (Customer)'} span={2} star  open>
+              <CaseField label={'Estimated Arrival Time (Customer)'} span={2}   lock={!canEditapo}>
                 <DatePicker 
                   value={estimatedArrivalTimeCustomerTime ? new Date(estimatedArrivalTimeCustomerTime) : ""}
                   onChange={setEstimatedArrivalTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'Actual Arrival Time (Customer)'} span={2} star open>
+              <CaseField label={'Actual Arrival Time (Customer)'} span={2}  lock={!canEditlg}>
                 <DatePicker 
                   value={actualArrivalTimeCustomerTime ? new Date(actualArrivalTimeCustomerTime) : ""}
                   onChange={setActualArrivalTimeCustomerTime}
@@ -753,7 +792,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
               <hr />
             </CardHeader>
             <CardContent className="grid grid-cols-3 gap-6">
-              <CaseField label={'Schedule Jeopardy'} span={2} icon>
+              <CaseField label={'Schedule Jeopardy'} span={2} lock>
               <Input
                   type="text"
                   value={scheduleJeopardy}
@@ -761,7 +800,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   readOnly
                 />
               </CaseField>
-              <CaseField label={'Schedule Jeopardy Time'} span={2} icon>
+              <CaseField label={'Schedule Jeopardy Time'} span={2} lock>
                 <DatePicker value={
                     scheduleJeopardyTime
                       ? new Date(scheduleJeopardyTime)

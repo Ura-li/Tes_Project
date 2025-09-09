@@ -24,10 +24,11 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Plus, Trash2, Image as ImageIcon, Search } from "lucide-react";
+import { Loader2, Plus, Trash2, Image as ImageIcon, Search, Building, User, File, LucideLaptop } from "lucide-react";
 import { format } from "date-fns";
-import { SelectBarState } from "@/components/sc-select";
+import { ComboboxDemo, SearchCommandBlock, SelectBarState } from "@/components/sc-select";
 import { toast } from "sonner";
+import { formatDateForInput } from "@/lib/utils";
 
 
 
@@ -185,7 +186,9 @@ function getUserFromTokenSafe() {
     const raw = localStorage.getItem("token");
     if (!raw) return null;
     const payload = JSON.parse(atob(raw.split(".")[1]));
-    return { id: payload?.id ?? payload?.userId };
+    return { id: payload?.id ?? payload?.userId,
+      user: payload
+     };
   } catch {
     return null;
   }
@@ -247,7 +250,7 @@ export default function NewCaseForm() {
   const [contactResults, setContactResults] = useState([]);
 
   const [contactNotFound, setContactNotFound] = useState(false);
-  
+
   /** @type {[SiteAccount[], (val: SiteAccount[]) => void]} */
   const [companyResults, setCompanyResults] = useState([]);
   const [companyNotFound, setCompanyNotFound] = useState(false);
@@ -265,7 +268,12 @@ export default function NewCaseForm() {
   const [contactCity, setContactCity] = useState("");
   const [contactCountry, setContactCountry] = useState("");
   const [contactZipPostalCode, setContactZipPostalCode] = useState("");
-  
+
+  const [usePIC, setUsePIC] = useState(false);
+  const [contactPICName, setContactPICName] = useState("");
+  const [contactPICEmail, setContactPICEmail] = useState("");
+  const [contactPICPhone, setContactPICPhone] = useState("");
+
   const [provContact, setProvContact] = useState([]);
   const [cityContact, setCityContact] = useState([]);
 
@@ -307,10 +315,15 @@ export default function NewCaseForm() {
   const [isNewAsset, setIsNewAsset] = useState(false);
   const [isNewContact, setIsNewContact] = useState(false);
   const [isNewCompany, setIsNewCompany] = useState(false);
-  
 
-  
+
+
   // Warranty
+  const [warrantySearchValue, setWarrantySearchValue] = useState("");
+  const [warrantyOptions, setWarrantyOptions] = useState([]);
+
+  const [selectWarrantyCodeStatus, setSelectWarrantyCodeStatus] = useState("")
+  const [selectWarrantyStatus, setSelectWarrantyStatus] = useState("")
   const [warrantyStatus, setWarrantyStatus] = useState("");
   const [eowDate, setEowDate] = useState("");
 
@@ -354,7 +367,7 @@ export default function NewCaseForm() {
           setAssetNotFound(list.length === 0);
           setShowProductCard(true);
         } catch (e) {
-          console.error("Search asset failed",   e);
+          console.error("Search asset failed", e);
           setAssetResults([]);
           setAssetNotFound(true);
         }
@@ -431,6 +444,32 @@ export default function NewCaseForm() {
   );
 
   /**
+   * Search Warranty OTC Code (debounced).
+   * @param {string} q
+   */
+  const fetchWarrantyStatus = useMemo(
+    () =>
+      debounce(async (q) => {
+        try {
+          const response = await ApiCustomer.get(`/api/otc-code`,{
+            params: { search: q}
+          })
+          const list = response.data?.data || []
+          console.log("WArranty Lis : ", list)
+          const option = response.data?.data.map((res)=>({
+            label: res.Description,
+            value: res.OTCCode
+          }))
+          console.log("warranry List map : ",option)
+          setWarrantyOptions(option);
+        } catch (error) {
+          console.error("Failed fetch warranty:", error);
+          setWarrantyOptions([]);
+        }
+      }, 400)
+  )
+
+  /**
    * Search products type.
    * @param {string} q
    */
@@ -453,213 +492,253 @@ export default function NewCaseForm() {
       const response = await ApiCustomer.get(`/api/product-type`, {
         params: { ProductTower: tower, ProductGroup: group },
       });
-      console.log("Product Type List : ",response);
+      console.log("Product Type List : ", response);
       setProductTypeList(response.data.data || []);
     } catch (err) {
       setProductTypeList([]);
     }
   };
 
-    // ----------------------------
-    // Effects
-    // ----------------------------
+  
 
+  // ----------------------------
+  // Effects
+  // ----------------------------
 
-    // Auto-fill company when company field selected
-    useEffect(() => {
-      if(selectedCompany?.Company){
-        const cm = selectedCompany;
-        setCompanyName(cm.Company);
-        setCompanyEmail(cm.Email);
-        setCompanyPhone(cm.PrimaryPhone);
-        setCompanyWhatsapp(cm.WhatsappNo);
-        setCompanyAddressLine1(cm.AddressLine1);
-        
-        //emsifa reverse engineer
-        // Province (convert string -> object)
-        const provObj = provCompany.find((p) => p.name === cm.StateProvince);
-        setCompanyStateProvince(provObj ? provObj : { id: "", name: cm.StateProvince });
-
-        // City (convert string -> object) -> city list harus sesuai province id
-        if (provObj?.id) {
-          (async () => {
-            const res = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provObj.id}.json`);
-            const cityList = await res.json();
-            const cityObj = cityList.find((c) => c.name === cm.City);
-            setCompanyCity(cityObj ? cityObj : { id: "", name: cm.City });
-          })();
-        } else {
-          setCompanyCity({ id: "", name: cm.City });
-        }
-
-        setCompanyCountry(cm.Country);
-        setCompanyZipPostalCode(cm.ZipPostalCode);
+  
+  useEffect(() => {
+    if (warrantyOptions.length > 0 && warrantySearchValue) {
+      const matched = warrantyOptions.find(
+        (opt) => opt.value === warrantySearchValue
+      );
+      if (!matched) {
+        // Option tidak ditemukan, bisa auto-add atau log warning
+        console.warn("Warranty option not found:", warrantySearchValue);
       }
-    },[selectedCompany])
+    }
+  }, [warrantyOptions, warrantySearchValue]);
 
-    // Auto-fill Contact when Company field selected 
-    useEffect(() =>{
-      (async () => {
-        if (!selectedCompany) return;
+  // Auto-fill company when company field selected
+  useEffect(() => {
+    if (selectedCompany?.Company) {
+      setShowCompanySection(true);
+      const cm = selectedCompany;
+      setCompanyName(cm.Company);
+      setCompanyEmail(cm.Email);
+      setCompanyPhone(cm.PrimaryPhone);
+      setCompanyWhatsapp(cm.WhatsappNo);
+      setCompanyAddressLine1(cm.AddressLine1);
+
+      //emsifa reverse engineer
+      // Province (convert string -> object)
+      const provObj = provCompany.find((p) => p.name === cm.StateProvince);
+      setCompanyStateProvince(provObj ? provObj : { id: "", name: cm.StateProvince });
+
+      // City (convert string -> object) -> city list harus sesuai province id
+      if (provObj?.id) {
+        (async () => {
+          const res = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provObj.id}.json`);
+          const cityList = await res.json();
+          const cityObj = cityList.find((c) => c.name === cm.City);
+          setCompanyCity(cityObj ? cityObj : { id: "", name: cm.City });
+        })();
+      } else {
+        setCompanyCity({ id: "", name: cm.City });
+      }
+
+      setCompanyCountry(cm.Country);
+      setCompanyZipPostalCode(cm.ZipPostalCode);
+    }
+  }, [selectedCompany])
+
+  // Auto-fill Contact when Company field selected 
+  useEffect(() => {
+    (async () => {
+      if (!selectedCompany) return;
+      try {
+        const resContactAffiliated = await ApiCustomer.get(`/api/contact-information?SiteAccountID=${selectedCompany.SiteAccountID}`);
+        const listContactAffiliated = resContactAffiliated.data.data || []
+        setContactResults(listContactAffiliated);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, [selectedCompany])
+
+  // Auto-fill product when asset selected
+  useEffect(() => {
+    if (selectedAsset?.product_information) {
+      console.log("selected asset ", selectedAsset)
+      const p = selectedAsset.product_information;
+      setSelectedProduct(p);
+      setProductNo(p.ProductNumber);
+      setProductName(p.ProductName);
+      setProductLine(p.ProductLine || "");
+      setVendor(p.vendor || "");
+      if (p.product_type) {
+        setProductTower(p.product_type.ProductTower || "");
+        setProductGroup(p.product_type.ProductGroup || "");
+        setProductTypeId(p.product_type.ProductTypeID?.toString() || "");
+      } else {
+        setProductTypeId(p.ProductTypeID?.toString() || "");
+      }
+      setShowProductCard(true);
+    }
+  }, [selectedAsset]);
+
+  //auto fill waranty when asset selected
+  useEffect(() => {
+    if(selectedAsset?.Warranty_Status){
+      console.log("EOW DATE :",selectedAsset.EOW_Date)
+      if (selectedAsset.EOW_Date) {
+        console.log("EOW DATE :",selectedAsset.EOW_Date)
+        console.log("FORMATTED EOW DATE :",formatDateForInput(selectedAsset.EOW_Date))
+        setEowDate(formatDateForInput(selectedAsset.EOW_Date));
+      }
+
+      // Fetch warranty options, lalu set value
+      const warrantyCode = selectedAsset.Warranty_Status;
+      fetchWarrantyStatus(warrantyCode); // << fetch list berdasarkan kode yang sudah ada
+      setWarrantySearchValue(warrantyCode);
+    }
+  }, [selectedAsset])
+
+  // Auto-fill customer when asset selected (if asset has owner)
+  useEffect(() => {
+    (async () => {
+      if (!selectedAsset) return;
+      if (selectedAsset?.ContactID) {
         try {
-          const resContactAffiliated = await ApiCustomer.get(`/api/contact-information?SiteAccountID=${selectedCompany.SiteAccountID}`);
-          const listContactAffiliated = resContactAffiliated.data.data || []
-          setContactResults(listContactAffiliated); 
-        } catch (err) {
-          console.error(err);
-        }
-      })();
-    },[selectedCompany])
+          const [cRes] = await Promise.all([
+            ApiCustomer.get(`/api/contact-information/${selectedAsset.ContactID}`),
+          ]);
+          const c = cRes.data?.data;
+          if (c) {
+            setSelectedContact(c);
+            if (c.SiteAccountID) {
+              setShowCompanySection(true);
+              const sa = await ApiCustomer.get(`/api/site_account/${c.SiteAccountID}`);
+              const comp = sa.data?.data;
 
-    // Auto-fill product when asset selected
-    useEffect(() => {
-      if (selectedAsset?.product_information) {
-        console.log("selected asset ",selectedAsset)
-        const p = selectedAsset.product_information;
-        setSelectedProduct(p);
-        setProductNo(p.ProductNumber);
-        setProductName(p.ProductName);
-        setProductLine(p.ProductLine || "");
-        setVendor(p.vendor || "");
-        if (p.product_type) {
-          setProductTower(p.product_type.ProductTower || "");
-          setProductGroup(p.product_type.ProductGroup || "");
-          setProductTypeId(p.product_type.ProductTypeID?.toString() || "");
-        } else {
-          setProductTypeId(p.ProductTypeID?.toString() || "");
-        }
-        setShowProductCard(true);
-      }
-    }, [selectedAsset]);
-
-    // Auto-fill customer when asset selected (if asset has owner)
-    useEffect(() => {
-      (async () => {
-        if (!selectedAsset) return;
-        if (selectedAsset?.ContactID) {
-          try {
-            const [cRes] = await Promise.all([
-              ApiCustomer.get(`/api/contact-information/${selectedAsset.ContactID}`),
-            ]);
-            const c = cRes.data?.data;
-            if (c) {
-              setSelectedContact(c);
-              if (c.SiteAccountID) {
-                setShowCompanySection(true);
-                const sa = await ApiCustomer.get(`/api/site_account/${c.SiteAccountID}`);
-                const comp = sa.data?.data;
-                
-                if (comp) setSelectedCompany(comp);
-              }else{
-                setSelectedCompany([]);
-              }
+              if (comp) setSelectedCompany(comp);
+            } else {
+              setSelectedCompany([]);
             }
-          } catch (e) {
-            console.error("Autofill customer failed", e);
-          }
-        }
-      })();
-    }, [selectedAsset]);
-
-    // Enforce DOA case-type if another open case exists for the same asset
-    const [mustDOA, setMustDOA] = useState(false);
-    useEffect(() => {
-      (async () => {
-        if (!selectedAsset) return;
-        try {
-          const res = await ApiCustomer.get(`/api/case-information`, {
-            params: { CaseStatus: "Open" },
-          });
-          const list = res.data?.data ?? [];
-          const hasOpen = list.some((c) => c?.caseinformation?.AssetID === selectedAsset.AssetID);
-          if (hasOpen) {
-            setMustDOA(true);
-            setCaseType("DOA");
-          } else {
-            setMustDOA(false);
           }
         } catch (e) {
-          console.error("Check open case failed", e);
+          console.error("Autofill customer failed", e);
         }
-      })();
-    }, [selectedAsset]);
-    
-
-    // Auto-fill customer when customer field selected
-    useEffect(() =>{
-      if(selectedContact?.ContactID){
-        const ct = selectedContact;
-        setContactSalutation(ct.Salutation);
-        setContactFirstName(ct.FirstName);
-        setContactLastName(ct.LastName);
-        setContactEmail(ct.Email);
-        setContactPhone(ct.Phone);
-        setContactMobile(ct.Mobile);
-        setContactAddressLine1(ct.AddressLine1);
-      
-
-        // setContactStateProvince(ct.StateProvince || "");
-        // setContactCity(ct.City || "");
-
-        const provObj = provContact.find((p) => p.name === ct.StateProvince);
-        setContactStateProvince(provObj ? provObj : { id: "", name: ct.StateProvince });
-        console.log(provObj)
-        console.log(ct.StateProvince)
-
-        // City (convert string -> object) -> city list harus sesuai province id
-        if (provObj?.id) {
-          (async () => {
-            const res = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provObj.id}.json`);
-            const cityList = await res.json();
-            const cityObj = cityList.find((c) => c.name === ct.City);
-            setContactCity(cityObj ? cityObj : { id: "", name: ct.City });
-          })();
-        } else {
-          setContactCity({ id: "", name: ct.City });
-        }
-
-        
-        setContactCountry(ct.Country);
-        setContactZipPostalCode(ct.ZipPostalCode);
       }
-    },[selectedContact])
+    })();
+  }, [selectedAsset]);
 
-
-    // Auto-fill Company when contact selected (if any)
-    useEffect(() => {
-      (async () => {
-        if (!selectedContact) return;
-        try { 
-          if (selectedContact?.SiteAccountID) {
-            setShowCompanySection(true);
-            const sa = await ApiCustomer.get(`/api/site_account/${selectedContact.SiteAccountID}`);
-            const comp = sa.data?.data;
-            
-            if (comp) setSelectedCompany(comp);
-          }else{
-            setSelectedCompany([]);
-          }  
-        } catch (err) {
-          console.error(err);
-          
+  // Enforce DOA case-type if another open case exists for the same asset
+  const [mustDOA, setMustDOA] = useState(false);
+  useEffect(() => {
+    (async () => {
+      if (!selectedAsset) return;
+      try {
+        const res = await ApiCustomer.get(`/api/case-information`, {
+          params: { CaseStatus: "Open" },
+        });
+        const list = res.data?.data ?? [];
+        const hasOpen = list.some((c) => c?.caseinformation?.AssetID === selectedAsset.AssetID);
+        if (hasOpen) {
+          setMustDOA(true);
+          setCaseType("DOA");
+        } else {
+          setMustDOA(false);
         }
-      })();
-    }, [selectedContact])
+      } catch (e) {
+        console.error("Check open case failed", e);
+      }
+    })();
+  }, [selectedAsset]);
 
-    // Auto-fill product when contact selected (asset owned by contact)
-    useEffect(() => {
-      (async () => {
-        if (!selectedContact) return;
-        try {
-          const checkAssetAffiliatedContact = await ApiCustomer.get(`/api/asset-information?ContactID=${selectedContact.ContactID}`)
-          const listAffiliatedAsset = checkAssetAffiliatedContact.data.data || [];
-          console.log(selectedContact, listAffiliatedAsset)
-          setAssetResults(listAffiliatedAsset);
-        } catch (err) {
-          console.error(err);
+
+  // Auto-fill customer when customer field selected
+  useEffect(() => {
+    if (selectedContact?.ContactID) {
+      const ct = selectedContact;
+      setContactSalutation(ct.Salutation);
+      setContactFirstName(ct.FirstName);
+      setContactLastName(ct.LastName);
+      setContactEmail(ct.Email);
+      setContactPhone(ct.Phone);
+      setContactMobile(ct.Mobile);
+      setContactAddressLine1(ct.AddressLine1);
+
+      if(ct.PIC_Name){
+        setUsePIC(true);
+        console.log("DATA CT : ",ct)
+        setContactPICName(ct.PIC_Name)
+        setContactPICEmail(ct.PIC_Email)
+        setContactPICPhone(ct.PIC_Phone)
+      }
+
+
+      // setContactStateProvince(ct.StateProvince || "");
+      // setContactCity(ct.City || "");
+
+      const provObj = provContact.find((p) => p.name === ct.StateProvince);
+      setContactStateProvince(provObj ? provObj : { id: "", name: ct.StateProvince });
+      console.log(provObj)
+      console.log(ct.StateProvince)
+
+      // City (convert string -> object) -> city list harus sesuai province id
+      if (provObj?.id) {
+        (async () => {
+          const res = await fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provObj.id}.json`);
+          const cityList = await res.json();
+          const cityObj = cityList.find((c) => c.name === ct.City);
+          setContactCity(cityObj ? cityObj : { id: "", name: ct.City });
+        })();
+      } else {
+        setContactCity({ id: "", name: ct.City });
+      }
+
+
+      setContactCountry(ct.Country);
+      setContactZipPostalCode(ct.ZipPostalCode);
+    }
+  }, [selectedContact])
+
+
+  // Auto-fill Company when contact selected (if any)
+  useEffect(() => {
+    (async () => {
+      if (!selectedContact) return;
+      try {
+        if (selectedContact?.SiteAccountID) {
+          setShowCompanySection(true);
+          const sa = await ApiCustomer.get(`/api/site_account/${selectedContact.SiteAccountID}`);
+          const comp = sa.data?.data;
+
+          if (comp) setSelectedCompany(comp);
+        } else {
+          setSelectedCompany([]);
         }
-      })()
-    }, [selectedContact]);
+      } catch (err) {
+        console.error(err);
+
+      }
+    })();
+  }, [selectedContact])
+
+  // Auto-fill product when contact selected (asset owned by contact)
+  useEffect(() => {
+    (async () => {
+      if (!selectedContact) return;
+      try {
+        const checkAssetAffiliatedContact = await ApiCustomer.get(`/api/asset-information?ContactID=${selectedContact.ContactID}`)
+        const listAffiliatedAsset = checkAssetAffiliatedContact.data.data || [];
+        console.log(selectedContact, listAffiliatedAsset)
+        setAssetResults(listAffiliatedAsset);
+      } catch (err) {
+        console.error(err);
+      }
+    })()
+  }, [selectedContact]);
 
   // ----------------------------
   // EMSIFA Province / City (ID only)
@@ -680,14 +759,15 @@ export default function NewCaseForm() {
         const json = await res.json();
         setProvContact(json ?? []);
         setProvCompany(json ?? []);
-        console.log("Province :",res)
-        console.log("json :",json)
+        console.log("Province :", res)
+        console.log("json :", json)
       } catch (e) {
         console.warn("EMSIFA provinces fetch failed");
       }
     })();
+    fetchWarrantyStatus();
   }, []);
-  
+
   useEffect(() => {
     (async () => {
       if (!contactStateProvince?.id) {
@@ -742,7 +822,7 @@ export default function NewCaseForm() {
    */
   const removeAccessory = (id) =>
     setAccessories((s) => (s.length === 1 ? s : s.filter((r) => r.id !== id)));
-  
+
   /**
    * Update accessory field.
    * @param {string} id
@@ -766,6 +846,34 @@ export default function NewCaseForm() {
   };
 
   // ----------------------------
+  // Company <- Contact copier
+  // ----------------------------
+  const copyCompanyFromContact = () => {
+    // Basic fields
+    setCompanyEmail(contactEmail || "");
+    setCompanyPhone(contactPhone || "");
+    setCompanyWhatsapp(contactMobile || "");
+    setCompanyAddressLine1(contactAddressLine1 || "");
+    setCompanyCountry(contactCountry || "");
+    setCompanyZipPostalCode(contactZipPostalCode || "");
+
+    // Province/City are objects used by ComboboxDemo; reuse the selected contact objects
+    // This also triggers city list fetch effect for company when province has an id
+    setCompanyStateProvince(contactStateProvince || { id: "", name: "" });
+    setCompanyCity(contactCity || { id: "", name: "" });
+  };
+
+  // ----------------------------
+  // PIC <- Contact copier
+  // ----------------------------
+  const copyPICFromContact = () => {
+    setContactPICName(`${contactFirstName} ${contactLastName}`.trim());
+    setContactPICEmail(contactEmail || "");
+    setContactPICPhone(contactPhone || "");
+  };
+
+
+  // ----------------------------
   // Create Case
   // ----------------------------
 
@@ -778,6 +886,47 @@ export default function NewCaseForm() {
       alert("Please select or Create both an Asset and a Contact before creating a case.");
       return;
     }
+    if(isNewAsset && (!isNewProduct && !selectedProduct)){
+      toast.warning("Please select or Create Product No before creating new asset")
+      return
+    }
+    if (usePIC && (!contactPICName || !contactPICEmail || !contactPICPhone)) {
+      toast.warning("Mohon lengkapi data PIC jika checkbox 'Gunakan PIC' dicentang.");
+      return;
+    }
+    if (!problemDesc || !caseSubject) {
+      toast.custom((id) => (
+        <div style={{ padding: "1rem", background: "#333", color: "#fff", borderRadius: "8px" }}>
+          <strong>!! Problem description or casesubject undefined</strong>
+          <p>Please fill the require column.</p>
+          <button onClick={() => toast.dismiss(id)}>Close</button>
+        </div>
+      ));
+
+      return;
+    }
+
+    //failsafe is warranty
+    if(!warrantySearchValue) {
+      toast("Warranty tidak valid")
+      return;
+    }
+
+
+    /**
+     * TODO : (FOR SLAMET)
+     * ADDING A In Warranty Group
+     */
+    if(warrantySearchValue === "02N"){
+      const today = new Date();
+      const eow = new Date(eowDate);
+
+      if (eow < today.setHours(0, 0, 0, 0)) {
+        toast.warning("Warranty tidak valid: EOW date sudah lewat.");
+        return;
+      }
+    }
+    
     setLoading(true);
     try {
       const user = getUserFromTokenSafe();
@@ -788,12 +937,12 @@ export default function NewCaseForm() {
       );
 
       let assetId = selectedAsset?.AssetID;
-      let productId = selectedProduct?.ProductNumber;
+      let productId = selectedProduct?.ProductNumber || productNo;
       let companyId = selectedCompany?.SiteAccountID;
       let contactId = selectedContact?.ContactID;
-      
-      if(isNewProduct){
-        const productRes = await ApiCustomer.post("/api/product-information",{
+
+      if (isNewProduct) {
+        const productRes = await ApiCustomer.post("/api/product-information", {
           ProductNumber: productNo,
           ProductName: productName,
           ProductLine: productLine,
@@ -802,28 +951,32 @@ export default function NewCaseForm() {
         })
         productId = productRes.data?.data?.ProductNumber
       }
-
-      
-
-      if(isNewContact && showCompanySection){
-        const companyRes = await ApiCustomer.post("/api/site_account", {
-          Company: companyName,
-          Email: companyEmail,
-          PrimaryPhone: companyPhone,
-          WhatsappNo: companyWhatsapp,
-          AddressLine1: companyAddressLine1,
-          City: companyCity.name, // --> emsifa
-          StateProvince: companyStateProvince.name, // --> emsifa
-          Country: companyCountry,
-          ZipPostalCode: companyZipPostalCode
-        })
-        companyId = companyRes.data?.data?.SiteAccountID;
+      if (isNewContact && (showCompanySection)) {
+        if(selectedCompany) {
+          companyId = companyId;
+        }else{
+          console.log("TIS IS A NEW COMPANY")
+          const companyRes = await ApiCustomer.post("/api/site_account", {
+            Company: companyName,
+            Email: companyEmail,
+            PrimaryPhone: companyPhone,
+            WhatsappNo: companyWhatsapp,
+            AddressLine1: companyAddressLine1,
+            City: companyCity.name, // --> emsifa
+            StateProvince: companyStateProvince.name, // --> emsifa
+            Country: companyCountry,
+            ZipPostalCode: companyZipPostalCode
+          })
+          companyId = companyRes.data?.data?.SiteAccountID;
+        };
       }
 
-      
 
-      if(isNewContact){
-        const contactRes = await ApiCustomer.post("/api/contact-information",{
+
+      if (isNewContact) {
+        console.log("TIS IS A NEW Contact")
+        if(usePIC) console.log("TIS IS A PIC")
+        const contactRes = await ApiCustomer.post("/api/contact-information", {
           SiteAccountID: companyId,
           Salutation: contactSalutation,
           FirstName: contactFirstName,
@@ -835,29 +988,49 @@ export default function NewCaseForm() {
           City: contactCity.name, // --> emsifa
           StateProvince: contactStateProvince.name, // --> emsifa
           Country: contactCountry,
-          ZipPostalCode: contactZipPostalCode
+          ZipPostalCode: contactZipPostalCode,
+          PIC_Name: contactPICName,
+          PIC_Email: contactPICEmail,
+          PIC_Phone: contactPICPhone
         })
         contactId = contactRes.data?.data?.ContactID;
       }
 
-      if(isNewAsset){
-        // const [assetContactId, setAssetContactId] = useState(null)
-        // const [assetSiteAccountId, setAssetSiteAccountId] = useState(null)
-        // if(showCompanySection && isNewContact) {
-        //   setAssetSiteAccountId(companyId);
-        // } else if(selectedCompany.SiteAccountID) { setAssetSiteAccountId(selectedCompany?.SiteAccountID) }
+      if(!isNewContact && usePIC) {
+        console.log("UPDATE PIC")
+        await ApiCustomer.patch(`/api/contact-information/${contactId}`, {
+          PIC_Name: contactPICName,
+          PIC_Email: contactPICEmail,
+          PIC_Phone: contactPICPhone
+        })
+      }
 
-        // if(isNewContact) { 
-        //   setAssetContactId(contactId); 
-        // } else if(selectedContact.ContactID) { setAssetContactId(selectedContact?.ContactID) }
+      if (isNewAsset) {
+        console.log(warrantySearchValue)
+        console.log(eowDate)
         const assetRes = await ApiCustomer.post("/api/asset-information", {
           SerialNumber: serialQuery,
           ProductNumber: productId,
           ContactID: contactId ?? null ,
-          SiteAccountID: companyId ?? null
+          SiteAccountID: companyId ?? null,
+          Warranty_Status: warrantySearchValue,
+          EOW_Date: eowDate ? new Date(eowDate).toISOString() : null
+          
         })
+        
         assetId = assetRes.data?.data?.AssetID
       }
+
+      if(!isNewAsset && warrantySearchValue) {
+        console.log("UPDATE WARRANTY")
+        await ApiCustomer.patch(`/api/asset-information/${assetId}`, {
+          Warranty_Status: warrantySearchValue,
+          EOW_Date: eowDate ? new Date(eowDate).toISOString() : null
+        })
+      }
+
+
+      
 
       const payload = {
         AssetID: assetId,
@@ -867,7 +1040,7 @@ export default function NewCaseForm() {
         CaseType: caseType,
         KCI_Flag: kciFlag,
         IncomingChannel: "Email",
-        CaseStatus: "Open",
+        CaseStatus: "New",
         CasePriority: "Medium",
         CustomerSeverity: "Normal",
         CaseClosedDate: null,
@@ -881,6 +1054,8 @@ export default function NewCaseForm() {
       };
 
       
+      console.log(payload);
+
       const res = await ApiCustomer.post("/api/case-information", payload);
       const caseId = res.data?.data?.CaseID;
 
@@ -913,6 +1088,25 @@ export default function NewCaseForm() {
         console.warn("ActionLog failed", e);
       }
 
+      //case note
+      try {
+        const userData = user?.user;
+        console.log("CASE NOT RUNNING")
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          CaseID: `${caseId}`,
+          LogTye: 'NotesLog',
+          ActionType: 'Initial',
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `${problemDesc}`,
+          CreatedBy: user?.id
+        })
+      } catch (error) {
+        console.warn("Case Note failed, ", error)
+      }
+      // console.log(user);
+
+      toast("succcess");
       // Navigate detail
       navigate(`/app/case/${caseId}`);
     } catch (e) {
@@ -931,479 +1125,554 @@ export default function NewCaseForm() {
   // ----------------------------
 
   return (
-    <div className="bg-[#F8F9FA] mx-auto  p-6 space-y-8">
+    <div className="bg-[#F8F9FA] mx-auto  p-2 space-y-2">
       {/* Header */}
       {/* <div className="flex items-center justify-between pb-4 border-b"> */}
-      <div className="sticky top-[3.25rem] z-30  bg-[#0077B6] rounded-b-xl border-b p-3 flex flex-wrap gap-2 justify-between">
+      {/* <div className="sticky top-[3.25rem] z-30  bg-[#0077B6] rounded-b-xl border-b p-3 flex flex-wrap gap-2 justify-between">
         <h1 className="text-2xl font-bold ">Create Case </h1>
-          <div className="flex gap-4">
-            <a href="#case"><Badge className={'p-2 hover:bg-secondary  rounded-lg border border-cyan-400 px-4 py-2 font-semibold text-cyan-400'} variant="outline">Case</Badge></a>
-            <a href="#customer"><Badge className={'p-2 hover:bg-secondary  rounded-lg border border-cyan-400 px-4 py-2 font-semibold text-cyan-400'} variant="outline">Customer</Badge></a>
-            <a href="#product"><Badge className={'p-2 hover:bg-secondary  rounded-lg border border-cyan-400 px-4 py-2 font-semibold text-cyan-400'} variant="outline">Product</Badge></a>
-            <a href="#warranty"><Badge className={'p-2 hover:bg-secondary  rounded-lg border border-cyan-400 px-4 py-2 font-semibold text-cyan-400'} variant="outline">Warranty</Badge></a>
-            <a href="#accessories"><Badge className={'p-2 hover:bg-secondary  rounded-lg border border-cyan-400 px-4 py-2 font-semibold text-cyan-400'} variant="outline">Accessories</Badge></a>
-            <a href="#photos"><Badge className={'p-2 hover:bg-secondary  rounded-lg border border-cyan-400 px-4 py-2 font-semibold text-cyan-400'} variant="outline">Photos</Badge></a>
-            <a href="#notes"><Badge className={'p-2 hover:bg-secondary  rounded-lg border border-cyan-400 px-4 py-2 font-semibold text-cyan-400'} variant="outline">Notes</Badge></a>
-          </div>
-        </div>
-      {/* </div> */}
       
+      </div> */}
+      {/* </div> */}
 
-      <div className="grid grid-cols-12 gap-6">
-        {/* LEFT MAIN FORM */}
-        <div className="col-span-12 lg:col-span-9 space-y-8">
-          {/* Quick Search */}
-          <Card>
-            <CardHeader className="flex items-center gap-2 border-b pb-3">
-              <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">0</div>
-              <div>
-                <CardTitle>Quick Search</CardTitle>
-                <CardDescription>Mulai dari Serial Number atau Customer untuk auto-fill.</CardDescription>
+
+
+        {/* Quick Search */}
+        <Card>
+
+          <CardContent className="pt-4 grid md:grid-cols-2 gap-6">
+            {/* Serial Number Search */}
+            <div className="space-y-2">
+              <Label>Serial Number</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Type serial number..."
+                  value={serialQuery}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setSerialQuery(v);
+                    searchAsset(v);
+                  }}
+                />
+                <Button variant="outline" type="button" onClick={() => searchAsset.flush()}>
+                  <Search className="w-4 h-4" />
+                </Button>
               </div>
-            </CardHeader>
-            <CardContent className="pt-4 grid md:grid-cols-2 gap-6">
-              {/* Serial Number Search */}
-              <div className="space-y-2">
-                <Label>Serial Number</Label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Type serial number..."
-                    value={serialQuery}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setSerialQuery(v);
-                      searchAsset(v);
-                    }}
-                  />
-                  <Button variant="outline" type="button" onClick={() => searchAsset.flush()}>
-                    <Search className="w-4 h-4" />
-                  </Button>
-                </div>
 
-                {/* Results */}
-                {assetResults.length > 0 ? (
-                  <div className="mt-2 divide-y rounded-md border bg-card max-h-40 overflow-auto">
-                    {assetResults.map((a) => (
+              {/* Results */}
+              {assetResults.length > 0 ? (
+                <div className="mt-2 divide-y rounded-md border bg-card max-h-40 overflow-auto">
+                  {assetResults.map((a) => (
+                    <button
+                      key={a.AssetID}
+                      type="button"
+                      className={classNames(
+                        "w-full text-left px-3 py-2 hover:bg-accent/40",
+                        selectedAsset?.AssetID === a.AssetID && "bg-accent/70"
+                      )}
+                      onClick={() => setSelectedAsset(a)}
+                    >
+                      <div className="font-medium">{a.SerialNumber}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {a.product_information?.ProductName} · PN {a.ProductNumber}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : assetNotFound ? (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  ❌ Data asset tidak ditemukan
+                </div>
+              ) : null}
+
+              {/* Checkbox */}
+              <div className="flex items-center gap-2 mt-2">
+                <Checkbox
+                  id="isNewAsset"
+                  checked={isNewAsset}
+                  onCheckedChange={(v) => {
+                    setIsNewAsset(Boolean(v));
+
+                  }
+                  }
+                />
+                <Label htmlFor="isNewAsset">Buat Asset Baru</Label>
+              </div>
+            </div>
+
+            {/* Customer Search */}
+            <div className="space-y-2">
+              <Label>Customer (name/email/phone/company)</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Search customer or company..."
+                  value={customerQuery}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setCustomerQuery(v);
+                    searchCustomer(v);
+                  }}
+                />
+                <Button variant="outline" type="button" onClick={() => searchCustomer.flush()}>
+                  <Search className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {/* Results */}
+              {(contactResults.length > 0 || companyResults.length > 0) ? (
+                <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {/* Contacts */}
+                  <div className="rounded-md border bg-card max-h-40 overflow-auto divide-y">
+                    <div className="px-2 py-1 text-xs font-medium">Contacts</div>
+                    {contactResults.map((c) => (
                       <button
-                        key={a.AssetID}
+                        key={c.ContactID}
                         type="button"
                         className={classNames(
                           "w-full text-left px-3 py-2 hover:bg-accent/40",
-                          selectedAsset?.AssetID === a.AssetID && "bg-accent/70"
+                          selectedContact?.ContactID === c.ContactID && "bg-accent/70"
                         )}
-                        onClick={() => setSelectedAsset(a)}
+                        onClick={() => setSelectedContact(c)}
                       >
-                        <div className="font-medium">{a.SerialNumber}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {a.product_information?.ProductName} · PN {a.ProductNumber}
+                        <div className="font-medium">
+                          {c.FirstName} {c.LastName}
+                          {c.site_account?.Company && (
+                            <span className="text-xs text-muted-foreground"> · {c.site_account.Company}</span>
+                          )}
                         </div>
+                        <div className="text-xs text-muted-foreground">{c.Email || c.Phone || "-"}</div>
                       </button>
                     ))}
                   </div>
-                ) : assetNotFound ? (
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    ❌ Data asset tidak ditemukan
-                  </div>
-                ) : null}
 
-                {/* Checkbox */}
-                <div className="flex items-center gap-2 mt-2">
-                  <Checkbox
-                    id="isNewAsset"
-                    checked={isNewAsset}
-                    onCheckedChange={(v) => setIsNewAsset(Boolean(v))}
-                  />
-                  <Label htmlFor="isNewAsset">Buat Asset Baru</Label>
-                </div>
-              </div>
-
-              {/* Customer Search */}
-              <div className="space-y-2">
-                <Label>Customer (name/email/phone/company)</Label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Search customer or company..."
-                    value={customerQuery}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setCustomerQuery(v);
-                      searchCustomer(v);
-                    }}
-                  />
-                  <Button variant="outline" type="button" onClick={() => searchCustomer.flush()}>
-                    <Search className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                {/* Results */}
-                {(contactResults.length > 0 || companyResults.length > 0) ? (
-                  <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {/* Contacts */}
-                    <div className="rounded-md border bg-card max-h-40 overflow-auto divide-y">
-                      <div className="px-2 py-1 text-xs font-medium">Contacts</div>
-                      {contactResults.map((c) => (
-                        <button
-                          key={c.ContactID}
-                          type="button"
-                          className={classNames(
-                            "w-full text-left px-3 py-2 hover:bg-accent/40",
-                            selectedContact?.ContactID === c.ContactID && "bg-accent/70"
-                          )}
-                          onClick={() => setSelectedContact(c)}
-                        >
-                          <div className="font-medium">
-                            {c.FirstName} {c.LastName}
-                            {c.site_account?.Company && (
-                              <span className="text-xs text-muted-foreground"> · {c.site_account.Company}</span>
-                            )}
-                          </div>
-                          <div className="text-xs text-muted-foreground">{c.Email || c.Phone || "-"}</div>
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Companies */}
-                    <div className="rounded-md border bg-card max-h-40 overflow-auto divide-y">
-                      <div className="px-2 py-1 text-xs font-medium">Companies</div>
-                      {companyResults.map((s) => (
-                        <button
-                          key={s.SiteAccountID}
-                          type="button"
-                          className={classNames(
-                            "w-full text-left px-3 py-2 hover:bg-accent/40",
-                            selectedCompany?.SiteAccountID === s.SiteAccountID && "bg-accent/70"
-                          )}
-                          onClick={() => setSelectedCompany(s)}
-                        >
-                          <div className="font-medium">{s.Company}</div>
-                          <div className="text-xs text-muted-foreground">{s.City}, {s.Country}</div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ): contactNotFound ? (
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    ❌ Customer / Company tidak ditemukan
-                  </div>
-                ): null}
-
-                <div className="flex items-center gap-2 mt-2">
-                  <Checkbox
-                    id="createCustomer"
-                    checked={isNewContact}
-                    onCheckedChange={(v) => setIsNewContact(Boolean(v))}
-                  />
-                  <Label htmlFor="createCustomer">Buat customer baru (jika tidak ditemukan)</Label>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 1) Case Section */}
-          <Card className="rounded-2xl p-[20px]  shadow-2xl col-span-3   scroll-mt-[120px]" id='case'>
-            <CardHeader>
-              <CardTitle>1) Case</CardTitle>
-              <CardDescription>Diisi setelah pilih serial/customer.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label>Case Subject <Label className="text-red-600">*</Label></Label>
-                <Input type="text" value={caseSubject} onChange={(e) => setCaseSubject(e.target.value)} />
-              </div>
-              <div>
-                <Label>Received Date <Label className="text-red-600">*</Label></Label>
-                <Input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} />
-              </div>
-              <div>
-                <Label>Case ID Manual</Label>
-                <Input value={caseIdManual} onChange={(e) => setCaseIdManual(e.target.value)} />
-              </div>
-              <div>
-                <Label>Case ID Manual Date</Label>
-                <Input type="date" value={caseIdManualDate} onChange={(e) => setCaseIdManualDate(e.target.value)} />
-              </div>
-              <div className="md:col-span-2">
-                <Label>Reference Case</Label>
-                <Input value={referenceCase} onChange={(e) => setReferenceCase(e.target.value)} />
-              </div>
-              <div>
-                <Label>Case Status <Label className="text-red-600">*</Label></Label>
-                <Select value={caseStatus} onValueChange={setCaseStatus}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Case Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CASE_STATUS.map((s) => (
-                      <SelectItem value={s} key={s}>{s}</SelectItem>
+                  {/* Companies */}
+                  <div className="rounded-md border bg-card max-h-40 overflow-auto divide-y">
+                    <div className="px-2 py-1 text-xs font-medium">Companies</div>
+                    {companyResults.map((s) => (
+                      <button
+                        key={s.SiteAccountID}
+                        type="button"
+                        className={classNames(
+                          "w-full text-left px-3 py-2 hover:bg-accent/40",
+                          selectedCompany?.SiteAccountID === s.SiteAccountID && "bg-accent/70"
+                        )}
+                        onClick={() => setSelectedCompany(s)}
+                      >
+                        <div className="font-medium">{s.Company}</div>
+                        <div className="text-xs text-muted-foreground">{s.City}, {s.Country}</div>
+                      </button>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Case Type <Label className="text-red-600">*</Label></Label>
-                <Select value={caseType} onValueChange={setCaseType} disabled={mustDOA}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Case Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CASE_TYPES.map((t) => (
-                      <SelectItem value={t} key={t}>{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {mustDOA && (
-                  <p className="text-xs text-amber-600 mt-1">Ada case OPEN untuk asset ini. Case Type otomatis DOA dan tidak
-                    bisa diubah.</p>
-                )}
-              </div>
-              <div className="md:col-span-3">
-                <div className="flex items-center gap-2 mt-2">
-                  <Checkbox id="kci" checked={kciFlag} onCheckedChange={(v) => setKciFlag(Boolean(v))} />
-                  <Label htmlFor="kci">KCI Flag</Label>
+                  </div>
                 </div>
+              ) : contactNotFound ? (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  ❌ Customer / Company tidak ditemukan
+                </div>
+              ) : null}
+
+              <div className="flex items-center gap-2 mt-2">
+                <Checkbox
+                  id="createCustomer"
+                  checked={isNewContact}
+                  onCheckedChange={(v) => {
+                    setIsNewContact(Boolean(v));
+
+                  }
+                  }
+                />
+                <Label htmlFor="createCustomer">Buat customer baru (jika tidak ditemukan)</Label>
               </div>
-              <div className="md:col-span-3">
-                <Label>Problem Description <Label className="text-red-600">*</Label></Label>
-                <Textarea rows={3} value={problemDesc} onChange={(e) => setProblemDesc(e.target.value)} />
+            </div>
+          </CardContent>
+        </Card>
+      
+      {/* LEFT MAIN FORM */}
+      <div className="columns-2 space-y-2">
+
+        {/* 1) Case Section */}
+        <Card className="rounded-2xl p-[20px]  shadow-2xl   " id='case'>
+          <CardHeader>
+            <CardTitle>1) Case</CardTitle>
+            <CardDescription>Diisi setelah pilih serial/customer.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label>Received Date <Label className="text-red-600">*</Label></Label>
+              <Input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} />
+            </div>
+            <div>
+              <Label>Case ID Manual</Label>
+              <Input value={caseIdManual} onChange={(e) => setCaseIdManual(e.target.value)} />
+            </div>
+            <div>
+              <Label>Case ID Manual Date</Label>
+              <Input type="date" value={caseIdManualDate} onChange={(e) => setCaseIdManualDate(e.target.value)} />
+            </div>
+            <div className="md:col-span-2">
+              <Label>Reference Case</Label>
+              <Input value={referenceCase} onChange={(e) => setReferenceCase(e.target.value)} />
+            </div>
+            <div>
+              <Label>Case Status <Label className="text-red-600">*</Label></Label>
+              <Select value={caseStatus} onValueChange={setCaseStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Case Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CASE_STATUS.map((s) => (
+                    <SelectItem value={s} key={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Case Type <Label className="text-red-600">*</Label></Label>
+              <Select value={caseType} onValueChange={setCaseType} disabled={mustDOA}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Case Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CASE_TYPES.map((t) => (
+                    <SelectItem value={t} key={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {mustDOA && (
+                <p className="text-xs text-amber-600 mt-1">Ada case OPEN untuk asset ini. Case Type otomatis DOA dan tidak
+                  bisa diubah.</p>
+              )}
+            </div>
+            <div className="md:col-span-3">
+              <div className="flex items-center gap-2 mt-2">
+                <Checkbox id="kci" checked={kciFlag} onCheckedChange={(v) => setKciFlag(Boolean(v))} />
+                <Label htmlFor="kci">KCI Flag</Label>
               </div>
-              <div className="md:col-span-3">
-                <Label>Case Note <Label className="text-red-600">*</Label></Label>
-                <Textarea rows={3} value={caseNote} onChange={(e) => setCaseNote(e.target.value)} />
-              </div>
-            </CardContent>
-          </Card>
-          {/* 2) Customer / Company */}
-          <Card className="rounded-2xl p-[20px]  shadow-2xl col-span-3   scroll-mt-[120px]" id='customer'>
-            <CardHeader>
-              <CardTitle>2) Customer / Company</CardTitle>
-              <CardDescription>Isi data customer baru. Centang untuk include ke Company.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Customer */}
-                <div className="space-y-2">
-                  <div className="grid grid-cols-3 gap-2 items-center">
-                    <Label className="col-span-1">Salutation<Label className="text-red-600">*</Label></Label>
-                    <div className="col-span-2">
-                      <Select value={contactSalutation} onValueChange={setContactSalutation}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Mr / Mrs" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Mr.">Mr</SelectItem>
-                          <SelectItem value="Mrs.">Mrs</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+            </div>
+            <div className="md:col-span-3 space-y-2">
+              <Label>Case Subject <Label className="text-red-600">*</Label></Label>
+              <Textarea type="text" value={caseSubject} onChange={(e) => setCaseSubject(e.target.value)} />
+            </div>
+            <div className="md:col-span-3 space-y-2">
+              <Label>Problem Description <Label className="text-red-600">*</Label></Label>
+              <Textarea rows={3} value={problemDesc} onChange={(e) => setProblemDesc(e.target.value)} />
+            </div>
+            <div className="md:col-span-3 space-y-2">
+              <Label>Case Note <Label className="text-red-600">*</Label></Label>
+              <Textarea rows={3} value={caseNote} onChange={(e) => setCaseNote(e.target.value)} />
+            </div>
+          </CardContent>
+        </Card>
+        {/* 2) Customer / Company */}
+        <Card className="rounded-2xl p-[20px]  shadow-2xl   break-inside-avoid" id='customer'>
+          <CardHeader>
+            <CardTitle>2) Customer / Company</CardTitle>
+            <CardDescription>Isi data customer baru. Centang untuk include ke Company.</CardDescription>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="incCompany"
+                checked={showCompanySection}
+                onCheckedChange={(v) => setShowCompanySection(Boolean(v))}
+              />
+              <Label htmlFor="incCompany">Termasuk dalam company</Label>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-flow-row  gap-4 ">
+              {/* Customer */}
+              <div className="space-y-2 border-2 p-2 ">
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <Label className="col-span-1">Salutation<Label className="text-red-600">*</Label></Label>
+                  <div className="col-span-2">
+                    <Select value={contactSalutation} onValueChange={setContactSalutation}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Mr / Mrs" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Mr.">Mr</SelectItem>
+                        <SelectItem value="Mrs.">Mrs</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 items-center">
-                    <Label className="col-span-1">Nama Customer<Label className="text-red-600">*</Label></Label>
-                    <div className="col-span-2 grid grid-cols-2 gap-2">
-                      <Input placeholder="First Name" value={contactFirstName} onChange={(e) => setContactFirstName(e.target.value)} />
-                      <Input placeholder="Last Name" value={contactLastName} onChange={(e) => setContactLastName(e.target.value)} />
-                    </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <Label className="col-span-1">Nama Customer<Label className="text-red-600">*</Label></Label>
+                  <div className="col-span-2 grid grid-cols-2 gap-2">
+                    <Input placeholder="First Name" value={contactFirstName} onChange={(e) => setContactFirstName(e.target.value)} />
+                    <Input placeholder="Last Name" value={contactLastName} onChange={(e) => setContactLastName(e.target.value)} />
                   </div>
-                  <div className="grid grid-cols-3 gap-2 items-center">
-                    <Label className="col-span-1">No. Telepon<Label className="text-red-600">*</Label></Label>
-                    <Input className="col-span-2" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 items-center">
-                    <Label className="col-span-1">No. Whatsapp</Label>
-                    <Input className="col-span-2" value={contactMobile} onChange={(e) => setContactMobile(e.target.value)} />
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 items-center">
-                    <Label className="col-span-1">Email<Label className="text-red-600">*</Label></Label>
-                    <Input className="col-span-2" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
-                  </div>
-                  <Separator className="my-2" />
-                  <div className="grid grid-cols-3 gap-2 items-center">
-                    <Label className="col-span-1">Alamat<Label className="text-red-600">*</Label></Label>
-                    <Input className="col-span-2" value={contactAddressLine1} onChange={(e) => setContactAddressLine1(e.target.value)} />
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 items-center">
-                    <Label className="col-span-1">Country<Label className="text-red-600">*</Label></Label>
-                    <Input className="col-span-2" placeholder="Indonesia / other" value={contactCountry} onChange={(e) => setContactCountry(e.target.value)} />
-                  </div>
-                  {/* Province/City (Indonesia via EMSIFA) */}
-                  <div className="grid grid-cols-3 gap-2 items-center">
-                    <Label className="col-span-1">Province<Label className="text-red-600">*</Label></Label>
-                    <div className="col-span-2">
-                      <SelectBarState
-                        id="contactStateProvince"
-                        value={contactStateProvince}
-                        onChange={setContactStateProvince}
-                        options={provContact}
-                        placeholder="Select a Province"
+                </div>
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <Label className="col-span-1">No. Telepon<Label className="text-red-600">*</Label></Label>
+                  <Input className="col-span-2" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
+                </div>
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <Label className="col-span-1">No. Whatsapp</Label>
+                  <Input className="col-span-2" value={contactMobile} onChange={(e) => setContactMobile(e.target.value)} />
+                </div>
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <Label className="col-span-1">Email<Label className="text-red-600">*</Label></Label>
+                  <Input className="col-span-2" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+                </div>
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <Label className="col-span-1">Alamat<Label className="text-red-600">*</Label></Label>
+                  <Input className="col-span-2" value={contactAddressLine1} onChange={(e) => setContactAddressLine1(e.target.value)} />
+                </div>
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <Label className="col-span-1">Country<Label className="text-red-600">*</Label></Label>
+                  <Input className="col-span-2" placeholder="Indonesia / other" value={contactCountry} onChange={(e) => setContactCountry(e.target.value)} />
+                </div>
+                {/* Province/City (Indonesia via EMSIFA) */}
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <Label className="col-span-1">Province<Label className="text-red-600">*</Label></Label>
+                  <div className="col-span-2">
+                    {/* <SelectBarState
+                      id="contactStateProvince"
+                      value={contactStateProvince}
+                      onChange={setContactStateProvince}
+                      options={provContact}
+                      placeholder="Select a Province"
+                    /> */}
+                    <ComboboxDemo
+                      id="contactStateProvince"
+                      value={contactStateProvince}
+                      setValue={setContactStateProvince}
+                      options={provContact}
+                      placeholder="Select a Province"
                       />
-
-                      {/* <SelectBar
+                    {/* <SelectBar
                             id="StateProvince"
                             value={contactStateProvince.name}
                             onChange={setContactStateProvince}
                             options={prov}
                             placeholder="Select a Province"
                           /> */}
-                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 items-center">
-                    <Label className="col-span-1">City<Label className="text-red-600">*</Label></Label>
-                    <div className="col-span-2">
-                      <SelectBarState
-                        id="contactCity"
-                        value={contactCity}
-                        onChange={setContactCity}
-                        options={cityContact}
-                        placeholder="Select a City"
-                        disabled={!contactStateProvince || cityContact.length === 0}
+                </div>
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <Label className="col-span-1">City<Label className="text-red-600">*</Label></Label>
+                  <div className="col-span-2 overflow-hidden">
+                    <ComboboxDemo
+                      id="contactCity"
+                      value={contactCity}
+                      setValue={setContactCity}
+                      options={cityContact}
+                      placeholder="Select a City"
+                      disabled={!contactStateProvince || cityContact.length === 0}
+                    />
+                    {/* <SelectBarState
+                      id="contactCity"
+                      value={contactCity}
+                      onChange={setContactCity}
+                      options={cityContact}
+                      placeholder="Select a City"
+                      disabled={!contactStateProvince || cityContact.length === 0}
+                    /> */}
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
+                  <Input className="col-span-2" value={contactZipPostalCode} onChange={(e) => setContactZipPostalCode(e.target.value)} />
+                </div>
+
+                {/* PIC Information */}
+                
+                <div className="space-y-2 border-2 p-2 rounded">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="usePIC"
+                        checked={usePIC}
+                        onCheckedChange={(v) => setUsePIC(Boolean(v))}
+                      />
+                      <Label htmlFor="usePIC">Gunakan PIC</Label>
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={copyPICFromContact} disabled={!usePIC}>
+                      Same as Contact Information
+                    </Button>
+                  </div>
+                </div>
+                
+                {usePIC && (
+                  <>  
+                    <div className="grid grid-cols-3 gap-2 items-center pt-4 border-t">
+                      <Label className="col-span-1">Nama PIC<Label className="text-red-600">*</Label></Label>
+                      <Input
+                        className="col-span-2"
+                        placeholder="Nama PIC"
+                        value={contactPICName}
+                        onChange={(e) => setContactPICName(e.target.value)}
                       />
                     </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 items-center">
-                    <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
-                    <Input className="col-span-2" value={contactZipPostalCode} onChange={(e) => setContactZipPostalCode(e.target.value)} />
-                  </div>
-                </div>
-                {/* Company (optional) */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="incCompany"
-                      checked={showCompanySection}
-                      onCheckedChange={(v) => setShowCompanySection(Boolean(v))}
-                    />
-                    <Label htmlFor="incCompany">Termasuk dalam company</Label>
-                  </div>
-                  {showCompanySection && (
-                    <div className="space-y-2">
-                      <div className="grid grid-cols-3 gap-2 items-center">
-                        <Label className="col-span-1">Nama Company<Label className="text-red-600">*</Label></Label>
-                        <Input className="col-span-2" placeholder="Cari / isi nama company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 items-center">
-                        <Label className="col-span-1">Email Company<Label className="text-red-600">*</Label></Label>
-                        <Input className="col-span-2" type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)} />
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 items-center">
-                        <Label className="col-span-1">Nomor Telepon<Label className="text-red-600">*</Label></Label>
-                        <Input className="col-span-2" value={companyPhone} onChange={(e) => setCompanyPhone(e.target.value)} />
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 items-center">
-                        <Label className="col-span-1">Nomor WA</Label>
-                        <Input className="col-span-2" value={companyWhatsapp} onChange={(e) => setCompanyWhatsapp(e.target.value)} />
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 items-center">
-                        <Label className="col-span-1">Alamat<Label className="text-red-600">*</Label></Label>
-                        <Input className="col-span-2" value={companyAddressLine1} onChange={(e) => setCompanyAddressLine1(e.target.value)} />
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 items-center">
-                        <Label className="col-span-1">Country<Label className="text-red-600">*</Label></Label>
-                        <Input className="col-span-2" value={companyCountry} onChange={(e) => setCompanyCountry(e.target.value)} />
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 items-center">
-                        <Label className="col-span-1">Province (ID)<Label className="text-red-600">*</Label></Label>
-                        <div className="col-span-2">
-                          <SelectBarState
-                            id="CompanyStateProvince"
-                            value={companyStateProvince}
-                            onChange={setCompanyStateProvince}
-                            options={provCompany}
-                            placeholder="Select a Province"
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 items-center">
-                        <Label className="col-span-1">City (ID)<Label className="text-red-600">*</Label></Label>
-                        <div className="col-span-2">
-                          <SelectBarState
-                            id="CompanyCity"
-                            value={companyCity}
-                            onChange={setCompanyCity}
-                            options={cityCompany}
-                            placeholder="Select a City"
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 items-center">
-                        <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
-                        <Input className="col-span-2" value={companyZipPostalCode} onChange={(e) => setCompanyZipPostalCode(e.target.value)} />
-                      </div>
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">Email PIC<Label className="text-red-600">*</Label></Label>
+                      <Input
+                        className="col-span-2"
+                        placeholder="Email PIC"
+                        type="email"
+                        value={contactPICEmail}
+                        onChange={(e) => setContactPICEmail(e.target.value)}
+                      />
                     </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          {/* {showCustomerCard && (
-              )} */}
-          {/* 3) Product */}
-          <Card className="rounded-2xl p-[20px]  shadow-2xl col-span-3   scroll-mt-[120px]" id='product'>
-            <CardHeader>
-              <CardTitle>3) Product</CardTitle>
-              <CardDescription>
-                Auto dari Asset; atau cari Product Number/Name jika tidak ada Asset.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label>Serial No.<Label className="text-red-600">*</Label></Label>
-                  <Input value={selectedAsset?.SerialNumber || serialQuery} readOnly={!!selectedAsset} onChange={(e) => setSerialQuery(e.target.value)} />
-                  <Button variant="link" asChild>
-                    <a
-                      href="https://support.hp.com/id-en/check-warranty"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Check Warranty
-                    </a>
-                  </Button>
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">No. Telepon PIC<Label className="text-red-600">*</Label></Label>
+                      <Input className="col-span-2" value={contactPICPhone} onChange={(e) => setContactPICPhone(e.target.value)} />
+                    </div>
+                  </>
+                )}
 
-                </div>
-                <div className="md:col-span-2">
-                  <Label>Check Product (Number/Name)</Label>
-                  <Input
-                    placeholder="Type product number or name..."
-                    value={productQuery}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setProductQuery(v);
-                      searchProduct(v);
-                    }}
-                  />
-                  <div className="mt-2 flex items-center gap-2">
-                    <Checkbox
-                      id="isNewProduct"
-                      checked={isNewProduct}
-                      onCheckedChange={(v) => setIsNewProduct(Boolean(v))}
-                    />
-                    <Label htmlFor="isNewProduct">Buat Product Baru</Label>
+              </div>
+              {/* Company (optional) */}
+                {showCompanySection && (
+                <div className="space-y-2 border-2 p-2">
+                  <div className="flex justify-end">
+                    <Button type="button" variant="outline" size="sm" onClick={copyCompanyFromContact}>
+                      Same as contact information
+                    </Button>
                   </div>
-                  {productResults.length > 0 && (
-                    <div className="mt-2 rounded-xl border p-2 max-h-40 overflow-auto">
-                      {productResults.map((p) => (
-                        <button
-                          key={p.ProductNumber}
-                          type="button"
-                          className={classNames(
-                            "w-full text-left px-2 py-1.5 rounded hover:bg-muted",
-                            selectedProduct?.ProductNumber === p.ProductNumber && "bg-muted"
-                          )}
-                          onClick={() => {
-                            setSelectedProduct(p);
-                            setProductNo(p.ProductNumber);
-                            setProductName(p.ProductName);
-                            setProductLine(p.ProductLine || "");
-                            setVendor(p.vendor || "");
-                            setProductTypeId(p.ProductTypeID);
-                          }}
-                        >
-                          <div className="font-medium">{p.ProductName}</div>
-                          <div className="text-xs text-muted-foreground">PN {p.ProductNumber} · {p.ProductLine || "-"}</div>
-                        </button>
-                      ))}
+
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">Nama Company<Label className="text-red-600">*</Label></Label>
+                      <Input className="col-span-2" placeholder="Cari / isi nama company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                     </div>
-                  )}
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">Email Company<Label className="text-red-600">*</Label></Label>
+                      <Input className="col-span-2" type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">Nomor Telepon<Label className="text-red-600">*</Label></Label>
+                      <Input className="col-span-2" value={companyPhone} onChange={(e) => setCompanyPhone(e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">Nomor WA</Label>
+                      <Input className="col-span-2" value={companyWhatsapp} onChange={(e) => setCompanyWhatsapp(e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">Alamat<Label className="text-red-600">*</Label></Label>
+                      <Input className="col-span-2" value={companyAddressLine1} onChange={(e) => setCompanyAddressLine1(e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">Country<Label className="text-red-600">*</Label></Label>
+                      <Input className="col-span-2" value={companyCountry} onChange={(e) => setCompanyCountry(e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">Province (ID)<Label className="text-red-600">*</Label></Label>
+                      <div className="col-span-2">
+                        {/* <SelectBarState
+                          id="CompanyStateProvince"
+                          value={companyStateProvince}
+                          onChange={setCompanyStateProvince}
+                          options={provCompany}
+                          placeholder="Select a Province"
+                        /> */}
+                        <ComboboxDemo
+                          id="CompanyStateProvince"
+                          value={companyStateProvince}
+                          setValue={setCompanyStateProvince}
+                          options={provCompany}
+                          placeholder="Select a Province"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">City (ID)<Label className="text-red-600">*</Label></Label>
+                      <div className="col-span-2">
+                        {/* <SelectBarState
+                          id="CompanyCity"
+                          value={companyCity}
+                          onChange={setCompanyCity}
+                          options={cityCompany}
+                          placeholder="Select a City"
+                        /> */}
+                        <ComboboxDemo
+                          id="CompanyCity"
+                          value={companyCity}
+                          setValue={setCompanyCity}
+                          options={cityCompany}
+                          placeholder="Select a City"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
+                      <Input className="col-span-2" value={companyZipPostalCode} onChange={(e) => setCompanyZipPostalCode(e.target.value)} />
+                    </div>
+                  </div>
                 </div>
+                )}
+            </div>
+          </CardContent>
+        </Card>
+        {/* {showCustomerCard && (
+              )} */}
+        {/* 3) Product */}
+        <Card className="rounded-2xl p-[20px]  shadow-2xl    " id='product'>
+          <CardHeader>
+            <CardTitle>3) Product</CardTitle>
+            <CardDescription>
+              Auto dari Asset; atau cari Product Number/Name jika tidak ada Asset.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Serial No.<Label className="text-red-600">*</Label></Label>
+                <Input value={selectedAsset?.SerialNumber || serialQuery} readOnly={!!selectedAsset} onChange={(e) => setSerialQuery(e.target.value)} />
+                <Button variant="outline" asChild>
+                  <a
+                    href="https://support.hp.com/id-en/check-warranty"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Check Warranty
+                  </a>
+                </Button>
+
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <Label>Check Product (Number/Name)</Label>
+                <Input
+                  placeholder="Type product number or name..."
+                  value={productQuery}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setProductQuery(v);
+                    searchProduct(v);
+                  }}
+                />
+                <div className="mt-2 flex items-center gap-2">
+                  <Checkbox
+                    id="isNewProduct"
+                    checked={isNewProduct}
+                    onCheckedChange={(v) => setIsNewProduct(Boolean(v))}
+                  />
+                  <Label htmlFor="isNewProduct">Buat Product Baru</Label>
+                </div>
+                {productResults.length > 0 && (
+                  <div className="mt-2 rounded-xl border p-2 max-h-40 overflow-auto">
+                    {productResults.map((p) => (
+                      <button
+                        key={p.ProductNumber}
+                        type="button"
+                        className={classNames(
+                          "w-full text-left px-2 py-1.5 rounded hover:bg-muted",
+                          selectedProduct?.ProductNumber === p.ProductNumber && "bg-muted"
+                        )}
+                        onClick={() => {
+                          setSelectedProduct(p);
+                          setProductNo(p.ProductNumber);
+                          setProductName(p.ProductName);
+                          setProductLine(p.ProductLine || "");
+                          setVendor(p.vendor || "");
+                          setProductTypeId(p.ProductTypeID);
+                        }}
+                      >
+                        <div className="font-medium">{p.ProductName}</div>
+                        <div className="text-xs text-muted-foreground">PN {p.ProductNumber} · {p.ProductLine || "-"}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -1432,7 +1701,7 @@ export default function NewCaseForm() {
                 </div>
                 {productTower && productGroup && (
                   <div>
-                    <Label>Product Type *</Label>
+                    <span>Product Type <label className="text-red-600">*</label></span>
                     <Select
                       value={productTypeId || null}
                       onValueChange={setProductTypeId}
@@ -1464,10 +1733,6 @@ export default function NewCaseForm() {
                   <Label>Product Name<Label className="text-red-600">*</Label></Label>
                   <Input value={productName} onChange={(e) => setProductName(e.target.value)} />
                 </div>
-                <div>
-                  <Label>Vendor</Label>
-                  <Input value={vendor} onChange={(e) => setVendor(e.target.value)} />
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -1482,16 +1747,17 @@ export default function NewCaseForm() {
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label>Warranty Status</Label>
-                <Select value={warrantyStatus} onValueChange={setWarrantyStatus}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select warranty status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {WARRANTY_STATUS.map((w) => (
-                      <SelectItem key={w} value={w}>{w}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchCommandBlock
+                  options={warrantyOptions}
+                  value={warrantySearchValue}
+                  onChange={(val) => setWarrantySearchValue(val)}
+                  onSearchInputChange={(val) => {
+                    setWarrantySearchValue(val);   // update field search
+                    fetchWarrantyStatus(val); // trigger fetch API
+                  }}
+
+                  placeholder="Warranty Option..."
+                />
               </div>
               <div>
                 <Label>EOW Date</Label>
@@ -1514,7 +1780,15 @@ export default function NewCaseForm() {
                       value={row.name}
                       onChange={(e) => updateAccessory(row.id, "name", e.target.value)}
                       placeholder={`Accessory #${idx + 1}`}
+                      hidden
                     />
+                    <SearchCommandBlock
+                      value={row.name}
+                      onChange={(v) => updateAccessory(row.id, "name", v)}
+                      placeholder="Type to search accessory..."
+                      options={["Cable","Adapter","Other"]}
+                    >
+                    </SearchCommandBlock>
                   </div>
                   <div className="col-span-12 md:col-span-6">
                     <Label className="text-xs">Note</Label>
@@ -1554,59 +1828,10 @@ export default function NewCaseForm() {
               </div>
             </CardContent>
           </Card>
-          {/* 7) Log Note */}
-          <Card className="rounded-2xl p-[20px]  shadow-2xl col-span-3   scroll-mt-[120px]" id='notes'>
-            <CardHeader>
-              <CardTitle>7) Log Note</CardTitle>
-              <CardDescription>Opsional.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea rows={3} placeholder="Additional log note (optional)" value={logNote} onChange={(e) => setLogNote(e.target.value)} />
-            </CardContent>
-          </Card>
         </div>
 
-        {/* RIGHT SUMMARY PANEL */}
-        <aside className="hidden lg:block col-span-3 sticky top-30 h-fit space-y-4">
-            {/* Show compact summary cards after selection */}
-            {selectedCompany && (
-              <Card>
-                <CardHeader><CardTitle>Selected Company</CardTitle></CardHeader>
-                <CardContent>
-                  <p className="font-medium">{selectedCompany.Company}</p>
-                  <p className="text-xs text-muted-foreground">{selectedCompany.Email || selectedCompany.PrimaryPhone}</p>
-                </CardContent>
-              </Card>
-            )}
-            {selectedContact && (
-              <Card>
-                <CardHeader><CardTitle>Selected Customer</CardTitle></CardHeader>
-                <CardContent>
-                  <p className="font-medium">{selectedContact.FirstName} {selectedContact.LastName}</p>
-                  <p className="text-xs text-muted-foreground">{selectedContact.Email || selectedContact.Phone}</p>
-                </CardContent>
-              </Card>
-            )}
-            {selectedAsset && (
-              <Card>
-                <CardHeader><CardTitle>Selected Asset</CardTitle></CardHeader>
-                <CardContent>
-                  <p className="font-medium">{selectedAsset.SerialNumber}</p>
-                  <p className="text-xs text-muted-foreground">{selectedAsset.product_information?.ProductName}</p>
-                </CardContent>
-              </Card>
-            )}
-            {selectedProduct && (
-              <Card>
-                <CardHeader><CardTitle>Selected Product</CardTitle></CardHeader>
-                <CardContent>
-                  <p className="font-medium">{selectedProduct.ProductName}</p>
-                  <p className="text-xs text-muted-foreground">PN {selectedProduct.ProductNumber}</p>
-                </CardContent>
-              </Card>
-            )}
-        </aside>
-      </div>
+      {/* RIGHT SUMMARY PANEL */}
+
 
       {/* Footer */}
       <div className="sticky bottom-0 bg-background/90 backdrop-blur border-t py-3">

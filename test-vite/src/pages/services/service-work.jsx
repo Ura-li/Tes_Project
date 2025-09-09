@@ -40,7 +40,7 @@ import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
 
-import { CaseField, QuickWOInput } from "../../components/quick-wo-input";
+import {  QuickWOInput } from "../../components/quick-wo-input";
 import { NewBookableResourceBooking } from "../services/service-booking";
 import { getUserFromToken } from "@/lib/utils/auth";
 
@@ -69,12 +69,14 @@ import {
 import { useDraft } from "../../components/DraftContext";
 import { Accordion, AccordionContent } from "@/components/ui/accordion";
 import { AccordionHeader, AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion";
+import CaseField from "@/components/CaseField";
 
 export const ServiceWork = () => {
   const user = getUserFromToken();
   const { woid } = useParams();
   const { updateDraft } = useDraft();
   const [workOrders, setWorkOrders] = useState([]);
+  console.log("TESwoWI",workOrders);
   const fetchWorkOrders = async () => {
     try {
       const res = await ApiCustomer.get(`/api/work-order/${woid}`);
@@ -145,6 +147,14 @@ export const ServiceWork = () => {
       ...prev,
       [field]: value,
     }));
+  };
+
+ const statusEnumToLabelWO = {
+  OPEN_UNSCHEDULED: 'Open - Unscheduled',
+  OPEN_SCHEDULED: 'Open - Scheduled',
+  OPEN_INPROGRES: 'Open - In Progress',
+  OPEN_COMPLETED: 'Open - Completed',
+  CLOSED_POSTED: 'Closed - Posted'
   };
 
   const handleWOGeneral = (field) => (eOrValue) => {
@@ -325,6 +335,18 @@ export const ServiceWork = () => {
   const [finishedOnDate, setFinishedOnDate] = useState(null);
 
   const [meterReadAvailable, setMeterReadAvailable] = useState(false);
+
+  const [caseDetails, setCaseDetails] = useState([])
+
+  let canEditapo;
+
+
+
+  if ( user?.role === "admin") {
+    canEditapo = true;
+  } else if (workOrders?.caseinformation?.Owner) {
+     canEditapo = workOrders?.caseinformation.Owner === user?.id && user?.role === "apo";
+  }
   return (
     <>
       {workOrders.SystemStatus === "CLOSED_POSTED" && (
@@ -440,7 +462,7 @@ export const ServiceWork = () => {
                 </CardHeader>
                 <CardContent className="grid items-center grid-cols-4 gap-6">
                   <div className="grid items-center grid-cols-2 col-span-2 p-4 ring-1" hidden>
-                    <CaseField label="Incoming Channel" icon>
+                    <CaseField label="Incoming Channel" lock>
                       <Input
                         variant={"invisible"}
                         className=""
@@ -449,7 +471,7 @@ export const ServiceWork = () => {
                       />
                     </CaseField>
                   </div>
-                  <CaseField label="Work Order Number" icon>
+                  <CaseField label="Work Order Number" lock>
                     <Input
                       variant={"invisible"}
                       className=""
@@ -457,7 +479,7 @@ export const ServiceWork = () => {
                       readOnly
                     />
                   </CaseField>
-                  <CaseField label="Patner Case Id" icon>
+                  <CaseField label="Patner Case Id" lock>
                     <Input
                       variant={"invisible"}
                       className=""
@@ -465,15 +487,15 @@ export const ServiceWork = () => {
                       readOnly
                     />
                   </CaseField>
-                  <CaseField label="System Status" open>
+                  <CaseField label="System Status" lock>
                     <Input
                       variant={"invisible"}
                       className=""
-                      value={WOGeneral.SystemStatus || "---"}
+                      value={statusEnumToLabelWO[WOGeneral.SystemStatus] || "---"}
                       readOnly
                     />
                   </CaseField>
-                  <CaseField label="Patner Status" icon>
+                  <CaseField label="Patner Status" lock>
                     <Input
                       variant={"invisible"}
                       className=""
@@ -481,7 +503,7 @@ export const ServiceWork = () => {
                       readOnly
                     />
                   </CaseField>
-                  <CaseField label="Work Order Type" icon>
+                  <CaseField label="Work Order Type" lock>
                     <Input
                       variant={"invisible"}
                       className=""
@@ -490,7 +512,7 @@ export const ServiceWork = () => {
                       readOnly
                     />
                   </CaseField>
-                  <CaseField label="Priority" icon>
+                  <CaseField label="Priority" lock>
                     <Input
                       variant={"invisible"}
                       className=""
@@ -498,7 +520,7 @@ export const ServiceWork = () => {
                       onChange={handleWOGeneral('Priority')}
                     />
                   </CaseField>
-                  <CaseField label="Shipment Country" open>
+                  <CaseField label="Shipment Country" lock>
                     <SearchCommandBlock
                       variant={"invisible"}
                       value={WOGeneral.ShipmentCountry}
@@ -507,7 +529,7 @@ export const ServiceWork = () => {
                       options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"] }
                     />
                   </CaseField>
-                  <CaseField label="Recommended Resource" icon>
+                  <CaseField label="Recommended Resource" lock>
                     <Input
                       variant={"invisible"}
                       value={WOGeneral.RecommendedResource}
@@ -516,14 +538,14 @@ export const ServiceWork = () => {
                       readOnly
                     />
                   </CaseField>
-                  <CaseField label="Work Order Description"  open >
+                  <CaseField label="Work Order Description"  lock >
                       <Input variant={'invisible'}
                       value={WOGeneral.WorkOrderDescription}
                       onChange={handleWOGeneral('WorkOrderDescription')}
                       placeholder="---"
                       /> 
                   </CaseField>
-                  <CaseField label="Sub-Status" icon={KeyRound}>
+                  <CaseField label="Sub-Status" lock={KeyRound}>
                     <Input
                       variant={"invisible"}
                       className=""
@@ -532,10 +554,10 @@ export const ServiceWork = () => {
                       placeholder="---"
                     />
                   </CaseField>
-                   <CaseField label="Work Order Instruction" icon >
+                   <CaseField label="Work Order Instruction" lock >
                       <Input variant={'invisible'} placeholder="---" readOnly/> 
                   </CaseField>
-                  <CaseField label="Shipment State" open>
+                  <CaseField label="Shipment State" lock>
                     <Input
                       variant={"invisible"}                      
                       value={WOGeneral.ShipmentState}
@@ -550,7 +572,7 @@ export const ServiceWork = () => {
                       <AccordionTrigger className="cursor-pointer p-2">More Details</AccordionTrigger>
                       <AccordionContent className={"m-2"}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <CaseField label="Bookable Resource Booking" icon>
+                          <CaseField label="Bookable Resource Booking" lock>
                           <Input
                             variant={"invisible"}
                             className=""
@@ -562,7 +584,7 @@ export const ServiceWork = () => {
                         <CaseField
                           label="Service Offer ID"
                           className={"col-start-1"}
-                          icon
+                          lock
                         >
                           <Input
                             variant={"invisible"}
@@ -577,7 +599,7 @@ export const ServiceWork = () => {
                         <CaseField
                           label="Service Description"
                           className={"col-start-1"}
-                          icon
+                          lock
                         >
                           <Input
                             variant={"invisible"}
@@ -632,7 +654,7 @@ export const ServiceWork = () => {
                     <hr />
                   </CardHeader>
                   <CardContent className="grid items-center grid-cols-2 gap-5">
-                    <CaseField label="Entitlement" icon>
+                    <CaseField label="Entitlement" lock>
                       <Input
                         variant={"invisible"}
                         className=""
@@ -640,7 +662,7 @@ export const ServiceWork = () => {
                         readOnly
                       />
                     </CaseField>
-                    <CaseField label="Offer" icon>
+                    <CaseField label="Offer" lock>
                       <Input
                         variant={"invisible"}
                         className=""
@@ -648,7 +670,7 @@ export const ServiceWork = () => {
                         readOnly
                       />
                     </CaseField>
-                    <CaseField label="OTC Code" icon>
+                    <CaseField label="OTC Code" lock>
                       <Input
                         variant={"invisible"}
                         className=""
@@ -656,7 +678,7 @@ export const ServiceWork = () => {
                         readOnly
                       />
                     </CaseField>
-                    <CaseField label="Authorizing Employee" icon>
+                    <CaseField label="Authorizing Employee" lock>
                       <Input
                         variant={"invisible"}
                         className=""
@@ -664,7 +686,7 @@ export const ServiceWork = () => {
                         readOnly
                       />
                     </CaseField>
-                    <CaseField label="Coverage Window Used" icon>
+                    <CaseField label="Coverage Window Used" lock>
                       <Input
                         variant={"invisible"}
                         className=""
@@ -678,7 +700,7 @@ export const ServiceWork = () => {
                         <AccordionTrigger>More Details</AccordionTrigger>
                         <AccordionContent className={"m-1"}>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                           <CaseField label="Coverage Window Value" icon>
+                           <CaseField label="Coverage Window Value" lock>
                             <Input
                               variant={"invisible"}
                               className=""
@@ -686,7 +708,7 @@ export const ServiceWork = () => {
                               readOnly
                             />
                           </CaseField>
-                          <CaseField label="Response Time Value" icon>
+                          <CaseField label="Response Time Value" lock>
                             <Input
                               variant={"invisible"}
                               className=""
@@ -694,7 +716,7 @@ export const ServiceWork = () => {
                               readOnly
                             />
                           </CaseField>
-                          <CaseField label="Repair Time Value" icon>
+                          <CaseField label="Repair Time Value" lock>
                             <Input
                               variant={"invisible"}
                               className=""
@@ -702,7 +724,7 @@ export const ServiceWork = () => {
                               readOnly
                             />
                           </CaseField>
-                          <CaseField label="Case Priority Index" icon>
+                          <CaseField label="Case Priority Index" lock>
                             <Input
                               variant={"invisible"}
                               className=""
@@ -744,7 +766,7 @@ export const ServiceWork = () => {
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-8 gap-5 auto-rows-auto place-content-between">
-                <CaseField label="SLA Jeopardy" className={""} icon span={2}>
+                <CaseField label="SLA Jeopardy" className={""} lock span={2}>
                   {" "}
                   <Input className="" value={SLA.slaJeopardy} readOnly />{" "}
                 </CaseField>
@@ -763,11 +785,11 @@ export const ServiceWork = () => {
                   />
                 </CaseField>
 
-                <CaseField label="SLA Reschedule" className={""} icon>
+                <CaseField label="SLA Reschedule" className={""} lock>
                   {" "}
                   <Input className="" value={SLA.slaReschedule} readOnly />{" "}
                 </CaseField>
-                <CaseField label="Due Date (Customer)" className={""} icon span={2}>
+                <CaseField label="Due Date (Customer)" className={""} lock span={2}>
                   <DatePicker value={
                       SLA.dueDateCustomer
                         ? new Date(SLA.dueDateCustomer)
@@ -778,7 +800,7 @@ export const ServiceWork = () => {
                 <CaseField
                   label="Guaranteed Fix Time (Customer)"
                   className={""}
-                  icon
+                  lock
                   span={2}
                 >
                   <DatePicker value={
@@ -788,7 +810,7 @@ export const ServiceWork = () => {
                     }
                     onChange={handleSLAChange("guaranteedFixTimeCustomer")}/>
                 </CaseField>
-                <CaseField label="Active Schedule Date" className={""} icon>
+                <CaseField label="Active Schedule Date" className={""} lock>
                   {" "}
                   <Input
                     className=""
@@ -810,6 +832,7 @@ export const ServiceWork = () => {
                   span={2}
                 >
                   <DatePicker
+
                     value={
                       SLA.earlyStartDateTimeCustomer
                         ? new Date(SLA.earlyStartDateTimeCustomer)
@@ -822,7 +845,7 @@ export const ServiceWork = () => {
                   label="SLA Error Description"
                   className={"row-span-2 items-start"}
                   childClass={"row-span-2"}
-                  icon
+                  lock
                 >
                   <textarea
                     value={SLA.slaErrorDescription}
@@ -856,7 +879,7 @@ export const ServiceWork = () => {
                 <CaseField
                   label="Case Priority Index"
                   className={"col-start-7"}
-                  icon
+                  lock
                 >
                   {" "}
                   <Input
@@ -982,7 +1005,7 @@ export const ServiceWork = () => {
                 <hr />
               </CardHeader>
               <CardContent className={"grid items-center grid-cols-6 gap-10"}>
-                <CaseField label={"Requested Date Time (Customer)"} open span={2}>
+                <CaseField label={"Requested Date Time (Customer)"} lock={!canEditapo } span={2}>
                   <DatePicker
                     variant="icon"
                     value={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}
@@ -991,7 +1014,7 @@ export const ServiceWork = () => {
                 </CaseField>
 
                 
-     <CaseField label="Early Start Date Time (Customer)"  open span={2}>
+     <CaseField label="Early Start Date Time (Customer)"  lock={!canEditapo} span={2}>
                     <DatePicker
                         value={SLA.earlyStartDateTimeCustomer ? new Date(SLA.earlyStartDateTimeCustomer) : null}
                         onChange={handleSLAChange("earlyStartDateTimeCustomer")}
@@ -999,7 +1022,7 @@ export const ServiceWork = () => {
                     </CaseField>
 
 
-                <CaseField label={"Guaranteed Fix Time (Customer)"} open span={2}>
+                <CaseField label={"Guaranteed Fix Time (Customer)"} lock={!canEditapo } span={2}>
                   <DatePicker
                     variant="icon"
                     value={SLA.guaranteedFixTimeCustomer ? new Date(SLA.guaranteedFixTimeCustomer) : null}
@@ -1008,14 +1031,14 @@ export const ServiceWork = () => {
                 </CaseField>
 
 
-                <CaseField label="Latest Start Date Time (Customer)" open span={2}> 
+                <CaseField label="Latest Start Date Time (Customer)" lock={!canEditapo } span={2}> 
                       <DatePicker
                         value={SLA.latestStartDateTimeCustomer ? new Date(SLA.latestStartDateTimeCustomer) : null}
                         onChange={handleSLAChange("latestStartDateTimeCustomer")}
                     ></DatePicker>
                 </CaseField>             
 
-                <CaseField label={"Due Date  (Customer)"} open span={2}>
+                <CaseField label={"Due Date  (Customer)"} lock={!canEditapo } span={2}>
                   <DatePicker
                     variant="icon"
                     value={SLA.dueDateCustomer ? new Date(SLA.dueDateCustomer) : null}
@@ -1023,7 +1046,7 @@ export const ServiceWork = () => {
                   ></DatePicker>
                 </CaseField>
 
-                      <CaseField label="Active Schedule Date" open span={2}> 
+                      <CaseField label="Active Schedule Date" lock={!canEditapo } span={2}> 
                          <DatePicker
                         value={SLA.activeScheduleDate ? new Date(SLA.activeScheduleDate) : null}
                         onChange={handleSLAChange("activeScheduleDate")}
@@ -1036,12 +1059,15 @@ export const ServiceWork = () => {
             <Card className="flex-col mt-5 rounded-md">
               <span className="ml-5 text-xl font-bold">Booking </span>
               <CardContent className="grid">
+                {canEditapo || user.role === "admin" ? 
+                
                 <NewBookableResourceBooking
                   CaseID={caseInformation?.CaseID}
                   WOID={workOrders.WOID}
                   CreatedBy={user.id}
                   RequestedDateTimeCustomer={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}
                 />
+                : null}
                 <Table>
                   <TableHeader>
                     <TableRow>

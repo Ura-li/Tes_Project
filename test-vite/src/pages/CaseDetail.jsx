@@ -56,6 +56,7 @@ import {
   FileSliders,
   Contact,
   Briefcase,
+  CopyX,
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -86,6 +87,7 @@ import { Textarea } from "@/components/ui/textarea";
 import CaseField from "@/components/CaseField";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
+import EquipmentReciptForm from "@/components/Equipment-Recipt-Form";
 
 /**
  * TODO : 
@@ -122,6 +124,7 @@ export const TabsServiceCaseDetails = ({
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
   const { user } = useAuth();
   const [selectedSymptom, setSelectedSymptom] = useState(null);
+  const [notesList, setNotesList] = useState([]);
 
   const { open } = useSidebar();
   const [entitlementStatus, setEntitlementStatus] = useState({
@@ -134,6 +137,8 @@ export const TabsServiceCaseDetails = ({
     CaseSubject: "",
     Owner: "",
     CasePriority: "",
+    ProblemDescription:"",
+    CaseProductNote: "",
   });
 
   const [gtcForm, setGtcForm] = useState({
@@ -210,6 +215,8 @@ export const TabsServiceCaseDetails = ({
       CaseSubject: caseForm.CaseSubject,
       Owner: caseForm.Owner,
       CasePriority: caseForm.CasePriority,
+      CaseProductNote: caseForm.CaseProductNote,
+      ProblemDescription: caseForm.ProblemDescription
     }).some(([_, v]) => v !== undefined && v !== null && String(v).trim() !== "");
     const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
     // Only treat entitlement as edited if it has any non-empty value
@@ -234,31 +241,28 @@ export const TabsServiceCaseDetails = ({
       switch (target) {
 
        case 'NOTE':
-  if (noteFilled) {
-    const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
+         if (noteFilled) {
+           const response = await ApiCustomer.post("/api/case-information/case-notes", {
+             LogType: caseNoteFormData.LogType,
+             ActionType: caseNoteFormData.ActionType,
+             VisibleExternally: caseNoteFormData.VisibleExternally,
+             Note: caseNoteFormData.Note,
+             CaseID: caseDetails.CaseID,
+             CreatedBy: user?.id
+           });
+           dataToUpdate.CaseNote = response.data.data.NoteID;
 
-    const response = await ApiCustomer.post("/api/case-information/case-notes", {
-      LogType: caseNoteFormData.LogType,
-      ActionType: caseNoteFormData.ActionType,
-      VisibleExternally: caseNoteFormData.VisibleExternally,
-      Note: modifiedNote,
-      CaseID: caseDetails.CaseID
-    });
-      dataToUpdate.CaseNote = response.data.data.NoteID;
+           // Refresh notes table and clear input note
+          //  await fetchCaseNotes();
+          //  setCaseNoteFormData((prev) => ({ ...prev, Note: "" }));
 
-    const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
-    setCaseNotes({ NotesDisplay: NotedDisplay, 
-          ActionType: caseNoteFormData.ActionType,
-          LogType: caseNoteFormData.LogType,
-          VisibleExternally: caseNoteFormData.VisibleExternally,});
-    
-     if (selectedSymptom) {
-      dataToUpdate.SymptomCode = selectedSymptom.SymptomCodeID;
-    }
+           if (selectedSymptom) {
+             dataToUpdate.SymptomCode = selectedSymptom.SymptomCodeID;
+           }
 
-    savedModules.push("Note");
-  }
-  break;
+           savedModules.push("Note");
+         }
+         break;
 
         case 'GTC':
           if (gtcEdited) {
@@ -324,6 +328,12 @@ export const TabsServiceCaseDetails = ({
                 }
                 if (caseForm.CasePriority && String(caseForm.CasePriority).trim() !== "") {
                   caseUpdates.CasePriority = caseForm.CasePriority;
+                } 
+                if (caseForm.CaseProductNote && String(caseForm.CaseProductNote).trim() !== "") {
+                  caseUpdates.CaseProductNote = caseForm.CaseProductNote;
+                }
+                if (caseForm.ProblemDescription && String(caseForm.ProblemDescription).trim() !== "") {
+                  caseUpdates.ProblemDescription = caseForm.ProblemDescription;
                 }
 
                 Object.assign(dataToUpdate, caseUpdates);
@@ -355,7 +365,7 @@ export const TabsServiceCaseDetails = ({
                   allowEscapeKey: false,
                 });
               }
-          }
+          } 
           break;
       }
 
@@ -389,7 +399,7 @@ export const TabsServiceCaseDetails = ({
     }
 
   } catch (error) {
-    console.error("Save failed:", error);
+    console.error("failed:", error);
     Swal.fire({
       icon: "error",
       title: error.message,
@@ -418,23 +428,8 @@ const openPopup = () => {
 };
   
 
-  useEffect(() => {
-    const loadNote = async () => {
-      const noteDetail = caseNote;
-      if(noteDetail ){
-        const NotedDisplay = `@Created On : ${noteDetail.CreatedOn}\n${noteDetail.Note}`;
-        setCaseNotes({
-          NotesDisplay: NotedDisplay,
-          ActionType: noteDetail.ActionType,
-          LogType: noteDetail.LogType,
-          VisibleExternally: noteDetail.VisibleExternally,
-        })
-      } 
-    }
-    loadNote()
-  }, [])
-
-  const [caseNotes, setCaseNotes] = useState([]);
+  // Deprecated: previously used for single textarea notes display
+  // Replaced by notesList table
 
   const buttons = [
     {
@@ -448,10 +443,15 @@ const openPopup = () => {
       onClick: () => handleSave(), 
       roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
     },
-    
     {
       icon: FileSymlink,
       label: "Save & Close",
+      onClick: () => handleSave().then(() => navigate(`/app/viewcase`)),
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
+    },
+    {
+      icon: CopyX,
+      label: "Close",
       onClick: () => saveAndCloseCase(),
       roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
     },
@@ -471,6 +471,14 @@ const openPopup = () => {
       link.click();
       document.body.removeChild(link);
     }, 
+    roles: ["admin", "fd","user", "spv"]
+  },
+    { icon: StepBack, label: "ERF", 
+      onClick: async () => {
+        const blob = await pdf(<EquipmentReciptForm caseDetails={caseDetails} />).toBlob();
+        const url = URL.createObjectURL(blob);
+        window.open(url); // opens PDF in a new tab
+      },
     roles: ["admin", "fd","user", "spv"]
   },
   { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), 
@@ -643,8 +651,8 @@ const openPopup = () => {
             onChangeGtc={handleGtcChange}
             onChange={handleCaseNoteChange}
             handleCaseDetails={handleCaseDetails}
-            caseNotes={caseNotes}
-            setCaseNotes={setCaseNotes}
+            notesList={notesList}
+            setNotesList={setNotesList}
             selectedSymptom={selectedSymptom}
             setSelectedSymptom={setSelectedSymptom}
             entitlementStatus={entitlementStatus}
@@ -670,8 +678,8 @@ export const ServiceCase = ({
   formData,
   setCaseNoteFormData,
   onChange,
-  caseNotes,
-  setCaseNotes,
+  notesList,
+  setNotesList,
   handleCaseDetails,
   selectedSymptom,
   setSelectedSymptom,
@@ -709,9 +717,10 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","celead","lg","ps"]},
-    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","celead","lg","ps"]},
-    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","celead","lg","ps"]},
+    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg","celead"]},
+    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg","celead"]},
+    { value: "note_part", label: "Sparepart" , roles:["admin", "apo","ce","celead","fd","lg"]},
+    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg","celead"]},
     // { value: "customer,add,entitement", label: "Asset & Entitement", roles:["admin"]},
     // { value: "ci_notes", label: "Notes & Information", roles:["admin"]},
     // { value: "ci_activitas", label: "Activities", disable: true, roles:["admin"]},
@@ -798,44 +807,15 @@ export const ServiceCase = ({
 
   const fetchCaseNotes = async () => {
     try {
-      const res = await ApiCustomer.get(`/api/case-information/case-notes`);
-      const notes = res.data.data;
-
-      const existingNote = notes.find(
-        (note) => note.CaseID === caseDetails.CaseID
-      );
-
-      let noteID = null;
-
-      if (existingNote) {
-        noteID = existingNote.NoteID;
-      } else {
-        const createResponse = await ApiCustomer.post(
-          `/api/case-information/case-notes`,
-          {
-            LogType: "NotesLog",
-            ActionType: "",
-            Template: "",
-            VisibleExternally: false,
-            MinutesSpent: 0,
-            Note: "",
-            CaseID: caseID,
-          }
-        );
-
-        noteID = createResponse.data.data.NoteID;
-      }
-
-      const detailRes = await ApiCustomer.get(
-        `/api/case-information/case-notes/${noteID}`
-      );
-      const noteDetail = detailRes.data.data;
-
-      console.log("Case Note Detail:", noteDetail);
-      return noteDetail;
+      const res = await ApiCustomer.get(`/api/case-information/case-notes?caseId=${caseDetails.CaseID}`);
+      const list = Array.isArray(res.data?.data) ? res.data.data : [];
+      console.log("Case Nots Available : ",res.data.data)
+      setNotesList(list);
+      return list;
     } catch (err) {
       console.error("Error in fetchCaseNotes:", err);
-      return null;
+      setNotesList([]);
+      return [];
     }
   };
 
@@ -1000,6 +980,14 @@ export const ServiceCase = ({
     FinishRepair: "Finish Repair",
   };
 
+   const statusEnumToLabelWO = {
+  OPEN_UNSCHEDULED: 'Open - Unscheduled',
+  OPEN_SCHEDULED: 'Open - Scheduled',
+  OPEN_INPROGRES: 'Open - In Progress',
+  OPEN_COMPLETED: 'Open - Completed',
+  CLOSED_POSTED: 'Closed - Posted'
+  };
+
   const assignToForm= true;
   // const assignToForm = statusEnumToLabel.startsWith("NEW_Assign");
 
@@ -1029,6 +1017,7 @@ const fetchCase = async () => {
   try {
     const res = await ApiCustomer.get(`/api/case-information/${caseDetails.CaseID}`);
     setCaseForm(res.data.data);
+    console.log("Case Infomation",res.data.data)
   } catch (err) {
     console.error("Error fetching case:", err);
     setCaseForm(caseForm); // fallback jika error
@@ -1051,20 +1040,7 @@ const fetchActionLog = async () => {
     fetchOwnerUserData();
 
     fetchWorkOrders();
-    const loadNote = async () => {
-      const noteDetail = await fetchCaseNotes();
-      if (noteDetail) {
-        setCaseNoteFormData((prev) => ({
-          ...prev,
-          NotesDisplay: noteDetail.Note,
-          ActionType: noteDetail.ActionType,
-          CreatedOn: noteDetail.CreatedOn,
-          LogType: noteDetail.LogType,
-          VisibleExternally: noteDetail.VisibleExternally,
-        }));
-      }
-    };
-    loadNote();
+    fetchCaseNotes();
     fetchGtc(); 
     fetchOTCCode();
     fetchCsr();
@@ -1237,11 +1213,11 @@ return (
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-2 ">
-                <CaseField label="Case Subject" lock span={3}>
+                <CaseField label="Case Subject" span={3} >
                     <Textarea
-                     value={caseDetails?.CaseSubject}
-                      onChange={e => handleCaseDetails("CaseSubject")(e.target.value)}
-                     className="resize-none border-none italic "
+                     value={caseForm?.CaseSubject}
+                      onChange={e => onChangeCase("CaseSubject")(e.target.value)}
+                     className="resize-none border-none italic ring-1 ring-gray-400 bg-gray-50"
                     />
                 </CaseField>
               
@@ -1336,6 +1312,14 @@ return (
                     "Onsite",
                     "Bench",
                     ]}
+                    />
+                </CaseField>
+
+                <CaseField label="Problem Description" span={2}>
+                    <Textarea
+                     value={caseForm?.ProblemDescription}
+                     onChange={(e) => onChangeCase("ProblemDescription") (e.target.value)}
+                     className="resize-none ring-1 ring-gray-300 bg-gray-50 italic"
                     />
                 </CaseField>
 
@@ -1570,8 +1554,8 @@ return (
                     <div className="space-y-6">
                       <textarea
                         className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
-                        readOnly
-                        value={caseDetails?.CaseProductNote}
+                        value={caseForm?.CaseProductNote}
+                           onChange={(e) => onChangeCase("CaseProductNote") (e.target.value)}
                       />
                     </div>
                     {/* RIGHT COLUMN - System Info */}
@@ -1613,18 +1597,39 @@ return (
               {/* --- Card 2: Case Notes --- */}
               <Card className=" hover:shadow-gray-400">
                 <CardHeader>
-                  <CardTitle className="text-xl flex gap-2 "><NotepadText />Case Notes</CardTitle>
+                  <CardTitle className="text-xl flex gap-2 "><NotepadText />Log Notes</CardTitle>
                   <hr />
                 </CardHeader>
                 <CardContent >
                   <div className="flex flex-col gap-2">
-                    <CaseField >
-                      <textarea
-                        className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
-                        readOnly
-                        value={formData?.NotesDisplay}
-                      ></textarea>
-                    </CaseField>
+                    <div className="w-full overflow-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Created On</TableHead>
+                            <TableHead>Created By</TableHead>
+                            <TableHead>Role</TableHead>
+                            <TableHead>Note</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {Array.isArray(notesList) && notesList.length > 0 ? (
+                            notesList.map((n) => (
+                              <TableRow key={n.NoteID}>
+                                <TableCell>{n.CreatedOn ? format(new Date(n.CreatedOn), 'yyyy-MM-dd HH:mm') : '-'}</TableCell>
+                                <TableCell>{n.createdByUser?.Name || n.CreatedBy || '-'}</TableCell>
+                                <TableCell>{n.createdByUser?.Role || '-'}</TableCell>
+                                <TableCell className="whitespace-pre-wrap max-w-xl">{n.Note}</TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={4} className="text-center text-sm text-gray-500">No notes yet</TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <CaseField
@@ -1774,7 +1779,7 @@ return (
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
                     </div>
-                    <CaseField label="OTC Code" lock={!canEdit} span={3} star>
+                    <CaseField label="Warranty Status"  span={3} star>
                       <SearchCommandBlock
                         options={otcCode}
                         value={entitlementStatus.OTCCode}
@@ -1796,7 +1801,7 @@ return (
                       <table className="min-w-full border text-sm text-left">
                         <thead className="bg-gray-100 text-gray-700">
                           <tr>
-                            <th className="border px-4 py-2">No Accesories</th>
+                            <th className="border px-4 py-2" hidden>No Accesories</th>
                             <th className="border px-4 py-2" hidden>
                               Case ID
                             </th>
@@ -1808,7 +1813,7 @@ return (
                         <tbody>
                           {caseDetails.accessory?.map((item, index) => (
                             <tr key={index} className="hover:bg-gray-50">
-                              <td className="border px-4 py-2">{item.id}</td>
+                              <td className="border px-4 py-2" hidden>{item.id}</td>
                               <td className="border px-4 py-2" hidden>
                                 {item.CaseID}
                               </td>
@@ -1901,7 +1906,7 @@ return (
                             </TableCell>
   
                             <TableCell>{work.SubStatus}</TableCell>
-                            <TableCell>{work.SystemStatus}</TableCell>
+                            <TableCell>{statusEnumToLabelWO[work.SystemStatus]}</TableCell>
                             <TableCell>{work.Priority}</TableCell>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
@@ -1976,6 +1981,7 @@ return (
                       <TableRow>
                         <TableHead className="w-[60px]">No</TableHead>
                         <TableHead>ReferenceId</TableHead>
+                        <TableHead>Case ID</TableHead>
                         <TableHead>Change By</TableHead>
                         <TableHead>Old Status</TableHead>
                         <TableHead>New Status</TableHead>
@@ -1988,8 +1994,9 @@ return (
                         actionLogs.map((log, index) => (
                           <TableRow key={log.id || index}>
                             <TableCell>{index + 1}</TableCell>
+                            <TableCell>{log.CaseId}</TableCell>
                             <TableCell>{log.ReferenceId}</TableCell>
-                            <TableCell>{log.changedByUser?.Name}</TableCell>
+                            <TableCell>{log.changedByUser?.Role} - {log.changedByUser?.Name} ({log.changedByUser?.Username})</TableCell>
                             <TableCell>{log.dataOld}</TableCell>
                             <TableCell>{log.dataNew}</TableCell>
                             <TableCell>{new Date(log.ChangeAt).toLocaleString()}</TableCell>
@@ -2009,7 +2016,114 @@ return (
               </Card>
             </div>
           </TabsContent>
-
+          
+          <TabsContent value="note_part">
+         
+              {caseDetails?.workorder?.[0]?.materialorder?.map((mo, index) => (
+              <div key={index} className={"flex flex-col p-3 space-y-5"}>
+                {mo?.materialorderlineitems.map((moli, i) => (
+                  <Card key={i} >
+                  <CardHeader>
+                  <CardTitle className={"text-lg"}>Sparepart {i + 1}</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent className={"grid grid-cols-6 gap-3"}>
+                  <CaseField label={"Part Category"}>
+                    <Input value={moli?.servicecatalog_parts?.Keyword}
+                    variant={"invisible"}
+                    />
+                  </CaseField>
+                <CaseField label={"Vendor Part No"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Hp Part No"}>
+                  <Input variant="invisible" value={moli?.servicecatalog_parts?.PartNumber}/>
+                </CaseField>
+                <CaseField label={"Part From HP ?"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Part Name"}>
+                    <Input value={moli?.servicecatalog_parts?.PartDescription}
+                    variant={"invisible"}
+                    />
+                </CaseField>
+                <CaseField label={"Qty"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Qty Use"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Qty unused"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Part Backup"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Price"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Part Status"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Part Return Status"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Bad CT Code"}>
+                  <Input variant="invisible" value={moli?.RemovedPartNumber}/>
+                </CaseField>
+                <CaseField label={"CT Code New"}>
+                  <Input variant="invisible" value={moli?.RemovedSerialNumber}/>
+                </CaseField>
+                <CaseField label={"CT Validation"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"UEFI Code"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"SO Number"}>
+                  <Input variant="invisible" value={mo?.SalesOrderNumber}/>
+                </CaseField>
+                <CaseField label={"RMA Number"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"RMA Status"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"AWB no. in"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"Part Request date"}>
+                  <Input variant="invisible" value={mo?.CreatedOn ? new Date(mo.CreatedOn).toLocaleString("id-ID", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit"
+                }) : ""}/>
+                </CaseField>
+                <CaseField label={"AWB no. out"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+                <CaseField label={"ETA date"}>
+                  <Input variant="invisible" 
+                  value={caseDetails?.workorder?.[0]?.bookings?.[0]?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime ? new Date(
+                    caseDetails?.workorder?.[0]?.bookings?.[0]?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime) .toLocaleString("id-ID", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  }) : ""} />
+                </CaseField>
+                <CaseField label={"Part Return SC date"}>
+                  <Input variant="invisible"/>
+                </CaseField>
+              </CardContent>
+                  </Card>
+                ))}
+              </div>
+              ))}
+          </TabsContent>
 
         </Tabs>
       </Card>

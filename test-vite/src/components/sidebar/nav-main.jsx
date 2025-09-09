@@ -46,7 +46,7 @@ import { Link } from "react-router";
                   <SidebarMenuSub>
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton asChild disabled={subItem.disabled} className={'text-gray-200 text-md hover:text-black'}>
+                        <SidebarMenuSubButton asChild disabled={subItem.disabled} className={'text-gray-200 text-[1rem] hover:text-black'}>
                           <Link to={subItem.url}>
                           {subItem.icon && <subItem.icon />}
                             <span className="">{subItem.title}</span>
