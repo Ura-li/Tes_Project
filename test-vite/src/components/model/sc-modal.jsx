@@ -4787,79 +4787,78 @@ export function BtnModalsServiceCatalog({
 
   //createorder
   const createOrder = async () => {
-    if (!assignApo)
-      {
+    if (!assignApo) {
       toast.warning("APO IS NOT ASSIGN YET", {
         description: "PLEASE CHOOSE THE APO PATNER BEFORE CREATING ORDER",
         position: 'top-center'
       })
-      } else{
-      try {
-        Swal.fire({
-          title: "Creating Order...",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          didOpen: () => Swal.showLoading()
-        });
-        const data = {
-          user: getUserFromToken()
-        }
-        const res = await ApiCustomer.post("/api/service-log/create-order", {
-          AssetID: assetForWorkOrderCreation.AssetID,
-          CaseID: caseDetails.CaseID,
-          selectedWarrantyServices,
-          selectedPartCatalog,
-          IncidentType: selected,
-          OwnerID: data.user.id,
-          assignApo: assignApo
-        });
-        console.log(res)
-        const updateLogCase = await ApiCustomer.post("/api/actionlog",{
-          CaseId: `${caseDetails.CaseID}`,
-          model: "Case",
-          dataOld: caseDetails.CaseStatus,
-          dataNew: "Part Request",
-          changedBy: data.user.id,
-          logDescription: `Edit: change status from ${caseDetails.CaseStatus} to InActive`
-        })
-        const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
-          CaseId: `${caseDetails.CaseID}`,
-          ReferenceId: `${res.data.WOID}`,
-          model: "Work",
-          dataOld: "OPEN_UNSCHEDULED",
-          dataNew: "OPEN_UNSCHEDULED",
-          changedBy: data.user.id,
-          logDescription: `New Work Order : ${res.data.WOID}`
-        })
-        const updateMaterialLog = await ApiCustomer.post("/api/actionlog",{
-          CaseId: `${caseDetails.CaseID}`,
-          ReferenceId: `${res.data.MOID}`,
-          model: "Material Order",
-          dataOld: "New",
-          dataNew: "New",
-          changedBy: data.user.id,
-          logDescription: `New Material Order : ${res.data.MOID}`
-        })
-    
-        
-        Swal.close(); 
-        
-        // Close loading after success
-        await Swal.fire({
-          title: "Success!",
-          text:  "Order added successfully!",
-          icon:  "success",
-          timer: 1500,
-          showConfirmButton: false,
-          allowEscapeKey: false,
-        }).then(()=>{
-          setOpen(false);
-          const WOID = res.data.WOID
-          const MOID = res.data.MOID
-          switch (serviceCatalogType) {
-            case "CSR":
-              window.open(`/app/material-order/${MOID}`, '_blank');
-              break;
+    } else {
+    try {
+       Swal.fire({
+        title: "Creating Order...",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading()
+      });
+      const data = {
+        user: getUserFromToken()
+      }
+      const res = await ApiCustomer.post("/api/service-log/create-order", {
+        AssetID: assetForWorkOrderCreation.AssetID,
+        CaseID: caseDetails.CaseID,
+        selectedWarrantyServices,
+        selectedPartCatalog,
+        IncidentType: selected,
+        OwnerID: data.user.id,
+        assignApo: assignApo
+      });
+      console.log(res)
+      const updateLogCase = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseDetails.CaseID}`,
+        model: "Case",
+        dataOld: caseDetails.CaseStatus,
+        dataNew: "Part Request",
+        changedBy: data.user.id,
+        logDescription: `Edit: change status from ${caseDetails.CaseStatus} to InActive`
+      })
+      const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseDetails.CaseID}`,
+        ReferenceId: `${res.data.WOID}`,
+        model: "Work",
+        dataOld: "OPEN_UNSCHEDULED",
+        dataNew: "OPEN_UNSCHEDULED",
+        changedBy: data.user.id,
+        logDescription: `New Work Order : ${res.data.WOID}`
+      })
+      const updateMaterialLog = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseDetails.CaseID}`,
+        ReferenceId: `${res.data.MOID}`,
+        model: "Material Order",
+        dataOld: "New",
+        dataNew: "New",
+        changedBy: data.user.id,
+        logDescription: `New Material Order : ${res.data.MOID}`
+      })
+  
+      
+      Swal.close(); 
+      
+       // Close loading after success
+      await Swal.fire({
+        title: "Success!",
+        text:  "Order added successfully!",
+        icon:  "success",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(()=>{
+        setOpen(false);
+        const WOID = res.data.WOID
+        const MOID = res.data.MOID
+        switch (serviceCatalogType) {
+          case "CSR":
+            window.open(`/app/material-order/${MOID}`, '_blank');
+            break;
 
             case "serviceorder":
               window.open(`/app/work/${WOID}`, '_blank');  
@@ -4879,7 +4878,8 @@ export function BtnModalsServiceCatalog({
           showConfirmButton: false,
           allowEscapeKey: false,
         });
-      }}
+      }
+    }
   };
   
   function renderStepContent() {
