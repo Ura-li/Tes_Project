@@ -15,17 +15,19 @@ export async function GET(request) {
 
         let whereCondition = {}
         
-          if (search) {
-            whereCondition.AND = [
-                whereCondition, // Keep SiteAccountID & ContactID constraints
-                {
-                    OR: [
+            if (search) {
+                whereCondition = {
+                    AND: [
+                    {
+                        OR: [
                         { OTCCode: { contains: search } },
                         { Description: { contains: search } },
+                        ]
+                    }
                     ]
                 }
-            ];
-        }
+            }
+
 
         console.log("Final WHERE Condition:", JSON.stringify(whereCondition));
 

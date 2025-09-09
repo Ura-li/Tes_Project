@@ -129,7 +129,10 @@ export async function POST(request) {
         City,
         StateProvince,
         Country,
-        ZipPostalCode
+        ZipPostalCode,
+        PIC_Name,
+        PIC_Email,
+        PIC_Phone
     } = await request.json();
 
     try {
@@ -174,7 +177,10 @@ export async function POST(request) {
                 City,
                 StateProvince,
                 Country,
-                ZipPostalCode
+                ZipPostalCode,
+                PIC_Name,
+                PIC_Email,
+                PIC_Phone
             },
         });
 

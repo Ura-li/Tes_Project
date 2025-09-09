@@ -72,7 +72,7 @@ export async function POST(request) {
 
         // 5. Change Case Status to InActive
         const caseUpdateData = {
-            CaseStatus: "InActive"
+            CaseStatus: "PartRequest"
         };
 
         if (assignApo !== null && assignApo !== undefined) {

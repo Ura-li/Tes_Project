@@ -19,7 +19,8 @@ export async function GET(request, {params}) {
             NoteID: noteID,
         },
         include: {
-            caseinformation_casenotes_CaseIDTocaseinformation: true
+            caseinformation_casenotes_CaseIDTocaseinformation: true,
+            createdByUser: { select: { IDUser: true, Name: true, Role: true, Email: true } },
         }
     })
 

@@ -27,6 +27,7 @@ export const SearchCommandBlock = ({
   value,
   onChange,
   placeholder = "Search...",
+  onSearchInputChange = undefined,
   renderLabel = (opt) => opt.label || opt,
   getValue = (opt) => opt.value || opt,
   readOnly,
@@ -66,16 +67,21 @@ export const SearchCommandBlock = ({
 
   return (
     <div className="relative w-full">
-      {selectedOption  ? (
-        <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2 ring-1" 
-          onClick={() => 
-            !readOnly ?
-            onChange(null)
-            :
-            ""
+      {selectedOption ? (
+        <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2 ring-1"
+          onClick={() => {
+            if (!readOnly) {
+              onChange(null)
+              setOpen
+
+              setTimeout(() => {
+                inputRef.current?.focus(); // focus input
+              }, 0);
+            }
           }
-          
-          
+          }
+
+
         >
           <Archive color="blue" className="size-4 shrink-0" />
           <span className="pl-1">{renderLabel(selectedOption)}</span>
@@ -87,6 +93,11 @@ export const SearchCommandBlock = ({
             placeholder={placeholder}
             onFocus={() => !readOnly && setOpen(true)}
             onBlur={handleBlur}
+            onValueChange={(val) => {
+              if (onSearchInputChange) {
+                onSearchInputChange(val); // 👈 call if exist
+              }
+            }}
             disabled={readOnly} // 👈 prevent typing if readOnly
           />
           {open && !readOnly && ( // 👈 don’t open dropdown if readOnly

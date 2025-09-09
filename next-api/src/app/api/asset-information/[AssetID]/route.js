@@ -48,23 +48,34 @@ export async function GET(request, { params }) {
  * MAKE UPDATE ASSET AND CREATE PRODUCT SEPARATELY
  */
 export async function PATCH(request, { params }) {
-    const assetID = parseInt(params.AssetID);
+    const {AssetID} = await params;
+    const assetId = parseInt(AssetID);
 
     try { 
         const body = await request.json();
-        const { SerialNumber, ProductName, ProductNumber, ProductLine, SiteAccountID, ContactID } = body;
+        const { 
+            SerialNumber, 
+            ProductName, 
+            ProductNumber, 
+            ProductLine, 
+            SiteAccountID, 
+            ContactID,
+            Warranty_Status,
+            EOW_Date 
+        } = body;
 
+        console.log(body);
         // Validasi input tidak boleh kosong
-        if (!SerialNumber || !ProductName || !ProductNumber || !ProductLine) {
-            return NextResponse.json({
-                success: false,
-                message: "All fields are required!"
-            }, { status: 400 });
-        }
+        // if (!SerialNumber || !ProductName || !ProductNumber || !ProductLine) {
+        //     return NextResponse.json({
+        //         success: false,
+        //         message: "All fields are required!"
+        //     }, { status: 400 });
+        // }
 
         // Cek apakah AssetID ada
         const existingAsset = await prisma.asset_information.findUnique({
-            where: { AssetID: assetID }
+            where: { AssetID: assetId }
         });
 
         if (!existingAsset) {
@@ -76,12 +87,14 @@ export async function PATCH(request, { params }) {
 
         // Update data
         const updatedAsset = await prisma.asset_information.update({
-            where: { AssetID: assetID },
+            where: { AssetID: assetId },
             data: {
                 SerialNumber,
                 ProductNumber,
                 SiteAccountID,
-                ContactID
+                ContactID,
+                Warranty_Status,
+                EOW_Date
             }
         });
 
