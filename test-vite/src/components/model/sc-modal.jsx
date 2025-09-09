@@ -4812,7 +4812,7 @@ export function BtnModalsServiceCatalog({
         dataOld: caseDetails.CaseStatus,
         dataNew: "Part Request",
         changedBy: data.user.id,
-        logDescription: `Edit: change status from ${caseDetails.CaseStatus} to InActive`
+        logDescription: `Edit: change status from ${caseDetails.CaseStatus} to Part Request`
       })
       const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
         CaseId: `${caseDetails.CaseID}`,

@@ -124,6 +124,7 @@ export const TabsServiceCaseDetails = ({
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
   const { user } = useAuth();
   const [selectedSymptom, setSelectedSymptom] = useState(null);
+  const [notesList, setNotesList] = useState([]);
 
   const { open } = useSidebar();
   const [entitlementStatus, setEntitlementStatus] = useState({
@@ -240,31 +241,28 @@ export const TabsServiceCaseDetails = ({
       switch (target) {
 
        case 'NOTE':
-  if (noteFilled) {
-    const modifiedNote = `[@${timestamp}] by ${author} (${role})\n${caseNoteFormData.LogType} : ${caseNoteFormData.Note}`;
+         if (noteFilled) {
+           const response = await ApiCustomer.post("/api/case-information/case-notes", {
+             LogType: caseNoteFormData.LogType,
+             ActionType: caseNoteFormData.ActionType,
+             VisibleExternally: caseNoteFormData.VisibleExternally,
+             Note: caseNoteFormData.Note,
+             CaseID: caseDetails.CaseID,
+             CreatedBy: user?.id
+           });
+           dataToUpdate.CaseNote = response.data.data.NoteID;
 
-    const response = await ApiCustomer.post("/api/case-information/case-notes", {
-      LogType: caseNoteFormData.LogType,
-      ActionType: caseNoteFormData.ActionType,
-      VisibleExternally: caseNoteFormData.VisibleExternally,
-      Note: modifiedNote,
-      CaseID: caseDetails.CaseID
-    });
-      dataToUpdate.CaseNote = response.data.data.NoteID;
+           // Refresh notes table and clear input note
+          //  await fetchCaseNotes();
+          //  setCaseNoteFormData((prev) => ({ ...prev, Note: "" }));
 
-    const NotedDisplay = `@Created On : ${response.data.data.CreatedOn}\n${response.data.data.Note}`;
-    setCaseNotes({ NotesDisplay: NotedDisplay, 
-          ActionType: caseNoteFormData.ActionType,
-          LogType: caseNoteFormData.LogType,
-          VisibleExternally: caseNoteFormData.VisibleExternally,});
-    
-     if (selectedSymptom) {
-      dataToUpdate.SymptomCode = selectedSymptom.SymptomCodeID;
-    }
+           if (selectedSymptom) {
+             dataToUpdate.SymptomCode = selectedSymptom.SymptomCodeID;
+           }
 
-    savedModules.push("Note");
-  }
-  break;
+           savedModules.push("Note");
+         }
+         break;
 
         case 'GTC':
           if (gtcEdited) {
@@ -367,7 +365,7 @@ export const TabsServiceCaseDetails = ({
                   allowEscapeKey: false,
                 });
               }
-          }
+          } 
           break;
       }
 
@@ -401,7 +399,7 @@ export const TabsServiceCaseDetails = ({
     }
 
   } catch (error) {
-    console.error("Save failed:", error);
+    console.error("failed:", error);
     Swal.fire({
       icon: "error",
       title: error.message,
@@ -430,23 +428,8 @@ const openPopup = () => {
 };
   
 
-  useEffect(() => {
-    const loadNote = async () => {
-      const noteDetail = caseNote;
-      if(noteDetail ){
-        const NotedDisplay = `@Created On : ${noteDetail.CreatedOn}\n${noteDetail.Note}`;
-        setCaseNotes({
-          NotesDisplay: NotedDisplay,
-          ActionType: noteDetail.ActionType,
-          LogType: noteDetail.LogType,
-          VisibleExternally: noteDetail.VisibleExternally,
-        })
-      } 
-    }
-    loadNote()
-  }, [])
-
-  const [caseNotes, setCaseNotes] = useState([]);
+  // Deprecated: previously used for single textarea notes display
+  // Replaced by notesList table
 
   const buttons = [
     {
@@ -668,8 +651,8 @@ const openPopup = () => {
             onChangeGtc={handleGtcChange}
             onChange={handleCaseNoteChange}
             handleCaseDetails={handleCaseDetails}
-            caseNotes={caseNotes}
-            setCaseNotes={setCaseNotes}
+            notesList={notesList}
+            setNotesList={setNotesList}
             selectedSymptom={selectedSymptom}
             setSelectedSymptom={setSelectedSymptom}
             entitlementStatus={entitlementStatus}
@@ -695,8 +678,8 @@ export const ServiceCase = ({
   formData,
   setCaseNoteFormData,
   onChange,
-  caseNotes,
-  setCaseNotes,
+  notesList,
+  setNotesList,
   handleCaseDetails,
   selectedSymptom,
   setSelectedSymptom,
@@ -824,44 +807,15 @@ export const ServiceCase = ({
 
   const fetchCaseNotes = async () => {
     try {
-      const res = await ApiCustomer.get(`/api/case-information/case-notes`);
-      const notes = res.data.data;
-
-      const existingNote = notes.find(
-        (note) => note.CaseID === caseDetails.CaseID
-      );
-
-      let noteID = null;
-
-      if (existingNote) {
-        noteID = existingNote.NoteID;
-      } else {
-        const createResponse = await ApiCustomer.post(
-          `/api/case-information/case-notes`,
-          {
-            LogType: "NotesLog",
-            ActionType: "",
-            Template: "",
-            VisibleExternally: false,
-            MinutesSpent: 0,
-            Note: "",
-            CaseID: caseID,
-          }
-        );
-
-        noteID = createResponse.data.data.NoteID;
-      }
-
-      const detailRes = await ApiCustomer.get(
-        `/api/case-information/case-notes/${noteID}`
-      );
-      const noteDetail = detailRes.data.data;
-
-      console.log("Case Note Detail:", noteDetail);
-      return noteDetail;
+      const res = await ApiCustomer.get(`/api/case-information/case-notes?caseId=${caseDetails.CaseID}`);
+      const list = Array.isArray(res.data?.data) ? res.data.data : [];
+      console.log("Case Nots Available : ",res.data.data)
+      setNotesList(list);
+      return list;
     } catch (err) {
       console.error("Error in fetchCaseNotes:", err);
-      return null;
+      setNotesList([]);
+      return [];
     }
   };
 
@@ -1086,20 +1040,7 @@ const fetchActionLog = async () => {
     fetchOwnerUserData();
 
     fetchWorkOrders();
-    const loadNote = async () => {
-      const noteDetail = await fetchCaseNotes();
-      if (noteDetail) {
-        setCaseNoteFormData((prev) => ({
-          ...prev,
-          NotesDisplay: noteDetail.Note,
-          ActionType: noteDetail.ActionType,
-          CreatedOn: noteDetail.CreatedOn,
-          LogType: noteDetail.LogType,
-          VisibleExternally: noteDetail.VisibleExternally,
-        }));
-      }
-    };
-    loadNote();
+    fetchCaseNotes();
     fetchGtc(); 
     fetchOTCCode();
     fetchCsr();
@@ -1661,13 +1602,34 @@ return (
                 </CardHeader>
                 <CardContent >
                   <div className="flex flex-col gap-2">
-                    <CaseField >
-                      <textarea
-                        className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
-                        readOnly
-                        value={formData?.NotesDisplay}
-                      ></textarea>
-                    </CaseField>
+                    <div className="w-full overflow-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Created On</TableHead>
+                            <TableHead>Created By</TableHead>
+                            <TableHead>Role</TableHead>
+                            <TableHead>Note</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {Array.isArray(notesList) && notesList.length > 0 ? (
+                            notesList.map((n) => (
+                              <TableRow key={n.NoteID}>
+                                <TableCell>{n.CreatedOn ? format(new Date(n.CreatedOn), 'yyyy-MM-dd HH:mm') : '-'}</TableCell>
+                                <TableCell>{n.createdByUser?.Name || n.CreatedBy || '-'}</TableCell>
+                                <TableCell>{n.createdByUser?.Role || '-'}</TableCell>
+                                <TableCell className="whitespace-pre-wrap max-w-xl">{n.Note}</TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={4} className="text-center text-sm text-gray-500">No notes yet</TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <CaseField
