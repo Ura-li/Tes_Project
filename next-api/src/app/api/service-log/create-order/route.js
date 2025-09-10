@@ -6,11 +6,17 @@ import { generateID } from "@/utils/generateID";
 export async function POST(request) {
     try{
         const body = await request.json()
-        const { AssetID, CaseID, selectedWarrantyServices, selectedPartCatalog, IncidentType, OwnerID, assignApo } = body;
+        const { AssetID, CaseID, selectedWarrantyServices, selectedPartCatalog, IncidentType, OwnerID, assignApo, notesLog } = body;
 
         //validate owner
         const materialOrderOwnerID = assignApo ?? OwnerID;
 
+        // opt : get case info 
+        const caseInfo = await prisma.caseinformation.findUnique({
+            where: { CaseID: CaseId },
+            select: { Owner: true, CreatedBy: true }  
+        })
+        
          // 1. Create Work Order
         const WOID = await generateID("WO-", "workorder", "WOID"); 
         console.log("Generated ID:", WOID, typeof WOID);
@@ -70,7 +76,21 @@ export async function POST(request) {
             });
         }
 
-        // 5. Change Case Status to InActive
+        // 5. Log Note inform Part Order
+        await prisma.casenotes.create({
+            data:{
+                CaseID,
+                LogType: "NotesLog",
+                ActionType: "Action Plan",
+                Template: "",
+                VisibleExternally: true,
+                MinutesSpent: 0,
+                Note: notesLog,
+                CreatedBy: OwnerID
+            }
+        })
+
+        // 6. Change Case Status to Part Request
         const caseUpdateData = {
             CaseStatus: "PartRequest"
         };
@@ -83,12 +103,68 @@ export async function POST(request) {
             where: { CaseID: CaseID },
             data: caseUpdateData
         });
+
+
+        // 7. Action Log changed case Status
+        await prisma.ActionLog.create({
+            data:{
+                CaseID_toActionLog:{
+                    connect:{
+                        CaseID: CaseID
+                    }
+                },
+                model: "Case",
+                dataOld: caseInfo?.CaseStatus,
+                dataNew: "Part Request",
+                changedBy: OwnerID,
+                logDescription: `Edit: change status from ${caseInfo?.CaseStatus} to Part Request`
+            }
+        })
+        
+        // 8. Action Log create new Work Order
+        await prisma.ActionLog.create({
+            data:{
+                CaseID_toActionLog:{
+                    connect:{
+                        CaseID: CaseID
+                    }
+                },
+                ReferenceId: WOID,
+                model: "Work",
+                dataOld: "OPEN_UNSCHEDULED",
+                dataNew: "OPEN_UNSCHEDULED",
+                changedBy: OwnerID,
+                logDescription: `New Work Order : ${WOID}`
+            }
+        })
+        
+        // 9. Action Log create Material Order 
+        await prisma.ActionLog.create({
+            data:{
+                CaseID_toActionLog:{
+                    connect:{
+                        CaseID: CaseID
+                    }
+                },
+                ReferenceId: MOID,
+                model: "Material Order",
+                dataOld: "New",
+                dataNew: "New",
+                changedBy: OwnerID,
+                logDescription: `New Material Order : ${MOID}`
+            }
+        })
+        
+
+
+
         return NextResponse.json({ 
             success: true, 
             message: "Order created successfully", 
             WOID, 
             MOID 
         });
+
 
 
     }catch(err){
