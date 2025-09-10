@@ -185,10 +185,11 @@ model contact_information {
   StateProvince     String?             @db.VarChar(100)
   Country           String?             @db.VarChar(100)
   ZipPostalCode     String?             @db.VarChar(20)
+  NPWP              String?             @db.VarChar(25)
 
   PIC_Name          String?             @db.VarChar(100)
-  PIC_Email          String?             @db.VarChar(100)
-  PIC_Phone          String?             @db.VarChar(100)
+  PIC_Email         String?             @db.VarChar(100)
+  PIC_Phone         String?             @db.VarChar(100)
   asset_information asset_information[]
   caseinformation   caseinformation[]
   site_account      site_account?       @relation(fields: [SiteAccountID], references: [SiteAccountID], onDelete: Restrict, onUpdate: Restrict, map: "contact_information_ibfk_1")
