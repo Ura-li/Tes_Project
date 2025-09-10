@@ -352,6 +352,15 @@ export const Contact_table = () => {
               <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ZipPostalCode")}>
                 Zip/Postal Code {getSortIcon("ZipPostalCode")}
               </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Name")}>
+                PIC Name {getSortIcon("PIC_Name")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Email")}>
+                PIC Email {getSortIcon("PIC_Email")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Phone")}>
+                PIC Phone {getSortIcon("PIC_Phone")}
+              </th>
               <th className="p-3 text-sm font-semibold text-center border">Actions</th>
             </tr>
           </thead>
@@ -380,6 +389,9 @@ export const Contact_table = () => {
                   <td className="p-3 border">{contact.StateProvince}</td>
                   <td className="p-3 border">{contact.Country}</td>
                   <td className="p-3 border">{contact.ZipPostalCode}</td>
+                  <td className="p-3 border">{contact.PIC_Name}</td>
+                  <td className="p-3 border">{contact.PIC_Email}</td>
+                  <td className="p-3 border">{contact.PIC_Phone}</td>
                   <td className="flex items-center justify-center gap-2 p-3 border">
                     <ContactEdit contactID={contact.ContactID} onUpdate={fetchContacts} />
                     <ContactDelete contactID={contact.ContactID} />
@@ -1532,6 +1544,14 @@ export const Assets_table = () => {
           valA = a?.product_information?.ProductLine ?? "";
           valB = b?.product_information?.ProductLine ?? "";
           break;
+        case "Warranty_Status":
+        valA = a?.Warranty_Status ?? "";
+        valB = b?.Warranty_Status ?? "";
+        break;
+        case "EOW_Date":
+        valA = a?.EOW_Date ? new Date(a.EOW_Date).getTime() : 0;
+        valB = b?.EOW_Date ? new Date(b.EOW_Date).getTime() : 0;
+        break;
         default:
           valA = a?.[sortConfig.key] ?? "";
           valB = b?.[sortConfig.key] ?? "";
@@ -1657,6 +1677,12 @@ export const Assets_table = () => {
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("ContactID")}>
                 Contact ID {renderSortIcon("ContactID")}
               </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Warranty_Status")}>
+                Warranty Status {renderSortIcon("Warranty_Status")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("EOW_Date")}>
+                EOW Date {renderSortIcon("EOW_Date")}
+              </th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
@@ -1674,6 +1700,12 @@ export const Assets_table = () => {
                   <td className="p-2 border">{a?.product_information?.ProductLine}</td>
                   <td className="p-2 border">{a?.site_account?.Company}</td>
                   <td className="p-2 border">{a?.contact_information?.FirstName} {a?.contact_information?.LastName}</td>
+                  <td className="p-2 border">{a?.Warranty_Status}</td>
+                  <td className="p-2 border">
+                    {a?.EOW_Date
+                      ? new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(a.EOW_Date))
+                      : "—"}
+                  </td>
                   <td className="flex p-2 gap-2 border">
                     <AssetEdit assetId={a.AssetID} onUpdate={fetchAllAssets} />
                     <AssetDelete assetId={a.AssetID} />
@@ -7526,6 +7558,14 @@ export const OTCCodeTable = () => {
                   Description {getSortIcon("Description")}
                 </div>
               </th>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("WarrantyCondition")}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  Warranty Condition {getSortIcon("WarrantyCondition")}
+                </div>
+              </th>
               <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("CreatedOn")}>
                 <div className="flex items-center justify-center gap-1">
                   Created At {getSortIcon("CreatedOn")}
@@ -7545,6 +7585,9 @@ export const OTCCodeTable = () => {
                     {item.OTCCode}
                   </td>
                   <td className="p-3 border">{item.Description}</td>
+                  <td className="p-3 border">
+                    {item.WarrantyCondition ? item.WarrantyCondition : "—"}
+                  </td>
                   <td className="p-3 border">
                     {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
                       year: "numeric",

@@ -46,7 +46,13 @@ export async function GET(request) {
             where: whereCondition,
             // skip: skip,
               // take: limit,
-            orderBy: { OTCCode: "asc" }
+            orderBy: { OTCCode: "asc" },
+            select: {
+            OTCCode: true,
+            Description: true,
+            WarrantyCondition: true,   // ✅ Tambahkan ini
+            CreatedOn: true,
+         },
         });
 
         return NextResponse.json({
@@ -84,7 +90,8 @@ export async function POST(request) {
     //get all request
     const { 
         OTCCode,
-        Description
+        Description,
+        WarrantyCondition,
     } = await request.json();
 
     console.log()
@@ -92,7 +99,8 @@ export async function POST(request) {
     const otcCodeData = await prisma.OTCCodeTable.create({
         data:{
             OTCCode: OTCCode,
-            Description: Description
+            Description: Description,
+            WarrantyCondition: WarrantyCondition,
         },
     });
 

@@ -922,9 +922,13 @@ function GenericSelector({
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (query.length < 2) return;
+    if (query.length < 2) {
+      setResults([]);
+      return;
+    }
     const fetchData = async () => {
       try {
         const res = await ApiCustomer.get(`${endpoint}?search=${query}`);
@@ -936,30 +940,44 @@ function GenericSelector({
     fetchData();
   }, [query, endpoint]);
 
+  const handleSelect = (item) => {
+    onChange(item);
+    setQuery(item[labelKey]); // tampilkan label di input
+    setOpen(false); // tutup dropdown setelah pilih
+  };
+
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-gray-700">{label}</label>
-      <Command className="border rounded-lg">
-        <input
-          className="w-full p-2 border-b"
-          placeholder={placeholder}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <CommandGroup>
+    <div className="flex flex-col gap-1 relative">
+      {label && <label className="text-sm font-medium text-gray-700">{label}</label>}
+      
+      <input
+        className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        placeholder={placeholder}
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+      />
+
+      {/* Dropdown Results */}
+      {open && results.length > 0 && (
+        <div className="absolute top-full mt-1 w-full bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto z-50">
           {results.map((item) => (
-            <CommandItem
+            <div
               key={item[valueKey]}
-              onSelect={() => {
-                onChange(item);
-                setQuery(item[labelKey]); // tampilkan label di input
-              }}
+              onClick={() => handleSelect(item)}
+              className={`px-3 py-2 cursor-pointer hover:bg-blue-100 ${
+                value === item[valueKey] ? "bg-blue-50 font-medium" : ""
+              }`}
             >
-              {item[labelKey]} ({item[valueKey]})
-            </CommandItem>
+              {item[labelKey]} <span className="text-gray-500 text-xs">({item[valueKey]})</span>
+            </div>
           ))}
-        </CommandGroup>
-      </Command>
+        </div>
+      )}
+
       {helperText && <p className="text-xs text-gray-500">{helperText}</p>}
     </div>
   );
@@ -974,6 +992,7 @@ export function AssetEdit({ assetId, onUpdate }) {
     ProductLine: "",
     SiteAccountID: "",
     ContactID: "",
+    Warranty_Status: "",
   });
   const [isOpen, setIsOpen] = useState(false);
 
@@ -992,6 +1011,7 @@ export function AssetEdit({ assetId, onUpdate }) {
         ProductLine: data?.product_information?.ProductLine || "",
         SiteAccountID: data?.SiteAccountID || "",
         ContactID: data?.ContactID || "",
+        Warranty_Status:  data?.Warranty_Status || "",
       });
     } catch (error) {
       console.error("Error fetching asset information:", error);
@@ -1011,6 +1031,7 @@ export function AssetEdit({ assetId, onUpdate }) {
         ProductLine: "",
         SiteAccountID: "",
         ContactID: "",
+        Warranty_Status: "",
       });
       setAsset(null);
     }
@@ -1127,6 +1148,17 @@ export function AssetEdit({ assetId, onUpdate }) {
             placeholder="Search contact..."
             label="Contact"
             helperText="Minimal 2 huruf untuk mencari contact"
+          />
+
+          <GenericSelector
+            value={formData.Warranty_Status}
+            onChange={(w) => handleChange("Warranty_Status", w.Code)} 
+            endpoint="/api/otc-code" 
+            labelKey="Description"
+            valueKey="Code"
+            placeholder="Select warranty status..."
+            label="Warranty Status"
+            helperText="Pilih status warranty asset"
           />
         </div>
 
@@ -1513,6 +1545,9 @@ export function ContactEdit({ contactID, onUpdate }) {
   const [stateProvince, setStateProvince] = useState("");
   const [country, setCountry] = useState("");
   const [zipPostalCode, setZipPostalCode] = useState("");
+  const [picName, setPicName] = useState("");
+  const [picEmail, setPicEmail] = useState("");
+  const [picPhone, setPicPhone] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   const fetchContact = async () => {
@@ -1536,6 +1571,9 @@ export function ContactEdit({ contactID, onUpdate }) {
       setStateProvince(data?.StateProvince || "");
       setCountry(data?.Country || "");
       setZipPostalCode(data?.ZipPostalCode || "");
+      setPicName(data?.PIC_Name || "");
+      setPicEmail(data?.PIC_Email || "");
+      setPicPhone(data?.PIC_Phone || "");
     } catch (error) {
       console.error("Error fetching contact information:", error);
     }
@@ -1578,6 +1616,9 @@ export function ContactEdit({ contactID, onUpdate }) {
         StateProvince: stateProvince,
         Country: country,
         ZipPostalCode: zipPostalCode,
+        PIC_Name: picName,
+        PIC_Email: picEmail,
+        PIC_Phone: picPhone,
       });
 
       Swal.fire({
@@ -1685,6 +1726,18 @@ export function ContactEdit({ contactID, onUpdate }) {
             <div>
               <label className="text-sm font-medium">Zip / Postal Code *</label>
               <Input value={zipPostalCode} onChange={(e) => setZipPostalCode(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">PIC Name</label>
+              <Input value={picName} onChange={(e) => setPicName(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">PIC Email</label>
+              <Input value={picEmail} onChange={(e) => setPicEmail(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">PIC Phone</label>
+              <Input value={picPhone} onChange={(e) => setPicPhone(e.target.value)} />
             </div>
           </div>
         </div>
@@ -8478,7 +8531,8 @@ export function ServiceCatalogDelete({ ServiceCatalogID, onUpdate }) {
 export function OTCAdd({ onUpdate }) {
   const [formData, setFormData] = useState({
     OTCCode: "",
-    Description: ""
+    Description: "",
+    WarrantyCondition: "InWarranty",
   });
 
   const handleInputChange = (e) => {
@@ -8490,7 +8544,7 @@ export function OTCAdd({ onUpdate }) {
   };
 
   const handleSubmit = async () => {
-    if (!formData.OTCCode || !formData.Description) {
+    if (!formData.OTCCode || !formData.Description || !formData.WarrantyCondition) {
       Swal.fire({
         title: "Incomplete Data",
         text: "All fields are required.",
@@ -8545,6 +8599,16 @@ export function OTCAdd({ onUpdate }) {
           <Label>Description</Label>
           <Input id="Description" value={formData.Description} onChange={handleInputChange} />
 
+          <Label>Warranty Condition *</Label>
+          <select
+            id="WarrantyCondition"
+            value={formData.WarrantyCondition}
+            onChange={handleInputChange}
+            className="w-full border rounded p-2"
+          >
+            <option value="InWarranty">In Warranty</option>
+            <option value="OutWarranty">Out Warranty</option>
+          </select>
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit}>Add</Button>
@@ -8558,6 +8622,7 @@ export function OTCEdit({ OTCCode, onUpdate }) {
   const [formData, setFormData] = useState({
     OTCCode: "",
     Description: "",
+    WarrantyCondition: "",
   });
   const [open, setOpen] = useState(false);
 
@@ -8568,6 +8633,7 @@ export function OTCEdit({ OTCCode, onUpdate }) {
         setFormData({
           OTCCode: res.data.data.OTCCode,
           Description: res.data.data.Description,
+          WarrantyCondition: res.data.data.WarrantyCondition || "",
         });
       } else {
         throw new Error("Failed to load data");
@@ -8648,6 +8714,18 @@ export function OTCEdit({ OTCCode, onUpdate }) {
 
           <Label>Description</Label>
           <Input id="Description" value={formData.Description} onChange={handleInputChange} />
+
+          <Label>Warranty Condition</Label>
+          <select
+            id="WarrantyCondition"
+            value={formData.WarrantyCondition}
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded-md"
+          >
+            <option value="">-- Select Condition --</option>
+            <option value="InWarranty">In Warranty</option>
+            <option value="OutWarranty">Out of Warranty</option>
+          </select>
         </div>
 
         <DialogFooter>
