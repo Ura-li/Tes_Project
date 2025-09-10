@@ -911,18 +911,25 @@ import { toast } from "sonner";
 
 
 function GenericSelector({ 
-  value, 
+  value = null, 
   onChange, 
   endpoint, 
   labelKey, 
   valueKey, 
-  placeholder, 
+  placeholder = "Search...", 
   label,
   helperText 
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [open, setOpen] = useState(false);
+
+  // ✅ Sync query dengan value dari luar (misalnya saat edit form)
+  useEffect(() => {
+    if (value && typeof value === "object") {
+      setQuery(value[labelKey] || "");
+    }
+  }, [value, labelKey]);
 
   useEffect(() => {
     if (query.length < 2) {
@@ -969,7 +976,7 @@ function GenericSelector({
               key={item[valueKey]}
               onClick={() => handleSelect(item)}
               className={`px-3 py-2 cursor-pointer hover:bg-blue-100 ${
-                value === item[valueKey] ? "bg-blue-50 font-medium" : ""
+                value?.[valueKey] === item[valueKey] ? "bg-blue-50 font-medium" : ""
               }`}
             >
               {item[labelKey]} <span className="text-gray-500 text-xs">({item[valueKey]})</span>
@@ -987,16 +994,15 @@ export function AssetEdit({ assetId, onUpdate }) {
   const [asset, setAsset] = useState(null);
   const [formData, setFormData] = useState({
     SerialNumber: "",
-    ProductName: "",
-    ProductNumber: "",
-    ProductLine: "",
-    SiteAccountID: "",
-    ContactID: "",
-    Warranty_Status: "",
+    Product: null,       // object { ProductNumber, ProductName, ProductLine }
+    SiteAccount: null,   // object { SiteAccountID, Company }
+    Contact: null,       // object { ContactID, FirstName }
+    Warranty: null,      // object { OTCCode, Description }
+    EOW_Date: "",
   });
   const [isOpen, setIsOpen] = useState(false);
 
-  const requiredFields = ["SerialNumber", "ProductName", "ProductNumber", "ProductLine"];
+  const requiredFields = ["SerialNumber", "Product"];
 
   const fetchAsset = async () => {
     if (!assetId) return;
@@ -1004,14 +1010,14 @@ export function AssetEdit({ assetId, onUpdate }) {
       const response = await ApiCustomer.get(`/api/asset-information/${assetId}`);
       const data = response.data.data;
       setAsset(data);
+
       setFormData({
         SerialNumber: data?.SerialNumber || "",
-        ProductName: data?.product_information?.ProductName || "",
-        ProductNumber: data?.ProductNumber || "",
-        ProductLine: data?.product_information?.ProductLine || "",
-        SiteAccountID: data?.SiteAccountID || "",
-        ContactID: data?.ContactID || "",
-        Warranty_Status:  data?.Warranty_Status || "",
+        Product: data?.product_information || null,
+        SiteAccount: data?.site_account || null,
+        Contact: data?.contact_information || null,
+        Warranty: data?.WarrantyOTCCode || null,
+        EOW_Date: data?.EOW_Date ? data.EOW_Date.split("T")[0] : "",
       });
     } catch (error) {
       console.error("Error fetching asset information:", error);
@@ -1019,23 +1025,10 @@ export function AssetEdit({ assetId, onUpdate }) {
   };
 
   useEffect(() => {
-    if (assetId && isOpen) fetchAsset();
-  }, [assetId, isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setFormData({
-        SerialNumber: "",
-        ProductName: "",
-        ProductNumber: "",
-        ProductLine: "",
-        SiteAccountID: "",
-        ContactID: "",
-        Warranty_Status: "",
-      });
-      setAsset(null);
+    if (isOpen && assetId) {
+      fetchAsset();
     }
-  }, [isOpen]);
+  }, [isOpen, assetId]);
 
   const handleChange = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -1057,7 +1050,16 @@ export function AssetEdit({ assetId, onUpdate }) {
     }
 
     try {
-      await ApiCustomer.patch(`/api/asset-information/${assetId}`, formData);
+      const payload = {
+        SerialNumber: formData.SerialNumber,
+        ProductNumber: formData.Product?.ProductNumber || null,
+        SiteAccountID: formData.SiteAccount?.SiteAccountID || null,
+        ContactID: formData.Contact?.ContactID || null,
+        Warranty_Status: formData.Warranty?.OTCCode || null,
+        EOW_Date: formData.EOW_Date || null,
+      };
+
+      await ApiCustomer.patch(`/api/asset-information/${assetId}`, payload);
 
       Swal.fire({
         icon: "success",
@@ -1090,6 +1092,7 @@ export function AssetEdit({ assetId, onUpdate }) {
           <Pencil className="w-4 h-4" />
         </Button>
       </DialogTrigger>
+
       <DialogContent className="max-w-lg w-full">
         <DialogHeader>
           <DialogTitle>Edit Asset Information</DialogTitle>
@@ -1107,59 +1110,61 @@ export function AssetEdit({ assetId, onUpdate }) {
               onChange={(e) => handleChange("SerialNumber", e.target.value)}
               placeholder="Enter Serial Number"
             />
-            <p className="text-xs text-gray-500">Isi dengan nomor unik asset</p>
           </div>
 
           {/* Product */}
           <GenericSelector
-            value={formData.ProductNumber}
-            onChange={(p) => {
-              handleChange("ProductNumber", p.ProductNumber);
-              handleChange("ProductName", p.ProductName);
-              handleChange("ProductLine", p.ProductLine);
-            }}
+            value={formData.Product}
+            onChange={(p) => handleChange("Product", p)}
             endpoint="/api/product-information"
             labelKey="ProductName"
             valueKey="ProductNumber"
             placeholder="Search product..."
             label="Product*"
-            helperText="Minimal 2 huruf untuk mencari produk"
           />
 
           {/* Site Account */}
           <GenericSelector
-            value={formData.SiteAccountID}
-            onChange={(s) => handleChange("SiteAccountID", s.SiteAccountID)}
+            value={formData.SiteAccount}
+            onChange={(s) => handleChange("SiteAccount", s)}
             endpoint="/api/site_account"
             labelKey="Company"
             valueKey="SiteAccountID"
             placeholder="Search site account..."
             label="Site Account"
-            helperText="Minimal 2 huruf untuk mencari site account"
           />
 
           {/* Contact */}
           <GenericSelector
-            value={formData.ContactID}
-            onChange={(c) => handleChange("ContactID", c.ContactID)}
+            value={formData.Contact}
+            onChange={(c) => handleChange("Contact", c)}
             endpoint="/api/contact-information"
             labelKey="FirstName"
             valueKey="ContactID"
             placeholder="Search contact..."
             label="Contact"
-            helperText="Minimal 2 huruf untuk mencari contact"
           />
 
+          {/* Warranty Status */}
           <GenericSelector
-            value={formData.Warranty_Status}
-            onChange={(w) => handleChange("Warranty_Status", w.Code)} 
-            endpoint="/api/otc-code" 
+            value={formData.Warranty}
+            onChange={(w) => handleChange("Warranty", w)}
+            endpoint="/api/otc-code"
             labelKey="Description"
-            valueKey="Code"
+            valueKey="OTCCode"
             placeholder="Select warranty status..."
             label="Warranty Status"
-            helperText="Pilih status warranty asset"
           />
+
+          {/* End of Warranty Date */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">End of Warranty Date</label>
+            <Input
+              type="date"
+              value={formData.EOW_Date}
+              onChange={(e) => handleChange("EOW_Date", e.target.value)}
+            />
+          </div>
         </div>
 
         <DialogFooter className="flex justify-end gap-2">

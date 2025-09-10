@@ -69,7 +69,9 @@ export const Contact_table = () => {
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedZipCode, setSelectedZipCode] = useState("");
-
+  const [picNameSearch, setPicNameSearch] = useState("");
+  const [picEmailSearch, setPicEmailSearch] = useState("");
+  const [picPhoneSearch, setPicPhoneSearch] = useState("");
   // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -153,7 +155,10 @@ export const Contact_table = () => {
         (!selectedCountry || contact.Country === selectedCountry) &&
         (!selectedState || contact.StateProvince === selectedState) &&
         (!selectedCity || contact.City === selectedCity) &&
-        (!selectedZipCode || contact.ZipPostalCode === selectedZipCode)
+        (!selectedZipCode || contact.ZipPostalCode === selectedZipCode) &&
+        (!picNameSearch || (contact.PIC_Name && contact.PIC_Name.toLowerCase().includes(picNameSearch.toLowerCase()))) &&
+        (!picEmailSearch || (contact.PIC_Email && contact.PIC_Email.toLowerCase().includes(picEmailSearch.toLowerCase()))) &&
+        (!picPhoneSearch || (contact.PIC_Phone && contact.PIC_Phone.toLowerCase().includes(picPhoneSearch.toLowerCase())))
       );
     });
   }, [
@@ -166,6 +171,9 @@ export const Contact_table = () => {
     selectedState,
     selectedCity,
     selectedZipCode,
+    picNameSearch,
+    picEmailSearch,
+    picPhoneSearch
   ]);
 
   // Sorting (pakai sortConfig)
@@ -7399,16 +7407,13 @@ export const ServiceCatalogTable = () => {
 
 export const OTCCodeTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  // State untuk menunda pencarian (debounce)
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  // Default 10 item per halaman, dapat diubah
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [otcCodeData, setOTCCodeData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // State untuk input "Go to page"
   const [goToPageInput, setGoToPageInput] = useState("");
   const navigate = useNavigate();
 
@@ -7418,7 +7423,10 @@ export const OTCCodeTable = () => {
     direction: "asc",
   });
 
-  // Efek untuk menunda (debounce) pencarian selama 500ms
+  // ✅ state baru untuk filter WarrantyCondition
+  const [warrantyFilter, setWarrantyFilter] = useState("all");
+
+  // Debounce
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -7459,7 +7467,6 @@ export const OTCCodeTable = () => {
     fetchOTCCode();
   }, []);
 
-  // handle sorting dengan useMemo untuk performa lebih baik
   const handleSort = (key) => {
     setSortConfig((prev) => {
       if (prev.key === key) {
@@ -7469,14 +7476,19 @@ export const OTCCodeTable = () => {
     });
   };
 
-  // filter & sort
+  // ✅ Filter by search + warranty condition
   const filteredData = useMemo(() => {
-    return otcCodeData.filter((item) =>
-      Object.values(item).some((value) =>
-        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    return otcCodeData
+      .filter((item) =>
+        Object.values(item).some((value) =>
+          value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        )
       )
-    );
-  }, [otcCodeData, debouncedSearchTerm]);
+      .filter((item) => {
+        if (warrantyFilter === "all") return true;
+        return item.WarrantyCondition === warrantyFilter;
+      });
+  }, [otcCodeData, debouncedSearchTerm, warrantyFilter]);
 
   const sortedData = useMemo(() => {
     const sorted = [...filteredData];
@@ -7484,7 +7496,7 @@ export const OTCCodeTable = () => {
       sorted.sort((a, b) => {
         const aValue = a[sortConfig.key] ?? "";
         const bValue = b[sortConfig.key] ?? "";
-        
+
         if (aValue < bValue) {
           return sortConfig.direction === "asc" ? -1 : 1;
         }
@@ -7503,7 +7515,6 @@ export const OTCCodeTable = () => {
     currentPage * itemsPerPage
   );
 
-  // function ambil icon sort
   const getSortIcon = (key) => {
     if (sortConfig.key !== key) return <ArrowUpDown size={16} />;
     return sortConfig.direction === "asc" ? (
@@ -7513,7 +7524,6 @@ export const OTCCodeTable = () => {
     );
   };
 
-  // Fungsi untuk menangani "Go to page"
   const handleGoToPage = (e) => {
     e.preventDefault();
     const page = Number(goToPageInput);
@@ -7525,7 +7535,7 @@ export const OTCCodeTable = () => {
     <div className="p-6">
       <h2 className="text-xl font-bold mb-4">📊 OTC Codes Table</h2>
 
-      {/* Kontainer untuk Search dan Tombol Add yang sejajar dan sama tinggi */}
+      {/* 🔍 Search + Add + Filter Warranty */}
       <div className="flex flex-wrap items-center gap-4 mb-4">
         <input
           type="text"
@@ -7534,7 +7544,21 @@ export const OTCCodeTable = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {/* OTCAdd akan sejajar dengan input berkat flexbox */}
+
+        {/* ✅ Filter WarrantyCondition */}
+        <select
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={warrantyFilter}
+          onChange={(e) => {
+            setWarrantyFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="all">All Warranty</option>
+          <option value="InWarranty">In Warranty</option>
+          <option value="OutWarranty">Out Warranty</option>
+        </select>
+
         <OTCAdd onUpdate={fetchOTCCode} />
       </div>
 
