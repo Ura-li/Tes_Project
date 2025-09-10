@@ -17,7 +17,9 @@ export default function Logistik() {
         Signature: null,
     });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 4;
+  const [filterStatus, setFilterStatus] = useState("All");
+  
 
     const fetchData = async () => {
         try {
@@ -44,6 +46,7 @@ export default function Logistik() {
             const valueFilterPartOrder = fetchCaseData.data.data.filter(c =>  c?.caseinformation?.workorder?.[0]?.materialorder?.[0]?.materialorderlineitems?.[0]?.LineItemID)
             console.log("Filtered PartData:", valueFilterPartOrder); 
             setCaseData(valueFilterPartOrder);
+            
         } catch (err) {
             console.error(err);
         }
@@ -51,10 +54,19 @@ export default function Logistik() {
     useEffect(() =>{
         fetchData();
     },[])
+
+      const filteredData =
+    filterStatus === "All"
+      ? CaseData
+      : CaseData.filter(
+          (c) =>
+            c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.OrderStatus ===
+            filterStatus
+        );
    
-    const totalPages = Math.ceil(CaseData.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = CaseData.slice(startIndex, startIndex + itemsPerPage);
+  const currentData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
 
     return (
@@ -104,39 +116,59 @@ export default function Logistik() {
             </Card>
 
              <Card className={"rounded-sm col-span-2 row-span-2"}>
-                <CardHeader>
+                <CardHeader className={"flex flex-row gap-2 justify-between"}>
                     <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
-                    <hr />
+                    <div className="flex gap-2 ">
+                    {["All", "New", "Closed"].map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => {
+                          setFilterStatus(status);
+                          setCurrentPage(1); // reset ke page 1 setiap ganti filter
+                        }}
+                        className={`px-3 py-1 rounded cursor-pointer ${
+                          filterStatus === status
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
                 </CardHeader>
-                <CardContent className={"grid gap-2"}>
+                <CardContent className={"grid gap-3"}>
                  {currentData.length > 0 ? (
             currentData.map((c) => (
-              <Card
+              <div
                 key={c.caseinformation.CaseID}
-                className="border-3 rounded-sm hover:bg-gray-200 cursor-pointer"
+                className="rounded-sm hover:bg-gray-50 cursor-pointer  ring-1  ring-gray-400 px-2 py-1 "
                 onClick={() =>
                   navigate(
                     `/app/material-order/${c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID}`
                   )
                 }
               >
-                <CardHeader className={"gap-2"}>
-                  <div className="flex flex-row justify-between">
-                  <CardTitle>
+                <CardHeader className="p-1 px-2">
+                  <div className="flex flex-row justify-between ">
+                  <CardTitle className={"flex flex-row gap-2 items-center "}>
                     {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID}
+                    <Badge className={c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.OrderStatus === 'New' ? "text-white bg-green-400" : "text-white bg-red-500"} variant="invisible">
+                    {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.OrderStatus}
+                    </Badge>
                   </CardTitle>
-                  <CardTitle className={"text-sm text-gray-400"}>
+                  <CardTitle className={"text-sm text-gray-500"}>
                     {
                       c.caseinformation?.workorder?.[0]?.materialorder?.[0]
                         ?.materialorderlineitems?.[0]?.PartNumber
                     }
                   </CardTitle>          
                   </div>
-                  <hr />
+                   <hr className="border-1 border-gray-500 rounded-md"/>
                 </CardHeader>
-                <CardContent className="flex flex-col">
+                <CardContent className="flex justify-between px-2 ">
+                  <div className="">
                   <CaseField label={"Part Description"} className={"text-md"}>
-                   <hr className="w-[8em] border-1 border-gray-500 rounded-md"/>
                    <span className="text-gray-600 text-sm">
                     {
                       c.caseinformation?.workorder?.[0]?.materialorder?.[0]
@@ -144,8 +176,20 @@ export default function Logistik() {
                     }
                    </span>
                   </CaseField>
+                  </div>
+
+                  <div className="flex flex-col items-end text-right">
+                  <CaseField label={"SO Number"} className={"text-md "}>
+                 
+                   <span className="text-gray-600 text-sm">
+                    {
+                      c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.SalesOrderNumber
+                    }
+                   </span>
+                  </CaseField>
+                  </div>
                 </CardContent>
-              </Card>
+              </div>
             ))
           ) : (
             <p className="text-gray-400">No Open Orders found</p>
@@ -153,9 +197,9 @@ export default function Logistik() {
         </CardContent>
 
         {/* Pagination Controls */}
-        <CardFooter className="flex justify-between items-center">
+        <CardFooter className="items-center justify-center flex gap-4">
           <button
-            className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+            className=" px-2 bg-gray-300 rounded disabled:opacity-50"
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
           >
@@ -165,14 +209,14 @@ export default function Logistik() {
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+            className=" px-2 bg-gray-300 rounded disabled:opacity-50"
             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
             disabled={currentPage === totalPages}
           >
             Next
           </button>
         </CardFooter>
-            </Card>
+        </Card>
 
             <Card className={"rounded-sm"}>
                 <CardHeader>

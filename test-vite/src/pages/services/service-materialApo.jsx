@@ -55,7 +55,8 @@ export const ServiceMaterialApo = () => {
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
   const [MaterialOrder, setMaterialOrder] = useState([]);
   const [moForm, setMoForm] = useState({
-    SalesOrderNumber: ""
+    SalesOrderNumber: "",
+    RMANumber: ""
   })
   const [materialOrderInformation, setMaterialOrderInformation] = useState({
     MOID: "",
@@ -159,6 +160,7 @@ export const ServiceMaterialApo = () => {
       setMoForm((prev) => ({
       ...prev,
       SalesOrderNumber: data.SalesOrderNumber || "",
+      RMANumber: data.RMANumber || ""
     }));
 
       console.log("Fetched Material Order:", data);
@@ -289,7 +291,7 @@ export const ServiceMaterialApo = () => {
                   <hr />
                 </CardHeader>
                 <CardContent className="grid items-center grid-cols-4 gap-5">
-                  <CaseField label={"Case ID"} icon>
+                  <CaseField label={"Case ID"} lock>
                     <Input
                       variant={"invisible"}
                       type="text"
@@ -298,7 +300,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Resource Name"} open>
+                  <CaseField label={"Resource Name"} lock>
                     <Input
                       variant={"invisible"}
                       type="text"
@@ -310,7 +312,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Contact"} icon>
+                  <CaseField label={"Contact"} lock>
                     <Input
                       variant={"invisible"}
                       type="text"
@@ -319,7 +321,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Service Offer ID"} icon>
+                  <CaseField label={"Service Offer ID"} lock>
                     <Input
                       variant={"invisible"}
                       type="text"
@@ -328,7 +330,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Work Order"} icon>
+                  <CaseField label={"Work Order"} lock>
                     <Input
                       variant={"invisible"}
                       type="text"
@@ -337,7 +339,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Service Description"} icon>
+                  <CaseField label={"Service Description"} lock>
                     <Input
                       variant={"invisible"}
                       type="text"
@@ -346,7 +348,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Order Number"} icon>
+                  <CaseField label={"Order Number"} lock>
                     <Input
                       variant={"invisible"}
                       type="text"
@@ -355,7 +357,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Sales Order Number"} icon>
+                  <CaseField label={"Sales Order Number"} star>
                     <Input
                       variant={"invisible"}
                       type="text"
@@ -365,7 +367,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Order Type"} icon>
+                  <CaseField label={"Order Type"} lock>
                     <Input
                       variant={"invisible"}
                       type="text"
@@ -374,21 +376,28 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField
+                  <CaseField label="RMA Number" star>
+                    <Input variant="invisible" placeholder="---" 
+                    value={moForm?.RMANumber || ""}
+                    onChange={handleMoFormChange("RMANumber")}
+                    />
+                  </CaseField>  
+
+                  <Accordion type="single" collapsible className="col-span-4 ">
+                    <AccordionItem value="more-detail" >
+                      <AccordionTrigger className="pl-8">More Detail</AccordionTrigger>
+                      <AccordionContent className={"p-2"}>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                          <CaseField
                     label={"Delivery Required Date (Customer Time)"}
-                    open
+                    
                   >
                     <DatePicker
                       value={deliveryRequiredDate}
                       onChange={setDeliveryRequiredDate}
                     />
                   </CaseField>
-
-                  <Accordion type="single" collapsible className="col-span-4 pl-6">
-                    <AccordionItem value="more-detail">
-                      <AccordionTrigger>More Detail</AccordionTrigger>
-                      <AccordionContent className={"p-2"}>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                           <CaseField label={"Collection Requested Date"} icon>
                             <DatePicker
                               value={collectionRequestedDate}

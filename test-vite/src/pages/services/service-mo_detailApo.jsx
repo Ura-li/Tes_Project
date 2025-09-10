@@ -257,7 +257,7 @@ export const ServiceMoDetailApo = () => {
                   <hr />
                 </CardHeader>
                 <CardContent className="grid grid-cols-4 gap-5">
-                  <CaseField label={"MO Order Name"} icon>
+                  <CaseField label={"MO Order Name"} lock>
                     <Input
                       variant={"invisible"}
                       value={MODetailInput.moOrderName}
@@ -265,14 +265,14 @@ export const ServiceMoDetailApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Part/Product Number"} icon>
+                  <CaseField label={"Part/Product Number"} lock>
                     <Input
                       variant={"invisible"}
                       value={MODetailInput.partNumber}
                     />
                   </CaseField>
 
-                  <CaseField label={"Collection Instructions"} open>
+                  <CaseField label={"Collection Instructions"} >
                     <SearchCommandBlock
                       value={MODetailInput.collectionInstructions}
                       onChange={handleChange("collectionInstructions")}
@@ -280,7 +280,7 @@ export const ServiceMoDetailApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Sales Order Number"} icon>
+                  <CaseField label={"Sales Order Number"} lock>
                     <Input
                       variant={"invisible"}
                       value={moLineItems?.materialorder?.SalesOrderNumber}
@@ -289,27 +289,29 @@ export const ServiceMoDetailApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Description"} open >
-                    <textarea
-                      className="w-full h-20 pt-2 pl-3 mt-2 resize-none border-1"
-                      name="description"
-                      value={MODetailInput.description}
-                      onChange={handleChange}
-                      placeholder="Description"
-                    />
-                  </CaseField>
 
-                  <CaseField label={"RoHS"} icon>
+                  <CaseField label={"RoHS"} lock>
                     <Input
                       value={MODetailInput.rohs ? "Yes" : "No"}
                       variant={"invisible"}
                     />
                   </CaseField>
 
-                  <CaseField label={"Returnability Flag"} icon>
+                  <CaseField label={"Returnability Flag"} lock>
                     <Input
                       value={MODetailInput.returnabilityFlag ? "Yes" : "No"}
                       variant={"invisible"}
+                    />
+                  </CaseField>
+
+                  
+                  <CaseField label={"Description"}  lock span={3}>
+                    <textarea
+                      className="w-full h-10 pt-2 pl-3 resize-none border-none rounded-md focus:outline-none focus:ring-1"
+                      name="description"
+                      value={MODetailInput.description}
+                      onChange={handleChange}
+                      placeholder="Description"
                     />
                   </CaseField>
 
@@ -475,9 +477,9 @@ export const ServiceMoDetailApo = () => {
 
             <TabsContent
               value="mo_failure"
-              className={" flex flex-col gap-4"}
+              className={" flex flex-col gap-4 p-2"}
             >
-              <Card className="flex-col ">
+              <Card className="flex-col">
                 <CardHeader>
                   <CardTitle className="text-lg">
                     Failure & Usage Details
@@ -485,44 +487,17 @@ export const ServiceMoDetailApo = () => {
                   <hr />
                 </CardHeader>
                 <CardContent className="grid items-center grid-cols-4 gap-6 m-1">
-                  <CaseField label="Failure Analysis" icon>
+                  <CaseField label="Failure Analysis" lock>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
+                  
                   <FailureSelect
                     failureId={MODetailInput.failureId}
                     setMODetailInput={setMODetailInput}
                     readOnly
                   />
-                  <CaseField label="Additional Failure Code" icon>
-                    <Input variant="invisible" placeholder="---" 
-                    readOnly
-                    />
-                  </CaseField>
 
-                  <CaseField label="Serial Number" open>
-                    <Input
-                      variant="invisible"
-                      name="serialNumber"
-                      value={MODetailInput.serialNumber}
-                      onChange={handleChange}
-                      placeholder="---"
-                      readOnly
-                    />
-                  </CaseField>
-
-                  <CaseField label="Part Usage Code" icon>
-                    <Input variant="invisible" placeholder="---" readOnly/>
-                  </CaseField>
-
-                  <CaseField label="Part Consumption" icon>
-                    <Input variant="invisible" placeholder="---" readOnly/>
-                  </CaseField>
-
-                  <CaseField label="Part Order Consumption Comment" icon>
-                    <Input variant="invisible" placeholder="---" readOnly/>
-                  </CaseField>
-
-                  <CaseField label="Removed Part Number (BAD CT CODE)" icon>
+                    <CaseField label="Return CT Key" star>
                     <Input
                       variant="invisible"
                       name="removedPartNumber"
@@ -532,8 +507,8 @@ export const ServiceMoDetailApo = () => {
                       
                     />
                   </CaseField>
-
-                  <CaseField label="Removed Serial Number (NEW CT CODE)">
+                  
+                  <CaseField label="New CT Key" star>
                     <Input
                       variant="invisible"
                       name="removedSerialNumber"
@@ -544,14 +519,32 @@ export const ServiceMoDetailApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label="Removed Part Desc" icon>
+                  <CaseField label="Additional Failure Code" lock>
+                    <Input variant="invisible" placeholder="---" 
+                    />
+                  </CaseField>
+
+                
+
+                  <CaseField label="Part Usage Code" lock>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+
+                  <CaseField label="Part Consumption" lock>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>                
+
+                  <CaseField label="Part Order Consumption Comment" lock>
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+
+                  <CaseField label="Removed Part Desc" lock>
                     <Input
                       variant="invisible"
                       name="removedPartDescription"
                       value={MODetailInput.removedPartDescription}
                       onChange={handleChange}
                       placeholder="---"
-                      readOnly
                     />
                   </CaseField>
                 </CardContent>
@@ -560,42 +553,39 @@ export const ServiceMoDetailApo = () => {
               <Card className="rounded-md ">
                 <CardHeader>
                   <CardTitle className="text-lg">Part Return Details</CardTitle>
+                  <hr />
                 </CardHeader>
-                <hr />
                 <CardContent className="grid items-center grid-cols-6 gap-10 m-1">
-                  <CaseField label="Returnable Code" icon>
+                  <CaseField label="Returnable Code" lock>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="Return Type Code Identifier" icon>
+                  <CaseField label="Return Type Code Identifier" lock>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="Return Instructions" icon>
+                  <CaseField label="Return Instructions" lock>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="Return Tracking Number" icon>
+                  <CaseField label="Return Tracking Number" lock>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="Return Override Flag" icon>
+                  <CaseField label="Return Override Flag" lock>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="Return Ovveride Reason" icon>
+                  <CaseField label="Return Ovveride Reason" lock>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="RMA" icon>
+
+                  <CaseField label="RMA Identifier" lock>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="RMA Identifier" icon>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>
-
-                  <CaseField label="Return Deadline" icon>
+                  <CaseField label="Return Deadline" lock>
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
                 </CardContent>

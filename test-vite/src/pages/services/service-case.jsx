@@ -878,6 +878,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
 
       const res = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`,{
         SalesOrderNumber: moForm.SalesOrderNumber || undefined,
+        RMANumber: moForm.RMANumber || undefined,
       })
       // console.log("update ok",updatedLineItems);
       // for(const [lineItemID, status] of Object.entries(updatedLineItems)){

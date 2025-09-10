@@ -1499,27 +1499,35 @@ return (
                 <CaseField label="Region" lock>
                   <Input 
                   variant="invisible" 
-                  placeholder="---" readOnly 
+                  placeholder="---"  
                   value={dataFetchCustomerData.SiteAccount?.City}/>
                 </CaseField>
                 <CaseField label="Is Partner" lock>
-                  <Input variant="invisible" placeholder="---" readOnly/>
+                  <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Partner & Customer" lock>
-                  <Input variant="invisible" placeholder="---"  readOnly/>
+                  <Input variant="invisible" placeholder="---"  />
                 </CaseField>
-                <CaseField label="PIC ID" lock>
-                  <Input variant="invisible" placeholder="---"  readOnly/>
+                <CaseField label="PIC Name" lock>
+                  <Input variant="invisible" placeholder="---"  
+                  value={dataFetchCustomerData.MainAccount?.PIC_Name}
+                  />
                 </CaseField>
-                <CaseField label="PIC name" lock>
-                  <Input variant="invisible" placeholder="---"  readOnly/>
+                <CaseField label="PIC Email" lock>
+                  <Input variant="invisible" placeholder="---"  
+                  value={dataFetchCustomerData.MainAccount?.PIC_Email}
+                  />
                 </CaseField>
-                <CaseField label="PIC phone no." lock>
-                  <Input variant="invisible" placeholder="---"  readOnly/>
+                <CaseField label="PIC Phone no." lock>
+                  <Input variant="invisible" placeholder="---"  
+                  value={dataFetchCustomerData.MainAccount?.PIC_Phone}
+                  />
                 </CaseField>
-                <CaseField label="PIC mobile no." lock>
-                  <Input variant="invisible" placeholder="---"  readOnly/>
+                <CaseField label="NPWP" lock>
+                  <Input variant="invisible" placeholder="---"  
+                  />
                 </CaseField>
+
                 <Accordion type="single" collapsible className="col-span-2">
                   <AccordionItem value="more-details" className={"pl-5 "}>
                     <AccordionTrigger className={"decoration-transparent border p-2 cursor-pointer"}>More Details</AccordionTrigger>

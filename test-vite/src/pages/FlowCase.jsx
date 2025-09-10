@@ -143,7 +143,7 @@ export const FlowCase = () => {
       <SidebarInset>
         <div className="max-h-screen flex flex-col w-full ">
           <Tabs defaultValue="active">
-            <div className="sticky top-13   bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
+            <div className="sticky top-13  bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
               <div className="mx-auto flex h-14 w-full max-w-7xl items-center gap-3 px-4 justify-between">
                 <TabsList className=" flex items-center gap-2">
                   <TabsTrigger value="active" size="sm" >Active Case</TabsTrigger>

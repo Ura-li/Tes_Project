@@ -4,18 +4,46 @@ import ApiCustomer from "@/api";
 import { useAuth } from "@/context/auth-context";
 import { Badge } from "@/components/ui/badge";
 import { NotificationCard } from "@/components/NotificationCard";
-
+import { useSocket } from '@/hooks/useSocket';
+import { useNavigate } from 'react-router';
+import Swal from 'sweetalert2';
 
 export default function ApoLanding() {
     const { user } = useAuth();
     const [userData, setUserData] = useState([]);
+      const [caseData, setCaseData] = useState([]);
+      const [loading, setLoading] = useState(false);
+      const [casevaluedata, setCasevaluedata] = useState([])
+      const [inactivecasevaluedata, setInactivecasevaluedata] = useState([])
+      const [closecasevaluedata, setClosecasevaluedata] = useState([])
     const [preview, setPreview] = useState({
         ProfilePhoto: null,
         Signature: null,
     });
 
+      const radialchartdata = [
+        { name: "Open", value: casevaluedata || 0, fill: "#3B82F6" },
+        { name: "InActive", value: inactivecasevaluedata || 0, fill: "#FACC15" },
+        { name: "Closed", value: closecasevaluedata || 0, fill: "#10B981" },
+        // { name: "Pending", value: 5, fill: "#F97316" },
+      ];
+    
+    
+      useSocket("case:created", (newCase) => {
+        console.log("case Created",newCase);
+        setCaseData((prev) => [newCase, ...prev]); // prepend
+      });
+    
+      useSocket("case:updated", (updated) => {
+        console.log("Case Updated",updated);
+        setCaseData((prev) =>
+          prev.map((c) => (c.CaseID === updated.CaseID ? updated : c))
+        );
+      });
+
     const fetchData = async () => {
         try {
+             const response = await ApiCustomer.get('/api/case-information');
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
             console.log("Fetch user daya : ", user)
@@ -32,24 +60,56 @@ export default function ApoLanding() {
                 ProfilePhoto: fecthUserData.data.data.ProfilePhoto ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.ProfilePhoto}` : null,
                 Signature: fecthUserData.data.data.Signature ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.Signature}` : null,
             });
-        } catch (err) {
-            console.error(err);
+             const valuefiltercases = response.data.data.filter(c => c?.caseinformation?.CreatedBy == user.id);
+      const valueFilterOpenCase = response.data.data.filter(c => c?.CaseStatus == 'Open' && c?.caseinformation?.CreatedBy == user.id)
+      const valueFilterInActiveCase = response.data.data.filter(c => c?.CaseStatus == 'InActive' && c?.caseinformation?.CreatedBy == user.id)
+      const valueFilterCloseCase = response.data.data.filter(c => c?.CaseStatus == 'Close' && c?.caseinformation?.CreatedBy == user.id)
+      const filtercases = response.data.data.filter(c => c?.CaseStatus !== 'Close' && c?.caseinformation?.Owner == user.id);
+      const rawDate = filtercases[0]?.caseinformation?.ActionLog[0]?.ChangeAt;
+      let newdate;
+      if (rawDate) {
+        const dateObj = rawDate instanceof Date ? rawDate : new Date(rawDate);
+        console.log("Readable:", dateObj.toLocaleString("id-ID"));
+        newdate = dateObj.toLocaleString("id-ID");
+      } else {
+        console.log("No date available");
+      }
+      const sortedCases = filtercases.sort((a, b) => {
+        const dateAraw = a.caseinformation.ActionLog[0]?.ChangeAt;
+        const dateBraw = b.caseinformation.ActionLog[0]?.ChangeAt;
+
+        const dateA = dateAraw ? (dateAraw instanceof Date ? dateAraw : new Date(dateAraw)) : new Date(0);
+        const dateB = dateBraw ? (dateBraw instanceof Date ? dateBraw : new Date(dateBraw)) : new Date(0);
+
+        return dateB - dateA; // newest first
+      });
+      const recentCases = sortedCases.slice(0, 4);
+      console.log("Length of the arrays", valuefiltercases);
+      
+      setCaseData(recentCases);
+      setCasevaluedata(valueFilterOpenCase?.length);
+      setInactivecasevaluedata(valueFilterInActiveCase?.length)
+      setClosecasevaluedata(valueFilterCloseCase?.length);
+      return response.data.data;
             
-        }
+        } catch (err) {
+            Swal.fire({
+                   icon: 'error',
+                   title: 'Error',
+                   text: 'Gagal memuat data. Silakan coba lagi.',
+                 });
+                 console.error('Error fetching case data:', error);
+                 throw error;
+               } finally {
+                 setLoading(false);
+               }
     }
     // fetchData();
     useEffect(() =>{
         fetchData();
     },[])
-    // const [parts, setPart] = useState([]);
-    // const [currentPage, setCurrentPage] = useState(1);
-    // const ItemsPerPage = 3;
-
-    // const indexOfLastItem = currentPage * ItemsPerPage;
-    // const indexOfFirstItem = indexOfLastItem - ItemsPerPage;
-    // const currentData = parts.slice(indexOfFirstItem, indexOfLastItem);
-    // const totalPages  = Math.ceil(parts.length / ItemsPerPage);
-
+   
+  const navigate = useNavigate();
     return (
         <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3">
             <Card className={"rounded-sm"}>
@@ -91,37 +151,50 @@ export default function ApoLanding() {
                     <span className="text-gray-400">{user?.email}</span> 
                     <span className='text-sm text-gray-500'>{userData.Phone}</span>
                 </CardContent>
-                <span className="text-xs text-center text-gray-500 mt-4">
+                <span className="text-xs text-center text-gray-500 ">
                     Latest Login: {new Date().toLocaleString()}
                 </span>
             </Card>
 
-             <Card className={"rounded-sm col-span-2 row-span-2"}>
+             <Card className={"rounded-sm col-span-2 row-span-2 "}>
                 <CardHeader>
-                    <CardTitle className={"text-2xl"}>Sparepart Order</CardTitle>
+                    <CardTitle className={"text-2xl"}>Recent Cases</CardTitle>
                     <hr />
                 </CardHeader>
-                <CardContent>
-                      <table className="border min-w-full shadow-lg border-gray-300">
-                        <thead>
-                            <tr className="uppercase">
-                                <th className="p-2 border">HP Part No</th>
-                                <th className="p-2 border">Part Name</th>
-                                <th className="p-2 border">Bad CT Code</th>
-                                <th className="p-2 border">CT Validation</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {/* {parts.map((Parts) => ( 
-                            <tr key={Parts.id} className="text-center">
-                                <td className="p-2 border">{Parts.photo}</td>
-                                <td className="p-2 border">{Parts.name}</td>
-                                <td className="p-2 border">{Parts.email}</td>
-                                <td className="p-2 border">{Parts.phone}</td>
-                            </tr>
-                            ))} */}
-                        </tbody>
-                    </table>
+                <CardContent className={"grid gap-3 max-h-[calc(100vh-200px)] overflow-y-auto grid-cols-2"}>
+                     {loading
+              ? Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-lg" />
+              ))
+              : caseData.map((c) => (
+                <Card
+                  key={c.CaseID}
+                  className="p-3 border-l-4 hover:scale-[0.99] rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400 bg-white cursor-pointer"
+                  onClick={() => navigate(`/app/case/${c.CaseID}`)}
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      className={`px-2 py-1 rounded-md text-xs font-medium
+                      ${c.caseinformation.CasePriority === "High"
+                          ? "bg-orange-100 text-orange-700"
+                          : c.caseinformation.CasePriority === "Critical"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-gray-200 text-gray-700"
+                        }`}
+                    >
+                      {c?.caseinformation.CasePriority || "Low"}
+                    </Badge>
+                    <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
+                      {c.CaseStatus}
+                    </Badge>
+                  </div>
+                  <p className="font-medium truncate mt-1">{c.CaseSubject}</p>
+                  <div className="text-xs text-gray-500 mt-1 flex justify-between">
+                    <p>{c.CaseID}</p>
+                    <span>{c.CreatedOn}</span>
+                  </div>
+                </Card>
+              ))}
                 </CardContent>
             </Card>
 
