@@ -157,7 +157,6 @@ export function ServiceBookingApo ({BookingId , woid}) {
         
         setStartTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.StartTimeUserTime || ""));
         setEndTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.EndTimeUserTime || ""));
-        // console.log("kontol ",formatDateForInput(data?.bookingDetails?.[0]?.EndTimeUserTime || ""))
         setDurationInMinutesUserTime(data?.bookingDetails?.[0]?.DurationInMinutesUserTime || 0);
         setEstimatedArrivalTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime || ""));
         setActualArrivalTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.ActualArrivalTimeUserTime || ""));
@@ -226,7 +225,6 @@ export function ServiceBookingApo ({BookingId , woid}) {
     console.log("Booking Data : ",updatedBookingData)
     await setBookingData(updatedBookingData);
     try {
-
       await ApiCustomer.patch(`/api/bookings/${bookingid}`, {
         ChangedBy: changedBy,
         BookingStatus: bookingStatus,

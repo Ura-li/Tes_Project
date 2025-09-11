@@ -851,7 +851,7 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
 
   const handleCreateBooking = async () => {
     try {
-      // setLoading(true);
+      setLoading(true);
       
       const isValid = await CheckRequestedDateTimeCustomer(RequestedDateTimeCustomer);
       console.log("Validasi result:", isValid);
@@ -908,7 +908,7 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
     } catch (error) {
       console.error('Gagal membuat booking:', error);
     } finally {
-      // setLoading(false);
+      setLoading(false);
     }
   };
 

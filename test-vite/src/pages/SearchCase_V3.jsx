@@ -1187,8 +1187,6 @@ export default function NewCaseForm() {
         console.warn("ActionLog failed", e);
       }
 
-      
-
       //case note
       try {
         const userData = user?.user;
