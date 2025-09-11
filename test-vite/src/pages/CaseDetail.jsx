@@ -57,6 +57,7 @@ import {
   Contact,
   Briefcase,
   CopyX,
+  NotebookPen,
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -88,6 +89,9 @@ import CaseField from "@/components/CaseField";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
 import EquipmentReciptForm from "@/components/Equipment-Recipt-Form";
+import SignatureWrite from "@/components/SignaturePad";
+import { description } from "@/components/sc-chart";
+import { toast } from "sonner";
 
 /**
  * TODO : 
@@ -160,6 +164,9 @@ export const TabsServiceCaseDetails = ({
     pendingCustomerAction: "",
     customerRequestedCloseDate: "",
   });
+
+  const [signature, setSignature] = useState(null);
+
 
   const handleCaseDetails = (field) => (value) => {
     setCaseDetails((prev) => ({ ...prev, [field]: value }));
@@ -426,6 +433,22 @@ const openPopup = () => {
     alert('Popup blocked by browser. Please allow popups for this site.');
   }
 };
+
+  const handleOpenSignaturePad = () => {
+    const sigWindow = window.open("/signature-pad", "Signature Pad", "width=600,height=400");
+
+    window.addEventListener("message", (event) => {
+      if (event.data.type === "signature") {
+        setSignature(event.data.signature); // save base64 signature
+        toast.success("Signature captured successfully!",
+          {
+            description: "Print ERF OR SRF Avaiable",
+            position:"top-center"
+          }
+        );
+      }
+    });
+  };
   
 
   // Deprecated: previously used for single textarea notes display
@@ -462,7 +485,7 @@ const openPopup = () => {
     // { icon: StepBack, label: "Complaint",},
     { icon: StepBack, label: "SRF", 
       onClick: async () => {
-      const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails}  />).toBlob();
+        const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails} customerSignature={signature} />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -475,15 +498,22 @@ const openPopup = () => {
   },
     { icon: StepBack, label: "ERF", 
       onClick: async () => {
-        const blob = await pdf(<EquipmentReciptForm caseDetails={caseDetails} />).toBlob();
+        const blob = await pdf(<EquipmentReciptForm caseDetails={caseDetails} customerSignature={signature} />).toBlob();
         const url = URL.createObjectURL(blob);
-        window.open(url); // opens PDF in a new tab
+        window.open(url); 
       },
     roles: ["admin", "fd","user", "spv"]
   },
   { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), 
     roles: ["admin",   "ce", "celead", ],
   },
+    {
+      icon: NotebookPen, label: "Signature Customer",
+      onClick: () => {
+        handleOpenSignaturePad();
+      },
+      roles: ["admin", "fd", "user", "spv"]
+    },
     // { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR"), hidden: true },
     // { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder"), hidden:true },
     // { icon: StepBack, label: "Sales Offer", hidden:true},
@@ -660,6 +690,8 @@ const openPopup = () => {
             csrForm={csrForm}
             setCsrForm={setCsrForm}
             onChangeCsr={handleCsrChange}
+            signature={signature}
+            setSignature={setSignature}
           />
       </div>
     </>
@@ -694,6 +726,8 @@ export const ServiceCase = ({
   caseForm,
   onChangeCase,
   setCaseForm,
+  signature,
+  setSignature
 }) => {
   const { open } = useSidebar();
 
@@ -1118,8 +1152,8 @@ const fetchSymptomCodes = async (term) => {
 const [hideAsignTo, setHideAsignTo] = useState(null)
   const canEdit = caseDetails?.Owner === user?.id;
   console.log("OI",canEdit)
-
-return (
+  
+  return (
     <>
       {caseDetails.CaseStatus === "Close" && (
         <div className="p-4 mt-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
@@ -1135,7 +1169,7 @@ return (
             {/* LEFT SIDE - Case Info */}
             <div>
               <h1 className="text-2xl font-semibold">{caseDetails.CaseID}</h1>
-              <p className="text-sm text-muted-foreground">{caseDetails.CaseSubject}</p>
+              <p className="text-lg text-muted-foreground">{caseDetails.CaseSubject}</p>
             </div>
 
             {/* RIGHT SIDE - Quick Info */}
@@ -1217,7 +1251,7 @@ return (
                     <Textarea
                      value={caseForm?.CaseSubject}
                       onChange={e => onChangeCase("CaseSubject")(e.target.value)}
-                     className="resize-none border-none italic ring-1 ring-gray-400 bg-gray-50"
+                     className="resize-none border-none italic ring-1 ring-gray-400 bg-gray-50 text-base"
                     />
                 </CaseField>
               
@@ -1538,6 +1572,8 @@ return (
             </Card>
 
 
+
+            </div>
             {/* --- Card 1: Customer Issue & System Info --- */}
                          
               <Card className="flex-col">
@@ -1559,7 +1595,12 @@ return (
                       />
                     </div>
                     {/* RIGHT COLUMN - System Info */}
-                    <div className="grid grid-cols-4 gap-6">
+                <Accordion type="single" collapsible className="col-span-2">
+                  <AccordionItem value="more-details" className={"pl-5 "}>
+                    <AccordionTrigger className={"decoration-transparent border p-2 cursor-pointer"}>More Details . . .</AccordionTrigger>
+                    <AccordionContent className="m-1">
+
+                      <div className="grid grid-cols-4 gap-6">
                         <CaseField label="Related Device" lock >
                           <Input variant="invisible" placeholder="---" />
                         </CaseField>
@@ -1569,28 +1610,31 @@ return (
                         <CaseField label="Device Model" lock >
                           <Input variant="invisible" placeholder="---" />
                         </CaseField>
-                      <CaseField label="Program / Category" lock >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                      <CaseField label="Operating System" lock >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                      <CaseField label="Version" lock >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                      <CaseField label="Remote Diag Code" lock >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                      <CaseField label="Application Information" lock >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                      <CaseField label="Provider / Platform" lock >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                      <CaseField label="Software Version" lock >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                    </div>
+                        <CaseField label="Program / Category" lock >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                        <CaseField label="Operating System" lock >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                        <CaseField label="Version" lock >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                        <CaseField label="Remote Diag Code" lock >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                        <CaseField label="Application Information" lock >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                        <CaseField label="Provider / Platform" lock >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                        <CaseField label="Software Version" lock >
+                          <Input variant="invisible" placeholder="---" />
+                        </CaseField>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
                   </div>
                 </CardContent>
               </Card>
@@ -1602,128 +1646,127 @@ return (
                 </CardHeader>
                 <CardContent >
                   <div className="flex flex-col gap-2">
-                    <div className="w-full overflow-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Created On</TableHead>
-                            <TableHead>Created By</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Note</TableHead>
+                    
+
+                <div className="grid grid-cols-2 gap-4">
+                  <CaseField
+                    label="Log Type"
+
+                  >
+                    <Select
+                      value={formData?.LogType}
+                      onValueChange={(val) => onChange("LogType", val)}
+                    >
+                      <SelectTrigger
+                        className={"w-[100%] hover:shadow-lg border-b-0 p-3"}
+                      >
+                        <SelectValue placeholder="Log Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="NotesLog">Notes Log</SelectItem>
+                        <SelectItem value="PhoneLog">Phone Log</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </CaseField>
+
+                  <CaseField
+                    label="Action Type"
+
+                  >
+                    <SearchCommandBlock
+                      value={formData?.ActionType}
+                      onChange={(val) => onChange("ActionType", val)}
+                      placeholder="--Select--"
+                      options={[
+                        "Inbound Customer call",
+                        "Action Plan",
+                        "Administrative task",
+                        "CE/Partner Assist",
+                        "Customer Email",
+                      ]}
+                    />
+                  </CaseField>
+
+                  <CaseField
+                    label="Template"
+
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+
+                  <CaseField
+                    label="Visible Externally"
+
+                  >
+                    <SelectYN
+                      value={
+                        formData?.VisibleExternally === undefined ||
+                          formData?.VisibleExternally === null
+                          ? ""
+                          : formData?.VisibleExternally
+                            ? "Yes"
+                            : "No"
+                      }
+                      onValueChange={(val) =>
+                        onChange("VisibleExternally", val === "Yes")
+                      }
+                    ></SelectYN>
+                  </CaseField>
+
+                  <CaseField
+                    label="Number of Minutes Spent"
+
+                  >
+                    <Input variant="invisible" placeholder="---" />
+                  </CaseField>
+
+                  <CaseField
+                    label="Notes"
+
+
+                    star
+                  >
+                    <textarea
+                      className="w-full h-full min-h-[100px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 shadow-sm"
+                      value={formData?.Note || ""}
+                      onChange={(e) => onChange("Note", e.target.value)}
+                      placeholder="Write your note"
+                    />
+                  </CaseField>
+                </div>
+                <div className="w-full overflow-auto rounded-2xl shadow-xl">
+                  <Table >
+                    <TableHeader className={'bg-slate-300 '}>
+                      <TableRow>
+                        <TableHead>Created On</TableHead>
+                        <TableHead>Created By</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead>Note</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {Array.isArray(notesList) && notesList.length > 0 ? (
+                        notesList.map((n,i) => (
+                          <TableRow key={n.NoteID} className={``}>
+                            <TableCell>{n.CreatedOn ? format(new Date(n.CreatedOn), 'yyyy-MM-dd HH:mm') : '-'}</TableCell>
+                            <TableCell>{n.createdByUser?.Name || n.CreatedBy || '-'}</TableCell>
+                            <TableCell>{n.createdByUser?.Role || '-'}</TableCell>
+                            <TableCell className="whitespace-pre-wrap max-w-xl">{n.Note}</TableCell>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {Array.isArray(notesList) && notesList.length > 0 ? (
-                            notesList.map((n) => (
-                              <TableRow key={n.NoteID}>
-                                <TableCell>{n.CreatedOn ? format(new Date(n.CreatedOn), 'yyyy-MM-dd HH:mm') : '-'}</TableCell>
-                                <TableCell>{n.createdByUser?.Name || n.CreatedBy || '-'}</TableCell>
-                                <TableCell>{n.createdByUser?.Role || '-'}</TableCell>
-                                <TableCell className="whitespace-pre-wrap max-w-xl">{n.Note}</TableCell>
-                              </TableRow>
-                            ))
-                          ) : (
-                            <TableRow>
-                              <TableCell colSpan={4} className="text-center text-sm text-gray-500">No notes yet</TableCell>
-                            </TableRow>
-                          )}
-                        </TableBody>
-                      </Table>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <CaseField
-                        label="Log Type"
-
-                      >
-                        <Select
-                          value={formData?.LogType}
-                          onValueChange={(val) => onChange("LogType", val)}
-                        >
-                          <SelectTrigger
-                            className={"w-[100%] hover:shadow-lg border-b-0 p-3"}
-                          >
-                            <SelectValue placeholder="Log Type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="NotesLog">Notes Log</SelectItem>
-                            <SelectItem value="PhoneLog">Phone Log</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </CaseField>
-
-                      <CaseField
-                        label="Action Type"
-
-                      >
-                        <SearchCommandBlock
-                          value={formData?.ActionType}
-                          onChange={(val) => onChange("ActionType", val)}
-                          placeholder="--Select--"
-                          options={[
-                            "Inbound Customer call",
-                            "Action Plan",
-                            "Administrative task",
-                            "CE/Partner Assist",
-                            "Customer Email",
-                          ]}
-                        />
-                      </CaseField>
-
-                      <CaseField
-                        label="Template"
-
-                      >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-
-                      <CaseField
-                        label="Visible Externally"
-
-                      >
-                        <SelectYN
-                          value={
-                            formData?.VisibleExternally === undefined ||
-                              formData?.VisibleExternally === null
-                              ? ""
-                              : formData?.VisibleExternally
-                                ? "Yes"
-                                : "No"
-                          }
-                          onValueChange={(val) =>
-                            onChange("VisibleExternally", val === "Yes")
-                          }
-                        ></SelectYN>
-                      </CaseField>
-
-                      <CaseField
-                        label="Number of Minutes Spent"
-
-                      >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-
-                      <CaseField
-                        label="Notes"
-
-
-                        star
-                      >
-                        <textarea
-                          className="w-full h-full min-h-[100px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300"
-                          value={formData?.Note || ""}
-                          onChange={(e) => onChange("Note", e.target.value)}
-                          placeholder="Write your note"
-                        />
-                      </CaseField>
-                    </div>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center text-sm text-gray-500">No notes yet</TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
                   </div>
 
 
                 </CardContent>
               </Card>
-
-            </div>
 
 
           </TabsContent>
