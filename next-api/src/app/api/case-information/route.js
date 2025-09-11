@@ -196,10 +196,10 @@ export async function POST(request) {
           select: { CaseID: true }
         });
         if (openExisting) {
-          return NextResponse.json({
-            success: false,
-            message: `An OPEN case for this asset already exists (${openExisting.CaseID}).`,
-          }, { status: 409 });
+          // return NextResponse.json({
+          //   success: false,
+          //   message: `An OPEN case for this asset already exists (${openExisting.CaseID}).`,
+          // }, { status: 409 });
         }
       }
 

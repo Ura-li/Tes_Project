@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-const ServiceRequestPDF = ({ nama, caseDetails }) =>
+const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) =>
 
 (
   <Document>
@@ -386,8 +386,17 @@ const ServiceRequestPDF = ({ nama, caseDetails }) =>
           <Text style={[styles.textSmall, styles.bold]}>Check Repair Status</Text>
         </View>
         <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-          <Text style={[styles.textSmall, { marginBottom: 30 }]}>Received By</Text>
-          <Text style={styles.textSmall}>--------------------------------------------</Text>
+          {!customerSignature ?
+            <>
+              <Text style={[styles.textSmall, { marginBottom: 30 }]}>Received By</Text>
+              <Text style={styles.textSmall}>--------------------------------------------</Text>
+            </>
+            :
+            <>
+              <Text style={[styles.textSmall, { marginBottom: 10 }]}>Received By</Text>
+              <Image src={customerSignature} style={{ width: 120, height: 60 }} />
+            </>
+          }
           <Text style={styles.textSmall}>{caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
               ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
               : 'N/A'}</Text>

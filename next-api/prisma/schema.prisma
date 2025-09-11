@@ -185,10 +185,11 @@ model contact_information {
   StateProvince     String?             @db.VarChar(100)
   Country           String?             @db.VarChar(100)
   ZipPostalCode     String?             @db.VarChar(20)
+  NIK               String?             @db.VarChar(25)
 
   PIC_Name          String?             @db.VarChar(100)
-  PIC_Email          String?             @db.VarChar(100)
-  PIC_Phone          String?             @db.VarChar(100)
+  PIC_Email         String?             @db.VarChar(100)
+  PIC_Phone         String?             @db.VarChar(100)
   asset_information asset_information[]
   caseinformation   caseinformation[]
   site_account      site_account?       @relation(fields: [SiteAccountID], references: [SiteAccountID], onDelete: Restrict, onUpdate: Restrict, map: "contact_information_ibfk_1")
@@ -388,6 +389,7 @@ model site_account {
   StateProvince       String?               @db.VarChar(100)
   Country             String                @db.VarChar(100)
   ZipPostalCode       String                @db.VarChar(20)
+  NPWP                String?               @db.VarChar(25)
   asset_information   asset_information[]
   caseinformation     caseinformation[]
   contact_information contact_information[]
@@ -444,6 +446,7 @@ model User {
   caseinformations_created caseinformation[] @relation("UserCreatedCases")
   caseinformations_owned   caseinformation[] @relation("UserOwnedCases")
   bookings_created         Bookings[]        @relation("UserCreatedBookings")
+  engineer_booking_detail  BookingDetails[]  @relation("EngineerCreatedBookings")
 
   workorders_owned     workorder[]     @relation("UserWorkOrders")
   materialorders_owned materialorder[] @relation("UserMaterialOrders")
@@ -478,7 +481,9 @@ model SubkTechnician {
 
 model Bookings {
   BookingId     Int     @id @default(autoincrement())
-  BookingStatus String? @db.VarChar(100)
+
+  BookingStatusId Int?
+  BookingStatus BookingStatus? @relation(fields: [BookingStatusId], references: [BookingStatusId])
   WOID          String
 
   // SLA  
@@ -510,9 +515,14 @@ model BookingDetails {
   BookingId         Int
   ResourceId        String?
   ResourceAccountId String?
+
+  EngineerId        Int?   // <-- NEW
+  engineer          User? @relation("EngineerCreatedBookings", fields: [EngineerId], references: [IDUser], onDelete: SetNull)
+
   SubkTechnicianId  String?
   Name              String  @db.VarChar(255)
-  Status            String  @db.VarChar(50)
+  BookingStatusId Int?
+  Status          BookingStatus?  @relation(fields: [BookingStatusId], references: [BookingStatusId])
 
   // Customer Time
   StartTimeCustomerTime            DateTime?
@@ -534,6 +544,18 @@ model BookingDetails {
   resourceaccount ResourceAccount? @relation(fields: [ResourceAccountId], references: [ResourceAccountId], onDelete: Restrict, onUpdate: Cascade)
   subkTechnician  SubkTechnician?  @relation(fields: [SubkTechnicianId], references: [SubkTechnicianId], onDelete: Restrict, onUpdate: Cascade)
   booking         Bookings         @relation(fields: [BookingId], references: [BookingId], onDelete: Cascade)
+
+  @@index([EngineerId])
+
+}
+
+model BookingStatus {
+  BookingStatusId Int @id @default(autoincrement())
+  Description String @db.VarChar(100)
+  CreatedOn   DateTime @default(now()) @db.DateTime(0)
+
+  Bookings Bookings[]
+  BookingsDetail  BookingDetails[]
 }
 
 model workorder {
