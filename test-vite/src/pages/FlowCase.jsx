@@ -135,6 +135,8 @@ export const FlowCase = () => {
     }
   };
 
+  const allowedRoles = ["fd", "admin"];
+
   const navigate = useNavigate();
   return (
     <>
@@ -143,17 +145,19 @@ export const FlowCase = () => {
       <SidebarInset>
         <div className="max-h-screen flex flex-col w-full ">
           <Tabs defaultValue="active">
-            <div className="sticky top-13  border-t-4 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
+            <div className="sticky top-13   bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
               <div className="mx-auto flex h-14 w-full max-w-7xl items-center gap-3 px-4 justify-between">
                 <TabsList className=" flex items-center gap-2">
                   <TabsTrigger value="active" size="sm" >Active Case</TabsTrigger>
-                  <TabsTrigger value="finish" size="sm">Ready To Finish</TabsTrigger>
+                  {allowedRoles.includes(user.role) && (
+                    <TabsTrigger value="finish" size="sm">Ready To Finish</TabsTrigger>
+                  )}
                 </TabsList>
                 <h1 className="lg:text-xl md:text-md font-semibold tracking-tight">Case For You</h1>
                 <SidebarTrigger icon={PanelRight} />
               </div>
             </div>
-            <TabsContent value="active" className="mx-auto w-full max-w-7xl p-1 md:p-2">
+            <TabsContent value="active" className="mx-auto w-full max-w-7xl p-1 ">
               <div className="space-y-3 ">
                 {renderer ? (
                   Array.from({ length: 6 }).map((_, i) => (

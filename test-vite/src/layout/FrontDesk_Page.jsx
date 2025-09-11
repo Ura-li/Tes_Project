@@ -79,7 +79,7 @@ export default function FrontDesk_Page() {
       const valueFilterInActiveCase = response.data.data.filter(c => c?.CaseStatus == 'InActive' && c?.caseinformation?.CreatedBy == user.id)
       const valueFilterCloseCase = response.data.data.filter(c => c?.CaseStatus == 'Close' && c?.caseinformation?.CreatedBy == user.id)
       const filtercases = response.data.data.filter(c => c?.CaseStatus !== 'Close' && c?.caseinformation?.Owner == user.id);
-      const rawDate = filtercases[0].caseinformation.ActionLog[0]?.ChangeAt;
+      const rawDate = filtercases[0]?.caseinformation?.ActionLog[0]?.ChangeAt;
       let newdate;
       if (rawDate) {
         const dateObj = rawDate instanceof Date ? rawDate : new Date(rawDate);

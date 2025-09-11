@@ -67,16 +67,21 @@ export const SearchCommandBlock = ({
 
   return (
     <div className="relative w-full">
-      {selectedOption  ? (
-        <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2 ring-1" 
-          onClick={() => 
-            !readOnly ?
-            onChange(null)
-            :
-            ""
+      {selectedOption ? (
+        <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2 ring-1"
+          onClick={() => {
+            if (!readOnly) {
+              onChange(null)
+              setOpen
+
+              setTimeout(() => {
+                inputRef.current?.focus(); // focus input
+              }, 0);
+            }
           }
-          
-          
+          }
+
+
         >
           <Archive color="blue" className="size-4 shrink-0" />
           <span className="pl-1">{renderLabel(selectedOption)}</span>

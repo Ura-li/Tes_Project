@@ -76,6 +76,7 @@ import { getUserFromToken } from "./lib/utils/auth";
 
 const Bookings = lazy(() => import('./bookings').then(m => ({ default: m.Bookings })));
 const Labor = lazy(() => import('./labor'));
+const SignatureWrite = lazy(() => import('@/components/SignaturePad'));
 const Auditwindows = lazy(() => import('./components/audit-windows'));
 const Home = lazy(() => import('./Home').then(m => ({ default: m.Home })));
 const GateKeepingRouting = lazy(() =>
@@ -303,6 +304,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/" element={<Home />} />
             <Route path="/auditwindows" element={<Auditwindows />} />
             <Route path="/lorem" element={<Lorem />} />
+            <Route path="/signature-pad" element={<SignatureWrite />} />
             <Route path="*" element={<NotFound />} />
         </Routes>
         </Suspense>
