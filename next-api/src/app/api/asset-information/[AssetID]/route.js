@@ -23,6 +23,7 @@ export async function GET(request, { params }) {
                     product_type: true
                 }
             },
+            WarrantyOTCCode: true
         }
     });
 

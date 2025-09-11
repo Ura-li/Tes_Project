@@ -29,6 +29,7 @@ export async function GET(request, { params }) {
             resourceaccount: true,
             resource: true,
             subkTechnician: true,
+            engineer: true,
           }
         }
         

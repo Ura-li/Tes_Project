@@ -140,6 +140,7 @@ export async function PATCH(request, { params }) {
             if (
                 body[field] !== undefined &&
                 body[field] !== null &&
+                body[field] !== '' &&
                 body[field] !== existing[field]
             ) {
                 dataToUpdate[field] = body[field];

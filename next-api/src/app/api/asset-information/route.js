@@ -70,7 +70,8 @@ export async function GET(request) {
                     include: {
                         product_type: true
                     }
-                }
+                },
+                WarrantyOTCCode: true
             }
         });
 
