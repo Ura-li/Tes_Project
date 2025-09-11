@@ -7856,6 +7856,265 @@ export function BookingDetailsDelete({ BookingDetailId, onUpdate }) {
   );
 }
 
+export function BookingStatusAdd({ onUpdate }) {
+  const [formData, setFormData] = useState({
+    Description: "",
+  });
+
+  // Input Handler
+  const handlerInput = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  // Submit Handler
+  const handlerSubmit = async () => {
+    const { Description } = formData;
+
+    if (!Description) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in Description before submitting.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post("/api/booking-status", formData);
+      console.log("Success:", response.data);
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Booking Status berhasil disimpan.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        if (onUpdate) onUpdate(); // ✅ refresh tabel, bukan reload halaman
+        setFormData({ Description: "" }); // reset form
+      });
+    } catch (err) {
+      console.error("Error saving Booking Status:", err);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to save Booking Status. Please try again.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">
+          Booking Status Add
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Booking Status</DialogTitle>
+          <DialogDescription>
+            Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>Description *</Label>
+          <Input
+            type="text"
+            id="Description"
+            value={formData.Description}
+            onChange={handlerInput}
+          />
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handlerSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingStatusEdit({ BookingStatusId, onUpdate }) {
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    BookingStatusId: "",
+    Description: "",
+  });
+
+  // ✅ ambil detail booking status saat modal dibuka
+  useEffect(() => {
+    if (!open) return;
+    const fetchDetail = async () => {
+      try {
+        const res = await ApiCustomer.get(`/api/booking-status/${BookingStatusId}`);
+        const data = res.data.data;
+        setFormData({
+          BookingStatusId: data.BookingStatusId,
+          Description: data.Description,
+        });
+      } catch (err) {
+        console.error("Error fetch booking status:", err);
+        Swal.fire({ icon: "error", title: "Error", text: "Failed to load data" });
+      }
+    };
+
+    fetchDetail();
+  }, [open, BookingStatusId]);
+
+  const handlerInput = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handlerSave = async () => {
+    if (!formData.Description) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete",
+        text: "Description is required",
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.put(`/api/booking-status/${formData.BookingStatusId}`, {
+        Description: formData.Description,
+      });
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: "Booking Status updated successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      setOpen(false);
+      onUpdate?.();
+    } catch (err) {
+      console.error("Error update:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Update failed, please try again.",
+      });
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Booking Status</DialogTitle>
+          <DialogDescription>Update booking status description below.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>Description *</Label>
+          <Input
+            type="text"
+            id="Description"
+            value={formData.Description}
+            onChange={handlerInput}
+          />
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handlerSave}>Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingStatusDelete({ BookingStatusId, isModalOpen, setIsModalOpen, onUpdate }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "BookingStatus ini akan dihapus dan tidak dapat dikembalikan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/booking-status/${BookingStatusId}`);
+
+        if (response.status === 409 || response.data?.success === false) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data?.message || "BookingStatus ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'BookingStatus berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          setIsModalOpen(false);
+          if (onUpdate) {
+            onUpdate();
+          }
+          window.location.reload();
+        });
+      } catch (error) {
+        if (error.response?.status === 409) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data?.message || "BookingStatus tidak dapat dihapus karena memiliki relasi.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus BookingStatus. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
+    }
+  };
+
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
+}
+
 export function RepairClassCodeAdd() {
   const [formData, setFormData] = useState({
     Code: "",

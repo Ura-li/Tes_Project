@@ -24,6 +24,7 @@ import { SubkTechnicianAdd, SubkTechnicianEdit, SubkTechnicianDelete } from "@/c
 import { SymptomCodeAdd, SymptomCodeEdit, SymptomCodeDelete } from "@/components/model/sc-modal";
 import { BookingsAdd, BookingsEdit, BookingsDelete } from "@/components/model/sc-modal";
 import { BookingDetailsAdd, BookingDetailsEdit, BookingDetailsDelete } from "@/components/model/sc-modal";
+import { BookingStatusAdd, BookingStatusEdit, BookingStatusDelete} from "@/components/model/sc-modal";
 import { RepairClassCodeAdd, RepairClassCodeEdit, RepairClassCodeDelete } from "@/components/model/sc-modal";
 import { ServiceCatalogAdd, ServiceCatalogEdit, ServiceCatalogDelete } from "@/components/model/sc-modal";
 import { OTCAdd, OTCEdit, OTCDelete} from "@/components/model/sc-modal";
@@ -6730,6 +6731,299 @@ export const BookingDetailsTable = () => {
           Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
           <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
           <b>{sortedData.length}</b> booking details
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const BookingStatusTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [bookingStatusData, setBookingStatusData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
+  const navigate = useNavigate();
+
+  const [sortConfig, setSortConfig] = useState({
+    key: "BookingStatusId",
+    direction: "asc",
+  });
+
+  // 🔍 Debounce pencarian
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // 🚀 Fetch data
+  const fetchBookingStatus = async () => {
+    Swal.fire({
+      title: "Memuat Data Booking Status...",
+      text: "Mohon tunggu sebentar...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/booking-status");
+      if (response.data.success) {
+        setBookingStatusData(response.data.data);
+      } else {
+        setError("Failed to fetch Booking Status data");
+      }
+    } catch (err) {
+      console.error("Error fetching BookingStatus Table:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+      Swal.close();
+    }
+  };
+
+  useEffect(() => {
+    fetchBookingStatus();
+  }, []);
+
+  // 📌 Sorting handler
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+  };
+
+  // 🔍 Filter + search
+  const filteredData = useMemo(() => {
+    return bookingStatusData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    );
+  }, [bookingStatusData, debouncedSearchTerm]);
+
+  // 📊 Sorting data
+  const sortedData = useMemo(() => {
+    const sorted = [...filteredData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        const aValue = a[sortConfig.key] ?? "";
+        const bValue = b[sortConfig.key] ?? "";
+        if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return sorted;
+  }, [filteredData, sortConfig]);
+
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
+  const currentData = sortedData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown size={16} />;
+    return sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />;
+  };
+
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
+
+  return (
+    <div className="p-6">
+      <h2 className="text-xl font-bold mb-4">📋 Booking Status Table</h2>
+
+      {/* 🔍 Search + Add */}
+      <div className="flex flex-wrap items-center gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="🔍 Search..."
+          className="w-full sm:w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+
+        <BookingStatusAdd onUpdate={fetchBookingStatus} />
+      </div>
+
+      {loading && <p>Loading data...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* 📑 Table */}
+      <div className="bg-white rounded-2xl shadow overflow-auto max-h-[600px] relative">
+        <table className="w-full border-collapse">
+          <thead className="sticky top-0 bg-gray-100 z-10">
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-3 text-sm font-semibold text-center border">No</th>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("BookingStatusId")}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  Booking StatusID {getSortIcon("BookingStatusId")}
+                </div>
+              </th>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("Description")}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  Description {getSortIcon("Description")}
+                </div>
+              </th>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("CreatedOn")}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  Created At {getSortIcon("CreatedOn")}
+                </div>
+              </th>
+              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.length > 0 ? (
+              currentData.map((item, i) => (
+                <tr
+                  key={item.BookingStatusId}
+                  className={`hover:bg-gray-100 text-center text-sm ${
+                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  }`}
+                >
+                  <td className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + i + 1}
+                  </td>
+                  <td className="p-3 border">
+                    {item.BookingStatusId}
+                  </td>
+                  <td className="p-3 border">{item.Description}</td>
+                  <td className="p-3 border">
+                    {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
+                  <td className="border p-2 flex space-x-2 justify-center">
+                    <BookingStatusEdit
+                      BookingStatusId={item.BookingStatusId}
+                      onUpdate={fetchBookingStatus}
+                    />
+                    <BookingStatusDelete
+                      BookingStatusId={item.BookingStatusId}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchBookingStatus}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="p-4 text-center text-gray-500">
+                  No entries found 🚫
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* 🔻 Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> entries
         </div>
 
         {/* Pagination + Go to page */}

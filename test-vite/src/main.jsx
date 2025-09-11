@@ -44,6 +44,7 @@ const masterTables = {
   OTCCodeTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.OTCCodeTable }))),
   CrsTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.CrsTable }))),
   FailureTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.FailureTable }))),
+  BookingStatusTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.BookingStatusTable }))),
 };
 
 const {
@@ -69,6 +70,7 @@ const {
   OTCCodeTable,
   CrsTable,
   FailureTable,
+  BookingStatusTable,
 } = masterTables;
 import { getUserFromToken } from "./lib/utils/auth";
 
@@ -230,6 +232,14 @@ createRoot(document.getElementById("root")).render(
               element={
                 <MasterGateKeeping allow={["admin"]}>
                   <BookingDetailsTable />
+                </MasterGateKeeping>
+              }
+            />
+            <Route
+              path="/app/master/BookingStatus"
+              element={
+                <MasterGateKeeping allow={["admin"]}>
+                  <BookingStatusTable />
                 </MasterGateKeeping>
               }
             />

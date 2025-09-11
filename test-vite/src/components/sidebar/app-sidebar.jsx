@@ -141,7 +141,7 @@ export function AppSidebar({
           },
                     {
             title: "Booking Status",
-            url: "/app/master/OTC_Code",
+            url: "/app/master/BookingStatus",
             icon: ClipboardCheck
           },
           {
