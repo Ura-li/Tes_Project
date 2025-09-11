@@ -40,10 +40,9 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
-    const woidParam = searchParams.get("WOID");
+    const woidParamRaw = searchParams.get("WOID");
 
-    
-    if (woidParam.length === 0) {
+    if (!woidParamRaw || woidParamRaw.trim().length === 0) {
       return NextResponse.json({
         success: false,
         message: "Parameter 'WOID' tidak valid atau kosong",
@@ -51,11 +50,13 @@ export async function GET(request) {
       }, { status: 400 });
     }
 
+    const woidList = woidParamRaw.split(",").map((id) => id.trim());
+
         // console.log("Query Params:", { search, page, limit });
          // Initialize search filters
          const materialOrders = await prisma.materialorder.findMany({
             where: {
-              WOID: { contains: woidParam }
+              WOID: { in: woidList }
             },
             include: {
                 workorder: {

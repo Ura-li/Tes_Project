@@ -851,32 +851,37 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
 
   const handleCreateBooking = async () => {
     try {
-      setLoading(true);
+      // setLoading(true);
       
       const isValid = await CheckRequestedDateTimeCustomer(RequestedDateTimeCustomer);
       console.log("Validasi result:", isValid);
       if (!isValid) return;
-
+      //getLogistic
+      const getCaseDetail = await ApiCustomer.get(`/api/case-information/${CaseID}`)
+      const getLogistic = await ApiCustomer.get(`/api/user?role=lg`)
+      
+      const selectedLogistic = getLogistic.data.data.find(user => user.Username === 'logis');
+      const caseDetails = getCaseDetail.data.data
       
       const data = {
         WOID: WOID,
         CreatedBy: CreatedBy,
-        user: getUserFromToken()
+        user: getUserFromToken(),
+        caseinfo: caseDetails
       }
-      const response = await ApiCustomer.post('/api/bookings', data);
+      
 
-      //getLogistic
-      const getCaseDetail = await ApiCustomer.get(`/api/case-information/${CaseID}`)
-      const getLogistic = await ApiCustomer.get(`/api/user?role=lg`)
+      console.log("Get Logistic : ",getLogistic);
       /**
        * TODO : CHANGE TIS HIST
-       */
-      const firstLogistic = getLogistic.data.data[0]
-      const caseDetails = getCaseDetail.data.data
+      */
+
+
+      const response = await ApiCustomer.post('/api/bookings', data);
       //update case
       const updateCaseStatus = await ApiCustomer.patch(`/api/case-information/${CaseID}`, {
         CaseStatus: "PartOrder",
-        Owner: firstLogistic.IDUser
+        Owner: selectedLogistic.IDUser
       })
 
       const updateLogCase = await ApiCustomer.post("/api/actionlog",{
@@ -903,7 +908,7 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
     } catch (error) {
       console.error('Gagal membuat booking:', error);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 

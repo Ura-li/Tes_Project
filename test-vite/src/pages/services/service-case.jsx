@@ -191,6 +191,7 @@ export const TabsService = ({
       let savedModules = [];
       const dataToUpdate = {};
       for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE']) {
+        console.log(target);
         switch (target) {
 
           case 'NOTE':

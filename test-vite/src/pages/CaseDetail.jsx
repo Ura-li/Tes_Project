@@ -88,6 +88,7 @@ import CaseField from "@/components/CaseField";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
 import EquipmentReciptForm from "@/components/Equipment-Recipt-Form";
+import { parseNoteText } from "@/lib/utils.jsx";
 
 /**
  * TODO : 
@@ -277,7 +278,7 @@ export const TabsServiceCaseDetails = ({
 
         case 'ENTITLEMENT':
           if (entitlementEdited) {
-            console.log(entitlementStatus);
+            console.log("OTC CODE EDIT : ",entitlementStatus);
             Object.assign(dataToUpdate, entitlementStatus); // includes OTCCo
             savedModules.push("Entitlement");
           }
@@ -353,6 +354,17 @@ export const TabsServiceCaseDetails = ({
                     dataNew: newStatus,
                     changedBy: token.user.id,
                     logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${oldStatus} to ${newStatus}`,
+                  });
+                }else{
+                  const token = { user: getUserFromToken() };
+                  await ApiCustomer.post("/api/actionlog", {
+                    CaseId: `${caseDetails.CaseID}`,
+                    ReferenceId: ``,
+                    model: "Case",
+                    dataOld: oldStatus,
+                    dataNew: newStatus,
+                    changedBy: token.user.id,
+                    logDescription: `Edit : Edit Case ${caseDetails.CaseID} Data`,
                   });
                 }
               } catch (err) {
@@ -498,7 +510,7 @@ const openPopup = () => {
   // Do not memoize with only user.role; it freezes onClick closures
   // causing handleSave to capture stale state. Compute each render.
   const visibleButtons = buttons.filter(button => button.roles.includes(user.role));
-  console.log("TES CASE DETAILS VALUE",caseDetails);
+  // console.log("TES CASE DETAILS VALUE",caseDetails);
   // const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   // const hiddenButtons = open ? buttons.slice(-3) : [];
   const [serviceCatalogType, setServiceCatalogType] = useState("null");
@@ -1081,16 +1093,12 @@ const fetchActionLog = async () => {
 
   const navigate = useNavigate();
 
-  const handleClick = async () => {
-    // await fetchOwnerUserData();
-    // await fetchCustomerData();
-    {
-      workOrders.map((work) => {
-        navigate(`/app/work/${work.WOID}`, {
-          // state: { ownerUserData, dataFetchCustomerData }
-        });
-      });
-    }
+  const handleClick = async (work) => {
+    console.log(work.WOID); // ✅ Ini sekarang valid
+
+    navigate(`/app/work/${work.WOID}`, {
+      // state: { ownerUserData, dataFetchCustomerData }
+    });
   };
 
 useEffect(() =>{
@@ -1117,7 +1125,7 @@ const fetchSymptomCodes = async (term) => {
 
 const [hideAsignTo, setHideAsignTo] = useState(null)
   const canEdit = caseDetails?.Owner === user?.id;
-  console.log("OI",canEdit)
+  // console.log("OI",canEdit)
 
 return (
     <>
@@ -1311,6 +1319,7 @@ return (
                     "Depot Repair",
                     "Onsite",
                     "Bench",
+                    "DOA"
                     ]}
                     />
                 </CaseField>
@@ -1619,7 +1628,7 @@ return (
                                 <TableCell>{n.CreatedOn ? format(new Date(n.CreatedOn), 'yyyy-MM-dd HH:mm') : '-'}</TableCell>
                                 <TableCell>{n.createdByUser?.Name || n.CreatedBy || '-'}</TableCell>
                                 <TableCell>{n.createdByUser?.Role || '-'}</TableCell>
-                                <TableCell className="whitespace-pre-wrap max-w-xl">{n.Note}</TableCell>
+                                <TableCell className="whitespace-pre-wrap max-w-xl">{parseNoteText(n.Note)}</TableCell>
                               </TableRow>
                             ))
                           ) : (
@@ -1782,7 +1791,8 @@ return (
                     <CaseField label="Warranty Status"  span={3} star>
                       <SearchCommandBlock
                         options={otcCode}
-                        value={entitlementStatus.OTCCode}
+                        // value={entitlementStatus.OTCCode}
+                        value={dataFetchAssetInformation?.AssetInformation?.Warranty_Status}
                         onChange={(value) =>
                           handleEntitlementStatus("OTCCode")(value)
                         }
@@ -1889,7 +1899,7 @@ return (
                           <TableRow
                             key={work.WOID}
                             className="cursor-pointer hover:bg-gray-300"
-                            onClick={handleClick}
+                            onClick={() => handleClick(work)}
                           >
                             <TableCell className="font-medium ">
                               {work.WOID}

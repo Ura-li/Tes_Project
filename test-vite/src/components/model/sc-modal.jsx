@@ -4749,7 +4749,7 @@ export function BtnModalsServiceCatalog({
     setSelectedPartCatalog((prev) =>
       prev.map((item) => {
         if (item.PartNumber === partNumber) {
-          const parsedQty = parseInt(qty) || 0;
+          const parsedQty = parseInt(qty) || 1;
           const price = parseFloat(item.Price) || 0;
           return {
             ...item,
@@ -4778,9 +4778,13 @@ export function BtnModalsServiceCatalog({
       return acc + (parseFloat(part.Total) || 0);
     }, 0);
   
-    const subTotal = serviceTotal + partsTotal;
-    console.log("SubTotal Confirm Services : ",subTotal)
-    setSubTotalConfirmServices(subTotal.toFixed(2));
+    if(assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
+      const subTotal = serviceTotal + partsTotal;
+      console.log("SubTotal Confirm Services : ",subTotal)
+      setSubTotalConfirmServices(subTotal.toFixed(2));
+    }else{
+      setSubTotalConfirmServices(0);
+    }
 
   }
 
@@ -4796,6 +4800,20 @@ export function BtnModalsServiceCatalog({
       const data = {
         user: getUserFromToken()
       }
+
+      let noteCreateOrderLog = '';
+      if(assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
+        noteCreateOrderLog = `[NOTICE] Order Part
+Order Part : ${selectedPartCatalog?.[0]?.PartNumber} - ${selectedPartCatalog?.[0]?.PartDescription}
+Harga : Rp. ${selectedPartCatalog?.[0]?.Price}
+Requested to APO : ${assignApo}`;
+      }else{
+        noteCreateOrderLog = `[NOTICE] Order Part
+Order Part : ${selectedPartCatalog?.[0]?.PartNumber} - ${selectedPartCatalog?.[0]?.PartDescription}
+Requested to APO : ${assignApo}`;
+      }
+      console.log(noteCreateOrderLog);
+
       const res = await ApiCustomer.post("/api/service-log/create-order", {
         AssetID: assetForWorkOrderCreation.AssetID,
         CaseID: caseDetails.CaseID,
@@ -4803,35 +4821,36 @@ export function BtnModalsServiceCatalog({
         selectedPartCatalog,
         IncidentType: selected,
         OwnerID: data.user.id,
-        assignApo: assignApo
+        assignApo: assignApo,
+        notesLog: noteCreateOrderLog
       });
       console.log(res)
-      const updateLogCase = await ApiCustomer.post("/api/actionlog",{
-        CaseId: `${caseDetails.CaseID}`,
-        model: "Case",
-        dataOld: caseDetails.CaseStatus,
-        dataNew: "Part Request",
-        changedBy: data.user.id,
-        logDescription: `Edit: change status from ${caseDetails.CaseStatus} to Part Request`
-      })
-      const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
-        CaseId: `${caseDetails.CaseID}`,
-        ReferenceId: `${res.data.WOID}`,
-        model: "Work",
-        dataOld: "OPEN_UNSCHEDULED",
-        dataNew: "OPEN_UNSCHEDULED",
-        changedBy: data.user.id,
-        logDescription: `New Work Order : ${res.data.WOID}`
-      })
-      const updateMaterialLog = await ApiCustomer.post("/api/actionlog",{
-        CaseId: `${caseDetails.CaseID}`,
-        ReferenceId: `${res.data.MOID}`,
-        model: "Material Order",
-        dataOld: "New",
-        dataNew: "New",
-        changedBy: data.user.id,
-        logDescription: `New Material Order : ${res.data.MOID}`
-      })
+      // const updateLogCase = await ApiCustomer.post("/api/actionlog",{
+      //   CaseId: `${caseDetails.CaseID}`,
+      //   model: "Case",
+      //   dataOld: caseDetails.CaseStatus,
+      //   dataNew: "Part Request",
+      //   changedBy: data.user.id,
+      //   logDescription: `Edit: change status from ${caseDetails.CaseStatus} to Part Request`
+      // })
+      // const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
+      //   CaseId: `${caseDetails.CaseID}`,
+      //   ReferenceId: `${res.data.WOID}`,
+      //   model: "Work",
+      //   dataOld: "OPEN_UNSCHEDULED",
+      //   dataNew: "OPEN_UNSCHEDULED",
+      //   changedBy: data.user.id,
+      //   logDescription: `New Work Order : ${res.data.WOID}`
+      // })
+      // const updateMaterialLog = await ApiCustomer.post("/api/actionlog",{
+      //   CaseId: `${caseDetails.CaseID}`,
+      //   ReferenceId: `${res.data.MOID}`,
+      //   model: "Material Order",
+      //   dataOld: "New",
+      //   dataNew: "New",
+      //   changedBy: data.user.id,
+      //   logDescription: `New Material Order : ${res.data.MOID}`
+      // })
   
       
       Swal.close(); 
@@ -4862,7 +4881,7 @@ export function BtnModalsServiceCatalog({
         }
       });
     } catch (err) {
-      console.error(" Order Creation Failed:", err);
+      console.error("Order Creation Failed:", err);
       Swal.fire({
         title: "Error!",
         text: "Failed to create order",
@@ -4919,7 +4938,7 @@ export function BtnModalsServiceCatalog({
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: {caseDetails?.OTCCode} - {caseDetails?.otcCodeTable?.Description} </p>
+                <p>Warranty Status</p><p>: {assetForWorkOrderCreation?.Warranty_Status} - {assetForWorkOrderCreation?.WarrantyOTCCode?.Description} </p>
                 <p>Currency</p><p>: </p>
               </div>
             </div>
@@ -5031,7 +5050,7 @@ export function BtnModalsServiceCatalog({
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: {caseDetails?.OTCCode} - {caseDetails?.otcCodeTable?.Description}</p>
+                <p>Warranty Status</p><p>: {assetForWorkOrderCreation?.Warranty_Status} - {assetForWorkOrderCreation?.WarrantyOTCCode?.Description}</p>
                 <p>Currency</p><p>: </p>
               </div>
             </div>
@@ -5226,7 +5245,7 @@ export function BtnModalsServiceCatalog({
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: {caseDetails?.OTCCode} - {caseDetails?.otcCodeTable?.Description} </p>
+                <p>Warranty Status</p><p>: {assetForWorkOrderCreation?.Warranty_Status} - {assetForWorkOrderCreation?.WarrantyOTCCode?.Description} </p>
                 <p>Currency</p><p>: </p>
               </div>
             </div>
@@ -5253,7 +5272,7 @@ export function BtnModalsServiceCatalog({
                         <TableCell>{selectedWarrantyServices.Shipping_Fee}</TableCell>
                         <TableCell>1</TableCell>
                         <TableCell>{selectedWarrantyServices.Tax}</TableCell>
-                        <TableCell>{selectedWarrantyServices.Price}</TableCell>
+                        <TableCell>{assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? selectedWarrantyServices.Price : 0}</TableCell>
                       </TableRow>
                     {/* )
                   })} */}
@@ -5283,18 +5302,19 @@ export function BtnModalsServiceCatalog({
                         <TableCell>{part.PartNumber}</TableCell>
                         <TableCell>{part.PartDescription}</TableCell>
                         <TableCell>{part.Shipping_Fee}</TableCell>
-                        <TableCell>
-                        <Input
+                        <TableCell>{part.qty}
+                        {/* <Input
                           placeholder="QTY"
                           min={1}
+                          readOnly
                           type="number"
                           value={part.qty}
                           onChange={(e) => handleQtyChangePartsCatalog(part.PartNumber, e.target.value)}
                           className="w-16"
-                        />
+                        /> */}
                         </TableCell>
                         <TableCell>{part.Tax}</TableCell>
-                        <TableCell>{part.Total}</TableCell>
+                        <TableCell>{assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? part.Total : 0}</TableCell>
                       </TableRow>
                     )
                   })}
