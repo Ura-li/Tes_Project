@@ -44,6 +44,7 @@ export async function GET(request) {
             resource: true,
             resourceaccount: true,
             subkTechnician: true,
+            engineer: true
           },
         },
       },
@@ -78,7 +79,7 @@ export async function GET(request) {
 // /api/bookings
 export async function POST(request) {
   try {
-    const { WOID, CreatedBy } = await request.json();
+    const { WOID, CreatedBy, caseinfo } = await request.json();
 
     const woid = WOID;
     const createdBy = parseInt(CreatedBy);
@@ -90,12 +91,59 @@ export async function POST(request) {
       );
     }
 
+    const workorder = caseinfo.workorder.find(work => work.WOID = woid)
+    console.log("CASE INFO WO BOOKING Owner : ", workorder?.owner?.IDUser)
+
     const result = await prisma.$transaction(async (tx) => {
+      //get work order data
+      const wo = await tx.workorder.findUnique({
+        where: { WOID: woid},
+        include: {
+          owner: true
+        }
+      })
+
+      if(!wo) throw new Error("Work Order tidak ditemukan");
+      
+      const engineerId = wo.OwnerID ?? null;
+      let resourceIdFromEngineer = null;
+      let resourceAccountIdFromEngineer = null;
+
+      if(engineerId){
+        const engineer = await tx.user.findUnique({
+          where: { IDUser: engineerId},
+          select : {
+            Role: true,
+            ResourceId: true
+          }
+        })
+
+        console.log("engineer : ",engineer);
+        if(!engineer || engineer.Role !== 'ce') throw new Error("Owner WO bukan engineer / tidak ditemukan");
+        
+        resourceIdFromEngineer = engineer.ResourceId ?? null;
+      }
+
+
+      if(resourceIdFromEngineer){
+        const resourceAccount = await tx.resourceAccount.findMany({
+          where:{
+            ResourceId: resourceIdFromEngineer
+          },
+          select:{
+            ResourceAccountId: true,
+          }
+        })
+
+        
+        console.log("resource Account : ",resourceAccount)
+        resourceAccountIdFromEngineer = resourceAccount[0].ResourceAccountId;
+      }
       // 1. Buat booking
       const booking = await tx.bookings.create({
         data: {
           WOID: woid,
-          BookingStatus: '',
+          BookingStatusId: 1,
           CreatedBy: createdBy,
         },
       });
@@ -106,7 +154,7 @@ export async function POST(request) {
           BookingId: booking.BookingId,
           ChangedBy: createdBy,
           Name: "",
-          Status: "Schedule",
+          BookingStatusId: 1,
           StartTimeCustomerTime: null,
           EndTimeCustomerTime: null,
           EstimatedArrivalTimeCustomerTime: null,
@@ -116,9 +164,10 @@ export async function POST(request) {
           DurationInMinutesUserTime: 0,
           EstimatedArrivalTimeUserTime: null,
           ActualArrivalTimeUserTime: null,
-          ResourceId: null,
-          ResourceAccountId: null,
-          SubkTechnicianId: null,
+          EngineerId: engineerId,
+          ResourceId: resourceIdFromEngineer,
+          ResourceAccountId: resourceAccountIdFromEngineer,
+          SubkTechnicianId: null
         },
       });
 

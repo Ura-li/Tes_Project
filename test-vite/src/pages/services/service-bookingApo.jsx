@@ -65,6 +65,9 @@ export function ServiceBookingApo ({BookingId , woid}) {
   const [subkTechnicianName, setSubkTechnicianName] = useState("");
   const [subkTechnicianId, setSubkTechnicianId] = useState(null);
   
+  const [subkEngineerName, setSubkEngineerName] = useState("");
+  const [subkEngineerId, setSubkEngineerId] = useState(null);
+  
   const [subkTechnicianLearnerName, setSubkTechnicianLearnerName] = useState("");
   const [subkTechnicianLearnerId, setSubkTechnicianLearnerId] = useState(null);
   
@@ -136,6 +139,9 @@ export function ServiceBookingApo ({BookingId , woid}) {
         setSubkTechnicianName(data?.bookingDetails?.[0]?.subkTechnician?.Name || "");
         setSubkTechnicianId(data?.bookingDetails?.[0]?.subkTechnician?.SubkTechnicianId || "");
         
+        setSubkEngineerName(data?.bookingDetails?.[0]?.engineer?.Name || "");
+        setSubkEngineerId(data?.bookingDetails?.[0]?.engineer?.IDUser || "");
+        
         setBookingStatus(data?.BookingStatus || "");
         setWorkOrderNumber(data?.workorder?.WorkOrderNumber || "");
         setRequestedDateTimeCustomer(new Date(data?.workorder?.RequestedDateTimeCustomer || ""));
@@ -151,7 +157,6 @@ export function ServiceBookingApo ({BookingId , woid}) {
         
         setStartTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.StartTimeUserTime || ""));
         setEndTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.EndTimeUserTime || ""));
-        // console.log("kontol ",formatDateForInput(data?.bookingDetails?.[0]?.EndTimeUserTime || ""))
         setDurationInMinutesUserTime(data?.bookingDetails?.[0]?.DurationInMinutesUserTime || 0);
         setEstimatedArrivalTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime || ""));
         setActualArrivalTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.ActualArrivalTimeUserTime || ""));
@@ -204,7 +209,8 @@ export function ServiceBookingApo ({BookingId , woid}) {
       ...bookingData, // keep all original fields
       ResourceId: resourceId,
       ResourceAccountId: accountId,
-      SubkTechnicianId: subkTechnicianId,
+      SubkTechnicianId: null,
+      EngineerId: subkEngineerId,
       StartTimeCustomerTime: startTimeCustomerTime || null,
       EndTimeCustomerTime: endTimeCustomerTime || null,
       EstimatedArrivalTimeCustomerTime: estimatedArrivalTimeCustomerTime || null,
@@ -504,9 +510,10 @@ export function ServiceBookingApo ({BookingId , woid}) {
                 <Input
                   variant={"invisible"}
                   placeholder="---"
-                  value={subkTechnicianName}
+                  value={subkEngineerName}
                   onChange={(e) => {
-                    setSubkTechnicianName(e.target.value);
+                    console.log("Subuk Tech Name in APO : ",e)
+                    setSubkEngineerName(e.target.value);
                     handleSearchSubkTechnician(e.target.value);
                   }}
                 />
@@ -517,8 +524,9 @@ export function ServiceBookingApo ({BookingId , woid}) {
                         key={tech.SubkTechnicianId}
                         className="p-2 cursor-pointer hover:bg-gray-200"
                         onClick={() => {
-                          setSubkTechnicianName(tech.Name);
-                          setSubkTechnicianId(tech.SubkTechnicianId);
+                          console.log("USER IN SUBK CLICK : ",tech);
+                          setSubkEngineerName(tech.Name);
+                          setSubkEngineerId(tech.IDUser);
                           setSearchResultsSubkTechnician([]); // Clear suggestions
                         }}
                       >
@@ -531,9 +539,9 @@ export function ServiceBookingApo ({BookingId , woid}) {
               <CaseField label={"Subk Technician Learner ID"} lock={!canEditapo} span={2}>
                 <Input
                   variant={"invisible"}
-                  value={subkTechnicianId}
+                  value={subkEngineerId}
                   placeholder="---"
-                  onChange={(e) => setSubkTechnicianId(e.target.value)}
+                  onChange={(e) => setSubkEngineerId(e.target.value)}
                 />
                 {searchResultsSubkTechnicianLearner.length > 0 && (
                   <ul className="absolute z-10 w-full mt-1 bg-white border">

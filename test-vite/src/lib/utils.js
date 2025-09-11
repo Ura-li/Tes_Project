@@ -9,3 +9,17 @@ export function formatDateForInput(dateString) {
   const offsetDate = new Date(date.getTime() + Math.abs(date.getTimezoneOffset() * 60000)); // handle timezone
   return offsetDate.toISOString().split('T')[0]; // ambil 'YYYY-MM-DD'
 };
+
+export function formatDate(dateString) {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  return date.toLocaleString("id-ID", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+
