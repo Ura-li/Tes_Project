@@ -41,7 +41,7 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
   const { OTCCode } = params;
 
-  const { Description } = await request.json();
+  const { Description, WarrantyCondition } = await request.json();
 
   if (!Description) {
     return NextResponse.json(
@@ -53,7 +53,7 @@ export async function PATCH(request, { params }) {
   try {
     const updated = await prisma.oTCCodeTable.update({
       where: { OTCCode },
-      data: { Description },
+      data: { Description, WarrantyCondition,},
     });
 
     return NextResponse.json(

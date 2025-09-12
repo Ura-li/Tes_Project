@@ -24,6 +24,7 @@ import { SubkTechnicianAdd, SubkTechnicianEdit, SubkTechnicianDelete } from "@/c
 import { SymptomCodeAdd, SymptomCodeEdit, SymptomCodeDelete } from "@/components/model/sc-modal";
 import { BookingsAdd, BookingsEdit, BookingsDelete } from "@/components/model/sc-modal";
 import { BookingDetailsAdd, BookingDetailsEdit, BookingDetailsDelete } from "@/components/model/sc-modal";
+import { BookingStatusAdd, BookingStatusEdit, BookingStatusDelete} from "@/components/model/sc-modal";
 import { RepairClassCodeAdd, RepairClassCodeEdit, RepairClassCodeDelete } from "@/components/model/sc-modal";
 import { ServiceCatalogAdd, ServiceCatalogEdit, ServiceCatalogDelete } from "@/components/model/sc-modal";
 import { OTCAdd, OTCEdit, OTCDelete} from "@/components/model/sc-modal";
@@ -69,7 +70,9 @@ export const Contact_table = () => {
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedZipCode, setSelectedZipCode] = useState("");
-
+  const [picNameSearch, setPicNameSearch] = useState("");
+  const [picEmailSearch, setPicEmailSearch] = useState("");
+  const [picPhoneSearch, setPicPhoneSearch] = useState("");
   // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -153,7 +156,10 @@ export const Contact_table = () => {
         (!selectedCountry || contact.Country === selectedCountry) &&
         (!selectedState || contact.StateProvince === selectedState) &&
         (!selectedCity || contact.City === selectedCity) &&
-        (!selectedZipCode || contact.ZipPostalCode === selectedZipCode)
+        (!selectedZipCode || contact.ZipPostalCode === selectedZipCode) &&
+        (!picNameSearch || (contact.PIC_Name && contact.PIC_Name.toLowerCase().includes(picNameSearch.toLowerCase()))) &&
+        (!picEmailSearch || (contact.PIC_Email && contact.PIC_Email.toLowerCase().includes(picEmailSearch.toLowerCase()))) &&
+        (!picPhoneSearch || (contact.PIC_Phone && contact.PIC_Phone.toLowerCase().includes(picPhoneSearch.toLowerCase())))
       );
     });
   }, [
@@ -166,6 +172,9 @@ export const Contact_table = () => {
     selectedState,
     selectedCity,
     selectedZipCode,
+    picNameSearch,
+    picEmailSearch,
+    picPhoneSearch
   ]);
 
   // Sorting (pakai sortConfig)
@@ -240,11 +249,11 @@ export const Contact_table = () => {
   };
 
   return (
-    <div className="p-6">
-      <h2 className="mb-6 text-2xl font-bold">📊 Contact Management</h2>
+    <div className="p-4 sm:p-6 w-full">
+      <h2 className="mb-4 text-xl sm:text-2xl font-bold">📊 Contact Management</h2>
 
       {/* Search + Filters */}
-      <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between w-full">
+      <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between w-full">
         <input
           type="text"
           placeholder="🔍 Search contacts..."
@@ -288,7 +297,7 @@ export const Contact_table = () => {
 
       {/* Table */}
       <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[70vh] w-full">
-        <table className="w-full border-collapse min-w-[1000px]">
+        <table className="w-full border-collapse min-w-[1200px]">
           <thead className="sticky z-10 top-0 bg-gray-100 text-xs sm:text-sm">
             <tr>
               <th className="p-3 text-sm font-semibold text-left border">No</th>
@@ -352,6 +361,15 @@ export const Contact_table = () => {
               <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ZipPostalCode")}>
                 Zip/Postal Code {getSortIcon("ZipPostalCode")}
               </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Name")}>
+                PIC Name {getSortIcon("PIC_Name")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Email")}>
+                PIC Email {getSortIcon("PIC_Email")}
+              </th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Phone")}>
+                PIC Phone {getSortIcon("PIC_Phone")}
+              </th>
               <th className="p-3 text-sm font-semibold text-center border">Actions</th>
             </tr>
           </thead>
@@ -380,6 +398,9 @@ export const Contact_table = () => {
                   <td className="p-3 border">{contact.StateProvince}</td>
                   <td className="p-3 border">{contact.Country}</td>
                   <td className="p-3 border">{contact.ZipPostalCode}</td>
+                  <td className="p-3 border">{contact.PIC_Name}</td>
+                  <td className="p-3 border">{contact.PIC_Email}</td>
+                  <td className="p-3 border">{contact.PIC_Phone}</td>
                   <td className="flex items-center justify-center gap-2 p-3 border">
                     <ContactEdit contactID={contact.ContactID} onUpdate={fetchContacts} />
                     <ContactDelete contactID={contact.ContactID} />
@@ -1532,6 +1553,14 @@ export const Assets_table = () => {
           valA = a?.product_information?.ProductLine ?? "";
           valB = b?.product_information?.ProductLine ?? "";
           break;
+        case "Warranty_Status":
+        valA = a?.Warranty_Status ?? "";
+        valB = b?.Warranty_Status ?? "";
+        break;
+        case "EOW_Date":
+        valA = a?.EOW_Date ? new Date(a.EOW_Date).getTime() : 0;
+        valB = b?.EOW_Date ? new Date(b.EOW_Date).getTime() : 0;
+        break;
         default:
           valA = a?.[sortConfig.key] ?? "";
           valB = b?.[sortConfig.key] ?? "";
@@ -1657,6 +1686,12 @@ export const Assets_table = () => {
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("ContactID")}>
                 Contact ID {renderSortIcon("ContactID")}
               </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Warranty_Status")}>
+                Warranty Status {renderSortIcon("Warranty_Status")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("EOW_Date")}>
+                EOW Date {renderSortIcon("EOW_Date")}
+              </th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
@@ -1674,6 +1709,12 @@ export const Assets_table = () => {
                   <td className="p-2 border">{a?.product_information?.ProductLine}</td>
                   <td className="p-2 border">{a?.site_account?.Company}</td>
                   <td className="p-2 border">{a?.contact_information?.FirstName} {a?.contact_information?.LastName}</td>
+                  <td className="p-2 border">{a?.Warranty_Status}</td>
+                  <td className="p-2 border">
+                    {a?.EOW_Date
+                      ? new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(a.EOW_Date))
+                      : "—"}
+                  </td>
                   <td className="flex p-2 gap-2 border">
                     <AssetEdit assetId={a.AssetID} onUpdate={fetchAllAssets} />
                     <AssetDelete assetId={a.AssetID} />
@@ -3888,33 +3929,36 @@ export const User_table = () => {
   }, [UserData, debouncedSearchTerm]);
 
   // 🔹 Sorting logic
-  const sortedData = useMemo(() => {
-    let sortableItems = [...filteredUserTable];
-    if (sortConfig.key !== null) {
-      sortableItems.sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
-        
-        // Handle null or undefined values
-        if (aVal === null || aVal === undefined) aVal = "";
-        if (bVal === null || bVal === undefined) bVal = "";
-        
-        // Case-insensitive sorting for strings
-        if (typeof aVal === "string") aVal = aVal.toLowerCase();
-        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+const sortedData = useMemo(() => {
+  let sortableItems = [...filteredUserTable];
+  if (sortConfig.key !== null) {
+    sortableItems.sort((a, b) => {
+      let aVal, bVal;
 
-        if (aVal < bVal) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (aVal > bVal) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableItems;
-  }, [filteredUserTable, sortConfig]);
+      // ✅ khusus untuk field nested Resources
+      if (sortConfig.key === "Resources") {
+        aVal = a.resource?.Name || "";
+        bVal = b.resource?.Name || "";
+      } else {
+        aVal = a[sortConfig.key];
+        bVal = b[sortConfig.key];
+      }
 
+      // Handle null/undefined
+      if (aVal === null || aVal === undefined) aVal = "";
+      if (bVal === null || bVal === undefined) bVal = "";
+
+      // Case-insensitive untuk string
+      if (typeof aVal === "string") aVal = aVal.toLowerCase();
+      if (typeof bVal === "string") bVal = bVal.toLowerCase();
+
+      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
+  return sortableItems;
+}, [filteredUserTable, sortConfig]);  
   // 🔹 Calculate total pages
   const totalPages = Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
 
@@ -4008,6 +4052,12 @@ export const User_table = () => {
                 onClick={() => handleSort("Role")}
               >
                 Role {getSortIcon("Role")}
+              </th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Resources")}
+              >
+                Resources {getSortIcon("Resources")}
               </th>
               {/* Tambahkan kolom Phone di sini */}
               <th
@@ -5684,21 +5734,19 @@ export const SymptomCodeTable = () => {
 
   return (
     <div className="p-6">
-      <h2 className="mb-6 text-2xl font-bold">Symptom Code Table</h2>
+      <h2 className="mb-6 text-xl font-bold">Symptom Code Table</h2>
 
       {/* Search + Add Button (row 1) */}
-      <div className="flex flex-col items-center justify-between gap-4 mb-4 sm:flex-row">
-        <div className="flex w-full gap-2">
-          <input
-            type="text"
-            placeholder="🔍 Search symptom codes..."
-            className="w-full p-2 border rounded-lg shadow-sm sm:w-1/3 focus:ring-2 focus:ring-blue-400"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+    <div className="flex flex-wrap items-center gap-2 mb-4">
+      <input
+        type="text"
+        placeholder="🔍 Search symptom codes..."
+        className="w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
         <SymptomCodeAdd onUpdate={fetchSymptomCodeData} />
-      </div>
+    </div>
 
       {loading && <p>Loading data...</p>}
       {error && <p className="text-red-500">{error}</p>}
@@ -6732,6 +6780,299 @@ export const BookingDetailsTable = () => {
   );
 };
 
+export const BookingStatusTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [bookingStatusData, setBookingStatusData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
+  const navigate = useNavigate();
+
+  const [sortConfig, setSortConfig] = useState({
+    key: "Description",
+    direction: "asc",
+  });
+
+  // 🔍 Debounce pencarian
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // 🚀 Fetch data
+  const fetchBookingStatus = async () => {
+    Swal.fire({
+      title: "Memuat Data Booking Status...",
+      text: "Mohon tunggu sebentar...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/booking-status");
+      if (response.data.success) {
+        setBookingStatusData(response.data.data);
+      } else {
+        setError("Failed to fetch Booking Status data");
+      }
+    } catch (err) {
+      console.error("Error fetching BookingStatus Table:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+      Swal.close();
+    }
+  };
+
+  useEffect(() => {
+    fetchBookingStatus();
+  }, []);
+
+  // 📌 Sorting handler
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+  };
+
+  // 🔍 Filter + search
+  const filteredData = useMemo(() => {
+    return bookingStatusData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    );
+  }, [bookingStatusData, debouncedSearchTerm]);
+
+  // 📊 Sorting data
+  const sortedData = useMemo(() => {
+    const sorted = [...filteredData];
+    if (sortConfig.key) {
+      sorted.sort((a, b) => {
+        const aValue = a[sortConfig.key] ?? "";
+        const bValue = b[sortConfig.key] ?? "";
+        if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return sorted;
+  }, [filteredData, sortConfig]);
+
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
+  const currentData = sortedData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown size={16} />;
+    return sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />;
+  };
+
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
+
+  return (
+    <div className="p-6">
+      <h2 className="text-xl font-bold mb-4">📋 Booking Status Table</h2>
+
+      {/* 🔍 Search + Add */}
+      <div className="flex flex-wrap items-center gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="🔍 Search..."
+          className="w-full sm:w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+
+        <BookingStatusAdd onUpdate={fetchBookingStatus} />
+      </div>
+
+      {loading && <p>Loading data...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* 📑 Table */}
+      <div className="bg-white rounded-2xl shadow overflow-auto max-h-[600px] relative">
+        <table className="w-full border-collapse">
+          <thead className="sticky top-0 bg-gray-100 z-10">
+            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
+              <th className="p-3 text-sm font-semibold text-center border">No</th>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("BookingStatusId")}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  Booking StatusID {getSortIcon("BookingStatusId")}
+                </div>
+              </th>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("Description")}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  Description {getSortIcon("Description")}
+                </div>
+              </th>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("CreatedOn")}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  Created At {getSortIcon("CreatedOn")}
+                </div>
+              </th>
+              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.length > 0 ? (
+              currentData.map((item, i) => (
+                <tr
+                  key={item.BookingStatusId}
+                  className={`hover:bg-gray-100 text-center text-sm ${
+                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  }`}
+                >
+                  <td className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + i + 1}
+                  </td>
+                  <td className="p-3 border">
+                    {item.BookingStatusId}
+                  </td>
+                  <td className="p-3 border">{item.Description}</td>
+                  <td className="p-3 border">
+                    {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
+                  <td className="border p-2 flex space-x-2 justify-center">
+                    <BookingStatusEdit
+                      BookingStatusId={item.BookingStatusId}
+                      onUpdate={fetchBookingStatus}
+                    />
+                    <BookingStatusDelete
+                      BookingStatusId={item.BookingStatusId}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchBookingStatus}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="p-4 text-center text-gray-500">
+                  No entries found 🚫
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* 🔻 Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> entries
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const RepairClassCodeTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   // State untuk menunda pencarian (debounce)
@@ -7360,16 +7701,13 @@ export const ServiceCatalogTable = () => {
 
 export const OTCCodeTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  // State untuk menunda pencarian (debounce)
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  // Default 10 item per halaman, dapat diubah
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [otcCodeData, setOTCCodeData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // State untuk input "Go to page"
   const [goToPageInput, setGoToPageInput] = useState("");
   const navigate = useNavigate();
 
@@ -7379,7 +7717,10 @@ export const OTCCodeTable = () => {
     direction: "asc",
   });
 
-  // Efek untuk menunda (debounce) pencarian selama 500ms
+  // ✅ state baru untuk filter WarrantyCondition
+  const [warrantyFilter, setWarrantyFilter] = useState("all");
+
+  // Debounce
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -7420,7 +7761,6 @@ export const OTCCodeTable = () => {
     fetchOTCCode();
   }, []);
 
-  // handle sorting dengan useMemo untuk performa lebih baik
   const handleSort = (key) => {
     setSortConfig((prev) => {
       if (prev.key === key) {
@@ -7430,14 +7770,19 @@ export const OTCCodeTable = () => {
     });
   };
 
-  // filter & sort
+  // ✅ Filter by search + warranty condition
   const filteredData = useMemo(() => {
-    return otcCodeData.filter((item) =>
-      Object.values(item).some((value) =>
-        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    return otcCodeData
+      .filter((item) =>
+        Object.values(item).some((value) =>
+          value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        )
       )
-    );
-  }, [otcCodeData, debouncedSearchTerm]);
+      .filter((item) => {
+        if (warrantyFilter === "all") return true;
+        return item.WarrantyCondition === warrantyFilter;
+      });
+  }, [otcCodeData, debouncedSearchTerm, warrantyFilter]);
 
   const sortedData = useMemo(() => {
     const sorted = [...filteredData];
@@ -7445,7 +7790,7 @@ export const OTCCodeTable = () => {
       sorted.sort((a, b) => {
         const aValue = a[sortConfig.key] ?? "";
         const bValue = b[sortConfig.key] ?? "";
-        
+
         if (aValue < bValue) {
           return sortConfig.direction === "asc" ? -1 : 1;
         }
@@ -7464,7 +7809,6 @@ export const OTCCodeTable = () => {
     currentPage * itemsPerPage
   );
 
-  // function ambil icon sort
   const getSortIcon = (key) => {
     if (sortConfig.key !== key) return <ArrowUpDown size={16} />;
     return sortConfig.direction === "asc" ? (
@@ -7474,7 +7818,6 @@ export const OTCCodeTable = () => {
     );
   };
 
-  // Fungsi untuk menangani "Go to page"
   const handleGoToPage = (e) => {
     e.preventDefault();
     const page = Number(goToPageInput);
@@ -7486,7 +7829,7 @@ export const OTCCodeTable = () => {
     <div className="p-6">
       <h2 className="text-xl font-bold mb-4">📊 OTC Codes Table</h2>
 
-      {/* Kontainer untuk Search dan Tombol Add yang sejajar dan sama tinggi */}
+      {/* 🔍 Search + Add + Filter Warranty */}
       <div className="flex flex-wrap items-center gap-4 mb-4">
         <input
           type="text"
@@ -7495,7 +7838,21 @@ export const OTCCodeTable = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {/* OTCAdd akan sejajar dengan input berkat flexbox */}
+
+        {/* ✅ Filter WarrantyCondition */}
+        <select
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={warrantyFilter}
+          onChange={(e) => {
+            setWarrantyFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="all">All Warranty</option>
+          <option value="InWarranty">In Warranty</option>
+          <option value="OutWarranty">Out Warranty</option>
+        </select>
+
         <OTCAdd onUpdate={fetchOTCCode} />
       </div>
 
@@ -7519,6 +7876,14 @@ export const OTCCodeTable = () => {
                   Description {getSortIcon("Description")}
                 </div>
               </th>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("WarrantyCondition")}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  Warranty Condition {getSortIcon("WarrantyCondition")}
+                </div>
+              </th>
               <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("CreatedOn")}>
                 <div className="flex items-center justify-center gap-1">
                   Created At {getSortIcon("CreatedOn")}
@@ -7538,6 +7903,9 @@ export const OTCCodeTable = () => {
                     {item.OTCCode}
                   </td>
                   <td className="p-3 border">{item.Description}</td>
+                  <td className="p-3 border">
+                    {item.WarrantyCondition ? item.WarrantyCondition : "—"}
+                  </td>
                   <td className="p-3 border">
                     {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
                       year: "numeric",

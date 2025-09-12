@@ -911,20 +911,31 @@ import { toast } from "sonner";
 
 
 function GenericSelector({ 
-  value, 
+  value = null, 
   onChange, 
   endpoint, 
   labelKey, 
   valueKey, 
-  placeholder, 
+  placeholder = "Search...", 
   label,
   helperText 
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  const [open, setOpen] = useState(false);
+
+  // ✅ Sync query dengan value dari luar (misalnya saat edit form)
+  useEffect(() => {
+    if (value && typeof value === "object") {
+      setQuery(value[labelKey] || "");
+    }
+  }, [value, labelKey]);
 
   useEffect(() => {
-    if (query.length < 2) return;
+    if (query.length < 2) {
+      setResults([]);
+      return;
+    }
     const fetchData = async () => {
       try {
         const res = await ApiCustomer.get(`${endpoint}?search=${query}`);
@@ -936,30 +947,44 @@ function GenericSelector({
     fetchData();
   }, [query, endpoint]);
 
+  const handleSelect = (item) => {
+    onChange(item);
+    setQuery(item[labelKey]); // tampilkan label di input
+    setOpen(false); // tutup dropdown setelah pilih
+  };
+
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-gray-700">{label}</label>
-      <Command className="border rounded-lg">
-        <input
-          className="w-full p-2 border-b"
-          placeholder={placeholder}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <CommandGroup>
+    <div className="flex flex-col gap-1 relative">
+      {label && <label className="text-sm font-medium text-gray-700">{label}</label>}
+      
+      <input
+        className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        placeholder={placeholder}
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+      />
+
+      {/* Dropdown Results */}
+      {open && results.length > 0 && (
+        <div className="absolute top-full mt-1 w-full bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto z-50">
           {results.map((item) => (
-            <CommandItem
+            <div
               key={item[valueKey]}
-              onSelect={() => {
-                onChange(item);
-                setQuery(item[labelKey]); // tampilkan label di input
-              }}
+              onClick={() => handleSelect(item)}
+              className={`px-3 py-2 cursor-pointer hover:bg-blue-100 ${
+                value?.[valueKey] === item[valueKey] ? "bg-blue-50 font-medium" : ""
+              }`}
             >
-              {item[labelKey]} ({item[valueKey]})
-            </CommandItem>
+              {item[labelKey]} <span className="text-gray-500 text-xs">({item[valueKey]})</span>
+            </div>
           ))}
-        </CommandGroup>
-      </Command>
+        </div>
+      )}
+
       {helperText && <p className="text-xs text-gray-500">{helperText}</p>}
     </div>
   );
@@ -969,15 +994,15 @@ export function AssetEdit({ assetId, onUpdate }) {
   const [asset, setAsset] = useState(null);
   const [formData, setFormData] = useState({
     SerialNumber: "",
-    ProductName: "",
-    ProductNumber: "",
-    ProductLine: "",
-    SiteAccountID: "",
-    ContactID: "",
+    Product: null,       // object { ProductNumber, ProductName, ProductLine }
+    SiteAccount: null,   // object { SiteAccountID, Company }
+    Contact: null,       // object { ContactID, FirstName }
+    Warranty: null,      // object { OTCCode, Description }
+    EOW_Date: "",
   });
   const [isOpen, setIsOpen] = useState(false);
 
-  const requiredFields = ["SerialNumber", "ProductName", "ProductNumber", "ProductLine"];
+  const requiredFields = ["SerialNumber", "Product"];
 
   const fetchAsset = async () => {
     if (!assetId) return;
@@ -985,13 +1010,14 @@ export function AssetEdit({ assetId, onUpdate }) {
       const response = await ApiCustomer.get(`/api/asset-information/${assetId}`);
       const data = response.data.data;
       setAsset(data);
+
       setFormData({
         SerialNumber: data?.SerialNumber || "",
-        ProductName: data?.product_information?.ProductName || "",
-        ProductNumber: data?.ProductNumber || "",
-        ProductLine: data?.product_information?.ProductLine || "",
-        SiteAccountID: data?.SiteAccountID || "",
-        ContactID: data?.ContactID || "",
+        Product: data?.product_information || null,
+        SiteAccount: data?.site_account || null,
+        Contact: data?.contact_information || null,
+        Warranty: data?.WarrantyOTCCode || null,
+        EOW_Date: data?.EOW_Date ? data.EOW_Date.split("T")[0] : "",
       });
     } catch (error) {
       console.error("Error fetching asset information:", error);
@@ -999,22 +1025,10 @@ export function AssetEdit({ assetId, onUpdate }) {
   };
 
   useEffect(() => {
-    if (assetId && isOpen) fetchAsset();
-  }, [assetId, isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setFormData({
-        SerialNumber: "",
-        ProductName: "",
-        ProductNumber: "",
-        ProductLine: "",
-        SiteAccountID: "",
-        ContactID: "",
-      });
-      setAsset(null);
+    if (isOpen && assetId) {
+      fetchAsset();
     }
-  }, [isOpen]);
+  }, [isOpen, assetId]);
 
   const handleChange = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -1036,7 +1050,16 @@ export function AssetEdit({ assetId, onUpdate }) {
     }
 
     try {
-      await ApiCustomer.patch(`/api/asset-information/${assetId}`, formData);
+      const payload = {
+        SerialNumber: formData.SerialNumber,
+        ProductNumber: formData.Product?.ProductNumber || null,
+        SiteAccountID: formData.SiteAccount?.SiteAccountID || null,
+        ContactID: formData.Contact?.ContactID || null,
+        Warranty_Status: formData.Warranty?.OTCCode || null,
+        EOW_Date: formData.EOW_Date || null,
+      };
+
+      await ApiCustomer.patch(`/api/asset-information/${assetId}`, payload);
 
       Swal.fire({
         icon: "success",
@@ -1069,6 +1092,7 @@ export function AssetEdit({ assetId, onUpdate }) {
           <Pencil className="w-4 h-4" />
         </Button>
       </DialogTrigger>
+
       <DialogContent className="max-w-lg w-full">
         <DialogHeader>
           <DialogTitle>Edit Asset Information</DialogTitle>
@@ -1086,48 +1110,61 @@ export function AssetEdit({ assetId, onUpdate }) {
               onChange={(e) => handleChange("SerialNumber", e.target.value)}
               placeholder="Enter Serial Number"
             />
-            <p className="text-xs text-gray-500">Isi dengan nomor unik asset</p>
           </div>
 
           {/* Product */}
           <GenericSelector
-            value={formData.ProductNumber}
-            onChange={(p) => {
-              handleChange("ProductNumber", p.ProductNumber);
-              handleChange("ProductName", p.ProductName);
-              handleChange("ProductLine", p.ProductLine);
-            }}
+            value={formData.Product}
+            onChange={(p) => handleChange("Product", p)}
             endpoint="/api/product-information"
             labelKey="ProductName"
             valueKey="ProductNumber"
             placeholder="Search product..."
             label="Product*"
-            helperText="Minimal 2 huruf untuk mencari produk"
           />
 
           {/* Site Account */}
           <GenericSelector
-            value={formData.SiteAccountID}
-            onChange={(s) => handleChange("SiteAccountID", s.SiteAccountID)}
+            value={formData.SiteAccount}
+            onChange={(s) => handleChange("SiteAccount", s)}
             endpoint="/api/site_account"
             labelKey="Company"
             valueKey="SiteAccountID"
             placeholder="Search site account..."
             label="Site Account"
-            helperText="Minimal 2 huruf untuk mencari site account"
           />
 
           {/* Contact */}
           <GenericSelector
-            value={formData.ContactID}
-            onChange={(c) => handleChange("ContactID", c.ContactID)}
+            value={formData.Contact}
+            onChange={(c) => handleChange("Contact", c)}
             endpoint="/api/contact-information"
             labelKey="FirstName"
             valueKey="ContactID"
             placeholder="Search contact..."
             label="Contact"
-            helperText="Minimal 2 huruf untuk mencari contact"
           />
+
+          {/* Warranty Status */}
+          <GenericSelector
+            value={formData.Warranty}
+            onChange={(w) => handleChange("Warranty", w)}
+            endpoint="/api/otc-code"
+            labelKey="Description"
+            valueKey="OTCCode"
+            placeholder="Select warranty status..."
+            label="Warranty Status"
+          />
+
+          {/* End of Warranty Date */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">End of Warranty Date</label>
+            <Input
+              type="date"
+              value={formData.EOW_Date}
+              onChange={(e) => handleChange("EOW_Date", e.target.value)}
+            />
+          </div>
         </div>
 
         <DialogFooter className="flex justify-end gap-2">
@@ -1513,6 +1550,9 @@ export function ContactEdit({ contactID, onUpdate }) {
   const [stateProvince, setStateProvince] = useState("");
   const [country, setCountry] = useState("");
   const [zipPostalCode, setZipPostalCode] = useState("");
+  const [picName, setPicName] = useState("");
+  const [picEmail, setPicEmail] = useState("");
+  const [picPhone, setPicPhone] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   const fetchContact = async () => {
@@ -1536,6 +1576,9 @@ export function ContactEdit({ contactID, onUpdate }) {
       setStateProvince(data?.StateProvince || "");
       setCountry(data?.Country || "");
       setZipPostalCode(data?.ZipPostalCode || "");
+      setPicName(data?.PIC_Name || "");
+      setPicEmail(data?.PIC_Email || "");
+      setPicPhone(data?.PIC_Phone || "");
     } catch (error) {
       console.error("Error fetching contact information:", error);
     }
@@ -1578,6 +1621,9 @@ export function ContactEdit({ contactID, onUpdate }) {
         StateProvince: stateProvince,
         Country: country,
         ZipPostalCode: zipPostalCode,
+        PIC_Name: picName,
+        PIC_Email: picEmail,
+        PIC_Phone: picPhone,
       });
 
       Swal.fire({
@@ -1685,6 +1731,18 @@ export function ContactEdit({ contactID, onUpdate }) {
             <div>
               <label className="text-sm font-medium">Zip / Postal Code *</label>
               <Input value={zipPostalCode} onChange={(e) => setZipPostalCode(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">PIC Name</label>
+              <Input value={picName} onChange={(e) => setPicName(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">PIC Email</label>
+              <Input value={picEmail} onChange={(e) => setPicEmail(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">PIC Phone</label>
+              <Input value={picPhone} onChange={(e) => setPicPhone(e.target.value)} />
             </div>
           </div>
         </div>
@@ -6694,7 +6752,7 @@ export function SymptomCodeAdd({ onUpdate }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="mb-4 rounded-sm h-11">Add Symptom Code</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Add Symptom Code</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -6987,7 +7045,7 @@ export function BookingsAdd({ onUpdate }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="mb-4 rounded-sm h-11">Add Booking</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Add Booking</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -7798,6 +7856,265 @@ export function BookingDetailsDelete({ BookingDetailId, onUpdate }) {
   );
 }
 
+export function BookingStatusAdd({ onUpdate }) {
+  const [formData, setFormData] = useState({
+    Description: "",
+  });
+
+  // Input Handler
+  const handlerInput = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  // Submit Handler
+  const handlerSubmit = async () => {
+    const { Description } = formData;
+
+    if (!Description) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in Description before submitting.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post("/api/booking-status", formData);
+      console.log("Success:", response.data);
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Booking Status berhasil disimpan.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        if (onUpdate) onUpdate(); // ✅ refresh tabel, bukan reload halaman
+        setFormData({ Description: "" }); // reset form
+      });
+    } catch (err) {
+      console.error("Error saving Booking Status:", err);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to save Booking Status. Please try again.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">
+          Booking Status Add
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Booking Status</DialogTitle>
+          <DialogDescription>
+            Fields marked with * are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>Description *</Label>
+          <Input
+            type="text"
+            id="Description"
+            value={formData.Description}
+            onChange={handlerInput}
+          />
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handlerSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingStatusEdit({ BookingStatusId, onUpdate }) {
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    BookingStatusId: "",
+    Description: "",
+  });
+
+  // ✅ ambil detail booking status saat modal dibuka
+  useEffect(() => {
+    if (!open) return;
+    const fetchDetail = async () => {
+      try {
+        const res = await ApiCustomer.get(`/api/booking-status/${BookingStatusId}`);
+        const data = res.data.data;
+        setFormData({
+          BookingStatusId: data.BookingStatusId,
+          Description: data.Description,
+        });
+      } catch (err) {
+        console.error("Error fetch booking status:", err);
+        Swal.fire({ icon: "error", title: "Error", text: "Failed to load data" });
+      }
+    };
+
+    fetchDetail();
+  }, [open, BookingStatusId]);
+
+  const handlerInput = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handlerSave = async () => {
+    if (!formData.Description) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete",
+        text: "Description is required",
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.put(`/api/booking-status/${formData.BookingStatusId}`, {
+        Description: formData.Description,
+      });
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: "Booking Status updated successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      setOpen(false);
+      onUpdate?.();
+    } catch (err) {
+      console.error("Error update:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Update failed, please try again.",
+      });
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Booking Status</DialogTitle>
+          <DialogDescription>Update booking status description below.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>Description *</Label>
+          <Input
+            type="text"
+            id="Description"
+            value={formData.Description}
+            onChange={handlerInput}
+          />
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handlerSave}>Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function BookingStatusDelete({ BookingStatusId, isModalOpen, setIsModalOpen, onUpdate }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "BookingStatus ini akan dihapus dan tidak dapat dikembalikan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/booking-status/${BookingStatusId}`);
+
+        if (response.status === 409 || response.data?.success === false) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data?.message || "BookingStatus ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'BookingStatus berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          setIsModalOpen(false);
+          if (onUpdate) {
+            onUpdate();
+          }
+          window.location.reload();
+        });
+      } catch (error) {
+        if (error.response?.status === 409) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data?.message || "BookingStatus tidak dapat dihapus karena memiliki relasi.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus BookingStatus. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
+    }
+  };
+
+  return (
+    <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+      <Trash />
+    </Button>
+  );
+}
+
 export function RepairClassCodeAdd() {
   const [formData, setFormData] = useState({
     Code: "",
@@ -8498,7 +8815,8 @@ export function ServiceCatalogDelete({ ServiceCatalogID, onUpdate }) {
 export function OTCAdd({ onUpdate }) {
   const [formData, setFormData] = useState({
     OTCCode: "",
-    Description: ""
+    Description: "",
+    WarrantyCondition: "InWarranty",
   });
 
   const handleInputChange = (e) => {
@@ -8510,7 +8828,7 @@ export function OTCAdd({ onUpdate }) {
   };
 
   const handleSubmit = async () => {
-    if (!formData.OTCCode || !formData.Description) {
+    if (!formData.OTCCode || !formData.Description || !formData.WarrantyCondition) {
       Swal.fire({
         title: "Incomplete Data",
         text: "All fields are required.",
@@ -8565,6 +8883,16 @@ export function OTCAdd({ onUpdate }) {
           <Label>Description</Label>
           <Input id="Description" value={formData.Description} onChange={handleInputChange} />
 
+          <Label>Warranty Condition *</Label>
+          <select
+            id="WarrantyCondition"
+            value={formData.WarrantyCondition}
+            onChange={handleInputChange}
+            className="w-full border rounded p-2"
+          >
+            <option value="InWarranty">In Warranty</option>
+            <option value="OutWarranty">Out Warranty</option>
+          </select>
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit}>Add</Button>
@@ -8578,6 +8906,7 @@ export function OTCEdit({ OTCCode, onUpdate }) {
   const [formData, setFormData] = useState({
     OTCCode: "",
     Description: "",
+    WarrantyCondition: "",
   });
   const [open, setOpen] = useState(false);
 
@@ -8588,6 +8917,7 @@ export function OTCEdit({ OTCCode, onUpdate }) {
         setFormData({
           OTCCode: res.data.data.OTCCode,
           Description: res.data.data.Description,
+          WarrantyCondition: res.data.data.WarrantyCondition || "",
         });
       } else {
         throw new Error("Failed to load data");
@@ -8668,6 +8998,18 @@ export function OTCEdit({ OTCCode, onUpdate }) {
 
           <Label>Description</Label>
           <Input id="Description" value={formData.Description} onChange={handleInputChange} />
+
+          <Label>Warranty Condition</Label>
+          <select
+            id="WarrantyCondition"
+            value={formData.WarrantyCondition}
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded-md"
+          >
+            <option value="">-- Select Condition --</option>
+            <option value="InWarranty">In Warranty</option>
+            <option value="OutWarranty">Out of Warranty</option>
+          </select>
         </div>
 
         <DialogFooter>
