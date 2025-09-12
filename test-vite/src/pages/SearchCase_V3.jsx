@@ -28,14 +28,8 @@ import { Loader2, Plus, Trash2, Image as ImageIcon, Search, Building, User, File
 import { format } from "date-fns";
 import { ComboboxDemo, SearchCommandBlock, SelectBarState } from "@/components/sc-select";
 import { toast } from "sonner";
-import { formatDateForInput,formatDate } from "@/lib/utils";
+import { formatDateForInput } from "@/lib/utils";
 
-/**
- * @fileoverview Create Case page (SearchCase_V3)
- * A single-page flow to create a Case with auto-fill from Asset, Contact, Company, and Product.
- * Includes debounced search helpers, EMSIFA region lookups, accessory and photo handling,
- * and final payload submission to `/api/case-information`.
- */
 
 
 // ----------------------------
@@ -90,6 +84,7 @@ import { formatDateForInput,formatDate } from "@/lib/utils";
  * @property {string|null} [StateProvince]
  * @property {string} Country
  * @property {string} ZipPostalCode
+ * @property {string} NPWP
  */
 
 /**
@@ -98,44 +93,6 @@ import { formatDateForInput,formatDate } from "@/lib/utils";
  * @property {string} name
  * @property {string} note
  * @property {string} code
- */
-
-/**
- * @typedef {Object} ProductType
- * @property {number} ProductTypeID
- * @property {string} ProductTower
- * @property {string} ProductGroup
- * @property {string} ProductType
- */
-
-/**
- * Province/City option used by EMSIFA helpers and SelectBarState.
- * @typedef {Object} ProvinceOption
- * @property {string} id
- * @property {string} name
- */
-
-/**
- * Payload sent to create a Case.
- * @typedef {Object} CaseCreatePayload
- * @property {number} AssetID
- * @property {number} ContactID
- * @property {number|null} SiteAccountID
- * @property {string} CaseSubject
- * @property {string} CaseType
- * @property {boolean} KCI_Flag
- * @property {"Email"|"Phone"|"WalkIn"} IncomingChannel
- * @property {"Open"|"Close"|string} CaseStatus
- * @property {"Low"|"Medium"|"Important"|string} CasePriority
- * @property {string} CustomerSeverity
- * @property {string|null} CaseClosedDate
- * @property {number|null} CaseNote
- * @property {number|null} SymptomCode
- * @property {string|null} CaseResolution
- * @property {number} CreatedBy
- * @property {string} ProblemDescription
- * @property {string} CaseNoteProduct
- * @property {AccessoryRow[]} [accessories]
  */
 
 
@@ -243,9 +200,7 @@ function getUserFromTokenSafe() {
 // ----------------------------
 
 /**
- * NewCaseForm - one page create-case form with auto-fill from asset/customer/product.
- * Manages local state for lookups, conditional auto-fill behaviors, and submit flow.
- * @component
+ * NewCaseForm component - one page create-case form with auto-fill from asset/customer/product.
  * @returns {JSX.Element}
  */
 export default function NewCaseForm() {
@@ -334,6 +289,7 @@ export default function NewCaseForm() {
   const [companyCity, setCompanyCity] = useState("");
   const [companyCountry, setCompanyCountry] = useState("");
   const [companyZipPostalCode, setCompanyZipPostalCode] = useState("");
+  const [companyNPWP, setCompanyNPWP] = useState("");
 
   const [provCompany, setProvCompany] = useState([]);
   const [cityCompany, setCityCompany] = useState([]);
@@ -533,12 +489,6 @@ export default function NewCaseForm() {
   }, [productTower, productGroup]);
 
   // Fetch product types from API
-  /**
-   * Fetch and populate Product Types based on tower and group.
-   * @param {string} tower
-   * @param {string} group
-   * @returns {Promise<void>}
-   */
   const fetchProductTypes = async (tower, group) => {
     try {
       const response = await ApiCustomer.get(`/api/product-type`, {
@@ -600,6 +550,7 @@ export default function NewCaseForm() {
 
       setCompanyCountry(cm.Country);
       setCompanyZipPostalCode(cm.ZipPostalCode);
+      setCompanyNPWP(cm.NPWP)
     }
   }, [selectedCompany])
 
@@ -684,38 +635,8 @@ export default function NewCaseForm() {
     })();
   }, [selectedAsset]);
 
-  // Enforce rerepair if another open case exists for the same asset
-  const [mustRerepair, setMustRerepair] = useState(false);
-  const [lastCase, setLastCase] = useState([]);
-  
-  // Function to check rerepair count in the last 90 days
-  const getReRepairCount = async (assetID) => {
-    try {
-      const res = await ApiCustomer.get(`/api/case-information`, {
-        params: {
-          AssetID: assetID,
-          CaseStatus: "Open", // atau ambil semua status, tergantung kebutuhan
-        },
-      });
-
-      const allCases = res.data?.data ?? [];
-
-      const now = new Date();
-      const past90Days = new Date(now);
-      past90Days.setDate(now.getDate() - 90);
-
-      const count = allCases.filter((c) => {
-        const createdDate = new Date(c.caseinformation.CreatedOn); 
-        return createdDate >= past90Days && createdDate <= now;
-      }).length;
-
-      return count;
-    } catch (e) {
-      console.error("Failed to fetch rerepair count", e);
-      return 0;
-    }
-  };
-
+  // Enforce DOA case-type if another open case exists for the same asset
+  const [mustDOA, setMustDOA] = useState(false);
   useEffect(() => {
     (async () => {
       if (!selectedAsset) return;
@@ -724,26 +645,12 @@ export default function NewCaseForm() {
           params: { CaseStatus: "Open" },
         });
         const list = res.data?.data ?? [];
-
-        // Filter berdasarkan asset yang dipilih
-        const openCasesForAsset = list.filter(
-          (c) => c?.caseinformation?.AssetID === selectedAsset.AssetID
-        );
-        if (openCasesForAsset.length > 0) {
-          // Urutkan berdasarkan tanggal dibuat (pastikan pakai field yang sesuai)
-          const sortedCases = openCasesForAsset.sort((a, b) =>
-            new Date(b.caseinformation.CreatedOn) - new Date(a.caseinformation.CreatedOn)
-          );
-
-          const latestCase = sortedCases[0]; // Ambil yang terbaru
-
-          console.log("Has Open Case: ", latestCase);
-
-          setLastCase(latestCase); // Simpan ke state
-          setMustRerepair(true);
+        const hasOpen = list.some((c) => c?.caseinformation?.AssetID === selectedAsset.AssetID);
+        if (hasOpen) {
+          setMustDOA(true);
+          setCaseType("DOA");
         } else {
-          setMustRerepair(false);
-          setLastCase([]); // Clear last case jika tidak ada case terbuka
+          setMustDOA(false);
         }
       } catch (e) {
         console.error("Check open case failed", e);
@@ -976,7 +883,6 @@ export default function NewCaseForm() {
   /**
    * Create a new case using selected asset/contact and other form fields.
    * Performs optional photo upload and action log creation.
-   * @returns {Promise<void>}
    */
   const onCreateCase = async () => {
     if ((!selectedAsset && !isNewAsset) || (!selectedContact && !isNewContact)) {
@@ -1034,7 +940,6 @@ export default function NewCaseForm() {
       );
 
       let assetId = selectedAsset?.AssetID;
-      let assetSN = selectedAsset?.SerialNumber;
       let productId = selectedProduct?.ProductNumber || productNo;
       let companyId = selectedCompany?.SiteAccountID;
       let contactId = selectedContact?.ContactID;
@@ -1063,7 +968,8 @@ export default function NewCaseForm() {
             City: companyCity.name, // --> emsifa
             StateProvince: companyStateProvince.name, // --> emsifa
             Country: companyCountry,
-            ZipPostalCode: companyZipPostalCode
+            ZipPostalCode: companyZipPostalCode,
+            NPWP: companyNPWP
           })
           companyId = companyRes.data?.data?.SiteAccountID;
         };
@@ -1130,7 +1036,6 @@ export default function NewCaseForm() {
 
       
 
-      /** @type {CaseCreatePayload} */
       const payload = {
         AssetID: assetId,
         ContactID: contactId,
@@ -1202,25 +1107,6 @@ export default function NewCaseForm() {
         })
       } catch (error) {
         console.warn("Case Note failed, ", error)
-      }
-      
-      //if rerepair, add note
-      if(mustRerepair){
-        try {
-          const rerepairCount = await getReRepairCount(selectedAsset.AssetID);
-          await ApiCustomer.post("/api/case-information/case-notes",{
-            CaseID: `${caseId}`,
-            LogTye: 'NotesLog',
-            ActionType: 'Initial',
-            VisibleExternally: false,
-            MinutesSpent: 0,
-            Note: `[WARNING]! SN# ${assetSN} has been rerepair ${rerepairCount} times in the last 90 day. Last case ID : ${lastCase.caseinformation.CaseID} received on ${formatDate(lastCase.caseinformation.CreatedOn)}, closed on .`,
-            CreatedBy: user?.id
-          })
-        } catch (e) {
-          console.warn("Case Note failed, ", e)
-          
-        }
       }
       // console.log(user);
 
@@ -1444,7 +1330,7 @@ export default function NewCaseForm() {
             </div>
             <div>
               <Label>Case Type <Label className="text-red-600">*</Label></Label>
-              <Select value={caseType} onValueChange={setCaseType}>
+              <Select value={caseType} onValueChange={setCaseType} disabled={mustDOA}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Case Type" />
                 </SelectTrigger>
@@ -1454,12 +1340,9 @@ export default function NewCaseForm() {
                   ))}
                 </SelectContent>
               </Select>
-              {mustRerepair && (
-                <div>
-                  <p className="text-xs text-amber-600 mt-1">Ada case OPEN untuk asset ini. Case akan berubah status menjadi re repair</p>
-                  <p>Last open case ID: {lastCase.caseinformation.CaseID}</p>
-                  <p>Case created at: {formatDate(lastCase.caseinformation.CreatedOn)}</p>
-                </div>
+              {mustDOA && (
+                <p className="text-xs text-amber-600 mt-1">Ada case OPEN untuk asset ini. Case Type otomatis DOA dan tidak
+                  bisa diubah.</p>
               )}
             </div>
             <div className="md:col-span-3">
@@ -1717,6 +1600,10 @@ export default function NewCaseForm() {
                       <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
                       <Input className="col-span-2" value={companyZipPostalCode} onChange={(e) => setCompanyZipPostalCode(e.target.value)} />
                     </div>
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Label className="col-span-1">NPWP<Label className="text-red-600">*</Label></Label>
+                      <Input className="col-span-2" value={companyNPWP} onChange={(e) => setCompanyNPWP(e.target.value)} />
+                    </div>
                   </div>
                 </div>
                 )}
@@ -1866,7 +1753,7 @@ export default function NewCaseForm() {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
+              <div className="md:col-span-2">
                 <Label>Warranty Status</Label>
                 <SearchCommandBlock
                   options={warrantyOptions}

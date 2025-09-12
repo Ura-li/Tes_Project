@@ -1567,7 +1567,8 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   />
                 </CaseField>
                 <CaseField label="NPWP" lock>
-                  <Input variant="invisible" placeholder="---"  
+                  <Input variant="invisible" placeholder="---"
+                  value={dataFetchCustomerData.SiteAccount?.NPWP}  
                   />
                 </CaseField>
 

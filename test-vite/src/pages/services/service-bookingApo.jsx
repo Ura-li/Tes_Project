@@ -449,7 +449,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }}
                 />
                 {searchResultsResource.length > 0 && (
-                  <ul className="absolute z-10 w-[21em] mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg max-h-60">
+                  <ul className="absolute z-10 w-[17em] mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg max-h-60">
                     {searchResultsResource.map((res) => (
                       <li
                         key={res.ResourceId}
@@ -561,7 +561,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   </ul>
                 )}
               </CaseField>
-              <CaseField label={"Booking Status"} lock span={2} star>
+              <CaseField label={"Booking Status"} span={2} star>
                 <Input
                   variant={"invisible"}
                   value={bookingStatus}
