@@ -4712,6 +4712,7 @@ export function BtnModalsServiceCatalog({
       setLoading(false)
     }
   }
+  
   useEffect(() => {
     fetchDataServiceOffer().then((data) => {
       console.log("Data received for warrantyOffer:", data);
@@ -4763,7 +4764,7 @@ export function BtnModalsServiceCatalog({
       setPartCatalog(response.data.data)
       return response.data.data
     }catch(e){
-
+      console.error("Err :",e)
     }
   }
 
@@ -4849,114 +4850,92 @@ export function BtnModalsServiceCatalog({
 
   //createorder
   const createOrder = async () => {
+
     if (!assignApo) {
       toast.warning("APO IS NOT ASSIGN YET", {
         description: "PLEASE CHOOSE THE APO PATNER BEFORE CREATING ORDER",
         position: 'top-center'
       })
-    } else {
-    try {
-       Swal.fire({
-        title: "Creating Order...",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: () => Swal.showLoading()
-      });
-      const data = {
-        user: getUserFromToken()
-      }
 
-      let noteCreateOrderLog = '';
-      if(assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
-        noteCreateOrderLog = `[NOTICE] Order Part
+    } else {
+      try {
+        Swal.fire({
+          title: "Creating Order...",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => Swal.showLoading()
+        });
+        const data = {
+          user: getUserFromToken()
+        }
+
+        let noteCreateOrderLog = '';
+        if(assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
+          noteCreateOrderLog = `[NOTICE] Order Part
 Order Part : ${selectedPartCatalog?.[0]?.PartNumber} - ${selectedPartCatalog?.[0]?.PartDescription}
 Harga : Rp. ${selectedPartCatalog?.[0]?.Price}
 Requested to APO : ${assignApo}`;
-      }else{
-        noteCreateOrderLog = `[NOTICE] Order Part
+        }else{
+          noteCreateOrderLog = `[NOTICE] Order Part
 Order Part : ${selectedPartCatalog?.[0]?.PartNumber} - ${selectedPartCatalog?.[0]?.PartDescription}
 Requested to APO : ${assignApo}`;
-      }
-      console.log(noteCreateOrderLog);
+        }
+        console.log(noteCreateOrderLog);
 
-      const res = await ApiCustomer.post("/api/service-log/create-order", {
-        AssetID: assetForWorkOrderCreation.AssetID,
-        CaseID: caseDetails.CaseID,
-        selectedWarrantyServices,
-        selectedPartCatalog,
-        IncidentType: selected,
-        OwnerID: data.user.id,
-        assignApo: assignApo,
-        notesLog: noteCreateOrderLog
-      });
-      console.log(res)
-      // const updateLogCase = await ApiCustomer.post("/api/actionlog",{
-      //   CaseId: `${caseDetails.CaseID}`,
-      //   model: "Case",
-      //   dataOld: caseDetails.CaseStatus,
-      //   dataNew: "Part Request",
-      //   changedBy: data.user.id,
-      //   logDescription: `Edit: change status from ${caseDetails.CaseStatus} to Part Request`
-      // })
-      // const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
-      //   CaseId: `${caseDetails.CaseID}`,
-      //   ReferenceId: `${res.data.WOID}`,
-      //   model: "Work",
-      //   dataOld: "OPEN_UNSCHEDULED",
-      //   dataNew: "OPEN_UNSCHEDULED",
-      //   changedBy: data.user.id,
-      //   logDescription: `New Work Order : ${res.data.WOID}`
-      // })
-      // const updateMaterialLog = await ApiCustomer.post("/api/actionlog",{
-      //   CaseId: `${caseDetails.CaseID}`,
-      //   ReferenceId: `${res.data.MOID}`,
-      //   model: "Material Order",
-      //   dataOld: "New",
-      //   dataNew: "New",
-      //   changedBy: data.user.id,
-      //   logDescription: `New Material Order : ${res.data.MOID}`
-      // })
+        const res = await ApiCustomer.post("/api/service-log/create-order", {
+          AssetID: assetForWorkOrderCreation.AssetID,
+          CaseID: caseDetails.CaseID,
+          selectedWarrantyServices,
+          selectedPartCatalog,
+          IncidentType: selected,
+          OwnerID: data.user.id,
+          assignApo: assignApo,
+          notesLog: noteCreateOrderLog
+        });
+        console.log(res)
   
       
-      Swal.close(); 
+        Swal.close(); 
       
-       // Close loading after success
-      await Swal.fire({
-        title: "Success!",
-        text:  "Order added successfully!",
-        icon:  "success",
-        timer: 1500,
-        showConfirmButton: false,
-        allowEscapeKey: false,
-      }).then(()=>{
-        setOpen(false);
-        const WOID = res.data.WOID
-        const MOID = res.data.MOID
-        switch (serviceCatalogType) {
-          case "CSR":
-            window.open(`/app/material-order/${MOID}`, '_blank');
-            break;
+        // Close loading after success
+        await Swal.fire({
+          title: "Success!",
+          text:  "Order added successfully!",
+          icon:  "success",
+          timer: 1500,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        }).then(()=>{
+          setOpen(false);
+          const WOID = res.data.WOID
+          const MOID = res.data.MOID
+          switch (serviceCatalogType) {
+            case "CSR":
+              window.open(`/app/material-order/${MOID}`, '_blank');
+              break;
 
             case "serviceorder":
               window.open(`/app/work/${WOID}`, '_blank');  
               break;
 
-          default:
-            break;
-        }
-      });
-    } catch (err) {
-      console.error("Order Creation Failed:", err);
-      Swal.fire({
-        title: "Error!",
-        text: "Failed to create order",
-        icon: "error",
-        timer: 1500,
-        showConfirmButton: false,
-        allowEscapeKey: false,
-      });
-    }
-  };
+            default:
+              break;
+
+          }
+        });
+      } catch (err) {
+        console.error("Order Creation Failed:", err);
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to create order",
+          icon: "error",
+          timer: 1500,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        });
+      }
+    };
+  }  
   
   function renderStepContent() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -5479,7 +5458,7 @@ Requested to APO : ${assignApo}`;
   </>
   );
 }
-}
+
 
 export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen  }) {
   const [formData, setFormData] = useState({
