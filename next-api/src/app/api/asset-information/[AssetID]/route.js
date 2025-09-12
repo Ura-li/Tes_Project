@@ -55,10 +55,8 @@ export async function PATCH(request, { params }) {
     try { 
         const body = await request.json();
         const { 
-            SerialNumber, 
-            ProductName, 
+            SerialNumber,  
             ProductNumber, 
-            ProductLine, 
             SiteAccountID, 
             ContactID,
             Warranty_Status,
@@ -92,10 +90,10 @@ export async function PATCH(request, { params }) {
             data: {
                 SerialNumber,
                 ProductNumber,
-                SiteAccountID,
-                ContactID,
+                SiteAccountID: SiteAccountID ? parseInt(SiteAccountID) : null,
+                ContactID: ContactID ? parseInt(ContactID) : null,
                 Warranty_Status,
-                EOW_Date
+                EOW_Date: EOW_Date ? new Date(EOW_Date) : null
             }
         });
 

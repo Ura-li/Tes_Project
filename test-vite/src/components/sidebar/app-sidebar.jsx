@@ -139,6 +139,11 @@ export function AppSidebar({
             url: "/app/master/BookingDetails",
             icon: ClipboardCheck
           },
+                    {
+            title: "Booking Status",
+            url: "/app/master/BookingStatus",
+            icon: ClipboardCheck
+          },
           {
             title: "User",
             url: "/app/master/User_table",
