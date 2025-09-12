@@ -6793,7 +6793,7 @@ export const BookingStatusTable = () => {
   const navigate = useNavigate();
 
   const [sortConfig, setSortConfig] = useState({
-    key: "BookingStatusId",
+    key: "Description",
     direction: "asc",
   });
 
