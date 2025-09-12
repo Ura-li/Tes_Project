@@ -72,7 +72,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
   const [subkTechnicianLearnerId, setSubkTechnicianLearnerId] = useState(null);
   
 
-  const [bookingStatus, setBookingStatus] = useState("");
+  const [bookingStatusId, setBookingStatusId] = useState("");
   const [workOrderNumber, setWorkOrderNumber] = useState("");
   const [requestedDateTimeCustomer, setRequestedDateTimeCustomer] = useState("");
   const [guaranteedFixTimeCustomer, setGuaranteedFixTimeCustomer] = useState("");
@@ -142,7 +142,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
         setSubkEngineerName(data?.bookingDetails?.[0]?.engineer?.Name || "");
         setSubkEngineerId(data?.bookingDetails?.[0]?.engineer?.IDUser || "");
         
-        setBookingStatus(data?.BookingStatus || "");
+        setBookingStatusId(data?.BookingStatusId || "");
         setWorkOrderNumber(data?.workorder?.WorkOrderNumber || "");
         setRequestedDateTimeCustomer(new Date(data?.workorder?.RequestedDateTimeCustomer || ""));
         setGuaranteedFixTimeCustomer(new Date(data?.workorder?.GuaranteedFixTimeCustomer || ""));
@@ -227,7 +227,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
     try {
       await ApiCustomer.patch(`/api/bookings/${bookingid}`, {
         ChangedBy: changedBy,
-        BookingStatus: bookingStatus,
+        BookingStatusId: bookingStatusId,
         DoNotDisturb: doNotDisturb,
         CeScheduleChange: ceScheduleChange,
         ScheduleJeopardy: scheduleJeopardy,
@@ -376,6 +376,30 @@ export function ServiceBookingApo ({BookingId , woid}) {
     // canEditlg = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "lg" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "ce" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "apo";
     // canEditce = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "ce" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "apo" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "lg";
   }
+
+  const [bookingStatusOptions, setBookingStatusOptions] = useState([]);
+
+  const fetchBookingStatusOptions = async () => {
+    try {
+      const response = await ApiCustomer.get('/api/booking-status');  
+
+      const mapOptionbookingStatus = response.data.data.map((status) => ({
+        value: status.BookingStatusId,
+        label: status.Description,
+      }));
+
+      setBookingStatusOptions(mapOptionbookingStatus);
+      console.log("Booking Status Options:", mapOptionbookingStatus);
+
+    } catch (error) {
+      console.error('Error fetching booking status options:', error);
+    }
+  };
+  useEffect(() => {
+    fetchBookingStatusOptions();
+  }, []);
+
+  
 
   return (
     <div>
@@ -564,20 +588,15 @@ export function ServiceBookingApo ({BookingId , woid}) {
               <CaseField label={"Booking Status"} span={2} star>
                 <Input
                   variant={"invisible"}
-                  value={bookingStatus}
-                  onChange={(e) => setBookingStatus(e.target.value)}
+                  value={bookingStatusId}
+                  onChange={(e) => setBookingStatusId(e.target.value)}
                   hidden
                 /> 
                 <SearchCommandBlock
-                  value={bookingStatus}          
-                  onChange={setBookingStatus}
-                  options={[
-                    "A",
-                    "B",
-                    "C"
-                  ]}
+                  value={bookingStatusId}          
+                  onChange={setBookingStatusId}
+                  options={bookingStatusOptions}
                 >
-
                 </SearchCommandBlock>
               </CaseField>
               <CaseField label={"Work Order"} lock span={2}>
