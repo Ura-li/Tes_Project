@@ -1928,6 +1928,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
   // ambil product detail saat modal dibuka
   useEffect(() => {
     if (!open) return;
+
     const fetchDetail = async () => {
       try {
         const res = await ApiCustomer.get(`/api/product-information/${ProductNumber}`);
@@ -1963,15 +1964,28 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
   };
 
   const handlerSave = async () => {
-    const { ProductNumber, ProductLine, ProductName, ProductTypeID } = formDataProduct;
+    const { ProductNumber, ProductLine, ProductName, ProductTypeID, oldProductNumber } = formDataProduct;
     if (!ProductNumber || !ProductLine || !ProductName || !ProductTypeID) {
       Swal.fire({ icon: "warning", title: "Incomplete", text: "Please fill all fields" });
       return;
     }
 
     try {
-      await ApiCustomer.patch("/api/product-information", formDataProduct);
-      Swal.fire({ icon: "success", title: "Updated", text: "Product updated successfully", timer: 1200, showConfirmButton: false });
+      await ApiCustomer.patch(`/api/product-information/${oldProductNumber}`, {
+        newProductNumber: ProductNumber, // kirim product number baru
+        ProductLine,
+        ProductName,
+        ProductTypeID,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: "Product updated successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+
       setOpen(false);
       onUpdate?.();
     } catch (err) {
@@ -1983,7 +1997,9 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">Edit</Button>
+        <Button variant="outline" size="sm">
+          <Pencil />
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -1993,7 +2009,12 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
 
         <div className="space-y-3">
           <Label>Product Number *</Label>
-          <Input type="text" id="ProductNumber" value={formDataProduct.ProductNumber} onChange={handlerInputProduct} />
+          <Input
+            type="text"
+            id="ProductNumber"
+            value={formDataProduct.ProductNumber}
+            onChange={handlerInputProduct}
+          />
 
           <Label>Product Line *</Label>
           <Input type="text" id="ProductLine" value={formDataProduct.ProductLine} onChange={handlerInputProduct} />
