@@ -1531,7 +1531,8 @@ export const Assets_table = () => {
       const haystack = [a?.AssetID, a?.SerialNumber, a?.SiteAccountID, a?.ContactID,       a?.product_information?.ProductName,
       a?.product_information?.ProductLine,
       a?.ProductNumber,
-      a?.site_account?.Company, `${a?.contact_information?.FirstName ?? ""} ${a?.contact_information?.LastName ?? ""}` ,pn, pl, num]
+      a?.site_account?.Company, `${a?.contact_information?.FirstName ?? ""} ${a?.contact_information?.LastName ?? ""}` ,pn, pl, num, a?.Warranty_Status, a?.EOW_Date ? new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(a.EOW_Date))
+        : ""]
         .map(v => (v ?? "").toString().toLowerCase()).join(" ");
       return haystack.includes(q);
     });
