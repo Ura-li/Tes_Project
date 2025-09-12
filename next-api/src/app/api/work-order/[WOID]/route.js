@@ -15,7 +15,14 @@ export async function GET(request, {params}) {
         const workorder = await prisma.workorder.findUnique({
             where: { WOID: woid },
             include: {
-              caseinformation: true
+              caseinformation: true,
+              serviceCatalog: {
+                include: {
+                  warranty_services: true,
+                  servicecatalog_parts: true,
+                  asset_information: true,
+                }
+              }
             }
         });
     
