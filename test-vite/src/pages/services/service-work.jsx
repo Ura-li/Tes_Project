@@ -197,7 +197,6 @@ export const ServiceWork = () => {
         const resBooking = await ApiCustomer.get(
           `/api/bookings?WOID=${woid}`
         );
-        console.log("Bookisng Mapping : ", resBooking.data.data)
         const resOwner = await ApiCustomer.get(
           `/api/user/${workOrderData.OwnerID}`
         );

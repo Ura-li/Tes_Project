@@ -320,7 +320,7 @@ export const ServiceMoDetailApo = () => {
                       <AccordionTrigger className={"decoration-transparent cursor-pointer pl-6"}>More Details</AccordionTrigger>
                       <AccordionContent>
                         <div className="grid grid-cols-6 gap-4 p-4">
-                          <CaseField label={"Media Handling Part"} icon>
+                          <CaseField label={"Media Handling Part"} lock>
                             <Input
                               value={MODetailInput.mediaHandlingPart}
                               variant={"invisible"}
@@ -328,7 +328,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Functional Equivalence"} icon>
+                          <CaseField label={"Functional Equivalence"} lock>
                             <Input
                               value={MODetailInput.functionalEquivalence}
                               variant="invisible"
@@ -336,7 +336,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Line Number"} icon>
+                          <CaseField label={"Line Number"} lock>
                             <Input
                               value={MODetailInput.lineNumber}
                               variant={"invisible"}
@@ -384,7 +384,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Part Authorization Reason"} icon>
+                          <CaseField label={"Part Authorization Reason"} lock>
                             <Input
                               value={MODetailInput.partAuthorizationReason}
                               variant={"invisible"}
@@ -392,7 +392,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Part Authorization Detail"} icon>
+                          <CaseField label={"Part Authorization Detail"} lock>
                             <Input
                               value={MODetailInput.partAuthorizationDetail}
                               variant={"invisible"}
@@ -400,7 +400,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Functional Equivalent"} icon>
+                          <CaseField label={"Functional Equivalent"} lock>
                             <Input
                               variant={"invisible"}
                               value={MODetailInput.functionalEquivalence}
@@ -408,7 +408,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Original Part Number"} icon>
+                          <CaseField label={"Original Part Number"} lock>
                             <Input
                               variant={"invisible"}
                               value={MODetailInput.originalPartNumber}
@@ -416,7 +416,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Offered Part Number"} icon>
+                          <CaseField label={"Offered Part Number"} lock>
                             <Input
                               value={MODetailInput.offeredPartNumber}
                               variant={"invisible"}
@@ -424,7 +424,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Offered Part Description"} icon>
+                          <CaseField label={"Offered Part Description"} lock>
                             <Input
                               value={MODetailInput.offeredPartDescription}
                               variant={"invisible"}
@@ -432,7 +432,7 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Main Component"} icon>
+                          <CaseField label={"Main Component"} lock>
                             <Input
                               value={MODetailInput.mainComponent}
                               variant={"invisible"}
@@ -440,14 +440,14 @@ export const ServiceMoDetailApo = () => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Gratis Flag"} icon>
+                          <CaseField label={"Gratis Flag"} lock>
                             <Input
                               variant={"invisible"}
                               value={MODetailInput.gratisFlag ? "Yes" : "No"}
                             />
                           </CaseField>
 
-                          <CaseField label={"ATP Status"} icon>
+                          <CaseField label={"ATP Status"} lock>
                             <Input
                               variant={"invisible"}
                               value={MODetailInput.atpStatus}
