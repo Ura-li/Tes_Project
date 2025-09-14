@@ -3,14 +3,15 @@ import prisma from "../../../../../prisma/client";
 
 export async function GET(request, { params }) {
     try {
-        const workOrderID = parseInt(params.WOID);
+        const {WOID} = await params;
+        const workOrderID = WOID;
 
-        if (isNaN(workOrderID)) {
-            return NextResponse.json(
-                { success: false, message: "Invalid WorkOrder ID" },
-                { status: 400 }
-            );
-        }
+        // if (isNaN(workOrderID)) {
+        //     return NextResponse.json(
+        //         { success: false, message: "Invalid WorkOrder ID" },
+        //         { status: 400 }
+        //     );
+        // }
 
         const workorder = await prisma.workorder.findUnique({
             where: { WOID: workOrderID },
