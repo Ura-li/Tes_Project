@@ -143,7 +143,8 @@ export async function POST(request) {
                 City: data.City || "",
                 StateProvince: data.StateProvince || "",
                 Country: data.Country || "",
-                ZipPostalCode: data.ZipPostalCode || ""
+                ZipPostalCode: data.ZipPostalCode || "",
+                NPWP: data.NPWP || "",
             }
         });
 

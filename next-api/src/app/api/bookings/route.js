@@ -39,6 +39,7 @@ export async function GET(request) {
       include: {
         workorder: true,
         createdByUser: true,
+        BookingStatus: true,
         bookingDetails: {
           include: {
             resource: true,
