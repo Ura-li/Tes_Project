@@ -1531,7 +1531,8 @@ export const Assets_table = () => {
       const haystack = [a?.AssetID, a?.SerialNumber, a?.SiteAccountID, a?.ContactID,       a?.product_information?.ProductName,
       a?.product_information?.ProductLine,
       a?.ProductNumber,
-      a?.site_account?.Company, `${a?.contact_information?.FirstName ?? ""} ${a?.contact_information?.LastName ?? ""}` ,pn, pl, num]
+      a?.site_account?.Company, `${a?.contact_information?.FirstName ?? ""} ${a?.contact_information?.LastName ?? ""}` ,pn, pl, num, a?.Warranty_Status, a?.EOW_Date ? new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(a.EOW_Date))
+        : ""]
         .map(v => (v ?? "").toString().toLowerCase()).join(" ");
       return haystack.includes(q);
     });
@@ -2431,7 +2432,7 @@ export const WarrantyService_table = () => {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [goToPageInput, setGoToPageInput] = useState("");
 
   // Sorting
@@ -2570,7 +2571,7 @@ export const WarrantyService_table = () => {
 
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
-      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[300px]">
+      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[600px]">
         <table className="w-full relative border-collapse">
           <thead className="sticky z-10 top-0 bg-gray-100">
             <tr>
@@ -2623,6 +2624,12 @@ export const WarrantyService_table = () => {
               >
                 Total {renderSortIcon("Total")}
               </th>
+              <th onClick={() => handleSort("WarrantyCondition")} className="p-3 text-sm font-semibold text-left border cursor-pointer">
+                Warranty Condition {renderSortIcon("WarrantyCondition")}
+              </th>
+              <th onClick={() => handleSort("CaseTypeServices")} className="p-3 text-sm font-semibold text-left border cursor-pointer">
+                Case Type {renderSortIcon("CaseTypeServices")}
+              </th>
               <th className="p-3 text-sm font-semibold text-center border">
                 Actions
               </th>
@@ -2655,6 +2662,8 @@ export const WarrantyService_table = () => {
                   <td className="p-3 border">{WarrantyServiceItem.qty_ws}</td>
                   <td className="p-3 border">{WarrantyServiceItem.Tax}</td>
                   <td className="p-3 border">{WarrantyServiceItem.Total}</td>
+                  <td className="p-3 border">{WarrantyServiceItem.WarrantyCondition}</td>
+                  <td className="p-3 border">{WarrantyServiceItem.CaseTypeServices}</td>
                   <td className="flex p-3 space-x-2 border justify-center">
                     <WarrantyServiceEdit
                       Service_offerID={WarrantyServiceItem.Service_offerID}
@@ -2699,7 +2708,6 @@ export const WarrantyService_table = () => {
               }
             }}
           >
-            <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={25}>25</option>
             <option value={50}>50</option>
