@@ -1049,6 +1049,11 @@ export const ServiceCase = ({
   CLOSED_POSTED: 'Closed - Posted'
   };
 
+  const WarrantyConditionEnumToLabel = {
+    InWarranty: "In Warranty",
+    OutWarranty: "Out of Warranty",
+  };  
+
   const assignToForm= true;
   // const assignToForm = statusEnumToLabel.startsWith("NEW_Assign");
 
@@ -1827,7 +1832,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   </CardHeader>
                   <CardContent className="grid items-center grid-cols-6 gap-10">
                     <CaseField label="Category Warranty" lock className={"whitespace-nowrap"}>
-                      {dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition}{" "}
+                      {WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition]}{" "}
                     </CaseField>
                     <CaseField label="Product Number" lock>
                       <span className="pl-3">
