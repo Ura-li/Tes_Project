@@ -1385,7 +1385,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
           onClick={() => { setIsOpen(true); }} 
           className="flex items-center gap-2"
         >
-          <Pencil className="w-4 h-4" /> Edit
+          <Pencil />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
