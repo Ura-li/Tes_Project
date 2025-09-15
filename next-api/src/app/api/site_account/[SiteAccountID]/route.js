@@ -60,6 +60,7 @@ export async function PATCH(request, { params }) {
             StateProvince,
             Country,
             ZipPostalCode,
+            NPWP
         } = await request.json();
 
         // Validasi: Minimal harus ada satu field yang diisi
@@ -83,6 +84,7 @@ export async function PATCH(request, { params }) {
                 StateProvince,
                 Country,
                 ZipPostalCode,
+                NPWP
             },
         });
 

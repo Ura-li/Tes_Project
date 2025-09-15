@@ -18,6 +18,7 @@ Font.register({
 });
 
 
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
@@ -137,7 +138,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#f3f4f6', 
     fontWeight: 'bold',
   },
+
+  sectionContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    marginVertical: 10,
+    paddingTop: 12, // extra space so the title doesn't overlap content
+    position: 'relative',
+  },
+
+  sectionTitle: {
+    position: 'absolute',
+    top: -8, // moves the heading above the border
+    left: 10,
+    fontSize: 10,
+    fontWeight: 'bold',
+    backgroundColor: 'white', // covers the border behind text
+    paddingHorizontal: 4,
+  },
+
+  sectionContent: {
+    paddingHorizontal: 10,
+    paddingBottom: 8,
+  },
+
 });
+
+const Section = ({ title, children }) => (
+  <View style={styles.sectionContainer}>
+    <Text style={styles.sectionTitle}>{title}</Text>
+    <View style={styles.sectionContent}>{children}</View>
+  </View>
+);
 const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
 
 (
@@ -195,7 +228,8 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
       </View>
 
       {/* Customer Section */}
-      <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Customer</Text>
+      {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Customer</Text> */}
+      <Section title="Customer">
       <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
         <View style={styles.leftSection}>
           <Text style={styles.label}>Company</Text>
@@ -271,9 +305,11 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
 
         </View>
       </View>
+      </Section>
 
       {/* Product Section */}
-      <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text>
+      {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text> */}
+      <Section title="Product">
       <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
         <View style={styles.leftSection}>
           <Text style={styles.label}>Serial no</Text>
@@ -315,7 +351,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
           </Text>
         </View>
       </View>
-
+      </Section>
       <View style={[styles.tableRow, styles.tableHeader, { marginTop: 20 }]}>
         <Text style={styles.tableHeaderCell}>Accessories</Text>
         <Text style={styles.tableHeaderCell}>Note</Text>

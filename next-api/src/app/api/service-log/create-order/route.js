@@ -48,14 +48,21 @@ export async function POST(request) {
             });
 
             // 2. Create ServiceCatalog for each selected warranty
-            await tx.servicecatalog.create({
+            const createdServiceCatalog = await tx.servicecatalog.create({
                 data: {
                     AssetID,
                     Service_offerID: selectedWarrantyServices.Service_offerID,
                     Price: selectedWarrantyServices.Price,
                     Tax: selectedWarrantyServices.Tax,
                     Total: selectedWarrantyServices.Total
-                }
+                },
+                select: { ServiceCatalogID: true }
+            });
+
+            // Link the chosen warranty service to this Work Order
+            await tx.workorder.update({
+                where: { WOID },
+                data: { ServiceCatalogID: createdServiceCatalog.ServiceCatalogID }
             });
 
             // 3. Create Material Order (One only)

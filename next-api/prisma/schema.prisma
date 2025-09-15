@@ -8,14 +8,14 @@ datasource db {
 }
 
 model asset_information {
-  AssetID             Int                  @id @default(autoincrement())
-  SerialNumber        String               @db.VarChar(20)
-  ProductNumber       String               @db.VarChar(11)
-  SiteAccountID       Int?
-  ContactID           Int?
-  Warranty_Status     String?
-  EOW_Date            DateTime?            @db.DateTime(0)
-  WarrantyOTCCode     OTCCodeTable?        @relation(fields: [Warranty_Status], references: [OTCCode])
+  AssetID         Int           @id @default(autoincrement())
+  SerialNumber    String        @db.VarChar(20)
+  ProductNumber   String        @db.VarChar(11)
+  SiteAccountID   Int?
+  ContactID       Int?
+  Warranty_Status String?
+  EOW_Date        DateTime?     @db.DateTime(0)
+  WarrantyOTCCode OTCCodeTable? @relation(fields: [Warranty_Status], references: [OTCCode])
 
   site_account        site_account?        @relation(fields: [SiteAccountID], references: [SiteAccountID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_1")
   contact_information contact_information? @relation(fields: [ContactID], references: [ContactID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_2")
@@ -30,11 +30,11 @@ model asset_information {
 }
 
 model asset_warranty {
-  WarrantyID  Int @id @default(autoincrement())
-  AssetID     Int? 
+  WarrantyID        Int                @id @default(autoincrement())
+  AssetID           Int?
   asset_information asset_information? @relation(fields: [AssetID], references: [AssetID], onDelete: Restrict, onUpdate: Cascade, map: "asset_warranty_ibfk_1")
 
-  @@index([AssetID], map:"AssetID")
+  @@index([AssetID], map: "AssetID")
 }
 
 model caseinformation {
@@ -94,10 +94,10 @@ model caseinformation {
 }
 
 model OTCCodeTable {
-  OTCCode     String    @id @db.VarChar(5)
-  Description String    @db.VarChar(100)
-  WarrantyCondition WarrantyCondition?  
-  CreatedOn   DateTime? @default(now()) @db.DateTime(0)
+  OTCCode           String             @id @db.VarChar(5)
+  Description       String             @db.VarChar(100)
+  WarrantyCondition WarrantyCondition?
+  CreatedOn         DateTime?          @default(now()) @db.DateTime(0)
 
   cases caseinformation[]
   asset asset_information[]
@@ -165,27 +165,27 @@ model ActionLog {
 }
 
 model contact_information {
-  ContactID         Int                 @id @default(autoincrement())
+  ContactID         Int     @id @default(autoincrement())
   SiteAccountID     Int?
-  Salutation        String?             @db.VarChar(20)
-  FirstName         String              @db.VarChar(100)
-  LastName          String              @db.VarChar(100)
-  Email             String?             @db.VarChar(255)
-  PreferredLanguage String?             @db.VarChar(50)
-  Phone             String?             @db.VarChar(50)
-  Mobile            String?             @db.VarChar(50)
-  WorkPhone         String?             @db.VarChar(50)
-  WorkExtension     String?             @db.VarChar(10)
-  OtherPhone        String?             @db.VarChar(50)
-  OtherExtension    String?             @db.VarChar(10)
-  Fax               String?             @db.VarChar(50)
-  AddressLine1      String?             @db.VarChar(255)
-  AddressLine2      String?             @db.VarChar(255)
-  City              String?             @db.VarChar(100)
-  StateProvince     String?             @db.VarChar(100)
-  Country           String?             @db.VarChar(100)
-  ZipPostalCode     String?             @db.VarChar(20)
-  NIK               String?             @db.VarChar(25)
+  Salutation        String? @db.VarChar(20)
+  FirstName         String  @db.VarChar(100)
+  LastName          String  @db.VarChar(100)
+  Email             String? @db.VarChar(255)
+  PreferredLanguage String? @db.VarChar(50)
+  Phone             String? @db.VarChar(50)
+  Mobile            String? @db.VarChar(50)
+  WorkPhone         String? @db.VarChar(50)
+  WorkExtension     String? @db.VarChar(10)
+  OtherPhone        String? @db.VarChar(50)
+  OtherExtension    String? @db.VarChar(10)
+  Fax               String? @db.VarChar(50)
+  AddressLine1      String? @db.VarChar(255)
+  AddressLine2      String? @db.VarChar(255)
+  City              String? @db.VarChar(100)
+  StateProvince     String? @db.VarChar(100)
+  Country           String? @db.VarChar(100)
+  ZipPostalCode     String? @db.VarChar(20)
+  NIK               String? @db.VarChar(25)
 
   PIC_Name          String?             @db.VarChar(100)
   PIC_Email         String?             @db.VarChar(100)
@@ -336,6 +336,7 @@ model servicecatalog {
   warranty_services        warranty_services          @relation(fields: [Service_offerID], references: [Service_offerID], map: "servicecatalog_ibfk_3")
   caseinformation          caseinformation[]
   serviceCatalogManytoMany ServiceCatalogManytoMany[]
+  workorder                workorder?
 
   @@index([AssetID], map: "AssetID")
   @@index([PartNumber], map: "PartNumber")
@@ -428,20 +429,19 @@ model test_table {
 }
 
 model User {
-  IDUser       Int      @id @default(autoincrement())
-  Email        String   @unique @db.VarChar(255)
-  Username     String   @unique @db.VarChar(100)
-  Password     String   @db.VarChar(255)
-  Name         String   @db.VarChar(255)
-  Role         String   @default("user") @db.VarChar(50)
-  ProfilePhoto String?  @db.VarChar(500)
-  CreatedAt    DateTime @default(now())
-  UpdatedAt    DateTime @updatedAt
-  Phone        String?  @db.VarChar(20)
-  Signature    String?  @db.VarChar(500)
-  ResourceId   String?  @db.VarChar(255)
-  resource     Resource? @relation(fields: [ResourceId], references: [ResourceId]) 
-
+  IDUser       Int       @id @default(autoincrement())
+  Email        String    @unique @db.VarChar(255)
+  Username     String    @unique @db.VarChar(100)
+  Password     String    @db.VarChar(255)
+  Name         String    @db.VarChar(255)
+  Role         String    @default("user") @db.VarChar(50)
+  ProfilePhoto String?   @db.VarChar(500)
+  CreatedAt    DateTime  @default(now())
+  UpdatedAt    DateTime  @updatedAt
+  Phone        String?   @db.VarChar(20)
+  Signature    String?   @db.VarChar(500)
+  ResourceId   String?   @db.VarChar(255)
+  resource     Resource? @relation(fields: [ResourceId], references: [ResourceId])
 
   caseinformations_created caseinformation[] @relation("UserCreatedCases")
   caseinformations_owned   caseinformation[] @relation("UserOwnedCases")
@@ -453,7 +453,7 @@ model User {
   ActionLog            ActionLog[]
 
   // Case notes created by this user
-  caseNotes_created    casenotes[]     @relation("UserCreatedCaseNotes")
+  caseNotes_created casenotes[] @relation("UserCreatedCaseNotes")
 }
 
 model warranty_services {
@@ -465,6 +465,8 @@ model warranty_services {
   qty_ws              Int              @default(0)
   Tax                 Float            @default(0) @db.Float
   Total               Float            @default(0) @db.Float
+  WarrantyCondition   WarrantyCondition?
+  CaseTypeServices    String?          @db.VarChar(255)
   servicecatalog      servicecatalog[]
 }
 
@@ -480,11 +482,11 @@ model SubkTechnician {
 }
 
 model Bookings {
-  BookingId     Int     @id @default(autoincrement())
+  BookingId Int @id @default(autoincrement())
 
   BookingStatusId Int?
-  BookingStatus BookingStatus? @relation(fields: [BookingStatusId], references: [BookingStatusId])
-  WOID          String
+  BookingStatus   BookingStatus? @relation(fields: [BookingStatusId], references: [BookingStatusId])
+  WOID            String
 
   // SLA  
   ScheduleJeopardy     Boolean?
@@ -516,13 +518,13 @@ model BookingDetails {
   ResourceId        String?
   ResourceAccountId String?
 
-  EngineerId        Int?   // <-- NEW
-  engineer          User? @relation("EngineerCreatedBookings", fields: [EngineerId], references: [IDUser], onDelete: SetNull)
+  EngineerId Int? // <-- NEW
+  engineer   User? @relation("EngineerCreatedBookings", fields: [EngineerId], references: [IDUser], onDelete: SetNull)
 
-  SubkTechnicianId  String?
-  Name              String  @db.VarChar(255)
-  BookingStatusId Int?
-  Status          BookingStatus?  @relation(fields: [BookingStatusId], references: [BookingStatusId])
+  SubkTechnicianId String?
+  Name             String         @db.VarChar(255)
+  BookingStatusId  Int?
+  Status           BookingStatus? @relation(fields: [BookingStatusId], references: [BookingStatusId])
 
   // Customer Time
   StartTimeCustomerTime            DateTime?
@@ -546,16 +548,15 @@ model BookingDetails {
   booking         Bookings         @relation(fields: [BookingId], references: [BookingId], onDelete: Cascade)
 
   @@index([EngineerId])
-
 }
 
 model BookingStatus {
-  BookingStatusId Int @id @default(autoincrement())
-  Description String @db.VarChar(100)
-  CreatedOn   DateTime @default(now()) @db.DateTime(0)
+  BookingStatusId Int      @id @default(autoincrement())
+  Description     String   @db.VarChar(100)
+  CreatedOn       DateTime @default(now()) @db.DateTime(0)
 
-  Bookings Bookings[]
-  BookingsDetail  BookingDetails[]
+  Bookings       Bookings[]
+  BookingsDetail BookingDetails[]
 }
 
 model workorder {
@@ -592,10 +593,14 @@ model workorder {
   WorkOrderDescription        String?          @db.Text
   PartnerNotes                String?          @db.Text
   IncomingChannel             String?          @db.VarChar(50)
+  // Link to chosen warranty Service Catalog (1 WO -> 1 servicecatalog)
+  ServiceCatalogID            Int?
+  serviceCatalog              servicecatalog?  @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID], onDelete: SetNull)
   materialorder               materialorder[]
   caseinformation             caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict, map: "workorder_ibfk_1")
   bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
 
+  @@unique([ServiceCatalogID])
   @@index([CaseID], map: "CaseID")
   @@index([OwnerID])
 }
@@ -607,7 +612,7 @@ model Resource {
   // Relations
   resourceAccounts ResourceAccount[] // <-- 1 Resource has many ResourceAccounts
   bookingDetails   BookingDetails[]
-  users           User[]
+  users            User[]
 }
 
 model ResourceAccount {
@@ -735,6 +740,7 @@ enum WarrantyCondition {
   InWarranty
   OutWarranty
 }
+
 enum CaseStatus {
   New
   Open

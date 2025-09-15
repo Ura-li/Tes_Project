@@ -4665,7 +4665,8 @@ export function BtnModalsServiceCatalog({
   open, 
   setOpen, 
   caseDetails,
-  serviceCatalogType
+  serviceCatalogType,
+  WOID = undefined
 }) {
   const {user} = useAuth();
 
@@ -4675,7 +4676,7 @@ export function BtnModalsServiceCatalog({
     // Resetting modal state when serviceCatalogType changes
     setCurrentStep(1);
     setStep(0);
-    setSelectedWarrantyServices([]);
+    setSelectedWarrantyServices(null);
     setSelectedPartCatalog([]);
     setSubTotalConfirmServices(0);
     setTotalTaxConfirmServices(0);
@@ -4690,13 +4691,24 @@ export function BtnModalsServiceCatalog({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
   const [currentStep, setCurrentStep] = useState(1);
+  // If creating MO from WO, start directly at parts step
+  useEffect(() => {
+    if ((WOID || serviceCatalogType === 'wo-add-mo') && open) {
+      setCurrentStep(2);
+    }
+  }, [WOID, serviceCatalogType, open]);
   const [assetForWorkOrderCreation, setAssetForWorkOrderCreation] = useState([]);
   const [modalPart, setModalPart] = useState(false);
   const [roleAssign, setRoleAssign] = useState([]);
   const [assignApo, setAssignApo] = useState(null);
+
+  
   //product information
   const fetchDataAssets = async () => {
     try {
+      console.log("Case Details in ervice Order",caseDetails)
+      const assetId = caseDetails?.AssetID;
+      if (!assetId) return null;
       const response = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
    
       return response.data.data
@@ -4733,6 +4745,7 @@ export function BtnModalsServiceCatalog({
       setLoading(false)
     }
   }
+  
   useEffect(() => {
     fetchDataServiceOffer().then((data) => {
       console.log("Data received for warrantyOffer:", data);
@@ -4743,7 +4756,29 @@ export function BtnModalsServiceCatalog({
     });
     fetchDataPartCatalog();
     fetchUserAssign('apo');
-  }, [])
+  }, [caseDetails])
+
+  useEffect(() => {
+    const fetchWarrantyFromWO = async () => {
+      if (!WOID) return;
+
+      try {
+        const res = await ApiCustomer.get(`/api/work-order/${WOID}`);
+        
+        const woData = res.data.data;
+
+        if (woData?.serviceCatalog?.warranty_services) {
+          setWoWarrantyService(woData.serviceCatalog.warranty_services);
+          console.log("WODATA : ",woData.serviceCatalog.warranty_services);
+        }
+      } catch (err) {
+        console.error("Error fetching WO Warranty:", err);
+      }
+    };
+
+    fetchWarrantyFromWO();
+  }, [WOID]);
+
 
   const [selected, setSelected] = useState("DepotRepair"); 
 
@@ -4764,6 +4799,7 @@ export function BtnModalsServiceCatalog({
   // }, [selectedWarrantyServices]);
   
   const [selectedWarrantyServices, setSelectedWarrantyServices] = useState(null);
+  const [woWarrantyService, setWoWarrantyService] = useState(null);
 
     const handlerWarrantyService = (service) => {
       setSelectedWarrantyServices(service);
@@ -4784,7 +4820,7 @@ export function BtnModalsServiceCatalog({
       setPartCatalog(response.data.data)
       return response.data.data
     }catch(e){
-
+      console.error("Err :",e)
     }
   }
 
@@ -4850,6 +4886,9 @@ export function BtnModalsServiceCatalog({
   const [subTotalConfirmServices, setSubTotalConfirmServices] = useState(0)
   const [TotalTaxConfirmServices, setTotalTaxConfirmServices] = useState(0)
   const [totalConfirmServices, setTotalConfirmServices] = useState(0)
+  const effectiveWarrantyService = selectedWarrantyServices ?? woWarrantyService;
+  console.log("EFEKTIF SELECTED WS",selectedWarrantyServices)
+  console.log("EFEKTIF WO WS",woWarrantyService)
   const handlerPriceConfirmServices = () =>{
     let serviceTotal = selectedWarrantyServices ? (parseFloat(selectedWarrantyServices.Price) || 0) : 0;
 
@@ -4868,116 +4907,106 @@ export function BtnModalsServiceCatalog({
 
   }
 
+
+  
   //createorder
   const createOrder = async () => {
+
     if (!assignApo) {
       toast.warning("APO IS NOT ASSIGN YET", {
         description: "PLEASE CHOOSE THE APO PATNER BEFORE CREATING ORDER",
         position: 'top-center'
       })
-    } else {
-    try {
-       Swal.fire({
-        title: "Creating Order...",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: () => Swal.showLoading()
-      });
-      const data = {
-        user: getUserFromToken()
-      }
 
-      let noteCreateOrderLog = '';
-      if(assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
-        noteCreateOrderLog = `[NOTICE] Order Part
+    } else {
+      try {
+        Swal.fire({
+          title: "Creating Order...",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => Swal.showLoading()
+        });
+        const data = {
+          user: getUserFromToken()
+        }
+
+        let noteCreateOrderLog = '';
+        if(assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
+          noteCreateOrderLog = `[NOTICE] Order Part
 Order Part : ${selectedPartCatalog?.[0]?.PartNumber} - ${selectedPartCatalog?.[0]?.PartDescription}
 Harga : Rp. ${selectedPartCatalog?.[0]?.Price}
 Requested to APO : ${assignApo}`;
-      }else{
-        noteCreateOrderLog = `[NOTICE] Order Part
+        }else{
+          noteCreateOrderLog = `[NOTICE] Order Part
 Order Part : ${selectedPartCatalog?.[0]?.PartNumber} - ${selectedPartCatalog?.[0]?.PartDescription}
 Requested to APO : ${assignApo}`;
-      }
-      console.log(noteCreateOrderLog);
+        }
+        console.log(noteCreateOrderLog);
 
-      const res = await ApiCustomer.post("/api/service-log/create-order", {
-        AssetID: assetForWorkOrderCreation.AssetID,
-        CaseID: caseDetails.CaseID,
-        selectedWarrantyServices,
-        selectedPartCatalog,
-        IncidentType: selected,
-        OwnerID: data.user.id,
-        assignApo: assignApo,
-        notesLog: noteCreateOrderLog
-      });
-      console.log(res)
-      // const updateLogCase = await ApiCustomer.post("/api/actionlog",{
-      //   CaseId: `${caseDetails.CaseID}`,
-      //   model: "Case",
-      //   dataOld: caseDetails.CaseStatus,
-      //   dataNew: "Part Request",
-      //   changedBy: data.user.id,
-      //   logDescription: `Edit: change status from ${caseDetails.CaseStatus} to Part Request`
-      // })
-      // const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
-      //   CaseId: `${caseDetails.CaseID}`,
-      //   ReferenceId: `${res.data.WOID}`,
-      //   model: "Work",
-      //   dataOld: "OPEN_UNSCHEDULED",
-      //   dataNew: "OPEN_UNSCHEDULED",
-      //   changedBy: data.user.id,
-      //   logDescription: `New Work Order : ${res.data.WOID}`
-      // })
-      // const updateMaterialLog = await ApiCustomer.post("/api/actionlog",{
-      //   CaseId: `${caseDetails.CaseID}`,
-      //   ReferenceId: `${res.data.MOID}`,
-      //   model: "Material Order",
-      //   dataOld: "New",
-      //   dataNew: "New",
-      //   changedBy: data.user.id,
-      //   logDescription: `New Material Order : ${res.data.MOID}`
-      // })
+        // If WOID present or special mode, create only MO for existing WO
+        const isCreateMOOnly = !!WOID || serviceCatalogType === 'wo-add-mo';
+        const res = isCreateMOOnly
+          ? await ApiCustomer.post("/api/material-order", {
+              WOID: WOID,
+              selectedPartCatalog,
+              OwnerID: data.user.id,
+              assignApo: assignApo,
+              notesLog: noteCreateOrderLog,
+            })
+          : await ApiCustomer.post("/api/service-log/create-order", {
+              AssetID: assetForWorkOrderCreation.AssetID,
+              CaseID: caseDetails.CaseID,
+              selectedWarrantyServices,
+              selectedPartCatalog,
+              IncidentType: selected,
+              OwnerID: data.user.id,
+              assignApo: assignApo,
+              notesLog: noteCreateOrderLog,
+            });
+        console.log(res)
   
       
-      Swal.close(); 
+        Swal.close(); 
       
-       // Close loading after success
-      await Swal.fire({
-        title: "Success!",
-        text:  "Order added successfully!",
-        icon:  "success",
-        timer: 1500,
-        showConfirmButton: false,
-        allowEscapeKey: false,
-      }).then(()=>{
-        setOpen(false);
-        const WOID = res.data.WOID
-        const MOID = res.data.MOID
-        switch (serviceCatalogType) {
-          case "CSR":
-            window.open(`/app/material-order/${MOID}`, '_blank');
-            break;
+        // Close loading after success
+        await Swal.fire({
+          title: "Success!",
+          text:  "Order added successfully!",
+          icon:  "success",
+          timer: 1500,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        }).then(()=>{
+          setOpen(false);
+          const WOID = res.data.WOID
+          const MOID = res.data.MOID
+          switch (serviceCatalogType) {
+            case "CSR":
+              window.open(`/app/material-order/${MOID}`, '_blank');
+              break;
 
             case "serviceorder":
               window.open(`/app/work/${WOID}`, '_blank');  
               break;
 
-          default:
-            break;
-        }
-      });
-    } catch (err) {
-      console.error("Order Creation Failed:", err);
-      Swal.fire({
-        title: "Error!",
-        text: "Failed to create order",
-        icon: "error",
-        timer: 1500,
-        showConfirmButton: false,
-        allowEscapeKey: false,
-      });
-    }
-  };
+            default:
+              break;
+
+          }
+        });
+      } catch (err) {
+        console.error("Order Creation Failed:", err);
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to create order",
+          icon: "error",
+          timer: 1500,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        });
+      }
+    };
+  }  
   
   function renderStepContent() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -5001,7 +5030,12 @@ Requested to APO : ${assignApo}`;
       }
     };
 
-    switch (currentStep) {
+    // Skip warranty step when creating MO from WO
+    
+
+    const effectiveStep = ((WOID || serviceCatalogType === 'wo-add-mo') && currentStep === 1) ? 2 : currentStep;
+
+    switch (effectiveStep) {
       case 1:
         return (
           <DialogContent className="sm:max-w-[fit] sm:max-h-[100vh] flex flex-col justify-center gap-0 p-0 bg-white [&>button]:hidden" >
@@ -5123,10 +5157,11 @@ Requested to APO : ${assignApo}`;
               <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
               <DialogDescription>Select parts required for the repair.</DialogDescription>
             </DialogHeader>
+            {console.log("EFFECTIF WARANRY SERVUCE",effectiveWarrantyService)}
             <div className="flex items-start justify-between p-2">
               <div className="grid flex-1 grid-cols-2 p-2 bg-gray-300 gap-x-2">
-                <p>Service OfferID</p><p>: {selectedWarrantyServices.Service_offerID}</p>
-                <p>Service Description</p><p>: {selectedWarrantyServices.Service_description}</p>
+                <p>Service OfferID</p><p>: {effectiveWarrantyService?.Service_offerID ?? '-'}</p>
+                <p>Service Description</p><p>: {effectiveWarrantyService?.Service_description ?? '-'}</p>
               </div>
               <div className="flex items-center self-center justify-center flex-1 gap-2 space-x-2 ">
                 <Label htmlFor="orderability">Orderability</Label>
@@ -5351,14 +5386,15 @@ Requested to APO : ${assignApo}`;
                 <TableBody>
                   {/* {selectedWarrantyServices.map((service, index) => {
                     return ( */}
+                    
                       <TableRow>
-                        <TableCell>{selectedWarrantyServices.Service_offerID}</TableCell>
-                        <TableCell>{selectedWarrantyServices.Service_description}</TableCell>
-                        <TableCell>{selectedWarrantyServices.CTat_RTime}</TableCell>
-                        <TableCell>{selectedWarrantyServices.Shipping_Fee}</TableCell>
+                        <TableCell>{effectiveWarrantyService?.Service_offerID ?? '-'}</TableCell>
+                        <TableCell>{effectiveWarrantyService.Service_description}</TableCell>
+                        <TableCell>{effectiveWarrantyService.CTat_RTime}</TableCell>
+                        <TableCell>{effectiveWarrantyService.Shipping_Fee}</TableCell>
                         <TableCell>1</TableCell>
-                        <TableCell>{selectedWarrantyServices.Tax}</TableCell>
-                        <TableCell>{assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? selectedWarrantyServices.Price : 0}</TableCell>
+                        <TableCell>{effectiveWarrantyService.Tax}</TableCell>
+                        <TableCell>{assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? effectiveWarrantyService.Price : 0}</TableCell>
                       </TableRow>
                     {/* )
                   })} */}
@@ -5500,7 +5536,7 @@ Requested to APO : ${assignApo}`;
   </>
   );
 }
-}
+
 
 export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen  }) {
   const [formData, setFormData] = useState({

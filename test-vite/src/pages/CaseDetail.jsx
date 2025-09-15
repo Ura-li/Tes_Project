@@ -286,6 +286,9 @@ export const TabsServiceCaseDetails = ({
         case 'ENTITLEMENT':
           if (entitlementEdited) {
             console.log("OTC CODE EDIT : ",entitlementStatus);
+               await ApiCustomer.patch(`/api/asset-information/${caseDetails.AssetID}`, {
+                Warranty_Status: entitlementStatus.OTCCode || "",
+              });
             Object.assign(dataToUpdate, entitlementStatus); // includes OTCCo
             savedModules.push("Entitlement");
           }
@@ -765,8 +768,8 @@ export const ServiceCase = ({
   const tabs = [
     { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg","celead"]},
     { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg","celead"]},
-    { value: "note_part", label: "Sparepart" , roles:["admin", "apo","ce","celead","fd","lg"]},
     { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg","celead"]},
+    { value: "note_part", label: "Sparepart" , roles:["admin", "apo","ce","celead","fd","lg"], hidden:true},
     // { value: "customer,add,entitement", label: "Asset & Entitement", roles:["admin"]},
     // { value: "ci_notes", label: "Notes & Information", roles:["admin"]},
     // { value: "ci_activitas", label: "Activities", disable: true, roles:["admin"]},
@@ -800,6 +803,8 @@ export const ServiceCase = ({
     Type: null,
   });
   const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
+  const [dataWarrantyStatus, setDataWarrantyStatus] = useState()
+  console.log("tes data assets", dataFetchAssetInformation)
   const [ownerUserData, setOwnerUserData] = useState([]);
 
   const [workOrders, setWorkOrders] = useState([]);
@@ -807,6 +812,8 @@ export const ServiceCase = ({
   const [materialOrders, setMaterialOrders] = useState([]);
 
   const [actionLogs, setActionLogs] = useState([]);
+
+
 
   const fetchCustomerData = async () => {
     try {
@@ -845,6 +852,7 @@ export const ServiceCase = ({
       setDataFetchAssetInformation({
         AssetInformation: resAsset.data.data,
       });
+      setDataWarrantyStatus(resAsset.data.data?.Warranty_Status)
     } catch (err) {
       console.error("Error returning Asset Data : ", err);
       return null;
@@ -1098,8 +1106,8 @@ const fetchActionLog = async () => {
   }, [assignToForm]);
 
   useEffect(() => {
-    if (otcCode.length > 0 && caseDetails?.OTCCode) {
-      handleEntitlementStatus("OTCCode")(caseDetails.OTCCode)
+    if (otcCode.length > 0 && dataFetchAssetInformation?.AssetInformation?.Warranty_Status) {
+      handleEntitlementStatus("OTCCode")(dataFetchAssetInformation?.AssetInformation?.Warranty_Status);
     }
   }, [otcCode, caseDetails]);
 
@@ -1254,13 +1262,15 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                 <CardTitle className={"text-lg  flex gap-3"}><Briefcase/>Case Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-2 ">
-                <CaseField label="Case Subject" span={3} >
+              <CardContent className="grid grid-cols-2 gap-3 ">
+                <CaseField label="Case Subject" span={3}>
+                  <div className="ml-8">
                     <Textarea
                      value={caseForm?.CaseSubject}
                       onChange={e => onChangeCase("CaseSubject")(e.target.value)}
                      className="resize-none border-none italic ring-1 ring-gray-400 bg-gray-50 text-base"
                     />
+                  </div>
                 </CaseField>
               
                 <CaseField label="Case ID manual" className={"mt-2"} lock span={2}>  
@@ -1358,12 +1368,15 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     />
                 </CaseField>
 
-                <CaseField label="Problem Description" span={2}>
+                <CaseField label="Problem Description" span={3}>
+                  <div className="ml-8">
                     <Textarea
                      value={caseForm?.ProblemDescription}
                      onChange={(e) => onChangeCase("ProblemDescription") (e.target.value)}
                      className="resize-none ring-1 ring-gray-300 bg-gray-50 italic"
                     />
+
+                  </div>
                 </CaseField>
 
                  <CaseField label="Case Priority" className={"mt-2"} lock span={2}>
@@ -1378,13 +1391,6 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                       { id: "important", name: "Important" },
                     ]}
                     placeholder="Select a Country"
-                  />
-                </CaseField>
-
-                <CaseField label="Customer Severity" className={"mt-2"} lock span={2}>
-                  <Input
-                    variant="invisible"
-                    value={caseDetails.CustomerSeverity}
                   />
                 </CaseField>
 
@@ -1437,6 +1443,12 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                           ></DatePicker>
                         </span>
                       </CaseField>
+                          <CaseField label="Customer Severity" >
+                  <Input
+                    variant="invisible"
+                    value={caseDetails.CustomerSeverity}
+                  />
+                </CaseField>
                       <CaseField label="Business Segment" >
                         <Input variant="invisible" placeholder="---"/>
                       </CaseField>          
@@ -1538,15 +1550,36 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                 <CaseField label="Region" lock>
                   <Input 
                   variant="invisible" 
-                  placeholder="---" readOnly 
+                  placeholder="---"  
                   value={dataFetchCustomerData.SiteAccount?.City}/>
                 </CaseField>
                 <CaseField label="Is Partner" lock>
-                  <Input variant="invisible" placeholder="---" readOnly/>
+                  <Input variant="invisible" placeholder="---" />
                 </CaseField>
                 <CaseField label="Partner & Customer" lock>
-                  <Input variant="invisible" placeholder="---"  readOnly/>
+                  <Input variant="invisible" placeholder="---"  />
                 </CaseField>
+                <CaseField label="PIC Name" lock>
+                  <Input variant="invisible" placeholder="---"  
+                  value={dataFetchCustomerData.MainAccount?.PIC_Name}
+                  />
+                </CaseField>
+                <CaseField label="PIC Email" lock>
+                  <Input variant="invisible" placeholder="---"  
+                  value={dataFetchCustomerData.MainAccount?.PIC_Email}
+                  />
+                </CaseField>
+                <CaseField label="PIC Phone no." lock>
+                  <Input variant="invisible" placeholder="---"  
+                  value={dataFetchCustomerData.MainAccount?.PIC_Phone}
+                  />
+                </CaseField>
+                <CaseField label="NPWP" lock>
+                  <Input variant="invisible" placeholder="---"
+                  value={dataFetchCustomerData.SiteAccount?.NPWP}  
+                  />
+                </CaseField>
+
                 <Accordion type="single" collapsible className="col-span-2">
                   <AccordionItem value="more-details" className={"pl-5 "}>
                     <AccordionTrigger className={"decoration-transparent border p-2 cursor-pointer"}>More Details</AccordionTrigger>
@@ -1831,11 +1864,11 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
                     </div>
-                    <CaseField label="Warranty Status"  span={3} star>
+                    <CaseField label="Warranty Status"  span={3} star className={"whitespace-nowrap"}>
                       <SearchCommandBlock
                         options={otcCode}
-                        // value={entitlementStatus.OTCCode}
-                        value={dataFetchAssetInformation?.AssetInformation?.Warranty_Status}
+                        value={entitlementStatus.OTCCode}
+                        // value={dataWarrantyStatus || "--Select--"}
                         onChange={(value) =>
                           handleEntitlementStatus("OTCCode")(value)
                         }
@@ -2022,8 +2055,8 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
           </TabsContent>
 
           <TabsContent value="action_log" >
-            <div className="mt-2 p-1">
-              <Card className="flex-col">
+            <div className="mt-2 p-1 grid grid-cols-2">
+              <Card className="flex-col col-span-2">
                 <CardHeader>
                   <CardTitle className="text-lg">Action Log</CardTitle>
                   <hr />
@@ -2045,7 +2078,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     <TableBody>
                       {actionLogs?.length > 0 ? (
                         actionLogs.map((log, index) => (
-                          <TableRow key={log.id || index}>
+                          <TableRow key={log.id || index} className={'text-xs'}>
                             <TableCell>{index + 1}</TableCell>
                             <TableCell>{log.CaseId}</TableCell>
                             <TableCell>{log.ReferenceId}</TableCell>
@@ -2070,8 +2103,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
             </div>
           </TabsContent>
           
-          <TabsContent value="note_part">
-         
+          <TabsContent value="note_part" hidden>         
               {caseDetails?.workorder?.[0]?.materialorder?.map((mo, index) => (
               <div key={index} className={"flex flex-col p-3 space-y-5"}>
                 {mo?.materialorderlineitems.map((moli, i) => (
@@ -2081,94 +2113,80 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   <hr />
                 </CardHeader>
                 <CardContent className={"grid grid-cols-6 gap-3"}>
-                  <CaseField label={"Part Category"}>
+                  <CaseField label={"Part Category"}  lock>
                     <Input value={moli?.servicecatalog_parts?.Keyword}
                     variant={"invisible"}
                     />
                   </CaseField>
-                <CaseField label={"Vendor Part No"}>
+                <CaseField label={"Vendor Part No"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"Hp Part No"}>
+                <CaseField label={"Hp Part No"} lock>
                   <Input variant="invisible" value={moli?.servicecatalog_parts?.PartNumber}/>
                 </CaseField>
-                <CaseField label={"Part From HP ?"}>
+                <CaseField label={"Part From HP ?"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"Part Name"}>
+                <CaseField label={"Part Name"} lock>
                     <Input value={moli?.servicecatalog_parts?.PartDescription}
                     variant={"invisible"}
                     />
                 </CaseField>
-                <CaseField label={"Qty"}>
+                <CaseField label={"Qty"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"Qty Use"}>
+                <CaseField label={"Qty Use"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"Qty unused"}>
+                <CaseField label={"Qty unused"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"Part Backup"}>
+                <CaseField label={"Part Backup"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"Price"}>
+                <CaseField label={"Price"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"Part Status"}>
+                <CaseField label={"Part Status"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"Part Return Status"}>
+                <CaseField label={"Part Return Status"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"Bad CT Code"}>
+                <CaseField label={"Bad CT Code"} lock>
                   <Input variant="invisible" value={moli?.RemovedPartNumber}/>
                 </CaseField>
-                <CaseField label={"CT Code New"}>
+                <CaseField label={"CT Code New"} lock>
                   <Input variant="invisible" value={moli?.RemovedSerialNumber}/>
                 </CaseField>
-                <CaseField label={"CT Validation"}>
+                <CaseField label={"CT Validation"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"UEFI Code"}>
+                <CaseField label={"UEFI Code"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"SO Number"}>
+                <CaseField label={"SO Number"} lock>
                   <Input variant="invisible" value={mo?.SalesOrderNumber}/>
                 </CaseField>
-                <CaseField label={"RMA Number"}>
+                <CaseField label={"RMA Number"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"RMA Status"}>
+                <CaseField label={"RMA Status"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"AWB no. in"}>
+                <CaseField label={"AWB no. in"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"Part Request date"}>
-                  <Input variant="invisible" value={mo?.CreatedOn ? new Date(mo.CreatedOn).toLocaleString("id-ID", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit"
-                }) : ""}/>
+                <CaseField label={"Part Request date"} lock>
+                  <Input variant="invisible" />
                 </CaseField>
-                <CaseField label={"AWB no. out"}>
+                <CaseField label={"AWB no. out"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
-                <CaseField label={"ETA date"}>
-                  <Input variant="invisible" 
-                  value={caseDetails?.workorder?.[0]?.bookings?.[0]?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime ? new Date(
-                    caseDetails?.workorder?.[0]?.bookings?.[0]?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime) .toLocaleString("id-ID", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit"
-                  }) : ""} />
+                <CaseField label={"ETA date"} lock>
+                  <Input variant="invisible" />
                 </CaseField>
-                <CaseField label={"Part Return SC date"}>
+                <CaseField label={"Part Return SC date"} lock>
                   <Input variant="invisible"/>
                 </CaseField>
               </CardContent>

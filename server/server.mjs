@@ -6,12 +6,22 @@ import dotenv from "dotenv"
 
 dotenv.config();
 
+const allowedOrigin = process.env.VITE_URL?.replace(/\/$/, "");
+
+
 const app = express();
+
+app.use(cors({
+    origin: [allowedOrigin],
+    methods: ["GET", "POST"],
+    credentials: true
+}));
+
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
     cors: {
-        origin: [process.env.VITE_URL], // your Vite frontend
+        origin: allowedOrigin, // your Vite frontend
         methods: ["GET", "POST"]
     }
 });

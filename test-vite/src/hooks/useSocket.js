@@ -2,7 +2,9 @@
 import { useEffect } from "react";
 import { io } from "socket.io-client";
 
-const socket = io(import.meta.env.VITE_WS_URL);
+const socket = io(import.meta.env.VITE_WS_URL,{
+    transports: ['websocket', 'polling']
+});
 
 export function useSocket(event, handler) {
     useEffect(() => {

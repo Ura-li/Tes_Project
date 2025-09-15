@@ -41,6 +41,7 @@ import { useParams } from "react-router";
 import ApiCustomer from "@/api";
 
 import {  QuickWOInput } from "../../components/quick-wo-input";
+import { BtnModalsServiceCatalog } from "@/components/model/sc-modal";
 import { NewBookableResourceBooking } from "../services/service-booking";
 import { getUserFromToken } from "@/lib/utils/auth";
 
@@ -76,7 +77,18 @@ export const ServiceWork = () => {
   const { woid } = useParams();
   const { updateDraft } = useDraft();
   const [workOrders, setWorkOrders] = useState([]);
+  const [openWorkOrder, setOpenWorkOrder] = useState(false);
+  const [serviceCatalogType, setServiceCatalogType] = useState("");
+  const [caseDetails, setCaseDetails] = useState([])
   console.log("TESwoWI",workOrders);
+
+  //state for open service order 
+  const openServiceCatalog = async (type) => {
+    console.log(caseInformation)
+    setCaseDetails(caseInformation)
+    setOpenAddMO(true);
+    setServiceCatalogType(type)
+  };
   const fetchWorkOrders = async () => {
     try {
       const res = await ApiCustomer.get(`/api/work-order/${woid}`);
@@ -101,6 +113,7 @@ export const ServiceWork = () => {
   const [caseInformation, setCaseInformation] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [ownerWorkOrder, setOwnerWorkOrder] = useState([]);
+  const [openAddMO, setOpenAddMO] = useState(false);
 
   const [dataFetchCustomerData, setDataFetchCustomerData] = useState({
     MainAccount: null,
@@ -239,6 +252,7 @@ export const ServiceWork = () => {
           casePriorityIndex: resWO.data.data.CasePriorityIndex ?? "",
         }));
 
+        const svc = resWO.data.data.serviceCatalog;
         setWOGeneral((prev) => ({
           ...prev,
           IncomingChannel:  workOrderData.IncomingChannel || "",
@@ -249,8 +263,8 @@ export const ServiceWork = () => {
           SystemStatus: workOrderData.SystemStatus || "",
           SubStatus: workOrderData.SubStatus || "",
           BookableResourceBooking:resBooking.data.data.BookingDetails?.ResourceId,
-          ServiceOfferID:resCI.data.data.servicecatalog?.warranty_services?.Service_offerID,
-          ServiceDescription:resCI.data.data.servicecatalog?.warranty_services?.Service_description,
+          ServiceOfferID: svc?.warranty_services?.Service_offerID || resCI.data.data.servicecatalog?.warranty_services?.Service_offerID,
+          ServiceDescription: svc?.warranty_services?.Service_description || resCI.data.data.servicecatalog?.warranty_services?.Service_description,
           PatnerCaseID: "",
           PatnerStatus: "",
           RecommendedResource: workOrderData.RecommendedResource || "",
@@ -336,7 +350,7 @@ export const ServiceWork = () => {
 
   const [meterReadAvailable, setMeterReadAvailable] = useState(false);
 
-  const [caseDetails, setCaseDetails] = useState([])
+  
 
   let canEditapo;
 
@@ -943,6 +957,11 @@ export const ServiceWork = () => {
                   {" "}
                   Material Order Information
                 </CardTitle>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => openServiceCatalog("wo-add-mo")}>
+                    <Plus className="mr-2" size={16}/> Create Material Order
+                  </Button>
+                </div>
                 <hr />
               </CardHeader>
               <CardContent className="grid">
@@ -981,6 +1000,15 @@ export const ServiceWork = () => {
                 </Table>
               </CardContent>
             </Card>
+
+            {/* Modal: Create new MO for this WO */}
+            <BtnModalsServiceCatalog
+              open={openAddMO}
+              setOpen={setOpenAddMO}
+              caseDetails={caseDetails}
+              serviceCatalogType="wo-add-mo"
+              WOID={woid}
+            />
 
             <Card className="flex-col mt-5" hidden>
               <CardHeader>
@@ -1085,7 +1113,7 @@ export const ServiceWork = () => {
                     </TableRow>
                   </TableHeader>
 
-                  <TableBody>
+                  <TableBody className={"cursor-pointer"}>
                     {bookings.length > 0 ? (
                       bookings.map((booking, index) => (
                         <TableRow
@@ -1101,7 +1129,7 @@ export const ServiceWork = () => {
                             {booking.bookingDetails?.[0].resourceaccount
                               ?.Name || "-"}
                           </TableCell>
-                          <TableCell>{booking.BookingStatus || "-"}</TableCell>
+                          <TableCell>{booking.BookingStatus?.Description || "-"}</TableCell>
                           <TableCell>
                             {booking.CeScheduleChange ? "Yes" : "No"}
                           </TableCell>
