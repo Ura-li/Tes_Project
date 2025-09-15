@@ -25,63 +25,66 @@ export async function GET(request, { params }) {
   }
 
 // UPDATE
+// UPDATE
 export async function PATCH(request, { params }) {
-    const Service_offerID = String(params.Service_offerID);
-  
-    try {
-      const body = await request.json();
-      const {
-        Service_description,	
-        CTat_RTime,
-        Price,
-        Shipping_Fee,
-        qty_ws,
-        Tax,
-        Total
-      } = body;
-  
-      if (
-        !Service_description || 
-        !CTat_RTime ||
-        Price === undefined || 
-        Shipping_Fee === undefined || 
-        qty_ws === undefined || 
-        Tax === undefined || 
-        Total === undefined
-      ) {
-        return NextResponse.json({
-          success: false,
-          message: "All fields are required!"
-        }, { status: 400 });
-      }
-  
-      const updatedWarrantyServiceInformation = await prisma.warranty_services.update({
+  const Service_offerID = String(params.Service_offerID);
+
+  try {
+    const body = await request.json();
+    const {
+      Service_description,
+      CTat_RTime,
+      Price,
+      Shipping_Fee,
+      qty_ws,
+      Tax,
+      Total,
+      WarrantyCondition,
+      CaseTypeServices,
+    } = body;
+
+    if (!Service_description || !CTat_RTime) {
+      return NextResponse.json(
+        { success: false, message: "Service description & TAT are required!" },
+        { status: 400 }
+      );
+    }
+
+    const updatedWarrantyServiceInformation =
+      await prisma.warranty_services.update({
         where: { Service_offerID },
         data: {
           Service_description,
           CTat_RTime,
-          Price,
-          Shipping_Fee,
-          qty_ws,
-          Tax,
-          Total
-        }
+          Price: Price ?? 0,
+          Shipping_Fee: Shipping_Fee ?? 0,
+          qty_ws: qty_ws ?? 0,
+          Tax: Tax ?? 0,
+          Total: Total ?? 0,
+          WarrantyCondition: WarrantyCondition || null,
+          CaseTypeServices: CaseTypeServices || null,
+        },
       });
-  
-      return NextResponse.json({
+
+    return NextResponse.json(
+      {
         success: true,
-        message: "Data Warranty Service Information Updated!",
-        data: updatedWarrantyServiceInformation
-      }, { status: 200 });
-  
-    } catch (error) {
-      return NextResponse.json({
+        message: "Warranty Service updated successfully!",
+        data: updatedWarrantyServiceInformation,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      {
         success: false,
         message: "Failed to update Warranty Service",
-        error: error.message
-      }, { status: 500 });
-    }
+        error: error.message,
+      },
+      { status: 500 }
+    );
   }
+}
   
 
 // DELETE 
