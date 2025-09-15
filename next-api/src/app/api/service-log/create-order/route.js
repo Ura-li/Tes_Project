@@ -27,13 +27,10 @@ export async function POST(request) {
         const previousCaseStatus = caseInfo.CaseStatus;
 
         // start atomic transaction
-        const { WOID, MOID, actionLogs } = await prisma.$transaction(async (tx) => {
+        const { WOID, MOIDs, actionLogs } = await prisma.$transaction(async (tx) => {
             //Generate ID
-            const WOID = await generateID("WO-", "workorder", "WOID"); 
+            const WOID = await generateID("WO-", "workorder", "WOID", tx); 
             console.log("Generated ID:", WOID, typeof WOID);
-
-            const MOID = await generateID("MO-", "materialorder", "MOID");
-            console.log("Generated MOID:", MOID, typeof MOID);
 
             // 1. Create Work Order
             await tx.workorder.create({
@@ -65,35 +62,77 @@ export async function POST(request) {
                 data: { ServiceCatalogID: createdServiceCatalog.ServiceCatalogID }
             });
 
-            // 3. Create Material Order (One only)
-            await tx.materialorder.create({
-                data: {
-                MOID,
-                WOID,
-                OrderStatus: "New",
-                OrderType: "Repair",
-                OwnerID: materialOrderOwnerID
-                }
-            });
-
-            // 4. Create MaterialOrderLineItems
-            await Promise.all(selectedPartCatalog.map((part, i) =>
-                tx.materialorderlineitems.create({
+            // 3. Create Multiple Material Orders: one per selected part
+            const createdMOIDs = [];
+            const perMologs = [];
+            let lineNumber = 1;
+            for (const part of selectedPartCatalog) {
+                const MOID = await generateID("MO-", "materialorder", "MOID", tx);
+                console.log("MOID : ",MOID)
+                await tx.materialorder.create({
                     data: {
-                        LineNumber: i + 1,
+                        MOID,
+                        WOID,
+                        OrderStatus: "New",
+                        OrderType: "Repair",
+                        OwnerID: materialOrderOwnerID,
+                    }
+                });
+
+                await tx.materialorderlineitems.create({
+                    data: {
+                        LineNumber: lineNumber++,
                         Description: part.PartDescription,
-                        Price: parseFloat(part.Price),
+                        Price: part.Price != null ? parseFloat(part.Price) : 0,
                         Quantity: part.qty || 1,
                         Status: "New",
-                        materialorder: {
-                            connect: { MOID },
-                        },
-                        servicecatalog_parts: {
-                            connect: { PartNumber: part.PartNumber },
-                        },
+                        RemovedPartNumber: part.RemovedPartNumber ?? null,
+                        materialorder: { connect: { MOID } },
+                        servicecatalog_parts: part.PartNumber
+                            ? { connect: { PartNumber: part.PartNumber } }
+                            : undefined,
                     },
-                })
-            ));
+                });
+
+                // Per-MO case note
+                const noteText = `[NOTICE] Order Part\n` +
+                  `Order Part : ${part.PartNumber ?? "-"} - ${part.PartDescription ?? "-"}\n` +
+                  `${part.Price ? `Harga : Rp. ${part.Price}\n` : ""}` +
+                  `${part.RemovedPartNumber ? `Return CT Key : ${part.RemovedPartNumber}\n` : ""}` +
+                  `Requested to APO : ${assignApo ?? materialOrderOwnerID ?? "-"}`;
+                await tx.casenotes.create({
+                    data:{
+                        CaseID,
+                        LogType: "NotesLog",
+                        ActionType: "Action Plan",
+                        Template: "",
+                        VisibleExternally: true,
+                        MinutesSpent: 0,
+                        Note: noteText,
+                        CreatedBy: OwnerID
+                    }
+                });
+
+                // Per-MO action log
+                const perMoLog = await tx.ActionLog.create({
+                    data:{
+                        CaseID_toActionLog:{
+                            connect:{ CaseID }
+                        },
+                        ReferenceId: MOID,
+                        model: "Material Order",
+                        dataOld: "New",
+                        dataNew: "New",
+                        changedByUser: {
+                            connect: { IDUser: OwnerID },
+                        },
+                        logDescription: `New Material Order : ${MOID}`
+                    }
+                });
+
+                perMologs.push(perMoLog);
+                createdMOIDs.push(MOID);
+            }
             // for (const [i, part] of selectedPartCatalog.entries()) {
             //     await tx.materialorderlineitems.create({
             //     data: {
@@ -115,19 +154,21 @@ export async function POST(request) {
             //     });
             // }
 
-            // 5. Log Note inform Part Order
-            await tx.casenotes.create({
-                data:{
-                    CaseID,
-                    LogType: "NotesLog",
-                    ActionType: "Action Plan",
-                    Template: "",
-                    VisibleExternally: true,
-                    MinutesSpent: 0,
-                    Note: notesLog,
-                    CreatedBy: OwnerID
-                }
-            })
+            // 5. (Optional) Global log note if provided
+            if (notesLog) {
+                await tx.casenotes.create({
+                    data:{
+                        CaseID,
+                        LogType: "NotesLog",
+                        ActionType: "Action Plan",
+                        Template: "",
+                        VisibleExternally: true,
+                        MinutesSpent: 0,
+                        Note: notesLog,
+                        CreatedBy: OwnerID
+                    }
+                })
+            }
             
             // 6. Change Case Status to Part Request
             const caseUpdateData = {
@@ -180,26 +221,9 @@ export async function POST(request) {
                 }
             })
             
-            // 9. Action Log create Material Order 
-            const log3 = await tx.ActionLog.create({
-                data:{
-                    CaseID_toActionLog:{
-                        connect:{
-                            CaseID: CaseID
-                        }
-                    },
-                    ReferenceId: MOID,
-                    model: "Material Order",
-                    dataOld: "New",
-                    dataNew: "New",
-                    changedByUser: {
-                        connect: { IDUser: OwnerID },
-                    },
-                    logDescription: `New Material Order : ${MOID}`
-                }
-            })
+            // 9. Action Logs for Material Orders already created per part
 
-            return { WOID, MOID, actionLogs: [log1, log2, log3] };
+            return { WOID, MOIDs: createdMOIDs, actionLogs: [log1, log2, ...perMologs] };
         }, { timeout: 20000 })
 
         const { Owner, CreatedBy } = caseInfo;
@@ -217,7 +241,9 @@ export async function POST(request) {
             success: true, 
             message: "Order created successfully", 
             WOID,
-            MOID,
+            MOID: (MOIDs && MOIDs.length > 0) ? MOIDs[MOIDs.length - 1] : undefined,
+            MOIDs,
+            many: Array.isArray(MOIDs) && MOIDs.length > 1
         });
 
 

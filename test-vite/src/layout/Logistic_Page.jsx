@@ -64,9 +64,17 @@ export default function Logistik() {
             filterStatus
         );
    
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const sortedData = [...filteredData].sort((a, b) => {
+    const orderA = a.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID || "";
+    const orderB = b.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID || "";
+    console.log("sorted Data", orderA)
+    console.log("sorted Data", orderB)
+    return orderB.localeCompare(orderA); // descending
+  });
+  console.log("sorted Data", sortedData)
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+  const currentData = sortedData.slice(startIndex, startIndex + itemsPerPage);
 
 
     return (
