@@ -48,67 +48,61 @@ export async function GET(request) {
   }
 }
 
-
 export async function POST(request) {
-    //get all request
-    const { 
-        Service_offerID,
-        Service_description,	
-        CTat_RTime,
-        Price,
-        Shipping_Fee,
-        qty_ws,
-        Tax,
-        Total
-    } = await request.json();
-    
+  const { 
+    Service_offerID,
+    Service_description,	
+    CTat_RTime,
+    Price,
+    Shipping_Fee,
+    qty_ws,
+    Tax,
+    Total,
+    WarrantyCondition,   // ✅ Tambah
+    CaseTypeServices     // ✅ Tambah
+  } = await request.json();
 
-     // ✅ Check if ProductType already exists
-     const existingWarrantyService = await prisma.warranty_services.findFirst({
-        where: { 
-          Service_offerID : Service_offerID,
-          Service_description : Service_description,	
-          CTat_RTime : CTat_RTime,
-          Price : parseFloat(Price),
-          Shipping_Fee : parseFloat(Shipping_Fee),
-          qty_ws : parseInt(qty_ws),
-          Tax : parseFloat(Tax),
-          Total : parseFloat(Total)
-        }
-    });
-
-    if (existingWarrantyService) {
-        return NextResponse.json({
-            success: true,
-            message: "Warranty Services already exists. No need to create a new entry.",
-            data: existingWarrantyService
-        }, { status: 200 });
+  const existingWarrantyService = await prisma.warranty_services.findFirst({
+    where: { 
+      Service_offerID : Service_offerID,
+      Service_description : Service_description,	
+      CTat_RTime : CTat_RTime,
+      Price : parseFloat(Price),
+      Shipping_Fee : parseFloat(Shipping_Fee),
+      qty_ws : parseInt(qty_ws),
+      Tax : parseFloat(Tax),
+      Total : parseFloat(Total),
+      WarrantyCondition : WarrantyCondition,   // ✅ Tambah
+      CaseTypeServices : CaseTypeServices     // ✅ Tambah
     }
+  });
 
-    //create data 
-    const warranty_service = await prisma.warranty_services.create({
-        data:{
-          Service_offerID : Service_offerID,
-          Service_description : Service_description,	
-          CTat_RTime : CTat_RTime,
-          Price : parseFloat(Price),
-          Shipping_Fee : parseFloat(Shipping_Fee),
-          qty_ws : parseInt(qty_ws),
-          Tax : parseFloat(Tax),
-          Total : parseFloat(Total)
+  if (existingWarrantyService) {
+    return NextResponse.json({
+      success: true,
+      message: "Warranty Services already exists. No need to create a new entry.",
+      data: existingWarrantyService
+    }, { status: 200 });
+  }
 
-        },
-    });
+  const warranty_service = await prisma.warranty_services.create({
+    data:{
+      Service_offerID : Service_offerID,
+      Service_description : Service_description,	
+      CTat_RTime : CTat_RTime,
+      Price : parseFloat(Price),
+      Shipping_Fee : parseFloat(Shipping_Fee),
+      qty_ws : parseInt(qty_ws),
+      Tax : parseFloat(Tax),
+      Total : parseFloat(Total),
+      WarrantyCondition : WarrantyCondition,   // ✅ Tambah
+      CaseTypeServices : CaseTypeServices     // ✅ Tambah
+    },
+  });
 
-    return NextResponse.json(
-        {
-            success: true,  
-            message: "Warranty Service Information Created Successfully!",
-            data: warranty_service
-        },
-        { 
-            status: 201
-        }
-    )
+  return NextResponse.json({
+    success: true,  
+    message: "Warranty Service Information Created Successfully!",
+    data: warranty_service
+  }, { status: 201 });
 }
-

@@ -2624,6 +2624,12 @@ export const WarrantyService_table = () => {
               >
                 Total {renderSortIcon("Total")}
               </th>
+              <th onClick={() => handleSort("WarrantyCondition")} className="p-3 text-sm font-semibold text-left border cursor-pointer">
+                Warranty Condition {renderSortIcon("WarrantyCondition")}
+              </th>
+              <th onClick={() => handleSort("CaseTypeServices")} className="p-3 text-sm font-semibold text-left border cursor-pointer">
+                Case Type {renderSortIcon("CaseTypeServices")}
+              </th>
               <th className="p-3 text-sm font-semibold text-center border">
                 Actions
               </th>
@@ -2656,6 +2662,8 @@ export const WarrantyService_table = () => {
                   <td className="p-3 border">{WarrantyServiceItem.qty_ws}</td>
                   <td className="p-3 border">{WarrantyServiceItem.Tax}</td>
                   <td className="p-3 border">{WarrantyServiceItem.Total}</td>
+                  <td className="p-3 border">{WarrantyServiceItem.WarrantyCondition}</td>
+                  <td className="p-3 border">{WarrantyServiceItem.CaseTypeServices}</td>
                   <td className="flex p-3 space-x-2 border justify-center">
                     <WarrantyServiceEdit
                       Service_offerID={WarrantyServiceItem.Service_offerID}
