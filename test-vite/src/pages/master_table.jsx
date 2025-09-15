@@ -2432,7 +2432,7 @@ export const WarrantyService_table = () => {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [goToPageInput, setGoToPageInput] = useState("");
 
   // Sorting
@@ -2571,7 +2571,7 @@ export const WarrantyService_table = () => {
 
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
-      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[300px]">
+      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[600px]">
         <table className="w-full relative border-collapse">
           <thead className="sticky z-10 top-0 bg-gray-100">
             <tr>
@@ -2708,7 +2708,6 @@ export const WarrantyService_table = () => {
               }
             }}
           >
-            <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={25}>25</option>
             <option value={50}>50</option>
