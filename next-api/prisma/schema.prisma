@@ -465,6 +465,8 @@ model warranty_services {
   qty_ws              Int              @default(0)
   Tax                 Float            @default(0) @db.Float
   Total               Float            @default(0) @db.Float
+  WarrantyCondition   WarrantyCondition?
+  CaseTypeServices    String?          @db.VarChar(255)
   servicecatalog      servicecatalog[]
 }
 
