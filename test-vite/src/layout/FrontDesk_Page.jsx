@@ -97,7 +97,7 @@ export default function FrontDesk_Page() {
 
         return dateB - dateA; // newest first
       });
-      const recentCases = sortedCases.slice(0, 4);
+      const recentCases = sortedCases.slice(0, 3);
       console.log("Length of the arrays", valuefiltercases);
       
       setCaseData(recentCases);

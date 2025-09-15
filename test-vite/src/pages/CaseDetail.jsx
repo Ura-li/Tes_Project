@@ -286,6 +286,9 @@ export const TabsServiceCaseDetails = ({
         case 'ENTITLEMENT':
           if (entitlementEdited) {
             console.log("OTC CODE EDIT : ",entitlementStatus);
+               await ApiCustomer.patch(`/api/asset-information/${caseDetails.AssetID}`, {
+                Warranty_Status: entitlementStatus.OTCCode || "",
+              });
             Object.assign(dataToUpdate, entitlementStatus); // includes OTCCo
             savedModules.push("Entitlement");
           }
@@ -807,6 +810,8 @@ export const ServiceCase = ({
     Type: null,
   });
   const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
+  const [dataWarrantyStatus, setDataWarrantyStatus] = useState()
+  console.log("tes data assets", dataFetchAssetInformation)
   const [ownerUserData, setOwnerUserData] = useState([]);
 
   const [workOrders, setWorkOrders] = useState([]);
@@ -814,6 +819,8 @@ export const ServiceCase = ({
   const [materialOrders, setMaterialOrders] = useState([]);
 
   const [actionLogs, setActionLogs] = useState([]);
+
+
 
   const fetchCustomerData = async () => {
     try {
@@ -852,6 +859,7 @@ export const ServiceCase = ({
       setDataFetchAssetInformation({
         AssetInformation: resAsset.data.data,
       });
+      setDataWarrantyStatus(resAsset.data.data?.Warranty_Status)
     } catch (err) {
       console.error("Error returning Asset Data : ", err);
       return null;
@@ -1105,8 +1113,8 @@ const fetchActionLog = async () => {
   }, [assignToForm]);
 
   useEffect(() => {
-    if (otcCode.length > 0 && caseDetails?.OTCCode) {
-      handleEntitlementStatus("OTCCode")(caseDetails.OTCCode)
+    if (otcCode.length > 0 && dataFetchAssetInformation?.AssetInformation?.Warranty_Status) {
+      handleEntitlementStatus("OTCCode")(dataFetchAssetInformation?.AssetInformation?.Warranty_Status);
     }
   }, [otcCode, caseDetails]);
 
@@ -1863,8 +1871,8 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     <CaseField label="Warranty Status"  span={3} star className={"whitespace-nowrap"}>
                       <SearchCommandBlock
                         options={otcCode}
-                        // value={entitlementStatus.OTCCode}
-                        value={dataFetchAssetInformation?.AssetInformation?.Warranty_Status}
+                        value={entitlementStatus.OTCCode}
+                        // value={dataWarrantyStatus || "--Select--"}
                         onChange={(value) =>
                           handleEntitlementStatus("OTCCode")(value)
                         }
@@ -2051,8 +2059,8 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
           </TabsContent>
 
           <TabsContent value="action_log" >
-            <div className="mt-2 p-1">
-              <Card className="flex-col">
+            <div className="mt-2 p-1 grid grid-cols-2">
+              <Card className="flex-col col-span-2">
                 <CardHeader>
                   <CardTitle className="text-lg">Action Log</CardTitle>
                   <hr />
@@ -2074,7 +2082,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     <TableBody>
                       {actionLogs?.length > 0 ? (
                         actionLogs.map((log, index) => (
-                          <TableRow key={log.id || index}>
+                          <TableRow key={log.id || index} className={'text-xs'}>
                             <TableCell>{index + 1}</TableCell>
                             <TableCell>{log.CaseId}</TableCell>
                             <TableCell>{log.ReferenceId}</TableCell>
