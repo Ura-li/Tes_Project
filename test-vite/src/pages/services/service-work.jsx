@@ -635,7 +635,7 @@ export const ServiceWork = () => {
               <div className="flex flex-col flex-1 gap-4">
                 <Card className="rounded-sm ">
                   <CardContent className="grid items-center grid-cols-2" >
-                      <CaseField label="Incoming Channel" open>
+                      <CaseField label="Incoming Channel" lock>
                       <Input
                         variant={"invisible"}
                         className=""
@@ -684,12 +684,12 @@ export const ServiceWork = () => {
                         readOnly
                       />
                     </CaseField>
-                    <CaseField label="OTC Code" lock>
+                    <CaseField label="Warranty Status" lock>
                       <Input
                         variant={"invisible"}
-                        className=""
-                        value={"---"}
-                        readOnly
+                        value={workOrders?.caseinformation?.otcCodeTable?.Description || "---"}
+                        placeholder= "---"
+                       
                       />
                     </CaseField>
                     <CaseField label="Authorizing Employee" lock>
@@ -987,7 +987,7 @@ export const ServiceWork = () => {
                               </Link>
                             </TableCell>
                             <TableCell>{material.workorder?.CaseID}</TableCell>
-                            <TableCell>{material.CreatedOn}</TableCell>
+                            <TableCell>{formatDate(material.CreatedOn)}</TableCell>
                             <TableCell>{material.OrderStatus}</TableCell>
                             <TableCell>{material.OrderType}</TableCell>
                             <TableCell>
