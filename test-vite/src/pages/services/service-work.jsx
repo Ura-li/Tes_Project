@@ -1113,7 +1113,7 @@ export const ServiceWork = () => {
                     </TableRow>
                   </TableHeader>
 
-                  <TableBody>
+                  <TableBody className={"cursor-pointer"}>
                     {bookings.length > 0 ? (
                       bookings.map((booking, index) => (
                         <TableRow
@@ -1129,7 +1129,7 @@ export const ServiceWork = () => {
                             {booking.bookingDetails?.[0].resourceaccount
                               ?.Name || "-"}
                           </TableCell>
-                          <TableCell>{booking.BookingStatus || "-"}</TableCell>
+                          <TableCell>{booking.BookingStatus?.Description || "-"}</TableCell>
                           <TableCell>
                             {booking.CeScheduleChange ? "Yes" : "No"}
                           </TableCell>

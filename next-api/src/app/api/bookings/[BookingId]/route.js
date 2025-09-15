@@ -20,7 +20,7 @@ export async function GET(request, { params }) {
         workorder: {
           include: {
             caseinformation: true,
-          }
+          },
         }, // Relasi ke tabel workorder
         bookingDetails: {
           orderBy: { ChangedAt: 'desc' }, // Urutkan ChangedAt terbaru
@@ -31,8 +31,8 @@ export async function GET(request, { params }) {
             subkTechnician: true,
             engineer: true,
           }
-        }
-        
+        },
+        BookingStatus: true,
       }
     })
 
@@ -68,7 +68,7 @@ export async function PATCH(request, { params }) {
 
     const body = await request.json();
     const {
-      BookingStatus,
+      BookingStatusId,
       ChangedBy,
       DoNotDisturb,
       CeScheduleChange,
@@ -123,7 +123,7 @@ export async function PATCH(request, { params }) {
       const updatedBooking = await tx.bookings.update({
         where: { BookingId: bookingId },
         data: {
-          BookingStatus,
+          BookingStatusId : BookingStatusId,
           DoNotDisturb,
           CeScheduleChange,
           ScheduleJeopardy,
@@ -146,7 +146,9 @@ export async function PATCH(request, { params }) {
       const dataToUpdate = {
         ChangedBy: changedBy,
         Name: "",
-        Status: BookingStatus,
+          Status: BookingStatusId
+    ? { connect: { BookingStatusId: BookingStatusId } }
+    : { disconnect: true },
         StartTimeCustomerTime: isValidDate(bookingDetailsData.StartTimeCustomerTime),
         EndTimeCustomerTime: isValidDate(bookingDetailsData.EndTimeCustomerTime),
         EstimatedArrivalTimeCustomerTime: isValidDate(bookingDetailsData.EstimatedArrivalTimeCustomerTime),
@@ -173,7 +175,7 @@ export async function PATCH(request, { params }) {
       });
 
       // Jika BookingStatus = Completed, update SystemStatus menjadi OPEN_COMPLETED
-      if (BookingStatus === 'Completed') {
+      if (BookingStatusId === 2) {
         await tx.workorder.update({
           where: { WOID: existingBooking.WOID },
           data: { SystemStatus: 'OPEN_COMPLETED' },
