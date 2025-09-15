@@ -1385,7 +1385,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
           onClick={() => { setIsOpen(true); }} 
           className="flex items-center gap-2"
         >
-          <Pencil className="w-4 h-4" /> Edit
+          <Pencil />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -1928,6 +1928,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
   // ambil product detail saat modal dibuka
   useEffect(() => {
     if (!open) return;
+
     const fetchDetail = async () => {
       try {
         const res = await ApiCustomer.get(`/api/product-information/${ProductNumber}`);
@@ -1963,15 +1964,28 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
   };
 
   const handlerSave = async () => {
-    const { ProductNumber, ProductLine, ProductName, ProductTypeID } = formDataProduct;
+    const { ProductNumber, ProductLine, ProductName, ProductTypeID, oldProductNumber } = formDataProduct;
     if (!ProductNumber || !ProductLine || !ProductName || !ProductTypeID) {
       Swal.fire({ icon: "warning", title: "Incomplete", text: "Please fill all fields" });
       return;
     }
 
     try {
-      await ApiCustomer.patch("/api/product-information", formDataProduct);
-      Swal.fire({ icon: "success", title: "Updated", text: "Product updated successfully", timer: 1200, showConfirmButton: false });
+      await ApiCustomer.patch(`/api/product-information/${oldProductNumber}`, {
+        newProductNumber: ProductNumber, // kirim product number baru
+        ProductLine,
+        ProductName,
+        ProductTypeID,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: "Product updated successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+
       setOpen(false);
       onUpdate?.();
     } catch (err) {
@@ -1983,7 +1997,9 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">Edit</Button>
+        <Button variant="outline" size="sm">
+          <Pencil />
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -1993,7 +2009,12 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
 
         <div className="space-y-3">
           <Label>Product Number *</Label>
-          <Input type="text" id="ProductNumber" value={formDataProduct.ProductNumber} onChange={handlerInputProduct} />
+          <Input
+            type="text"
+            id="ProductNumber"
+            value={formDataProduct.ProductNumber}
+            onChange={handlerInputProduct}
+          />
 
           <Label>Product Line *</Label>
           <Input type="text" id="ProductLine" value={formDataProduct.ProductLine} onChange={handlerInputProduct} />
@@ -2444,128 +2465,219 @@ export function ProductTypeDelete ({ ProductTypeID, isModalOpen, setIsModalOpen,
   );
 };
 
-export function WarrantyServiceAdd () {
-   const [formDataWarratyService, setFormDataWarrantyService] = useState({
-    Service_offerID: '',
-    Service_description: '',	
-    CTat_RTime: '',
-    Price: '',
-    Shipping_Fee: '',
-    qty_ws: '',
-    Tax: '',
-    Total: '',
-    })
-    
-    // Make Handler ProductType
-    const handlerInputWarrantyService = (e) => {
-      const { id, value } = e.target
-      setFormDataWarrantyService(prevState => ({
-        ...prevState,
-        [id]:value
-      }));
-    };
+export function WarrantyServiceAdd() {
+  const [formDataWarrantyService, setFormDataWarrantyService] = useState({
+    Service_offerID: "",
+    Service_description: "",
+    CTat_RTime: "",
+    Price: "",
+    Shipping_Fee: "",
+    qty_ws: "",
+    Tax: "",
+    Total: "",
+    WarrantyCondition: "",   // ✅ Tambah
+    CaseTypeServices: "",    // ✅ Tambah
+  });
 
-    // Handler Submit
-    const handlerWarrantyService = async () => {
-      const { 
-        Service_offerID, Service_description, CTat_RTime, Price,
-        Shipping_Fee, qty_ws, Tax, Total
-      } = formDataWarratyService;
-    
-      if (!Service_offerID || !Service_description || !CTat_RTime || !Price || !Shipping_Fee || !qty_ws || !Tax || !Total) {
-        Swal.fire({
-          title: "Incomplete Data",
-          text: "Please fill in all fields before submitting.",
-          icon: "warning",
-          timer: 1500,
-          timerProgressBar: true,
-          showConfirmButton: false,
-          allowEscapeKey: false,
-        });
-        return;
-      }
-    
-      try {
-        const response = await ApiCustomer.post("/api/warranty-services", formDataWarratyService);
-        console.log("Success:", response.data);
-    
-        Swal.fire({
-          icon: 'success',
-          title: 'Berhasil!',
-          text: 'Warranty Service berhasil disimpan.',
-          timer: 1200,
-          timerProgressBar: true,
-          showConfirmButton: false,
-          allowEscapeKey: false,
-        }).then(() => {
-          window.location.reload();
-        });
+  // Input handler
+  const handlerInputWarrantyService = (e) => {
+    const { id, value } = e.target;
+    setFormDataWarrantyService((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
 
-      } catch (err) {
-        console.error("Error saving warranty service: ", err);
-    
-        Swal.fire({
-          title: "Error!",
-          text: "Failed to save warranty service. Please try again.",
-          icon: "error",
-          timer: 1200,
-          timerProgressBar: true,
-          showConfirmButton: false,
-          allowEscapeKey: false,
-        });
-      }
-    };
+  // Submit handler
+  const handlerWarrantyService = async () => {
+    const {
+      Service_offerID,
+      Service_description,
+      CTat_RTime,
+      Price,
+      Shipping_Fee,
+      qty_ws,
+      Tax,
+      Total,
+      WarrantyCondition,
+      CaseTypeServices,
+    } = formDataWarrantyService;
+
+    if (
+      !Service_offerID ||
+      !Service_description ||
+      !CTat_RTime ||
+      !Price ||
+      !Shipping_Fee ||
+      !qty_ws ||
+      !Tax ||
+      !Total ||
+      !WarrantyCondition
+    ) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Please fill in all required fields before submitting.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post(
+        "/api/warranty-services",
+        formDataWarrantyService
+      );
+      console.log("Success:", response.data);
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Warranty Service berhasil disimpan.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (err) {
+      console.error("Error saving warranty service: ", err);
+
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to save warranty service. Please try again.",
+        icon: "error",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+    }
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="ml-2 rounded-sm h-11"> Warranty Service Add</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">
+          Warranty Service Add
+        </Button>
       </DialogTrigger>
-      <DialogContent className="h-[500px] overflow-y-auto">
+      <DialogContent className="h-[600px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Warranty Service Information</DialogTitle>
           <DialogDescription>
-            Add the warranty service Fields marked with * are required.
+            Add the warranty service. Fields marked with * are required.
           </DialogDescription>
         </DialogHeader>
+
         <div className="space-y-3">
+          <Label>Service Offer ID *</Label>
+          <Input
+            type="text"
+            id="Service_offerID"
+            className="p-2"
+            value={formDataWarrantyService.Service_offerID}
+            onChange={handlerInputWarrantyService}
+          />
 
-        <Label>Service Offer ID</Label>
-        <Input type="text" id="Service_offerID" className="p-2" value={formDataWarratyService.Service_offerID} onChange={handlerInputWarrantyService} />
-   
-        <Label htmlFor="Service_description">Service Description</Label>
-        <Textarea
-          id="Service_description"
-          placeholder="Masukkan deskripsi servis"
-          className="mt-1"
-          value={formDataWarratyService.Service_description}
-          onChange={handlerInputWarrantyService}
-        />
+          <Label htmlFor="Service_description">Service Description *</Label>
+          <Textarea
+            id="Service_description"
+            placeholder="Masukkan deskripsi servis"
+            className="mt-1"
+            value={formDataWarrantyService.Service_description}
+            onChange={handlerInputWarrantyService}
+          />
 
-        <Label>Customer TAT / Response Time</Label>
-        <Input type="text" id="CTat_RTime" className="p-2" value={formDataWarratyService.CTat_RTime} onChange={handlerInputWarrantyService} />
+          <Label>Customer TAT / Response Time *</Label>
+          <Input
+            type="text"
+            id="CTat_RTime"
+            className="p-2"
+            value={formDataWarrantyService.CTat_RTime}
+            onChange={handlerInputWarrantyService}
+          />
 
-        <Label>Price</Label>
-        <Input type="text" id="Price" className="p-2" value={formDataWarratyService.Price} onChange={handlerInputWarrantyService} />
-        
-        <Label>Shipping Fee</Label>
-        <Input type="text" id="Shipping_Fee" className="p-2" value={formDataWarratyService.Shipping_Fee} onChange={handlerInputWarrantyService} />
+          <Label>Price *</Label>
+          <Input
+            type="number"
+            id="Price"
+            className="p-2"
+            value={formDataWarrantyService.Price}
+            onChange={handlerInputWarrantyService}
+          />
 
-        <Label>Quantity</Label>
-        <Input type="number" id="qty_ws" className="p-2" value={formDataWarratyService.qty_ws} onChange={handlerInputWarrantyService} />
-         
-        <Label>Tax</Label>
-        <Input type="text" id="Tax" className="p-2" value={formDataWarratyService.Tax} onChange={handlerInputWarrantyService} />
+          <Label>Shipping Fee *</Label>
+          <Input
+            type="number"
+            id="Shipping_Fee"
+            className="p-2"
+            value={formDataWarrantyService.Shipping_Fee}
+            onChange={handlerInputWarrantyService}
+          />
 
-        <Label>Total</Label>
-        <Input type="text" id="Total" className="p-2" value={formDataWarratyService.Total} onChange={handlerInputWarrantyService} />
+          <Label>Quantity *</Label>
+          <Input
+            type="number"
+            id="qty_ws"
+            className="p-2"
+            value={formDataWarrantyService.qty_ws}
+            onChange={handlerInputWarrantyService}
+          />
+
+          <Label>Tax *</Label>
+          <Input
+            type="number"
+            id="Tax"
+            className="p-2"
+            value={formDataWarrantyService.Tax}
+            onChange={handlerInputWarrantyService}
+          />
+
+          <Label>Total *</Label>
+          <Input
+            type="number"
+            id="Total"
+            className="p-2"
+            value={formDataWarrantyService.Total}
+            onChange={handlerInputWarrantyService}
+          />
+
+          {/* ✅ Tambahan Field WarrantyCondition */}
+          <Label>Warranty Condition *</Label>
+          <select
+            id="WarrantyCondition"
+            className="w-full p-2 border rounded-lg"
+            value={formDataWarrantyService.WarrantyCondition}
+            onChange={handlerInputWarrantyService}
+          >
+            <option value="">-- Select Condition --</option>
+            <option value="InWarranty">In Warranty</option>
+            <option value="OutWarranty">Out of Warranty</option>
+          </select>
+
+          {/* ✅ Tambahan Field CaseTypeServices */}
+          <Label>Case Type Services</Label>
+          <Input
+            type="text"
+            id="CaseTypeServices"
+            className="p-2"
+            value={formDataWarrantyService.CaseTypeServices}
+            onChange={handlerInputWarrantyService}
+          />
         </div>
+
         <DialogFooter>
           <Button onClick={handlerWarrantyService}>Add</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-};
+  );
+}
 
 export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
   const [WarrantyService, setWarrantyService] = useState(null);
@@ -2577,12 +2689,16 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
   const [qty_ws, setQty_ws] = useState("");
   const [Tax, setTax] = useState("");
   const [Total, setTotal] = useState("");
+  const [WarrantyCondition, setWarrantyCondition] = useState(""); // NEW
+  const [CaseTypeServices, setCaseTypeServices] = useState("");   // NEW
   const [isOpen, setIsOpen] = useState(false);
 
   const fetchWarrantyService = async () => {
     if (!Service_offerID) return;
     try {
-      const response = await ApiCustomer.get(`/api/warranty-services/${Service_offerID}`);
+      const response = await ApiCustomer.get(
+        `/api/warranty-services/${Service_offerID}`
+      );
       const data = response.data.data;
       setWarrantyService(data);
       setService_offerIDState(data?.Service_offerID || "");
@@ -2593,7 +2709,8 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
       setQty_ws(data?.qty_ws || "");
       setTax(data?.Tax || "");
       setTotal(data?.Total || "");
-
+      setWarrantyCondition(data?.WarrantyCondition || "");
+      setCaseTypeServices(data?.CaseTypeServices || "");
     } catch (error) {
       console.error("Error fetching Warranty Service information:", error);
     }
@@ -2615,123 +2732,160 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
       setQty_ws("");
       setTax("");
       setTotal("");
+      setWarrantyCondition("");
+      setCaseTypeServices("");
     }
   }, [isOpen]);
 
   const handleUpdate = async () => {
-    if (
-      !Service_offerIDState || !Service_description || !CTat_RTime || !Price ||
-      !Shipping_Fee || !qty_ws || !Tax || !Total
-    ) {
+    if (!Service_offerIDState || !Service_description || !CTat_RTime) {
       Swal.fire({
         title: "Incomplete Data",
-        text: "Please fill in all fields before submitting.",
+        text: "Please fill in required fields.",
         icon: "warning",
         timer: 1100,
-        timerProgressBar: true,
         showConfirmButton: false,
-        allowEscapeKey: false,  
-      });  
+      });
       return;
     }
-  
+
     try {
-      //  Tampilkan loading saat proses update
       Swal.fire({
         title: "Updating...",
         text: "Please wait while saving data.",
         allowOutsideClick: false,
-        allowEscapeKey: false,
         didOpen: () => Swal.showLoading(),
       });
-  
+
       await ApiCustomer.patch(`/api/warranty-services/${Service_offerID}`, {
         Service_description,
         CTat_RTime,
-        Price: parseFloat(Price),
-        Shipping_Fee: parseFloat(Shipping_Fee),
-        qty_ws: parseInt(qty_ws),
-        Tax: parseFloat(Tax),
-        Total: parseFloat(Total)
+        Price: Price ? parseFloat(Price) : 0,
+        Shipping_Fee: Shipping_Fee ? parseFloat(Shipping_Fee) : 0,
+        qty_ws: qty_ws ? parseInt(qty_ws) : 0,
+        Tax: Tax ? parseFloat(Tax) : 0,
+        Total: Total ? parseFloat(Total) : 0,
+        WarrantyCondition: WarrantyCondition || null,
+        CaseTypeServices: CaseTypeServices || null, // boleh kosong
       });
-  
-      Swal.close(); // Tutup loading
-  
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'Warranty service updated successfully.',
-        timer: 1500,
-        showConfirmButton: false,
-        allowEscapeKey: false,
-      });
-  
-      onUpdate();
-      setIsOpen(false);
-  
-    } catch (error) {
-      console.error("Error updating Warranty Service:", error);
-  
+
       Swal.close();
       Swal.fire({
-        icon: 'error',
-        title: 'Update Failed',
-        text: 'An error occurred while updating warranty service.',
-        allowEscapeKey: false,
+        icon: "success",
+        title: "Success!",
+        text: "Warranty service updated successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      onUpdate();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating Warranty Service:", error);
+      Swal.close();
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "An error occurred while updating warranty service.",
       });
     }
   };
-  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => { setIsOpen(true); fetchWarrantyService(); }}>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setIsOpen(true);
+            fetchWarrantyService();
+          }}
+        >
           <Pencil />
         </Button>
       </DialogTrigger>
-      <DialogContent className="h-[500px] overflow-y-auto">
+      <DialogContent className="h-[600px] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Warranty Service Information</DialogTitle>
+          <DialogTitle>Edit Warranty Service</DialogTitle>
           <DialogDescription>
-            Update the details of the Warranty Service Fields marked with * are required.
+            Update the details of the Warranty Service. Fields marked with * are required.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
+          <Label htmlFor="Service_description">Service Description *</Label>
+          <Textarea
+            id="Service_description"
+            value={Service_description}
+            onChange={(e) => setService_description(e.target.value)}
+          />
 
-<Label htmlFor="Service_description">Service Description</Label>
-<Textarea
-  id="Service_description"
-  placeholder="Masukkan deskripsi servis"
-  className="mt-1"
-  value={Service_description} onChange={(e) => setService_description(e.target.value)}
-/>
+          <Label>Customer TAT / Response Time *</Label>
+          <Input
+            type="text"
+            value={CTat_RTime}
+            onChange={(e) => setCTat_RTime(e.target.value)}
+          />
 
-<Label>Customer TAT / Response Time</Label>
-<Input type="text" id="CTat_RTime" className="p-2"  value={CTat_RTime} onChange={(e) => setCTat_RTime(e.target.value)} />
+          <Label>Price *</Label>
+          <Input
+            type="number"
+            value={Price}
+            onChange={(e) => setPrice(e.target.value)}
+          />
 
-<Label>Price</Label>
-<Input type="text" id="Price" className="p-2"  value={Price} onChange={(e) => setPrice(e.target.value)} />
+          <Label>Shipping Fee *</Label>
+          <Input
+            type="number"
+            value={Shipping_Fee}
+            onChange={(e) => setShipping_Fee(e.target.value)}
+          />
 
-<Label>Shipping Fee</Label>
-<Input type="text" id="Shipping_Fee" className="p-2"  value={Shipping_Fee} onChange={(e) => setShipping_Fee(e.target.value)} />
+          <Label>Quantity *</Label>
+          <Input
+            type="number"
+            value={qty_ws}
+            onChange={(e) => setQty_ws(e.target.value)}
+          />
 
-<Label>Quantity</Label>
-<Input type="number" id="qty_ws" className="p-2"  value={qty_ws} onChange={(e) => setQty_ws(e.target.value)} />
- 
-<Label>Tax</Label>
-<Input type="text" id="Tax" className="p-2"  value={Tax} onChange={(e) => setTax(e.target.value)} />
+          <Label>Tax *</Label>
+          <Input
+            type="number"
+            value={Tax}
+            onChange={(e) => setTax(e.target.value)}
+          />
 
-<Label>Total</Label>
-<Input type="text" id="Total" className="p-2"  value={Total} onChange={(e) => setTotal(e.target.value)}/>
-</div>
+          <Label>Total *</Label>
+          <Input
+            type="number"
+            value={Total}
+            onChange={(e) => setTotal(e.target.value)}
+          />
+
+          <Label>Warranty Condition</Label>
+          <select
+            className="border rounded p-2 w-full"
+            value={WarrantyCondition}
+            onChange={(e) => setWarrantyCondition(e.target.value)}
+          >
+            <option value="">-- Select Condition --</option>
+            <option value="InWarranty">In Warranty</option>
+            <option value="OutWarranty">Out of Warranty</option>
+          </select>
+
+          <Label>Case Type Services</Label>
+          <Input
+            type="text"
+            value={CaseTypeServices}
+            onChange={(e) => setCaseTypeServices(e.target.value)}
+          />
+        </div>
         <DialogFooter>
           <Button onClick={handleUpdate}>Update</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export function WarrantyServiceDelete ({ Service_offerID, isModalOpen, setIsModalOpen, onUpdate }) {
   const handleDelete = async () => {
