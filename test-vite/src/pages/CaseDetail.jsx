@@ -759,9 +759,16 @@ export const ServiceCase = ({
   
   const [roleAssign, setRoleAssign] = useState([]);
   const [ReadyForClosureDate, setReadyForClosureDate] = useState(null);
+
   useEffect(() => {
     if (caseDetails?.CreatedOn) {
       setCreatedOn(new Date(caseDetails.CreatedOn)); // includes date + time
+    }
+  }, [caseDetails]);
+
+  useEffect(() => {
+    if (caseDetails?.CaseClosedDate) {
+      setCaseClosedDate(new Date(caseDetails.CaseClosedDate)); // includes date + time
     }
   }, [caseDetails]);
 
@@ -1394,13 +1401,6 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   />
                 </CaseField>
 
-                  <CaseField label="Incoming Channel" className={"mt-2"} lock span={2}>
-                  <Input
-                    variant="invisible"
-                    value={caseDetails.IncomingChannel}
-                  />
-                </CaseField>
-
                 <CaseField label="KCI For Case?" lock span={2}>
                      <Input 
                       variant="invisible"
@@ -1416,23 +1416,27 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   ></DatePicker>
                 </CaseField>
 
-                <Accordion type="single" collapsible className="w-full col-span-2">
-                  <AccordionItem value="more-details" className="pl-5">
-                    <AccordionTrigger className={"decoration-transparent border-1 p-2 cursor-pointer"}>More Details</AccordionTrigger>
-                    <AccordionContent className={"m-1"}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <CaseField label="Case Closed Date">
-                        <span className="gap-[5em]">
+                 <CaseField label="Case Closed Date" lock span={2}>
                           {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
                           <DatePicker
                             variant="icon"
                             value={caseClosedDate}
                             onChange={setCaseClosedDate}
-                            readOnly
                           ></DatePicker>
-                        </span>
                       </CaseField>
 
+                <Accordion type="single" collapsible className="w-full col-span-2">
+                  <AccordionItem value="more-details" className="pl-5">
+                    <AccordionTrigger className={"decoration-transparent border-1 p-2 cursor-pointer"}>More Details</AccordionTrigger>
+                    <AccordionContent className={"m-1"}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">                    
+   <CaseField label="Incoming Channel" className={"mt-2"}>
+                  <Input
+                    variant="invisible"
+                    value={caseDetails.IncomingChannel}
+                    readOnly
+                  />
+                </CaseField>
                       <CaseField label="Submitted To Base">
                         <span className="gap-[5em]">
                           <DatePicker
@@ -1822,8 +1826,8 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     <hr />
                   </CardHeader>
                   <CardContent className="grid items-center grid-cols-6 gap-10">
-                    <CaseField label="Assets" lock>
-                      {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
+                    <CaseField label="Category Warranty" lock className={"whitespace-nowrap"}>
+                      {dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition}{" "}
                     </CaseField>
                     <CaseField label="Product Number" lock>
                       <span className="pl-3">
