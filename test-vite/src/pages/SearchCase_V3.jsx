@@ -990,7 +990,7 @@ export default function NewCaseForm() {
       return
     }
     if (usePIC && (!contactPICName || !contactPICEmail || !contactPICPhone)) {
-      toast.warning("Mohon lengkapi data PIC jika checkbox 'Gunakan PIC' dicentang.");
+      toast.warning("Mohon lengkapi data PIC jika checkbox 'Tambahkan PIC' dicentang.");
       return;
     }
     if (!problemDesc || !caseSubject) {
@@ -1607,7 +1607,7 @@ export default function NewCaseForm() {
                         checked={usePIC}
                         onCheckedChange={(v) => setUsePIC(Boolean(v))}
                       />
-                      <Label htmlFor="usePIC">Gunakan PIC</Label>
+                      <Label htmlFor="usePIC">Tambahkan PIC</Label>
                     </div>
                     <Button type="button" variant="outline" size="sm" onClick={copyPICFromContact} disabled={!usePIC}>
                       Same as Contact Information
