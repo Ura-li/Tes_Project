@@ -617,7 +617,7 @@ const openPopup = () => {
           allowOutsideClick: false,
           allowEscapeKey: false,
         }).then(() => {
-          navigate(`/app/master/Case_table`);
+          navigate(`/app/viewcase`);
         });
       } else {
         Swal.fire({
@@ -1121,7 +1121,7 @@ const fetchActionLog = async () => {
     if (otcCode.length > 0 && dataFetchAssetInformation?.AssetInformation?.Warranty_Status) {
       handleEntitlementStatus("OTCCode")(dataFetchAssetInformation?.AssetInformation?.Warranty_Status);
     }
-  }, [otcCode]);
+  }, [caseDetails]);
 
   useEffect(() => {
     console.log("Data Asset Info : ", dataFetchAssetInformation);
@@ -1560,7 +1560,9 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   <Input 
                   variant="invisible" 
                   placeholder="---"  
-                  value={dataFetchCustomerData.SiteAccount?.City}/>
+                  value={dataFetchCustomerData?.Type == "SiteAccount"
+                    ? dataFetchCustomerData?.SiteAccount?.City + " - " + dataFetchCustomerData?.SiteAccount?.StateProvince
+                    : dataFetchCustomerData?.MainAccount?.City + " - " + dataFetchCustomerData?.MainAccount?.StateProvince}/>
                 </CaseField>
                 <CaseField label="Is Partner" lock>
                   <Input variant="invisible" placeholder="---" />
