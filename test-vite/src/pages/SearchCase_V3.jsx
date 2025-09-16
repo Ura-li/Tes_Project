@@ -1410,7 +1410,7 @@ export default function NewCaseForm() {
       <div className="columns-2 space-y-2">
 
         {/* 1) Case Section */}
-        <Card className="rounded-2xl p-[20px]  shadow-2xl   " id='case'>
+        <Card className="rounded-2xl p-[20px]  shadow-2xl   break-inside-avoid" id='case'>
           <CardHeader>
             <CardTitle>1) Case</CardTitle>
             <CardDescription>Diisi setelah pilih serial/customer.</CardDescription>
@@ -1734,7 +1734,7 @@ export default function NewCaseForm() {
         {/* {showCustomerCard && (
               )} */}
         {/* 3) Product */}
-        <Card className="rounded-2xl p-[20px]  shadow-2xl    " id='product'>
+        <Card className="rounded-2xl p-[20px]  shadow-2xl   break-inside-avoid " id='product'>
           <CardHeader>
             <CardTitle>3) Product</CardTitle>
             <CardDescription>
@@ -1866,7 +1866,7 @@ export default function NewCaseForm() {
             </CardContent>
           </Card>
           {/* 4) Warranty */}
-          <Card className="rounded-2xl p-[20px]  shadow-2xl col-span-3   scroll-mt-[120px]" id='warranty'>
+          <Card className="rounded-2xl p-[20px]  shadow-2xl break-inside-avoid col-span-3   scroll-mt-[120px] " id='warranty'>
             <CardHeader>
               <CardTitle>4) Warranty</CardTitle>
               <CardDescription>
@@ -1895,7 +1895,7 @@ export default function NewCaseForm() {
             </CardContent>
           </Card>
           {/* 5) Accessory */}
-          <Card className="rounded-2xl p-[20px]  shadow-2xl col-span-3   scroll-mt-[120px]" id='accessories'>
+          <Card className="rounded-2xl p-[20px]  shadow-2xl break-inside-avoid col-span-3   scroll-mt-[120px]" id='accessories'>
             <CardHeader>
               <CardTitle>5) Accessory</CardTitle>
               <CardDescription>Opsional. Tambahkan baris sesuai kebutuhan.</CardDescription>
@@ -1946,7 +1946,7 @@ export default function NewCaseForm() {
             </CardContent>
           </Card>
           {/* 6) Photos */}
-          <Card className="rounded-2xl p-[20px]  shadow-2xl col-span-3   scroll-mt-[120px]" id='photos'>
+          <Card className="rounded-2xl p-[20px]  shadow-2xl break-inside-avoid col-span-3   scroll-mt-[120px]" id='photos'>
             <CardHeader>
               <CardTitle>6) Foto</CardTitle>
               <CardDescription>Opsional. Disimpan lokal via endpoint upload.</CardDescription>

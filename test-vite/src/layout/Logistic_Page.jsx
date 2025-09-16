@@ -126,7 +126,7 @@ export default function Logistik() {
                 <CardHeader className={"flex flex-row gap-2 justify-between"}>
                     <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
                     <div className="flex gap-2 ">
-                    {["All", "New", "Closed"].map((status) => (
+                    {["All", "New", "Shipped", "Closed"].map((status) => (
                       <button
                         key={status}
                         onClick={() => {
@@ -160,7 +160,13 @@ export default function Logistik() {
                   <div className="flex flex-row justify-between ">
                   <CardTitle className={"flex flex-row gap-2 items-center "}>
                     {m.MOID}
-                    <Badge className={m.OrderStatus === 'New' ? "text-white bg-green-400" : "text-white bg-red-500"} variant="invisible">
+                    <Badge className={
+                      m.OrderStatus === 'New' ? 
+                      "text-white bg-green-400" : 
+                      m.OrderStatus === 'Shipped' ?
+                      "text-white bg-blue-500" :
+                      "text-white bg-red-500" 
+                    } variant="invisible">
                     {m.OrderStatus}
                     </Badge>
                   </CardTitle>

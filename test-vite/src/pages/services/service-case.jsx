@@ -909,6 +909,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
     },
     { icon: SquareArrowOutUpRight, label: "", },
     { icon: Save, label: "Save", onClick: () => saveMaterialOrder() },
+    { icon: FileSymlink, label: "Save & Close", onClick: () => saveMaterialOrder().then(() => navigate(`/app/work/${materialOrders.WOID}`))},
     {
       icon: CopyXIcon,
       label: "Close",
