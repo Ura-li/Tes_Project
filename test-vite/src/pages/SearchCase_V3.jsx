@@ -1902,7 +1902,8 @@ export default function NewCaseForm() {
             </CardHeader>
             <CardContent className="space-y-3">
               {accessories.map((row, idx) => (
-                <div key={row.id} className="grid grid-cols-12 gap-2 items-center">
+                <>
+                <div key={row.id} className="grid grid-cols-12 gap-2 items-center ring-1 p-3 rounded-2xl">
                   <div className="col-span-12 md:col-span-4">
                     <Label className="text-xs">Accessory Name</Label>
                     <Input
@@ -1926,7 +1927,7 @@ export default function NewCaseForm() {
                       onChange={(e) => updateAccessory(row.id, "note", e.target.value)}
                     />
                   </div>
-                  <div className="col-span-10 md:col-span-1">
+                  <div className="col-span-10 md:col-span-10">
                     <Label className="text-xs">CT/SN</Label>
                     <Input value={row.code} onChange={(e) => updateAccessory(row.id, "code", e.target.value)} />
                   </div>
@@ -1936,6 +1937,8 @@ export default function NewCaseForm() {
                     </Button>
                   </div>
                 </div>
+                  <Separator className="w-full border-2"/>
+                </>
               ))}
               <Button type="button" variant="secondary" onClick={addAccessory}>
                 <Plus className="w-4 h-4 mr-2" /> Add Row
