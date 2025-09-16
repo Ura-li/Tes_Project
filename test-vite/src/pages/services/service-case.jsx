@@ -865,7 +865,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
   const hiddenButtons = open ? buttons.slice(-3) : [];
 
   const saveMaterialOrder = async () => {
-   // if(updatedLineItems === null || Object.keys(updatedLineItems).length === 0) return
+   if(updatedLineItems === null || Object.keys(updatedLineItems).length === 0) return
     try {
       Swal.fire({
         title: "Saving...",
@@ -880,15 +880,15 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
         SalesOrderNumber: moForm.SalesOrderNumber || undefined,
         RMANumber: moForm.RMANumber || undefined,
       })
-      // console.log("update ok",updatedLineItems);
-      // for(const [lineItemID, status] of Object.entries(updatedLineItems)){
-      // console.log("user", user);
-      // const res = await ApiCustomer.patch(`/api/material-order/batch-update`, {
-      //   updates: updatedLineItems,
-      //   MOID: materialOrders.MOID,
-      //   WOID: materialOrders.WOID,
-      //   userId: user.id
-      // })
+      console.log("update ok",updatedLineItems);
+      for(const [lineItemID, status] of Object.entries(updatedLineItems)){
+      console.log("user", user);
+      const res = await ApiCustomer.patch(`/api/material-order/batch-update`, {
+        updates: updatedLineItems,
+        MOID: materialOrders.MOID,
+        WOID: materialOrders.WOID,
+        userId: user.id
+      })
 
       if(res.data) {
         Swal.fire({
@@ -907,8 +907,8 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
           text: res.data.message,
         });
       }
-      // }
-      // console.log("Semua line item berhasil diupdate.");
+      }
+      console.log("Semua line item berhasil diupdate.");
 
     } catch (error) {
          return Swal.fire({

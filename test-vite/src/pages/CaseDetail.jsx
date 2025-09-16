@@ -1101,6 +1101,7 @@ const fetchActionLog = async () => {
 
   //handler all case
   useEffect(() => {
+    fetchOTCCode();
     fetchCustomerData();
     fetchAssetInformation();
     fetchOwnerUserData();
@@ -1108,7 +1109,6 @@ const fetchActionLog = async () => {
     fetchWorkOrders();
     fetchCaseNotes();
     fetchGtc(); 
-    fetchOTCCode();
     fetchCsr();
     fetchCase();
     fetchActionLog();
@@ -1121,7 +1121,7 @@ const fetchActionLog = async () => {
     if (otcCode.length > 0 && dataFetchAssetInformation?.AssetInformation?.Warranty_Status) {
       handleEntitlementStatus("OTCCode")(dataFetchAssetInformation?.AssetInformation?.Warranty_Status);
     }
-  }, [caseDetails]);
+  }, [otcCode]);
 
   useEffect(() => {
     console.log("Data Asset Info : ", dataFetchAssetInformation);
