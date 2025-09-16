@@ -24,9 +24,12 @@ export default function Logistik() {
     const fetchData = async () => {
         try {
             const fetchCaseData = await ApiCustomer.get('/api/case-information')
+            const fetchMO = await ApiCustomer.get('/api/material-order');
             // setCaseData(fetchCaseData.data.data );           
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
+
+            const resFetchMO = fetchMO.data.data;
             console.log("Fetch user data : ", fecthUserData)
             console.log("Fetch Data Mo Detail Line", fetchCaseData.data.data)
 
@@ -44,6 +47,7 @@ export default function Logistik() {
                 Signature: fecthUserData.data.data.Signature ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.Signature}` : null,
             });
             const valueFilterPartOrder = fetchCaseData.data.data.filter(c =>  c?.caseinformation?.workorder?.[0]?.materialorder?.[0]?.materialorderlineitems?.[0]?.LineItemID)
+            
             console.log("Filtered PartData:", valueFilterPartOrder); 
             setCaseData(valueFilterPartOrder);
             

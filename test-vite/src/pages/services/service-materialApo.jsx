@@ -236,7 +236,9 @@ export const ServiceMaterialApo = () => {
   if (user?.role === "admin") {
     canEditapo = true;
   } else if (materialOrders?.workorder?.caseinformation?.Owner) {
-    canEditapo = materialOrders?.workorder?.caseinformation?.Owner === user?.id && allowedRoles.includes(user?.role); ;
+    canEditapo = 
+      // materialOrders?.workorder?.caseinformation?.Owner === user?.id && 
+      allowedRoles.includes(user?.role); ;
   }
 
   return (

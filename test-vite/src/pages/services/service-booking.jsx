@@ -783,9 +783,13 @@ const CheckRequestedDateTimeCustomer = async (WOID) => {
     const rawDateTime = woData?.RequestedDateTimeCustomer;
     console.log("Validasi DB RequestedDateTimeCustomer:", rawDateTime);
 
+    // Convert to Date object
+    const parsedDate = new Date(rawDateTime);
+    console.log("parsedDate:", parsedDate);
+
     if (!rawDateTime || 
-      !(rawDateTime instanceof Date) || 
-      isNaN(rawDateTime.getTime())) {
+      !(parsedDate  instanceof Date) || 
+      isNaN(parsedDate.getTime())) {
       await Swal.fire({
         icon: 'warning',
         title: "Gagal membuat booking",
