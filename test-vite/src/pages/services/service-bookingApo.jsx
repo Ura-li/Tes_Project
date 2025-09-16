@@ -260,7 +260,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
     try {
       await ApiCustomer.patch(`/api/bookings/${bookingid}`, {
         ChangedBy: changedBy,
-        BookingStatusId: markCompleted ? 2 : bookingid,
+        BookingStatusId: markCompleted ? 2 : parseInt(bookingid),
         DoNotDisturb: doNotDisturb,
         CeScheduleChange: ceScheduleChange,
         ScheduleJeopardy: scheduleJeopardy,
