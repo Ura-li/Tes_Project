@@ -196,7 +196,40 @@ export function ServiceBookingApo ({BookingId , woid}) {
     });
   }
 
-  const handleUpdate = async () => {
+  const canCompleteBooking = () => {
+    const role = (user?.role || '').toLowerCase();
+    return role === 'ce' || role === 'apo' || role === 'admin';
+  };
+
+  const handleComplete = async () => {
+    if (!canCompleteBooking()) {
+      return Swal.fire({
+        icon: 'error',
+        title: 'Unauthorized',
+        text: 'Only CE or APO can complete a Booking.',
+      });
+    }
+    // Validate required customer-time fields
+    if (!endTimeCustomerTime || !estimatedArrivalTimeCustomerTime || !actualArrivalTimeCustomerTime) {
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Missing Required Fields',
+        text: 'Fill End Time, Estimated Arrival Time, and Actual Arrival Time (Customer Time) first.',
+      });
+    }
+    // Save current fields first
+    await handleUpdate(true);
+
+    // If backend needs a specific BookingStatusId for Completed, it should be handled server-side or by mapping.
+    // Here we just notify success of validation + save.
+    Swal.fire({
+      icon: 'success',
+      title: 'Ready to Complete',
+      text: 'Fields validated and saved. Booking can be set to Completed.',
+    });
+  };
+
+  const handleUpdate = async (markCompleted = false) => {
     Swal.fire({
     title: 'Saving...',
     allowOutsideClick: false,
@@ -227,7 +260,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
     try {
       await ApiCustomer.patch(`/api/bookings/${bookingid}`, {
         ChangedBy: changedBy,
-        BookingStatusId: bookingStatusId,
+        BookingStatusId: markCompleted ? 2 : bookingid,
         DoNotDisturb: doNotDisturb,
         CeScheduleChange: ceScheduleChange,
         ScheduleJeopardy: scheduleJeopardy,
@@ -244,6 +277,9 @@ export function ServiceBookingApo ({BookingId , woid}) {
         icon: "success",
         text: "Booking telah berhasil di simpan",
       }).then(() => {
+        // if(redirect){
+
+        // }
         window.location.href = `/app/work/${bookingData.WOID}`
       })
     } catch (error) {
@@ -403,6 +439,13 @@ export function ServiceBookingApo ({BookingId , woid}) {
 
   return (
     <div>
+      {/* Quick actions header */}
+      <div className="flex items-center gap-2 mb-2">
+        <Button variant="secondary" onClick={handleUpdate}>Save</Button>
+        <Button variant="default" onClick={handleComplete} disabled={!canCompleteBooking()}>
+          Mark Completed
+        </Button>
+      </div>
       <TabsBooking
         handleUpdate={handleUpdate}
         bookingData={bookingData}

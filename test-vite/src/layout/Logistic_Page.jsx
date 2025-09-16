@@ -28,6 +28,8 @@ export default function Logistik() {
             setMoData(fetchMo.data.data);
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
+
+            const resFetchMO = fetchMO.data.data;
             console.log("Fetch user data : ", fecthUserData)
             console.log("Fetch MO Data : ", fetchMo.data.data)
 

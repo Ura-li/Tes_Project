@@ -724,6 +724,69 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
           Swal.showLoading();
         },
       });
+      // Role guard: only CE can close Work Order
+      const tokenUser = getUserFromToken();
+      if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'ce') {
+        Swal.close();
+        return Swal.fire({
+          icon: 'error',
+          title: 'Unauthorized',
+          text: 'Only CE can close a Work Order.',
+        });
+      }
+
+      // Validation: all MO under WO must be Closed
+      try {
+        const moRes = await ApiCustomer.get(`/api/material-order?WOID=${workOrders.WOID}`);
+        const mos = Array.isArray(moRes.data?.data) ? moRes.data.data : [];
+        const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed');
+        if (mosNotClosed.length > 0) {
+          Swal.close();
+          return Swal.fire({
+            icon: 'warning',
+            title: 'Material Orders Still Open',
+            text: 'Close all Material Orders before closing the Work Order.',
+          });
+        }
+      } catch (e) {
+        Swal.close();
+        return Swal.fire({
+          icon: 'error',
+          title: 'Validation Failed',
+          text: 'Unable to verify Material Orders for this Work Order.',
+        });
+      }
+
+      // Validation: bookings must be Completed. As a proxy, require end, ETA, AAT in Customer Time
+      try {
+        const bRes = await ApiCustomer.get(`/api/bookings?WOID=${workOrders.WOID}`);
+        const bookings = Array.isArray(bRes.data?.data) ? bRes.data.data : [];
+        const notCompleted = bookings.filter(b => {
+          // Prefer explicit status if present
+          const statusText = (b.BookingStatus || b.Status || '').toString().toLowerCase();
+          if (statusText === 'completed') return false;
+          const bd = Array.isArray(b.bookingDetails) && b.bookingDetails[0] ? b.bookingDetails[0] : {};
+          const end = bd?.EndTimeCustomerTime;
+          const eta = bd?.EstimatedArrivalTimeCustomerTime;
+          const aat = bd?.ActualArrivalTimeCustomerTime;
+          return !(end && eta && aat);
+        });
+        if (notCompleted.length > 0) {
+          Swal.close();
+          return Swal.fire({
+            icon: 'warning',
+            title: 'Booking Not Completed',
+            text: 'Ensure all bookings have End Time, Estimated Arrival, and Actual Arrival (Customer Time) before closing the Work Order.',
+          });
+        }
+      } catch (e) {
+        Swal.close();
+        return Swal.fire({
+          icon: 'error',
+          title: 'Validation Failed',
+          text: 'Unable to verify bookings for this Work Order.',
+        });
+      }
 
       const res = await ApiCustomer.patch(
         `/api/work-order/${workOrders.WOID}`,
@@ -837,6 +900,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
 export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
   const {user} = useAuth();
   const navigate = useNavigate();
+  const currentRole = (getUserFromToken()?.role || '').toLowerCase();
   const buttons = [
     {
       icon: ArrowLeftFromLine,
@@ -849,6 +913,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
       icon: CopyXIcon,
       label: "Close",
       onClick: () => saveAndCloseMaterialOrder(),
+      hidden: currentRole !== 'ce',
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Cancel Order", hidden: true},
@@ -865,7 +930,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
   const hiddenButtons = open ? buttons.slice(-3) : [];
 
   const saveMaterialOrder = async () => {
-   // if(updatedLineItems === null || Object.keys(updatedLineItems).length === 0) return
+   
     try {
       Swal.fire({
         title: "Saving...",
@@ -875,21 +940,42 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
           Swal.showLoading();
         },
       });
+      let res = null;
+      // Guard: if any line item update is set to Shipped, require SON and RMA
+      const hasShippingUpdate = updatedLineItems && Object.values(updatedLineItems).some(
+        (v) => String(v).toLowerCase() === 'shipped' || String(v).toLowerCase() === 'ordered'
+      );
+      const soNumber = (moForm?.SalesOrderNumber ?? materialOrders?.SalesOrderNumber ?? '').toString().trim();
+      const rmaNumber = (moForm?.RMANumber ?? materialOrders?.RMANumber ?? '').toString().trim();
+      if (hasShippingUpdate && (!soNumber || !rmaNumber)) {
+        Swal.close();
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Missing Sales/RMA Number',
+          text: 'Before setting a line item to Shipped, fill Sales Order Number and RMA Number.',
+        });
+      }
+      if(updatedLineItems === null || Object.keys(updatedLineItems).length === 0) {
+        const result = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`,{
+          SalesOrderNumber: moForm.SalesOrderNumber || undefined,
+          RMANumber: moForm.RMANumber || undefined,
+        })
+        res = result;
+      }else{
+        for(const [lineItemID, status] of Object.entries(updatedLineItems)){
+          console.log("user", user);
+          const result = await ApiCustomer.patch(`/api/material-order/batch-update`, {
+            updates: updatedLineItems,
+            MOID: materialOrders.MOID,
+            WOID: materialOrders.WOID,
+            userId: user.id
+          })
+          console.log("update ok",updatedLineItems);
+          res = result;
+        }
 
-      const res = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`,{
-        SalesOrderNumber: moForm.SalesOrderNumber || undefined,
-        RMANumber: moForm.RMANumber || undefined,
-      })
-      // console.log("update ok",updatedLineItems);
-      // for(const [lineItemID, status] of Object.entries(updatedLineItems)){
-      // console.log("user", user);
-      // const res = await ApiCustomer.patch(`/api/material-order/batch-update`, {
-      //   updates: updatedLineItems,
-      //   MOID: materialOrders.MOID,
-      //   WOID: materialOrders.WOID,
-      //   userId: user.id
-      // })
-
+      }
+      console.log("RES : ",res);
       if(res.data) {
         Swal.fire({
           icon: "success",
@@ -907,8 +993,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
           text: res.data.message,
         });
       }
-      // }
-      // console.log("Semua line item berhasil diupdate.");
+      console.log("Semua line item berhasil diupdate.");
 
     } catch (error) {
          return Swal.fire({
@@ -929,6 +1014,38 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
           Swal.showLoading();
         },
       });
+      // Role guard: only CE can close MO
+      const tokenUser = getUserFromToken();
+      if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'ce') {
+        Swal.close();
+        return Swal.fire({
+          icon: 'error',
+          title: 'Unauthorized',
+          text: 'Only CE can close a Material Order.',
+        });
+      }
+
+      // Validation: all MO line items must be Closed
+      try {
+        const listRes = await ApiCustomer.get(`/api/material-order/material-order-line-items?MOID=${materialOrders.MOID}`);
+        const items = Array.isArray(listRes.data?.data) ? listRes.data.data : [];
+        const notClosed = items.filter(it => String(it.Status).toLowerCase() !== 'closed');
+        if (notClosed.length > 0) {
+          Swal.close();
+          return Swal.fire({
+            icon: 'warning',
+            title: 'Line Items Still Open',
+            text: 'Please close all Material Order Line Items before closing the Material Order.',
+          });
+        }
+      } catch (e) {
+        Swal.close();
+        return Swal.fire({
+          icon: 'error',
+          title: 'Validation Failed',
+          text: 'Unable to verify line items status. Try again.',
+        });
+      }
       const res = await ApiCustomer.patch(
         `/api/material-order/${materialOrders.MOID}`,
         {
@@ -1022,6 +1139,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
 
 export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems }) => {
   const navigate = useNavigate();
+  const currentRole = (getUserFromToken()?.role || '').toLowerCase();
 
   const buttons = [
     {
@@ -1035,6 +1153,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
       icon: CopyXIcon,
       label: "Close",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
+      hidden: currentRole !== 'ce',
     },
     { icon: StepBack, label: "Cancel", hidden: true },
     { icon: StepBack, label: "Audit", hidden: true },
@@ -1116,6 +1235,29 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           Swal.showLoading();
         },
       });
+      // Role guard: only CE can close a line item
+      const tokenUser = getUserFromToken();
+      if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'ce') {
+        Swal.close();
+        return Swal.fire({
+          icon: 'error',
+          title: 'Unauthorized',
+          text: 'Only CE can close a Material Order Line Item.',
+        });
+      }
+
+      // Required fields guard: Failure Code, New CT Key, Return CT Key
+      const failureId = MOLineDetails?.failureId;
+      const newCtKey = (MOLineDetails?.removedSerialNumber ?? '').toString().trim();
+      const returnCtKey = (MOLineDetails?.removedPartNumber ?? '').toString().trim();
+      if (!failureId || !newCtKey || !returnCtKey) {
+        Swal.close();
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Missing Required Fields',
+          text: 'Fill Failure Code, New CT Key, and Return CT Key before closing the line item.',
+        });
+      }
       const success = await saveMOLI(LineItemID, false);
       if (!success) return; // Stop if saveMOLI failed
       const res = await ApiCustomer.patch(
