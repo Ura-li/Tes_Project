@@ -7,11 +7,12 @@ import { NotificationCard } from "@/components/NotificationCard";
 import { useNavigate } from "react-router";
 import { CaseField } from "@/pages/services/service-case";
 
+
 export default function Logistik() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [userData, setUserData] = useState([]);
-    const [CaseData, setCaseData] = useState([]);
+    const [MoData, setMoData] = useState([]);
     const [preview, setPreview] = useState({
         ProfilePhoto: null,
         Signature: null,
@@ -23,15 +24,14 @@ export default function Logistik() {
 
     const fetchData = async () => {
         try {
-            const fetchCaseData = await ApiCustomer.get('/api/case-information')
-            const fetchMO = await ApiCustomer.get('/api/material-order');
-            // setCaseData(fetchCaseData.data.data );           
+            const fetchMo = await ApiCustomer.get('/api/mo-detaill');
+            setMoData(fetchMo.data.data);
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
 
             const resFetchMO = fetchMO.data.data;
             console.log("Fetch user data : ", fecthUserData)
-            console.log("Fetch Data Mo Detail Line", fetchCaseData.data.data)
+            console.log("Fetch MO Data : ", fetchMo.data.data)
 
             setUserData({
                 ...userData,
@@ -46,10 +46,9 @@ export default function Logistik() {
                 ProfilePhoto: fecthUserData.data.data.ProfilePhoto ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.ProfilePhoto}` : null,
                 Signature: fecthUserData.data.data.Signature ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.Signature}` : null,
             });
-            const valueFilterPartOrder = fetchCaseData.data.data.filter(c =>  c?.caseinformation?.workorder?.[0]?.materialorder?.[0]?.materialorderlineitems?.[0]?.LineItemID)
-            
+            const valueFilterPartOrder = fetchMo.data.data.filter(m =>  m?.materialorderlineitems?.[0]?.LineItemID)
             console.log("Filtered PartData:", valueFilterPartOrder); 
-            setCaseData(valueFilterPartOrder);
+            setMoData(valueFilterPartOrder);
             
         } catch (err) {
             console.error(err);
@@ -61,21 +60,17 @@ export default function Logistik() {
 
       const filteredData =
     filterStatus === "All"
-      ? CaseData
-      : CaseData.filter(
-          (c) =>
-            c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.OrderStatus ===
-            filterStatus
+      ? MoData
+      : MoData.filter(
+          (m) =>
+            m.OrderStatus === filterStatus
         );
    
-  const sortedData = [...filteredData].sort((a, b) => {
-    const orderA = a.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID || "";
-    const orderB = b.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID || "";
-    console.log("sorted Data", orderA)
-    console.log("sorted Data", orderB)
-    return orderB.localeCompare(orderA); // descending
-  });
-  console.log("sorted Data", sortedData)
+  const sortedData = [...filteredData].sort((a,b) => {
+    const orderA = a.MOID;
+    const orderB = b.MOID;
+    return orderB.localeCompare(orderA);
+  })
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = sortedData.slice(startIndex, startIndex + itemsPerPage);
@@ -151,28 +146,27 @@ export default function Logistik() {
                 </CardHeader>
                 <CardContent className={"grid gap-3"}>
                  {currentData.length > 0 ? (
-            currentData.map((c) => (
+            currentData.map((m) => (
               <div
-                key={c.caseinformation.CaseID}
+                key={m.MOID}
                 className="rounded-sm hover:bg-gray-50 cursor-pointer  ring-1  ring-gray-400 px-2 py-1 "
                 onClick={() =>
                   navigate(
-                    `/app/material-order/${c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID}`
+                    `/app/material-order/${m.MOID}`
                   )
                 }
               >
                 <CardHeader className="p-1 px-2">
                   <div className="flex flex-row justify-between ">
                   <CardTitle className={"flex flex-row gap-2 items-center "}>
-                    {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID}
-                    <Badge className={c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.OrderStatus === 'New' ? "text-white bg-green-400" : "text-white bg-red-500"} variant="invisible">
-                    {c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.OrderStatus}
+                    {m.MOID}
+                    <Badge className={m.OrderStatus === 'New' ? "text-white bg-green-400" : "text-white bg-red-500"} variant="invisible">
+                    {m.OrderStatus}
                     </Badge>
                   </CardTitle>
                   <CardTitle className={"text-sm text-gray-500"}>
                     {
-                      c.caseinformation?.workorder?.[0]?.materialorder?.[0]
-                        ?.materialorderlineitems?.[0]?.PartNumber
+                      m.materialorderlineitems?.[0]?.PartNumber
                     }
                   </CardTitle>          
                   </div>
@@ -183,8 +177,7 @@ export default function Logistik() {
                   <CaseField label={"Part Description"} className={"text-md"}>
                    <span className="text-gray-600 text-sm">
                     {
-                      c.caseinformation?.workorder?.[0]?.materialorder?.[0]
-                        ?.materialorderlineitems?.[0]?.Description
+                      m.materialorderlineitems?.[0]?.Description
                     }
                    </span>
                   </CaseField>
@@ -195,7 +188,7 @@ export default function Logistik() {
                  
                    <span className="text-gray-600 text-sm">
                     {
-                      c.caseinformation?.workorder?.[0]?.materialorder?.[0]?.SalesOrderNumber
+                      m.SalesOrderNumber
                     }
                    </span>
                   </CaseField>
