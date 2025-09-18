@@ -121,6 +121,10 @@ export default function FrontDesk_Page() {
   useEffect(() => {
     fetchData();
   }, []);
+  const tesa = caseData[0]?.caseinformation?.ActionLog[0]?.ChangeAt;
+  const tes_time = tesa instanceof Date ? tesa : new Date(tesa);
+  console.log("testime:", tes_time.toLocaleString("id-ID"));
+  console.log("check created time at ", caseData[0])
 
   const navigate = useNavigate();
 
@@ -211,7 +215,7 @@ export default function FrontDesk_Page() {
                   className="p-3 border-l-4 hover:scale-[0.99] rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400 bg-white cursor-pointer"
                   onClick={() => navigate(`/app/case/${c.CaseID}`)}
                 >
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 ">
                     <Badge
                       className={`px-2 py-1 rounded-md text-xs font-medium
                       ${c.caseinformation.CasePriority === "High"
@@ -226,11 +230,12 @@ export default function FrontDesk_Page() {
                     <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
                       {c.CaseStatus}
                     </Badge>
+                    <p className='ml-auto text-xs text-gray-500 '>{c.CreatedOn}</p>
                   </div>
                   <p className="font-medium truncate mt-1">{c.CaseSubject}</p>
-                  <div className="text-xs text-gray-500 mt-1 flex justify-between">
-                    <p>{c.CaseID}</p>
-                    <span>{c.CreatedOn}</span>
+                  <div className=" text-gray-500 mt-1 flex justify-between">
+                    <p className='text-md'>{c.CaseID}</p>
+                    <p className='text-md  font-semibold'>{c.UpdateOn}</p>
                   </div>
                 </Card>
               ))}
