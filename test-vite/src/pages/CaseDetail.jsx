@@ -1116,7 +1116,7 @@ const fetchActionLog = async () => {
     if (otcCode.length > 0 && dataFetchAssetInformation?.AssetInformation?.Warranty_Status) {
       handleEntitlementStatus("OTCCode")(dataFetchAssetInformation?.AssetInformation?.Warranty_Status);
     }
-  }, [otcCode, caseDetails]);
+  }, [otcCode, caseDetails, dataFetchAssetInformation]);
 
   useEffect(() => {
     console.log("Data Asset Info : ", dataFetchAssetInformation);

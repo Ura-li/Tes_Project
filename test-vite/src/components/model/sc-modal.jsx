@@ -5020,8 +5020,8 @@ export function BtnModalsServiceCatalog({
   const [TotalTaxConfirmServices, setTotalTaxConfirmServices] = useState(0)
   const [totalConfirmServices, setTotalConfirmServices] = useState(0)
   const effectiveWarrantyService = selectedWarrantyServices ?? woWarrantyService;
-  console.log("EFEKTIF SELECTED WS",selectedWarrantyServices)
-  console.log("EFEKTIF WO WS",woWarrantyService)
+  // console.log("EFEKTIF SELECTED WS",selectedWarrantyServices)
+  // console.log("EFEKTIF WO WS",woWarrantyService)
   const handlerPriceConfirmServices = () =>{
     let serviceTotal = selectedWarrantyServices ? (parseFloat(selectedWarrantyServices.Price) || 0) : 0;
 
