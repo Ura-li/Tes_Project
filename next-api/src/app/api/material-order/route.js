@@ -146,7 +146,7 @@ export async function POST(request) {
     }
 
     const { MOID, actionLog } = await prisma.$transaction(async (tx) => {
-      const MOID = await generateID("MO-", "materialorder", "MOID");
+      const MOID = await generateID("MO-", "materialorder", "MOID", tx);
 
       await tx.materialorder.create({
         data: {
@@ -168,6 +168,7 @@ export async function POST(request) {
               Price: part.Price != null ? parseFloat(part.Price) : 0,
               Quantity: part.qty || 1,
               Status: "New",
+              RemovedPartNumber: part.RemovedPartNumber ?? null,
               materialorder: { connect: { MOID } },
               servicecatalog_parts: part.PartNumber
                 ? { connect: { PartNumber: part.PartNumber } }

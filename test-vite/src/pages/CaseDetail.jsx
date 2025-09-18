@@ -491,7 +491,7 @@ const openPopup = () => {
       icon: CopyX,
       label: "Close",
       onClick: () => saveAndCloseCase(),
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
+      roles: ["admin", "fd"],
     },
     { icon: RotateCw, label: "Refresh", 
       onClick: () => window.location.reload(),
@@ -552,6 +552,15 @@ const openPopup = () => {
     setServiceCatalogType(type)
   };
   const saveAndCloseCase = async () => {
+    // Role guard: only FD can close a Case
+    const tokenUser = getUserFromToken();
+    if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'fd') {
+      return Swal.fire({
+        icon: 'error',
+        title: 'Unauthorized',
+        text: 'Only FD can close a Case.',
+      });
+    }
 
   //   if (!csrForm.caseResolutionCode || csrForm.caseResolutionCode.trim() === "") {
   //   Swal.fire({
@@ -586,6 +595,41 @@ const openPopup = () => {
           Swal.showLoading();
         },
       });
+      // Validation: All WO must be CLOSED_POSTED and all related MO must be Closed
+      try {
+        const woRes = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
+        const workOrders = Array.isArray(woRes.data?.data) ? woRes.data.data : [];
+        const openWOs = workOrders.filter(wo => String(wo.SystemStatus).toUpperCase() !== 'CLOSED_POSTED');
+        if (openWOs.length > 0) {
+          Swal.close();
+          return Swal.fire({
+            icon: 'warning',
+            title: 'Work Orders Still Open',
+            text: 'Close all Work Orders before closing the Case.',
+          });
+        }
+        // For each WO, check Material Orders
+        for (const wo of workOrders) {
+          const moRes = await ApiCustomer.get(`/api/material-order?WOID=${wo.WOID}`);
+          const mos = Array.isArray(moRes.data?.data) ? moRes.data.data : [];
+          const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed');
+          if (mosNotClosed.length > 0) {
+            Swal.close();
+            return Swal.fire({
+              icon: 'warning',
+              title: 'Material Orders Still Open',
+              text: 'Close all Material Orders under all Work Orders before closing the Case.',
+            });
+          }
+        }
+      } catch (e) {
+        Swal.close();
+        return Swal.fire({
+          icon: 'error',
+          title: 'Validation Failed',
+          text: 'Unable to verify Work/Material Orders for this Case.',
+        });
+      }
       const success = await handleSave(false);
       if (!success) return; 
       const res = await ApiCustomer.patch(
@@ -617,7 +661,7 @@ const openPopup = () => {
           allowOutsideClick: false,
           allowEscapeKey: false,
         }).then(() => {
-          navigate(`/app/master/Case_table`);
+          navigate(`/app/viewcase`);
         });
       } else {
         Swal.fire({
@@ -1101,6 +1145,7 @@ const fetchActionLog = async () => {
 
   //handler all case
   useEffect(() => {
+    fetchOTCCode();
     fetchCustomerData();
     fetchAssetInformation();
     fetchOwnerUserData();
@@ -1108,7 +1153,6 @@ const fetchActionLog = async () => {
     fetchWorkOrders();
     fetchCaseNotes();
     fetchGtc(); 
-    fetchOTCCode();
     fetchCsr();
     fetchCase();
     fetchActionLog();
@@ -1121,7 +1165,7 @@ const fetchActionLog = async () => {
     if (otcCode.length > 0 && dataFetchAssetInformation?.AssetInformation?.Warranty_Status) {
       handleEntitlementStatus("OTCCode")(dataFetchAssetInformation?.AssetInformation?.Warranty_Status);
     }
-  }, [otcCode, caseDetails]);
+  }, [otcCode, dataFetchAssetInformation]);
 
   useEffect(() => {
     console.log("Data Asset Info : ", dataFetchAssetInformation);
@@ -1560,7 +1604,9 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   <Input 
                   variant="invisible" 
                   placeholder="---"  
-                  value={dataFetchCustomerData.SiteAccount?.City}/>
+                  value={dataFetchCustomerData?.Type == "SiteAccount"
+                    ? dataFetchCustomerData?.SiteAccount?.City + " - " + dataFetchCustomerData?.SiteAccount?.StateProvince
+                    : dataFetchCustomerData?.MainAccount?.City + " - " + dataFetchCustomerData?.MainAccount?.StateProvince}/>
                 </CaseField>
                 <CaseField label="Is Partner" lock>
                   <Input variant="invisible" placeholder="---" />
@@ -1876,7 +1922,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     <CaseField label="Warranty Status"  span={3} star className={"whitespace-nowrap"}>
                       <SearchCommandBlock
                         options={otcCode}
-                        value={entitlementStatus.OTCCode}
+                        value={entitlementStatus.OTCCode || "--select--"}
                         // value={dataWarrantyStatus || "--Select--"}
                         onChange={(value) =>
                           handleEntitlementStatus("OTCCode")(value)

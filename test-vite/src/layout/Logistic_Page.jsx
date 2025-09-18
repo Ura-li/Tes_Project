@@ -24,10 +24,13 @@ export default function Logistik() {
 
     const fetchData = async () => {
         try {
-            const fetchMo = await ApiCustomer.get('/api/mo-detaill');
-            setMoData(fetchMo.data.data);
+            const fetchCaseData = await ApiCustomer.get('/api/case-information')
+            const fetchMO = await ApiCustomer.get('/api/material-order');
+            // setCaseData(fetchCaseData.data.data );           
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
+
+            const resFetchMO = fetchMO.data.data;
             console.log("Fetch user data : ", fecthUserData)
             console.log("Fetch MO Data : ", fetchMo.data.data)
 
@@ -44,7 +47,8 @@ export default function Logistik() {
                 ProfilePhoto: fecthUserData.data.data.ProfilePhoto ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.ProfilePhoto}` : null,
                 Signature: fecthUserData.data.data.Signature ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.Signature}` : null,
             });
-            const valueFilterPartOrder = fetchMo.data.data.filter(m =>  m?.materialorderlineitems?.[0]?.LineItemID)
+            const valueFilterPartOrder = fetchCaseData.data.data.filter(c =>  c?.caseinformation?.workorder?.[0]?.materialorder?.[0]?.materialorderlineitems?.[0]?.LineItemID)
+            
             console.log("Filtered PartData:", valueFilterPartOrder); 
             setMoData(valueFilterPartOrder);
             
@@ -64,11 +68,14 @@ export default function Logistik() {
             m.OrderStatus === filterStatus
         );
    
-  const sortedData = [...filteredData].sort((a,b) => {
-    const orderA = a.MOID;
-    const orderB = b.MOID;
-    return orderB.localeCompare(orderA);
-  })
+  const sortedData = [...filteredData].sort((a, b) => {
+    const orderA = a.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID || "";
+    const orderB = b.caseinformation?.workorder?.[0]?.materialorder?.[0]?.MOID || "";
+    console.log("sorted Data", orderA)
+    console.log("sorted Data", orderB)
+    return orderB.localeCompare(orderA); // descending
+  });
+  console.log("sorted Data", sortedData)
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = sortedData.slice(startIndex, startIndex + itemsPerPage);
