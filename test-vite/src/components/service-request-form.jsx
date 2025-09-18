@@ -162,6 +162,14 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
 });
+
+const Section = ({ title, children }) => (
+  <View style={styles.sectionContainer}>
+    <Text style={styles.sectionTitle}>{title}</Text>
+    <View style={styles.sectionContent}>{children}</View>
+  </View>
+);
+
 const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) =>
 
 (
