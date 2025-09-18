@@ -137,6 +137,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#f3f4f6', 
     fontWeight: 'bold',
   },
+
+  sectionContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    marginVertical: 10,
+    paddingTop: 12, // extra space so the title doesn't overlap content
+    position: 'relative',
+  },
+
+  sectionTitle: {
+    position: 'absolute',
+    top: -8, // moves the heading above the border
+    left: 10,
+    fontSize: 10,
+    fontWeight: 'bold',
+    backgroundColor: 'white', // covers the border behind text
+    paddingHorizontal: 4,
+  },
+
+  sectionContent: {
+    paddingHorizontal: 10,
+    paddingBottom: 8,
+  },
 });
 const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) =>
 
@@ -154,7 +178,8 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) =>
         </View>
         <Text style={[styles.sectionHeader]}>SERVICE REQUEST FORM</Text>
       </View>
-
+      
+      <Section title="Case Info">
       <View style={{ display: 'flex', flexDirection: 'row' }}>
         <View style={styles.leftSection}>
           <Text style={styles.label}>Case Type</Text>
@@ -193,128 +218,133 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) =>
           <Image src="/random_qr.png" style={styles.qrCode} />
         </View>
       </View>
+      </Section>
 
       {/* Customer Section */}
-      <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Customer</Text>
-      <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
-        <View style={styles.leftSection}>
-          <Text style={styles.label}>Company</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.site_account?.Company ?? 'N/A'}
-          </Text>
+      <Section title="Customer">
+        {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Customer</Text> */}
+        <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
+          <View style={styles.leftSection}>
+            <Text style={styles.label}>Company</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.site_account?.Company ?? 'N/A'}
+            </Text>
 
-          <Text style={styles.label}>Name</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
-              ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
-              : 'N/A'}
-          </Text>
+            <Text style={styles.label}>Name</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
+                ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
+                : 'N/A'}
+            </Text>
 
-          <Text style={styles.label}>Email</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.site_account ? caseDetails?.site_account?.Email ?? 'N/A' : caseDetails?.contact_information?.Email ?? 'N/A'}
-          </Text>
+            <Text style={styles.label}>Email</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.site_account ? caseDetails?.site_account?.Email ?? 'N/A' : caseDetails?.contact_information?.Email ?? 'N/A'}
+            </Text>
 
-          <Text style={styles.label}>PIC name</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
-              ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
-              : 'N/A'}
-          </Text>
+            <Text style={styles.label}>PIC name</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
+                ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
+                : 'N/A'}
+            </Text>
 
-          <Text style={styles.label}>PIC email</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.contact_information?.Email ?? 'N/A'}
-          </Text>
+            <Text style={styles.label}>PIC email</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.contact_information?.Email ?? 'N/A'}
+            </Text>
 
-          <Text style={styles.label}>Address</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.site_account ? caseDetails?.site_account?.AddressLine1 ?? 'N/A' : caseDetails?.contact_information?.AddressLine1 ?? 'N/A'}
-          </Text>
+            <Text style={styles.label}>Address</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.site_account ? caseDetails?.site_account?.AddressLine1 ?? 'N/A' : caseDetails?.contact_information?.AddressLine1 ?? 'N/A'}
+            </Text>
+          </View>
+          <View style={styles.rightSection2}>
+            <Text style={styles.label}>Phone no</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.site_account ? caseDetails?.site_account?.PrimaryPhone ?? 'N/A' : caseDetails?.contact_information?.Phone ?? 'N/A'}
+            </Text>
+
+            <Text style={styles.label}>Mobile no</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.site_account ? caseDetails?.site_account?.WhatsappNo ?? 'N/A' : caseDetails?.contact_information?.Mobile ?? 'N/A'}
+            </Text>
+
+            <Text style={styles.label}>Fax no</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.contact_information?.Fax ?? 'N/A'}
+            </Text>
+
+            <Text style={styles.label}>PIC phone no.</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.contact_information?.Phone ?? 'N/A'}
+            </Text>
+
+            <Text style={styles.label}>PIC mobile no.</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.contact_information?.Mobile ?? 'N/A'}
+            </Text>
+
+          </View>
         </View>
-        <View style={styles.rightSection2}>
-          <Text style={styles.label}>Phone no</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.site_account ? caseDetails?.site_account?.PrimaryPhone  ?? 'N/A' : caseDetails?.contact_information?.Phone  ?? 'N/A' }
-          </Text>
-
-          <Text style={styles.label}>Mobile no</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.site_account ? caseDetails?.site_account?.WhatsappNo  ?? 'N/A' : caseDetails?.contact_information?.Mobile  ?? 'N/A' }
-          </Text>
-
-          <Text style={styles.label}>Fax no</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.contact_information?.Fax ?? 'N/A'}
-          </Text>
-
-          <Text style={styles.label}>PIC phone no.</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.contact_information?.Phone ?? 'N/A'}
-          </Text>
-
-          <Text style={styles.label}>PIC mobile no.</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.contact_information?.Mobile ?? 'N/A'}
-          </Text>
-
-        </View>
-      </View>
+      </Section>
 
       {/* Product Section */}
-      <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text>
-      <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
-        <View style={styles.leftSection}>
-          <Text style={styles.label}>Serial no</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.asset_information?.SerialNumber ?? 'N/A'}
-          </Text>
+      <Section title="Customer">
+        {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text> */}
+        <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
+          <View style={styles.leftSection}>
+            <Text style={styles.label}>Serial no</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.asset_information?.SerialNumber ?? 'N/A'}
+            </Text>
 
-          <Text style={styles.label}>Product no</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.asset_information?.ProductNumber ?? 'N/A'}
-          </Text>
+            <Text style={styles.label}>Product no</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.asset_information?.ProductNumber ?? 'N/A'}
+            </Text>
 
-          <Text style={styles.label}>Product name</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.asset_information?.product_information?.ProductName ?? 'N/A'}
-          </Text>
+            <Text style={styles.label}>Product name</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.asset_information?.product_information?.ProductName ?? 'N/A'}
+            </Text>
+          </View>
+
+          <View style={styles.rightSection2}>
+            <Text style={styles.label}>Product tower</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.asset_information?.product_information?.product_type?.ProductTower ?? 'N/A'}
+            </Text>
+
+            <Text style={styles.label}>Product group</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.asset_information?.product_information?.product_type?.ProductGroup ?? 'N/A'}
+            </Text>
+
+            <Text style={styles.label}>Product type</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.asset_information?.product_information?.product_type?.ProductType ?? 'N/A'}
+            </Text>
+          </View>
         </View>
-
-        <View style={styles.rightSection2}>
-          <Text style={styles.label}>Product tower</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.asset_information?.product_information?.product_type?.ProductTower ?? 'N/A'}
-          </Text>
-
-          <Text style={styles.label}>Product group</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.asset_information?.product_information?.product_type?.ProductGroup ?? 'N/A'}
-          </Text>
-
-          <Text style={styles.label}>Product type</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.asset_information?.product_information?.product_type?.ProductType ?? 'N/A'}
-          </Text>
-        </View>
-      </View>
+      </Section>
 
 <View style={[styles.tableRow, styles.tableHeader, {marginTop: 20}]}>
           <Text style={styles.tableHeaderCell}>Accessories</Text>

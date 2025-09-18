@@ -164,31 +164,6 @@ const styles = StyleSheet.create({
   },
 
 
-  sectionContainer: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 4,
-    marginVertical: 10,
-    paddingTop: 12, // extra space so the title doesn't overlap content
-    position: 'relative',
-  },
-
-  sectionTitle: {
-    position: 'absolute',
-    top: -8, // moves the heading above the border
-    left: 10,
-    fontSize: 10,
-    fontWeight: 'bold',
-    backgroundColor: 'white', // covers the border behind text
-    paddingHorizontal: 4,
-  },
-
-  sectionContent: {
-    paddingHorizontal: 10,
-    paddingBottom: 8,
-  },
-
-
 });
 
 const Section = ({ title, children }) => (
