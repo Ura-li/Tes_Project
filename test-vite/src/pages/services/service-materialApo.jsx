@@ -568,8 +568,8 @@ export const ServiceMaterialApo = () => {
                               <SelectItem value="New">New</SelectItem>
                               <SelectItem value="Ordered">Ordered</SelectItem>
                               <SelectItem value="Shipped">Shipped</SelectItem>
-                              <SelectItem value="Closed">Closed</SelectItem>
-                              <SelectItem value="Cancelled">Cancelled</SelectItem>
+                              {/* <SelectItem value="Closed">Closed</SelectItem>
+                              <SelectItem value="Cancelled">Cancelled</SelectItem> */}
                             </SelectContent>
                           </Select>
                         </TableCell>

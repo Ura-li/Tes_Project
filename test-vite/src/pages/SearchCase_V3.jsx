@@ -1411,7 +1411,7 @@ export default function NewCaseForm() {
       <div className="columns-2 space-y-2">
 
         {/* 1) Case Section */}
-        <Card className="rounded-2xl p-[20px]  shadow-2xl   " id='case'>
+        <Card className="rounded-2xl p-[20px]  shadow-2xl   break-inside-avoid" id='case'>
           <CardHeader>
             <CardTitle>1) Case</CardTitle>
             <CardDescription>Diisi setelah pilih serial/customer.</CardDescription>
@@ -1737,7 +1737,7 @@ export default function NewCaseForm() {
         {/* {showCustomerCard && (
               )} */}
         {/* 3) Product */}
-        <Card className="rounded-2xl p-[20px]  shadow-2xl    " id='product'>
+        <Card className="rounded-2xl p-[20px]  shadow-2xl   break-inside-avoid " id='product'>
           <CardHeader>
             <CardTitle>3) Product</CardTitle>
             <CardDescription>
@@ -1870,7 +1870,7 @@ export default function NewCaseForm() {
             </CardContent>
           </Card>
           {/* 4) Warranty */}
-          <Card className="rounded-2xl p-[20px]  shadow-2xl col-span-3   scroll-mt-[120px]" id='warranty'>
+          <Card className="rounded-2xl p-[20px]  shadow-2xl break-inside-avoid col-span-3   scroll-mt-[120px] " id='warranty'>
             <CardHeader>
               <CardTitle>4) Warranty</CardTitle>
               <CardDescription>
@@ -1899,14 +1899,15 @@ export default function NewCaseForm() {
             </CardContent>
           </Card>
           {/* 5) Accessory */}
-          <Card className="rounded-2xl p-[20px]  shadow-2xl col-span-3   scroll-mt-[120px]" id='accessories'>
+          <Card className="rounded-2xl p-[20px]  shadow-2xl break-inside-avoid col-span-3   scroll-mt-[120px]" id='accessories'>
             <CardHeader>
               <CardTitle>5) Accessory</CardTitle>
               <CardDescription>Opsional. Tambahkan baris sesuai kebutuhan.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {accessories.map((row, idx) => (
-                <div key={row.id} className="grid grid-cols-12 gap-2 items-center">
+                <>
+                <div key={row.id} className="grid grid-cols-12 gap-2 items-center ring-1 p-3 rounded-2xl">
                   <div className="col-span-12 md:col-span-4">
                     <Label className="text-xs">Accessory Name</Label>
                     <Input
@@ -1930,7 +1931,7 @@ export default function NewCaseForm() {
                       onChange={(e) => updateAccessory(row.id, "note", e.target.value)}
                     />
                   </div>
-                  <div className="col-span-10 md:col-span-1">
+                  <div className="col-span-10 md:col-span-10">
                     <Label className="text-xs">CT/SN</Label>
                     <Input value={row.code} onChange={(e) => updateAccessory(row.id, "code", e.target.value)} />
                   </div>
@@ -1940,6 +1941,8 @@ export default function NewCaseForm() {
                     </Button>
                   </div>
                 </div>
+                  <Separator className="w-full border-2"/>
+                </>
               ))}
               <Button type="button" variant="secondary" onClick={addAccessory}>
                 <Plus className="w-4 h-4 mr-2" /> Add Row
@@ -1947,7 +1950,7 @@ export default function NewCaseForm() {
             </CardContent>
           </Card>
           {/* 6) Photos */}
-          <Card className="rounded-2xl p-[20px]  shadow-2xl col-span-3   scroll-mt-[120px]" id='photos'>
+          <Card className="rounded-2xl p-[20px]  shadow-2xl break-inside-avoid col-span-3   scroll-mt-[120px]" id='photos'>
             <CardHeader>
               <CardTitle>6) Foto</CardTitle>
               <CardDescription>Opsional. Disimpan lokal via endpoint upload.</CardDescription>

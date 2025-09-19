@@ -67,6 +67,7 @@ export async function GET(request, { params }) {
                     owner: true
                 }
             },
+            casephotos: true,
             global_trade_check: true,
             caseresolution: true,
             accessory: true,

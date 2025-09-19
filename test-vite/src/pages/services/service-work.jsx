@@ -385,7 +385,7 @@ export const ServiceWork = () => {
   if ( user?.role === "admin") {
     canEditapo = true;
   } else if (workOrders?.caseinformation?.Owner) {
-     canEditapo = workOrders?.caseinformation.Owner === user?.id && user?.role === "apo";
+     canEditapo = workOrders?.caseinformation.Owner === user?.id && (user?.role === "apo" ||user?.role === "ce" || user?.role === "celead" );
   }
   return (
     <>

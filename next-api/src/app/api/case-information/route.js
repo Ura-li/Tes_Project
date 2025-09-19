@@ -122,6 +122,8 @@ export async function GET(request) {
         CaseID: caseData.CaseID,
         // CreatedOn: caseData.CreatedOn,
         CreatedOn: caseData.CreatedOn.toLocaleString("id-ID"),
+        UpdateOn: caseData.ActionLog[0]?.ChangeAt ? new Date(caseData.ActionLog[0].ChangeAt).toLocaleString("id-ID") : "No Update",
+        // Actionlog: caseData.ActionLog[0]?.ChangeAt,
         CaseSubject: caseData.CaseSubject,
         CustomerAccount:
           caseData.contact_information?.site_account?.Company || "No Company",

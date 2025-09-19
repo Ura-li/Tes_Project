@@ -6,3 +6,13 @@ server/.env
 server/node_modules
 /server/node_modules
 start_dev.bat
+
+next-api/public/uploads/**/*
+# Don't ignore the folder
+!next-api/public/uploads/
+!next-api/public/uploads/case/
+!next-api/public/uploads/case/.gitkeep
+!next-api/public/uploads/profiles/
+!next-api/public/uploads/profiles/.gitkeep
+!next-api/public/uploads/signatures/
+!next-api/public/uploads/signatures/.gitkeep

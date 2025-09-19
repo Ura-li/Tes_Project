@@ -163,6 +163,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
 
+
 });
 
 const Section = ({ title, children }) => (
@@ -187,7 +188,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
         </View>
         <Text style={[styles.sectionHeader]}>EQUIPMENT RECIPT FORM</Text>
       </View>
-
+      <Section title="Case Info">
       <View style={{ display: 'flex', flexDirection: 'row' }}>
         <View style={styles.leftSection}>
           <Text style={styles.label}>Case Type</Text>
@@ -226,11 +227,12 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
           <Image src="/random_qr.png" style={styles.qrCode} />
         </View>
       </View>
+      </Section>
 
       {/* Customer Section */}
       {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Customer</Text> */}
       <Section title="Customer">
-      <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
+        <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
         <View style={styles.leftSection}>
           <Text style={styles.label}>Company</Text>
           <Text style={styles.colon}>:</Text>
@@ -304,7 +306,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
           </Text>
 
         </View>
-      </View>
+        </View>
       </Section>
 
       {/* Product Section */}
