@@ -40,7 +40,7 @@ import { useParams } from "react-router";
 
 import ApiCustomer from "@/api";
 
-import {  QuickWOInput } from "../../components/quick-wo-input";
+import { QuickWOInput } from "../../components/quick-wo-input";
 import { BtnModalsServiceCatalog } from "@/components/model/sc-modal";
 import { NewBookableResourceBooking } from "../services/service-booking";
 import { getUserFromToken } from "@/lib/utils/auth";
@@ -71,6 +71,7 @@ import { useDraft } from "../../components/DraftContext";
 import { Accordion, AccordionContent } from "@/components/ui/accordion";
 import { AccordionHeader, AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion";
 import CaseField from "@/components/CaseField";
+import { map } from "lodash";
 
 export const ServiceWork = () => {
   const user = getUserFromToken();
@@ -80,7 +81,7 @@ export const ServiceWork = () => {
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
   const [serviceCatalogType, setServiceCatalogType] = useState("");
   const [caseDetails, setCaseDetails] = useState([])
-  console.log("TESwoWI",workOrders);
+  console.log("TESwoWI", workOrders);
 
   //state for open service order 
   const openServiceCatalog = async (type) => {
@@ -150,150 +151,150 @@ export const ServiceWork = () => {
     ServiceDescription: "",
     PatnerCaseID: "",
     PatnerStatus: "",
-    RecommendedResource:"",
+    RecommendedResource: "",
     ShipmentCountry: "",
     ShipmentState: ""
   })
   const handleSLAChange = (field) => (value) => {
-    console.log("Changed:", field, value); 
+    console.log("Changed:", field, value);
     setSLA((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
- const statusEnumToLabelWO = {
-  OPEN_UNSCHEDULED: 'Open - Unscheduled',
-  OPEN_SCHEDULED: 'Open - Scheduled',
-  OPEN_INPROGRES: 'Open - In Progress',
-  OPEN_COMPLETED: 'Open - Completed',
-  CLOSED_POSTED: 'Closed - Posted'
+  const statusEnumToLabelWO = {
+    OPEN_UNSCHEDULED: 'Open - Unscheduled',
+    OPEN_SCHEDULED: 'Open - Scheduled',
+    OPEN_INPROGRES: 'Open - In Progress',
+    OPEN_COMPLETED: 'Open - Completed',
+    CLOSED_POSTED: 'Closed - Posted'
   };
 
   const handleWOGeneral = (field) => (eOrValue) => {
-    const value = eOrValue?.target ? eOrValue.target.value :eOrValue;
-    console.log("Changed:", field, value); 
+    const value = eOrValue?.target ? eOrValue.target.value : eOrValue;
+    console.log("Changed:", field, value);
     setWOGeneral((prev) => ({
       ...prev,
       [field]: value,
     }))
   }
 
-  const hasFetched = useRef(false); 
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-  if (!woid || hasFetched.current) return;
-  hasFetched.current = true;
+    if (!woid || hasFetched.current) return;
+    hasFetched.current = true;
 
-  const fetchAllData = async () => {
-    Swal.fire({
-      title: "Please wait...",
-      text: "Loading Work Order Details...",
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading(),
-    });
+    const fetchAllData = async () => {
+      Swal.fire({
+        title: "Please wait...",
+        text: "Loading Work Order Details...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
 
       try {
         const resWO = await ApiCustomer.get(`/api/work-order/${woid}`);
         const workOrderData = resWO.data.data;
         setWorkOrders(workOrderData);
-        updateDraft('woid',workOrderData.WOID)
+        updateDraft('woid', workOrderData.WOID)
         const resMO = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
         setMaterialOrders(resMO.data.data);
 
-      if (workOrderData?.CaseID) {
-        const resCI = await ApiCustomer.get(
-          `/api/case-information/${workOrderData.CaseID}`
-        );
-        setCaseInformation(resCI.data.data);
+        if (workOrderData?.CaseID) {
+          const resCI = await ApiCustomer.get(
+            `/api/case-information/${workOrderData.CaseID}`
+          );
+          setCaseInformation(resCI.data.data);
 
-        const resBooking = await ApiCustomer.get(
-          `/api/bookings?WOID=${woid}`
-        );
-        const resOwner = await ApiCustomer.get(
-          `/api/user/${workOrderData.OwnerID}`
-        );
+          const resBooking = await ApiCustomer.get(
+            `/api/bookings?WOID=${woid}`
+          );
+          const resOwner = await ApiCustomer.get(
+            `/api/user/${workOrderData.OwnerID}`
+          );
 
-        const resMainAccount = resCI.data.data.contact_information;
-        setDataFetchCustomerData({
-          MainAccount: resMainAccount,
-        });
+          const resMainAccount = resCI.data.data.contact_information;
+          setDataFetchCustomerData({
+            MainAccount: resMainAccount,
+          });
 
-        if (resCI.data.data.site_account) {
-          setDataFetchCustomerData((prev) => ({
+          if (resCI.data.data.site_account) {
+            setDataFetchCustomerData((prev) => ({
+              ...prev,
+              SiteAccount: resCI.data.data.site_account,
+              Type: "SiteAccount",
+            }));
+          } else {
+            setDataFetchCustomerData((prev) => ({
+              ...prev,
+              type: "Individual",
+            }));
+          }
+
+          setOwnerWorkOrder(resOwner.data.data);
+          setBookings(resBooking.data.data);
+
+          setSLA((prev) => ({
             ...prev,
-            SiteAccount: resCI.data.data.site_account,
-            Type: "SiteAccount",
+            requestedDateTimeCustomer: resWO.data.data.RequestedDateTimeCustomer || "",
+            slaJeopardy: resWO.data.data.SLAJeopardy || "",
+            dueDateCustomer: resWO.data.data.DueDateCustomer || "",
+            coverageWindow: resWO.data.data.CoverageWindow || "",
+            response: resWO.data.data.Response || "",
+            otcCode: resWO.data.data.OTCCode || "",
+            guaranteedFixTimeCustomer: resWO.data.data.GuaranteedFixTimeCustomer || "",
+            earlyStartDateTimeCustomer: resWO.data.data.EarlyStartDateTimeCustomer || "",
+            latestStartDateTimeCustomer: resWO.data.data.LatestStartDateTimeCustomer || "",
+            slaReschedule: resWO.data.data.SLAReschedule || "",
+            activeScheduleDate: resWO.data.data.ActiveScheduleDate || "",
+            slaErrorDescription: resWO.data.data.SLAErrorDescription || "",
+            casePriorityIndex: resWO.data.data.CasePriorityIndex ?? "",
           }));
-        } else {
-          setDataFetchCustomerData((prev) => ({
+
+          const svc = resWO.data.data.serviceCatalog;
+          setWOGeneral((prev) => ({
             ...prev,
-            type: "Individual",
+            IncomingChannel: workOrderData.IncomingChannel || "",
+            WorkOrderNumber: woid || "",
+            WorkOrderType: workOrderData.WorkOrderType || "",
+            WorkOrderDescription: workOrderData.WorkOrderDescription || "",
+            Priority: workOrderData.Priority || "",
+            SystemStatus: workOrderData.SystemStatus || "",
+            SubStatus: workOrderData.SubStatus || "",
+            BookableResourceBooking: resBooking.data.data.BookingDetails?.ResourceId,
+            ServiceOfferID: svc?.warranty_services?.Service_offerID || resCI.data.data.servicecatalog?.warranty_services?.Service_offerID,
+            ServiceDescription: svc?.warranty_services?.Service_description || resCI.data.data.servicecatalog?.warranty_services?.Service_description,
+            PatnerCaseID: "",
+            PatnerStatus: "",
+            RecommendedResource: workOrderData.RecommendedResource || "",
+            ShipmentCountry: workOrderData.ShipmentCountry || "",
+            ShipmentState: workOrderData.ShipmentState || "",
           }));
         }
 
-        setOwnerWorkOrder(resOwner.data.data);
-        setBookings(resBooking.data.data);
-
-        setSLA((prev) => ({
-          ...prev,
-          requestedDateTimeCustomer:resWO.data.data.RequestedDateTimeCustomer || "",
-          slaJeopardy: resWO.data.data.SLAJeopardy || "",
-          dueDateCustomer: resWO.data.data.DueDateCustomer || "",
-          coverageWindow: resWO.data.data.CoverageWindow || "",
-          response: resWO.data.data.Response || "",
-          otcCode: resWO.data.data.OTCCode || "",
-          guaranteedFixTimeCustomer:resWO.data.data.GuaranteedFixTimeCustomer || "",
-          earlyStartDateTimeCustomer:resWO.data.data.EarlyStartDateTimeCustomer || "",
-          latestStartDateTimeCustomer:resWO.data.data.LatestStartDateTimeCustomer || "",
-          slaReschedule: resWO.data.data.SLAReschedule || "",
-          activeScheduleDate: resWO.data.data.ActiveScheduleDate || "",
-          slaErrorDescription: resWO.data.data.SLAErrorDescription || "",
-          casePriorityIndex: resWO.data.data.CasePriorityIndex ?? "",
-        }));
-
-        const svc = resWO.data.data.serviceCatalog;
-        setWOGeneral((prev) => ({
-          ...prev,
-          IncomingChannel:  workOrderData.IncomingChannel || "",
-          WorkOrderNumber: woid || "",
-          WorkOrderType: workOrderData.WorkOrderType || "",
-          WorkOrderDescription: workOrderData.WorkOrderDescription || "",
-          Priority: workOrderData.Priority || "",
-          SystemStatus: workOrderData.SystemStatus || "",
-          SubStatus: workOrderData.SubStatus || "",
-          BookableResourceBooking:resBooking.data.data.BookingDetails?.ResourceId,
-          ServiceOfferID: svc?.warranty_services?.Service_offerID || resCI.data.data.servicecatalog?.warranty_services?.Service_offerID,
-          ServiceDescription: svc?.warranty_services?.Service_description || resCI.data.data.servicecatalog?.warranty_services?.Service_description,
-          PatnerCaseID: "",
-          PatnerStatus: "",
-          RecommendedResource: workOrderData.RecommendedResource || "",
-          ShipmentCountry: workOrderData.ShipmentCountry || "",
-          ShipmentState: workOrderData.ShipmentState || "",
-        }));
-      }
-
-      if (resWO.data.data.RequestedDateTimeCustomer == null) {
+        if (resWO.data.data.RequestedDateTimeCustomer == null) {
+          Swal.fire({
+            icon: "warning",
+            title: "Warning",
+            text: "The Work Order does not have Response Time Value, nor a Repair Time Value and therefore the system cannot perform the SLA Calculation\nPlease Create Booking First.",
+          });
+        } else {
+          Swal.close();
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
         Swal.fire({
-          icon: "warning",
-          title: "Warning",
-          text: "The Work Order does not have Response Time Value, nor a Repair Time Value and therefore the system cannot perform the SLA Calculation\nPlease Create Booking First.",
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong while loading data!",
         });
-      } else {
-        Swal.close();
       }
-    } catch (err) {
-      console.error("Fetch error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Something went wrong while loading data!",
-      });
-    }
-  };
+    };
 
-  fetchAllData();
-}, [woid]);
+    fetchAllData();
+  }, [woid]);
 
   useEffect(() => {
     console.log("Data Fetch Customer Data in WO : ", dataFetchCustomerData);
@@ -321,15 +322,15 @@ export const ServiceWork = () => {
   // useEffect(() => {
   // }, [workOrders])
 
-  const [selected, setSelected] = useState("work_order");
+  const [selected, setSelected] = useState("");
 
   // const location = useLocation();
   // const { ownerUserData, dataFetchCustomerData } = location.state || {};
 
   const tabs = [
-    {value: "wo_summary", label: "Wo Summary"},
-    {value: "wo_bookings", label: "Wo Bookings"},
-    {value: "wo_input", label: "Quick WO Input"},
+    { value: "wo_summary", label: "Wo Summary" },
+    { value: "wo_bookings", label: "Wo Bookings" },
+    { value: "wo_input", label: "Quick WO Input" },
   ]
 
   const navigate = useNavigate();
@@ -340,7 +341,7 @@ export const ServiceWork = () => {
     useState(null);
   const [dueDate, setDuedate] = useState(null);
   // const [dueDateCustomer, setDueDateCustomer] = useState(null);
- const [first, setFirst] = useState(null);
+  const [first, setFirst] = useState(null);
 
   const [followUpRequired, setFollowUpRequired] = useState(false);
   const [followUpCompleted, setFollowUpCompleted] = useState(false);
@@ -352,7 +353,10 @@ export const ServiceWork = () => {
 
   
 
-  let canEditapo;
+  const editrole = ['apo', 'admin', 'ce', 'celead']
+
+  let canEditapo = editrole.includes(user?.role);
+  let canaddce = (user?.role === 'ce' || user?.role === 'celead') && user?.id === workOrders?.OwnerID;
 
   const validateRequestedDateTimeCustomer = async (WOID) => {
     try {
@@ -382,11 +386,7 @@ export const ServiceWork = () => {
 
 
 
-  if ( user?.role === "admin") {
-    canEditapo = true;
-  } else if (workOrders?.caseinformation?.Owner) {
-     canEditapo = workOrders?.caseinformation.Owner === user?.id && (user?.role === "apo" ||user?.role === "ce" || user?.role === "celead" );
-  }
+
   return (
     <>
       {workOrders.SystemStatus === "CLOSED_POSTED" && (
@@ -396,10 +396,10 @@ export const ServiceWork = () => {
         </div>
       )}
       {workOrders?.WOID && caseInformation?.CaseID && (
-        <TabsServiceWO 
-          workOrders={workOrders} 
-          SLA={SLA} 
-          setSLA={setSLA} 
+        <TabsServiceWO
+          workOrders={workOrders}
+          SLA={SLA}
+          setSLA={setSLA}
           WOGeneral={WOGeneral}
           setWOGeneral={setWOGeneral}
         />
@@ -407,12 +407,12 @@ export const ServiceWork = () => {
       <Card className="p-0 mt-2 border-0 rounded-none">
         <Tabs defaultValue="wo_summary">
           <CardHeader
-            className={"flex flex-col gap-3 border-2 w-full p-2 sticky"}
+            className={"flex flex-col gap-3 border-2 w-full p-2 sticky z-30 top-22 bg-white"}
           >
             <div className="flex justify-between">
               <CardTitle className="text-xl pl-2">
                 {woid}
-                <span className="flex items-center text-sm">
+                {/* <span className="flex items-center text-sm">
                   Work Order .
                   <Select
                     onValueChange={setSelected}
@@ -432,18 +432,18 @@ export const ServiceWork = () => {
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                </span>
+                </span> */}
               </CardTitle>
-              <CardTitle className="flex">
-                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
+              <CardTitle className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
+                <div className="flex flex-col ">
                   <h1 className="text-blue-500">{ownerWorkOrder.Name}</h1>
                   <p className="text-sm font-light ">Owner</p>
                 </div>
-                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
+                <div className="flex flex-col ">
                   <h1 className="text-blue-500">---</h1>
                   <p className="text-sm font-light ">Queue</p>
                 </div>
-                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
+                <div className="flex flex-col ">
                   <h1 className="text-blue-500">
                     {dataFetchCustomerData.MainAccount?.Salutation}{" "}
                     {dataFetchCustomerData.MainAccount?.FirstName}{" "}
@@ -451,7 +451,7 @@ export const ServiceWork = () => {
                   </h1>
                   <p className="text-sm font-light">Contact</p>
                 </div>
-                <div className="flex flex-col justify-center px-2 border-r-2 item-center">
+                <div className="flex flex-col ">
                   <Select onValueChange={setSelected} defaultValue="first">
                     <SelectTrigger className="p-0 text-blue-500 border-none shadow-none">
                       <SelectValue />
@@ -472,18 +472,18 @@ export const ServiceWork = () => {
                 </div>
               </CardTitle>
             </div>
-            <TabsList className="bg-white ">
+            <TabsList className="bg-gray-100 w-full flex gap-4">
               {tabs.map((tab, index) => (
-                tab.component ?(
+                tab.component ? (
                   <div key={index}>{tab.component}</div>
                 ) : (
                   <TabsTrigger
                     key={index}
-                    variant={"underline"}
+                    variant={"simple"}
                     value={tab.value}
                     disabled={tab.disable}
                     hidden={tab.hidden}
-                    className={"font-normal"}
+                    className="text-sm font-medium"
                   >
                     {tab.label}
                   </TabsTrigger>
@@ -566,7 +566,7 @@ export const ServiceWork = () => {
                       value={WOGeneral.ShipmentCountry}
                       onChange={handleWOGeneral('ShipmentCountry')}
                       placeholder="---"
-                      options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"] }
+                      options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"]}
                     />
                   </CaseField>
                   <CaseField label="Recommended Resource" lock>
@@ -578,12 +578,12 @@ export const ServiceWork = () => {
                       readOnly
                     />
                   </CaseField>
-                  <CaseField label="Work Order Description"  lock >
-                      <Input variant={'invisible'}
+                  <CaseField label="Work Order Description" lock >
+                    <Input variant={'invisible'}
                       value={WOGeneral.WorkOrderDescription}
                       onChange={handleWOGeneral('WorkOrderDescription')}
                       placeholder="---"
-                      /> 
+                    />
                   </CaseField>
                   <CaseField label="Sub-Status" lock={KeyRound}>
                     <Input
@@ -594,16 +594,16 @@ export const ServiceWork = () => {
                       placeholder="---"
                     />
                   </CaseField>
-                   <CaseField label="Work Order Instruction" lock >
-                      <Input variant={'invisible'} placeholder="---" readOnly/> 
+                  <CaseField label="Work Order Instruction" lock >
+                    <Input variant={'invisible'} placeholder="---" readOnly />
                   </CaseField>
                   <CaseField label="Shipment State" lock>
                     <Input
-                      variant={"invisible"}                      
+                      variant={"invisible"}
                       value={WOGeneral.ShipmentState}
                       onChange={handleWOGeneral('ShipmentState')}
                       placeholder="---"
-                      
+
                     />
                   </CaseField>
 
@@ -613,44 +613,44 @@ export const ServiceWork = () => {
                       <AccordionContent className={"m-2"}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <CaseField label="Bookable Resource Booking" lock>
-                          <Input
-                            variant={"invisible"}
-                            className=""
-                            value={WOGeneral.BookableResourceBooking || "---"}
-                            readOnly
-                          />
-                        </CaseField>
-                        
-                        <CaseField
-                          label="Service Offer ID"
-                          className={"col-start-1"}
-                          lock
-                        >
-                          <Input
-                            variant={"invisible"}
-                            className=""
-                            value={
-                              caseInformation.servicecatalog?.Service_offerID || "---"
-                            }
-                            readOnly
-                          />
-                        </CaseField>
+                            <Input
+                              variant={"invisible"}
+                              className=""
+                              value={WOGeneral.BookableResourceBooking || "---"}
+                              readOnly
+                            />
+                          </CaseField>
 
-                        <CaseField
-                          label="Service Description"
-                          className={"col-start-1"}
-                          lock
-                        >
-                          <Input
-                            variant={"invisible"}
-                            className=""
-                            value={
-                              caseInformation.servicecatalog?.warranty_services
-                                ?.Service_description || "---"
-                            }
-                            readOnly
-                          />
-                        </CaseField>
+                          <CaseField
+                            label="Service Offer ID"
+                            className={"col-start-1"}
+                            lock
+                          >
+                            <Input
+                              variant={"invisible"}
+                              className=""
+                              value={
+                                caseInformation.servicecatalog?.Service_offerID || "---"
+                              }
+                              readOnly
+                            />
+                          </CaseField>
+
+                          <CaseField
+                            label="Service Description"
+                            className={"col-start-1"}
+                            lock
+                          >
+                            <Input
+                              variant={"invisible"}
+                              className=""
+                              value={
+                                caseInformation.servicecatalog?.warranty_services
+                                  ?.Service_description || "---"
+                              }
+                              readOnly
+                            />
+                          </CaseField>
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -661,7 +661,7 @@ export const ServiceWork = () => {
               <div className="flex flex-col flex-1 gap-4">
                 <Card className="rounded-sm ">
                   <CardContent className="grid items-center grid-cols-2" >
-                      <CaseField label="Incoming Channel" lock>
+                    <CaseField label="Incoming Channel" lock>
                       <Input
                         variant={"invisible"}
                         className=""
@@ -672,7 +672,7 @@ export const ServiceWork = () => {
                     <CaseField
                       label="Currently Worked By"
                       className={"col-span-3 hidden"}
-                      
+
                     >
                       {" "}
                       <Input
@@ -714,8 +714,8 @@ export const ServiceWork = () => {
                       <Input
                         variant={"invisible"}
                         value={workOrders?.caseinformation?.otcCodeTable?.Description || "---"}
-                        placeholder= "---"
-                       
+                        placeholder="---"
+
                       />
                     </CaseField>
                     <CaseField label="Authorizing Employee" lock>
@@ -740,43 +740,43 @@ export const ServiceWork = () => {
                         <AccordionTrigger>More Details</AccordionTrigger>
                         <AccordionContent className={"m-1"}>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                           <CaseField label="Coverage Window Value" lock>
-                            <Input
-                              variant={"invisible"}
-                              className=""
-                              value={"---"}
-                              readOnly
-                            />
-                          </CaseField>
-                          <CaseField label="Response Time Value" lock>
-                            <Input
-                              variant={"invisible"}
-                              className=""
-                              value={"---"}
-                              readOnly
-                            />
-                          </CaseField>
-                          <CaseField label="Repair Time Value" lock>
-                            <Input
-                              variant={"invisible"}
-                              className=""
-                              value={"---"}
-                              readOnly
-                            />
-                          </CaseField>
-                          <CaseField label="Case Priority Index" lock>
-                            <Input
-                              variant={"invisible"}
-                              className=""
-                              value={"---"}
-                              readOnly
-                            />
-                          </CaseField>
+                            <CaseField label="Coverage Window Value" lock>
+                              <Input
+                                variant={"invisible"}
+                                className=""
+                                value={"---"}
+                                readOnly
+                              />
+                            </CaseField>
+                            <CaseField label="Response Time Value" lock>
+                              <Input
+                                variant={"invisible"}
+                                className=""
+                                value={"---"}
+                                readOnly
+                              />
+                            </CaseField>
+                            <CaseField label="Repair Time Value" lock>
+                              <Input
+                                variant={"invisible"}
+                                className=""
+                                value={"---"}
+                                readOnly
+                              />
+                            </CaseField>
+                            <CaseField label="Case Priority Index" lock>
+                              <Input
+                                variant={"invisible"}
+                                className=""
+                                value={"---"}
+                                readOnly
+                              />
+                            </CaseField>
                           </div>
                         </AccordionContent>
                       </AccordionItem>
                     </Accordion>
-                   
+
                   </CardContent>
                 </Card>
               </div>
@@ -831,11 +831,11 @@ export const ServiceWork = () => {
                 </CaseField>
                 <CaseField label="Due Date (Customer)" className={""} lock span={2}>
                   <DatePicker value={
-                      SLA.dueDateCustomer
-                        ? new Date(SLA.dueDateCustomer)
-                        : null
-                    }
-                    onChange={handleSLAChange("dueDateCustomer")}/>
+                    SLA.dueDateCustomer
+                      ? new Date(SLA.dueDateCustomer)
+                      : null
+                  }
+                    onChange={handleSLAChange("dueDateCustomer")} />
                 </CaseField>
                 <CaseField
                   label="Guaranteed Fix Time (Customer)"
@@ -844,11 +844,11 @@ export const ServiceWork = () => {
                   span={2}
                 >
                   <DatePicker value={
-                      SLA.guaranteedFixTimeCustomer
-                        ? new Date(SLA.guaranteedFixTimeCustomer)
-                        : null
-                    }
-                    onChange={handleSLAChange("guaranteedFixTimeCustomer")}/>
+                    SLA.guaranteedFixTimeCustomer
+                      ? new Date(SLA.guaranteedFixTimeCustomer)
+                      : null
+                  }
+                    onChange={handleSLAChange("guaranteedFixTimeCustomer")} />
                 </CaseField>
                 <CaseField label="Active Schedule Date" className={""} lock>
                   {" "}
@@ -902,11 +902,11 @@ export const ServiceWork = () => {
                   span={2}
                 >
                   <DatePicker value={
-                      SLA.latestStartDateTimeCustomer
-                        ? new Date(SLA.latestStartDateTimeCustomer)
-                        : null
-                    }
-                    onChange={handleSLAChange("latestStartDateTimeCustomer")}/>
+                    SLA.latestStartDateTimeCustomer
+                      ? new Date(SLA.latestStartDateTimeCustomer)
+                      : null
+                  }
+                    onChange={handleSLAChange("latestStartDateTimeCustomer")} />
                 </CaseField>
                 <CaseField label="OTC Code" className={""}>
                   {" "}
@@ -984,8 +984,8 @@ export const ServiceWork = () => {
                   Material Order Information
                 </CardTitle>
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={() => openServiceCatalog("wo-add-mo")}>
-                    <Plus className="mr-2" size={16}/> Create Material Order
+                  <Button size="sm" onClick={() => openServiceCatalog("wo-add-mo")} disabled={!canaddce}>
+                    <Plus className="mr-2" size={16} /> Create Material Order
                   </Button>
                 </div>
                 <hr />
@@ -1006,21 +1006,21 @@ export const ServiceWork = () => {
                   <TableBody>
                     {materialOrders.length > 0
                       ? materialOrders.map((material) => (
-                          <TableRow key={material.MOID}>
-                            <TableCell className="font-medium">
-                              <Link to={`/app/material-order/${material.MOID}`}>
-                                {material.MOID} on {material.WOID}
-                              </Link>
-                            </TableCell>
-                            <TableCell>{material.workorder?.CaseID}</TableCell>
-                            <TableCell>{formatDate(material.CreatedOn)}</TableCell>
-                            <TableCell>{material.OrderStatus}</TableCell>
-                            <TableCell>{material.OrderType}</TableCell>
-                            <TableCell>
-                              {material.ReadyForClosureDate}
-                            </TableCell>
-                          </TableRow>
-                        ))
+                        <TableRow key={material.MOID}>
+                          <TableCell className="font-medium">
+                            <Link to={`/app/material-order/${material.MOID}`}>
+                              {material.MOID} on {material.WOID}
+                            </Link>
+                          </TableCell>
+                          <TableCell>{material.workorder?.CaseID}</TableCell>
+                          <TableCell>{formatDate(material.CreatedOn)}</TableCell>
+                          <TableCell>{material.OrderStatus}</TableCell>
+                          <TableCell>{material.OrderType}</TableCell>
+                          <TableCell>
+                            {material.ReadyForClosureDate}
+                          </TableCell>
+                        </TableRow>
+                      ))
                       : null}
                   </TableBody>
                 </Table>
@@ -1059,7 +1059,7 @@ export const ServiceWork = () => {
                 <hr />
               </CardHeader>
               <CardContent className={"grid items-center grid-cols-6 gap-10"}>
-                <CaseField label={"Requested Date Time (Customer)"} lock={!canEditapo } span={2}>
+                <CaseField label={"Requested Date Time (Customer)"} lock={!canEditapo} span={2}>
                   <DatePicker
                     variant="icon"
                     value={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}
@@ -1067,16 +1067,16 @@ export const ServiceWork = () => {
                   ></DatePicker>
                 </CaseField>
 
-                
-     <CaseField label="Early Start Date Time (Customer)"  lock={!canEditapo} span={2}>
-                    <DatePicker
-                        value={SLA.earlyStartDateTimeCustomer ? new Date(SLA.earlyStartDateTimeCustomer) : null}
-                        onChange={handleSLAChange("earlyStartDateTimeCustomer")}
-                    ></DatePicker>
-                    </CaseField>
+
+                <CaseField label="Early Start Date Time (Customer)" lock={!canEditapo} span={2}>
+                  <DatePicker
+                    value={SLA.earlyStartDateTimeCustomer ? new Date(SLA.earlyStartDateTimeCustomer) : null}
+                    onChange={handleSLAChange("earlyStartDateTimeCustomer")}
+                  ></DatePicker>
+                </CaseField>
 
 
-                <CaseField label={"Guaranteed Fix Time (Customer)"} lock={!canEditapo } span={2}>
+                <CaseField label={"Guaranteed Fix Time (Customer)"} lock={!canEditapo} span={2}>
                   <DatePicker
                     variant="icon"
                     value={SLA.guaranteedFixTimeCustomer ? new Date(SLA.guaranteedFixTimeCustomer) : null}
@@ -1085,14 +1085,14 @@ export const ServiceWork = () => {
                 </CaseField>
 
 
-                <CaseField label="Latest Start Date Time (Customer)" lock={!canEditapo } span={2}> 
-                      <DatePicker
-                        value={SLA.latestStartDateTimeCustomer ? new Date(SLA.latestStartDateTimeCustomer) : null}
-                        onChange={handleSLAChange("latestStartDateTimeCustomer")}
-                    ></DatePicker>
-                </CaseField>             
+                <CaseField label="Latest Start Date Time (Customer)" lock={!canEditapo} span={2}>
+                  <DatePicker
+                    value={SLA.latestStartDateTimeCustomer ? new Date(SLA.latestStartDateTimeCustomer) : null}
+                    onChange={handleSLAChange("latestStartDateTimeCustomer")}
+                  ></DatePicker>
+                </CaseField>
 
-                <CaseField label={"Due Date  (Customer)"} lock={!canEditapo } span={2}>
+                <CaseField label={"Due Date  (Customer)"} lock={!canEditapo} span={2}>
                   <DatePicker
                     variant="icon"
                     value={SLA.dueDateCustomer ? new Date(SLA.dueDateCustomer) : null}
@@ -1100,15 +1100,15 @@ export const ServiceWork = () => {
                   ></DatePicker>
                 </CaseField>
 
-                      <CaseField label="Active Schedule Date" lock={!canEditapo } span={2}> 
-                         <DatePicker
-                        value={SLA.activeScheduleDate ? new Date(SLA.activeScheduleDate) : null}
-                        onChange={handleSLAChange("activeScheduleDate")}
-                    ></DatePicker>
+                <CaseField label="Active Schedule Date" lock={!canEditapo} span={2}>
+                  <DatePicker
+                    value={SLA.activeScheduleDate ? new Date(SLA.activeScheduleDate) : null}
+                    onChange={handleSLAChange("activeScheduleDate")}
+                  ></DatePicker>
 
-                      </CaseField>
+                </CaseField>
               </CardContent>
-            </Card>            
+            </Card>
 
             <Card className="flex-col mt-5 rounded-md">
               <span className="ml-5 text-xl font-bold">Booking </span>
@@ -1586,7 +1586,7 @@ export const ServiceWork = () => {
               />
             </TabsContent>
           )}
-          
+
         </Tabs>
       </Card>
     </>

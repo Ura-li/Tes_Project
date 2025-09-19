@@ -163,8 +163,8 @@ const App = () => {
     "--sidebar-width-mobile": "20rem",
   }}>
       <AppSidebar  />
-      <SidebarInset >
-        <header className="flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300">
+      <SidebarInset className={'w-full'}>
+        <header className="flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300 w-full">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />

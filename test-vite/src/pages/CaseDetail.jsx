@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { use, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -93,6 +93,7 @@ import { parseNoteText } from "@/lib/utils.jsx";
 import SignatureWrite from "@/components/SignaturePad";
 import { description } from "@/components/sc-chart";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 /**
  * TODO : 
@@ -500,14 +501,15 @@ const openPopup = () => {
     // { icon: StepBack, label: "Complaint",},
     { icon: StepBack, label: "SRF", 
       onClick: async () => {
-        const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails} customerSignature={signature} />).toBlob();
+      const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails} customerSignature={signature} />).toBlob();
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'Service_Request_Form.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        window.open(url); 
+      // const link = document.createElement('a');
+      // link.href = url;
+      // link.download = 'Service_Request_Form.pdf';
+      // document.body.appendChild(link);
+      // link.click();
+      // document.body.removeChild(link);
     }, 
     roles: ["admin", "fd","user", "spv"]
   },
@@ -1223,6 +1225,8 @@ const fetchSymptomCodes = async (term) => {
 
 const [hideAsignTo, setHideAsignTo] = useState(null)
   const canEdit = caseDetails?.Owner === user?.id;
+  const canEditFd = user?.role === "fd" ;
+  const canEditApo = user?.role === "apo" ;
   console.log("OI",canEdit)
   
   return (
@@ -1319,17 +1323,18 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-3 ">
-                <CaseField label="Case Subject" span={3}>
+                <CaseField label="Case Subject" span={3} lock={!canEditFd}>
                   <div className="ml-8">
                     <Textarea
                      value={caseForm?.CaseSubject}
                       onChange={e => onChangeCase("CaseSubject")(e.target.value)}
                      className="resize-none border-none italic ring-1 ring-gray-400 bg-gray-50 text-base"
+                      readOnly={!canEditFd}
                     />
                   </div>
                 </CaseField>
               
-                <CaseField label="Case ID manual" className={"mt-2"} lock span={2}>  
+                <CaseField label="Case ID manual" className={"mt-2"} lock={!canEditApo} span={2}>  
                     <Input variant="invisible" placeholder="---"
                       value={caseDetails.CaseIdManual}
                       onChange={e => handleCaseDetails("CaseIdManual")(e.target.value)}
@@ -1424,12 +1429,13 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     />
                 </CaseField>
 
-                <CaseField label="Problem Description" span={3}>
+                <CaseField label="Problem Description" span={3} lock={!canEditFd}>
                   <div className="ml-8">
                     <Textarea
                      value={caseForm?.ProblemDescription}
                      onChange={(e) => onChangeCase("ProblemDescription") (e.target.value)}
                      className="resize-none ring-1 ring-gray-300 bg-gray-50 italic"
+                     readOnly={!canEditFd}
                     />
 
                   </div>
@@ -1474,74 +1480,74 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                           ></DatePicker>
                       </CaseField>
 
-                <Accordion type="single" collapsible className="w-full col-span-2">
-                  <AccordionItem value="more-details" className="pl-5">
-                    <AccordionTrigger className={"decoration-transparent border-1 p-2 cursor-pointer"}>More Details</AccordionTrigger>
-                    <AccordionContent className={"m-1"}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">                    
-   <CaseField label="Incoming Channel" className={"mt-2"}>
-                  <Input
-                    variant="invisible"
-                    value={caseDetails.IncomingChannel}
-                    readOnly
-                  />
-                </CaseField>
-                      <CaseField label="Submitted To Base">
-                        <span className="gap-[5em]">
-                          <DatePicker
-                            variant="icon"
-                            value={submittedToBase}
-                            onChange={setsubmittedToBase}
-                            readOnly  
-                          ></DatePicker>
-                        </span>
-                      </CaseField>
-                          <CaseField label="Customer Severity" >
-                  <Input
-                    variant="invisible"
-                    value={caseDetails.CustomerSeverity}
-                  />
-                </CaseField>
-                      <CaseField label="Business Segment" >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>          
-                
-                      <CaseField label="HPI Segment" >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>
-                  
-                      <CaseField label="Customer Tracking Number" >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>
-                    
-                      <CaseField label="Update Customer Tracking Number">
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                      <CaseField label="Alternate Customer Tracking Number" >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>
-                    
-                      <CaseField label="Irrelevant" >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                    
-                        
-                      <CaseField label="Email Status"  >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>
+                  <Accordion type="single" collapsible className="w-full col-span-2">
+                    <AccordionItem value="more-details" className="pl-5">
+                      <AccordionTrigger className={"decoration-transparent border-1 p-2 cursor-pointer"}>More Details</AccordionTrigger>
+                      <AccordionContent className={"m-1"}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <CaseField lock label="Incoming Channel" className={"mt-2"}>
+                            <Input
+                              variant="invisible"
+                              value={caseDetails.IncomingChannel}
+                              
+                            />
+                          </CaseField>
+                          <CaseField lock label="Submitted To Base">
+                            <span className="gap-[5em]">
+                              <DatePicker
+                                variant="icon"
+                                value={submittedToBase}
+                                onChange={setsubmittedToBase}
+                                
+                              ></DatePicker>
+                            </span>
+                          </CaseField>
+                          <CaseField lock label="Customer Severity" >
+                            <Input
+                              variant="invisible"
+                              value={caseDetails.CustomerSeverity}
+                            />
+                          </CaseField>
+                          <CaseField lock label="Business Segment" >
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
 
-                        <CaseField label="Case ID" lock  className={"hidden"}>
-                        <Input
-                          variant="invisible"
-                          value={caseDetails.CaseID}
-                          readOnly
-                          hidden
-                        />
-                      </CaseField>
-                    </div>
-                  </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                          <CaseField lock label="HPI Segment" >
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField lock label="Customer Tracking Number" >
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField lock label="Update Customer Tracking Number">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+                          <CaseField lock label="Alternate Customer Tracking Number" >
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField lock label="Irrelevant" >
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+
+                          <CaseField lock label="Email Status"  >
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField  label="Case ID" lock className={"hidden"}>
+                            <Input
+                              variant="invisible"
+                              value={caseDetails.CaseID}
+                              
+                              hidden
+                            />
+                          </CaseField>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
               </CardContent>
             </Card>
                     
@@ -1640,25 +1646,25 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     <AccordionTrigger className={"decoration-transparent border p-2 cursor-pointer"}>More Details</AccordionTrigger>
                     <AccordionContent className="m-1">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
-                        <CaseField label="Submitted By">
+                        <CaseField lock label="Submitted By">
                           <Input variant="invisible" placeholder="---"  />
                         </CaseField>
-                        <CaseField label="HIPAA" >
+                        <CaseField lock label="HIPAA" >
                           <Input variant="invisible" placeholder="---" readOnly/>
                         </CaseField>
-                        <CaseField label="PIN">
+                        <CaseField lock label="PIN">
                           <Input variant="invisible" placeholder="---" />
                         </CaseField>              
-                        <CaseField label="Parent Company">
+                        <CaseField lock label="Parent Company">
                           <Input variant="invisible" placeholder="---" />
                         </CaseField>
-                        <CaseField label="Parent Company Non-Latin">
+                        <CaseField lock label="Parent Company Non-Latin">
                           <Input variant="invisible" placeholder="---" />
                         </CaseField>
-                        <CaseField label="Customer Time Zone">
+                        <CaseField lock label="Customer Time Zone">
                           <Input variant="invisible" placeholder="---" readOnly/>
                         </CaseField>
-                        <CaseField label="Account Tier">
+                        <CaseField lock label="Account Tier">
                           <Input variant="invisible" placeholder="---"/>
                         </CaseField>
                       </div>
@@ -1686,9 +1692,10 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     {/* LEFT COLUMN - Issue Description */}
                     <div className="space-y-6">
                       <textarea
-                        className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
+                      className={cn("w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50 ", !canEditFd && "cursor-not-allowed")}
                         value={caseForm?.CaseProductNote}
-                           onChange={(e) => onChangeCase("CaseProductNote") (e.target.value)}
+                      onChange={(e) => onChangeCase("CaseProductNote")(e.target.value)}
+                      disabled={!canEditFd}
                       />
                     </div>
                     {/* RIGHT COLUMN - System Info */}
@@ -1919,7 +1926,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
                     </div>
-                    <CaseField label="Warranty Status"  span={3} star className={"whitespace-nowrap"}>
+                    <CaseField label="Warranty Status"  span={3} star className={"whitespace-nowrap"} lock={!canEditFd}>
                       <SearchCommandBlock
                         options={otcCode}
                         value={entitlementStatus.OTCCode || "--select--"}

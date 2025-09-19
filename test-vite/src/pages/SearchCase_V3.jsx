@@ -1227,7 +1227,9 @@ export default function NewCaseForm() {
       }
       // console.log(user);
 
-      toast("succcess");
+      toast.success("Succcess",{
+        description: "Case has been created successfully"
+      });
       // Navigate detail
       navigate(`/app/case/${caseId}`);
     } catch (e) {
@@ -1263,7 +1265,7 @@ export default function NewCaseForm() {
           <CardContent className="pt-4 grid md:grid-cols-2 gap-6">
             {/* Serial Number Search */}
             <div className="space-y-2">
-              <Label>Serial Number</Label>
+            <Label className={'text-lg'}>Serial Number</Label>
               <div className="flex gap-2">
                 <Input
                   placeholder="Type serial number..."
@@ -1310,19 +1312,20 @@ export default function NewCaseForm() {
                 <Checkbox
                   id="isNewAsset"
                   checked={isNewAsset}
+                  className={'ring-1'}
                   onCheckedChange={(v) => {
                     setIsNewAsset(Boolean(v));
 
                   }
                   }
                 />
-                <Label htmlFor="isNewAsset">Buat Asset Baru</Label>
+                <Label htmlFor="isNewAsset" className={'font-[700]'}>Buat Asset Baru</Label>
               </div>
             </div>
 
             {/* Customer Search */}
             <div className="space-y-2">
-              <Label>Customer (name/email/phone/company)</Label>
+              <Label className={'text-lg'}>Customer (name/email/phone/company)</Label>
               <div className="flex gap-2">
                 <Input
                   placeholder="Search customer or company..."
@@ -1394,13 +1397,14 @@ export default function NewCaseForm() {
                 <Checkbox
                   id="createCustomer"
                   checked={isNewContact}
+                  className={'ring-1'}
                   onCheckedChange={(v) => {
                     setIsNewContact(Boolean(v));
 
                   }
                   }
                 />
-                <Label htmlFor="createCustomer">Buat customer baru (jika tidak ditemukan)</Label>
+                <Label htmlFor="createCustomer" className={'font-[700]'}>Buat customer baru (jika tidak ditemukan)</Label>
               </div>
             </div>
           </CardContent>
@@ -1772,9 +1776,10 @@ export default function NewCaseForm() {
                   <Checkbox
                     id="isNewProduct"
                     checked={isNewProduct}
+                    className={'ring-1'}
                     onCheckedChange={(v) => setIsNewProduct(Boolean(v))}
                   />
-                  <Label htmlFor="isNewProduct">Buat Product Baru</Label>
+                  <Label htmlFor="isNewProduct" className={'font-[700]'}>Buat Product Baru</Label>
                 </div>
                 {productResults.length > 0 && (
                   <div className="mt-2 rounded-xl border p-2 max-h-40 overflow-auto">
