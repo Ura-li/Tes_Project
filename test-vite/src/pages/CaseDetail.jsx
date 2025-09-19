@@ -1784,13 +1784,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                 </Accordion>
               </CardContent>
             </Card>
-
-
-
             </div>
-            {caseDetails.casephotos.map(photo =>(
-              <img src={import.meta.env.VITE_API_BASE_URL +''+photo.url} alt="" className="h-30 w-30 rounded-full border-4 border-white shadow-lg object-cover"/>
-            ))}
             {/* --- Card 1: Customer Issue & System Info --- */}
                          
               <Card className="flex-col">
@@ -2327,8 +2321,10 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   <CardTitle className={"text-lg"}>Photo Unit</CardTitle>
                   <hr />
                 </CardHeader>
-                <CardContent className={"flex flex-row gap-3"}>
-                  
+                <CardContent className={"grid grid-cols-2 gap-3"}>
+                  {caseDetails.casephotos.map(photo =>(
+                    <img src={import.meta.env.VITE_API_BASE_URL +''+photo.url} alt="" className="w-full border-4 border-white shadow-lg object-cover"/>
+                  ))}
                </CardContent>
                   </Card>
                 </div>

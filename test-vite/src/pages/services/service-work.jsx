@@ -983,11 +983,10 @@ export const ServiceWork = () => {
                 <CardTitle className="text-lg ">
                   Material Order Information
                 </CardTitle>
-                <div className="flex gap-2">
                   <Button size="sm" onClick={() => openServiceCatalog("wo-add-mo")} disabled={!canaddce}>
                     <Plus className="mr-2" size={16} /> Create Material Order
                   </Button>
-                </div>
+                  </div>
                 <hr />
               </CardHeader>
               <CardContent className="grid">

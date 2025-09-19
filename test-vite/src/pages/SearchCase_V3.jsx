@@ -1361,12 +1361,11 @@ export default function NewCaseForm() {
                 <Checkbox
                   id="isNewAsset"
                   checked={isNewAsset}
-                  className={'ring-1'}
+                  className={"ring-2 bg-gray-100"}
                   onCheckedChange={(v) => {
                     setIsNewAsset(Boolean(v));
                   }
                   }
-                  className={"ring-2 bg-gray-100"}
                 />
                 <Label htmlFor="isNewAsset" className={'font-[700]'}>Buat Asset Baru</Label>
               </div>
@@ -1446,13 +1445,12 @@ export default function NewCaseForm() {
                 <Checkbox
                   id="createCustomer"
                   checked={isNewContact}
-                  className={'ring-1'}
+                  className={"ring-2 bg-gray-100"}
                   onCheckedChange={(v) => {
                     setIsNewContact(Boolean(v));
 
                   }
                   }
-                  className={"ring-2 bg-gray-100"}
                 />
                 <Label htmlFor="createCustomer" className={'font-[700]'}>Buat customer baru (jika tidak ditemukan)</Label>
               </div>
@@ -1486,10 +1484,10 @@ export default function NewCaseForm() {
               <Label>Reference Case</Label>
               <Input value={referenceCase} onChange={(e) => setReferenceCase(e.target.value)} />
             </div>
-            <div>
-              <Label>Case Status <Label className="text-red-600 mb-2">*</Label></Label>
+            <div className="flex flex-col gap-2">
+              <Label>Case Status <Label className="text-red-600">*</Label></Label>
               <Select value={caseStatus} onValueChange={setCaseStatus}>
-                <SelectTrigger className={"ring-1 rounded-sm"}>
+                <SelectTrigger className={"ring-1 rounded-sm w-full"}>
                   <SelectValue placeholder="Select Case Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1499,10 +1497,10 @@ export default function NewCaseForm() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Case Type <Label className="text-red-600 mb-2">*</Label></Label>
+            <div className="flex flex-col gap-2">
+              <Label>Case Type <Label className="text-red-600">*</Label></Label>
               <Select value={caseType} onValueChange={setCaseType}>
-                <SelectTrigger className={"ring-1 rounded-sm"}>
+                <SelectTrigger className={"ring-1 rounded-sm w-full"}>
                   <SelectValue placeholder="Select Case Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1828,7 +1826,6 @@ export default function NewCaseForm() {
                   <Checkbox
                     id="isNewProduct"
                     checked={isNewProduct}
-                    className={'ring-1'}
                     onCheckedChange={(v) => setIsNewProduct(Boolean(v))}
                     className={"ring-2 bg-gray-100"}
                   />
@@ -1863,10 +1860,10 @@ export default function NewCaseForm() {
               </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label>Product Tower<Label className="text-red-600">*</Label></Label>
                   <Select value={productTower} onValueChange={setProductTower}>
-                    <SelectTrigger>
+                    <SelectTrigger className={"ring-1 rounded-sm w-full"}>
                       <SelectValue placeholder="IPG / PSG" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1875,10 +1872,10 @@ export default function NewCaseForm() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label>Product Group<Label className="text-red-600">*</Label></Label>
                   <Select value={productGroup} onValueChange={setProductGroup}>
-                    <SelectTrigger>
+                    <SelectTrigger className={"ring-1 rounded-sm w-full"}>
                       <SelectValue placeholder="Commercial / Consumer" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1894,7 +1891,7 @@ export default function NewCaseForm() {
                 </div>
                 </div>
                 {productTower && productGroup && (
-                  <div>
+                  <div className="flex flex-col gap-2">
                     <span>Product Type <label className="text-red-600">*</label></span>
                     <Select
                       value={productTypeId || null}
