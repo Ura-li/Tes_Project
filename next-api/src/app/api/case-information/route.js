@@ -172,6 +172,7 @@ export async function POST(request) {
         CaseResolution,
         CreatedBy,
         ProblemDescription,
+        CaseID_Manual,
         CaseNoteProduct,
         accessories,
     } = await request.json();
@@ -223,6 +224,7 @@ export async function POST(request) {
             Owner: parseInt(CreatedBy),
             CreatedBy: parseInt(CreatedBy),
             ProblemDescription: ProblemDescription,
+            CaseID_Manual: CaseID_Manual,
             CaseProductNote : CaseNoteProduct,
             ...(Array.isArray(accessories) && accessories.length > 0 && {
               accessory: {

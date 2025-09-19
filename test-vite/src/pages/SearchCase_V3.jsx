@@ -1312,9 +1312,9 @@ export default function NewCaseForm() {
                   checked={isNewAsset}
                   onCheckedChange={(v) => {
                     setIsNewAsset(Boolean(v));
-
                   }
                   }
+                  className={"ring-2 bg-gray-100"}
                 />
                 <Label htmlFor="isNewAsset">Buat Asset Baru</Label>
               </div>
@@ -1399,6 +1399,7 @@ export default function NewCaseForm() {
 
                   }
                   }
+                  className={"ring-2 bg-gray-100"}
                 />
                 <Label htmlFor="createCustomer">Buat customer baru (jika tidak ditemukan)</Label>
               </div>
@@ -1495,6 +1496,7 @@ export default function NewCaseForm() {
                 id="incCompany"
                 checked={showCompanySection}
                 onCheckedChange={(v) => setShowCompanySection(Boolean(v))}
+                className={"ring-2 bg-gray-100"}
               />
               <Label htmlFor="incCompany">Termasuk dalam company</Label>
             </div>
@@ -1606,6 +1608,7 @@ export default function NewCaseForm() {
                         id="usePIC"
                         checked={usePIC}
                         onCheckedChange={(v) => setUsePIC(Boolean(v))}
+                        className={"ring-2 bg-gray-100"}  
                       />
                       <Label htmlFor="usePIC">Tambahkan PIC</Label>
                     </div>
@@ -1773,6 +1776,7 @@ export default function NewCaseForm() {
                     id="isNewProduct"
                     checked={isNewProduct}
                     onCheckedChange={(v) => setIsNewProduct(Boolean(v))}
+                    className={"ring-2 bg-gray-100"}
                   />
                   <Label htmlFor="isNewProduct">Buat Product Baru</Label>
                 </div>

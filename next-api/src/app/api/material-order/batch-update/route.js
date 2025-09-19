@@ -40,12 +40,28 @@ export async function PATCH(request, {params}) {
         // cek apakah semua MOLI sudah shipped
         const allItems = await tx.materialorderlineitems.findMany({ where: { MOID } });
         const allShipped = allItems.every((item) => item.Status === "Shipped");
+        const allOrdered = allItems.every((item) => item.Status === "Ordered");
+        const allCancelled = allItems.every((item) => item.Status === "Cancelled");
 
         if (allShipped) {
             await tx.materialorder.update({
                 where: { MOID },
                 data: { OrderStatus: "Shipped" },
             });
+        }
+
+        if (allOrdered) {
+        await tx.materialorder.update({
+            where: { MOID },
+            data: { OrderStatus: "Ordered" },
+        });
+        }
+
+        if (allCancelled) {
+        await tx.materialorder.update({
+            where: { MOID },
+            data: { OrderStatus: "Cancelled" },
+        });
         }
         
         const getWOID = await prisma.workorder.findUnique({
@@ -62,7 +78,31 @@ export async function PATCH(request, {params}) {
                 ReferenceId: MOID,
                 model: "Material Orders",
                 dataOld: oldOrderStatus ?? "Unknown",
+                dataNew: "Ordered",
+                changedBy: userId,
+                logDescription: `Batch update MOLI for MO ${MOID}: ${Object.keys(updates).length} item(s) updated. MO status: ${oldOrderStatus} → Ordered`,
+            },
+        });
+
+        await tx.actionLog.create({
+            data: {
+                CaseId: getWOID?.caseinformation?.CaseID,
+                ReferenceId: MOID,
+                model: "Material Orders",
+                dataOld: oldOrderStatus ?? "Unknown",
                 dataNew: "Shipped",
+                changedBy: userId,
+                logDescription: `Batch update MOLI for MO ${MOID}: ${Object.keys(updates).length} item(s) updated. MO status: ${oldOrderStatus} → Shipped`,
+            },
+        });
+
+        await tx.actionLog.create({
+            data: {
+                CaseId: getWOID?.caseinformation?.CaseID,
+                ReferenceId: MOID,
+                model: "Material Orders",
+                dataOld: oldOrderStatus ?? "Unknown",
+                dataNew: "Cancelled",
                 changedBy: userId,
                 logDescription: `Batch update MOLI for MO ${MOID}: ${Object.keys(updates).length} item(s) updated. MO status: ${oldOrderStatus} → Shipped`,
             },

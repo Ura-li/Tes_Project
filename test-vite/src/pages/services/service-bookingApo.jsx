@@ -260,7 +260,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
     try {
       await ApiCustomer.patch(`/api/bookings/${bookingid}`, {
         ChangedBy: changedBy,
-        BookingStatusId: markCompleted ? 2 : bookingid,
+        BookingStatusId: markCompleted ? 2 : bookingStatusId,
         DoNotDisturb: doNotDisturb,
         CeScheduleChange: ceScheduleChange,
         ScheduleJeopardy: scheduleJeopardy,
@@ -441,14 +441,15 @@ export function ServiceBookingApo ({BookingId , woid}) {
     <div>
       {/* Quick actions header */}
       <div className="flex items-center gap-2 mb-2">
-        <Button variant="secondary" onClick={handleUpdate}>Save</Button>
-        <Button variant="default" onClick={handleComplete} disabled={!canCompleteBooking()}>
+        {/* <Button variant="secondary" onClick={handleUpdate}>Save</Button> */}
+        {/* <Button variant="default" onClick={handleComplete} disabled={!canCompleteBooking()}>
           Mark Completed
-        </Button>
+        </Button> */}
       </div>
       <TabsBooking
         handleUpdate={handleUpdate}
         bookingData={bookingData}
+        handleComplete={handleComplete}
       />
     <Card className="mt-2 rounded-none">
       {/* <Button onClick={handleUpdate}>Save</Button> */}

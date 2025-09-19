@@ -143,6 +143,7 @@ export const TabsServiceCaseDetails = ({
     Owner: "",
     CasePriority: "",
     ProblemDescription:"",
+    CaseID_Manual: "",
     CaseProductNote: "",
   });
 
@@ -224,7 +225,8 @@ export const TabsServiceCaseDetails = ({
       Owner: caseForm.Owner,
       CasePriority: caseForm.CasePriority,
       CaseProductNote: caseForm.CaseProductNote,
-      ProblemDescription: caseForm.ProblemDescription
+      ProblemDescription: caseForm.ProblemDescription,
+      CaseID_Manual: caseForm.CaseID_Manual
     }).some(([_, v]) => v !== undefined && v !== null && String(v).trim() !== "");
     const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
     // Only treat entitlement as edited if it has any non-empty value
@@ -345,6 +347,9 @@ export const TabsServiceCaseDetails = ({
                 }
                 if (caseForm.ProblemDescription && String(caseForm.ProblemDescription).trim() !== "") {
                   caseUpdates.ProblemDescription = caseForm.ProblemDescription;
+                }
+                if (caseForm.CaseID_Manual && String(caseForm.CaseID_Manual).trim() !== "") {
+                  caseUpdates.CaseID_Manual = caseForm.CaseID_Manual;
                 }
 
                 Object.assign(dataToUpdate, caseUpdates);
@@ -819,8 +824,8 @@ export const ServiceCase = ({
   const tabs = [
     { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg","celead"]},
     { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg","celead"]},
+    { value: "doc_photo", label: "Document Photo" , roles:["admin", "apo","ce","celead","fd","lg"]},
     { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg","celead"]},
-    { value: "note_part", label: "Sparepart" , roles:["admin", "apo","ce","celead","fd","lg"], hidden:true},
     // { value: "customer,add,entitement", label: "Asset & Entitement", roles:["admin"]},
     // { value: "ci_notes", label: "Notes & Information", roles:["admin"]},
     // { value: "ci_activitas", label: "Activities", disable: true, roles:["admin"]},
@@ -1329,10 +1334,10 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   </div>
                 </CaseField>
               
-                <CaseField label="Case ID manual" className={"mt-2"} lock span={2}>  
+                <CaseField label="Case ID manual" className={"mt-2"} span={2}>  
                     <Input variant="invisible" placeholder="---"
-                      value={caseDetails.CaseIdManual}
-                      onChange={e => handleCaseDetails("CaseIdManual")(e.target.value)}
+                      value={caseForm?.CaseID_Manual}
+                      onChange={e => onChangeCase("CaseID_Manual")(e.target.value)}
                     />                    
                 </CaseField>
 
@@ -1435,18 +1440,16 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   </div>
                 </CaseField>
 
-                 <CaseField label="Case Priority" className={"mt-2"} lock span={2}>
+                 <CaseField label="Case Priority" className={"mt-2"}  span={2}>
                   {/* <Input variant="invisible" value={caseDetails.CasePriority}/> */}
-                  <SelectBar
-                    id="Country"
-                    value={caseDetails?.CasePriority}
-                    onChange={e => handleCaseDetails("CasePriority")(e.target.value)}
-                    options={[
-                      { id: "low", name: "Low" },
-                      { id: "medium", name: "Medium" },
-                      { id: "important", name: "Important" },
+                  <SearchCommandBlock
+                  value={caseForm?.CasePriority}
+                  onChange={onChangeCase("CasePriority")}
+                  options={[
+                      "Same Businnes Day (SBD)",
+                      "Next Businnes Days (NBD)",
+                      "3 Businnes Days (3BD)"
                     ]}
-                    placeholder="Select a Country"
                   />
                 </CaseField>
 
@@ -1878,35 +1881,57 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   </CardHeader>
                   <CardContent className="grid items-center grid-cols-6 gap-10">
                     <CaseField label="Category Warranty" lock className={"whitespace-nowrap"}>
-                      {WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition]}{" "}
+                      <Input
+                        value={WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition]} 
+                        variant={"invisible"}
+                        placeholder={"---"}
+                      />
                     </CaseField>
                     <CaseField label="Product Number" lock>
-                      <span className="pl-3">
-                        {
+                      <Input
+                        value={
                           dataFetchAssetInformation?.AssetInformation
                             ?.product_information?.ProductNumber
                         }
-                      </span>
+                        variant={"invisible"}
+                        placeholder={"---"}
+                      />
                     </CaseField>
                     <CaseField label="Asset Location" lock>
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
                     <CaseField label="Serial Number" lock>
-                      {dataFetchAssetInformation?.AssetInformation?.SerialNumber}{" "}
+                      <Input
+                      value={dataFetchAssetInformation?.AssetInformation?.SerialNumber}
+                      variant={"invisible"}
+                      placeholder={"---"}
+                      />
                     </CaseField>
-                    <CaseField label="HWPC Code" lock>
-                      <Input variant="invisible" placeholder="---" />
+
+                    <CaseField label="HPI Segment" lock>
+                      <Input
+                      value={dataFetchAssetInformation?.AssetInformation?.product_information?.product_type?.ProductGroup}
+                      variant={"invisible"}
+                      placeholder={"---"}
+                      />
                     </CaseField>
+                    
                     <CaseField label="SNIC - Count" lock>
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
                     <CaseField label="Product Name" lock>
-                      {
+                      <Input
+                      value={
                         dataFetchAssetInformation?.AssetInformation
                           ?.product_information?.ProductName
-                      }{" "}
+                      }
+                      variant={"invisible"}
+                      placeholder={"---"}
+                      className={"b"}
+                      />
                     </CaseField>
-                    <CaseField label="MV Product Description" lock>
+
+                    <CaseField label="HWPC Code" lock>
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
   
@@ -2085,11 +2110,13 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
   
                       <TableBody>
                         {materialOrders.map((material) => (
-                          <TableRow key={material.MOID}>
+                          <TableRow 
+                          key={material.MOID}
+                          onClick = {() => navigate(`/app/material-order/${material.MOID}`)}
+                          className="cursor-pointer hover:bg-gray-300"
+                          >
                             <TableCell className="font-medium">
-                              <Link to={`/app/material-order/${material.MOID}`}>
                                 {material.MOID} on {material.WOID}
-                              </Link>
                             </TableCell>
                             <TableCell>{material.workorder?.CaseID}</TableCell>
                             <TableCell>{material.CreatedOn}</TableCell>
@@ -2158,97 +2185,18 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
             </div>
           </TabsContent>
           
-          <TabsContent value="note_part" hidden>         
-              {caseDetails?.workorder?.[0]?.materialorder?.map((mo, index) => (
-              <div key={index} className={"flex flex-col p-3 space-y-5"}>
-                {mo?.materialorderlineitems.map((moli, i) => (
-                  <Card key={i} >
+          <TabsContent value="doc_photo" >         
+              <div  className={"flex flex-col p-3 space-y-5"}>
+                  <Card >
                   <CardHeader>
-                  <CardTitle className={"text-lg"}>Sparepart {i + 1}</CardTitle>
+                  <CardTitle className={"text-lg"}>Photo Unit</CardTitle>
                   <hr />
                 </CardHeader>
-                <CardContent className={"grid grid-cols-6 gap-3"}>
-                  <CaseField label={"Part Category"}  lock>
-                    <Input value={moli?.servicecatalog_parts?.Keyword}
-                    variant={"invisible"}
-                    />
-                  </CaseField>
-                <CaseField label={"Vendor Part No"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"Hp Part No"} lock>
-                  <Input variant="invisible" value={moli?.servicecatalog_parts?.PartNumber}/>
-                </CaseField>
-                <CaseField label={"Part From HP ?"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"Part Name"} lock>
-                    <Input value={moli?.servicecatalog_parts?.PartDescription}
-                    variant={"invisible"}
-                    />
-                </CaseField>
-                <CaseField label={"Qty"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"Qty Use"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"Qty unused"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"Part Backup"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"Price"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"Part Status"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"Part Return Status"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"Bad CT Code"} lock>
-                  <Input variant="invisible" value={moli?.RemovedPartNumber}/>
-                </CaseField>
-                <CaseField label={"CT Code New"} lock>
-                  <Input variant="invisible" value={moli?.RemovedSerialNumber}/>
-                </CaseField>
-                <CaseField label={"CT Validation"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"UEFI Code"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"SO Number"} lock>
-                  <Input variant="invisible" value={mo?.SalesOrderNumber}/>
-                </CaseField>
-                <CaseField label={"RMA Number"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"RMA Status"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"AWB no. in"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"Part Request date"} lock>
-                  <Input variant="invisible" />
-                </CaseField>
-                <CaseField label={"AWB no. out"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-                <CaseField label={"ETA date"} lock>
-                  <Input variant="invisible" />
-                </CaseField>
-                <CaseField label={"Part Return SC date"} lock>
-                  <Input variant="invisible"/>
-                </CaseField>
-              </CardContent>
+                <CardContent className={"flex flex-row gap-3"}>
+                  
+               </CardContent>
                   </Card>
-                ))}
-              </div>
-              ))}
+                </div>
           </TabsContent>
 
         </Tabs>

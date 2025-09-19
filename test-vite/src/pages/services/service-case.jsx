@@ -943,7 +943,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
       let res = null;
       // Guard: if any line item update is set to Shipped, require SON and RMA
       const hasShippingUpdate = updatedLineItems && Object.values(updatedLineItems).some(
-        (v) => String(v).toLowerCase() === 'shipped' || String(v).toLowerCase() === 'ordered'
+        (v) => String(v).toLowerCase() === 'shipped' || String(v).toLowerCase() === 'Ordered'
       );
       const soNumber = (moForm?.SalesOrderNumber ?? materialOrders?.SalesOrderNumber ?? '').toString().trim();
       const rmaNumber = (moForm?.RMANumber ?? materialOrders?.RMANumber ?? '').toString().trim();

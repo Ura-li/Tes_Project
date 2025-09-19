@@ -45,6 +45,7 @@ import {
   ArrowUp,
   ChevronDown,
   KeyRound,
+  BookmarkCheck,
 } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { useLocation, useNavigate } from "react-router";
@@ -825,7 +826,8 @@ export const TabsServiceMOLineItems = ({ MOLineDetails }) => {
 
 export const TabsBooking = ({
   handleUpdate,
-  bookingData
+  bookingData,
+  handleComplete,
 }) => {
 
   const navigate = useNavigate();   
@@ -834,12 +836,11 @@ export const TabsBooking = ({
     { icon: ArrowLeftFromLine, label: "", onClick: () => navigate(`/app/work/${bookingData.WOID}`) },
     { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now"), hidden: true },
     { icon: Save, label: "Save", onClick: () => handleUpdate() },
-    { icon: FileSymlink, label: "Save & Close", onClick: () => alert("not now"), hidden: true  },
-    { icon: RotateCw, label: "Book", onClick: () => alert("not now"), hidden: true },
+    { icon: RotateCw, label: "Refresh", onClick: () => refresh() },
+    { icon: BookmarkCheck, label: "Mark Completed", onClick: () => handleComplete() },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now"), hidden: true },
     { icon: StepBack, label: "Pick", onClick: () => alert("not now"), hidden: true },
     { icon: StepBack, label: "Geo Code", onClick: () => alert("not now"), hidden: true },
-    { icon: RotateCw, label: "Refresh", onClick: () => refresh() },
     { icon: StepBack, label: "Process", onClick: () => alert("not now"), hidden: true },
     { icon: StepBack, label: "Reset RDT", onClick: () => alert("not now"), hidden: true },
     { icon: StepBack, label: "Add To Queue", onClick: () => alert("not now"), hidden: true },
