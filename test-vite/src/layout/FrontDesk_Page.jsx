@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/auth-context';
 import { useSocket } from '@/hooks/useSocket';
+import { cn } from '@/lib/utils';
 import { set } from 'lodash';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
@@ -232,7 +233,7 @@ export default function FrontDesk_Page() {
                     </Badge>
                     <p className='ml-auto text-xs text-gray-500 '>{c.CreatedOn}</p>
                   </div>
-                  <p className="font-medium truncate mt-1">{c.CaseSubject}</p>
+                  <p className={cn("font-medium truncate mt-1", !c.CaseSubject && 'text-red-500')}>{c.CaseSubject || "No Subject"}</p>
                   <div className=" text-gray-500 mt-1 flex justify-between">
                     <p className='text-md'>{c.CaseID}</p>
                     <p className='text-md  font-semibold'>{c.UpdateOn}</p>

@@ -850,7 +850,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
   };
   return (
     <>
-      <div className="flex items-center border-1 ">
+      <div className="flex items-center border-1 sticky top-13 bg-white z-10 ">
         {buttons.map((btn, index) => (
           <Button
             key={index}

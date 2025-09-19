@@ -380,7 +380,7 @@ export function AppSidebar({
   }
 
   return (  
-    <Sidebar collapsible="icon" {...props} className="border-0 bg-none z-40 ">
+    <Sidebar collapsible="icon" {...props} className="border-0 bg-none z-40 h-auto">
       <SidebarHeader className={'bg-gradient-to-l from-hp-50 via-hp-200 to-hp-300'}>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>

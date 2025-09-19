@@ -7,6 +7,7 @@ import { NotificationCard } from "@/components/NotificationCard";
 import { useSocket } from '@/hooks/useSocket';
 import { useNavigate } from 'react-router';
 import Swal from 'sweetalert2';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ApoLanding() {
     const { user } = useAuth();
@@ -43,6 +44,7 @@ export default function ApoLanding() {
 
     const fetchData = async () => {
         try {
+          setLoading(true);
              const response = await ApiCustomer.get('/api/case-information');
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
@@ -163,8 +165,8 @@ export default function ApoLanding() {
                 </CardHeader>
                 <CardContent className={"grid gap-3 max-h-[calc(100vh-200px)] overflow-y-auto grid-cols-2"}>
                      {loading
-              ? Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-20 w-full rounded-lg" />
+              ? Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-40 w-full rounded-lg" />
               ))
               : caseData.map((c) => (
                 <Card

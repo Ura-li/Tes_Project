@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { use, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -93,6 +93,7 @@ import { parseNoteText } from "@/lib/utils.jsx";
 import SignatureWrite from "@/components/SignaturePad";
 import { description } from "@/components/sc-chart";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 /**
  * TODO : 
@@ -115,6 +116,108 @@ function extractRoleFromStatus(status) {
   return null;
 }
 
+
+const STATUS_ENUM_TO_LABEL = {
+  New: "New",
+  Open: "Open",
+  InActive: "Inactive",
+  Close: "Closed",
+  Active: "Active",
+  Monitor: "Monitor",
+  Pending_Customer_Action: "Pending Customer Action",
+  Quote_Requested: "Quote Requested",
+  Pending_Follow_Up: "Pending Follow Up",
+  Pending_Order: "Pending Order",
+  Escalated: "Escalated",
+  Quote_Approved: "Quote Approved",
+  Pending_Quote: "Pending Quote",
+  NEW_AssignFD: "New Assign To FD",
+  NEW_AssignCE: "New Assign To CE",
+  NEW_AssignLeader: "New Assign To Leader",
+  NEW_AssignAPO: "New Assign To APO",
+  NEW_AssignPS: "New Assign To Product Store",
+  NEW_POPDoc: "New Needed POP Document",
+  NEW_Warranty: "New Warranty Approval",
+  PartRequest: "Part Request",
+  PartRequestLog: "Part Request Logistic",
+  PartOrder: "Part Order",
+  PartAvailable: "Part Available",
+  RepairProgress: "Repair Progress",
+  FinishRepair: "Finish Repair",
+};
+
+const BASE_STATUS_KEYS = [
+  "New",
+  "Open",
+  "InActive",
+  "Close",
+  "Active",
+  "Monitor",
+  "Pending_Customer_Action",
+  "Quote_Requested",
+  "Pending_Follow_Up",
+  "Pending_Order",
+  "Escalated",
+  "Quote_Approved",
+  "Pending_Quote",
+];
+
+const ROLE_STATUS_EXTRAS = {
+  fd: [
+    "NEW_AssignFD",
+    "NEW_AssignCE",
+    "NEW_AssignLeader",
+    "NEW_AssignAPO",
+    "NEW_AssignPS",
+    "NEW_POPDoc",
+    "NEW_Warranty",
+    "Close",
+    "New",
+  ],
+  ce: [
+    "PartRequest",
+    "PartRequestLog",
+    "PartOrder",
+    "PartAvailable",
+    "RepairProgress",
+    "FinishRepair",
+  ],
+  celead: [
+    "NEW_AssignCE",
+    "NEW_AssignAPO",
+    "PartRequest",
+    "PartRequestLog",
+    "PartOrder",
+    "PartAvailable",
+    "RepairProgress",
+    "FinishRepair",
+  ],
+  apo: [
+    "NEW_AssignCE",
+    "NEW_AssignAPO",
+    "PartRequest",
+    "PartRequestLog",
+    "PartOrder",
+    "PartAvailable",
+  ],
+  lg: [
+    "NEW_AssignCE",
+    "NEW_AssignAPO",
+    "PartRequest",
+    "PartRequestLog",
+    "PartOrder",
+    "PartAvailable",
+  ],
+  ps: [
+    "NEW_AssignCE",
+    "NEW_AssignLeader",
+    "NEW_AssignAPO",
+    "NEW_AssignPS",
+  ],
+};
+
+const ALL_STATUS_KEYS = Object.keys(STATUS_ENUM_TO_LABEL);
+const DEFAULT_EXTRA_STATUS_KEYS = ALL_STATUS_KEYS.filter((key) => !BASE_STATUS_KEYS.includes(key));
 
 export const TabsServiceCaseDetails = ({ 
   caseDetails,
@@ -506,14 +609,15 @@ const openPopup = () => {
     // { icon: StepBack, label: "Complaint",},
     { icon: StepBack, label: "SRF", 
       onClick: async () => {
-        const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails} customerSignature={signature} />).toBlob();
+      const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails} customerSignature={signature} />).toBlob();
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'Service_Request_Form.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        window.open(url); 
+      // const link = document.createElement('a');
+      // link.href = url;
+      // link.download = 'Service_Request_Form.pdf';
+      // document.body.appendChild(link);
+      // link.click();
+      // document.body.removeChild(link);
     }, 
     roles: ["admin", "fd","user", "spv"]
   },
@@ -1063,33 +1167,6 @@ export const ServiceCase = ({
 };
 
 
-  const statusEnumToLabel = {
-    New: "New",
-    Open: "Open",
-    InActive: "Inactive",
-    Close: "Closed",
-    Active: "Active",
-    Monitor: "Monitor",
-    Pending_Customer_Action: "Pending Customer Action",
-    Quote_Requested: "Quote Requested",
-    Pending_Follow_Up: "Pending Follow Up",
-    Pending_Order: "Pending Order",
-    Escalated: "Escalated",
-    Quote_Approved: "Quote Approved",
-    Pending_Quote: "Pending Quote",
-    NEW_AssignCE: "New Assign To CE",
-    NEW_AssignLeader: "New Assign To Leader",
-    NEW_AssignAPO: "New Assign To APO",
-    NEW_AssignPS: "New Assign To Product Store",
-    NEW_POPDoc: "New Needed POP Document",
-    NEW_Warranty: "New Warranty Approval",
-    PartRequest: "Part Request",
-    PartRequestLog: "Part Request Logistic",
-    PartOrder: "Part Order",
-    PartAvailable: "Part Available",
-    RepairProgress: "Repair Progress",
-    FinishRepair: "Finish Repair",
-  };
 
    const statusEnumToLabelWO = {
   OPEN_UNSCHEDULED: 'Open - Unscheduled',
@@ -1110,12 +1187,45 @@ export const ServiceCase = ({
   
 
 // const labelToStatusEnum = Object.fromEntries(
-//   Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
+//   Object.entries(STATUS_ENUM_TO_LABEL).map(([key, val]) => [val, key])
 // );
-const labelToStatusEnum = Object.entries(statusEnumToLabel).reduce((acc, [key, val]) => {
+const labelToStatusEnum = Object.entries(STATUS_ENUM_TO_LABEL).reduce((acc, [key, val]) => {
   acc[val] = key;
   return acc;
 }, {});
+
+const ownerRole = (
+  ownerUserData?.Role ??
+  ownerUserData?.role ??
+  caseDetails?.owner?.Role ??
+  user?.role ??
+  ""
+)
+  .toString()
+  .toLowerCase();
+
+const filteredStatusKeys = useMemo(() => {
+  const extras = ROLE_STATUS_EXTRAS[ownerRole] ?? DEFAULT_EXTRA_STATUS_KEYS;
+  const keys = [...BASE_STATUS_KEYS];
+
+  extras.forEach((key) => {
+    if (STATUS_ENUM_TO_LABEL[key] && !keys.includes(key)) {
+      keys.push(key);
+    }
+  });
+
+  const currentKey = caseForm?.CaseStatus;
+  if (currentKey && STATUS_ENUM_TO_LABEL[currentKey] && !keys.includes(currentKey)) {
+    keys.push(currentKey);
+  }
+
+  return keys.filter((key) => STATUS_ENUM_TO_LABEL[key]);
+}, [ownerRole, caseForm?.CaseStatus]);
+
+const statusOptions = useMemo(
+  () => filteredStatusKeys.map((key) => STATUS_ENUM_TO_LABEL[key]),
+  [filteredStatusKeys]
+);
 
 
 const fetchUserAssign = async (role) => {
@@ -1229,7 +1339,8 @@ const fetchSymptomCodes = async (term) => {
 
 const [hideAsignTo, setHideAsignTo] = useState(null)
   const canEdit = caseDetails?.Owner === user?.id;
-  console.log("OI",canEdit)
+  const canEditFd = user?.role === "fd" ;
+  const canEditApo = user?.role === "apo" ;
   
   return (
     <>
@@ -1325,17 +1436,18 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-3 ">
-                <CaseField label="Case Subject" span={3}>
+                <CaseField label="Case Subject" span={3} lock={!canEditFd}>
                   <div className="ml-8">
                     <Textarea
                      value={caseForm?.CaseSubject}
                       onChange={e => onChangeCase("CaseSubject")(e.target.value)}
                      className="resize-none border-none italic ring-1 ring-gray-400 bg-gray-50 text-base"
+                      readOnly={!canEditFd}
                     />
                   </div>
                 </CaseField>
               
-                <CaseField label="Case ID manual" className={"mt-2"} span={2}>  
+                <CaseField label="Case ID manual" className={"mt-2"} lock={!canEditApo} span={2}>  
                     <Input variant="invisible" placeholder="---"
                       value={caseForm?.CaseID_Manual}
                       onChange={e => onChangeCase("CaseID_Manual")(e.target.value)}
@@ -1361,7 +1473,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
               
                 <CaseField label="Case Status" className={"mt-2"} lock={!canEdit}  span={2}>
                   <SearchCommandBlock
-                      value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
+                      value={STATUS_ENUM_TO_LABEL[caseForm?.CaseStatus] || "--Select--"}
                       onChange={ async (label) => {
                         
 
@@ -1390,7 +1502,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                         
                       }}
                       placeholder="--Select--"
-                      options={Object.values(statusEnumToLabel)}
+                      options={statusOptions}
                     />
 
                 </CaseField>
@@ -1430,12 +1542,13 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     />
                 </CaseField>
 
-                <CaseField label="Problem Description" span={3}>
+                <CaseField label="Problem Description" span={3} lock={!canEditFd}>
                   <div className="ml-8">
                     <Textarea
                      value={caseForm?.ProblemDescription}
                      onChange={(e) => onChangeCase("ProblemDescription") (e.target.value)}
                      className="resize-none ring-1 ring-gray-300 bg-gray-50 italic"
+                     readOnly={!canEditFd}
                     />
 
                   </div>
@@ -1478,74 +1591,74 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                           ></DatePicker>
                       </CaseField>
 
-                <Accordion type="single" collapsible className="w-full col-span-2">
-                  <AccordionItem value="more-details" className="pl-5">
-                    <AccordionTrigger className={"decoration-transparent border-1 p-2 cursor-pointer"}>More Details</AccordionTrigger>
-                    <AccordionContent className={"m-1"}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">                    
-   <CaseField label="Incoming Channel" className={"mt-2"}>
-                  <Input
-                    variant="invisible"
-                    value={caseDetails.IncomingChannel}
-                    readOnly
-                  />
-                </CaseField>
-                      <CaseField label="Submitted To Base">
-                        <span className="gap-[5em]">
-                          <DatePicker
-                            variant="icon"
-                            value={submittedToBase}
-                            onChange={setsubmittedToBase}
-                            readOnly  
-                          ></DatePicker>
-                        </span>
-                      </CaseField>
-                          <CaseField label="Customer Severity" >
-                  <Input
-                    variant="invisible"
-                    value={caseDetails.CustomerSeverity}
-                  />
-                </CaseField>
-                      <CaseField label="Business Segment" >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>          
-                
-                      <CaseField label="HPI Segment" >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>
-                  
-                      <CaseField label="Customer Tracking Number" >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>
-                    
-                      <CaseField label="Update Customer Tracking Number">
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                      <CaseField label="Alternate Customer Tracking Number" >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>
-                    
-                      <CaseField label="Irrelevant" >
-                        <Input variant="invisible" placeholder="---" />
-                      </CaseField>
-                    
-                        
-                      <CaseField label="Email Status"  >
-                        <Input variant="invisible" placeholder="---"/>
-                      </CaseField>
+                  <Accordion type="single" collapsible className="w-full col-span-2">
+                    <AccordionItem value="more-details" className="pl-5">
+                      <AccordionTrigger className={"decoration-transparent border-1 p-2 cursor-pointer"}>More Details</AccordionTrigger>
+                      <AccordionContent className={"m-1"}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <CaseField lock label="Incoming Channel" className={"mt-2"}>
+                            <Input
+                              variant="invisible"
+                              value={caseDetails.IncomingChannel}
+                              
+                            />
+                          </CaseField>
+                          <CaseField lock label="Submitted To Base">
+                            <span className="gap-[5em]">
+                              <DatePicker
+                                variant="icon"
+                                value={submittedToBase}
+                                onChange={setsubmittedToBase}
+                                
+                              ></DatePicker>
+                            </span>
+                          </CaseField>
+                          <CaseField lock label="Customer Severity" >
+                            <Input
+                              variant="invisible"
+                              value={caseDetails.CustomerSeverity}
+                            />
+                          </CaseField>
+                          <CaseField lock label="Business Segment" >
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
 
-                        <CaseField label="Case ID" lock  className={"hidden"}>
-                        <Input
-                          variant="invisible"
-                          value={caseDetails.CaseID}
-                          readOnly
-                          hidden
-                        />
-                      </CaseField>
-                    </div>
-                  </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                          <CaseField lock label="HPI Segment" >
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField lock label="Customer Tracking Number" >
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField lock label="Update Customer Tracking Number">
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+                          <CaseField lock label="Alternate Customer Tracking Number" >
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField lock label="Irrelevant" >
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+
+                          <CaseField lock label="Email Status"  >
+                            <Input variant="invisible" placeholder="---" />
+                          </CaseField>
+
+                          <CaseField  label="Case ID" lock className={"hidden"}>
+                            <Input
+                              variant="invisible"
+                              value={caseDetails.CaseID}
+                              
+                              hidden
+                            />
+                          </CaseField>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
               </CardContent>
             </Card>
                     
@@ -1644,25 +1757,25 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     <AccordionTrigger className={"decoration-transparent border p-2 cursor-pointer"}>More Details</AccordionTrigger>
                     <AccordionContent className="m-1">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
-                        <CaseField label="Submitted By">
+                        <CaseField lock label="Submitted By">
                           <Input variant="invisible" placeholder="---"  />
                         </CaseField>
-                        <CaseField label="HIPAA" >
+                        <CaseField lock label="HIPAA" >
                           <Input variant="invisible" placeholder="---" readOnly/>
                         </CaseField>
-                        <CaseField label="PIN">
+                        <CaseField lock label="PIN">
                           <Input variant="invisible" placeholder="---" />
                         </CaseField>              
-                        <CaseField label="Parent Company">
+                        <CaseField lock label="Parent Company">
                           <Input variant="invisible" placeholder="---" />
                         </CaseField>
-                        <CaseField label="Parent Company Non-Latin">
+                        <CaseField lock label="Parent Company Non-Latin">
                           <Input variant="invisible" placeholder="---" />
                         </CaseField>
-                        <CaseField label="Customer Time Zone">
+                        <CaseField lock label="Customer Time Zone">
                           <Input variant="invisible" placeholder="---" readOnly/>
                         </CaseField>
-                        <CaseField label="Account Tier">
+                        <CaseField lock label="Account Tier">
                           <Input variant="invisible" placeholder="---"/>
                         </CaseField>
                       </div>
@@ -1675,6 +1788,9 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
 
 
             </div>
+            {caseDetails.casephotos.map(photo =>(
+              <img src={import.meta.env.VITE_API_BASE_URL +''+photo.url} alt="" className="h-30 w-30 rounded-full border-4 border-white shadow-lg object-cover"/>
+            ))}
             {/* --- Card 1: Customer Issue & System Info --- */}
                          
               <Card className="flex-col">
@@ -1690,9 +1806,10 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     {/* LEFT COLUMN - Issue Description */}
                     <div className="space-y-6">
                       <textarea
-                        className="w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50"
+                      className={cn("w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50 ", !canEditFd && "cursor-not-allowed")}
                         value={caseForm?.CaseProductNote}
-                           onChange={(e) => onChangeCase("CaseProductNote") (e.target.value)}
+                      onChange={(e) => onChangeCase("CaseProductNote")(e.target.value)}
+                      disabled={!canEditFd}
                       />
                     </div>
                     {/* RIGHT COLUMN - System Info */}
@@ -1841,18 +1958,31 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                       <TableRow>
                         <TableHead>Created On</TableHead>
                         <TableHead>Created By</TableHead>
+                        <TableHead>Log Type</TableHead>
+                        <TableHead>Action Type</TableHead>
+                        {/* <TableHead>Template</TableHead>
+                        <TableHead>Visible Externally</TableHead>
+                        <TableHead>Number of Minutes Spent</TableHead> */}
                         <TableHead>Role</TableHead>
                         <TableHead>Note</TableHead>
+                        <TableHead></TableHead>
+                        <TableHead></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {Array.isArray(notesList) && notesList.length > 0 ? (
                         notesList.map((n,i) => (
+                          
                           <TableRow key={n.NoteID} className={``}>
                             <TableCell>{n.CreatedOn ? format(new Date(n.CreatedOn), 'yyyy-MM-dd HH:mm') : '-'}</TableCell>
                             <TableCell>{n.createdByUser?.Name || n.CreatedBy || '-'}</TableCell>
+                            <TableCell>{n.LogType || '-'}</TableCell>
+                            <TableCell>{n.ActionType || '-'}</TableCell>
+                            {/* <TableCell>{n.Template || '-'}</TableCell>
+                            <TableCell>{n.VisibleExternally || '-'}</TableCell>
+                            <TableCell>{n.MinutesSpent || '-'}</TableCell> */}
                             <TableCell>{n.createdByUser?.Role || '-'}</TableCell>
-                            <TableCell className="whitespace-pre-wrap max-w-xl">{parseNoteText(n.Note)}</TableCell>
+                            <TableCell  colSpan="3" className="whitespace-pre-wrap max-w-xl">{parseNoteText(n.Note)}</TableCell>
                           </TableRow>
                         ))
                       ) : (
@@ -1873,7 +2003,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
           </TabsContent>
 
           <TabsContent value="ci_asset">
-<div className="grid grid-cols-1 p-3 gap-3">
+            <div className="grid grid-cols-1 p-3 gap-3">
   
                 <Card className="flex-col">
                   <CardHeader>
@@ -1949,7 +2079,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
                     </div>
-                    <CaseField label="Warranty Status"  span={3} star className={"whitespace-nowrap"}>
+                    <CaseField label="Warranty Status"  span={3} star className={"whitespace-nowrap"} lock={!canEditFd}>
                       <SearchCommandBlock
                         options={otcCode}
                         value={entitlementStatus.OTCCode || "--select--"}
