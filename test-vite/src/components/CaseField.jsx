@@ -12,7 +12,7 @@ const spanMap = {
     6: "col-span-6",
 };
 
-const CaseField = ({ label, children, lock = false, span = 1, className, childClass, star, hide}) => {
+const CaseField = ({ label, children, lock = false, span = 1, className, childClass, star = false, hide}) => {
     if (hide) return null;
     
     // Determine which lock to use

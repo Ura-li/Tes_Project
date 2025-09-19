@@ -229,17 +229,15 @@ export const ServiceMaterialApo = () => {
     return new Date(dateString).toLocaleString();
   };
 
-  let canEditapo;
-  const allowedRoles = ["apo", "lg", "ce"];
+  const allowedRoles = ["apo", "lg", "admin"];
+  const canEditapo = allowedRoles.includes(user?.role);
 
   console.log("tw", materialOrders?.workorder?.caseinformation?.Owner)
-  if (user?.role === "admin") {
-    canEditapo = true;
-  } else if (materialOrders?.workorder?.caseinformation?.Owner) {
-    canEditapo = 
-      // materialOrders?.workorder?.caseinformation?.Owner === user?.id && 
-      allowedRoles.includes(user?.role); ;
-  }
+  // if (user?.role === "admin") {
+  //   canEditapo = true;
+  // } else if (materialOrders?.workorder?.caseinformation?.Owner) {
+  //   canEditapo = materialOrders?.workorder?.caseinformation?.Owner === user?.id && allowedRoles.includes(user?.role); ;
+  // }
 
   return (
     <div>
@@ -359,7 +357,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Sales Order Number"} star>
+                  <CaseField label={"Sales Order Number"} star={canEditapo} lock={!canEditapo}>
                     <Input
                       variant={"invisible"}
                       type="text"
@@ -378,7 +376,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label="RMA Number" star>
+                  <CaseField label="RMA Number" star={canEditapo} lock={!canEditapo}>
                     <Input variant="invisible" placeholder="---" 
                     value={moForm?.RMANumber || ""}
                     onChange={handleMoFormChange("RMANumber")}
