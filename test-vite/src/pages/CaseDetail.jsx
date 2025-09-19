@@ -116,6 +116,108 @@ function extractRoleFromStatus(status) {
 }
 
 
+const STATUS_ENUM_TO_LABEL = {
+  New: "New",
+  Open: "Open",
+  InActive: "Inactive",
+  Close: "Closed",
+  Active: "Active",
+  Monitor: "Monitor",
+  Pending_Customer_Action: "Pending Customer Action",
+  Quote_Requested: "Quote Requested",
+  Pending_Follow_Up: "Pending Follow Up",
+  Pending_Order: "Pending Order",
+  Escalated: "Escalated",
+  Quote_Approved: "Quote Approved",
+  Pending_Quote: "Pending Quote",
+  NEW_AssignFD: "New Assign To FD",
+  NEW_AssignCE: "New Assign To CE",
+  NEW_AssignLeader: "New Assign To Leader",
+  NEW_AssignAPO: "New Assign To APO",
+  NEW_AssignPS: "New Assign To Product Store",
+  NEW_POPDoc: "New Needed POP Document",
+  NEW_Warranty: "New Warranty Approval",
+  PartRequest: "Part Request",
+  PartRequestLog: "Part Request Logistic",
+  PartOrder: "Part Order",
+  PartAvailable: "Part Available",
+  RepairProgress: "Repair Progress",
+  FinishRepair: "Finish Repair",
+};
+
+const BASE_STATUS_KEYS = [
+  "New",
+  "Open",
+  "InActive",
+  "Close",
+  "Active",
+  "Monitor",
+  "Pending_Customer_Action",
+  "Quote_Requested",
+  "Pending_Follow_Up",
+  "Pending_Order",
+  "Escalated",
+  "Quote_Approved",
+  "Pending_Quote",
+];
+
+const ROLE_STATUS_EXTRAS = {
+  fd: [
+    "NEW_AssignFD",
+    "NEW_AssignCE",
+    "NEW_AssignLeader",
+    "NEW_AssignAPO",
+    "NEW_AssignPS",
+    "NEW_POPDoc",
+    "NEW_Warranty",
+    "Close",
+    "New",
+  ],
+  ce: [
+    "PartRequest",
+    "PartRequestLog",
+    "PartOrder",
+    "PartAvailable",
+    "RepairProgress",
+    "FinishRepair",
+  ],
+  celead: [
+    "NEW_AssignCE",
+    "NEW_AssignAPO",
+    "PartRequest",
+    "PartRequestLog",
+    "PartOrder",
+    "PartAvailable",
+    "RepairProgress",
+    "FinishRepair",
+  ],
+  apo: [
+    "NEW_AssignCE",
+    "NEW_AssignAPO",
+    "PartRequest",
+    "PartRequestLog",
+    "PartOrder",
+    "PartAvailable",
+  ],
+  lg: [
+    "NEW_AssignCE",
+    "NEW_AssignAPO",
+    "PartRequest",
+    "PartRequestLog",
+    "PartOrder",
+    "PartAvailable",
+  ],
+  ps: [
+    "NEW_AssignCE",
+    "NEW_AssignLeader",
+    "NEW_AssignAPO",
+    "NEW_AssignPS",
+  ],
+};
+
+const ALL_STATUS_KEYS = Object.keys(STATUS_ENUM_TO_LABEL);
+const DEFAULT_EXTRA_STATUS_KEYS = ALL_STATUS_KEYS.filter((key) => !BASE_STATUS_KEYS.includes(key));
+
 export const TabsServiceCaseDetails = ({ 
   caseDetails,
   setCaseDetails, 
@@ -1057,33 +1159,6 @@ export const ServiceCase = ({
 };
 
 
-  const statusEnumToLabel = {
-    New: "New",
-    Open: "Open",
-    InActive: "Inactive",
-    Close: "Closed",
-    Active: "Active",
-    Monitor: "Monitor",
-    Pending_Customer_Action: "Pending Customer Action",
-    Quote_Requested: "Quote Requested",
-    Pending_Follow_Up: "Pending Follow Up",
-    Pending_Order: "Pending Order",
-    Escalated: "Escalated",
-    Quote_Approved: "Quote Approved",
-    Pending_Quote: "Pending Quote",
-    NEW_AssignCE: "New Assign To CE",
-    NEW_AssignLeader: "New Assign To Leader",
-    NEW_AssignAPO: "New Assign To APO",
-    NEW_AssignPS: "New Assign To Product Store",
-    NEW_POPDoc: "New Needed POP Document",
-    NEW_Warranty: "New Warranty Approval",
-    PartRequest: "Part Request",
-    PartRequestLog: "Part Request Logistic",
-    PartOrder: "Part Order",
-    PartAvailable: "Part Available",
-    RepairProgress: "Repair Progress",
-    FinishRepair: "Finish Repair",
-  };
 
    const statusEnumToLabelWO = {
   OPEN_UNSCHEDULED: 'Open - Unscheduled',
@@ -1104,12 +1179,45 @@ export const ServiceCase = ({
   
 
 // const labelToStatusEnum = Object.fromEntries(
-//   Object.entries(statusEnumToLabel).map(([key, val]) => [val, key])
+//   Object.entries(STATUS_ENUM_TO_LABEL).map(([key, val]) => [val, key])
 // );
-const labelToStatusEnum = Object.entries(statusEnumToLabel).reduce((acc, [key, val]) => {
+const labelToStatusEnum = Object.entries(STATUS_ENUM_TO_LABEL).reduce((acc, [key, val]) => {
   acc[val] = key;
   return acc;
 }, {});
+
+const ownerRole = (
+  ownerUserData?.Role ??
+  ownerUserData?.role ??
+  caseDetails?.owner?.Role ??
+  user?.role ??
+  ""
+)
+  .toString()
+  .toLowerCase();
+
+const filteredStatusKeys = useMemo(() => {
+  const extras = ROLE_STATUS_EXTRAS[ownerRole] ?? DEFAULT_EXTRA_STATUS_KEYS;
+  const keys = [...BASE_STATUS_KEYS];
+
+  extras.forEach((key) => {
+    if (STATUS_ENUM_TO_LABEL[key] && !keys.includes(key)) {
+      keys.push(key);
+    }
+  });
+
+  const currentKey = caseForm?.CaseStatus;
+  if (currentKey && STATUS_ENUM_TO_LABEL[currentKey] && !keys.includes(currentKey)) {
+    keys.push(currentKey);
+  }
+
+  return keys.filter((key) => STATUS_ENUM_TO_LABEL[key]);
+}, [ownerRole, caseForm?.CaseStatus]);
+
+const statusOptions = useMemo(
+  () => filteredStatusKeys.map((key) => STATUS_ENUM_TO_LABEL[key]),
+  [filteredStatusKeys]
+);
 
 
 const fetchUserAssign = async (role) => {
@@ -1355,7 +1463,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
               
                 <CaseField label="Case Status" className={"mt-2"} lock={!canEdit}  span={2}>
                   <SearchCommandBlock
-                      value={statusEnumToLabel[caseForm?.CaseStatus] || "--Select--"}
+                      value={STATUS_ENUM_TO_LABEL[caseForm?.CaseStatus] || "--Select--"}
                       onChange={ async (label) => {
                         
 
@@ -1384,7 +1492,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                         
                       }}
                       placeholder="--Select--"
-                      options={Object.values(statusEnumToLabel)}
+                      options={statusOptions}
                     />
 
                 </CaseField>
