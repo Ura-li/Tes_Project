@@ -72,6 +72,7 @@ model caseinformation {
   createdByUser                                 User?                @relation("UserCreatedCases", fields: [CreatedBy], references: [IDUser], onDelete: Restrict, onUpdate: Cascade)
   ownerUser                                     User?                @relation("UserOwnedCases", fields: [Owner], references: [IDUser], onDelete: Restrict, onUpdate: Cascade)
   ServiceCatalogID                              Int?
+  StorageLocationStore                          String?              @db.VarChar(50)
   servicecatalog                                servicecatalog?      @relation(fields: [ServiceCatalogID], references: [ServiceCatalogID], onDelete: Restrict)
   global_trade_check                            global_trade_check?  @relation(fields: [id_gtc], references: [id_gtc], onDelete: Restrict)
   caseresolution                                caseresolution?      @relation(fields: [id_csr], references: [id_csr], onDelete: Restrict)
@@ -81,6 +82,7 @@ model caseinformation {
   CaseProductNote                               String?              @db.Text
   accessory                                     accessory[]
   ActionLog                                     ActionLog[]
+  casephotos                                    casephotos[]
 
   @@index([AssetID], map: "AssetID")
   @@index([CaseNote], map: "CaseNote")
@@ -91,6 +93,20 @@ model caseinformation {
   @@index([id_gtc])
   @@index([OTCCode])
   @@index([id_csr])
+}
+
+model casephotos {
+  id         Int      @id @default(autoincrement())
+  CaseID     String
+  url        String   @db.VarChar(500) // lokasi file / CDN URL
+  filename   String?  @db.VarChar(255)
+  size       Int // in bytes
+  mimeType   String?  @db.VarChar(100)
+  uploadedAt DateTime @default(now()) @db.DateTime(0)
+
+  caseinformation caseinformation @relation(fields: [CaseID], references: [CaseID], onDelete: Cascade)
+
+  @@index([CaseID])
 }
 
 model OTCCodeTable {
@@ -304,6 +320,7 @@ model product_information {
   ProductLine         String              @db.VarChar(3)
   ProductName         String              @db.VarChar(255)
   ProductTypeID       Int
+  HWPC                String?             @db.VarChar(50)
   end_of_sales_date   DateTime?           @db.Date
   end_of_support_date DateTime?           @db.Date
   vendor              String?             @db.VarChar(50)
@@ -457,16 +474,16 @@ model User {
 }
 
 model warranty_services {
-  Service_offerID     String           @id @db.VarChar(8)
-  Service_description String           @db.VarChar(255)
-  CTat_RTime          String?          @db.VarChar(5)
-  Price               Float            @default(0) @db.Float
-  Shipping_Fee        Float            @default(0) @db.Float
-  qty_ws              Int              @default(0)
-  Tax                 Float            @default(0) @db.Float
-  Total               Float            @default(0) @db.Float
+  Service_offerID     String             @id @db.VarChar(8)
+  Service_description String             @db.VarChar(255)
+  CTat_RTime          String?            @db.VarChar(5)
+  Price               Float              @default(0) @db.Float
+  Shipping_Fee        Float              @default(0) @db.Float
+  qty_ws              Int                @default(0)
+  Tax                 Float              @default(0) @db.Float
+  Total               Float              @default(0) @db.Float
   WarrantyCondition   WarrantyCondition?
-  CaseTypeServices    String?          @db.VarChar(255)
+  CaseTypeServices    String?            @db.VarChar(255)
   servicecatalog      servicecatalog[]
 }
 
