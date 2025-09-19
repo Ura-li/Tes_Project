@@ -775,11 +775,21 @@ export function ServiceBooking ({BookingId , woid}) {
 }
 
 // Fungsi pengecekan format dan isi dari RequestedDateTimeCustomer
-const CheckRequestedDateTimeCustomer = async (rawDateTime) => {
+const CheckRequestedDateTimeCustomer = async (WOID) => {
   try {
+    const res = await ApiCustomer.get(`/api/work-order/${WOID}`);
+    const woData = res.data.data;
+
+    const rawDateTime = woData?.RequestedDateTimeCustomer;
+    console.log("Validasi DB RequestedDateTimeCustomer:", rawDateTime);
+
+    // Convert to Date object
+    const parsedDate = new Date(rawDateTime);
+    console.log("parsedDate:", parsedDate);
+
     if (!rawDateTime || 
-      !(rawDateTime instanceof Date) || 
-      isNaN(rawDateTime.getTime())) {
+      !(parsedDate  instanceof Date) || 
+      isNaN(parsedDate.getTime())) {
       await Swal.fire({
         icon: 'warning',
         title: "Gagal membuat booking",
@@ -853,7 +863,7 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
     try {
       setLoading(true);
       
-      const isValid = await CheckRequestedDateTimeCustomer(RequestedDateTimeCustomer);
+      const isValid = await CheckRequestedDateTimeCustomer(WOID);
       console.log("Validasi result:", isValid);
       if (!isValid) return;
       //getLogistic

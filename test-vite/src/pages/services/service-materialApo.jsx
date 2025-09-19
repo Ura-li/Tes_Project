@@ -236,7 +236,9 @@ export const ServiceMaterialApo = () => {
   if (user?.role === "admin") {
     canEditapo = true;
   } else if (materialOrders?.workorder?.caseinformation?.Owner) {
-    canEditapo = materialOrders?.workorder?.caseinformation?.Owner === user?.id && allowedRoles.includes(user?.role); ;
+    canEditapo = 
+      // materialOrders?.workorder?.caseinformation?.Owner === user?.id && 
+      allowedRoles.includes(user?.role); ;
   }
 
   return (
@@ -566,8 +568,8 @@ export const ServiceMaterialApo = () => {
                               <SelectItem value="New">New</SelectItem>
                               <SelectItem value="Ordered">Ordered</SelectItem>
                               <SelectItem value="Shipped">Shipped</SelectItem>
-                              <SelectItem value="Closed">Closed</SelectItem>
-                              <SelectItem value="Cancelled">Cancelled</SelectItem>
+                              {/* <SelectItem value="Closed">Closed</SelectItem>
+                              <SelectItem value="Cancelled">Cancelled</SelectItem> */}
                             </SelectContent>
                           </Select>
                         </TableCell>

@@ -354,12 +354,38 @@ export const ServiceWork = () => {
 
   let canEditapo;
 
+  const validateRequestedDateTimeCustomer = async (WOID) => {
+    try {
+      const res = await ApiCustomer.get(`/api/work-order/${WOID}`);
+      const woData = res.data.data;
+
+      if (!woData?.RequestedDateTimeCustomer) {
+        Swal.fire({
+          icon: "warning",
+          title: "Requested Date Time is missing",
+          text: "Please save Requested Date Time (Customer) before creating a booking.",
+        });
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error("Error validating RequestedDateTimeCustomer:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Validation Error",
+        text: "Failed to validate Requested Date Time.",
+      });
+      return false;
+    }
+  };
+
+
 
 
   if ( user?.role === "admin") {
     canEditapo = true;
   } else if (workOrders?.caseinformation?.Owner) {
-     canEditapo = workOrders?.caseinformation.Owner === user?.id && user?.role === "apo";
+     canEditapo = workOrders?.caseinformation.Owner === user?.id && (user?.role === "apo" ||user?.role === "ce" || user?.role === "celead" );
   }
   return (
     <>
@@ -1094,6 +1120,7 @@ export const ServiceWork = () => {
                   WOID={workOrders.WOID}
                   CreatedBy={user.id}
                   RequestedDateTimeCustomer={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}
+                  validateRequestedDateTimeCustomer={validateRequestedDateTimeCustomer}
                 />
                 : null}
                 <Table>

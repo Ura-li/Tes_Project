@@ -16,6 +16,8 @@ import { toast } from "sonner";
 
 export function UserProfile() {
     const {user} = useAuth();
+    const [isDialogEditOpen, setIsDialogEditOpen] = useState(false);
+
     const [formData, setFormData] = useState({
         Username: '',
         Name: '',
@@ -24,6 +26,7 @@ export function UserProfile() {
         NewPassword: "",
         ProfilePhoto: null,
         Signature: null,
+        Role: user.role
     })
     const [preview, setPreview] = useState({
         ProfilePhoto: null,
@@ -96,6 +99,7 @@ export function UserProfile() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log(user);
         const fd = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
             if (value) fd.append(key, value)
@@ -113,7 +117,9 @@ export function UserProfile() {
             })
             if (res.data.data) {
                 localStorage.setItem("token", res.data.token);
-                Swal.fire("data berhasil diupdate");
+                setIsDialogEditOpen(false);
+
+                toast("data berhasil diupdate");
             }
 
         } catch (error) {
@@ -173,9 +179,9 @@ export function UserProfile() {
                         Role: {user.role}
                     </Badge>
 
-            <Dialog >
+            <Dialog open={isDialogEditOpen} onOpenChange={setIsDialogEditOpen}>
                 <DialogTrigger asChild>
-                    <Button variant="outline" className="absolute top-4 right-4">Edit Profile
+                    <Button variant="outline" className="absolute top-4 right-4" onClick={() => setIsDialogEditOpen(true)}>Edit Profile
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-lg p-10">

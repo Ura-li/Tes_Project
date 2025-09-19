@@ -1,8 +1,10 @@
 import prisma from "../../prisma/client";
 
-export async function generateID(prefix, modelName, idField) {
+// Accept an optional Prisma client (e.g., transaction 'tx') to ensure
+// ID generation sees writes within the same transaction/connection.
+export async function generateID(prefix, modelName, idField, client = prisma) {
   // Cari ID terakhir berdasarkan urutan DESC
-  const lastRecord = await prisma[modelName].findFirst({
+  const lastRecord = await client[modelName].findFirst({
     where: {
       [idField]: {
         startsWith: prefix,

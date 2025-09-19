@@ -5011,6 +5011,14 @@ export function BtnModalsServiceCatalog({
     );
   };
 
+  const handleRemovedPartNumberChange = (partNumber, value) => {
+    setSelectedPartCatalog((prev) =>
+      prev.map((item) => (
+        item.PartNumber === partNumber ? { ...item, RemovedPartNumber: value } : item
+      ))
+    );
+  };
+
   //handle add part in confirm services
   const [tempSelectedParts, setTempSelectedParts] = useState([]);
   
@@ -5079,13 +5087,21 @@ Requested to APO : ${assignApo}`;
         // If WOID present or special mode, create only MO for existing WO
         const isCreateMOOnly = !!WOID || serviceCatalogType === 'wo-add-mo';
         const res = isCreateMOOnly
-          ? await ApiCustomer.post("/api/material-order", {
-              WOID: WOID,
-              selectedPartCatalog,
-              OwnerID: data.user.id,
-              assignApo: assignApo,
-              notesLog: noteCreateOrderLog,
-            })
+          ? await (async () => {
+              const createdMOIDs = [];
+              for (const part of selectedPartCatalog) {
+                const note = `[NOTICE] Order Part\nOrder Part : ${part.PartNumber} - ${part.PartDescription}\n${part.Price ? `Harga : Rp. ${part.Price}\n` : ''}${part.RemovedPartNumber ? `Return CT Key : ${part.RemovedPartNumber}\n` : ''}Requested to APO : ${assignApo}`;
+                const r = await ApiCustomer.post("/api/material-order", {
+                  WOID: WOID,
+                  selectedPartCatalog: [{ ...part, qty: part.qty || 1 }],
+                  OwnerID: data.user.id,
+                  assignApo: assignApo,
+                  notesLog: note,
+                });
+                if (r?.data?.MOID) createdMOIDs.push(r.data.MOID);
+              }
+              return { data: { many: true, MOIDs: createdMOIDs } };
+            })()
           : await ApiCustomer.post("/api/service-log/create-order", {
               AssetID: assetForWorkOrderCreation.AssetID,
               CaseID: caseDetails.CaseID,
@@ -5111,20 +5127,35 @@ Requested to APO : ${assignApo}`;
           allowEscapeKey: false,
         }).then(()=>{
           setOpen(false);
-          const WOID = res.data.WOID
+          const WOIDRes = res.data.WOID
           const MOID = res.data.MOID
-          switch (serviceCatalogType) {
-            case "CSR":
+          if (isCreateMOOnly) {
+            if (res.data?.many && Array.isArray(res.data.MOIDs) && res.data.MOIDs.length) {
+              // could open the last MO, keep silent here per prior behavior
+            } else if (MOID) {
               window.open(`/app/material-order/${MOID}`, '_blank');
-              break;
+            }
+          } else {
+            // handle multi-MO creation from create-order
+            const manyCreate = res.data?.many && Array.isArray(res.data.MOIDs) && res.data.MOIDs.length;
+            switch (serviceCatalogType) {
+              case "CSR":
+                if (manyCreate) {
+                  // Open the last created MO or keep on WO page as desired
+                  // window.open(`/app/material-order/${res.data.MOIDs.slice(-1)[0]}`, '_blank');
+                } else if (MOID) {
+                  window.open(`/app/material-order/${MOID}`, '_blank');
+                }
+                break;
 
-            case "serviceorder":
-              window.open(`/app/work/${WOID}`, '_blank');  
-              break;
-
-            default:
-              break;
-
+              case "serviceorder":
+                window.open(`/app/work/${WOIDRes}`, '_blank');  
+                break;
+  
+              default:
+                break;
+  
+            }
           }
         });
       } catch (err) {
@@ -5420,11 +5451,11 @@ Requested to APO : ${assignApo}`;
                       );
                     })}
 
-                    {/* pagination row */}
-                    <TableRow>
-                      <TableCell colSpan="100%">
-                        <Pagination className="flex justify-start">
-                          <PaginationContent>
+                {/* pagination row */}
+                <TableRow>
+                  <TableCell colSpan="100%">
+                    <Pagination className="flex justify-start">
+                      <PaginationContent>
                             <PaginationItem>
                               <PaginationPrevious
                                 href="#"
@@ -5539,6 +5570,7 @@ Requested to APO : ${assignApo}`;
                     <TableHead className={'font-bold text-black'}>Unit Price</TableHead>
                     <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
                     <TableHead className={'font-bold text-black'}>Qty</TableHead>
+                    <TableHead className={'font-bold text-black'}>CT KEY RETURN</TableHead>
                     <TableHead className={'font-bold text-black'}>Tax</TableHead>
                     <TableHead className={'font-bold text-black'}>Price</TableHead>
                   </TableRow>
@@ -5557,7 +5589,15 @@ Requested to APO : ${assignApo}`;
                         <TableCell>{part.PartNumber}</TableCell>
                         <TableCell>{part.PartDescription}</TableCell>
                         <TableCell>{part.Shipping_Fee}</TableCell>
-                        <TableCell>{part.qty}
+                        <TableCell>{part.qty} </TableCell>
+                        <TableCell>
+
+                          <Input
+                            placeholder="Enter Return CT Key"
+                            className="bg-white"
+                            value={part.RemovedPartNumber || ''}
+                            onChange={(e) => handleRemovedPartNumberChange(part.PartNumber, e.target.value)}
+                          />
                         {/* <Input
                           placeholder="QTY"
                           min={1}
@@ -5586,6 +5626,7 @@ Requested to APO : ${assignApo}`;
                   </TableRow>
                 </TableBody>
               </Table>
+              
             </div>
             
   
@@ -6108,10 +6149,52 @@ export function BtnModalsPartAdd({
                         </PaginationItem>
                       </PaginationContent>
                     </Pagination>
-                    </TableCell>
-                  </TableRow>
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
+
+            {/* Selected Parts Summary with Return CT Key inputs */}
+            {selectedPartCatalog.length > 0 && (
+              <div className="mt-4 p-3 border rounded-md bg-gray-50">
+                <div className="font-semibold mb-2">Selected Parts</div>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-200">
+                      <TableHead>Part Number</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Qty</TableHead>
+                      <TableHead>Return CT Key</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {selectedPartCatalog.map((p, idx) => (
+                      <TableRow key={p.PartNumber || idx}>
+                        <TableCell>{p.PartNumber}</TableCell>
+                        <TableCell>{p.PartDescription}</TableCell>
+                        <TableCell className="max-w-24">
+                          <Input
+                            className="bg-white"
+                            value={p.qty || 1}
+                            type="number"
+                            min="1"
+                            onChange={(e) => handleQtyChangePartsCatalog(p.PartNumber, e.target.value)}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            placeholder="Enter Return CT Key"
+                            className="bg-white"
+                            value={p.RemovedPartNumber || ''}
+                            onChange={(e) => handleRemovedPartNumberChange(p.PartNumber, e.target.value)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </div>
           <DialogFooter className={'sm:justify-start'}>
             <Button 
