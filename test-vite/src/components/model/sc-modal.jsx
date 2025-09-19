@@ -4863,6 +4863,10 @@ export function BtnModalsServiceCatalog({
   //waranty
   //warranty state
   const [warrantyOffer, setWarrantyOffer] = useState([])
+
+
+  
+
   //fetching data function
   const fetchDataServiceOffer = async () => {
     setLoading(true);
@@ -4882,6 +4886,7 @@ export function BtnModalsServiceCatalog({
   useEffect(() => {
     fetchDataServiceOffer().then((data) => {
       console.log("Data received for warrantyOffer:", data);
+      
       if (data) setWarrantyOffer(data);
     });
     fetchDataAssets().then((data) => {
@@ -4890,6 +4895,7 @@ export function BtnModalsServiceCatalog({
     fetchDataPartCatalog();
     fetchUserAssign('apo');
   }, [caseDetails])
+  
 
   useEffect(() => {
     const fetchWarrantyFromWO = async () => {
@@ -4990,7 +4996,18 @@ export function BtnModalsServiceCatalog({
     handlerPriceConfirmServices();
   }, [selectedPartCatalog]);
   
+  const warrantyCondition =
+    assetForWorkOrderCreation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition;
 
+  const isOutWarranty =
+    assetForWorkOrderCreation?.AssetInformation?.WarrantyOTCCode?.OTCCode === "01T";
+
+  const filteredWarrantyOffers = warrantyOffer.filter(
+    (service) =>
+      isOutWarranty
+        ? service.WarrantyCondition === "OutWarranty"
+        : service.WarrantyCondition === "InWarranty"
+  );
   
   //hanlder confirm
   //handler qty price parts
@@ -5245,7 +5262,7 @@ Requested to APO : ${assignApo}`;
               </TableHeader>
 
               <TableBody>
-                {warrantyOffer.map((service, index) => {
+                {filteredWarrantyOffers.map((service, index) => {
                   const selected =
                     selectedWarrantyServices?.Service_offerID === service.Service_offerID;
 

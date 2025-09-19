@@ -83,18 +83,41 @@ export async function PATCH(request, { params }) {
                 message: "Asset not found!"
             }, { status: 404 });
         }
+        const dataToUpdate = {};
+
+        if (typeof SerialNumber !== "undefined") {
+            dataToUpdate.SerialNumber = SerialNumber;
+        }
+        if (typeof ProductNumber !== "undefined") {
+            dataToUpdate.ProductNumber = ProductNumber;
+        }
+        if (typeof SiteAccountID !== "undefined") {
+            dataToUpdate.SiteAccountID =
+                SiteAccountID === null || SiteAccountID === "" ? null : parseInt(SiteAccountID);
+        }
+        if (typeof ContactID !== "undefined") {
+            dataToUpdate.ContactID =
+                ContactID === null || ContactID === "" ? null : parseInt(ContactID);
+        }
+        if (typeof Warranty_Status !== "undefined") {
+            dataToUpdate.Warranty_Status = Warranty_Status;
+        }
+        if (typeof EOW_Date !== "undefined") {
+            dataToUpdate.EOW_Date = EOW_Date ? new Date(EOW_Date) : null;
+        }
+
+        if (!Object.keys(dataToUpdate).length) {
+            return NextResponse.json({
+                success: true,
+                message: "No changes applied to asset.",
+                data: existingAsset
+            }, { status: 200 });
+        }
 
         // Update data
         const updatedAsset = await prisma.asset_information.update({
             where: { AssetID: assetId },
-            data: {
-                SerialNumber,
-                ProductNumber,
-                SiteAccountID: SiteAccountID ? parseInt(SiteAccountID) : null,
-                ContactID: ContactID ? parseInt(ContactID) : null,
-                Warranty_Status,
-                EOW_Date: EOW_Date ? new Date(EOW_Date) : null
-            }
+            data: dataToUpdate,
         });
 
         return NextResponse.json({
@@ -138,3 +161,4 @@ export async function DELETE(request, { params }) {
         }, { status: 404 });
     }
 }
+

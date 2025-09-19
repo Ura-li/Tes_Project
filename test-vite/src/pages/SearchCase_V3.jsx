@@ -940,7 +940,18 @@ export default function NewCaseForm() {
    */
   const onPickPhotos = (files) => {
     if (!files) return;
-    setPhotos(Array.from(files));
+    const validFiles = Array.from(files).filter((f) => {
+      if (f.size > 5 * 1024 * 1024) {
+        toast.warning(`${f.name} lebih dari 5MB, tidak bisa diupload`);
+        return false;
+      }
+      if (!f.type.startsWith("image/")) {
+        toast.warning(`${f.name} bukan file gambar`);
+        return false;
+      }
+      return true;
+    });
+    setPhotos(validFiles);
   };
 
   // ----------------------------
@@ -1040,6 +1051,8 @@ export default function NewCaseForm() {
       let productId = selectedProduct?.ProductNumber || productNo;
       let companyId = selectedCompany?.SiteAccountID;
       let contactId = selectedContact?.ContactID;
+      const normalizedEowDate = eowDate ? new Date(eowDate).toISOString() : null;
+      console.log("asset nfo", selectedAsset)
 
       if (isNewProduct) {
         const productRes = await ApiCustomer.post("/api/product-information", {
@@ -1097,13 +1110,23 @@ export default function NewCaseForm() {
         contactId = contactRes.data?.data?.ContactID;
       }
 
-      if(!isNewContact && usePIC) {
-        console.log("UPDATE PIC")
-        await ApiCustomer.patch(`/api/contact-information/${contactId}`, {
-          PIC_Name: contactPICName,
-          PIC_Email: contactPICEmail,
-          PIC_Phone: contactPICPhone
-        })
+      if (!isNewContact) {
+        const contactPatchPayload = {};
+        if (usePIC) {
+          contactPatchPayload.PIC_Name = contactPICName;
+          contactPatchPayload.PIC_Email = contactPICEmail;
+          contactPatchPayload.PIC_Phone = contactPICPhone;
+        }
+        if (companyId && selectedContact?.SiteAccountID == null) {
+          contactPatchPayload.SiteAccountID = companyId;
+        }
+
+        if (Object.keys(contactPatchPayload).length) {
+          await ApiCustomer.patch(`/api/contact-information/${contactId}`, contactPatchPayload);
+          if (contactPatchPayload.SiteAccountID) {
+            setSelectedContact((prev) => (prev ? { ...prev, SiteAccountID: contactPatchPayload.SiteAccountID } : prev));
+          }
+        }
       }
 
       if (isNewAsset) {
@@ -1115,19 +1138,44 @@ export default function NewCaseForm() {
           ContactID: contactId ?? null ,
           SiteAccountID: companyId ?? null,
           Warranty_Status: warrantySearchValue,
-          EOW_Date: eowDate ? new Date(eowDate).toISOString() : null
+          EOW_Date: normalizedEowDate
           
         })
         
         assetId = assetRes.data?.data?.AssetID
-      }
+      } else {
+        const assetPatchPayload = {};
+        if (warrantySearchValue) {
+          assetPatchPayload.Warranty_Status = warrantySearchValue;
+          assetPatchPayload.EOW_Date = normalizedEowDate;
+        }
+        if (selectedAsset?.ContactID == null && contactId) {
+          assetPatchPayload.ContactID = contactId;
+        }
+        if (selectedAsset?.SiteAccountID == null && companyId) {
+          assetPatchPayload.SiteAccountID = companyId;
+        }
 
-      if(!isNewAsset && warrantySearchValue) {
-        console.log("UPDATE WARRANTY")
-        await ApiCustomer.patch(`/api/asset-information/${assetId}`, {
-          Warranty_Status: warrantySearchValue,
-          EOW_Date: eowDate ? new Date(eowDate).toISOString() : null
-        })
+        if (Object.keys(assetPatchPayload).length) {
+          await ApiCustomer.patch(`/api/asset-information/${assetId}`, assetPatchPayload);
+          setSelectedAsset((prev) => {
+            if (!prev) return prev;
+            const next = { ...prev };
+            if (Object.prototype.hasOwnProperty.call(assetPatchPayload, "ContactID")) {
+              next.ContactID = assetPatchPayload.ContactID;
+            }
+            if (Object.prototype.hasOwnProperty.call(assetPatchPayload, "SiteAccountID")) {
+              next.SiteAccountID = assetPatchPayload.SiteAccountID;
+            }
+            if (Object.prototype.hasOwnProperty.call(assetPatchPayload, "Warranty_Status")) {
+              next.Warranty_Status = assetPatchPayload.Warranty_Status;
+            }
+            if (Object.prototype.hasOwnProperty.call(assetPatchPayload, "EOW_Date")) {
+              next.EOW_Date = assetPatchPayload.EOW_Date;
+            }
+            return next;
+          });
+        }
       }
 
 
@@ -1160,18 +1208,20 @@ export default function NewCaseForm() {
 
       const res = await ApiCustomer.post("/api/case-information", payload);
       const caseId = res.data?.data?.CaseID;
+      
 
       // Optional: upload photos to a local endpoint if present
       if (photos.length > 0) {
         try {
           const fd = new FormData();
+          
           photos.forEach((f) => fd.append("files", f));
           fd.append("caseId", caseId);
-          await ApiCustomer.post("/api/uploads", fd, {
+          await ApiCustomer.post("/api/case-information/upload-case", fd, {
             headers: { "Content-Type": "multipart/form-data" },
           });
         } catch (e) {
-          console.warn("Photo upload skipped/failed", e);
+          toast.warning("Photo upload skipped/failed", e);
         }
       }
 
@@ -1225,7 +1275,7 @@ export default function NewCaseForm() {
           
         }
       }
-      // console.log(user);
+      console.log(user);
 
       toast("succcess");
       // Navigate detail
@@ -1958,6 +2008,21 @@ export default function NewCaseForm() {
                   <ImageIcon className="w-3 h-3" /> {photos.length} selected
                 </Badge>
               </div>
+              {/* preview */}
+              {photos.length > 0 && (
+                <div className="grid grid-cols-3 gap-3 mt-2">
+                  {photos.map((file, idx) => (
+                    <div key={idx} className="relative">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="w-full h-24 object-cover rounded-lg border"
+                      />
+                      <p className="text-xs truncate mt-1">{file.name}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -1983,3 +2048,10 @@ export default function NewCaseForm() {
     </div>
   );
 }
+
+
+
+
+
+
+

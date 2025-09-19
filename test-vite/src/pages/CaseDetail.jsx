@@ -356,6 +356,7 @@ export const TabsServiceCaseDetails = ({
              LogType: caseNoteFormData.LogType,
              ActionType: caseNoteFormData.ActionType,
              VisibleExternally: caseNoteFormData.VisibleExternally,
+
              Note: caseNoteFormData.Note,
              CaseID: caseDetails.CaseID,
              CreatedBy: user?.id
@@ -1331,7 +1332,6 @@ const fetchSymptomCodes = async (term) => {
 
 const [hideAsignTo, setHideAsignTo] = useState(null)
   const canEdit = caseDetails?.Owner === user?.id;
-  console.log("OI",canEdit)
   
   return (
     <>
@@ -1779,6 +1779,9 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
 
 
             </div>
+            {caseDetails.casephotos.map(photo =>(
+              <img src={import.meta.env.VITE_API_BASE_URL +''+photo.url} alt="" className="h-30 w-30 rounded-full border-4 border-white shadow-lg object-cover"/>
+            ))}
             {/* --- Card 1: Customer Issue & System Info --- */}
                          
               <Card className="flex-col">
@@ -1945,18 +1948,31 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                       <TableRow>
                         <TableHead>Created On</TableHead>
                         <TableHead>Created By</TableHead>
+                        <TableHead>Log Type</TableHead>
+                        <TableHead>Action Type</TableHead>
+                        {/* <TableHead>Template</TableHead>
+                        <TableHead>Visible Externally</TableHead>
+                        <TableHead>Number of Minutes Spent</TableHead> */}
                         <TableHead>Role</TableHead>
                         <TableHead>Note</TableHead>
+                        <TableHead></TableHead>
+                        <TableHead></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {Array.isArray(notesList) && notesList.length > 0 ? (
                         notesList.map((n,i) => (
+                          
                           <TableRow key={n.NoteID} className={``}>
                             <TableCell>{n.CreatedOn ? format(new Date(n.CreatedOn), 'yyyy-MM-dd HH:mm') : '-'}</TableCell>
                             <TableCell>{n.createdByUser?.Name || n.CreatedBy || '-'}</TableCell>
+                            <TableCell>{n.LogType || '-'}</TableCell>
+                            <TableCell>{n.ActionType || '-'}</TableCell>
+                            {/* <TableCell>{n.Template || '-'}</TableCell>
+                            <TableCell>{n.VisibleExternally || '-'}</TableCell>
+                            <TableCell>{n.MinutesSpent || '-'}</TableCell> */}
                             <TableCell>{n.createdByUser?.Role || '-'}</TableCell>
-                            <TableCell className="whitespace-pre-wrap max-w-xl">{parseNoteText(n.Note)}</TableCell>
+                            <TableCell  colSpan="3" className="whitespace-pre-wrap max-w-xl">{parseNoteText(n.Note)}</TableCell>
                           </TableRow>
                         ))
                       ) : (
