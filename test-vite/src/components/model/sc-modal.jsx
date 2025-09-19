@@ -4863,10 +4863,6 @@ export function BtnModalsServiceCatalog({
   //waranty
   //warranty state
   const [warrantyOffer, setWarrantyOffer] = useState([])
-
-
-  
-
   //fetching data function
   const fetchDataServiceOffer = async () => {
     setLoading(true);
@@ -4886,7 +4882,6 @@ export function BtnModalsServiceCatalog({
   useEffect(() => {
     fetchDataServiceOffer().then((data) => {
       console.log("Data received for warrantyOffer:", data);
-      
       if (data) setWarrantyOffer(data);
     });
     fetchDataAssets().then((data) => {
@@ -4896,7 +4891,6 @@ export function BtnModalsServiceCatalog({
     fetchUserAssign('apo');
   }, [caseDetails])
   
-
   useEffect(() => {
     const fetchWarrantyFromWO = async () => {
       if (!WOID) return;

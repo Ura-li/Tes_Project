@@ -356,7 +356,6 @@ export const TabsServiceCaseDetails = ({
              LogType: caseNoteFormData.LogType,
              ActionType: caseNoteFormData.ActionType,
              VisibleExternally: caseNoteFormData.VisibleExternally,
-
              Note: caseNoteFormData.Note,
              CaseID: caseDetails.CaseID,
              CreatedBy: user?.id
@@ -1993,7 +1992,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
           </TabsContent>
 
           <TabsContent value="ci_asset">
-<div className="grid grid-cols-1 p-3 gap-3">
+            <div className="grid grid-cols-1 p-3 gap-3">
   
                 <Card className="flex-col">
                   <CardHeader>

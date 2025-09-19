@@ -1052,7 +1052,6 @@ export default function NewCaseForm() {
       let companyId = selectedCompany?.SiteAccountID;
       let contactId = selectedContact?.ContactID;
       const normalizedEowDate = eowDate ? new Date(eowDate).toISOString() : null;
-      console.log("asset nfo", selectedAsset)
 
       if (isNewProduct) {
         const productRes = await ApiCustomer.post("/api/product-information", {
@@ -1208,13 +1207,11 @@ export default function NewCaseForm() {
 
       const res = await ApiCustomer.post("/api/case-information", payload);
       const caseId = res.data?.data?.CaseID;
-      
 
       // Optional: upload photos to a local endpoint if present
       if (photos.length > 0) {
         try {
           const fd = new FormData();
-          
           photos.forEach((f) => fd.append("files", f));
           fd.append("caseId", caseId);
           await ApiCustomer.post("/api/case-information/upload-case", fd, {
@@ -1275,7 +1272,6 @@ export default function NewCaseForm() {
           
         }
       }
-      console.log(user);
 
       toast("succcess");
       // Navigate detail
