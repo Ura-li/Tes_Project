@@ -123,15 +123,13 @@ export const TabsServiceCaseDetails = ({
   caseNoteFormData,
   setCaseNoteFormData
 }) => {
-  
-  
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
   const { user } = useAuth();
   const [selectedSymptom, setSelectedSymptom] = useState(null);
   const [notesList, setNotesList] = useState([]);
-
   const { open } = useSidebar();
+
   const [entitlementStatus, setEntitlementStatus] = useState({
     OTCCode: ''
   })
@@ -217,6 +215,7 @@ export const TabsServiceCaseDetails = ({
     const role = user?.role || "Unknown"; 
 
     const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
+
     // Consider CASE edited if any field has a non-empty value
     const caseEdited = Object.entries({
       CaseType: caseForm.CaseType,
@@ -228,6 +227,7 @@ export const TabsServiceCaseDetails = ({
       ProblemDescription: caseForm.ProblemDescription,
       CaseID_Manual: caseForm.CaseID_Manual
     }).some(([_, v]) => v !== undefined && v !== null && String(v).trim() !== "");
+    
     const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
     // Only treat entitlement as edited if it has any non-empty value
     const entitlementEdited =
@@ -235,6 +235,7 @@ export const TabsServiceCaseDetails = ({
       Object.values(entitlementStatus).some(
         (v) => v !== undefined && v !== null && String(v).trim() !== ""
       );
+
     const csrEdited = csrForm && Object.keys(csrForm).length > 0;
 
     const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseEdited;
@@ -315,7 +316,7 @@ export const TabsServiceCaseDetails = ({
           }
           break;
 
-          case 'CASE':
+        case 'CASE':
           if (caseEdited) {
               try {
                 console.log("CaseForm Data To Update: ", caseForm);
@@ -1927,12 +1928,16 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                       }
                       variant={"invisible"}
                       placeholder={"---"}
-                      className={"b"}
+                      
                       />
                     </CaseField>
 
-                    <CaseField label="HWPC Code" lock>
-                      <Input variant="invisible" placeholder="---" />
+                    <CaseField label="HWPC Code" lock >
+                      <Input 
+                      value={dataFetchAssetInformation?.AssetInformation?.product_information?.HWPC}
+                      variant="invisible" 
+                      placeholder="---" 
+                      />
                     </CaseField>
   
                     <CaseField label="HW Profit Center" lock>

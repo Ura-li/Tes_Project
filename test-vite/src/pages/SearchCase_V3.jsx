@@ -355,6 +355,7 @@ export default function NewCaseForm() {
   const [productTypeId, setProductTypeId] = useState(undefined);
   const [productLine, setProductLine] = useState("");
   const [productNo, setProductNo] = useState("");
+  const [HWPCCode, setHWPCCode] = useState("");
   const [productName, setProductName] = useState("");
   const [vendor, setVendor] = useState("");
 
@@ -628,6 +629,7 @@ export default function NewCaseForm() {
       setProductNo(p.ProductNumber);
       setProductName(p.ProductName);
       setProductLine(p.ProductLine || "");
+      setHWPCCode(p.HWPC || "");
       setVendor(p.vendor || "");
       if (p.product_type) {
         setProductTower(p.product_type.ProductTower || "");
@@ -1046,6 +1048,7 @@ export default function NewCaseForm() {
           ProductNumber: productNo,
           ProductName: productName,
           ProductLine: productLine,
+          HWPC: HWPCCode,
           vendor: vendor,
           ProductTypeID: parseInt(productTypeId)
         })
@@ -1421,11 +1424,11 @@ export default function NewCaseForm() {
               <Label>Received Date <Label className="text-red-600">*</Label></Label>
               <Input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} />
             </div>
-            <div>
+            <div className="hidden">
               <Label>Case ID Manual</Label>
               <Input value={caseIdManual} onChange={(e) => setCaseIdManual(e.target.value)} />
             </div>
-            <div>
+            <div className="hidden">
               <Label>Case ID Manual Date</Label>
               <Input type="date" value={caseIdManualDate} onChange={(e) => setCaseIdManualDate(e.target.value)} />
             </div>
@@ -1434,9 +1437,9 @@ export default function NewCaseForm() {
               <Input value={referenceCase} onChange={(e) => setReferenceCase(e.target.value)} />
             </div>
             <div>
-              <Label>Case Status <Label className="text-red-600">*</Label></Label>
+              <Label>Case Status <Label className="text-red-600 mb-2">*</Label></Label>
               <Select value={caseStatus} onValueChange={setCaseStatus}>
-                <SelectTrigger>
+                <SelectTrigger className={"ring-1 rounded-sm"}>
                   <SelectValue placeholder="Select Case Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1447,9 +1450,9 @@ export default function NewCaseForm() {
               </Select>
             </div>
             <div>
-              <Label>Case Type <Label className="text-red-600">*</Label></Label>
+              <Label>Case Type <Label className="text-red-600 mb-2">*</Label></Label>
               <Select value={caseType} onValueChange={setCaseType}>
-                <SelectTrigger>
+                <SelectTrigger className={"ring-1 rounded-sm"}>
                   <SelectValue placeholder="Select Case Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1795,6 +1798,7 @@ export default function NewCaseForm() {
                           setProductNo(p.ProductNumber);
                           setProductName(p.ProductName);
                           setProductLine(p.ProductLine || "");
+                          setHWPCCode(p.HWPC || "");
                           setVendor(p.vendor || "");
                           setProductTypeId(p.ProductTypeID);
                         }}
@@ -1832,6 +1836,12 @@ export default function NewCaseForm() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div>
+                  <div>
+                  <Label>HWPC Code<Label className="text-red-600">*</Label></Label>
+                  <Input value={HWPCCode} onChange={(e) => setHWPCCode(e.target.value)} />
+                </div>
+                </div>
                 {productTower && productGroup && (
                   <div>
                     <span>Product Type <label className="text-red-600">*</label></span>
@@ -1839,7 +1849,7 @@ export default function NewCaseForm() {
                       value={productTypeId || null}
                       onValueChange={setProductTypeId}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full ring-1 rounded-sm">
                         <SelectValue placeholder="Select Product Type" />
                       </SelectTrigger>
                       <SelectContent>
