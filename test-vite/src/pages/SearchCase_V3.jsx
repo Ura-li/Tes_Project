@@ -1544,9 +1544,10 @@ export default function NewCaseForm() {
               <Checkbox
                 id="incCompany"
                 checked={showCompanySection}
+                className={'ring-1'}
                 onCheckedChange={(v) => setShowCompanySection(Boolean(v))}
               />
-              <Label htmlFor="incCompany">Termasuk dalam company</Label>
+              <Label htmlFor="incCompany" className={'font-[700]'}>Termasuk dalam company</Label>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
