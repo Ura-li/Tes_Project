@@ -355,6 +355,7 @@ export default function NewCaseForm() {
   const [productTypeId, setProductTypeId] = useState(undefined);
   const [productLine, setProductLine] = useState("");
   const [productNo, setProductNo] = useState("");
+  const [HWPCCode, setHWPCCode] = useState("");
   const [productName, setProductName] = useState("");
   const [vendor, setVendor] = useState("");
 
@@ -628,6 +629,7 @@ export default function NewCaseForm() {
       setProductNo(p.ProductNumber);
       setProductName(p.ProductName);
       setProductLine(p.ProductLine || "");
+      setHWPCCode(p.HWPC || "");
       setVendor(p.vendor || "");
       if (p.product_type) {
         setProductTower(p.product_type.ProductTower || "");
@@ -1058,6 +1060,7 @@ export default function NewCaseForm() {
           ProductNumber: productNo,
           ProductName: productName,
           ProductLine: productLine,
+          HWPC: HWPCCode,
           vendor: vendor,
           ProductTypeID: parseInt(productTypeId)
         })
@@ -1358,10 +1361,9 @@ export default function NewCaseForm() {
                 <Checkbox
                   id="isNewAsset"
                   checked={isNewAsset}
-                  className={'ring-1'}
+                  className={"ring-2 bg-gray-100"}
                   onCheckedChange={(v) => {
                     setIsNewAsset(Boolean(v));
-
                   }
                   }
                 />
@@ -1443,7 +1445,7 @@ export default function NewCaseForm() {
                 <Checkbox
                   id="createCustomer"
                   checked={isNewContact}
-                  className={'ring-1'}
+                  className={"ring-2 bg-gray-100"}
                   onCheckedChange={(v) => {
                     setIsNewContact(Boolean(v));
 
@@ -1470,11 +1472,11 @@ export default function NewCaseForm() {
               <Label>Received Date <Label className="text-red-600">*</Label></Label>
               <Input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} />
             </div>
-            <div>
+            <div className="hidden">
               <Label>Case ID Manual</Label>
               <Input value={caseIdManual} onChange={(e) => setCaseIdManual(e.target.value)} />
             </div>
-            <div>
+            <div className="hidden">
               <Label>Case ID Manual Date</Label>
               <Input type="date" value={caseIdManualDate} onChange={(e) => setCaseIdManualDate(e.target.value)} />
             </div>
@@ -1482,10 +1484,10 @@ export default function NewCaseForm() {
               <Label>Reference Case</Label>
               <Input value={referenceCase} onChange={(e) => setReferenceCase(e.target.value)} />
             </div>
-            <div>
+            <div className="flex flex-col gap-2">
               <Label>Case Status <Label className="text-red-600">*</Label></Label>
               <Select value={caseStatus} onValueChange={setCaseStatus}>
-                <SelectTrigger>
+                <SelectTrigger className={"ring-1 rounded-sm w-full"}>
                   <SelectValue placeholder="Select Case Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1495,10 +1497,10 @@ export default function NewCaseForm() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="flex flex-col gap-2">
               <Label>Case Type <Label className="text-red-600">*</Label></Label>
               <Select value={caseType} onValueChange={setCaseType}>
-                <SelectTrigger>
+                <SelectTrigger className={"ring-1 rounded-sm w-full"}>
                   <SelectValue placeholder="Select Case Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1545,6 +1547,7 @@ export default function NewCaseForm() {
                 id="incCompany"
                 checked={showCompanySection}
                 onCheckedChange={(v) => setShowCompanySection(Boolean(v))}
+                className={"ring-2 bg-gray-100"}
               />
               <Label htmlFor="incCompany">Termasuk dalam company</Label>
             </div>
@@ -1656,6 +1659,7 @@ export default function NewCaseForm() {
                         id="usePIC"
                         checked={usePIC}
                         onCheckedChange={(v) => setUsePIC(Boolean(v))}
+                        className={"ring-2 bg-gray-100"}  
                       />
                       <Label htmlFor="usePIC">Tambahkan PIC</Label>
                     </div>
@@ -1822,8 +1826,8 @@ export default function NewCaseForm() {
                   <Checkbox
                     id="isNewProduct"
                     checked={isNewProduct}
-                    className={'ring-1'}
                     onCheckedChange={(v) => setIsNewProduct(Boolean(v))}
+                    className={"ring-2 bg-gray-100"}
                   />
                   <Label htmlFor="isNewProduct" className={'font-[700]'}>Buat Product Baru</Label>
                 </div>
@@ -1842,6 +1846,7 @@ export default function NewCaseForm() {
                           setProductNo(p.ProductNumber);
                           setProductName(p.ProductName);
                           setProductLine(p.ProductLine || "");
+                          setHWPCCode(p.HWPC || "");
                           setVendor(p.vendor || "");
                           setProductTypeId(p.ProductTypeID);
                         }}
@@ -1855,10 +1860,10 @@ export default function NewCaseForm() {
               </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label>Product Tower<Label className="text-red-600">*</Label></Label>
                   <Select value={productTower} onValueChange={setProductTower}>
-                    <SelectTrigger>
+                    <SelectTrigger className={"ring-1 rounded-sm w-full"}>
                       <SelectValue placeholder="IPG / PSG" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1867,10 +1872,10 @@ export default function NewCaseForm() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label>Product Group<Label className="text-red-600">*</Label></Label>
                   <Select value={productGroup} onValueChange={setProductGroup}>
-                    <SelectTrigger>
+                    <SelectTrigger className={"ring-1 rounded-sm w-full"}>
                       <SelectValue placeholder="Commercial / Consumer" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1879,14 +1884,20 @@ export default function NewCaseForm() {
                     </SelectContent>
                   </Select>
                 </div>
-                {productTower && productGroup && (
+                <div>
                   <div>
+                  <Label>HWPC Code<Label className="text-red-600">*</Label></Label>
+                  <Input value={HWPCCode} onChange={(e) => setHWPCCode(e.target.value)} />
+                </div>
+                </div>
+                {productTower && productGroup && (
+                  <div className="flex flex-col gap-2">
                     <span>Product Type <label className="text-red-600">*</label></span>
                     <Select
                       value={productTypeId || null}
                       onValueChange={setProductTypeId}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full ring-1 rounded-sm">
                         <SelectValue placeholder="Select Product Type" />
                       </SelectTrigger>
                       <SelectContent>

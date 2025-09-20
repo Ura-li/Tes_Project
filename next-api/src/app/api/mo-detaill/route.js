@@ -53,7 +53,11 @@ export async function GET(request) {
             orderBy: { workorder: { WOID: "asc" } },
             include:
             {
-                workorder: true,
+                workorder: {
+                    include: {
+                        caseinformation: true,
+                    }
+                },
                 materialorderlineitems: true,
             }
         });

@@ -18,18 +18,17 @@ export default function Logistik() {
         Signature: null,
     });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 3;
   const [filterStatus, setFilterStatus] = useState("All");
   
 
     const fetchData = async () => {
         try {
             const fetchMo = await ApiCustomer.get('/api/mo-detaill');
-            setMoData(fetchMo.data.data);
+            setMoData(fetchMo.data.data);      
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
 
-            const resFetchMO = fetchMO.data.data;
             console.log("Fetch user data : ", fecthUserData)
             console.log("Fetch MO Data : ", fetchMo.data.data)
 
@@ -46,10 +45,8 @@ export default function Logistik() {
                 ProfilePhoto: fecthUserData.data.data.ProfilePhoto ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.ProfilePhoto}` : null,
                 Signature: fecthUserData.data.data.Signature ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.Signature}` : null,
             });
-            const valueFilterPartOrder = fetchMo.data.data.filter(m =>  m?.materialorderlineitems?.[0]?.LineItemID)
-            console.log("Filtered PartData:", valueFilterPartOrder); 
-            setMoData(valueFilterPartOrder);
-            
+          const valueFilterPartOrder = fetchMo.data.data.filter(m =>  m?.materialorderlineitems?.[0]?.LineItemID)
+         setMoData(valueFilterPartOrder)            
         } catch (err) {
             console.error(err);
         }
@@ -58,7 +55,7 @@ export default function Logistik() {
         fetchData();
     },[])
 
-      const filteredData =
+    const filteredData =
     filterStatus === "All"
       ? MoData
       : MoData.filter(
@@ -66,11 +63,12 @@ export default function Logistik() {
             m.OrderStatus === filterStatus
         );
    
-  const sortedData = [...filteredData].sort((a,b) => {
+   const sortedData = [...filteredData].sort((a,b) => {
     const orderA = a.MOID;
     const orderB = b.MOID;
     return orderB.localeCompare(orderA);
   })
+  console.log("Sorted Data:", sortedData);
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = sortedData.slice(startIndex, startIndex + itemsPerPage);
@@ -126,7 +124,7 @@ export default function Logistik() {
                 <CardHeader className={"flex flex-row gap-2 justify-between"}>
                     <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
                     <div className="flex gap-2 ">
-                    {["All", "New", "Shipped", "Closed"].map((status) => (
+                    {["All", "New", "Ordered", "Shipped", "Closed", "Cancelled"].map((status) => (
                       <button
                         key={status}
                         onClick={() => {
@@ -158,32 +156,31 @@ export default function Logistik() {
               >
                 <CardHeader className="p-1 px-2">
                   <div className="flex flex-row justify-between ">
-                  <CardTitle className={"flex flex-row gap-2 items-center "}>
-                    {m.MOID}
+                  <CardTitle className={"flex flex-row gap-2 items-center"}>
+                    {m.MOID} 
                     <Badge className={
-                      m.OrderStatus === 'New' ? 
-                      "text-white bg-green-400" : 
-                      m.OrderStatus === 'Shipped' ?
-                      "text-white bg-blue-500" :
-                      "text-white bg-red-500" 
-                    } variant="invisible">
+                      m.OrderStatus === 'New' ? "text-white bg-green-500" : 
+                      m.OrderStatus  === 'Shipped' ? "text-white bg-yellow-500" : 
+                      m.OrderStatus === 'Ordered' ? "text-white bg-blue-500" :
+                      m.OrderStatus === 'Closed' ? "text-white bg-gray-500" :
+                      "text-white bg-red-500"} variant="invisible">
                     {m.OrderStatus}
                     </Badge>
                   </CardTitle>
                   <CardTitle className={"text-sm text-gray-500"}>
                     {
-                      m.materialorderlineitems?.[0]?.PartNumber
+                      m.workorder?.caseinformation?.CaseID
                     }
                   </CardTitle>          
                   </div>
                    <hr className="border-1 border-gray-500 rounded-md"/>
                 </CardHeader>
-                <CardContent className="flex justify-between px-2 ">
-                  <div className="">
-                  <CaseField label={"Part Description"} className={"text-md"}>
+                <CardContent className="flex justify-between px-2">
+                  <div>
+                  <CaseField label={"Part Number"} className={"text-md"}>
                    <span className="text-gray-600 text-sm">
                     {
-                      m.materialorderlineitems?.[0]?.Description
+                      m.materialorderlineitems?.[0]?.PartNumber
                     }
                    </span>
                   </CaseField>
@@ -195,6 +192,29 @@ export default function Logistik() {
                    <span className="text-gray-600 text-sm">
                     {
                       m.SalesOrderNumber
+                    }
+                   </span>
+                  </CaseField>
+                  </div>
+                </CardContent>
+
+                <CardContent className="flex justify-between px-2">
+                  <div>
+                  <CaseField label={"Part Description"} className={"text-md"}>
+                   <span className="text-gray-600 text-sm">
+                    {
+                      m.materialorderlineitems?.[0]?.Description
+                    }
+                   </span>
+                  </CaseField>
+                  </div>
+
+                  <div className="flex flex-col items-end text-right">
+                  <CaseField label={"RMA Number"} className={"text-md "}>
+                 
+                   <span className="text-gray-600 text-sm">
+                    {
+                      m.RMANumber
                     }
                    </span>
                   </CaseField>

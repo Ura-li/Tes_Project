@@ -52,6 +52,7 @@ export async function PATCH(request, { params }) {
         ProductLine,
         ProductName,
         ProductTypeID: parseInt(ProductTypeID),
+        HWPC
       },
     });
 

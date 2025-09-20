@@ -31,12 +31,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Link } from "react-router";
 import { TabsServiceMO } from "./service-case";
 import Swal from "sweetalert2";
 
-import { useParams } from "react-router";
-
+import { useParams, useNavigate } from "react-router";
 import ApiCustomer from "@/api";
 import DatePicker from "../../components/date-picker";
 import { Case } from "@/pages/Case";
@@ -48,7 +46,7 @@ import { useAuth } from "@/context/auth-context";
 
 export const ServiceMaterialApo = () => {
   const { user } = useAuth();
-
+  const navigate = useNavigate();
   const { moid } = useParams();
   const {updateDraft } = useDraft(); // Access updateDraft from the DraftContext
   const [materialOrders, setMaterialOrders] = useState([]);
@@ -547,11 +545,13 @@ export const ServiceMaterialApo = () => {
 
                   <TableBody>
                     {materialLineOrders.map((lineitem) => (
-                      <TableRow key={lineitem.LineItemID}>
+                      <TableRow 
+                      key={lineitem.LineItemID}
+                      onClick={() => navigate(`/app/mo_detail/${lineitem.LineItemID}`)}
+                      className="cursor-pointer hover:bg-gray-300"
+                      >
                         <TableCell className="font-medium">
-                          <Link to={`/app/mo_detail/${lineitem.LineItemID}`}>
                             {lineitem.MOID} - {lineitem.LineNumber}
-                          </Link>
                         </TableCell>
                         <TableCell>
                           <Select
@@ -575,6 +575,13 @@ export const ServiceMaterialApo = () => {
                         <TableCell>{lineitem.ATPStatus}</TableCell>
                         <TableCell>{lineitem.PartNumber}</TableCell>
                         <TableCell>{lineitem.Description}</TableCell>
+                        <TableCell>---</TableCell>
+                        <TableCell>---</TableCell>
+                        <TableCell>---</TableCell>
+                        <TableCell>---</TableCell>
+                        <TableCell>---</TableCell>
+                        <TableCell>---</TableCell>
+                        <TableCell>---</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
