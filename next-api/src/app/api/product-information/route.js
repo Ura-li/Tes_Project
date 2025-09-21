@@ -83,7 +83,7 @@ export async function GET(request) {
 
 
 export async function POST(request) {
-    const { ProductNumber, ProductName, ProductLine, ProductTypeID } = await request.json();
+    const { ProductNumber, ProductName, ProductLine, ProductTypeID, HWPC } = await request.json();
 
     try {
         if (!ProductNumber || !ProductName) {
@@ -111,7 +111,8 @@ export async function POST(request) {
                 ProductNumber,
                 ProductName,
                 ProductLine,
-                ProductTypeID
+                ProductTypeID,
+                HWPC
             },
         });
 

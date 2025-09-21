@@ -130,6 +130,7 @@ export async function PATCH(request, { params }) {
             'OTCCode',
             'id_csr',
             'ProblemDescription',
+            'CaseID_Manual',
             'CaseProductNote',
         ];
     

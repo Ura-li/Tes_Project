@@ -979,15 +979,14 @@ export const ServiceWork = () => {
 
             <Card className="flex-col mt-5">
               <CardHeader>
+                <div className={"flex justify-between"}>
                 <CardTitle className="text-lg ">
-                  {" "}
                   Material Order Information
                 </CardTitle>
-                <div className="flex gap-2">
                   <Button size="sm" onClick={() => openServiceCatalog("wo-add-mo")} disabled={!canaddce}>
                     <Plus className="mr-2" size={16} /> Create Material Order
                   </Button>
-                </div>
+                  </div>
                 <hr />
               </CardHeader>
               <CardContent className="grid">
@@ -1006,21 +1005,23 @@ export const ServiceWork = () => {
                   <TableBody>
                     {materialOrders.length > 0
                       ? materialOrders.map((material) => (
-                        <TableRow key={material.MOID}>
-                          <TableCell className="font-medium">
-                            <Link to={`/app/material-order/${material.MOID}`}>
-                              {material.MOID} on {material.WOID}
-                            </Link>
-                          </TableCell>
-                          <TableCell>{material.workorder?.CaseID}</TableCell>
-                          <TableCell>{formatDate(material.CreatedOn)}</TableCell>
-                          <TableCell>{material.OrderStatus}</TableCell>
-                          <TableCell>{material.OrderType}</TableCell>
-                          <TableCell>
-                            {material.ReadyForClosureDate}
-                          </TableCell>
-                        </TableRow>
-                      ))
+                          <TableRow 
+                          key={material.MOID}
+                          onClick={() => navigate(`/app/material-order/${material.MOID}`)}
+                           className="cursor-pointer hover:bg-gray-300"
+                          >
+                            <TableCell className="font-medium">
+                                {material.MOID} on {material.WOID}
+                            </TableCell>
+                            <TableCell>{material.workorder?.CaseID}</TableCell>
+                            <TableCell>{formatDate(material.CreatedOn)}</TableCell>
+                            <TableCell>{material.OrderStatus}</TableCell>
+                            <TableCell>{material.OrderType}</TableCell>
+                            <TableCell>
+                              {material.ReadyForClosureDate}
+                            </TableCell>
+                          </TableRow>
+                        ))
                       : null}
                   </TableBody>
                 </Table>
@@ -1140,7 +1141,7 @@ export const ServiceWork = () => {
                     </TableRow>
                   </TableHeader>
 
-                  <TableBody className={"cursor-pointer"}>
+                  <TableBody>
                     {bookings.length > 0 ? (
                       bookings.map((booking, index) => (
                         <TableRow
@@ -1148,6 +1149,7 @@ export const ServiceWork = () => {
                           onClick={() =>
                             navigate(`/app/bookings/${booking.BookingId}`)
                           }
+                          className="cursor-pointer hover:bg-gray-300"
                         >
                           <TableCell>
                             {booking.bookingDetails?.[0].resource?.Name || "-"}
