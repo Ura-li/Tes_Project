@@ -28,7 +28,8 @@ export async function GET(request, { params }) {
                         include: {
                             product_type: true
                         }
-                    }
+                    },
+                    WarrantyOTCCode: true
                 }
             } ,
             contact_information: true, 
@@ -132,6 +133,7 @@ export async function PATCH(request, { params }) {
             'ProblemDescription',
             'CaseID_Manual',
             'CaseProductNote',
+            'StorageLocationStore',
         ];
     
         const dataToUpdate = {};

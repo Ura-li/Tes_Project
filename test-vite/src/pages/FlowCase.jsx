@@ -207,9 +207,10 @@ export const FlowCase = () => {
                       </div>
                       <div className="flex flex-col items-center gap-2">
                         <div className="space-x-2">
-                      {c?.caseinformation?.otcCodeTable?.WarrantyCondition === "InWarranty" ? (
+                          {console.log(c?.caseinformation)}
+                      {c?.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition === "InWarranty" ? (
                         <Badge className="bg-green-500">IW</Badge>
-                      ) : c?.caseinformation?.otcCodeTable?.WarrantyCondition === "OutWarranty" ? (
+                      ) : c?.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? (
                         <Badge className="bg-red-500">OOW</Badge>
                       ) : (
                         <Badge className="bg-gray-500">?</Badge>

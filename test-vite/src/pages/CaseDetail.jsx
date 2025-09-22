@@ -248,6 +248,7 @@ export const TabsServiceCaseDetails = ({
     ProblemDescription:"",
     CaseID_Manual: "",
     CaseProductNote: "",
+    StorageLocationStore: "",
   });
 
   const [gtcForm, setGtcForm] = useState({
@@ -330,7 +331,8 @@ export const TabsServiceCaseDetails = ({
       CasePriority: caseForm.CasePriority,
       CaseProductNote: caseForm.CaseProductNote,
       ProblemDescription: caseForm.ProblemDescription,
-      CaseID_Manual: caseForm.CaseID_Manual
+      CaseID_Manual: caseForm.CaseID_Manual,
+      StorageLocationStore: caseForm.StorageLocationStore
     }).some(([_, v]) => v !== undefined && v !== null && String(v).trim() !== "");
     
     const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
@@ -456,6 +458,9 @@ export const TabsServiceCaseDetails = ({
                 }
                 if (caseForm.CaseID_Manual && String(caseForm.CaseID_Manual).trim() !== "") {
                   caseUpdates.CaseID_Manual = caseForm.CaseID_Manual;
+                }
+                if (caseForm.StorageLocationStore && String(caseForm.StorageLocationStore).trim()!== ""){
+                  caseUpdates.StorageLocationStore = caseForm.StorageLocationStore
                 }
 
                 Object.assign(dataToUpdate, caseUpdates);
@@ -929,10 +934,10 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg","celead"]},
-    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg","celead"]},
-    { value: "doc_photo", label: "Document Photo" , roles:["admin", "apo","ce","celead","fd","lg"]},
-    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg","celead"]},
+    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg","celead","ps"]},
+    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg","celead","ps"]},
+    { value: "doc_photo", label: "Document Photo" , roles:["admin", "apo","ce","celead","ps","fd","lg"]},
+    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg","celead","ps"]},
     // { value: "customer,add,entitement", label: "Asset & Entitement", roles:["admin"]},
     // { value: "ci_notes", label: "Notes & Information", roles:["admin"]},
     // { value: "ci_activitas", label: "Activities", disable: true, roles:["admin"]},
@@ -2024,8 +2029,10 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                         placeholder={"---"}
                       />
                     </CaseField>
-                    <CaseField label="Asset Location" lock>
-                      <Input variant="invisible" placeholder="---" />
+                    <CaseField label="Asset Location" lock={user?.role  !== 'ps'}>
+                      <Input variant="invisible" placeholder="---" value={caseForm?.StorageLocationStore} 
+                      onChange= {(e) => onChangeCase('StorageLocationStore')(e.target.value)}
+                      />
                     </CaseField>
                     <CaseField label="Serial Number" lock>
                       <Input
