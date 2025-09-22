@@ -40,7 +40,7 @@ export function Breadcrumbs() {
   const pathnames = location.pathname.split('/').filter((x) => x);
 
   return (
-    <nav className="text-sm">
+    <nav className="text-[10px] w-full sm:text-sm overflow-hidden whitespace-nowrap text-ellipsis">
       <Link to="/" className="text-gray-700 font-medium">Home</Link>
       {pathnames.map((segment, index) => {
         const to = '/' + pathnames.slice(0, index + 1).join('/');
@@ -164,10 +164,9 @@ const App = () => {
   }}>
       <AppSidebar  />
       <SidebarInset className={'w-full'}>
-        <header className="flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300 w-full">
-          <div className="flex items-center gap-2 px-4">
+        <header className="flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300 w-(screen-64) h-16 border-b border-b-slate-200">
+          <div className="flex items-center gap-4  p-4">
             <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumbs/>
           </div>
             <div className="flex  p-2 items-center gap-2 self-center">

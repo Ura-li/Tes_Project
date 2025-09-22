@@ -409,7 +409,7 @@ export const ServiceWork = () => {
           <CardHeader
             className={"flex flex-col gap-3 border-2 w-full p-2 sticky z-30 top-22 bg-white"}
           >
-            <div className="flex justify-between">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
               <CardTitle className="text-xl pl-2">
                 {woid}
                 {/* <span className="flex items-center text-sm">
@@ -434,7 +434,7 @@ export const ServiceWork = () => {
                   </Select>
                 </span> */}
               </CardTitle>
-              <CardTitle className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
+              <CardTitle className="flex flex-row gap-4  items-center">
                 <div className="flex flex-col ">
                   <h1 className="text-blue-500">{ownerWorkOrder.Name}</h1>
                   <p className="text-sm font-light ">Owner</p>
@@ -461,10 +461,10 @@ export const ServiceWork = () => {
                         <SelectItem value="first" className="p-0">
                           {dataFetchCustomerData.SiteAccount?.Company}
                         </SelectItem>
-                        <SelectItem value="??">??</SelectItem>
+                        {/* <SelectItem value="??">??</SelectItem>
                         <SelectItem value="!!">!!</SelectItem>
                         <SelectItem value="**">**</SelectItem>
-                        <SelectItem value="&&">&&</SelectItem>
+                        <SelectItem value="&&">&&</SelectItem> */}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -494,13 +494,13 @@ export const ServiceWork = () => {
           </CardHeader>
 
           <TabsContent value="wo_summary">
-            <div className="flex gap-4">
+            <div className="flex flex-col md:flex-row gap-4">
               <Card className="rounded-md flex-1/3">
                 <CardHeader>
                   <CardTitle className="text-lg ">General</CardTitle>
                   <hr />
                 </CardHeader>
-                <CardContent className="grid items-center grid-cols-4 gap-6">
+                <CardContent className="grid items-center grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="grid items-center grid-cols-2 col-span-2 p-4 ring-1" hidden>
                     <CaseField label="Incoming Channel" lock>
                       <Input
@@ -607,7 +607,7 @@ export const ServiceWork = () => {
                     />
                   </CaseField>
 
-                  <Accordion type="single" collapsible className="w-full col-span-4">
+                  <Accordion type="single" collapsible className="w-full col-span-2 lg:col-span-4">
                     <AccordionItem value="more-details" className="pl-5">
                       <AccordionTrigger className="cursor-pointer p-2">More Details</AccordionTrigger>
                       <AccordionContent className={"m-2"}>
@@ -807,8 +807,8 @@ export const ServiceWork = () => {
               </CardHeader>
               <CardContent className="grid grid-cols-8 gap-5 auto-rows-auto place-content-between">
                 <CaseField label="SLA Jeopardy" className={""} lock span={2}>
-                  {" "}
-                  <Input className="" value={SLA.slaJeopardy} readOnly />{" "}
+                  
+                  <Input className="" value={SLA.slaJeopardy} readOnly />
                 </CaseField>
                 <CaseField
                   label="Requested Date Time (Customer)"
@@ -826,8 +826,8 @@ export const ServiceWork = () => {
                 </CaseField>
 
                 <CaseField label="SLA Reschedule" className={""} lock>
-                  {" "}
-                  <Input className="" value={SLA.slaReschedule} readOnly />{" "}
+                  
+                  <Input className="" value={SLA.slaReschedule} readOnly />
                 </CaseField>
                 <CaseField label="Due Date (Customer)" className={""} lock span={2}>
                   <DatePicker value={
@@ -851,20 +851,20 @@ export const ServiceWork = () => {
                     onChange={handleSLAChange("guaranteedFixTimeCustomer")} />
                 </CaseField>
                 <CaseField label="Active Schedule Date" className={""} lock>
-                  {" "}
+                  
                   <Input
                     className=""
                     value={SLA.activeScheduleDate}
                     readOnly
-                  />{" "}
+                  />
                 </CaseField>
                 <CaseField label="Coverage Window" className={""} span={2}>
-                  {" "}
+                  
                   <Input
                     className=""
                     value={SLA.coverageWindow}
                     onChange={(e) => setCoverageWindow(e.target.value)}
-                  />{" "}
+                  />
                 </CaseField>
                 <CaseField
                   label="Early Start Date Time (Customer)"
@@ -893,8 +893,8 @@ export const ServiceWork = () => {
                   ></textarea>
                 </CaseField>
                 <CaseField label="Response" className={""} span={2}>
-                  {" "}
-                  <Input className="" value={SLA.response} readOnly />{" "}
+                  
+                  <Input className="" value={SLA.response} readOnly />
                 </CaseField>
                 <CaseField
                   label="Latest Start Date Time (Customer)"
@@ -909,24 +909,24 @@ export const ServiceWork = () => {
                     onChange={handleSLAChange("latestStartDateTimeCustomer")} />
                 </CaseField>
                 <CaseField label="OTC Code" className={""}>
-                  {" "}
+                  
                   <Input
                     className=""
                     value={SLA.otcCode}
                     onChange={(e) => setOtcCode(e.target.value)}
-                  />{" "}
+                  />
                 </CaseField>
                 <CaseField
                   label="Case Priority Index"
                   className={"col-start-7"}
                   lock
                 >
-                  {" "}
+                  
                   <Input
                     className=""
                     value={SLA.casePriorityIndex}
                     readOnly
-                  />{" "}
+                  />
                 </CaseField>
               </CardContent>
             </Card>
@@ -934,7 +934,7 @@ export const ServiceWork = () => {
             <Card className="flex-col mt-5" hidden>
               <CardHeader>
                 <CardTitle className="text-lg ">
-                  {" "}
+                  
                   Part Order Information
                 </CardTitle>
                 <hr />
@@ -1059,8 +1059,8 @@ export const ServiceWork = () => {
                 <CardTitle>WO Bookings</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className={"grid items-center grid-cols-6 gap-10"}>
-                <CaseField label={"Requested Date Time (Customer)"} lock={!canEditapo} span={2}>
+              <CardContent className={"grid items-center grid-cols-2 lg:grid-cols-6 gap-10"}>
+                <CaseField label={"Requested Date Time (Customer)"} lock={!canEditapo} span={2} >
                   <DatePicker
                     variant="icon"
                     value={SLA.requestedDateTimeCustomer ? new Date(SLA.requestedDateTimeCustomer) : null}
@@ -1069,7 +1069,7 @@ export const ServiceWork = () => {
                 </CaseField>
 
 
-                <CaseField label="Early Start Date Time (Customer)" lock={!canEditapo} span={2}>
+                <CaseField label="Early Start Date Time (Customer)" lock={!canEditapo} span={2} >
                   <DatePicker
                     value={SLA.earlyStartDateTimeCustomer ? new Date(SLA.earlyStartDateTimeCustomer) : null}
                     onChange={handleSLAChange("earlyStartDateTimeCustomer")}
@@ -1077,7 +1077,7 @@ export const ServiceWork = () => {
                 </CaseField>
 
 
-                <CaseField label={"Guaranteed Fix Time (Customer)"} lock={!canEditapo} span={2}>
+                <CaseField label={"Guaranteed Fix Time (Customer)"} lock={!canEditapo} span={2} >
                   <DatePicker
                     variant="icon"
                     value={SLA.guaranteedFixTimeCustomer ? new Date(SLA.guaranteedFixTimeCustomer) : null}
@@ -1086,14 +1086,14 @@ export const ServiceWork = () => {
                 </CaseField>
 
 
-                <CaseField label="Latest Start Date Time (Customer)" lock={!canEditapo} span={2}>
+                <CaseField label="Latest Start Date Time (Customer)" lock={!canEditapo} span={2} >
                   <DatePicker
                     value={SLA.latestStartDateTimeCustomer ? new Date(SLA.latestStartDateTimeCustomer) : null}
                     onChange={handleSLAChange("latestStartDateTimeCustomer")}
                   ></DatePicker>
                 </CaseField>
 
-                <CaseField label={"Due Date  (Customer)"} lock={!canEditapo} span={2}>
+                <CaseField label={"Due Date  (Customer)"} lock={!canEditapo} span={2} >
                   <DatePicker
                     variant="icon"
                     value={SLA.dueDateCustomer ? new Date(SLA.dueDateCustomer) : null}
@@ -1101,7 +1101,7 @@ export const ServiceWork = () => {
                   ></DatePicker>
                 </CaseField>
 
-                <CaseField label="Active Schedule Date" lock={!canEditapo} span={2}>
+                <CaseField label="Active Schedule Date" lock={!canEditapo} span={2} >
                   <DatePicker
                     value={SLA.activeScheduleDate ? new Date(SLA.activeScheduleDate) : null}
                     onChange={handleSLAChange("activeScheduleDate")}

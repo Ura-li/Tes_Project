@@ -126,13 +126,13 @@ export default function DatePicker({ value, onChange, variant = "full", classNam
   
 
   return (
-    <div className={cn("flex gap-5 items-center ", variant === "icon" && " gap-15")}>
+    <div className={cn("flex flex-col sm:flex-col md:flex-row lg:flex-row  gap-5 items-center ", variant === "icon" && " gap-5")}>
    
       <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
         <PopoverTrigger asChild>
           <button
             className={cn(
-              "border-0 rounded-md text-sm px-2 py-2 flex justify-between w-[200px] bg-none focus:ring-1 hover:ring-blue-500 hover:ring-1",
+              "border-0 rounded-md text-sm px-2 py-2 flex justify-between md:w-[200px] w-full bg-none focus:ring-1 hover:ring-blue-500 hover:ring-1",
               variant === "full" && "hover:bg-gray-50 ",
               readOnly && "cursor-not-allowed text-gray-500",
             )}
@@ -276,7 +276,7 @@ export default function DatePicker({ value, onChange, variant = "full", classNam
       </PopoverContent>
     </Popover>
         </div>
-) : variant === "icon" && "---"}
+) : variant === "icon" && ""}
 
 
     </div>
