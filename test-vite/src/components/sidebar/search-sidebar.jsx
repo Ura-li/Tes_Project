@@ -27,6 +27,7 @@ import { Home, Inbox, Calendar, Search, Settings, User2, ChevronRight } from "lu
 import { cn } from "@/lib/utils"
 import { Label } from "../ui/label"
 import { Input } from "../ui/input"
+import { STATUS_LABELS } from "@/pages/CaseDetail"
 
 export function SearchBar({ filters, setFilters, className }) {
     const items = [
@@ -42,17 +43,17 @@ export function SearchBar({ filters, setFilters, className }) {
     };
 
     return (
-        <Sidebar side="right" variant="sidebar" className={cn("z-10 fixed top-13", className)}>
-            {/* <SidebarHeader className="bg-cyan-700 h-14" /> */}
+        <Sidebar side="right" variant="sidebar" className={cn("z-10 top-16 h-full", className)}>
+            <SidebarHeader className="bg-cyan-700 h-14" />
 
-            <SidebarContent className=" bg-gradient-to-br from-hp-200 to-hp-400">
+            <SidebarContent className=" ">
                 <SidebarGroup>
                     <SidebarGroupContent>
-                        <SidebarMenu className="flex flex-col gap-5 p-3">
+                        <SidebarMenu className="flex flex-col gap-3 p-3">
                             {items.map((item) => (
                                 <SidebarMenuItem key={item.title} className="flex flex-col gap-3">
-                                    <Label className="flex items-center gap-2 text-amber-50" htmlFor={item.title}>
-                                        <span className="text-lg">{item.label}</span>
+                                    <Label className="font-semibold flex items-center gap-2 text-gray-500 text-md" htmlFor={item.title}>
+                                        {item.label}
                                     </Label>
                                     <Input
                                         id={item.title}
@@ -66,34 +67,35 @@ export function SearchBar({ filters, setFilters, className }) {
 
                             {/* Dropdown filters */}
                             <SidebarMenuItem className="flex flex-col gap-3">
-                                <Label className="text-amber-50">Case Status</Label>
+                                <Label className="text-gray-500">Case Status</Label>
                                 <select
                                     value={filters.Status}
                                     onChange={(e) => handleChange("Status", e.target.value)}
                                     className="p-2 rounded-md"
                                 >
                                     <option value="">All</option>
-                                    <option value="Open">Open</option>
-                                    <option value="InActive">InActive</option>
-                                    <option value="On Hold">On Hold</option>
-                                    <option value="Escalated">Escalated</option>
+                                    {STATUS_LABELS.map((status) => (
+                                        <option key={status} value={status}>
+                                            {status}
+                                        </option>
+                                    ))}
                                 </select>
                             </SidebarMenuItem>
 
                             <SidebarMenuItem className="flex flex-col gap-3">
-                                <Label className="text-amber-50">Case Type</Label>
+                                <Label className="text-gray-500">Case Type</Label>
                                 <select
                                     value={filters.Type}
                                     onChange={(e) => handleChange("Type", e.target.value)}
                                     className="p-2 rounded-md"
                                 >
                                     <option value="">All</option>
-                                    <option value="Bench">Hardware</option>
-                                    <option value="Onsite">Software</option>
+                                    <option value="Bench">Bench</option>
+                                    <option value="Onsite">Onsite</option>
                                 </select>
                             </SidebarMenuItem>
                             <SidebarMenuItem className="flex flex-col gap-3">
-                                <Label className="text-amber-50">Case Holder</Label>
+                                <Label className="text-gray-500">Case Holder</Label>
                                 <select
                                     value={filters.Role}
                                     onChange={(e) => handleChange("Role", e.target.value)}
@@ -109,7 +111,7 @@ export function SearchBar({ filters, setFilters, className }) {
                 </SidebarGroup>
             </SidebarContent>
 
-            {/* <SidebarFooter /> */}
+            <SidebarFooter />
             <SidebarRail />
         </Sidebar>
     );

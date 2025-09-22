@@ -310,7 +310,7 @@ export function ChartRadialText({
         <CardDescription>Today’s activity</CardDescription>
       </CardHeader> */}
 
-      <CardContent className="pb-0 flex justify-center m-0 p-0">
+      <CardContent className="pb-0 flex flex-col lg:flex-row justify-center m-0 p-0 gap-2">
         <RadialBarChart
           width={220}
           height={190}

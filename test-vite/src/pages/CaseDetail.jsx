@@ -117,7 +117,7 @@ function extractRoleFromStatus(status) {
 }
 
 
-const STATUS_ENUM_TO_LABEL = {
+export const STATUS_ENUM_TO_LABEL = {
   New: "New",
   Open: "Open",
   InActive: "Inactive",
@@ -145,6 +145,8 @@ const STATUS_ENUM_TO_LABEL = {
   RepairProgress: "Repair Progress",
   FinishRepair: "Finish Repair",
 };
+
+export const STATUS_LABELS = Object.keys(STATUS_ENUM_TO_LABEL);
 
 const BASE_STATUS_KEYS = [
   "New",
@@ -790,7 +792,7 @@ const openPopup = () => {
   };
   return (
     <>
-      <div className="flex items-center border-1 sticky top-13 z-10 bg-gray-50">
+      <div className="flex items-center border-1 sticky top-13 z-10 bg-gray-50 overflow-auto">
         {/* {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -1352,7 +1354,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
       )}
       <Card className="border-0 w-full">
         <Tabs defaultValue="case_info">
-        <CardHeader className="sticky top-22 z-10 w-full border-b bg-white shadow-sm">
+        <CardHeader className="sticky top-22 z-10 w-full border-b bg-white shadow-sm flex flex-col">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
 
             {/* LEFT SIDE - Case Info */}
@@ -1405,8 +1407,8 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
           </div>
 
           {/* TABS */}
-          <div className="px-4 border-t bg-gray-50">
-            <TabsList className="w-full flex gap-4">
+          <div className=" border-t bg-gray-50 w-full overflow-x-auto">
+            <TabsList className="sm:w-full w-fit flex gap-4 h-fit p-0 ">
               {visibleTabs.map((tab, index) =>
                 tab.component ? (
                   <div key={index}>{tab.component}</div>
@@ -1435,19 +1437,19 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                 <CardTitle className={"text-lg  flex gap-3"}><Briefcase/>Case Information</CardTitle>
                 <hr />
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-3 ">
-                <CaseField label="Case Subject" span={3} lock={!canEditFd}>
-                  <div className="ml-8">
+              <CardContent className="grid grid-cols-3 gap-3 ">
+                <CaseField label="Case Subject"  lock={!canEditFd} span={3} childClass={' col-span-3'} >
+                  <div className="ml-8 w-full">
                     <Textarea
                      value={caseForm?.CaseSubject}
                       onChange={e => onChangeCase("CaseSubject")(e.target.value)}
-                     className="resize-none border-none italic ring-1 ring-gray-400 bg-gray-50 text-base"
+                     className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base"
                       readOnly={!canEditFd}
                     />
                   </div>
                 </CaseField>
               
-                <CaseField label="Case ID manual" className={"mt-2"} lock={!canEditApo} span={2}>  
+                <CaseField label="Case ID manual" className={"mt-2"} childClass={'col-span-2'} span={2} lock={!canEditApo} >  
                     <Input variant="invisible" placeholder="---"
                       value={caseForm?.CaseID_Manual}
                       onChange={e => onChangeCase("CaseID_Manual")(e.target.value)}
@@ -1455,23 +1457,23 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                 </CaseField>
 
                 {/* detail owner */}
-                <CaseField label="Created By" className={"mt-2"} lock span={2}>  
+                <CaseField label="Created By" className={"mt-2"} childClass={'col-span-2'} span={2} lock >  
                 {/* {console.log("Bool to check wo owner aaliabe : ", caseDetails?.workorder[0]?.owner?.IDUser)} */}
                     <Input variant="invisible" placeholder="---" value={caseDetails.createdByUser.Name} readOnly/>                    
                 </CaseField>
                 {caseDetails?.workorder[0]?.owner?.IDUser && (
-                  <CaseField label="Engineer name" className={"mt-2"} lock span={2}>  
+                  <CaseField label="Engineer name" className={"mt-2"} childClass={'col-span-2'} span={2} lock >  
                       <Input variant="invisible" placeholder="---" value={caseDetails.workorder[0].owner.Name} readOnly/>                    
                   </CaseField>
                 )}
                 {caseDetails?.workorder[0]?.materialorder[0]?.owner?.IDUser && (
-                  <CaseField label="APO name" className={"mt-2"} lock span={2}>  
+                  <CaseField label="APO name" className={"mt-2"} childClass={'col-span-2'} span={2} lock >  
                       <Input variant="invisible" placeholder="---" value={caseDetails.workorder[0].materialorder[0].owner.Name} readOnly/>                    
                   </CaseField>
                 )}
                 
               
-                <CaseField label="Case Status" className={"mt-2"} lock={!canEdit}  span={2}>
+                <CaseField label="Case Status" className={"mt-2"} childClass={'col-span-2'} span={2} lock={!canEdit}  >
                   <SearchCommandBlock
                       value={STATUS_ENUM_TO_LABEL[caseForm?.CaseStatus] || "--Select--"}
                       onChange={ async (label) => {
@@ -1506,7 +1508,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     />
 
                 </CaseField>
-                <CaseField label="Assign To" className={"mt-2"}  span={2} hide={!hideAsignTo}>
+                  <CaseField label="Assign To" className={"mt-2"} childClass={'col-span-2'} span={2}   hide={!hideAsignTo}>
                     <SearchCommandBlock
                       value={caseForm?.Owner}
                       onChange={(selectedID) => {
@@ -1528,7 +1530,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                 {/* {assignToForm == true ?? (
                 )} */}
 
-                <CaseField label="Case Type" open className={"mt-2"} lock={!canEdit} span={2}>
+                <CaseField label="Case Type" open className={"mt-2"} childClass={'col-span-2'} span={2} lock={!canEdit} >
                   <SearchCommandBlock
                     value={caseForm?.CaseType}
                     onChange={onChangeCase("CaseType")}
@@ -1542,19 +1544,19 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     />
                 </CaseField>
 
-                <CaseField label="Problem Description" span={3} lock={!canEditFd}>
-                  <div className="ml-8">
+                  <CaseField label="Problem Description" childClass={'col-span-3'} span={3} lock={!canEditFd}  >
+                  <div className="ml-8 w-full">
                     <Textarea
                      value={caseForm?.ProblemDescription}
                      onChange={(e) => onChangeCase("ProblemDescription") (e.target.value)}
-                     className="resize-none ring-1 ring-gray-300 bg-gray-50 italic"
+                     className=" ring-1 ring-gray-300 bg-gray-50 italic"
                      readOnly={!canEditFd}
                     />
 
                   </div>
                 </CaseField>
 
-                 <CaseField label="Case Priority" className={"mt-2"}  span={2}>
+                  <CaseField label="Case Priority" className={"mt-2"} childClass={'col-span-2'} span={2}  >
                   {/* <Input variant="invisible" value={caseDetails.CasePriority}/> */}
                   <SearchCommandBlock
                   value={caseForm?.CasePriority}
@@ -1567,13 +1569,13 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   />
                 </CaseField>
 
-                <CaseField label="KCI For Case?" lock span={2}>
+                <CaseField label="KCI For Case?" childClass={'col-span-2'} span={2} lock >
                      <Input 
                       variant="invisible"
                       value={caseDetails.KCI_Flag ? "Yes" : "No"}
                      />
                 </CaseField>               
-                <CaseField label="Created ON" span={2} lock>
+                <CaseField label="Created ON"  childClass={'col-span-2'} span={2} lock>
                   <DatePicker
                     variant="icon"
                     value={createdOn}
@@ -1582,20 +1584,20 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                   ></DatePicker>
                 </CaseField>
 
-                 <CaseField label="Case Closed Date" lock span={2}>
+                 <CaseField label="Case Closed Date" childClass={'col-span-2'} span={2} lock >
                           {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
                           <DatePicker
                             variant="icon"
                             value={caseClosedDate}
                             onChange={setCaseClosedDate}
                           ></DatePicker>
-                      </CaseField>
+                </CaseField>
 
-                  <Accordion type="single" collapsible className="w-full col-span-2">
+                  <Accordion type="single" collapsible className=" col-span-2">
                     <AccordionItem value="more-details" className="pl-5">
                       <AccordionTrigger className={"decoration-transparent border-1 p-2 cursor-pointer"}>More Details</AccordionTrigger>
                       <AccordionContent className={"m-1"}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2  gap-4">
                           <CaseField lock label="Incoming Channel" className={"mt-2"}>
                             <Input
                               variant="invisible"
@@ -2004,8 +2006,8 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                     <CardTitle className="text-lg ">Asset Information</CardTitle>
                     <hr />
                   </CardHeader>
-                  <CardContent className="grid items-center grid-cols-6 gap-10">
-                    <CaseField label="Category Warranty" lock className={"whitespace-nowrap"}>
+                <CardContent className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
+                    <CaseField label="Category Warranty" lock className={"whitespace-break-spaces"}>
                       <Input
                         value={WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition]} 
                         variant={"invisible"}
@@ -2073,7 +2075,7 @@ const [hideAsignTo, setHideAsignTo] = useState(null)
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
                     </div>
-                    <CaseField label="Warranty Status"  span={3} star className={"whitespace-nowrap"} lock={!canEditFd}>
+                    <CaseField label="Warranty Status"  span={3} star className={"whitespace-break-spaces col-span-1 sm:col-span-2 md:col-span-1"} lock={!canEditFd}>
                       <SearchCommandBlock
                         options={otcCode}
                         value={entitlementStatus.OTCCode || "--select--"}

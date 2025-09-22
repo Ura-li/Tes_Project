@@ -6,14 +6,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { Sidebar, SidebarContent, SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/context/auth-context'
+import { cn } from '@/lib/utils'
 import { se } from 'date-fns/locale'
 import { filter, set } from 'lodash'
 import { PanelRight } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import Swal from 'sweetalert2'
+import { STATUS_LABELS } from './CaseDetail'
+import { Label } from '@/components/ui/label'
 
 
 
@@ -25,7 +29,6 @@ export const FlowCase = () => {
   }
 
   const [caseData, setCaseData] = useState([]);
-  console.log(caseData)
   const [renderer, setRenderer] = useState(false)
   const [error, setError] = useState(false)
   const [filters, setFilters] = useState({
@@ -109,20 +112,41 @@ export const FlowCase = () => {
       const rawCreated = c.caseinformation?.ActionLog[0].ChangeAt;
       const createdDate = rawCreated ? (rawCreated instanceof Date ? rawCreated : new Date(rawCreated)) : null;
 
+      let estimatedTime = null;
+      if (createdDate) {
+        const diffMs = Date.now() - createdDate.getTime(); // difference in milliseconds
+        const diffSeconds = Math.floor(diffMs / 1000);
+        const diffMinutes = Math.floor(diffSeconds / 60);
+        const diffHours = Math.floor(diffMinutes / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffDays > 0) {
+          estimatedTime = `${diffDays} day(s) ago`;
+        } else if (diffHours > 0) {
+          estimatedTime = `${diffHours} hour(s) ago`;
+        } else if (diffMinutes > 0) {
+          estimatedTime = `${diffMinutes} minute(s) ago`;
+        } else {
+          estimatedTime = `${diffSeconds} second(s) ago`;
+        }
+      }
+
       return {
         ...c,
         FormattedCreatedOn: createdDate ? createdDate.toLocaleString("id-ID") : null,
+        EstimedTimeFromUpdate: estimatedTime || "No Update",
       };
     })
   ;
 
-  ;
   const finishedCases = caseData.filter(c => c.CaseStatus === "FinishRepair");
 
+  
   
   // console.log(caseData)
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 6;
+  // if the window width size more than 2400px set page size to 12
   const totalPages = Math.ceil(filteredCases.length / PAGE_SIZE);
   const currentPageData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
@@ -144,21 +168,23 @@ export const FlowCase = () => {
 
       <SidebarInset>
         <div className="max-h-screen flex flex-col w-full ">
-          <Tabs defaultValue="active">
+
             <div className="sticky top-13   bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
               <div className=" flex h-14 w-full  items-center gap-3 px-4 justify-between">
-                <TabsList className=" flex items-center gap-2">
-                  <TabsTrigger value="active" size="sm" >Active Case</TabsTrigger>
-                  {allowedRoles.includes(user.role) && (
-                    <TabsTrigger value="finish" size="sm">Ready To Finish</TabsTrigger>
-                  )}
-                </TabsList>
+                <div className="flex items-center gap-2">
+                  <Switch checked={filters.Status === "FinishRepair"}
+                  onCheckedChange={(checked) => setFilters({
+                    ...filters,
+                    Status: checked ? "FinishRepair" : "",
+                  })} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500"  id="Finish"/>
+                  <Label htmlFor="Finish" className={'font-[700]'}>Show Only Finished Case</Label>
+                </div>
                 <h1 className="lg:text-xl md:text-md font-semibold tracking-tight text-sm">Case For You</h1>
                 <SidebarTrigger icon={PanelRight} />
               </div>
             </div>
-            <TabsContent value="active" className=" w-full  p-1 ">
-              <div className="space-y-3 ">
+
+              <div className="space-y-3 p-5">
                 {renderer ? (
                   Array.from({ length: 6 }).map((_, i) => (
                     <Card key={i} className="p-4 shadow-sm">
@@ -169,17 +195,27 @@ export const FlowCase = () => {
                   currentPageData.map((c) => (
                     <Card
                       key={c.CaseID}
-                      className="flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4"
+                      className={cn("flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4",
+                      c.CaseStatus === "FinishRepair" ? "border-green-300" :
+                      c?.caseinformation.Owner !== user.id ? "border-blue-300" : ''
+                      )}
                       onClick={() => navigate(`/app/case/${c.CaseID}`)}
                     >
                       <div>
                         <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
                         <p className="text-sm text-gray-500">{c.SerialNumber} | {c.Primary} | {c.CustomerAccount || "No Company"} | {c.CreatedOn}</p>
                       </div>
-                      {console.log(c.caseinformation.ActionLog[0])}
                       <div className="flex flex-col items-center gap-2">
                         <div className="space-x-2">
-                          <Badge className="bg-green-600">{c.CaseStatus}</Badge>
+                      {c?.caseinformation?.otcCodeTable?.WarrantyCondition === "InWarranty" ? (
+                        <Badge className="bg-green-500">IW</Badge>
+                      ) : c?.caseinformation?.otcCodeTable?.WarrantyCondition === "OutWarranty" ? (
+                        <Badge className="bg-red-500">OOW</Badge>
+                      ) : (
+                        <Badge className="bg-gray-500">?</Badge>
+                      )}
+                     
+                          <Badge className="bg-cyan-600">{c.CaseStatus}</Badge>
                           <Badge>{c.caseinformation.CaseType}</Badge>
                           {c?.caseinformation.Owner === user.id ? (
                             <Badge className="bg-purple-500">Owner</Badge>
@@ -187,7 +223,7 @@ export const FlowCase = () => {
                             <Badge className="bg-sky-500">CreatedBy</Badge>
                           )}
                         </div>
-                        {c.FormattedCreatedOn}
+                        {c.EstimedTimeFromUpdate}
                       </div>
                     </Card>
                   ))
@@ -232,54 +268,10 @@ export const FlowCase = () => {
                 </Pagination>
                 {error ? <h1 className="text-center text-destructive">Something went wrong</h1> : ""}
               </div>
-            </TabsContent>
-            <TabsContent value="finish" className="mx-auto w-full max-w-7xl p-4 md:p-6">
-              <div className="grid grid-cols-1 gap-4 ">
-                {renderer ? (
-                  Array.from({ length: 3 }).map((_, i) => (
-                    <Card key={i} className="shadow-sm">
-                      <CardHeader>
-                        <Skeleton className="h-6 w-32" />
-                      </CardHeader>
-                      <CardContent className="flex gap-4">
-                        <Skeleton className="h-20 w-full" />
-                        <Skeleton className="h-20 w-full" />
-                      </CardContent>
-                    </Card>
-                  ))
-                ) : finishedCases.length > 0 ? (
-                  finishedCases.map((c) => (
-                    <Card
-                      key={c.CaseID}
-                      className="flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4 border-green-300"
-                      onClick={() => navigate(`/app/case/${c.CaseID}`)}
-                    >
-                      <div>
-                        <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
-                        <p className="text-sm text-gray-500">{c.SerialNumber} | {c.Primary} | {c.CustomerAccount || "No Company"} | {c.CreatedOn}</p>
-                      </div>
-                      {console.log(c.caseinformation.ActionLog[0])}
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="space-x-2">
-                          <Badge className="bg-green-600">{c.CaseStatus}</Badge>
-                          <Badge>{c.caseinformation.CaseType}</Badge>
-                          {c?.caseinformation.Owner === user.id ? (
-                            <Badge className="bg-purple-500">Owner</Badge>
-                          ) : (
-                            <Badge className="bg-sky-500">CreatedBy</Badge>
-                          )}
-                        </div>
-                        {c.FormattedCreatedOn}
-                      </div>
-                    </Card>
-                  ))
-                ) : (
-                  <h1 className="text-center text-gray-500">No finished cases yet.</h1>
-                )}
-              </div>
-            </TabsContent>
 
-          </Tabs>
+
+
+
         </div>
 
       </SidebarInset>

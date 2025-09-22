@@ -1136,11 +1136,12 @@ export const Case_table = () => {
 const { user } = useAuth();
 
   return (
-    <div className="flex flex-col gap-2 p-4">
+    <div className="grid p-6 grid-cols-1 w-full h-full bg-gray-200 rounded-2xl">
       {user?.role === 'admin' ? 
       <ExportExcel caseData={caseData} />
       : null}
-      <h2 className="mb-4 text-xl font-bold">ID Daily Aging Cases Javag FY</h2>
+      {/* <h2 className="mb-4 text-xl font-bold">ID Daily Aging Cases Javag FY</h2> */}
+      <h2 className="mb-4 text-2xl font-semibold">View All The Case</h2>
 
       {/* Search */}
       <input
