@@ -638,6 +638,7 @@ const openPopup = () => {
   },
   { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), 
     roles: ["admin",   "ce", "celead", ],
+    hidden: caseDetails?.CaseStatus === "Close" ? true : false
   },
     {
       icon: NotebookPen, label: "Signature Customer",
