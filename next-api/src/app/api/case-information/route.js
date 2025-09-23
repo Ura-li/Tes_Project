@@ -45,6 +45,7 @@ export async function GET(request) {
           AssetID: true,
           SerialNumber: true,
           ProductNumber: true,
+          WarrantyOTCCode: true,
           product_information: {
             select: {
               ProductName: true,
