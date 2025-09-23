@@ -1338,12 +1338,20 @@ const fetchSymptomCodes = async (term) => {
     console.error("Error fetching symptom codes", err);
   }
 };
+let canEdit;
+let canEditFd;
+let canEditApo;
 
 const [hideAsignTo, setHideAsignTo] = useState(null)
-  const canEdit = caseDetails?.Owner === user?.id;
-  const canEditFd = user?.role === "fd" ;
-  const canEditApo = user?.role === "apo" ;
-  
+if (caseDetails.CaseStatus !== "Close") {
+   canEdit = caseDetails?.Owner === user?.id;
+   canEditFd = user?.role === "fd" ;
+   canEditApo = user?.role === "apo" ;
+} else {
+   canEdit = false;
+   canEditFd = false;
+   canEditApo = false;
+}
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (
