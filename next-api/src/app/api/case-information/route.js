@@ -107,6 +107,9 @@ export async function GET(request) {
       },
       accessory: true,
       ActionLog: {
+        where: {
+          CaseID: { not: null }
+        },
         orderBy: {
           ChangeAt: 'desc'
         },
