@@ -226,9 +226,14 @@ export const ServiceMaterialApo = () => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleString();
   };
-
+  let canEditapo;
   const allowedRoles = ["apo", "lg", "admin"];
-  const canEditapo = allowedRoles.includes(user?.role);
+
+  if (materialOrders?.OrderStatus === "Closed") {
+    canEditapo = false;
+  } else {
+    canEditapo = allowedRoles.includes(user?.role);
+  }
 
   console.log("tw", materialOrders?.workorder?.caseinformation?.Owner)
   // if (user?.role === "admin") {

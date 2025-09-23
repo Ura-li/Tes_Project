@@ -354,10 +354,15 @@ export const ServiceWork = () => {
   
 
   const editrole = ['apo', 'admin', 'ce', 'celead']
-
-  let canEditapo = editrole.includes(user?.role);
-  let canaddce = (user?.role === 'ce' || user?.role === 'celead') && user?.id === workOrders?.OwnerID;
-
+  let canEditapo;
+  let canaddce;
+  if (workOrders?.SystemStatus !== "CLOSED_POSTED") {
+   canEditapo = editrole.includes(user?.role);
+   canaddce = (user?.role === 'ce' || user?.role === 'celead') && user?.id === workOrders?.OwnerID;
+  } else {
+    canEditapo = false;
+    canaddce = false;
+  }
   const validateRequestedDateTimeCustomer = async (WOID) => {
     try {
       const res = await ApiCustomer.get(`/api/work-order/${WOID}`);
