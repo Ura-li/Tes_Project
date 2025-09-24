@@ -106,9 +106,15 @@ export async function GET(request) {
       },
       accessory: true,
       ActionLog: {
-        orderBy: {
-          ChangeAt: 'desc'
-        },
+        // where: {
+        //   CaseId: 
+        //   { 
+        //     not: null 
+        //   }
+        // },
+        // orderBy: {
+        //   ChangeAt: 'desc'
+        // },
         take: 1,
       }
     },
