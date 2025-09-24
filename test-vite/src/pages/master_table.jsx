@@ -2036,6 +2036,7 @@ export const Product_table = () => {
               <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductTower")}>
                 Product Tower {getSortIcon("ProductTower")}
               </th>
+              <th className="p-3 text-sm font-semibold text-left border">HWPC</th>
               <th className="p-3 text-sm font-semibold text-left border">Vendor</th>
               <th className="p-3 text-sm font-semibold text-center border">Actions</th>
             </tr>
@@ -2053,6 +2054,7 @@ export const Product_table = () => {
                   <td className="p-3 border">{p.product_type?.ProductType}</td>
                   <td className="p-3 border">{p.product_type?.ProductGroup}</td>
                   <td className="p-3 border">{p.product_type?.ProductTower}</td>
+                  <td className="p-3 border">{p.HWPC}</td>
                   <td className="p-3 border">-</td>
                   <td className="flex items-center justify-center gap-2 p-3 border">
                     <ProductEdit ProductNumber={p.ProductNumber} onUpdate={fetchAllProducts} />

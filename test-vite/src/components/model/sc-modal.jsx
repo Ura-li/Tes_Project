@@ -1794,7 +1794,8 @@ export function ProductAdd() {
     ProductNumber: '',
     ProductLine: '',
     ProductName: '',
-    ProductTypeID: '', 
+    ProductTypeID: '',
+    HWPC: '', 
   });
 
   // List ProductType untuk dropdown
@@ -1903,6 +1904,16 @@ export function ProductAdd() {
               ))}
             </SelectContent>
           </Select>
+
+          {/* ✅ Tambahan Input HWPC */}
+          <Label>HWPC</Label>
+          <Input
+            type="text"
+            id="HWPC"
+            value={formDataProduct.HWPC}
+            onChange={handlerInputProduct}
+            placeholder="Enter HWPC (optional)"
+          />
         </div>
 
         <DialogFooter>
@@ -1921,6 +1932,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
     ProductLine: "",
     ProductName: "",
     ProductTypeID: "",
+    HWPC: "",
   });
 
   const [productTypes, setProductTypes] = useState([]);
@@ -1939,6 +1951,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
           ProductLine: data.ProductLine,
           ProductName: data.ProductName,
           ProductTypeID: data.ProductTypeID,
+          HWPC: data.HWPC || "",
         });
       } catch (err) {
         console.error("Error fetch product:", err);
@@ -1964,7 +1977,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
   };
 
   const handlerSave = async () => {
-    const { ProductNumber, ProductLine, ProductName, ProductTypeID, oldProductNumber } = formDataProduct;
+    const { ProductNumber, ProductLine, ProductName, ProductTypeID, oldProductNumber, HWPC } = formDataProduct;
     if (!ProductNumber || !ProductLine || !ProductName || !ProductTypeID) {
       Swal.fire({ icon: "warning", title: "Incomplete", text: "Please fill all fields" });
       return;
@@ -1976,18 +1989,23 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
         ProductLine,
         ProductName,
         ProductTypeID,
+        HWPC,
       });
+
 
       Swal.fire({
         icon: "success",
         title: "Updated",
         text: "Product updated successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
+        confirmButtonText: "OK",
+        timer: 1500,
+        timerProgressBar: true,
+}).then(() => {
+  setOpen(false);
+  onUpdate?.();
+});
 
-      setOpen(false);
-      onUpdate?.();
+
     } catch (err) {
       console.error("Error update:", err);
       Swal.fire({ icon: "error", title: "Failed", text: "Update failed, please try again." });
@@ -2038,6 +2056,15 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
               ))}
             </SelectContent>
           </Select>
+
+          <Label>HWPC</Label>
+          <Input
+            type="text"
+            id="HWPC"
+            value={formDataProduct.HWPC}
+            onChange={handlerInputProduct}
+            placeholder="Enter HWPC"
+          />
         </div>
 
         <DialogFooter>

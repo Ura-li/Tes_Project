@@ -42,7 +42,7 @@ export async function GET(request, { params }) {
 // PATCH - Update Product (ProductNumber bisa diubah)
 export async function PATCH(request, { params }) {
   const { ProductNumber } = params; // ProductNumber lama dari URL
-  const { newProductNumber, ProductLine, ProductName, ProductTypeID } = await request.json();
+  const { newProductNumber, ProductLine, ProductName, ProductTypeID, HWPC } = await request.json();
 
   try {
     const updatedProduct = await prisma.product_information.update({
@@ -52,7 +52,7 @@ export async function PATCH(request, { params }) {
         ProductLine,
         ProductName,
         ProductTypeID: parseInt(ProductTypeID),
-        HWPC
+        HWPC: HWPC && HWPC.trim() !== "" ? HWPC : null,
       },
     });
 
