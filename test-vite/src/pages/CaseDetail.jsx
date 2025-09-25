@@ -1358,6 +1358,35 @@ if (caseDetails.CaseStatus !== "Close") {
    canEditFd = false;
    canEditApo = false;
 }
+
+
+
+  // ----------------------------
+  // Photo handlers
+  // ----------------------------
+
+  // Photos
+  /** @type {[File[], (val: File[]) => void]} */
+  const [photos, setPhotos] = useState([]);
+  /**
+   * Handle file input change for photos.
+   * @param {FileList|null} files
+   */
+  const onPickPhotos = (files) => {
+    if (!files) return;
+    const validFiles = Array.from(files).filter((f) => {
+      if (f.size > 5 * 1024 * 1024) {
+        toast.warning(`${f.name} lebih dari 5MB, tidak bisa diupload`);
+        return false;
+      }
+      if (!f.type.startsWith("image/")) {
+        toast.warning(`${f.name} bukan file gambar`);
+        return false;
+      }
+      return true;
+    });
+    setPhotos(validFiles);
+  };
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (
@@ -2338,12 +2367,72 @@ if (caseDetails.CaseStatus !== "Close") {
                   <CardHeader>
                   <CardTitle className={"text-lg"}>Photo Unit</CardTitle>
                   <hr />
+                  {/* Tombol Add Photo */}
+                  <div className="flex items-center gap-2">
+                    <Input 
+                      type="file" 
+                      multiple 
+                      accept="image/*" 
+                      className="hidden" 
+                      id="upload-photos" 
+                      onChange={(e) => onPickPhotos(e.target.files)} 
+                    />
+                    <label htmlFor="upload-photos">
+                      <Button asChild size="sm" variant="outline">
+                        <span>+ Add Photo</span>
+                      </Button>
+                    </label>
+                    {photos.length > 0 && (
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            const fd = new FormData();
+                            photos.forEach((f) => fd.append("files", f));
+                            fd.append("caseId", caseDetails.CaseID); // pastikan sesuai field caseId
+                            await ApiCustomer.post("/api/case-information/upload-case", fd, {
+                              headers: { "Content-Type": "multipart/form-data" },
+                            });
+                            toast.success("Photos uploaded!");
+                            setPhotos([]); // reset preview
+                            // optionally: refresh caseDetails setelah upload
+                          } catch (e) {
+                            toast.error("Photo upload failed");
+                          }
+                        }}
+                      >
+                        Upload Photos
+                      </Button>
+                    )}
+                  </div>
+
                 </CardHeader>
                 <CardContent className={"grid grid-cols-2 gap-3"}>
+                  {/* preview photos baru sebelum upload */}
+                  <p>PREVIEW</p>
+                  {photos.length > 0 && photos.map((file, idx) => (
+                    <div key={idx} className="relative">
+                      
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="w-full h-full object-cover rounded-lg border"
+                      />
+                      <p className="text-xs truncate mt-1">{file.name}</p>
+                    </div>
+                  ))}
+               </CardContent>
+               <hr />
                   {caseDetails.casephotos.map(photo =>(
                     <img src={import.meta.env.VITE_API_BASE_URL +''+photo.url} alt="" className="w-full border-4 border-white shadow-lg object-cover"/>
                   ))}
-               </CardContent>
+
+               {photos.length > 0 && (
+                  <CardFooter>
+                    
+                  </CardFooter>
+                )}
+
                   </Card>
                 </div>
           </TabsContent>

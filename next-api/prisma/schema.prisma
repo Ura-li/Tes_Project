@@ -30,8 +30,18 @@ model asset_information {
 }
 
 model asset_warranty {
-  WarrantyID        Int                @id @default(autoincrement())
-  AssetID           Int?
+  WarrantyID             Int       @id @default(autoincrement())
+  AssetID                Int?
+  WarrantyApprovalStatus String?
+  PurchaseDate           DateTime?
+  WarrantyCardDate       DateTime?
+  POPDocument            String?
+  WarrantyCard           String?
+  PhotoUnit              String?
+  EndUserName            String?
+  EndUserPhone           String?
+  EndUserAddress         String?
+
   asset_information asset_information? @relation(fields: [AssetID], references: [AssetID], onDelete: Restrict, onUpdate: Cascade, map: "asset_warranty_ibfk_1")
 
   @@index([AssetID], map: "AssetID")

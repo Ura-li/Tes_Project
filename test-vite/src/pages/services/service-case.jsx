@@ -944,7 +944,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
       let res = null;
       // Guard: if any line item update is set to Shipped, require SON and RMA
       const hasShippingUpdate = updatedLineItems && Object.values(updatedLineItems).some(
-        (v) => String(v).toLowerCase() === 'shipped' || String(v).toLowerCase() === 'Ordered'
+        (v) => String(v).toLowerCase() === 'shipped' || String(v).toLowerCase() === 'ordered'
       );
       const soNumber = (moForm?.SalesOrderNumber ?? materialOrders?.SalesOrderNumber ?? '').toString().trim();
       const rmaNumber = (moForm?.RMANumber ?? materialOrders?.RMANumber ?? '').toString().trim();
@@ -956,25 +956,23 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
           text: 'Before setting a line item to Shipped, fill Sales Order Number and RMA Number.',
         });
       }
-      if(updatedLineItems === null || Object.keys(updatedLineItems).length === 0) {
-        const result = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`,{
-          SalesOrderNumber: moForm.SalesOrderNumber || undefined,
-          RMANumber: moForm.RMANumber || undefined,
-        })
+      if (!updatedLineItems || Object.keys(updatedLineItems).length === 0) {
+        const result = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`, {
+          SalesOrderNumber: soNumber || undefined,
+          RMANumber: rmaNumber || undefined,
+        });
         res = result;
-      }else{
-        for(const [lineItemID, status] of Object.entries(updatedLineItems)){
-          console.log("user", user);
-          const result = await ApiCustomer.patch(`/api/material-order/batch-update`, {
-            updates: updatedLineItems,
-            MOID: materialOrders.MOID,
-            WOID: materialOrders.WOID,
-            userId: user.id
-          })
-          console.log("update ok",updatedLineItems);
-          res = result;
-        }
-
+      } else {
+        const payload = {
+          updates: updatedLineItems,
+          MOID: materialOrders.MOID,
+          WOID: materialOrders.WOID,
+          userId: user.id,
+          SalesOrderNumber: soNumber || null,
+          RMANumber: rmaNumber || null,
+        };
+        const result = await ApiCustomer.patch(`/api/material-order/batch-update`, payload);
+        res = result;
       }
       console.log("RES : ",res);
       if(res.data) {
