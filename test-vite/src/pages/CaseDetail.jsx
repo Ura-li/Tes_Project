@@ -1337,6 +1337,9 @@ const fetchSymptomCodes = async (term) => {
   }
 };
 
+let canEdit;
+let canEditFd;
+let canEditApo;
 const [hideAsignTo, setHideAsignTo] = useState(null)
 if (caseDetails.CaseStatus !== "Close") {
    canEdit = caseDetails?.Owner === user?.id;

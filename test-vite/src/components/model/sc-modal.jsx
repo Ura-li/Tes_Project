@@ -4994,8 +4994,9 @@ export function BtnModalsServiceCatalog({
     assetForWorkOrderCreation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition;
 
   const isOutWarranty =
-    assetForWorkOrderCreation?.AssetInformation?.WarrantyOTCCode?.OTCCode === "01T";
-
+    assetForWorkOrderCreation?.Warranty_Status === "01T";
+console.log("Asset Info OTC : ",isOutWarranty)
+    
   const filteredWarrantyOffers = warrantyOffer.filter(
     (service) =>
       isOutWarranty
