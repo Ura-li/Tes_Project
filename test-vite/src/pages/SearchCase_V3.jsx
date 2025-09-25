@@ -1297,7 +1297,7 @@ export default function NewCaseForm() {
   // ----------------------------
 
   return (
-    <div className="bg-[#F8F9FA] mx-auto  p-2 space-y-2">
+    <div className="bg-[#F8F9FA]   p-2 space-y-2">
       {/* Header */}
       {/* <div className="flex items-center justify-between pb-4 border-b"> */}
       {/* <div className="sticky top-[3.25rem] z-30  bg-[#0077B6] rounded-b-xl border-b p-3 flex flex-wrap gap-2 justify-between">
@@ -1309,11 +1309,11 @@ export default function NewCaseForm() {
 
 
         {/* Quick Search */}
-        <Card>
+        <Card className={'w-full'}>
 
-          <CardContent className="pt-4 grid md:grid-cols-2 gap-6">
+          <CardContent className="pt-4 flex w-full gap-6 flex-col lg:flex-row">
             {/* Serial Number Search */}
-            <div className="space-y-2">
+            <div className="space-y-2 flex-1">
             <Label className={'text-lg'}>Serial Number</Label>
               <div className="flex gap-2">
                 <Input
@@ -1372,7 +1372,7 @@ export default function NewCaseForm() {
             </div>
 
             {/* Customer Search */}
-            <div className="space-y-2">
+            <div className="space-y-2 flex-1">
               <Label className={'text-lg'}>Customer (name/email/phone/company)</Label>
               <div className="flex gap-2">
                 <Input
@@ -1459,7 +1459,7 @@ export default function NewCaseForm() {
         </Card>
       
       {/* LEFT MAIN FORM */}
-      <div className="columns-2 space-y-2">
+      <div className="lg:columns-2 space-y-2 md:columns-1 ">
 
         {/* 1) Case Section */}
         <Card className="rounded-2xl p-[20px]  shadow-2xl   break-inside-avoid" id='case'>
@@ -1549,7 +1549,7 @@ export default function NewCaseForm() {
                 onCheckedChange={(v) => setShowCompanySection(Boolean(v))}
                 className={"ring-2 bg-gray-100"}
               />
-              <Label htmlFor="incCompany">Termasuk dalam company</Label>
+              <Label htmlFor="incCompany" className={'font-[700]'}>Termasuk dalam company</Label>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -1707,7 +1707,7 @@ export default function NewCaseForm() {
                     </Button>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 w-full">
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Nama Company<Label className="text-red-600">*</Label></Label>
                       <Input className="col-span-2" placeholder="Cari / isi nama company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
@@ -1800,11 +1800,12 @@ export default function NewCaseForm() {
               <div className="space-y-2">
                 <Label>Serial No.<Label className="text-red-600">*</Label></Label>
                 <Input value={selectedAsset?.SerialNumber || serialQuery} readOnly={!!selectedAsset} onChange={(e) => setSerialQuery(e.target.value)} />
-                <Button variant="outline" asChild>
+                <Button variant="outline" asChild className={'w-full'}>
                   <a
                     href="https://support.hp.com/id-en/check-warranty"
                     target="_blank"
                     rel="noopener noreferrer"
+                    
                   >
                     Check Warranty
                   </a>

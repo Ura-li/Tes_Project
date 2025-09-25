@@ -4,12 +4,12 @@ import { CardTitle } from "./ui/card";
 import { twMerge } from "tailwind-merge";
 
 const spanMap = {
-    1: "col-span-1",
-    2: "col-span-2",
-    3: "col-span-3",
-    4: "col-span-4",
-    5: "col-span-5",
-    6: "col-span-6",
+    1: "lg:col-span-1",
+    2: "lg:col-span-2",
+    3: "lg:col-span-3",
+    4: "lg:col-span-4",
+    5: "lg:col-span-5",
+    6: "lg:col-span-6",
 };
 
 const CaseField = ({ label, children, lock = false, span = 1, className, childClass, star = false, hide}) => {
@@ -36,7 +36,7 @@ const CaseField = ({ label, children, lock = false, span = 1, className, childCl
                 {label}
                 {star ? <span className="text-red-400">*</span> : ""}
             </CardTitle>
-            <CardTitle className={twMerge(spanMap[span], childClass, "font-semibold")}>
+            <CardTitle className={twMerge(spanMap[span], childClass, "font-semibold items-center flex ")}>
                 {modifiedChildren}
             </CardTitle>
         </>

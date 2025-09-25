@@ -4,14 +4,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { useAuth } from "@/context/auth-context";
 
 import ApiCustomer from "@/api";
 import Swal from "sweetalert2";
-import { setToken } from "@/lib/utils/auth";
 
 export function LoginForm({ className, ...props }) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -30,7 +31,7 @@ export function LoginForm({ className, ...props }) {
       });
       console.log("Login success:", res.data);
       const { token } = res.data;
-      setToken(token);
+      login(token);
 
       Swal.fire({
         title: "Success",

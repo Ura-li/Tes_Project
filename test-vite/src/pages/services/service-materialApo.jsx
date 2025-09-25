@@ -226,9 +226,14 @@ export const ServiceMaterialApo = () => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleString();
   };
-
+  let canEditapo;
   const allowedRoles = ["apo", "lg", "admin"];
-  const canEditapo = allowedRoles.includes(user?.role);
+
+  if (materialOrders?.OrderStatus === "Closed") {
+    canEditapo = false;
+  } else {
+    canEditapo = allowedRoles.includes(user?.role);
+  }
 
   console.log("tw", materialOrders?.workorder?.caseinformation?.Owner)
   // if (user?.role === "admin") {
@@ -288,7 +293,7 @@ export const ServiceMaterialApo = () => {
                   <CardTitle className="text-lg">Order Information</CardTitle>
                   <hr />
                 </CardHeader>
-                <CardContent className="grid items-center grid-cols-4 gap-5">
+                <CardContent className="grid items-center grid-cols-2 md:grid-cols-4 gap-5">
                   <CaseField label={"Case ID"} lock>
                     <Input
                       variant={"invisible"}
@@ -381,21 +386,21 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>  
 
-                  <Accordion type="single" collapsible className="col-span-4 ">
+                  <Accordion type="single" collapsible className="col-span-2 md:col-span-4 ">
                     <AccordionItem value="more-detail" >
-                      <AccordionTrigger className="pl-8">More Detail</AccordionTrigger>
+                      <AccordionTrigger className=" ">More Detail</AccordionTrigger>
                       <AccordionContent className={"p-2"}>
                         
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                           <CaseField
-                    label={"Delivery Required Date (Customer Time)"}
-                    
-                  >
-                    <DatePicker
-                      value={deliveryRequiredDate}
-                      onChange={setDeliveryRequiredDate}
-                    />
-                  </CaseField>
+                            label={"Delivery Required Date (Customer Time)"}
+
+                          >
+                            <DatePicker
+                              value={deliveryRequiredDate}
+                              onChange={setDeliveryRequiredDate}
+                            />
+                          </CaseField>
                           <CaseField label={"Collection Requested Date"} icon>
                             <DatePicker
                               value={collectionRequestedDate}
