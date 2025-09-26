@@ -1263,9 +1263,9 @@ const { user } = useAuth();
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
+          <thead className="sticky top-0 bg-gray-200 z-10">
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseID")}>
                 Case ID {getSortSymbol("CaseID")}
@@ -2036,7 +2036,12 @@ export const Product_table = () => {
               <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductTower")}>
                 Product Tower {getSortIcon("ProductTower")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border">HWPC</th>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("HWPC")}
+              >
+                HWPC {getSortIcon("HWPC")}
+              </th>
               <th className="p-3 text-sm font-semibold text-left border">Vendor</th>
               <th className="p-3 text-sm font-semibold text-center border">Actions</th>
             </tr>
@@ -6000,7 +6005,7 @@ export const BookingsTable = () => {
 
   // derive unique options
   const uniqueStatus = useMemo(() => {
-    const all = bookingData.map((b) => b.BookingStatus).filter(Boolean);
+    const all = bookingData.map((b) => b.BookingStatus?.Description).filter(Boolean);
     return ["", ...Array.from(new Set(all)).sort()];
   }, [bookingData]);
 
@@ -6014,7 +6019,7 @@ export const BookingsTable = () => {
   // filter + search
   const filteredData = useMemo(() => {
     return bookingData.filter((item) => {
-      const status = item.BookingStatus ?? "";
+      const status = item.BookingStatus ?.Description ?? "";
       const jeopardy = item.ScheduleJeopardy ? "Yes" : "No";
       const createdBy = item.createdByUser?.Username ?? "";
 
@@ -6232,7 +6237,7 @@ export const BookingsTable = () => {
                     {item.BookingId}
                   </td>
                   <td className="p-3 border text-center" onClick={() => navigate(`/app/work/${item.WOID}`)}>{item.WOID}</td>
-                  <td className="p-3 border text-center">{item.BookingStatus || "-"}</td>
+                  <td className="p-3 border text-center">{item.BookingStatus?.Description}</td>
                   <td className="p-3 border text-center">{item.ScheduleJeopardy ? "Yes" : "No"}</td>
                   <td className="p-3 border text-center">
                     {item.ScheduleJeopardyTime

@@ -932,25 +932,31 @@ function GenericSelector({
   }, [value, labelKey]);
 
   useEffect(() => {
-    if (query.length < 2) {
-      setResults([]);
-      return;
-    }
     const fetchData = async () => {
       try {
-        const res = await ApiCustomer.get(`${endpoint}?search=${query}`);
+        let url = endpoint;
+
+        if (query.length >= 2) {
+          url = `${endpoint}?search=${query}`;
+        }
+
+        const res = await ApiCustomer.get(url);
         setResults(res.data.data || []);
       } catch (err) {
         console.error("Failed to fetch:", err);
       }
     };
-    fetchData();
+
+    if (query.length === 0 || query.length >= 2) {
+      fetchData();
+    }
   }, [query, endpoint]);
+
 
   const handleSelect = (item) => {
     onChange(item);
-    setQuery(item[labelKey]); // tampilkan label di input
-    setOpen(false); // tutup dropdown setelah pilih
+    setQuery(item[labelKey]); 
+    setOpen(false); 
   };
 
   return (
@@ -1100,9 +1106,7 @@ export function AssetEdit({ assetId, onUpdate }) {
             Update the details of the asset. Fields marked with * are required.
           </DialogDescription>
         </DialogHeader>
-
         <div className="flex flex-col gap-4">
-          {/* Serial Number */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">Serial Number*</label>
             <Input
@@ -1112,7 +1116,6 @@ export function AssetEdit({ assetId, onUpdate }) {
             />
           </div>
 
-          {/* Product */}
           <GenericSelector
             value={formData.Product}
             onChange={(p) => handleChange("Product", p)}
@@ -1123,7 +1126,6 @@ export function AssetEdit({ assetId, onUpdate }) {
             label="Product*"
           />
 
-          {/* Site Account */}
           <GenericSelector
             value={formData.SiteAccount}
             onChange={(s) => handleChange("SiteAccount", s)}
@@ -1134,7 +1136,6 @@ export function AssetEdit({ assetId, onUpdate }) {
             label="Site Account"
           />
 
-          {/* Contact */}
           <GenericSelector
             value={formData.Contact}
             onChange={(c) => handleChange("Contact", c)}
@@ -1144,8 +1145,6 @@ export function AssetEdit({ assetId, onUpdate }) {
             placeholder="Search contact..."
             label="Contact"
           />
-
-          {/* Warranty Status */}
           <GenericSelector
             value={formData.Warranty}
             onChange={(w) => handleChange("Warranty", w)}
@@ -1155,8 +1154,6 @@ export function AssetEdit({ assetId, onUpdate }) {
             placeholder="Select warranty status..."
             label="Warranty Status"
           />
-
-          {/* End of Warranty Date */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">End of Warranty Date</label>
             <Input
@@ -2329,7 +2326,7 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
         ProductType: productType,
       });
   
-      Swal.fire({
+     await Swal.fire({
         icon: 'success',
         title: 'Success!',
         text: 'Product type updated successfully.',
@@ -7266,8 +7263,8 @@ export function SymptomCodeDelete({ SymptomCodeID, isModalOpen, setIsModalOpen, 
 
 export function BookingsAdd({ onUpdate }) {
   const [formData, setFormData] = useState({
-    WOID: "",
-    BookingStatus: "",
+    WOID: null,
+    BookingStatus: null,
     ScheduleJeopardy: false,
     ScheduleJeopardyTime: "",
     DoNotDisturb: false,
@@ -7278,25 +7275,23 @@ export function BookingsAdd({ onUpdate }) {
     CreatedBy: "",
   });
 
-  const [workorders, setWorkorders] = useState([]);
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    const fetchDropdownData = async () => {
+    const fetchUsers = async () => {
       try {
-        const [woRes, userRes] = await Promise.all([
-          ApiCustomer.get("/api/work-order"),
-          ApiCustomer.get("/api/user"),
-        ]);
-        setWorkorders(woRes.data.data || []);
-        setUsers(userRes.data.data || []);
+        const res = await ApiCustomer.get("/api/user");
+        setUsers(res.data.data || []);
       } catch (error) {
-        console.error("Failed to load dropdown data:", error);
+        console.error("Failed to load users:", error);
       }
     };
-
-    fetchDropdownData();
+    fetchUsers();
   }, []);
+
+  const handleChange = (key, value) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleInputChange = (e) => {
     const { id, value, type, checked } = e.target;
@@ -7320,8 +7315,12 @@ export function BookingsAdd({ onUpdate }) {
     }
 
     const dataToSend = {
-      ...formData,
+      WOID: formData.WOID?.WOID || null,
+      BookingStatusId: formData.BookingStatus?.BookingStatusId || null,
+      ScheduleJeopardy: formData.ScheduleJeopardy,
       ScheduleJeopardyTime: formData.ScheduleJeopardyTime ? new Date(formData.ScheduleJeopardyTime) : null,
+      DoNotDisturb: formData.DoNotDisturb,
+      CeScheduleChange: formData.CeScheduleChange,
       TotalBillableDurationInMinutes: formData.TotalBillableDurationInMinutes ? parseInt(formData.TotalBillableDurationInMinutes) : null,
       TotalInProgressDurationInMinutes: formData.TotalInProgressDurationInMinutes ? parseInt(formData.TotalInProgressDurationInMinutes) : null,
       TotalBreakDurationInMinutes: formData.TotalBreakDurationInMinutes ? parseInt(formData.TotalBreakDurationInMinutes) : null,
@@ -7363,22 +7362,29 @@ export function BookingsAdd({ onUpdate }) {
           <DialogTitle>Add Booking</DialogTitle>
           <DialogDescription>Fields marked with * are required.</DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
-          <Label>WOID *</Label>
-          <select
-            id="WOID"
-            value={formData.WOID}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
-          >
-            <option value="">-- Select WOID --</option>
-            {workorders.map((wo) => (
-              <option key={wo.WOID} value={wo.WOID}>{wo.WOID}</option>
-            ))}
-          </select>
 
-          <Label>Booking Status</Label>
-          <Input id="BookingStatus" value={formData.BookingStatus} onChange={handleInputChange} />
+        <div className="space-y-3">
+          {/* ✅ WOID pakai GenericSelector */}
+          <GenericSelector
+            value={formData.WOID}
+            onChange={(wo) => handleChange("WOID", wo)}
+            endpoint="/api/work-order"
+            labelKey="WOID"
+            valueKey="WOID"
+            placeholder="Search WOID..."
+            label="WOID *"
+          />
+
+          {/* ✅ Booking Status pakai GenericSelector */}
+          <GenericSelector
+            value={formData.BookingStatus}
+            onChange={(bs) => handleChange("BookingStatus", bs)}
+            endpoint="/api/booking-status"
+            labelKey="Description"
+            valueKey="BookingStatusId"
+            placeholder="Search booking status..."
+            label="Booking Status"
+          />
 
           <div className="flex items-center space-x-2">
             <input type="checkbox" id="ScheduleJeopardy" checked={formData.ScheduleJeopardy} onChange={handleInputChange} />
@@ -7407,6 +7413,7 @@ export function BookingsAdd({ onUpdate }) {
           <Label>Total Break Duration (minutes)</Label>
           <Input id="TotalBreakDurationInMinutes" type="number" value={formData.TotalBreakDurationInMinutes} onChange={handleInputChange} />
 
+          {/* Created By */}
           <Label>Created By *</Label>
           <select
             id="CreatedBy"
@@ -7422,6 +7429,7 @@ export function BookingsAdd({ onUpdate }) {
             ))}
           </select>
         </div>
+
         <DialogFooter>
           <Button onClick={handleSubmit}>Add</Button>
         </DialogFooter>
