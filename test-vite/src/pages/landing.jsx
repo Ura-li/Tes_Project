@@ -8,6 +8,7 @@ const CeLanding = lazy(() => import("../layout/Ce_Page"))
 const ProductStorageLanding = lazy(() => import("../layout/Ps_Page"));
 const LogistikLanding = lazy(() => import("../layout/Logistic_Page"))
 const CeLeadLanding = lazy(() => import("../layout/CeLead_Page") )
+const CashMLanding = lazy(() => import ("../layout/Cm_Page"))
 // const UserLanding = lazy(() => import("../pages/user/Dashboard"));
 
 export default function Landing() {
@@ -21,9 +22,10 @@ export default function Landing() {
       {user?.role === "fd" && <WorkerLanding />}
       {user?.role === "ce" && <WorkerLanding/>}
       {user?.role === "apo" && <ApoLanding/>}
-      {user?.role === "ps" && <WorkerLanding/>}
+      {user?.role === "ps" && <ProductStorageLanding/>}
       {user?.role === "lg" && <LogistikLanding/>}
       {user?.role === "celead" && <WorkerLanding/>}
+      {user?.role === "cm" && <CashMLanding/>}
     </Suspense>
   );
 }

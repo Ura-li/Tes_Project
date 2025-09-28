@@ -1189,6 +1189,19 @@ export const ServiceCase = ({
     OutWarranty: "Out of Warranty",
   };  
 
+  const OptionStorage = [
+     "Storage 1",
+     "Storage 2",
+     "Storage 3",
+     "Storage 4",
+     "Storage 5",
+     "Storage 6",
+     "Storage 7",
+     "Storage 8",
+     "Storage 9",
+     "Storage 10",
+  ]
+
   const assignToForm= true;
   // const assignToForm = statusEnumToLabel.startsWith("NEW_Assign");
 
@@ -1368,6 +1381,9 @@ if (caseDetails.CaseStatus !== "Close") {
   // Photos
   /** @type {[File[], (val: File[]) => void]} */
   const [photos, setPhotos] = useState([]);
+  const [selectedPhoto, setSelectedPhoto] = useState(null); 
+  const [selectedPhotoPreview, setSelectedPhotoPreview] = useState(null);
+
   /**
    * Handle file input change for photos.
    * @param {FileList|null} files
@@ -2070,6 +2086,11 @@ if (caseDetails.CaseStatus !== "Close") {
                     <CaseField label="Asset Location" lock={user?.role  !== 'ps'}>
                       <Input variant="invisible" placeholder="---" value={caseForm?.StorageLocationStore} 
                       onChange= {(e) => onChangeCase('StorageLocationStore')(e.target.value)}
+                      hidden/>
+                      <SearchCommandBlock
+                      value={caseForm?.StorageLocationStore}
+                      onChange={onChangeCase('StorageLocationStore')}
+                      options={OptionStorage}
                       />
                     </CaseField>
                     <CaseField label="Serial Number" lock>
@@ -2361,82 +2382,136 @@ if (caseDetails.CaseStatus !== "Close") {
             </div>
           </TabsContent>
           
-          <TabsContent value="doc_photo" >         
-              <div  className={"flex flex-col p-3 space-y-5"}>
-                  <Card >
-                  <CardHeader>
-                  <CardTitle className={"text-lg"}>Photo Unit</CardTitle>
-                  <hr />
-                  {/* Tombol Add Photo */}
-                  <div className="flex items-center gap-2">
-                    <Input 
-                      type="file" 
-                      multiple 
-                      accept="image/*" 
-                      className="hidden" 
-                      id="upload-photos" 
-                      onChange={(e) => onPickPhotos(e.target.files)} 
-                    />
-                    <label htmlFor="upload-photos">
-                      <Button asChild size="sm" variant="outline">
-                        <span>+ Add Photo</span>
-                      </Button>
-                    </label>
-                    {photos.length > 0 && (
-                      <Button
-                        size="sm"
-                        onClick={async () => {
-                          try {
-                            const fd = new FormData();
-                            photos.forEach((f) => fd.append("files", f));
-                            fd.append("caseId", caseDetails.CaseID); // pastikan sesuai field caseId
-                            await ApiCustomer.post("/api/case-information/upload-case", fd, {
-                              headers: { "Content-Type": "multipart/form-data" },
-                            });
-                            toast.success("Photos uploaded!");
-                            setPhotos([]); // reset preview
-                            // optionally: refresh caseDetails setelah upload
-                          } catch (e) {
-                            toast.error("Photo upload failed");
-                          }
-                        }}
-                      >
-                        Upload Photos
-                      </Button>
-                    )}
-                  </div>
+         <TabsContent value="doc_photo">
+  <div className="p-3 space-y-5">
+    <Card>
+      <CardHeader className="flex flex-row justify-between">
+        <CardTitle className="text-lg">Photo Unit</CardTitle>
 
-                </CardHeader>
-                <CardContent className={"grid grid-cols-2 gap-3"}>
-                  {/* preview photos baru sebelum upload */}
-                  <p>PREVIEW</p>
-                  {photos.length > 0 && photos.map((file, idx) => (
-                    <div key={idx} className="relative">
-                      
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={file.name}
-                        className="w-full h-full object-cover rounded-lg border"
-                      />
-                      <p className="text-xs truncate mt-1">{file.name}</p>
-                    </div>
-                  ))}
-               </CardContent>
-               <hr />
-                  {caseDetails.casephotos.map(photo =>(
-                    <img src={import.meta.env.VITE_API_BASE_URL +''+photo.url} alt="" className="w-full border-4 border-white shadow-lg object-cover"/>
-                  ))}
+        <div className="flex items-center gap-2">
+          {/* Hidden file input */}
+          <Input
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            id="upload-photos"
+            onChange={(e) => onPickPhotos(e.target.files)}
+          />
 
-               {photos.length > 0 && (
-                  <CardFooter>
-                    
-                  </CardFooter>
-                )}
+          {/* Add photo button */}
+          <label htmlFor="upload-photos">
+            <Button asChild size="sm" variant="outline" className={"cursor-pointer"}>
+              <span>+ Add Photo</span>
+            </Button>
+          </label>
 
-                  </Card>
-                </div>
-          </TabsContent>
+          {/* Upload button muncul hanya jika ada file dipilih */}
+          {photos.length > 0 && (
+            <Button
+              size="sm"
+              className={"cursor-pointer"}
+              onClick={async () => {
+                try {
+                  const fd = new FormData();
+                  photos.forEach((f) => fd.append("files", f));
+                  fd.append("caseId", caseDetails.CaseID);
 
+                  await ApiCustomer.post(
+                    "/api/case-information/upload-case",
+                    fd,
+                    { headers: { "Content-Type": "multipart/form-data" } }
+                  );
+
+                  toast.success("Photos uploaded!");
+                  setPhotos([]); // reset preview lokal
+                } catch (e) {
+                  console.error(e);
+                  toast.error("Photo upload failed");
+                }
+              }}
+            >
+              Upload Photos
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        {/*  Preview foto baru yang baru dipilih */}
+        {photos.length > 0 && (
+          <>
+            <span className="font-bold italic">Preview New Photos</span>
+            <div className="grid grid-cols-3 gap-3 mt-2">
+             {photos.map((file, idx) => {
+        const previewUrl = URL.createObjectURL(file);
+        return (
+          <div key={idx} className="relative">
+            <img
+              src={previewUrl}
+              alt={file.name}
+              className="border border-black shadow-lg rounded-sm cursor-pointer"
+              onClick={() => setSelectedPhotoPreview(previewUrl)} // ⬅️ klik = buka popup zoom
+            />
+            <p className="text-xs truncate mt-1">{file.name}</p>
+          </div>
+        );
+      })}
+            </div>
+          </>
+        )}
+
+        {/* Foto lama dari server */}
+        <span className="font-bold italic mt-4 block">Uploaded Photos</span>
+              {Array.isArray(caseDetails.casephotos) && caseDetails.casephotos.length > 0 ? (
+        <CardFooter className="grid grid-cols-3 gap-3 mt-2">
+          {caseDetails.casephotos.map((photo) => (
+            <img
+              key={photo.id}
+              src={`${import.meta.env.VITE_API_BASE_URL}${photo.url}`}
+              alt={`Photo ${photo.id}`}
+              className="border border-black shadow-lg rounded-sm cursor-pointer hover:opacity-80 transition"
+              onClick={() => setSelectedPhoto(photo)} // klik -> buka modal
+            />
+          ))}
+        </CardFooter>
+      ) : (
+        <p className="italic text-sm text-gray-500">Belum ada foto yang diupload</p>
+      )}
+
+      {/* 🪄 Popup Zoom Modal */}
+      {selectedPhoto && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={() => setSelectedPhoto(null)} // klik luar area untuk close
+        >
+          <div className="relative max-w-4xl max-h-[90vh] p-2">
+            <img
+              src={`${import.meta.env.VITE_API_BASE_URL}${selectedPhoto.url}`}
+              alt={`Photo ${selectedPhoto.id}`}
+              className="max-h-[90vh] rounded-lg shadow-2xl object-contain"
+            />
+          </div>
+        </div>
+      )}
+
+     {selectedPhotoPreview && (
+  <div
+    className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+    onClick={() => setSelectedPhotoPreview(null)}
+  >
+    <img
+      src={selectedPhotoPreview}
+      alt="Preview Zoom"
+      className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg"
+    />
+  </div>
+)}
+
+      </CardContent>
+    </Card>
+  </div>
+</TabsContent>
         </Tabs>
       </Card>
     </>
