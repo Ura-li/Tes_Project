@@ -972,6 +972,7 @@ function GenericSelector({
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 500)} // delay to allow click event on items
       />
 
       {/* Dropdown Results */}
@@ -7364,6 +7365,7 @@ export function BookingsAdd({ onUpdate }) {
         </DialogHeader>
 
         <div className="space-y-3">
+          <div className="mb-6" relative>
           {/* ✅ WOID pakai GenericSelector */}
           <GenericSelector
             value={formData.WOID}
@@ -7373,7 +7375,9 @@ export function BookingsAdd({ onUpdate }) {
             valueKey="WOID"
             placeholder="Search WOID..."
             label="WOID *"
+            className="z-50"
           />
+          </div>
 
           {/* ✅ Booking Status pakai GenericSelector */}
           <GenericSelector
@@ -7440,30 +7444,59 @@ export function BookingsAdd({ onUpdate }) {
 
 export function BookingsEdit({ BookingId, onUpdate }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [users, setUsers] = useState([]);
   const [bookingData, setBookingData] = useState({
-    BookingStatus: "",
+    WOID: null,
+    BookingStatus: null,
     ScheduleJeopardy: false,
     ScheduleJeopardyTime: "",
     DoNotDisturb: false,
     CeScheduleChange: false,
-    TotalBillableDurationInMinutes: 0,
-    TotalInProgressDurationInMinutes: 0,
-    TotalBreakDurationInMinutes: 0,
+    TotalBillableDurationInMinutes: "",
+    TotalInProgressDurationInMinutes: "",
+    TotalBreakDurationInMinutes: "",
+    CreatedBy: "",
   });
 
+  // 🔹 Ambil daftar user untuk dropdown "CreatedBy"
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await ApiCustomer.get("/api/user");
+        setUsers(res.data.data || []);
+      } catch (err) {
+        console.error("Failed to load users:", err);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  // 🔹 Ambil data booking berdasarkan ID
   const fetchBookingData = async () => {
     try {
       const res = await ApiCustomer.get(`/api/booking/${BookingId}`);
       const data = res.data.data;
+
       setBookingData({
-        BookingStatus: data.BookingStatus || "",
+        WOID: data.workorder
+            ? { WOID: data.workorder.WOID, label: data.workorder.WOID }
+            : null,
+          BookingStatus: data.BookingStatus
+            ? {
+                BookingStatusId: data.BookingStatus.BookingStatusId,
+                Description: data.BookingStatus.Description,
+              }
+            : null,
         ScheduleJeopardy: data.ScheduleJeopardy || false,
-        ScheduleJeopardyTime: data.ScheduleJeopardyTime?.slice(0, 16) || "",
+        ScheduleJeopardyTime: data.ScheduleJeopardyTime
+          ? data.ScheduleJeopardyTime.slice(0, 16) // format untuk input datetime-local
+          : "",
         DoNotDisturb: data.DoNotDisturb || false,
         CeScheduleChange: data.CeScheduleChange || false,
-        TotalBillableDurationInMinutes: data.TotalBillableDurationInMinutes || 0,
-        TotalInProgressDurationInMinutes: data.TotalInProgressDurationInMinutes || 0,
-        TotalBreakDurationInMinutes: data.TotalBreakDurationInMinutes || 0,
+        TotalBillableDurationInMinutes: data.TotalBillableDurationInMinutes || "",
+        TotalInProgressDurationInMinutes: data.TotalInProgressDurationInMinutes || "",
+        TotalBreakDurationInMinutes: data.TotalBreakDurationInMinutes || "",
+        CreatedBy: data.CreatedBy?.toString() || "", // supaya dropdown CreatedBy ke-select
       });
     } catch (error) {
       console.error("Error fetching booking:", error);
@@ -7474,23 +7507,44 @@ export function BookingsEdit({ BookingId, onUpdate }) {
     if (isOpen) fetchBookingData();
   }, [isOpen]);
 
-  const handleChange = (e) => {
+  // 🔹 Handler input
+  const handleChange = (key, value) => {
+    setBookingData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleInputChange = (e) => {
     const { id, value, type, checked } = e.target;
-  
     setBookingData((prev) => ({
       ...prev,
-      [id]:
-        type === "checkbox"
-          ? checked
-          : type === "number"
-          ? parseInt(value) || 0
-          : value,
+      [id]: type === "checkbox" ? checked : value,
     }));
   };
 
+  // 🔹 Update Booking
   const handleUpdate = async () => {
+    const dataToSend = {
+      WOID: bookingData.WOID?.WOID || null,
+      BookingStatusId: bookingData.BookingStatus?.BookingStatusId || null,
+      ScheduleJeopardy: bookingData.ScheduleJeopardy,
+      ScheduleJeopardyTime: bookingData.ScheduleJeopardyTime
+        ? new Date(bookingData.ScheduleJeopardyTime)
+        : null,
+      DoNotDisturb: bookingData.DoNotDisturb,
+      CeScheduleChange: bookingData.CeScheduleChange,
+      TotalBillableDurationInMinutes: bookingData.TotalBillableDurationInMinutes
+        ? parseInt(bookingData.TotalBillableDurationInMinutes)
+        : null,
+      TotalInProgressDurationInMinutes: bookingData.TotalInProgressDurationInMinutes
+        ? parseInt(bookingData.TotalInProgressDurationInMinutes)
+        : null,
+      TotalBreakDurationInMinutes: bookingData.TotalBreakDurationInMinutes
+        ? parseInt(bookingData.TotalBreakDurationInMinutes)
+        : null,
+      CreatedBy: parseInt(bookingData.CreatedBy),
+    };
+
     try {
-      await ApiCustomer.patch(`/api/booking/${BookingId}`, bookingData);
+      await ApiCustomer.patch(`/api/booking/${BookingId}`, dataToSend);
       Swal.fire({
         icon: "success",
         title: "Updated",
@@ -7524,61 +7578,120 @@ export function BookingsEdit({ BookingId, onUpdate }) {
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>Edit Booking</DialogTitle>
-          <DialogDescription>Update booking status and details below.</DialogDescription>
+          <DialogDescription>Update booking details below.</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <Input id="BookingStatus" value={bookingData.BookingStatus} onChange={handleChange} placeholder="Booking Status" />
+        <div className="space-y-3">
+          {/* ✅ WOID pakai GenericSelector */}
+          <GenericSelector
+            value={
+              bookingData.WOID
+                ? { WOID: bookingData.WOID.WOID, label: bookingData.WOID.WOID }
+                : null
+            }
+            onChange={(wo) => handleChange("WOID", wo)}
+            endpoint="/api/work-order"
+            labelKey="WOID"
+            valueKey="WOID"
+            placeholder="Search WOID..."
+            label="WOID *"
+          />
+
+          <GenericSelector
+            value={
+              bookingData.BookingStatus
+                ? {
+                    BookingStatusId: bookingData.BookingStatus.BookingStatusId,
+                    Description: bookingData.BookingStatus.Description,
+                  }
+                : null
+            }
+            onChange={(bs) => handleChange("BookingStatus", bs)}
+            endpoint="/api/booking-status"
+            labelKey="Description"
+            valueKey="BookingStatusId"
+            placeholder="Search booking status..."
+            label="Booking Status"
+          />
+          
 
           <div className="flex items-center space-x-2">
-            <label htmlFor="ScheduleJeopardy">Schedule Jeopardy</label>
-            <Checkbox
-                id="ScheduleJeopardy"
-                checked={bookingData.ScheduleJeopardy}
-                onCheckedChange={(checked) =>
-                  setBookingData((prev) => ({ ...prev, ScheduleJeopardy: checked }))
-                }
-              />
+            <input
+              type="checkbox"
+              id="ScheduleJeopardy"
+              checked={bookingData.ScheduleJeopardy}
+              onChange={handleInputChange}
+            />
+            <Label htmlFor="ScheduleJeopardy">Schedule Jeopardy</Label>
           </div>
 
+          <Label>Schedule Jeopardy Time</Label>
           <Input
             id="ScheduleJeopardyTime"
             type="datetime-local"
             value={bookingData.ScheduleJeopardyTime}
-            onChange={handleChange}
+            onChange={handleInputChange}
           />
 
           <div className="flex items-center space-x-2">
-            <Checkbox id="DoNotDisturb" checked={bookingData.DoNotDisturb} onChange={handleChange} />
-            <label htmlFor="DoNotDisturb">Do Not Disturb</label>
+            <input
+              type="checkbox"
+              id="DoNotDisturb"
+              checked={bookingData.DoNotDisturb}
+              onChange={handleInputChange}
+            />
+            <Label htmlFor="DoNotDisturb">Do Not Disturb</Label>
           </div>
 
           <div className="flex items-center space-x-2">
-            <Checkbox id="CeScheduleChange" checked={bookingData.CeScheduleChange} onChange={handleChange} />
-            <label htmlFor="CeScheduleChange">CE Schedule Change</label>
+            <input
+              type="checkbox"
+              id="CeScheduleChange"
+              checked={bookingData.CeScheduleChange}
+              onChange={handleInputChange}
+            />
+            <Label htmlFor="CeScheduleChange">CE Schedule Change</Label>
           </div>
 
+          <Label>Total Billable Duration (minutes)</Label>
           <Input
             id="TotalBillableDurationInMinutes"
             type="number"
             value={bookingData.TotalBillableDurationInMinutes}
-            onChange={handleChange}
-            placeholder="Total Billable Duration (min)"
+            onChange={handleInputChange}
           />
+
+          <Label>Total In Progress Duration (minutes)</Label>
           <Input
             id="TotalInProgressDurationInMinutes"
             type="number"
             value={bookingData.TotalInProgressDurationInMinutes}
-            onChange={handleChange}
-            placeholder="In-Progress Duration (min)"
+            onChange={handleInputChange}
           />
+
+          <Label>Total Break Duration (minutes)</Label>
           <Input
             id="TotalBreakDurationInMinutes"
             type="number"
             value={bookingData.TotalBreakDurationInMinutes}
-            onChange={handleChange}
-            placeholder="Break Duration (min)"
+            onChange={handleInputChange}
           />
+
+          {/* Created By */}
+          <Label>Created By *</Label>
+          <select
+            id="CreatedBy"
+            value={bookingData.CreatedBy}
+            onChange={handleInputChange}
+            className="w-full p-2 border rounded"
+          >
+            <option value="">-- Select User --</option>
+            {users.map((user) => (
+              <option key={user.IDUser} value={user.IDUser}>
+                {user.Name || `User ${user.IDUser}`}
+              </option>
+            ))}
+          </select>
         </div>
 
         <DialogFooter className="pt-4">
