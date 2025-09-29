@@ -122,23 +122,21 @@ export default function Logistik() {
              <Card className={"rounded-sm col-span-2 row-span-2"}>
                 <CardHeader className={"flex flex-row gap-2 justify-between"}>
                     <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
-                    <div className="flex gap-2 ">
-                    {["All", "New", "Ordered", "Shipped", "Closed", "Cancelled"].map((status) => (
-                      <button
-                        key={status}
-                        onClick={() => {
-                          setFilterStatus(status);
-                          setCurrentPage(1); // reset ke page 1 setiap ganti filter
-                        }}
-                        className={`px-3 py-1 rounded cursor-pointer ${
-                          filterStatus === status
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-200 text-gray-700"
-                        }`}
-                      >
-                        {status}
-                      </button>
-                    ))}
+                    <div className="flex">
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => {
+                        setFilterStatus(e.target.value)
+                        setCurrentPage(1)
+                      }}
+                      className="focus:ring-2 focus:ring-blue-400 ring-2 ring-blue-400 p-1 rounded-sm"
+                    >
+                      {["All", "New", "Ordered", "Shipped", "Closed", "Cancelled"].map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </CardHeader>
                 <CardContent className={"grid gap-5 "}>

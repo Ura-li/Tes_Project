@@ -16,6 +16,11 @@ export async function GET(request, { params }) {
             include: {
                 workorder: {
                     include: {
+                        serviceCatalog: {
+                          include : {
+                            warranty_services: true,
+                          },
+                        },
                         caseinformation: {
                             include:{
                                 site_account : true,

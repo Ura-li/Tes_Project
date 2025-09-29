@@ -329,7 +329,7 @@ export const ServiceMaterialApo = () => {
                       variant={"invisible"}
                       type="text"
                       className=""
-                      value={"---"}
+                      value={materialOrders?.workorder?.serviceCatalog?.warranty_services?.Service_offerID}
                     />
                   </CaseField>
 
@@ -347,7 +347,7 @@ export const ServiceMaterialApo = () => {
                       variant={"invisible"}
                       type="text"
                       className=""
-                      value={"---"}
+                      value={materialOrders?.workorder?.serviceCatalog?.warranty_services?.Service_description}
                     />
                   </CaseField>
 

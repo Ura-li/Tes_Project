@@ -61,7 +61,7 @@ export default function ProductStorage() {
         <div className="p-3 space-y-5">
   {renderer ? (
     Array.from({ length: 4 }).map((_, i) => (
-      <Card key={`skeleton-${i}`} className="p-3 shadow-sm">
+      <Card key={`skeleton-${i}`} className="p-2 shadow-sm">
         <div className="flex justify-between">
           <Skeleton className="h-5 w-32" />
           <Skeleton className="h-5 w-32" />
@@ -111,7 +111,7 @@ export default function ProductStorage() {
   
 </div>
 
-<CardFooter className="items-center justify-center flex gap-4">
+<CardFooter className="items-center  flex gap-4">
   <button
     className="px-2 bg-gray-300 rounded disabled:opacity-50 cursor-pointer"
     onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}

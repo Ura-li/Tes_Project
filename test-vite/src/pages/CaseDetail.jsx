@@ -1497,7 +1497,7 @@ if (caseDetails.CaseStatus !== "Close") {
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-3 gap-3 ">
-                <CaseField label="Case Subject"  lock={!canEditFd} span={3} childClass={' col-span-3'} >
+                <CaseField label="Case Subject"  span={3} childClass={' col-span-3'} >
                   <div className="ml-8 w-full">
                     <Textarea
                      value={caseForm?.CaseSubject}
@@ -1603,7 +1603,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     />
                 </CaseField>
 
-                  <CaseField label="Problem Description" childClass={'col-span-3'} span={3} lock={!canEditFd}  >
+                  <CaseField label="Problem Description" span={3} lock={!canEditFd}  >
                   <div className="ml-8 w-full">
                     <Textarea
                      value={caseForm?.ProblemDescription}
@@ -1615,7 +1615,7 @@ if (caseDetails.CaseStatus !== "Close") {
                   </div>
                 </CaseField>
 
-                  <CaseField label="Case Priority" className={"mt-2"} childClass={'col-span-2'} span={2}  >
+                  <CaseField label="Case Priority" className={"mt-2"} childClass={'col-span-2'} span={2}  lock={!canEditFd}>
                   {/* <Input variant="invisible" value={caseDetails.CasePriority}/> */}
                   <SearchCommandBlock
                   value={caseForm?.CasePriority}
@@ -1957,6 +1957,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         "CE/Partner Assist",
                         "Customer Email",
                       ]}
+                      
                     />
                   </CaseField>
 

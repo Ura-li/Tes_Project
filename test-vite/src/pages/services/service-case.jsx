@@ -1263,6 +1263,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
         `/api/material-order/material-order-line-items/${LineItemID}`,
         {
           Status: "Closed",
+          FailureId: MOLineDetails.failureId,
         }
       );
       if (res.data.success) {
