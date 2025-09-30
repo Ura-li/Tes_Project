@@ -24,6 +24,11 @@ import {
 } from "@/components/ui/tabs"
 import { SearchCommandBlock, SelectBarRelated } from '../../components/sc-select'
 import { CalendarDays,  Lock, PlusCircle } from 'lucide-react'
+import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
+
+const USER_TIMEZONE = "Asia/Jakarta";
+const CUSTOMER_TIMEZONE = "Asia/Jakarta";
+
 
 'use client'
 
@@ -375,23 +380,37 @@ export function ServiceBookingApo ({BookingId , woid}) {
 
   useEffect(() =>{
    if (startTimeUserTime && endTimeUserTime) {
-  const startTime = new Date(startTimeUserTime);
-  const endTime = new Date(endTimeUserTime);
+      const startTime = new Date(startTimeUserTime);
+      const endTime = new Date(endTimeUserTime);
 
-  if (!isNaN(startTime) && !isNaN(endTime)) {   // pastikan valid date
-    const diffMs = endTime.getTime() - startTime.getTime();
-    const diffHours = Math.max(diffMs / (1000 * 60 * 60), 0);
+      if (!isNaN(startTime) && !isNaN(endTime)) {   // pastikan valid date
+        const diffMs = endTime.getTime() - startTime.getTime();
+        const diffHours = Math.max(diffMs / (1000 * 60 * 60), 0);
 
-    setDurationInMinutesUserTime(diffHours);
+        setDurationInMinutesUserTime(diffHours);
 
-    console.log("Start Time : ", startTime);
-    console.log("End Time   : ", endTime);
-    console.log("Duration   : ", diffHours, "menit");
-  } else {
-    console.warn("Invalid Date:", startTimeUserTime, endTimeUserTime);
-  }
-}
-  }, [startTimeUserTime, endTimeUserTime])
+        console.log("Start Time : ", startTime);
+        console.log("End Time   : ", endTime);
+        console.log("Duration   : ", diffHours, "menit");
+      } else {
+        console.warn("Invalid Date:", startTimeUserTime, endTimeUserTime);
+      }
+    }
+  }, [endTimeUserTime, startTimeUserTime])
+
+  useEffect(() => {
+    if (startTimeUserTime && durationInMinutesUserTime != null) {
+      const startTime = new Date(startTimeUserTime);
+      if (!isNaN(startTime)) {
+        const newEndTime = new Date(startTime.getTime() + durationInMinutesUserTime * 60 * 60 * 1000);
+        setEndTimeUserTime(newEndTime.toISOString()); 
+      }
+    }
+  }, [durationInMinutesUserTime]);
+
+  useEffect(()=>{
+    if(startTimeUserTime) setStartTimeCustomerTime
+  })
 
   console.log("booking data is ther ",bookingData?.workorder?.caseinformation)
 
