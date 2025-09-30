@@ -219,7 +219,7 @@ export function ComboboxDemo({
           <CircleChevronDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[19em] p-0">
         <Command>
           <CommandInput placeholder={placeholder} className="h-9" />
           <CommandList>

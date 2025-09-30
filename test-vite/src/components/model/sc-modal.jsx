@@ -5173,7 +5173,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
   
   function renderStepContent() {
     const [currentPage, setCurrentPage] = useState(1);
-    const PAGE_SIZE = 6;
+    const PAGE_SIZE = 3;
     const filteredPartCatalog = partCatalog.filter(part => {
       return (
         part.PartNumber?.toLowerCase().includes(partNumberSearch.toLowerCase()) &&
@@ -5201,7 +5201,13 @@ console.log("Asset Info OTC : ",isOutWarranty)
     switch (effectiveStep) {
       case 1:
         return (
-          <DialogContent className="sm:max-w-[fit] sm:max-h-[100vh] flex flex-col justify-center gap-0 p-0 bg-white [&>button]:hidden" >
+          <DialogContent   className="
+    w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
+    max-h-[90vh] overflow-y-auto
+    flex flex-col justify-center
+    gap-0 p-0 bg-white
+    [&>button]:hidden
+  " >
             <DialogHeader>
               <div className="flex items-end justify-end ">
                 <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
@@ -5214,7 +5220,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
               <DialogDescription className={'bg-red-200 p-3 font-bold '}>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
               <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
             </DialogHeader>
-            <div className="flex justify-between gap-4 p-2 my-2">
+            <div className="flex justify-between gap-4 p-2 my-2 ">
               <DialogTitle>Step 1: Select From List of Service Options</DialogTitle>
               <div className="grid grid-cols-2 p-2 bg-gray-300 gap-x-10">
                 
@@ -5307,8 +5313,12 @@ console.log("Asset Info OTC : ",isOutWarranty)
        
        
         return (
-          <DialogContent className="sm:max-w-[fit] sm:max-h-[fit] flex flex-col  gap-0 p-0 bg-white [&>button]:hidden ">
-            <DialogHeader className={'gap-0'}>
+          <DialogContent className=" w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
+    max-h-[90vh] overflow-y-auto
+    flex flex-col justify-center
+    gap-0 p-0 bg-white
+    [&>button]:hidden rounded-none">
+            <DialogHeader className={"p-2"}>
               <div className="flex items-end justify-end">
                 <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
                 <DialogClose asChild>
@@ -5320,24 +5330,39 @@ console.log("Asset Info OTC : ",isOutWarranty)
               <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
               <DialogDescription>Select parts required for the repair.</DialogDescription>
             </DialogHeader>
-            {console.log("EFFECTIF WARANRY SERVUCE",effectiveWarrantyService)}
-            <div className="flex items-start justify-between p-2">
-              <div className="grid flex-1 grid-cols-2 p-2 bg-gray-300 gap-x-2">
-                <p>Service OfferID</p><p>: {effectiveWarrantyService?.Service_offerID ?? '-'}</p>
-                <p>Service Description</p><p>: {effectiveWarrantyService?.Service_description ?? '-'}</p>
-              </div>
-              <div className="flex items-center self-center justify-center flex-1 gap-2 space-x-2 ">
-                <Label htmlFor="orderability">Orderability</Label>
-                <Switch id="orderability" />
-              </div>
-              <div className="grid  grid-cols-2 p-2 bg-gray-300 gap-x-2">
-                <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
-                <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
-                <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: {assetForWorkOrderCreation?.Warranty_Status} - {assetForWorkOrderCreation?.WarrantyOTCCode?.Description}</p>
-                <p>Currency</p><p>: </p>
-              </div>
-            </div>
+  <div className="flex flex-col sm:flex-row justify-between gap-3">
+  {/* Kolom kiri  */}
+  <div className=" bg-gray-200 p-2 space-y-1 h-[5em]">
+    <div className="flex">
+      <p className="font-medium w-40">Service OfferID</p>
+      <p>: {effectiveWarrantyService?.Service_offerID ?? '-'}</p>
+    </div>
+    <div className="flex">
+      <p className="font-medium w-40">Service Description</p>
+      <p>: {effectiveWarrantyService?.Service_description ?? '-'}</p>
+    </div>
+  </div>
+
+  {/* Kolom kanan  */}
+  <div className=" bg-gray-200 grid grid-cols-2 gap-x-2 gap-y-1 p-2">
+    <p>Product Number</p>
+    <p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
+    <p>Product Name</p>
+    <p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
+    <p>Serial Number</p>
+    <p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
+    <p>Warranty Status</p>
+    <p>: {assetForWorkOrderCreation?.Warranty_Status} - {assetForWorkOrderCreation?.WarrantyOTCCode?.Description}</p>
+    <p>Currency</p>
+    <p>:</p>
+  </div>
+</div>
+
+<div className="flex items-center justify-end mt-3 gap-2">
+  <Label htmlFor="orderability">Orderability</Label>
+  <Switch id="orderability" />
+</div>
+
 
             <Tabs
             defaultValue="parts"
@@ -5511,7 +5536,11 @@ console.log("Asset Info OTC : ",isOutWarranty)
   
       case 3:
         return (
-          <DialogContent className="sm:max-w-[fit] sm:max-h-[full] p-0 bg-white [&>button]:hidden ">
+          <DialogContent className="w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
+    max-h-[90vh] overflow-y-auto
+    flex flex-col justify-center
+    gap-0 p-0 bg-white
+    [&>button]:hidden ">
             <DialogHeader>
               <div className="flex items-end justify-end">
                 <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
@@ -5521,8 +5550,11 @@ console.log("Asset Info OTC : ",isOutWarranty)
                   </Button>
                 </DialogClose>
               </div>
-              <DialogTitle className={'text-blue-600 text-2xl indent-5'}>Service Catalog</DialogTitle>
+              <div className="space-y-2 p-2">
+              <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
               <DialogDescription>SELECT PARTS REQUIRED FOR THE REPAIR.</DialogDescription>
+              </div>
+
             </DialogHeader>
             <div className="flex justify-end gap-4 p-2 my-2">
               <div className="grid grid-cols-2 p-2 bg-gray-300 gap-x-10">
@@ -5543,7 +5575,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
                     <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
                     <TableHead className={'font-bold text-black'}>Qty</TableHead>
                     <TableHead className={'font-bold text-black'}>Tax</TableHead>
-                    <TableHead className={'font-bold text-black'}>Price</TableHead>
+                    <TableHead className={'font-bold text-black'} colSpan={5}>Price</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -5619,7 +5651,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
                   </TableRow>
                   <TableRow className={'bg-blue-400'}>
                     <TableCell colSpan={4}></TableCell>
-                    <TableCell>Total</TableCell>
+                    <TableCell colSpan={2}>Total</TableCell>
                     <TableCell>--</TableCell>
                     <TableCell>--</TableCell>
                   </TableRow>
