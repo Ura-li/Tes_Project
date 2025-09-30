@@ -15,10 +15,10 @@ export default function Logistik() {
     const [MoData, setMoData] = useState([]);
     const [preview, setPreview] = useState({
         ProfilePhoto: null,
-        Signature: null,
+        Signature: null,  
     });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 4;
   const [filterStatus, setFilterStatus] = useState("All");
   
 
@@ -56,8 +56,7 @@ export default function Logistik() {
     },[])
 
     const filteredData =
-    filterStatus === "All"
-      ? MoData
+    filterStatus === "All" ? MoData
       : MoData.filter(
           (m) =>
             m.OrderStatus === filterStatus
@@ -115,7 +114,7 @@ export default function Logistik() {
                     <span className="text-gray-400">{user?.email}</span> 
                     <span className='text-sm text-gray-500'>{userData.Phone}</span>
                 </CardContent>
-                <span className="text-xs text-center text-gray-500 mt-4">
+                <span className="text-xs text-center text-gray-500">
                     Latest Login: {new Date().toLocaleString()}
                 </span>
             </Card>
@@ -123,31 +122,29 @@ export default function Logistik() {
              <Card className={"rounded-sm col-span-2 row-span-2"}>
                 <CardHeader className={"flex flex-row gap-2 justify-between"}>
                     <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
-                    <div className="flex gap-2 ">
-                    {["All", "New", "Ordered", "Shipped", "Closed", "Cancelled"].map((status) => (
-                      <button
-                        key={status}
-                        onClick={() => {
-                          setFilterStatus(status);
-                          setCurrentPage(1); // reset ke page 1 setiap ganti filter
-                        }}
-                        className={`px-3 py-1 rounded cursor-pointer ${
-                          filterStatus === status
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-200 text-gray-700"
-                        }`}
-                      >
-                        {status}
-                      </button>
-                    ))}
+                    <div className="flex">
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => {
+                        setFilterStatus(e.target.value)
+                        setCurrentPage(1)
+                      }}
+                      className="focus:ring-2 focus:ring-blue-400 ring-2 ring-blue-400 p-1 rounded-sm"
+                    >
+                      {["All", "New", "Ordered", "Shipped", "Closed", "Cancelled"].map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </CardHeader>
-                <CardContent className={"grid gap-3"}>
+                <CardContent className={"grid gap-5 "}>
                  {currentData.length > 0 ? (
             currentData.map((m) => (
               <div
                 key={m.MOID}
-                className="rounded-sm hover:bg-gray-50 cursor-pointer  ring-1  ring-gray-400 px-2 py-1 "
+                className="rounded-sm hover:bg-gray-50 cursor-pointer  ring-1  ring-gray-400 px-2 py-1"
                 onClick={() =>
                   navigate(
                     `/app/material-order/${m.MOID}`
@@ -176,47 +173,21 @@ export default function Logistik() {
                    <hr className="border-1 border-gray-500 rounded-md"/>
                 </CardHeader>
                 <CardContent className="flex justify-between px-2">
-                  <div>
-                  <CaseField label={"Part Number"} className={"text-md"}>
-                   <span className="text-gray-600 text-sm">
-                    {
-                      m.materialorderlineitems?.[0]?.PartNumber
-                    }
-                   </span>
+                  <div className="space-y-1">
+                  <CaseField className={"text-md"}>
+                   <span> Part Number - Part Description</span>
+                  </CaseField>
+                  <CaseField className={"text-md"}>
+                    {m.materialorderlineitems?.[0]?.PartNumber} / {m.materialorderlineitems?.[0]?.Description}
                   </CaseField>
                   </div>
 
-                  <div className="flex flex-col items-end text-right">
-                  <CaseField label={"SO Number"} className={"text-md "}>
-                 
-                   <span className="text-gray-600 text-sm">
-                    {
-                      m.SalesOrderNumber
-                    }
-                   </span>
+                  <div className="flex flex-col items-end text-right gap-1">
+                  <CaseField className="flex gap-1 items-center">
+                    <span>SO Number - RMA Number</span>
                   </CaseField>
-                  </div>
-                </CardContent>
-
-                <CardContent className="flex justify-between px-2">
-                  <div>
-                  <CaseField label={"Part Description"} className={"text-md"}>
-                   <span className="text-gray-600 text-sm">
-                    {
-                      m.materialorderlineitems?.[0]?.Description
-                    }
-                   </span>
-                  </CaseField>
-                  </div>
-
-                  <div className="flex flex-col items-end text-right">
-                  <CaseField label={"RMA Number"} className={"text-md "}>
-                 
-                   <span className="text-gray-600 text-sm">
-                    {
-                      m.RMANumber
-                    }
-                   </span>
+                  <CaseField className="flex gap-1 items-center">
+                    {m.SalesOrderNumber} / {m.RMANumber}
                   </CaseField>
                   </div>
                 </CardContent>
@@ -230,7 +201,7 @@ export default function Logistik() {
         {/* Pagination Controls */}
         <CardFooter className="items-center justify-center flex gap-4">
           <button
-            className=" px-2 bg-gray-300 rounded disabled:opacity-50"
+            className=" px-2 bg-gray-300 rounded disabled:opacity-50 cursor-pointer"
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
           >
@@ -240,7 +211,7 @@ export default function Logistik() {
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className=" px-2 bg-gray-300 rounded disabled:opacity-50"
+            className=" px-2 bg-gray-300 rounded disabled:opacity-50 cursor-pointer"
             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
             disabled={currentPage === totalPages}
           >

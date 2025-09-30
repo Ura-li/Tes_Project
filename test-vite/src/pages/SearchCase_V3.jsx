@@ -1937,7 +1937,7 @@ export default function NewCaseForm() {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
+              <div className="col-span-2 space-y-2">
                 <Label>Warranty Status</Label>
                 <SearchCommandBlock
                   options={warrantyOptions}
