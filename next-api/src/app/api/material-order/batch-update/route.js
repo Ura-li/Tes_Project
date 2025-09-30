@@ -1,10 +1,32 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
+import { handleActionLogNotifications } from "../../../../../lib/actionLogDispatcher";
 
 const CASE_STATUS_BY_ORDER_STATUS = {
   Ordered: "PartOrder",
   Shipped: "PartAvailable",
 };
+const CASE_INFO_SELECT = {
+  CaseID: true,
+  CaseSubject: true,
+  Owner: true,
+  CreatedBy: true,
+  ownerUser: {
+    select: {
+      IDUser: true,
+      Name: true,
+      Email: true,
+    },
+  },
+  createdByUser: {
+    select: {
+      IDUser: true,
+      Name: true,
+      Email: true,
+    },
+  },
+};
+
 
 export async function PATCH(request) {
   try {
@@ -101,7 +123,20 @@ export async function PATCH(request) {
       }
 
       const derivedOrderStatus = updatedOrder.OrderStatus;
-      const logsToCreate = [];
+      const caseId = workOrder.caseinformation?.CaseID ?? null;
+      const previousCaseOwnerId = workOrder.caseinformation?.Owner ?? null;
+
+      const includeChangedBy = {
+        changedByUser: {
+          select: {
+            IDUser: true,
+            Name: true,
+            Email: true,
+          },
+        },
+      };
+
+      const createdLogs = [];
 
       if (updateEntries.length > 0) {
         const statusSummary =
@@ -109,15 +144,20 @@ export async function PATCH(request) {
             ? `${originalOrderStatus ?? "Unknown"} -> ${derivedOrderStatus}`
             : derivedOrderStatus ?? originalOrderStatus ?? "Unknown";
 
-        logsToCreate.push({
-          CaseId: workOrder.caseinformation?.CaseID,
-          ReferenceId: MOID,
-          model: "Material Orders",
-          dataOld: originalOrderStatus ?? "Unknown",
-          dataNew: derivedOrderStatus ?? originalOrderStatus ?? "Unknown",
-          changedBy: userId,
-          logDescription: `Batch update MOLI for MO ${MOID}: ${updateEntries.length} item(s) updated. MO status: ${statusSummary}`,
+        const log = await tx.actionLog.create({
+          data: {
+            CaseId: workOrder.caseinformation?.CaseID,
+            ReferenceId: MOID,
+            model: "Material Orders",
+            dataOld: originalOrderStatus ?? "Unknown",
+            dataNew: derivedOrderStatus ?? originalOrderStatus ?? "Unknown",
+            changedBy: userId,
+            logDescription: `Batch update MOLI for MO ${MOID}: ${updateEntries.length} item(s) updated. MO status: ${statusSummary}`,
+          },
+          include: includeChangedBy,
         });
+
+        createdLogs.push(log);
       }
 
       const targetCaseStatus = CASE_STATUS_BY_ORDER_STATUS[derivedOrderStatus];
@@ -158,20 +198,44 @@ export async function PATCH(request) {
           caseOwnerId &&
           caseOwnerId !== (workOrder.caseinformation?.Owner ?? null);
 
+        if (ownerChanged) {
+          const ownerLog = await tx.actionLog.create({
+            data: {
+              CaseId: `${workOrder.caseinformation.CaseID}`,
+              model: "CaseOwner",
+              dataOld: String(previousCaseOwnerId ?? ""),
+              dataNew: String(caseOwnerId ?? ""),
+              changedBy: userId,
+              logDescription:
+                targetCaseStatus === "PartOrder"
+                  ? `Edit: change owner from ${previousCaseOwnerId ?? "Unknown"} to ${caseOwnerId} (Logistic)`
+                  : `Edit: change owner from ${previousCaseOwnerId ?? "Unknown"} to ${caseOwnerId}`,
+            },
+            include: includeChangedBy,
+          });
+
+          createdLogs.push(ownerLog);
+        }
+
         const ownerNote = ownerChanged
           ? targetCaseStatus === "PartOrder"
             ? " Owner reassigned to Logistic."
             : " Owner reassigned to CE."
           : "";
 
-        logsToCreate.push({
-          CaseId: `${workOrder.caseinformation.CaseID}`,
-          model: "Case",
-          dataOld: currentCaseStatus ?? "Unknown",
-          dataNew: targetCaseStatus,
-          changedBy: userId,
-          logDescription: `Edit: change status from ${currentCaseStatus ?? "Unknown"} to ${targetCaseStatus}.${ownerNote}`,
+        const statusLog = await tx.actionLog.create({
+          data: {
+            CaseId: `${workOrder.caseinformation.CaseID}`,
+            model: "Case",
+            dataOld: currentCaseStatus ?? "Unknown",
+            dataNew: targetCaseStatus,
+            changedBy: userId,
+            logDescription: `Edit: change status from ${currentCaseStatus ?? "Unknown"} to ${targetCaseStatus}.${ownerNote}`,
+          },
+          include: includeChangedBy,
         });
+
+        createdLogs.push(statusLog);
       }
 
       const identifiersChanged =
@@ -187,19 +251,20 @@ export async function PATCH(request) {
           changes.push(`RMA: ${originalRmaNumber ?? "-"} -> ${RMANumber || "-"}`);
         }
 
-        logsToCreate.push({
-          CaseId: workOrder.caseinformation?.CaseID,
-          ReferenceId: MOID,
-          model: "Material Orders",
-          dataOld: originalOrderStatus ?? "Unknown",
-          dataNew: derivedOrderStatus ?? originalOrderStatus ?? "Unknown",
-          changedBy: userId,
-          logDescription: `Material Order ${MOID} identifiers updated (${changes.join(", ")})`,
+        const identifierLog = await tx.actionLog.create({
+          data: {
+            CaseId: workOrder.caseinformation?.CaseID,
+            ReferenceId: MOID,
+            model: "Material Orders",
+            dataOld: originalOrderStatus ?? "Unknown",
+            dataNew: derivedOrderStatus ?? originalOrderStatus ?? "Unknown",
+            changedBy: userId,
+            logDescription: `Material Order ${MOID} identifiers updated (${changes.join(", ")})`,
+          },
+          include: includeChangedBy,
         });
-      }
 
-      for (const log of logsToCreate) {
-        await tx.actionLog.create({ data: log });
+        createdLogs.push(identifierLog);
       }
 
       const updatedLineItems = await tx.materialorderlineitems.findMany({ where: { MOID } });
@@ -209,8 +274,29 @@ export async function PATCH(request) {
           ...updatedOrder,
           materialorderlineitems: updatedLineItems,
         },
+        logs: createdLogs,
+        caseId,
       };
     });
+
+    const latestCaseInfo = result.caseId
+      ? await prisma.caseinformation.findUnique({
+          where: { CaseID: result.caseId },
+          select: CASE_INFO_SELECT,
+        })
+      : null;
+
+    let caseInfoForNotifications = latestCaseInfo;
+    for (const log of result.logs ?? []) {
+      const { caseInfo: updatedCaseInfo } = await handleActionLogNotifications({
+        actionLog: log,
+        caseInfo: caseInfoForNotifications,
+      });
+
+      if (updatedCaseInfo) {
+        caseInfoForNotifications = updatedCaseInfo;
+      }
+    }
 
     return NextResponse.json(
       {
