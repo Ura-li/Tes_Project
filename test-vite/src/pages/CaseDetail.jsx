@@ -498,7 +498,6 @@ export const TabsServiceCaseDetails = ({
                   const dataActionlog = actionlof.data.data
                   const subject = `[Case Update] Case #${caseDetails.CaseID} status berubah dari ${oldStatus} ke ${newStatus}`;
                   const caseLink = `${import.meta.env.VITE_BASE_URL}/app/case/${caseDetails.CaseID}`;
-                  console.log("Action Lof ESend KONTOL Email",caseLink)
                   
                   const html = `
                     <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">

@@ -64,7 +64,7 @@ app.post("/emit", (req, res) => {
     } else if (rooms?.length) {
         rooms.forEach(r => io.to(r).emit(event, payload));
     } else {
-        console.log("⚠️ No target room specified, skipped global emitKONTOL");
+        console.log("⚠️ No target room specified, skipped global emit");
     }
 
     return res.json({ success: true });
