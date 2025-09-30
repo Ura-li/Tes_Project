@@ -824,6 +824,27 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
           Owner: workOrders?.caseinformation?.CreatedBy,
           CaseStatus: "FinishRepair"
         })
+
+        const previousOwnerId = workOrders?.caseinformation?.Owner;
+        const newOwnerId = workOrders?.caseinformation?.CreatedBy;
+
+        if (
+          caseChangeStatus.data?.success &&
+          previousOwnerId &&
+          newOwnerId &&
+          String(previousOwnerId) !== String(newOwnerId)
+        ) {
+          await ApiCustomer.post("/api/actionlog", {
+            CaseId: `${workOrders.CaseID}`,
+            ReferenceId: `${workOrders.CaseID}`,
+            model: "CaseOwner",
+            dataOld: String(previousOwnerId ?? ""),
+            dataNew: String(newOwnerId ?? ""),
+            changedBy: token.user.id,
+            logDescription: `Edit : Change Case ${workOrders.CaseID} Owner from ${previousOwnerId} to ${newOwnerId}`,
+          });
+        }
+
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -1255,6 +1276,12 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           icon: 'warning',
           title: 'Missing Required Fields',
           text: 'Fill Failure Code, New CT Key, and Return CT Key before closing the line item.',
+          timer: 3000, // auto close dalam 3 detik
+          timerProgressBar: true, 
+          didOpen: () => {
+            Swal.showLoading();
+          }
+
         });
       }
       const success = await saveMOLI(LineItemID, false);

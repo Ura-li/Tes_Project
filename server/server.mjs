@@ -4,6 +4,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv"
 import cors from "cors";
+import { request } from "http";
 
 dotenv.config();
 
@@ -63,7 +64,7 @@ app.post("/emit", (req, res) => {
     } else if (rooms?.length) {
         rooms.forEach(r => io.to(r).emit(event, payload));
     } else {
-        console.log("⚠️ No target room specified, skipped global emit");
+        console.log("⚠️ No target room specified, skipped global emitKONTOL");
     }
 
     return res.json({ success: true });

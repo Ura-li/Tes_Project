@@ -2,28 +2,101 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 
 import { generateID } from "@/utils/generateID";
-import { notifySocket } from "../../../../../lib/SocketClient";
+import { handleActionLogNotifications } from "../../../../../lib/actionLogDispatcher";
+const CASE_INFO_SELECT = {
+    CaseID: true,
+    CaseSubject: true,
+    Owner: true,
+    CreatedBy: true,
+    ownerUser: {
+        select: {
+            IDUser: true,
+            Name: true,
+            Email: true,
+        },
+    },
+    createdByUser: {
+        select: {
+            IDUser: true,
+            Name: true,
+            Email: true,
+        },
+    },
+};
+
 
 export async function POST(request) {
     try{
         const body = await request.json()
         const { AssetID, CaseID, selectedWarrantyServices, selectedPartCatalog, IncidentType, OwnerID, assignApo, notesLog } = body;
 
+        const normalizeNote = (value) =>
+            typeof value === "string" ? value.replace(/\r\n/g, "\n").trim() : "";
+
+        const toNumberOrNull = (value) => {
+            if (value === null || value === undefined || value === "") {
+                return null;
+            }
+            const numeric = Number(value);
+            return Number.isNaN(numeric) ? null : numeric;
+        };
+
+        const ownerIdNumber = toNumberOrNull(OwnerID);
+        const assignApoId = toNumberOrNull(assignApo);
+        const assetIdNumber = toNumberOrNull(AssetID);
+
         //validate owner
-        const materialOrderOwnerID = assignApo ?? OwnerID;
+        const materialOrderOwnerID = assignApoId ?? ownerIdNumber;
 
         // opt : get case info 
         const caseInfo = await prisma.caseinformation.findUnique({
             where: { CaseID: CaseID },
-            select: { 
+            select: {
                 CaseStatus: true,
-                Owner: true, 
-                CreatedBy: true 
-            }  
+                Owner: true,
+                CreatedBy: true,
+                ownerUser: {
+                    select: {
+                        IDUser: true,
+                        Name: true,
+                    },
+                },
+            }
         })
 
         if(!caseInfo) throw new Error("Case not found");
         
+        const assetWarrantyInfo = assetIdNumber !== null
+            ? await prisma.asset_information.findUnique({
+                where: { AssetID: assetIdNumber },
+                select: {
+                    AssetID: true,
+                    Warranty_Status: true,
+                    WarrantyOTCCode: {
+                        select: {
+                            WarrantyCondition: true,
+                        },
+                    },
+                },
+            })
+            : null;
+
+        const warrantyCondition = assetWarrantyInfo?.WarrantyOTCCode?.WarrantyCondition ?? null;
+        const isOutWarranty = warrantyCondition === "OutWarranty";
+
+        const newOwnerUser = assignApoId !== null
+            ? await prisma.user.findUnique({
+                where: { IDUser: assignApoId },
+                select: {
+                    IDUser: true,
+                    Name: true,
+                },
+            })
+            : null;
+
+        const oldOwnerName = caseInfo.ownerUser?.Name ?? (caseInfo.Owner != null ? String(caseInfo.Owner) : "-");
+        const newOwnerName = newOwnerUser?.Name ?? (assignApo != null ? String(assignApo) : "-");
+
         const previousCaseStatus = caseInfo.CaseStatus;
 
         // start atomic transaction
@@ -40,7 +113,7 @@ export async function POST(request) {
                     WorkOrderType: IncidentType,
                     WorkOrderNumber: WOID,
                     SystemStatus: "OPEN_UNSCHEDULED",
-                    OwnerID: OwnerID 
+                    OwnerID: ownerIdNumber
                 }
             });
 
@@ -62,13 +135,23 @@ export async function POST(request) {
                 data: { ServiceCatalogID: createdServiceCatalog.ServiceCatalogID }
             });
 
-            // 3. Create Multiple Material Orders: one per selected part
+            const includeChangedBy = {
+                changedByUser: {
+                    select: {
+                        IDUser: true,
+                        Name: true,
+                        Email: true,
+                    },
+                },
+            };
+
             const createdMOIDs = [];
-            const perMologs = [];
+            const createdLogs = [];
+            const generatedNotes = new Set();
             let lineNumber = 1;
+
             for (const part of selectedPartCatalog) {
                 const MOID = await generateID("MO-", "materialorder", "MOID", tx);
-                console.log("MOID : ",MOID)
                 await tx.materialorder.create({
                     data: {
                         MOID,
@@ -76,7 +159,7 @@ export async function POST(request) {
                         OrderStatus: "New",
                         OrderType: "Repair",
                         OwnerID: materialOrderOwnerID,
-                    }
+                    },
                 });
 
                 await tx.materialorderlineitems.create({
@@ -94,14 +177,32 @@ export async function POST(request) {
                     },
                 });
 
-                // Per-MO case note
-                const noteText = `[NOTICE] Order Part\n` +
-                  `Order Part : ${part.PartNumber ?? "-"} - ${part.PartDescription ?? "-"}\n` +
-                  `${part.Price ? `Harga : Rp. ${part.Price}\n` : ""}` +
-                  `${part.RemovedPartNumber ? `Return CT Key : ${part.RemovedPartNumber}\n` : ""}` +
-                  `Requested to APO : ${assignApo ?? materialOrderOwnerID ?? "-"}`;
+                const noteLines = [
+                    "[NOTICE] Order Part",
+                    `Order Part : ${part.PartNumber ?? "-"} - ${part.PartDescription ?? "-"}`
+                ];
+
+                if (isOutWarranty && part.Price !== undefined && part.Price !== null && part.Price !== "") {
+                    noteLines.push(`Harga : Rp. ${part.Price}`);
+                }
+
+                if (part.RemovedPartNumber) {
+                    noteLines.push(`Return CT Key : ${part.RemovedPartNumber}`);
+                }
+
+                const requestedRecipient =
+                    assignApo != null
+                        ? (newOwnerName && newOwnerName !== "-" ? newOwnerName : String(assignApo))
+                        : materialOrderOwnerID != null
+                        ? String(materialOrderOwnerID)
+                        : "-";
+
+                noteLines.push(`Requested to APO : ${requestedRecipient}`);
+
+                const noteText = noteLines.join("\n");
+
                 await tx.casenotes.create({
-                    data:{
+                    data: {
                         CaseID,
                         LogType: "NotesLog",
                         ActionType: "Action Plan",
@@ -109,55 +210,39 @@ export async function POST(request) {
                         VisibleExternally: true,
                         MinutesSpent: 0,
                         Note: noteText,
-                        CreatedBy: OwnerID
-                    }
+                        CreatedBy: ownerIdNumber,
+                    },
                 });
 
-                // Per-MO action log
+                generatedNotes.add(normalizeNote(noteText));
+
                 const perMoLog = await tx.ActionLog.create({
-                    data:{
-                        CaseID_toActionLog:{
-                            connect:{ CaseID }
+                    data: {
+                        CaseID_toActionLog: {
+                            connect: { CaseID },
                         },
                         ReferenceId: MOID,
                         model: "Material Order",
                         dataOld: "New",
                         dataNew: "New",
-                        changedByUser: {
-                            connect: { IDUser: OwnerID },
-                        },
-                        logDescription: `New Material Order : ${MOID}`
-                    }
+                        changedByUser: ownerIdNumber
+                            ? {
+                                  connect: { IDUser: ownerIdNumber },
+                              }
+                            : undefined,
+                        logDescription: `New Material Order : ${MOID}`,
+                    },
+                    include: includeChangedBy,
                 });
 
-                perMologs.push(perMoLog);
+                createdLogs.push(perMoLog);
                 createdMOIDs.push(MOID);
             }
-            // for (const [i, part] of selectedPartCatalog.entries()) {
-            //     await tx.materialorderlineitems.create({
-            //     data: {
-            //         LineNumber: i + 1,
-            //         Description: part.PartDescription,
-            //         Price: parseFloat(part.Price),
-            //         Quantity: part.qty || 1,
-                    
-            //         materialorder: {
-            //             connect: { MOID: MOID }
-            //         },   
-            //         servicecatalog_parts: {
-            //             connect: { 
-            //                 PartNumber: part.PartNumber,
-            //             }
-            //         },
-            //         Status: "New"
-            //     }
-            //     });
-            // }
 
-            // 5. (Optional) Global log note if provided
-            if (notesLog) {
+            const trimmedNotesLog = normalizeNote(notesLog);
+            if (trimmedNotesLog && !generatedNotes.has(trimmedNotesLog)) {
                 await tx.casenotes.create({
-                    data:{
+                    data: {
                         CaseID,
                         LogType: "NotesLog",
                         ActionType: "Action Plan",
@@ -165,76 +250,101 @@ export async function POST(request) {
                         VisibleExternally: true,
                         MinutesSpent: 0,
                         Note: notesLog,
-                        CreatedBy: OwnerID
-                    }
-                })
+                        CreatedBy: ownerIdNumber,
+                    },
+                });
             }
-            
-            // 6. Change Case Status to Part Request
-            const caseUpdateData = {
-                CaseStatus: "PartRequest"
-            };
-    
-            if (assignApo !== null && assignApo !== undefined) {
-                caseUpdateData["Owner"] = assignApo;
+
+            const caseUpdateData = { CaseStatus: "PartRequest" };
+            if (assignApoId !== null) {
+                caseUpdateData.Owner = assignApoId;
             }
-    
+
             await tx.caseinformation.update({
-                where: { CaseID: CaseID },
-                data: caseUpdateData
+                where: { CaseID },
+                data: caseUpdateData,
             });
 
-            // 7. Action Log changed case Status
-            const log1 = await tx.ActionLog.create({
-                data:{
-                    CaseID_toActionLog:{
-                        connect:{
-                            CaseID: CaseID
-                        }
+            if (assignApoId !== null && assignApoId !== caseInfo.Owner) {
+                const ownerLog = await tx.ActionLog.create({
+                    data: {
+                        CaseID_toActionLog: {
+                            connect: { CaseID },
+                        },
+                        model: "CaseOwner",
+                        dataOld: oldOwnerName,
+                        dataNew: newOwnerName,
+                        changedByUser: ownerIdNumber
+                            ? {
+                                  connect: { IDUser: ownerIdNumber },
+                              }
+                            : undefined,
+                        logDescription: `Edit: change owner from ${oldOwnerName} to ${newOwnerName}`,
+                    },
+                    include: includeChangedBy,
+                });
+
+                createdLogs.push(ownerLog);
+            }
+
+            const statusLog = await tx.ActionLog.create({
+                data: {
+                    CaseID_toActionLog: {
+                        connect: { CaseID },
                     },
                     model: "Case",
                     dataOld: previousCaseStatus,
                     dataNew: "Part Request",
-                    changedByUser: {
-                        connect: { IDUser: OwnerID },
-                    },
-                    logDescription: `Edit: change status from ${previousCaseStatus} to Part Request`
-                }
-            })
-            
-            // 8. Action Log create new Work Order
-            const log2 = await tx.ActionLog.create({
-                data:{
-                    CaseID_toActionLog:{
-                        connect:{
-                            CaseID: CaseID
-                        }
+                    changedByUser: ownerIdNumber
+                        ? {
+                              connect: { IDUser: ownerIdNumber },
+                          }
+                        : undefined,
+                    logDescription: `Edit: change status from ${previousCaseStatus} to Part Request`,
+                },
+                include: includeChangedBy,
+            });
+            createdLogs.push(statusLog);
+
+            const workOrderLog = await tx.ActionLog.create({
+                data: {
+                    CaseID_toActionLog: {
+                        connect: { CaseID },
                     },
                     ReferenceId: WOID,
                     model: "Work",
                     dataOld: "OPEN_UNSCHEDULED",
                     dataNew: "OPEN_UNSCHEDULED",
-                    changedByUser: {
-                        connect: { IDUser: OwnerID },
-                    },
-                    logDescription: `New Work Order : ${WOID}`
-                }
-            })
-            
-            // 9. Action Logs for Material Orders already created per part
+                    changedByUser: ownerIdNumber
+                        ? {
+                              connect: { IDUser: ownerIdNumber },
+                          }
+                        : undefined,
+                    logDescription: `New Work Order : ${WOID}`,
+                },
+                include: includeChangedBy,
+            });
+            createdLogs.push(workOrderLog);
 
-            return { WOID, MOIDs: createdMOIDs, actionLogs: [log1, log2, ...perMologs] };
+            return { WOID, MOIDs: createdMOIDs, actionLogs: createdLogs };
         }, { timeout: 20000 })
 
-        const { Owner, CreatedBy } = caseInfo;
+        const latestCaseInfo = await prisma.caseinformation.findUnique({
+            where: { CaseID },
+            select: CASE_INFO_SELECT,
+        });
 
-        //Notify Socket
+        let caseInfoForNotifications = latestCaseInfo;
+
         for (const log of actionLogs) {
-            await notifySocket("log:created", log, {
-                createdById: CreatedBy || null,
-                ownerId: Owner || null,
-                CaseId: CaseID,
+            const { caseInfo: updatedCaseInfo } = await handleActionLogNotifications({
+                actionLog: log,
+                caseInfo: caseInfoForNotifications,
             });
+
+            if (updatedCaseInfo) {
+                caseInfoForNotifications = updatedCaseInfo;
+            }
         }
 
         return NextResponse.json({ 

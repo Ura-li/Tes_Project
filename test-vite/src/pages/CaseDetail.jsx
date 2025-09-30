@@ -432,6 +432,15 @@ export const TabsServiceCaseDetails = ({
                 
                 // const isNewAssignStatus = newStatus.includes("NEW_Assign");
                 savedModules.push("Case");
+                const originalOwnerId = caseDetails.Owner ?? null;
+                const nextOwnerId = caseForm.Owner;
+
+                const ownerChanged =
+                  nextOwnerId !== undefined &&
+                  nextOwnerId !== null &&
+                  String(nextOwnerId).trim() !== "" &&
+                  String(nextOwnerId) !== String(originalOwnerId ?? "");
+
                 // console.log(caseFor)
                 // Build updates only for fields provided (avoid blanking with empty strings)
                 const caseUpdates = {};
@@ -441,8 +450,8 @@ export const TabsServiceCaseDetails = ({
                 if (newStatus && String(newStatus).trim() !== "") {
                   caseUpdates.CaseStatus = newStatus;
                 }
-                if (caseForm.Owner && String(caseForm.Owner).trim() !== "") {
-                  caseUpdates.Owner = caseForm.Owner;
+                if (ownerChanged) {
+                  caseUpdates.Owner = nextOwnerId;
                 }
                 if (caseForm.CaseSubject && String(caseForm.CaseSubject).trim() !== "") {
                   caseUpdates.CaseSubject = caseForm.CaseSubject;
@@ -463,6 +472,11 @@ export const TabsServiceCaseDetails = ({
                   caseUpdates.StorageLocationStore = caseForm.StorageLocationStore
                 }
 
+                await ApiCustomer.patch(
+                  `/api/case-information/${caseDetails.CaseID}`,
+                  caseUpdates
+                );
+
                 Object.assign(dataToUpdate, caseUpdates);
 
                 // Log status change if it actually changed
@@ -472,7 +486,7 @@ export const TabsServiceCaseDetails = ({
                   oldStatus !== newStatus
                 ) {
                   const token = { user: getUserFromToken() };
-                  await ApiCustomer.post("/api/actionlog", {
+                  const actionlof = await ApiCustomer.post("/api/actionlog", {
                     CaseId: `${caseDetails.CaseID}`,
                     ReferenceId: ``,
                     model: "Case",
@@ -481,7 +495,58 @@ export const TabsServiceCaseDetails = ({
                     changedBy: token.user.id,
                     logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${oldStatus} to ${newStatus}`,
                   });
-                }else{
+                  const dataActionlog = actionlof.data.data
+                  const subject = `[Case Update] Case #${caseDetails.CaseID} status berubah dari ${oldStatus} ke ${newStatus}`;
+                  const caseLink = `${import.meta.env.VITE_BASE_URL}/app/case/${caseDetails.CaseID}`;
+                  console.log("Action Lof ESend KONTOL Email",caseLink)
+                  
+                  const html = `
+                    <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+                      <h2 style="color: #2c3e50;">Notifikasi Perubahan Case</h2>
+                      <p>Halo ${dataActionlog.ownerUser?.Name || "User"},</p>
+                      
+                      <p>Case dengan ID: <b>${caseDetails.CaseID}</b> telah diperbarui.</p>
+                      
+                      <table border="0" cellpadding="6" cellspacing="0" style="border-collapse: collapse;">
+                        <tr>
+                          <td><b>Status lama</b></td>
+                          <td>${oldStatus}</td>
+                        </tr>
+                        <tr>
+                          <td><b>Status baru</b></td>
+                          <td>${newStatus}</td>
+                        </tr>
+                        <tr>
+                          <td><b>Diedit oleh</b></td>
+                          <td>${token.user.name || token.user.id}</td>
+                        </tr>
+                      </table>
+                      
+                      <p><b>Deskripsi:</b><br>${dataActionlog.logDescription}</p>
+                      
+                      <p style="margin-top: 20px;">
+                        <a href="${caseLink}" 
+                              style="display: inline-block; padding: 10px 16px; background: #007bff; color: #fff; 
+                                    text-decoration: none; border-radius: 4px;">
+                          Lihat Case
+                        </a>
+                      </p>
+                      
+                      <p style="margin-top: 30px; font-size: 12px; color: #777;">
+                        Terima kasih,<br>
+                        <i>System Notification</i>
+                      </p>
+                    </div>
+                  `;
+
+                  await ApiCustomer.post("/api/sendEmail", {
+                    to: dataActionlog.ownerUser?.Email,
+                    subject,
+                    text: subject,
+                    html
+                  });
+
+                } else {
                   const token = { user: getUserFromToken() };
                   await ApiCustomer.post("/api/actionlog", {
                     CaseId: `${caseDetails.CaseID}`,
@@ -493,7 +558,39 @@ export const TabsServiceCaseDetails = ({
                     logDescription: `Edit : Edit Case ${caseDetails.CaseID} Data`,
                   });
                 }
-              } catch (err) {
+
+                if (ownerChanged) {
+                  try {
+                    let newOwnerInfo = null;
+                    try {
+                      const newOwnerResponse = await ApiCustomer.get(`/api/user/${nextOwnerId}`);
+                      newOwnerInfo = newOwnerResponse.data.data;
+                    } catch (infoError) {
+                      console.warn("Failed to fetch new owner info:", infoError);
+                    }
+
+                    const previousOwnerName = ownerUserData?.Name || originalOwnerId || "Unknown";
+                    const newOwnerName = newOwnerInfo?.Name || nextOwnerId;
+
+                    await ApiCustomer.post("/api/actionlog", {
+                      CaseId: `${caseDetails.CaseID}`,
+                      ReferenceId: "",
+                      model: "CaseOwner",
+                      dataOld: String(originalOwnerId ?? ""),
+                      dataNew: String(nextOwnerId ?? ""),
+                      changedBy: user?.id,
+                      logDescription: `Edit : Change Case ${caseDetails.CaseID} Owner from ${previousOwnerName} to ${newOwnerName}`,
+                    });
+
+                    if (newOwnerInfo) {
+                      setOwnerUserData(newOwnerInfo);
+                    }
+                  } catch (ownerLogError) {
+                    console.error("Failed to create owner change log:", ownerLogError);
+                  }
+                }
+
+              } catch (err) {           
                 console.error("Gagal update case:", err);
                 Swal.fire({
                   icon: "error",
@@ -510,14 +607,14 @@ export const TabsServiceCaseDetails = ({
     }
 
     // After collecting all updates, patch once if needed
-    console.log("Data To Update: ", dataToUpdate);
-    if (Object.keys(dataToUpdate).length > 0) {
-      console.log("Data To Update: ", dataToUpdate);
-      await ApiCustomer.patch(
-        `/api/case-information/${caseDetails.CaseID}`,
-        dataToUpdate
-      );
-    }
+    // console.log("Data To Update: ", dataToUpdate);
+    // if (Object.keys(dataToUpdate).length > 0) {
+    //   console.log("Data To Update: ", dataToUpdate);
+    //   await ApiCustomer.patch(
+    //     `/api/case-information/${caseDetails.CaseID}`,
+    //     dataToUpdate
+    //   );
+    // }
 
     if (savedModules.length > 0) {
       if(redirect){
@@ -531,7 +628,7 @@ export const TabsServiceCaseDetails = ({
           allowOutsideClick: false,
           allowEscapeKey: false,
         });
-        window.location.reload();
+        // window.location.reload();
       }
       return true
     }
@@ -2079,6 +2176,17 @@ if (caseDetails.CaseStatus !== "Close") {
                       placeholder={"---"}
                       />
                     </CaseField>
+
+                    <Button variant="outline" asChild className={'w-full'}>
+                      <a
+                        href={`https://partsurfer.hp.com/?searchtext=${dataFetchAssetInformation?.AssetInformation?.SerialNumber}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        
+                      >
+                        Part Surfer
+                      </a>
+                    </Button>
 
                     <CaseField label="HPI Segment" lock>
                       <Input

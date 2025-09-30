@@ -1,5 +1,5 @@
 import React from 'react'
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -24,10 +24,12 @@ import {
 } from "@/components/ui/tabs"
 import { SearchCommandBlock, SelectBarRelated } from '../../components/sc-select'
 import { CalendarDays,  Lock, PlusCircle } from 'lucide-react'
-import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
+
 
 const USER_TIMEZONE = "Asia/Jakarta";
 const CUSTOMER_TIMEZONE = "Asia/Jakarta";
+
+
 
 
 'use client'
@@ -56,6 +58,20 @@ function formatDateForInput(dateString) {
   const minutes = String(date.getMinutes()).padStart(2, "0");
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
+
+const DateHelper = {
+  fromDB(dateStr) {
+    // DB → UI
+    return formatDateForInput(dateStr);
+  },
+  toDB(dateStr) {
+    // UI → DB
+    return dateStr ? new Date(dateStr).toISOString() : null;
+  },
+};
+
+
+
 
 
 export function ServiceBookingApo ({BookingId , woid}) {  
@@ -155,19 +171,19 @@ export function ServiceBookingApo ({BookingId , woid}) {
         setDoNotDisturb(data?.DoNotDisturb || false);
         setCeScheduleChange(data?.CeScheduleChange || false);
         
-        setStartTimeCustomerTime(formatDateForInput(data?.bookingDetails?.[0]?.StartTimeCustomerTime || ""));
-        setEndTimeCustomerTime(formatDateForInput(data?.bookingDetails?.[0]?.EndTimeCustomerTime || ""));
-        setEstimatedArrivalTimeCustomerTime(formatDateForInput(data?.bookingDetails?.[0]?.EstimatedArrivalTimeCustomerTime || ""));
-        setActualArrivalTimeCustomerTime(formatDateForInput(data?.bookingDetails?.[0]?.ActualArrivalTimeCustomerTime || ""));
+        setStartTimeCustomerTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.StartTimeCustomerTime || ""));
+        setEndTimeCustomerTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.EndTimeCustomerTime || ""));
+        setEstimatedArrivalTimeCustomerTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.EstimatedArrivalTimeCustomerTime || ""));
+        setActualArrivalTimeCustomerTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.ActualArrivalTimeCustomerTime || ""));
         
-        setStartTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.StartTimeUserTime || ""));
-        setEndTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.EndTimeUserTime || ""));
+        setStartTimeUserTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.StartTimeUserTime || ""));
+        setEndTimeUserTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.EndTimeUserTime || ""));
         setDurationInMinutesUserTime(data?.bookingDetails?.[0]?.DurationInMinutesUserTime || 0);
-        setEstimatedArrivalTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime || ""));
-        setActualArrivalTimeUserTime(formatDateForInput(data?.bookingDetails?.[0]?.ActualArrivalTimeUserTime || ""));
+        setEstimatedArrivalTimeUserTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime || ""));
+        setActualArrivalTimeUserTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.ActualArrivalTimeUserTime || ""));
 
         setScheduleJeopardy(data?.ScheduleJeopardy || false);
-        setScheduleJeopardyTime(formatDateForInput(data?.ScheduleJeopardyTime || ""));
+        setScheduleJeopardyTime(DateHelper.fromDB(data?.ScheduleJeopardyTime || ""));
         
         setTotalBillableDurationInMinutes(data?.TotalBillableDurationInMinutes || 0);
         setTotalInProgressDurationInMinutes(data?.TotalInProgressDurationInMinutes || 0);
@@ -234,6 +250,13 @@ export function ServiceBookingApo ({BookingId , woid}) {
     });
   };
 
+  useEffect(() => {
+    if (startTimeUserTime) setStartTimeCustomerTime(startTimeUserTime);
+    if (endTimeUserTime) setEndTimeCustomerTime(endTimeUserTime);
+    if (estimatedArrivalTimeUserTime) setEstimatedArrivalTimeCustomerTime(estimatedArrivalTimeUserTime);
+    if (actualArrivalTimeUserTime) setActualArrivalTimeCustomerTime(actualArrivalTimeUserTime);
+  }, [startTimeUserTime, endTimeUserTime, estimatedArrivalTimeUserTime, actualArrivalTimeUserTime]);
+
   const handleUpdate = async (markCompleted = false) => {
     Swal.fire({
     title: 'Saving...',
@@ -249,15 +272,15 @@ export function ServiceBookingApo ({BookingId , woid}) {
       ResourceAccountId: accountId,
       SubkTechnicianId: null,
       EngineerId: subkEngineerId,
-      StartTimeCustomerTime: startTimeCustomerTime || null,
-      EndTimeCustomerTime: endTimeCustomerTime || null,
-      EstimatedArrivalTimeCustomerTime: estimatedArrivalTimeCustomerTime || null,
-      ActualArrivalTimeCustomerTime: actualArrivalTimeCustomerTime || null,
-      StartTimeUserTime: startTimeUserTime || null,
-      EndTimeUserTime: endTimeUserTime || null,
-      DurationInMinutesUserTime: durationInMinutesUserTime || null,
-      EstimatedArrivalTimeUserTime: estimatedArrivalTimeUserTime || null,
-      ActualArrivalTimeUserTime: actualArrivalTimeUserTime || null,
+      StartTimeCustomerTime: DateHelper.toDB(startTimeCustomerTime || null),
+      EndTimeCustomerTime: DateHelper.toDB(endTimeCustomerTime || null),
+      EstimatedArrivalTimeCustomerTime: DateHelper.toDB(estimatedArrivalTimeCustomerTime || null),
+      ActualArrivalTimeCustomerTime: DateHelper.toDB(actualArrivalTimeCustomerTime || null),
+      StartTimeUserTime: DateHelper.toDB(startTimeUserTime || null),
+      EndTimeUserTime: DateHelper.toDB(endTimeUserTime || null),
+      DurationInMinutesUserTime: durationInMinutesUserTime ? parseInt(durationInMinutesUserTime, 10) : null,
+      EstimatedArrivalTimeUserTime: DateHelper.toDB(estimatedArrivalTimeUserTime || null),
+      ActualArrivalTimeUserTime: DateHelper.toDB(actualArrivalTimeUserTime || null),
     };
     
     console.log("Booking Data : ",updatedBookingData)
@@ -269,7 +292,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
         DoNotDisturb: doNotDisturb,
         CeScheduleChange: ceScheduleChange,
         ScheduleJeopardy: scheduleJeopardy,
-        ScheduleJeopardyTime: scheduleJeopardyTime ? new Date(scheduleJeopardyTime) : null,
+        ScheduleJeopardyTime: DateHelper.toDB(scheduleJeopardyTime || null), 
         TotalBillableDurationInMinutes: totalBillableDurationInMinutes,
         TotalInProgressDurationInMinutes: totalInProgressDurationInMinutes,
         TotalBreakDurationInMinutes: totalBreakDurationInMinutes,
