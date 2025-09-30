@@ -7263,6 +7263,9 @@ export function SymptomCodeDelete({ SymptomCodeID, isModalOpen, setIsModalOpen, 
 }
 
 export function BookingsAdd({ onUpdate }) {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+
   const [formData, setFormData] = useState({
     WOID: null,
     BookingStatus: null,
@@ -7273,7 +7276,7 @@ export function BookingsAdd({ onUpdate }) {
     TotalBillableDurationInMinutes: "",
     TotalInProgressDurationInMinutes: "",
     TotalBreakDurationInMinutes: "",
-    CreatedBy: "",
+    CreatedBy: user?.id || "", // ✅ otomatis ambil dari auth user
   });
 
   const [users, setUsers] = useState([]);
@@ -7325,7 +7328,7 @@ export function BookingsAdd({ onUpdate }) {
       TotalBillableDurationInMinutes: formData.TotalBillableDurationInMinutes ? parseInt(formData.TotalBillableDurationInMinutes) : null,
       TotalInProgressDurationInMinutes: formData.TotalInProgressDurationInMinutes ? parseInt(formData.TotalInProgressDurationInMinutes) : null,
       TotalBreakDurationInMinutes: formData.TotalBreakDurationInMinutes ? parseInt(formData.TotalBreakDurationInMinutes) : null,
-      CreatedBy: parseInt(formData.CreatedBy),
+      CreatedBy: parseInt(formData.CreatedBy), // ✅ tetap kirim ID user
     };
 
     try {
@@ -7338,6 +7341,7 @@ export function BookingsAdd({ onUpdate }) {
         timerProgressBar: true,
         showConfirmButton: false,
       }).then(() => {
+        setOpen(false);
         onUpdate?.();
       });
     } catch (error) {
@@ -7354,7 +7358,7 @@ export function BookingsAdd({ onUpdate }) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="ml-2 rounded-sm h-11">Add Booking</Button>
       </DialogTrigger>
@@ -7366,17 +7370,17 @@ export function BookingsAdd({ onUpdate }) {
 
         <div className="space-y-3">
           <div className="mb-6" relative>
-          {/* ✅ WOID pakai GenericSelector */}
-          <GenericSelector
-            value={formData.WOID}
-            onChange={(wo) => handleChange("WOID", wo)}
-            endpoint="/api/work-order"
-            labelKey="WOID"
-            valueKey="WOID"
-            placeholder="Search WOID..."
-            label="WOID *"
-            className="z-50"
-          />
+            {/* ✅ WOID pakai GenericSelector */}
+            <GenericSelector
+              value={formData.WOID}
+              onChange={(wo) => handleChange("WOID", wo)}
+              endpoint="/api/work-order"
+              labelKey="WOID"
+              valueKey="WOID"
+              placeholder="Search WOID..."
+              label="WOID *"
+              className="z-50"
+            />
           </div>
 
           {/* ✅ Booking Status pakai GenericSelector */}
@@ -7417,21 +7421,15 @@ export function BookingsAdd({ onUpdate }) {
           <Label>Total Break Duration (minutes)</Label>
           <Input id="TotalBreakDurationInMinutes" type="number" value={formData.TotalBreakDurationInMinutes} onChange={handleInputChange} />
 
-          {/* Created By */}
+          {/* ✅ Created By (read-only, tampil nama user) */}
           <Label>Created By *</Label>
-          <select
+          <Input
             id="CreatedBy"
-            value={formData.CreatedBy}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
-          >
-            <option value="">-- Select User --</option>
-            {users.map((user) => (
-              <option key={user.IDUser} value={user.IDUser}>
-                {user.Name || `User ${user.IDUser}`}
-              </option>
-            ))}
-          </select>
+            type="text"
+            value={user?.name || `User ${user?.id}`} // tampilkan nama user
+            readOnly
+            className="w-full p-2 border rounded bg-gray-100 cursor-not-allowed"
+          />
         </div>
 
         <DialogFooter>
@@ -7679,19 +7677,17 @@ export function BookingsEdit({ BookingId, onUpdate }) {
 
           {/* Created By */}
           <Label>Created By *</Label>
-          <select
+          <Input
             id="CreatedBy"
-            value={bookingData.CreatedBy}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
-          >
-            <option value="">-- Select User --</option>
-            {users.map((user) => (
-              <option key={user.IDUser} value={user.IDUser}>
-                {user.Name || `User ${user.IDUser}`}
-              </option>
-            ))}
-          </select>
+            type="text"
+            value={
+              // tampilkan nama user dari daftar users
+              users.find((u) => u.IDUser.toString() === bookingData.CreatedBy)?.Name || 
+              `User ${bookingData.CreatedBy}`
+            }
+            readOnly
+            className="w-full p-2 border rounded bg-gray-100 cursor-not-allowed"
+          />
         </div>
 
         <DialogFooter className="pt-4">
