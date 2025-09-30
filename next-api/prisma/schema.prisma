@@ -306,6 +306,9 @@ model materialorderlineitems {
   RemovedSerialNumber    String? @db.VarChar(100)
   RemovedPartDescription String? @db.Text
 
+  UEFICode  UEFICode?
+  UEFI_NO   String? @db.VarChar(100)
+
   // Foreign key ke Failure
   FailureId Int?
   failure   Failure? @relation(fields: [FailureId], references: [FailureId], onDelete: SetNull)
@@ -812,4 +815,12 @@ enum CollectionInstructionType {
   Pickup
   DropOff
   ThirdParty
+}
+
+enum UEFICode {
+  DHU
+  FID
+  MPS
+  PND
+  PPR
 }
