@@ -5083,18 +5083,6 @@ console.log("Asset Info OTC : ",isOutWarranty)
           user: getUserFromToken()
         }
 
-        let noteCreateOrderLog = '';
-        if(assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
-          noteCreateOrderLog = `[NOTICE] Order Part
-Order Part : ${selectedPartCatalog?.[0]?.PartNumber} - ${selectedPartCatalog?.[0]?.PartDescription}
-Harga : Rp. ${selectedPartCatalog?.[0]?.Price}
-Requested to APO : ${assignApo}`;
-        }else{
-          noteCreateOrderLog = `[NOTICE] Order Part
-Order Part : ${selectedPartCatalog?.[0]?.PartNumber} - ${selectedPartCatalog?.[0]?.PartDescription}
-Requested to APO : ${assignApo}`;
-        }
-        console.log(noteCreateOrderLog);
 
         // If WOID present or special mode, create only MO for existing WO
         const isCreateMOOnly = !!WOID || serviceCatalogType === 'wo-add-mo';
@@ -5122,7 +5110,6 @@ Requested to APO : ${assignApo}`;
               IncidentType: selected,
               OwnerID: data.user.id,
               assignApo: assignApo,
-              notesLog: noteCreateOrderLog,
             });
         console.log(res)
   
