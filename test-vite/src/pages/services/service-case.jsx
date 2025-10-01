@@ -619,6 +619,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
         RecommendedResource: WOGeneral.RecommendedResource || undefined,
         WorkOrderDescription: WOGeneral.WorkOrderDescription || undefined,
         ShipmentState: WOGeneral.ShipmentState || undefined,
+        SystemStatus: WOGeneral.SystemStatus || undefined,
         //SLA
         SLAJeopardy: SLA.slaJeopardy || undefined,
         DueDateCustomer: SLA.dueDateCustomer || undefined,
