@@ -269,10 +269,6 @@ export const FlowCase = () => {
                 </Pagination>
                 {error ? <h1 className="text-center text-destructive">Something went wrong</h1> : ""}
               </div>
-
-
-
-
         </div>
 
       </SidebarInset>

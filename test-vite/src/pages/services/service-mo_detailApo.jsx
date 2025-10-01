@@ -51,10 +51,11 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import CaseField from "@/components/CaseField";
+import { useAuth } from "@/context/auth-context";
 
 export const ServiceMoDetailApo = () => {
   const { updateDraft } = useDraft(); // Access updateDraft from the DraftContext
-
+  const {user} = useAuth();
   const { lineItemID } = useParams();
 
   const [moLineItems, setMoLineItems] = useState([]);
@@ -194,11 +195,98 @@ export const ServiceMoDetailApo = () => {
     }
   };
 
+  const [inputValue, setInputValue] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isFocused, setIsFocused] = useState(false); // Track if input is focused
+
+useEffect(() => {
+  ApiCustomer.get("/api/failure/options").then((res) => {
+    const defaultOptions = res.data.map((f, index) => ({
+      value: f.FailureId.toString(), // value selalu string
+      label: (
+        <div className="flex flex-col">
+          <span className="font-medium">
+            {`${index === 0 ? "55" : index === 1 ? "72" : index === 2 ? "73" : index + 1}`} - {f.Name}
+          </span>
+          <span className="text-xs text-gray-500">{f.Description ?? ""}</span>
+        </div>
+      ),
+    }));
+    setSearchResults(defaultOptions);
+  });
+
+  if (MODetailInput.failureId) {
+    ApiCustomer.get(`/api/failure/${MODetailInput.failureId}`)
+      .then((res) => {
+        const f = res.data.data;
+        setInputValue(f.FailureId.toString()); // tetap string di state
+      })
+      .catch(() => {
+        
+      });
+  }
+}, [MODetailInput.failureId]);
+
+
+  const fetchFailures = debounce((query) => {
+    if (!query || query.length < 2) return;
+    ApiCustomer.get(`/api/failure/options?q=${query}`).then((res) => {
+      const limited = res.data.slice(0, 3).map((f) => ({
+        value: f.FailureId.toString(),
+        label: `${f.Name} — ${f.Description ?? ""}`,
+      }));
+      setSearchResults(limited);
+    });
+  }, 300);
+  
+  const handleInputChange = (value) => {
+    setInputValue(value);
+    fetchFailures(value);
+    setMODetailInput((prev) => ({
+      ...prev,
+      failureId: value ? parseInt(value, 10) : null,
+    }));
+  };
+
+  const handleSelect = (selected) => {
+    setInputValue(selected.label);
+    setSearchResults([
+      selected,
+      ...searchResults.filter((opt) => opt.value !== selected.value),
+    ]);
+    setMODetailInput((prev) => ({
+      ...prev,
+      failureId: selected.value,
+      failureName: selected.label,
+    }));
+    console.log("selected.value", selected.value);
+  };
+
+  // Handle focus and blur events
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => setIsFocused(false), 150); // Delay to allow click on dropdown
+  };
+
   const tabs = [
     { value: "mo_details", label: "MO Details" },
     { value: "mo_failure", label: "Failure & Return Details" },
     { value: "mo_attachments", label: "Attachments" },
   ];
+
+  let canEdit;
+  let canEditCE;
+  const allowedRoles = ["apo","lg","admin"]
+  if (moLineItems?.Status !== "Closed") {
+    canEditCE = user?.role  === "ce"
+    canEdit = allowedRoles.includes(user?.role)
+  } else {
+    canEdit = false
+    canEditCE = false
+  }
 
   return (
     <>
@@ -491,13 +579,40 @@ export const ServiceMoDetailApo = () => {
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
                   
-                  <FailureSelect
-                    failureId={MODetailInput.failureId}
-                    setMODetailInput={setMODetailInput}
-                    readOnly
-                  />
+          
+      <CaseField label={"Failure Code"} star={canEditCE} lock={!canEditCE}>
+      <div className="relative w-full">
+        <SearchCommandBlock
+          name="failureId"
+          value={inputValue}
+          onChange={handleInputChange}
+          placeholder="Search Failure..."
+          options={searchResults}
+          readOnly={!canEditCE}
+        />
 
-                    <CaseField label="Return CT Key" star>
+        {/* Show dropdown only if results exist and input is focused */}
+        {isFocused && (
+          <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg ">
+            {searchResults.length > 0 ? (
+              searchResults.map((opt) => (
+                <li
+                  key={opt.value}
+                  className="p-3 cursor-pointer hover:bg-gray-200"
+                  onMouseDown={() => handleSelect(opt)} // Use onMouseDown to prevent blur before click
+                >
+                  {opt.label}
+                </li>
+              ))
+            ) : (
+              <li className="p-3 text-gray-500">No results found</li>
+            )}
+          </ul>
+        )}
+      </div>
+    </CaseField>
+
+                    <CaseField label="Return CT Key" star={canEditCE} lock={!canEditCE}>
                     <Input
                       variant="invisible"
                       name="removedPartNumber"
@@ -508,14 +623,13 @@ export const ServiceMoDetailApo = () => {
                     />
                   </CaseField>
                   
-                  <CaseField label="New CT Key" star>
+                  <CaseField label="New CT Key" star={canEdit} lock={!canEdit}>
                     <Input
                       variant="invisible"
                       name="removedSerialNumber"
                       value={MODetailInput.removedSerialNumber}
                       onChange={handleChange('removedSerialNumber')}
                       placeholder="---"
-                     
                     />
                   </CaseField>
 
@@ -523,8 +637,6 @@ export const ServiceMoDetailApo = () => {
                     <Input variant="invisible" placeholder="---" 
                     />
                   </CaseField>
-
-                
 
                   <CaseField label="Part Usage Code" lock>
                     <Input variant="invisible" placeholder="---" />
@@ -550,7 +662,7 @@ export const ServiceMoDetailApo = () => {
                 </CardContent>
               </Card>
 
-              <Card className="rounded-md ">
+              <Card className="rounded-md " hidden>
                 <CardHeader>
                   <CardTitle className="text-lg">Part Return Details</CardTitle>
                   <hr />
@@ -592,8 +704,8 @@ export const ServiceMoDetailApo = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="mo_attachments">
-              <Card className="flex-col mt-5">
+            <TabsContent value="mo_attachments" className={"p-2"}>
+              <Card className="flex-col">
                 <CardContent className="grid gap-5">
                   <span className="text-xl font-bold">Timeline</span>
                   <CaseField className="flex font-bold">
@@ -603,7 +715,7 @@ export const ServiceMoDetailApo = () => {
                     ></Input>
                   </CaseField>
                   <span className="text-xl font-bold">Create a note</span>
-                  <CaseField className="">
+                  <div>
                     <Input
                       type="text"
                       className="border-1"
@@ -617,7 +729,7 @@ export const ServiceMoDetailApo = () => {
                       Add note
                     </Button>
                     <Button variant="outline">Cancel</Button>
-                  </CaseField>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -628,113 +740,3 @@ export const ServiceMoDetailApo = () => {
   );
 };
 
-const FailureSelect = ({ failureId, setMODetailInput }) => {
-  const [inputValue, setInputValue] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [isFocused, setIsFocused] = useState(false); // Track if input is focused
-
- useEffect(() => {
-  ApiCustomer.get("/api/failure/options").then((res) => {
-    const defaultOptions = res.data.map((f, index) => ({
-      value: f.FailureId.toString(),
-      label: (
-        <div className="flex flex-col">
-          <span className="font-medium">
-            {`${index === 0 ? "55" : index === 1 ? "72" : index === 2 ? "73" : index + 1}`} - {f.Name}
-          </span>
-          <span className="text-xs text-gray-500">{f.Description ?? ""}</span>
-        </div>
-      ),
-    }));
-    setSearchResults(defaultOptions);
-    });
-    if (failureId) {
-      // Ambil data failure berdasarkan ID yang sudah ada
-      ApiCustomer.get(`/api/failure/${failureId}`)
-        .then((res) => {
-          const f = res.data.data;
-          const label = `${f.Name} — ${f.Description ?? ""}`;
-          setInputValue(f.FailureId);
-        })
-        .catch(() => {
-          setInputValue(""); // Kosongkan jika tidak ditemukan
-        });
-    }
-  }, [failureId]);
-
-  const fetchFailures = debounce((query) => {
-    if (!query || query.length < 2) return;
-    ApiCustomer.get(`/api/failure/options?q=${query}`).then((res) => {
-      const limited = res.data.slice(0, 3).map((f) => ({
-        value: f.FailureId.toString(),
-        label: `${f.Name} — ${f.Description ?? ""}`,
-      }));
-      setSearchResults(limited);
-    });
-  }, 300);
-
-  const handleInputChange = (value) => {
-    setInputValue(value);
-    fetchFailures(value);
-    setMODetailInput((prev) => ({
-      ...prev,
-      failureId: value,
-    }));
-  };
-
-  const handleSelect = (selected) => {
-    setInputValue(selected.label);
-    setSearchResults([
-      selected,
-      ...searchResults.filter((opt) => opt.value !== selected.value),
-    ]);
-    setMODetailInput((prev) => ({
-      ...prev,
-      failureId: selected.value,
-      failureName: selected.label,
-    }));
-    console.log("selected.value", selected.value);
-  };
-
-  // Handle focus and blur events
-  const handleFocus = () => {
-    setIsFocused(true);
-  };
-
-  const handleBlur = () => {
-    setTimeout(() => setIsFocused(false), 150); // Delay to allow click on dropdown
-  };
-
-  return (
-    <CaseField label={"Failure Code"} star open>
-      <div className="relative w-full">
-        <SearchCommandBlock
-          name="failureId"
-          value={String(inputValue)}
-          onChange={handleInputChange}
-          placeholder="Search Failure..."
-          options={searchResults}
-        />
-
-        {/* Show dropdown only if results exist and input is focused */}
-        {isFocused && (
-          <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg ">
-            {searchResults.length > 0 ? (
-              searchResults.map((opt) => (
-                <li
-                  key={opt.value}
-                  className="p-3 cursor-pointer hover:bg-gray-200"
-                  onMouseDown={() => handleSelect(opt)} // Use onMouseDown to prevent blur before click
-                >
-                  {opt.label}
-                </li>
-              ))
-            ) : (
-              <li className="p-3 text-gray-500">No results found</li>
-            )}
-          </ul>
-        )}
-      </div>
-    </CaseField>
-  );
-};
