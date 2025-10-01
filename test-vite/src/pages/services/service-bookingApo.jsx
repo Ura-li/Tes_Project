@@ -749,7 +749,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
             </CardContent>
           </Card>
 
-           <Card className="">
+           <Card className="" hidden>
             <CardHeader>
               <CardTitle className="text-lg ">Total Duration</CardTitle>
               <hr />
@@ -782,6 +782,31 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 />
               </CaseField>
+            </CardContent>
+          </Card>
+
+          <Card className=" ">
+            <CardHeader>
+              <CardTitle className="text-lg ">SLA Jeopardy</CardTitle>
+              <hr />
+            </CardHeader>
+            <CardContent className="grid grid-cols-3 gap-6">
+              <CaseField label={'Schedule Jeopardy'} span={2} lock>
+              <Input
+                  type="text"
+                  value={scheduleJeopardy}
+                  onChange={(e) => setScheduleJeopardy(e.target.value)}
+                  readOnly
+                />
+              </CaseField>
+              <CaseField label={'Schedule Jeopardy Time'} span={2} lock>
+                <DatePicker value={
+                    scheduleJeopardyTime
+                      ? new Date(scheduleJeopardyTime)
+                      : ""
+                  }
+                  onChange={setScheduleJeopardyTime}></DatePicker>
+              </CaseField> 
             </CardContent>
           </Card>
 
@@ -894,30 +919,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
             </CardContent>
           </Card>
 
- <Card className=" ">
-            <CardHeader>
-              <CardTitle className="text-lg ">SLA Jeopardy</CardTitle>
-              <hr />
-            </CardHeader>
-            <CardContent className="grid grid-cols-3 gap-6">
-              <CaseField label={'Schedule Jeopardy'} span={2} lock>
-              <Input
-                  type="text"
-                  value={scheduleJeopardy}
-                  onChange={(e) => setScheduleJeopardy(e.target.value)}
-                  readOnly
-                />
-              </CaseField>
-              <CaseField label={'Schedule Jeopardy Time'} span={2} lock>
-                <DatePicker value={
-                    scheduleJeopardyTime
-                      ? new Date(scheduleJeopardyTime)
-                      : ""
-                  }
-                  onChange={setScheduleJeopardyTime}></DatePicker>
-              </CaseField> 
-            </CardContent>
-          </Card>
+ 
          
         </TabsContent>
 

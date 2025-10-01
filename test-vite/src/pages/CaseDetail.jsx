@@ -1501,6 +1501,8 @@ if (caseDetails.CaseStatus !== "Close") {
     });
     setPhotos(validFiles);
   };
+
+
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (
@@ -2209,24 +2211,21 @@ if (caseDetails.CaseStatus !== "Close") {
                       options={OptionStorage}
                       />
                     </CaseField>
+                    
                     <CaseField label="Serial Number" lock>
                       <Input
                       value={dataFetchAssetInformation?.AssetInformation?.SerialNumber}
                       variant={"invisible"}
                       placeholder={"---"}
+                      className={"hover:text-blue-600 hover:cursor-pointer"}
+                      onClick={() => {
+                      const sn = dataFetchAssetInformation?.AssetInformation?.SerialNumber;
+                      if (sn) {
+                        window.open(`https://partsurfer.hp.com/?searchtext=${sn}`, "_blank");
+                        }
+                      }}
                       />
                     </CaseField>
-
-                    <Button variant="outline" asChild className={'w-full'}>
-                      <a
-                        href={`https://partsurfer.hp.com/?searchtext=${dataFetchAssetInformation?.AssetInformation?.SerialNumber}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        
-                      >
-                        Part Surfer
-                      </a>
-                    </Button>
 
                     <CaseField label="HPI Segment" lock>
                       <Input
