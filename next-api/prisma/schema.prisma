@@ -20,7 +20,7 @@ model asset_information {
   site_account        site_account?        @relation(fields: [SiteAccountID], references: [SiteAccountID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_1")
   contact_information contact_information? @relation(fields: [ContactID], references: [ContactID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_2")
   product_information product_information  @relation(fields: [ProductNumber], references: [ProductNumber], onUpdate: Restrict, map: "asset_information_ibfk_3")
-  asset_waranty       asset_warranty[]
+  asset_warranty      asset_warranty[]
   caseinformation     caseinformation[]
   servicecatalog      servicecatalog[]
 
@@ -90,6 +90,7 @@ model caseinformation {
   otcCodeTable                                  OTCCodeTable?        @relation(fields: [OTCCode], references: [OTCCode])
   ProblemDescription                            String?              @db.VarChar(255)
   CaseProductNote                               String?              @db.Text
+  ErfDoc                                        String?              @db.Text
   accessory                                     accessory[]
   ActionLog                                     ActionLog[]
   casephotos                                    casephotos[]
@@ -306,8 +307,8 @@ model materialorderlineitems {
   RemovedSerialNumber    String? @db.VarChar(100)
   RemovedPartDescription String? @db.Text
 
-  UEFICode  UEFICode?
-  UEFI_NO   String? @db.VarChar(100)
+  UEFICode UEFICode?
+  UEFI_NO  String?   @db.VarChar(100)
 
   // Foreign key ke Failure
   FailureId Int?
