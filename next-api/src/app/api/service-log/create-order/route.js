@@ -170,6 +170,8 @@ export async function POST(request) {
                         Quantity: part.qty || 1,
                         Status: "New",
                         RemovedPartNumber: part.RemovedPartNumber ?? null,
+                        UEFICode: part.UEFICode ?? null,    
+                        UEFI_NO: part.UEFI_NO ?? null,         
                         materialorder: { connect: { MOID } },
                         servicecatalog_parts: part.PartNumber
                             ? { connect: { PartNumber: part.PartNumber } }
@@ -189,6 +191,13 @@ export async function POST(request) {
                 if (part.RemovedPartNumber) {
                     noteLines.push(`Return CT Key : ${part.RemovedPartNumber}`);
                 }
+                if (part.UEFICode) {
+                    noteLines.push(`UEFI Code : ${part.UEFICode}`);
+                }
+                if (part.UEFI_NO) {
+                    noteLines.push(`UEFI No : ${part.UEFI_NO}`);
+                }
+
 
                 const requestedRecipient =
                     assignApo != null

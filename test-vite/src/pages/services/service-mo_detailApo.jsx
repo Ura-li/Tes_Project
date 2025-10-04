@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -52,6 +52,41 @@ import {
 } from "@/components/ui/accordion";
 import CaseField from "@/components/CaseField";
 import { useAuth } from "@/context/auth-context";
+import { Switch } from "@/components/ui/switch";
+
+const GOOD_RETURN_REASON_OPTIONS = [
+  { value: "AdminIssue", label: "Admin Issue" },
+  { value: "CIDRejected", label: "CID Rejected By SC Team" },
+  { value: "ComplexIssue", label: "Complex Issue" },
+  { value: "CustomerCancelRepair", label: "Customer Cancel Repair / No Response" },
+  { value: "OnsiteRemoteArea", label: "Onsite in Remote Area" },
+  { value: "OtherReason", label: "Other Reason" },
+  { value: "WrongAnalysisCCC", label: "Wrong Analysis by CCC" },
+  { value: "WrongAnalysisCE", label: "Wrong Analysis by CE" },
+  { value: "WrongOrderCE", label: "Wrong Order by CE" },
+];
+
+function formatDateForInput(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+const DateHelper = {
+  fromDB(dateStr) {
+    // DB → UI
+    return formatDateForInput(dateStr);
+  },
+  toDB(dateStr) {
+    // UI → DB
+    return dateStr ? new Date(dateStr).toISOString() : null;
+  },
+};
 
 export const ServiceMoDetailApo = () => {
   const { updateDraft } = useDraft(); // Access updateDraft from the DraftContext
@@ -59,6 +94,9 @@ export const ServiceMoDetailApo = () => {
   const { lineItemID } = useParams();
 
   const [moLineItems, setMoLineItems] = useState([]);
+  const [partReturnStatuses, setPartReturnStatuses] = useState([]);
+  const [photoUploadPreview, setPhotoUploadPreview] = useState(null);
+  const [photoUploadLoading, setPhotoUploadLoading] = useState(false);
 
   const [MODetailInput, setMODetailInput] = useState({
     MOID: "",
@@ -89,6 +127,16 @@ export const ServiceMoDetailApo = () => {
     removedPartNumber: "",
     removedSerialNumber: "",
     removedPartDescription: "",
+    UEFICode: "",
+    UEFI_NO : "",
+
+    QuantityUsed : true,
+    PartReturnStatusId : null,
+    PartReturnStatusName : "",
+    PartReturnDOA : false,
+    DOAReason : "",
+    PhotoPartUnit : null,
+    GoodReturnReason : null,
   });
 
   const fetchMoLineItems = async () => {
@@ -111,7 +159,6 @@ export const ServiceMoDetailApo = () => {
       const data = res.data.data;
 
       setMoLineItems(data);
-      console.log("Data lIne Items",data);
 
       // Isi state MODetailInput berdasarkan data yang diambil
       setMODetailInput({
@@ -138,12 +185,21 @@ export const ServiceMoDetailApo = () => {
         mainComponent: data.MainComponent || "",
         gratisFlag: data.GratisFlag || false,
         failureId: data.FailureId || null,
-        failureName: data.Failure?.Name || "",
+        failureName: data.failure?.Name || "",
         atpStatus: data.ATPStatus || "",
         serialNumber: data.SerialNumber || "",
         removedPartNumber: data.RemovedPartNumber || "",
         removedSerialNumber: data.RemovedSerialNumber || "",
         removedPartDescription: data.RemovedPartDescription || "",
+        UEFICode: data.UEFICode || "",
+        UEFI_NO: data.UEFI_NO || "",
+        QuantityUsed: data.QuantityUsed ?? true,
+        PartReturnStatusId: data.PartReturnStatusId ?? null,
+        PartReturnStatusName: data.partReturnStatus?.StatusName || "",
+        PartReturnDOA: data.partReturnStatus?.DOA || false,
+        DOAReason: data.DOAReason || "",
+        PhotoPartUnit: data.PhotoPartUnit || null,
+        GoodReturnReason: data.GoodReturnReason ?? null,
       });
       updateDraft("moliId", data.lineItemID);
     } catch (err) {
@@ -158,6 +214,19 @@ export const ServiceMoDetailApo = () => {
     fetchMoLineItems();
   }, []);
 
+  useEffect(() => {
+    const fetchPartReturnStatuses = async () => {
+      try {
+        const response = await ApiCustomer.get("/api/part-return-status");
+        setPartReturnStatuses(response.data?.data ?? []);
+      } catch (error) {
+        console.error("Failed to fetch Part Return Statuses:", error);
+      }
+    };
+
+    fetchPartReturnStatuses();
+  }, []);
+
   // const handleChange = (e) => {
   //   const { name, value } = e.target;
   //   setMODetailInput((prev) => ({
@@ -168,11 +237,233 @@ export const ServiceMoDetailApo = () => {
 
   const handleChange = (field) => (eOrValue) => {
     const value = eOrValue?.target ? eOrValue.target.value : eOrValue;
-    console.log("Changed:", field, value);
     setMODetailInput((prev) => ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleQuantityUsedToggle = (value) => {
+    setMODetailInput((prev) => {
+      const nextState = { ...prev, QuantityUsed: value };
+      if (prev.PartReturnStatusId !== null) {
+        const matchedStatus = partReturnStatuses.find(
+          (status) =>
+            status.ReturnStatusId === prev.PartReturnStatusId &&
+            status.StatusQuantityType === value,
+        );
+        if (!matchedStatus) {
+          nextState.PartReturnStatusId = null;
+          nextState.PartReturnStatusName = "";
+          nextState.PartReturnDOA = false;
+          nextState.DOAReason = "";
+        }
+      }
+      if (value) {
+        nextState.GoodReturnReason = null;
+      }
+      return nextState;
+    });
+
+    if (value && MODetailInput.PhotoPartUnit) {
+      handleRemovePhoto();
+    }
+  };
+
+  const handlePartReturnStatusChange = (statusId) => {
+    if (!statusId) {
+      setMODetailInput((prev) => ({
+        ...prev,
+        PartReturnStatusId: null,
+        PartReturnStatusName: "",
+        PartReturnDOA: false,
+        DOAReason: "",
+      }));
+      return;
+    }
+
+    const selectedStatus = partReturnStatuses.find(
+      (status) => status.ReturnStatusId.toString() === statusId.toString(),
+    );
+
+    if (!selectedStatus) {
+      return;
+    }
+
+    setMODetailInput((prev) => ({
+      ...prev,
+      PartReturnStatusId: selectedStatus.ReturnStatusId,
+      PartReturnStatusName: selectedStatus.StatusName,
+      PartReturnDOA: selectedStatus.DOA,
+      DOAReason: selectedStatus.DOA ? prev.DOAReason || "" : "",
+    }));
+  };
+
+  const handlePhotoUpload = async (event) => {
+    const file = event.target?.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setPhotoUploadPreview(previewUrl);
+    setPhotoUploadLoading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    if (MODetailInput.PhotoPartUnit) {
+      formData.append("existingPath", MODetailInput.PhotoPartUnit);
+    }
+
+    try {
+      const response = await ApiCustomer.post(
+        `/api/material-order/material-order-line-items/${lineItemID}/upload-photo`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      );
+      const uploadedPath = response.data?.data?.path;
+      if (uploadedPath) {
+        setMODetailInput((prev) => ({
+          ...prev,
+          PhotoPartUnit: uploadedPath,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to upload PhotoPartUnit:", error);
+      Swal.fire(
+        "Upload Failed",
+        error.response?.data?.message || "Failed to upload unit photo.",
+        "error",
+      );
+    } finally {
+      setPhotoUploadLoading(false);
+      setPhotoUploadPreview((prev) => {
+        if (prev) {
+          URL.revokeObjectURL(prev);
+        }
+        return null;
+      });
+      if (event.target) {
+        event.target.value = "";
+      }
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    const currentPath = MODetailInput.PhotoPartUnit;
+
+    setPhotoUploadPreview((prev) => {
+      if (prev) {
+        URL.revokeObjectURL(prev);
+      }
+      return null;
+    });
+    setMODetailInput((prev) => ({
+      ...prev,
+      PhotoPartUnit: null,
+    }));
+
+    const isStoredPath =
+      typeof currentPath === "string" && currentPath.startsWith("/uploads/");
+
+    if (isStoredPath) {
+      try {
+        await ApiCustomer.delete(
+          `/api/material-order/material-order-line-items/${lineItemID}/upload-photo`,
+          { params: { path: currentPath } },
+        );
+      } catch (error) {
+        console.warn("Failed to delete PhotoPartUnit file:", error);
+      }
+    }
+  };
+
+  const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+
+  const resolvedPhotoSrc = useMemo(() => {
+    if (photoUploadPreview) {
+      return photoUploadPreview;
+    }
+
+    const assetPath = MODetailInput.PhotoPartUnit;
+    if (!assetPath) {
+      return null;
+    }
+    if (assetPath.startsWith("http://") || assetPath.startsWith("https://") || assetPath.startsWith("data:")) {
+      return assetPath;
+    }
+    if (assetPath.startsWith("/")) {
+      return `${apiBaseUrl}${assetPath}`;
+    }
+    return `${apiBaseUrl}/${assetPath}`;
+  }, [photoUploadPreview, MODetailInput.PhotoPartUnit, apiBaseUrl]);
+
+  const filteredPartReturnOptions = useMemo(() => {
+    const baseOptions = partReturnStatuses
+      .filter(
+        (status) =>
+          status.StatusQuantityType === Boolean(MODetailInput.QuantityUsed),
+      )
+      .map((status) => ({
+        value: status.ReturnStatusId.toString(),
+        label: status.StatusName,
+        data: status,
+      }));
+
+    const selectedId =
+      MODetailInput.PartReturnStatusId !== null
+        ? MODetailInput.PartReturnStatusId.toString()
+        : null;
+
+    if (selectedId && !baseOptions.some((option) => option.value === selectedId)) {
+      const selectedFromSource = partReturnStatuses.find(
+        (status) => status.ReturnStatusId.toString() === selectedId,
+      );
+
+      if (selectedFromSource) {
+        baseOptions.push({
+          value: selectedFromSource.ReturnStatusId.toString(),
+          label: selectedFromSource.StatusName,
+          data: selectedFromSource,
+        });
+      } else if (MODetailInput.PartReturnStatusName) {
+        baseOptions.push({
+          value: selectedId,
+          label: MODetailInput.PartReturnStatusName,
+          data: { DOA: MODetailInput.PartReturnDOA },
+        });
+      }
+    }
+
+    return baseOptions;
+  }, [
+    partReturnStatuses,
+    MODetailInput.QuantityUsed,
+    MODetailInput.PartReturnStatusId,
+    MODetailInput.PartReturnStatusName,
+    MODetailInput.PartReturnDOA,
+  ]);
+
+  const selectedPartReturnStatus = useMemo(
+    () =>
+      partReturnStatuses.find(
+        (status) => status.ReturnStatusId === MODetailInput.PartReturnStatusId,
+      ) || null,
+    [partReturnStatuses, MODetailInput.PartReturnStatusId],
+  );
+
+  const isDOASelected = Boolean(
+    (selectedPartReturnStatus && selectedPartReturnStatus.DOA) ?? MODetailInput.PartReturnDOA,
+  );
+
+  const renderPartReturnLabel = (option) => {
+    if (typeof option === "string") {
+      return option;
+    }
+    const label = option?.label ?? "";
+    return option?.data?.DOA ? `${label} (DOA)` : label;
   };
 
   const handleUpdate = async () => {
@@ -376,6 +667,25 @@ useEffect(() => {
                       readOnly
                     />
                   </CaseField>
+
+                  <CaseField label={"UEFI CODE"} lock>
+                    <Input
+                      variant={"invisible"}
+                      value={moLineItems?.UEFICode}
+                      placeholder= "---"
+                      readOnly
+                    />
+                  </CaseField>
+                  {moLineItems?.UEFICode == "FID" && (
+                    <CaseField label={"UEFI Number"} lock>
+                      <Input
+                        variant={"invisible"}
+                        value={moLineItems?.UEFI_NO}
+                        placeholder= "---"
+                        readOnly
+                      />
+                    </CaseField>
+                  )}
 
 
                   <CaseField label={"RoHS"} lock>
@@ -642,9 +952,99 @@ useEffect(() => {
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="Part Consumption" lock>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>                
+                  <CaseField label="Part Used">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={Boolean(MODetailInput.QuantityUsed)}
+                        onCheckedChange={handleQuantityUsedToggle}
+                        // disabled={!canEdit}
+                      />
+                      <span>{MODetailInput.QuantityUsed ? "Used" : "Not Used"}</span>
+                    </div>
+                  </CaseField>
+
+                  <CaseField label="Part Return Status" 
+                    star={canEdit} 
+                    // lock={!canEdit}
+                    >
+                    <SearchCommandBlock
+                      value={
+                        MODetailInput.PartReturnStatusId !== null
+                          ? MODetailInput.PartReturnStatusId.toString()
+                          : null
+                      }
+                      onChange={handlePartReturnStatusChange}
+                      placeholder="Select Part Return Status"
+                      options={filteredPartReturnOptions}
+                      // readOnly={!canEdit}
+                      renderLabel={renderPartReturnLabel}
+                    />
+                  </CaseField>
+
+                  <CaseField
+                    label="DOA Reason"
+                    star={isDOASelected}
+                    // lock={!canEdit}
+                    hide={!isDOASelected}
+                  >
+                    <Input
+                      variant="invisible"
+                      name="DOAReason"
+                      value={MODetailInput.DOAReason}
+                      onChange={handleChange("DOAReason")}
+                      placeholder="Enter DOA reason"
+                    />
+                  </CaseField>
+
+                  <CaseField
+                    label="Unit Photo"
+                    hide={Boolean(MODetailInput.QuantityUsed)}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        // disabled={!canEdit || photoUploadLoading}
+                      />
+                      {photoUploadLoading && (
+                        <span className="text-sm text-muted-foreground">Uploading photo...</span>
+                      )}
+                      {resolvedPhotoSrc && (
+                        <div className="flex items-start gap-3">
+                          <img
+                            src={resolvedPhotoSrc}
+                            alt="Unit photo preview"
+                            className="max-h-24 rounded border object-cover"
+                          />
+                          {canEdit && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => handleRemovePhoto()}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </CaseField>
+
+                  <CaseField
+                    label="Good Return Reason"
+                    star={!MODetailInput.QuantityUsed}
+                    hide={Boolean(MODetailInput.QuantityUsed)}
+                    // lock={!canEdit}
+                  >
+                    <SearchCommandBlock
+                      value={MODetailInput.GoodReturnReason}
+                      onChange={handleChange("GoodReturnReason")}
+                      placeholder="Select reason"
+                      options={GOOD_RETURN_REASON_OPTIONS}
+                      // readOnly={!canEdit}
+                    />
+                  </CaseField>
 
                   <CaseField label="Part Order Consumption Comment" lock>
                     <Input variant="invisible" placeholder="---" />

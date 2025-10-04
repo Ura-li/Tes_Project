@@ -87,6 +87,28 @@ import { pdf } from '@react-pdf/renderer';
 import ServiceRequestPDF from '../../components/service-request-form'; // adjust path if needed
 import { useAuth } from "@/context/auth-context";
 
+function formatDateForInput(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+const DateHelper = {
+  fromDB(dateStr) {
+    // DB → UI
+    return formatDateForInput(dateStr);
+  },
+  toDB(dateStr) {
+    // UI → DB
+    return dateStr ? new Date(dateStr).toISOString() : null;
+  },
+};
+
 
 export const TabsService = ({
   caseDetails,
@@ -918,7 +940,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
   );
 };
 
-export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
+export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm, setMoForm, materialOrderInformation }) => {
   const {user} = useAuth();
   const navigate = useNavigate();
   const currentRole = (getUserFromToken()?.role || '').toLowerCase();
@@ -977,14 +999,26 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
           text: 'Before setting a line item to Shipped, fill Sales Order Number and RMA Number.',
         });
       }
+      const formatMaterialOrderInformationForBackend = () => {
+        return {
+          ...materialOrderInformation,
+          deliveryRequestedDate: DateHelper.toDB(materialOrderInformation.deliveryRequestedDate),
+          collectionRequestedDate: DateHelper.toDB(materialOrderInformation.collectionRequestedDate),
+          readyForClosureDate: DateHelper.toDB(materialOrderInformation.readyForClosureDate),
+        };
+      };
+
       if (!updatedLineItems || Object.keys(updatedLineItems).length === 0) {
-        const result = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`, {
+        const payloadMoForm = {
           SalesOrderNumber: soNumber || undefined,
           RMANumber: rmaNumber || undefined,
-        });
+          moUpdates: formatMaterialOrderInformationForBackend(),
+        }
+        const result = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`, payloadMoForm);
         res = result;
       } else {
         const payload = {
+          moUpdates: formatMaterialOrderInformationForBackend(),
           updates: updatedLineItems,
           MOID: materialOrders.MOID,
           WOID: materialOrders.WOID,
@@ -1203,6 +1237,29 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           Swal.showLoading();
         }
       });
+      if (
+        MOLineDetails.PartReturnStatusId &&
+        MOLineDetails.PartReturnDOA &&
+        !String(MOLineDetails.DOAReason || '').trim()
+      ) {
+        Swal.close();
+        Swal.fire({
+          icon: 'warning',
+          title: 'Missing DOA Reason',
+          text: 'Please provide a DOA reason when selecting a DOA return status.',
+        });
+        return false;
+      }
+
+      if (!MOLineDetails.QuantityUsed && !MOLineDetails.GoodReturnReason) {
+        Swal.close();
+        Swal.fire({
+          icon: 'warning',
+          title: 'Missing Good Return Reason',
+          text: 'Select a reason for not using the part before saving.',
+        });
+        return false;
+      }
       const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${LineItemID}`, {
         Description: MOLineDetails.description,
         PickPackInstructions: MOLineDetails.pickPackInstructions,
@@ -1215,6 +1272,11 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
         RemovedPartNumber: MOLineDetails.removedPartNumber,
         RemovedSerialNumber: MOLineDetails.removedSerialNumber,
         RemovedPartDescription: MOLineDetails.removedPartDescription,
+        QuantityUsed: MOLineDetails.QuantityUsed,
+        PartReturnStatusId: MOLineDetails.PartReturnStatusId ?? null,
+        DOAReason: MOLineDetails.DOAReason,
+        PhotoPartUnit: MOLineDetails.PhotoPartUnit,
+        GoodReturnReason: MOLineDetails.GoodReturnReason,
       });
       if (res.data.success) {
         if (shouldRedirect) {
