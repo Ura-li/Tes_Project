@@ -726,7 +726,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
       });
       // Role guard: only CE can close Work Order
       const tokenUser = getUserFromToken();
-      if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'ce') {
+      if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'ce' && String(tokenUser.role).toLowerCase() !== 'celead') {
         Swal.close();
         return Swal.fire({
           icon: 'error',
@@ -935,7 +935,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
       icon: CopyXIcon,
       label: "Close",
       onClick: () => saveAndCloseMaterialOrder(),
-      hidden: currentRole !== 'ce',
+      hidden: currentRole !== 'ce' && currentRole !== 'celead',
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Cancel Order", hidden: true},
@@ -1173,7 +1173,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
       icon: CopyXIcon,
       label: "Close",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
-      hidden: currentRole !== 'ce',
+      hidden: currentRole !== 'ce' && currentRole !== 'celead',
     },
     { icon: StepBack, label: "Cancel", hidden: true },
     { icon: StepBack, label: "Audit", hidden: true },

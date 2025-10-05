@@ -1175,7 +1175,7 @@ const { user } = useAuth();
           <select
             value={selectedProduct}
             onChange={(e) => setSelectedProduct(e.target.value)}
-            className="p-2 border rounded"
+            className="p-2 border rounded w-full"
           >
             {uniqueProduct.map((prod) => (
               <option key={prod} value={prod}>

@@ -204,6 +204,7 @@ const CASE_STATUS = [
   "Open",
   "Close",
   "InActive",
+  "NEW_POPDoc"
 ];
 const WARRANTY_STATUS = ["In Warranty", "Out Warranty"];
 
@@ -364,10 +365,12 @@ export default function NewCaseForm() {
   const [isNewContact, setIsNewContact] = useState(false);
   const [isNewCompany, setIsNewCompany] = useState(false);
 
+  const [needWarrantyApproval, setNeedWarrantyApproval] = useState(false);
 
 
   // Warranty
   const [warrantySearchValue, setWarrantySearchValue] = useState("");
+  // console.log("warrantySearchValue : ",warrantySearchValue)
   const [warrantyOptions, setWarrantyOptions] = useState([]);
 
   const [selectWarrantyCodeStatus, setSelectWarrantyCodeStatus] = useState("")
@@ -993,6 +996,15 @@ export default function NewCaseForm() {
    * Performs optional photo upload and action log creation.
    * @returns {Promise<void>}
    */
+  useEffect(() => {
+      if (warrantySearchValue !== "01T" && needWarrantyApproval) {
+    setNeedWarrantyApproval(false);
+  }
+    needWarrantyApproval ? setCaseStatus("NEW_POPDoc")
+      : setCaseStatus("Open")
+      ;
+  }, [warrantySearchValue, needWarrantyApproval])
+
   const onCreateCase = async () => {
     if ((!selectedAsset && !isNewAsset) || (!selectedContact && !isNewContact)) {
       alert("Please select or Create both an Asset and a Contact before creating a case.");
@@ -1140,7 +1152,8 @@ export default function NewCaseForm() {
           ContactID: contactId ?? null ,
           SiteAccountID: companyId ?? null,
           Warranty_Status: warrantySearchValue,
-          EOW_Date: normalizedEowDate
+          EOW_Date: normalizedEowDate,
+          needWarrantyApproval: needWarrantyApproval,
           
         })
         
@@ -1158,7 +1171,8 @@ export default function NewCaseForm() {
           assetPatchPayload.SiteAccountID = companyId;
         }
 
-        if (Object.keys(assetPatchPayload).length) {
+        if (Object.keys(assetPatchPayload).length || needWarrantyApproval) {
+          assetPatchPayload.needWarrantyApproval = needWarrantyApproval;
           await ApiCustomer.patch(`/api/asset-information/${assetId}`, assetPatchPayload);
           setSelectedAsset((prev) => {
             if (!prev) return prev;
@@ -1204,6 +1218,9 @@ export default function NewCaseForm() {
         CaseNoteProduct: caseNote,
         ...(filteredAccessories.length > 0 && { accessories: filteredAccessories }),
       };
+
+      needWarrantyApproval && (payload.CaseStatus = "NEW_POPDoc")
+
 
       
       console.log(payload);
@@ -1955,6 +1972,23 @@ export default function NewCaseForm() {
                 <Label>EOW Date</Label>
                 <Input type="date" value={eowDate} onChange={(e) => setEowDate(e.target.value)} />
               </div>
+              {
+              warrantySearchValue === "01T" &&
+              (
+            <div className="">
+                <Label>Need Warranty Approval</Label>
+                <div className="flex items-center gap-2 mt-2">
+                  <Checkbox
+                    id="needWarrantyApproval"
+                    checked={needWarrantyApproval}
+                    onCheckedChange={(v) => setNeedWarrantyApproval(Boolean(v))}
+                    className={"ring-2 bg-gray-100"}
+                  />
+                  <Label htmlFor="needWarrantyApproval" className={'font-[700]'}>Yes</Label>
+                </div>
+            </div>
+              )
+              }
             </CardContent>
           </Card>
           {/* 5) Accessory */}
@@ -1965,8 +1999,9 @@ export default function NewCaseForm() {
             </CardHeader>
             <CardContent className="space-y-3">
               {accessories.map((row, idx) => (
-                <>
-                <div key={row.id} className="grid grid-cols-12 gap-2 items-center ring-1 p-3 rounded-2xl">
+                
+                  <React.Fragment key={row.id || idx}>
+                <div  className="grid grid-cols-12 gap-2 items-center ring-1 p-3 rounded-2xl">
                   <div className="col-span-12 md:col-span-4">
                     <Label className="text-xs">Accessory Name</Label>
                     <Input
@@ -2001,7 +2036,8 @@ export default function NewCaseForm() {
                   </div>
                 </div>
                   <Separator className="w-full border-2"/>
-                </>
+                </React.Fragment>
+                
               ))}
               <Button type="button" variant="secondary" onClick={addAccessory}>
                 <Plus className="w-4 h-4 mr-2" /> Add Row
