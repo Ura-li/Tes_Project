@@ -117,7 +117,8 @@ export async function POST(request) {
         ProductTypeID,
         ContactID,
         Warranty_Status,
-        EOW_Date
+        EOW_Date,
+        needWarrantyApproval,
     } = await request.json();
 
     if (!ContactID) {
@@ -159,6 +160,23 @@ export async function POST(request) {
             site_account: true
         }
     });
+
+    //create asset_warranty
+    if (asset_information && needWarrantyApproval && Warranty_Status === "01T") {
+        await prisma.asset_warranty.create({
+            data: {
+                AssetID: asset_information.AssetID,
+                WarrantyApprovalStatus : "New",
+                WarrantyCardDate: null,
+                POPDocument: null,
+                WarrantyCard: null,
+                PhotoUnit: null,
+                EndUserName: null,
+                EndUserPhone: null,
+                EndUserAddress: null,
+            }
+        });
+    }
 
     return NextResponse.json(
         {

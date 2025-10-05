@@ -236,8 +236,21 @@ export const TabsServiceCaseDetails = ({
   const { open } = useSidebar();
 
   const [entitlementStatus, setEntitlementStatus] = useState({
-    OTCCode: ''
+    OTCCode: "",
+    PurchaseDate: "",
+    WarrantyCardDate: "",
+    EOW_Date: "",
+    EndUserName: "",
+    EndUserPhone: "",
+    EndUserAddress: "",
+    WarrantyApprovalStatus: "",
+    needWarrantyApproval: false,
+    POPDocument: "",
+    WarrantyCard: "",
+    PhotoUnit: "",
   })
+
+  entitlementStatus.needWarrantyApproval  ? console.log("THIS IS TRUE") : console.log("NOPE NOT TODAYS");
 
   const [caseForm, setCaseForm] = useState({
     CaseType: "",
@@ -273,6 +286,7 @@ export const TabsServiceCaseDetails = ({
   });
 
   const [signature, setSignature] = useState(null);
+
 
 
   const handleCaseDetails = (field) => (value) => {
@@ -395,9 +409,55 @@ export const TabsServiceCaseDetails = ({
         case 'ENTITLEMENT':
           if (entitlementEdited) {
             console.log("OTC CODE EDIT : ",entitlementStatus);
-               await ApiCustomer.patch(`/api/asset-information/${caseDetails.AssetID}`, {
-                Warranty_Status: entitlementStatus.OTCCode || "",
-              });
+              //  await ApiCustomer.patch(`/api/asset-information/${caseDetails.AssetID}`, {
+              //   Warranty_Status: entitlementStatus.OTCCode || "",
+              //    EOW_Date: entitlementStatus.EOW_Date || "",
+              //    PurchaseDate: entitlementStatus.PurchaseDate || "",
+              //    WarrantyCardDate: entitlementStatus.WarrantyCardDate || "",
+              //    EndUserName: entitlementStatus.EndUserName || "",
+              //    EndUserPhone: entitlementStatus.EndUserPhone || "",
+              //    EndUserAddress: entitlementStatus.EndUserAddress || "",
+              //    WarrantyApprovalStatus: entitlementStatus.WarrantyApprovalStatus || "",
+              //    needWarrantyApproval: entitlementStatus.needWarrantyApproval || false,
+              //    POPDocument: entitlementStatus.POPDocument || "",
+              //    WarrantyCard: entitlementStatus.WarrantyCard || "",
+              //    PhotoUnit: entitlementStatus.PhotoUnit || "",
+
+              // });
+            const formData = new FormData();
+            formData.append("Warranty_Status", entitlementStatus.OTCCode || "");
+            formData.append("EOW_Date", entitlementStatus.EOW_Date?.toISOString?.() || "");
+            formData.append("PurchaseDate", entitlementStatus.PurchaseDate?.toISOString?.() || "");
+            formData.append("WarrantyCardDate", entitlementStatus.WarrantyCardDate?.toISOString?.() || "");
+            formData.append("EndUserName", entitlementStatus.EndUserName || "");
+            formData.append("EndUserPhone", entitlementStatus.EndUserPhone || "");
+            formData.append("EndUserAddress", entitlementStatus.EndUserAddress || "");
+            formData.append("WarrantyApprovalStatus", entitlementStatus.WarrantyApprovalStatus || "");
+            formData.append("needWarrantyApproval", entitlementStatus.needWarrantyApproval ? "true" : "false");
+
+            // Add files
+            if (entitlementStatus.POPDocument instanceof File) {
+              formData.append("POPDocument", entitlementStatus.POPDocument);
+            } else if (typeof entitlementStatus.POPDocument === "string") {
+              formData.append("POPDocument", entitlementStatus.POPDocument);
+            }
+            if (entitlementStatus.WarrantyCard instanceof File) {
+              formData.append("WarrantyCard", entitlementStatus.WarrantyCard);
+            } else if (typeof entitlementStatus.WarrantyCard === "string") {
+              formData.append("WarrantyCard", entitlementStatus.WarrantyCard);
+            }
+            if (entitlementStatus.PhotoUnit instanceof File) {
+              formData.append("PhotoUnit", entitlementStatus.PhotoUnit);
+            } else if (typeof entitlementStatus.PhotoUnit === "string") {
+              formData.append("PhotoUnit", entitlementStatus.PhotoUnit);
+            }
+
+
+            await ApiCustomer.patch(`/api/asset-information/${caseDetails.AssetID}`, formData, {
+              headers: {
+                "Content-Type": "multipart/form-data", // 👈 Important for file upload
+              },
+            });
             Object.assign(dataToUpdate, entitlementStatus); // includes OTCCo
             savedModules.push("Entitlement");
           }
@@ -896,7 +956,7 @@ const openPopup = () => {
   };
   return (
     <>
-      <div className="flex items-center border-1 sticky top-13 z-10 bg-gray-50 overflow-auto">
+      <div className="flex items-center border-1 sticky top-15 z-5 bg-gray-50 overflow-auto">
         {/* {visibleButtons.map((btn, index) => (
           <Button
             key={index}
@@ -1377,6 +1437,7 @@ const fetchActionLog = async () => {
     console.error("Error fetching ActionLog:", err);
   }
 }
+  // const location = useLocation();
 
   //handler all case
   useEffect(() => {
@@ -1391,7 +1452,7 @@ const fetchActionLog = async () => {
     fetchCsr();
     fetchCase();
     fetchActionLog();
-  }, []);
+  }, [ caseDetails.CaseID]);
   useEffect(() => {
     fetchUserAssign();
   }, [assignToForm]);
@@ -1399,15 +1460,35 @@ const fetchActionLog = async () => {
   useEffect(() => {
     if (otcCode.length > 0 && dataFetchAssetInformation?.AssetInformation?.Warranty_Status) {
       handleEntitlementStatus("OTCCode")(dataFetchAssetInformation?.AssetInformation?.Warranty_Status);
+      handleEntitlementStatus("EOW_Date")(new Date(dataFetchAssetInformation?.AssetInformation?.EOW_Date));
+      
+    }
+    
+    if (dataFetchAssetInformation?.AssetInformation?.asset_warranty.length > 0) {
+      handleEntitlementStatus("needWarrantyApproval")(true);
+      handleEntitlementStatus("PurchaseDate")(new Date(dataFetchAssetInformation?.AssetInformation?.asset_warranty[0]?.PurchaseDate));
+      handleEntitlementStatus("WarrantyCardDate")(new Date(dataFetchAssetInformation?.AssetInformation?.asset_warranty[0]?.WarrantyCardDate));
+      handleEntitlementStatus("WarrantyApprovalStatus")(dataFetchAssetInformation?.AssetInformation?.asset_warranty[0]?.WarrantyApprovalStatus);
+      handleEntitlementStatus("EndUserName")(dataFetchAssetInformation?.AssetInformation?.asset_warranty[0]?.EndUserName);
+      handleEntitlementStatus("EndUserPhone")(dataFetchAssetInformation?.AssetInformation?.asset_warranty[0]?.EndUserPhone);
+      handleEntitlementStatus("EndUserAddress")(dataFetchAssetInformation?.AssetInformation?.asset_warranty[0]?.EndUserAddress);
+      handleEntitlementStatus("POPDocument")(dataFetchAssetInformation?.AssetInformation?.asset_warranty[0]?.POPDocument);
+      handleEntitlementStatus("WarrantyCard")(dataFetchAssetInformation?.AssetInformation?.asset_warranty[0]?.WarrantyCard);
+      handleEntitlementStatus("PhotoUnit")(dataFetchAssetInformation?.AssetInformation?.asset_warranty[0]?.PhotoUnit);
+      
+    } else {
+      console.log("SEEMS NOT WORK")
     }
   }, [otcCode, dataFetchAssetInformation]);
-
+  console.log("THe number",dataFetchAssetInformation?.AssetInformation?.asset_warranty.length);
   useEffect(() => {
     console.log("Data Asset Info : ", dataFetchAssetInformation);
 
     console.log("Fetch Data Customer Success : ", dataFetchCustomerData);
     console.log("Fetch Data User ", ownerUserData);
   }, [ownerUserData]);
+
+
 
   // console.log("Selected Symptopm ",selectedSymptom)
 
@@ -1501,6 +1582,51 @@ if (caseDetails.CaseStatus !== "Close") {
     });
     setPhotos(validFiles);
   };
+  
+  
+
+  const onPickDocuments = (files) => {
+    if (!files) return;
+    const validFiles = Array.from(files).filter((f) => {
+      if (f.size > 5 * 1024 * 1024) {
+        toast.warning(`${f.name} lebih dari 5MB, tidak bisa diupload`);
+        return false;
+      }
+      return true
+    })
+    // setPopDocument(validFiles)
+    handleEntitlementStatus('POPDocument')(validFiles);
+  }
+
+  
+  const onPickWarrantyCards = (files) => {
+    if (!files) return;
+    const validFiles = Array.from(files).filter((f) => {
+      if (f.size > 5 * 1024 * 1024) {
+        toast.warning(`${f.name} lebih dari 5MB, tidak bisa diupload`);
+        return false;
+      }
+      return true
+    })
+    // setWarrantyCards(validFiles)
+    handleEntitlementStatus('WarrantyCard')(validFiles);
+  }
+  
+  
+
+  const onPickPhotoUnits = (files) => {
+    if (!files) return;
+    const validFiles = Array.from(files).filter((f) => {
+      if (f.size > 5 * 1024 * 1024) {
+        toast.warning(`${f.name} lebih dari 5MB, tidak bisa diupload`);
+        return false;
+      }
+      return true
+    })
+    // setPhotoUnit(validFiles)
+    handleEntitlementStatus('PhotoUnit')(validFiles);
+  }
+
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (
@@ -1511,7 +1637,7 @@ if (caseDetails.CaseStatus !== "Close") {
       )}
       <Card className="border-0 w-full">
         <Tabs defaultValue="case_info">
-        <CardHeader className="sticky top-22 z-10 w-full border-b bg-white shadow-sm flex flex-col">
+        <CardHeader className="sticky top-24 z-5 w-full border-b bg-white shadow-sm flex flex-col">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
 
             {/* LEFT SIDE - Case Info */}
@@ -1757,7 +1883,7 @@ if (caseDetails.CaseStatus !== "Close") {
                           ></DatePicker>
                 </CaseField>
 
-                  <Accordion type="single" collapsible className=" col-span-2">
+                  <Accordion type="single" collapsible className=" col-span-3">
                     <AccordionItem value="more-details" className="pl-5">
                       <AccordionTrigger className={"decoration-transparent border-1 p-2 cursor-pointer"}>More Details . . .</AccordionTrigger>
                       <AccordionContent className={"m-1"}>
@@ -2257,7 +2383,6 @@ if (caseDetails.CaseStatus !== "Close") {
                     </CaseField>
   
                     <CaseField label="HW Profit Center" lock>
-                      {" "}
                       <Input variant="invisible" placeholder="---" />
                     </CaseField>
                     <div className="grid items-center grid-cols-2 col-span-2 gap-2 p-5 ring-1">
@@ -2280,6 +2405,177 @@ if (caseDetails.CaseStatus !== "Close") {
                         getValue={(opt) => opt.OTCCode}
                       />
                     </CaseField>
+                  <CaseField lock={entitlementStatus?.needWarrantyApproval} label="Need warranty approval?"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-3"} span={2}>
+                    <SelectYN
+                      // value={caseDetails.CaseStatus === "NEW_POPDoc" ? (WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition] === 'Out of Warranty' ? "Yes" : WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition] === 'InWarranty' ? "No" : "") : (caseDetails?.IsHWUnderWarranty ? "Yes" : "No")}
+                      value={entitlementStatus?.needWarrantyApproval === undefined || entitlementStatus?.needWarrantyApproval === null ? "No" : entitlementStatus?.needWarrantyApproval ? "Yes" : "No"}
+                      onValueChange={(val) =>
+                        handleEntitlementStatus('needWarrantyApproval')(val === "Yes")}
+                    />
+                  </CaseField>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Approval Status"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-3"} span={2}>
+                    <SelectBar
+                      options={
+                        [
+                          {id: 1 , name: 'Add Info By WA' },
+                          {id: 2 , name: 'Revision To WA' },
+                          {id: 3 , name: 'New', disable: true }
+                        ]
+                      }
+                      value={entitlementStatus.WarrantyApprovalStatus}
+                      onChange={handleEntitlementStatus('WarrantyApprovalStatus')}
+                    />
+                  </CaseField>
+                    <CaseField  label="Warranty Expiration Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                      <DatePicker
+                        variant="icon"
+                      value={entitlementStatus?.EOW_Date}
+                        onChange={handleEntitlementStatus('EOW_Date')}
+                      ></DatePicker>
+                    </CaseField>
+                  {/* <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Upload Pop Document" className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                    <Input type="file"  onChange={(e) => onPickDocuments(e.target.files)} />
+                  </CaseField> */}
+                  <CaseField
+                    hide={!entitlementStatus.needWarrantyApproval}
+                    label="POP Document"
+                    className="col-span-1"
+                    childClass="col-span-1 sm:col-span-2 md:col-span-2"
+                    span={2}
+                  >
+                    {entitlementStatus.POPDocument ? (
+                      
+                      <div className="flex flex-col gap-2">
+                        <a
+                          href={`${import.meta.env.VITE_API_BASE_URL}${entitlementStatus.POPDocument}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          {(entitlementStatus.POPDocument).split('/').pop()}
+                        </a>
+                        <Input
+                          type="file"
+                          onChange={(e) =>
+                            handleEntitlementStatus("POPDocument")(e.target.files?.[0] || "")
+                          }
+                        />
+                        
+                      </div>
+                    ) : (
+                      <Input
+                        type="file"
+                        onChange={(e) =>
+                          handleEntitlementStatus("POPDocument")(e.target.files?.[0] || "")
+                        }
+                      />
+                    )}
+                  </CaseField>
+
+
+
+                  
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Purchase date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                    <DatePicker
+                      variant="icon"
+                      value={entitlementStatus?.PurchaseDate}
+                      onChange={handleEntitlementStatus('PurchaseDate')}
+                    ></DatePicker>
+                  </CaseField>
+                  <CaseField
+                    hide={!entitlementStatus.needWarrantyApproval}
+                    label="Upload Warranty Card"
+                    className="col-span-1"
+                    childClass="col-span-1 sm:col-span-2 md:col-span-2"
+                    span={2}
+                  >
+                    {entitlementStatus.WarrantyCard ? (
+
+                      <div className="flex flex-col gap-2">
+                        <a
+                          href={`${import.meta.env.VITE_API_BASE_URL}${entitlementStatus.WarrantyCard}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          {(entitlementStatus.WarrantyCard).split('/').pop()}
+                        </a>
+                        <Input
+                          type="file"
+                          onChange={(e) =>
+                            handleEntitlementStatus("WarrantyCard")(e.target.files?.[0] || "")
+                          }
+                        />
+
+                      </div>
+                    ) : (
+                      <Input
+                        type="file"
+                        onChange={(e) =>
+                          handleEntitlementStatus("WarrantyCard")(e.target.files?.[0] || "")
+                        }
+                      />
+                    )}
+                  </CaseField>
+                  {/* <CaseField hide={!entitlementStatus.needWarrantyApproval}   label="Upload Warranty Card" className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                    <Input type="file"  onChange={(e) => onPickWarrantyCards(e.target.files)} />
+                  </CaseField> */}
+                 
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Card Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                    <DatePicker
+                      variant="icon"
+                      value={entitlementStatus?.WarrantyCardDate}
+                      onChange={handleEntitlementStatus('WarrantyCardDate')}
+                    ></DatePicker>
+                  </CaseField>
+                  {/* <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Upload Photo Unit" className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                    <Input type="file"  onChange={(e) => onPickPhotoUnits(e.target.files)} />
+                  </CaseField> */}
+                  <CaseField
+                    hide={!entitlementStatus.needWarrantyApproval}
+                    label="Upload Photo Unit"
+                    className="col-span-1"
+                    childClass="col-span-1 sm:col-span-2 md:col-span-2"
+                    span={2}
+                  >
+                    {entitlementStatus.PhotoUnit ? (
+
+                      <div className="flex flex-col gap-2">
+                        <a
+                          href={`${import.meta.env.VITE_API_BASE_URL}${entitlementStatus.PhotoUnit}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          {(entitlementStatus.PhotoUnit).split('/').pop()}
+                        </a>
+                        <Input
+                          type="file"
+                          onChange={(e) =>
+                            handleEntitlementStatus("PhotoUnit")(e.target.files?.[0] || "")
+                          }
+                        />
+
+                      </div>
+                    ) : (
+                      <Input
+                        type="file"
+                        onChange={(e) =>
+                          handleEntitlementStatus("PhotoUnit")(e.target.files?.[0] || "")
+                        }
+                      />
+                    )}
+                  </CaseField>
+                  
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Name"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                    <Input value={entitlementStatus.EndUserName} onChange={(e) => handleEntitlementStatus('EndUserName')(e.target.value)} variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Phone"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                    <Input value={entitlementStatus.EndUserPhone} onChange={(e) => handleEntitlementStatus('EndUserPhone')(e.target.value)} variant="invisible" placeholder="---" />
+                  </CaseField>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Address"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                    <Textarea value={entitlementStatus.EndUserAddress} onChange={(e) => handleEntitlementStatus('EndUserAddress')(e.target.value)} variant="invisible" placeholder="---" />
+                  </CaseField>
                   </CardContent>
                   {/* TABEL ACCESSORY */}
                   <div className="px-6 pb-6">
@@ -2452,7 +2748,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     </Table>
                   </CardContent>
                 </Card>
-</div>
+            </div>
             
 
           </TabsContent>

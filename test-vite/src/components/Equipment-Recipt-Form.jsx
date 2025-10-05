@@ -383,26 +383,20 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
         <Text style={styles.tableHeaderCell}>NEW CT Code</Text>
         <Text style={styles.tableHeaderCell}>QTY</Text>
       </View>
-      {caseDetails?.accessory?.length > 0 ? (
-        caseDetails.accessory.map((item, index) => (
+      {caseDetails?.workorder?.length > 0 ? (
+        caseDetails.workorder.map((item, index) => (
           <View style={styles.tableRow} key={index}>
-            <Text style={styles.tableCell}>{index}</Text>
-            <Text style={styles.tableCell}>{item.Accessories ?? 'N/A'}</Text>
-            <Text style={styles.tableCell}>{item.Note ?? 'N/A'}</Text>
-            <Text style={styles.tableCell}>{item.CT_SNCode ?? 'N/A'}</Text>
-            <Text style={styles.tableCell}></Text>  
+            <Text style={[styles.tableCell,{ textAlign: 'center'}]}>{index + 1}</Text>
             <Text style={styles.tableCell}></Text>
+            <Text style={styles.tableCell}>{item.materialorder[0].materialorderlineitems[0].PartNumber ?? 'N/A'}</Text>
+            <Text style={styles.tableCell}>{item.materialorder[0].materialorderlineitems[0].Description ?? 'N/A'}</Text>  
+            <Text style={styles.tableCell}>{item.materialorder[0].materialorderlineitems[0].RemovedSerialNumber ?? 'N/A'}</Text>  
+            <Text style={styles.tableCell}>{item.materialorder[0].materialorderlineitems[0].Quantity ?? 'N/A'}</Text>  
           </View>
         ))
       ) : (
-        <View style={styles.tableRow}>
-          <Text style={[styles.tableCell,{textAlign: 'center'}]}>0</Text>
-          <Text style={styles.tableCell}>No Data</Text>
-          <Text style={styles.tableCell}>-</Text>
-          <Text style={styles.tableCell}>-</Text>
-          <Text style={styles.tableCell}>-</Text>
-          <Text style={styles.tableCell}>-</Text>
-        </View>
+        <>
+        </>
       )}
 
 

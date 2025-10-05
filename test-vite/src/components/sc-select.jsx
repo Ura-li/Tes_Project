@@ -154,7 +154,7 @@ export function SelectBar({ id, onChange, value, options, placeholder,readOnly }
       <SelectContent>
         <SelectGroup>
           {options.map((opt) => (
-            <SelectItem key={opt.id} value={opt.name}>
+            <SelectItem key={opt.id} value={opt.name} disabled={opt.disable}>
               {opt.name}
             </SelectItem>
           ))}
@@ -202,7 +202,6 @@ export function ComboboxDemo({
   disabled
 }) {
   const [open, setOpen] = useState(false)
-  console.log("WHY NOT SHOWN", options.find((province) => province.name === value.name)?.name)
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -214,7 +213,7 @@ export function ComboboxDemo({
           disabled={disabled}
         >
           {value
-            ? options.find((province) => province.name === value.name)?.name
+            ? options.find((data) => data.name === value.name)?.name
             : placeholder}
           <CircleChevronDown className="opacity-50" />
         </Button>
@@ -225,21 +224,21 @@ export function ComboboxDemo({
           <CommandList>
             <CommandEmpty>No state found.</CommandEmpty>
             <CommandGroup>
-              {options.map((province) => (
+              {options.map((data) => (
                 <CommandItem
-                  key={province.id}
-                  value={province.name}
+                  key={data.id}
+                  value={data.name}
                   onSelect={(currentValue) => {
                     const obj = options.find((o) => o.name === currentValue);
                     setValue(obj || { id: "", name: ""})
                     setOpen(false)
                   }}
                 >
-                  {province.name}
+                  {data.name}
                   <Check
                     className={cn(
                       "ml-auto",
-                      value === province.name ? "opacity-100" : "opacity-0"
+                      value === data.name ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>
@@ -392,7 +391,7 @@ export function ComboboxDemo({
 export function SelectYN({ value, onValueChange, readOnly }) {
   return (
     <Select
-      value={value}
+      value={value }
       onValueChange={onValueChange}
       disabled={readOnly}   // 👈 disable dropdown if readOnly
     >
@@ -400,7 +399,7 @@ export function SelectYN({ value, onValueChange, readOnly }) {
         className="w-full hover:shadow-lg border-b-0 p-3"
         disabled={readOnly} // 👈 also disable trigger button
       >
-        <span>{value}</span>
+        <span>{value }</span>
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
