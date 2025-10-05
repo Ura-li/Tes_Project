@@ -20,8 +20,8 @@ export const Case = () => {
   const [caseDetails, setCaseDetails] = useState(null);
   const [caseNote, setCaseNote] = useState(null);
   const [caseNoteFormData, setCaseNoteFormData] = useState({
-    LogType: '',
-    ActionType: '',
+    LogType: "Notes Log",
+    ActionType: "Inbound Customer call",
     Template: '',
     VisibleExternally: null,
     MinutesSpent: 0,

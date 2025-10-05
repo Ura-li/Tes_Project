@@ -47,10 +47,9 @@ export async function GET(request) {
           ProductNumber: true,
           WarrantyOTCCode: true,
           product_information: {
-            select: {
-              ProductName: true,
-              ProductLine: true,
-            },
+            include: {
+              product_type: true
+            }
           },
         },
       },
@@ -61,6 +60,7 @@ export async function GET(request) {
           LastName: true,
           Email: true,
           Phone: true,
+          City: true,
           site_account: {
             select: { Company: true, Email: true },
           },
@@ -182,6 +182,7 @@ export async function POST(request) {
         CreatedBy,
         ProblemDescription,
         CaseID_Manual,
+        CaseID_Manual_Date,
         CaseNoteProduct,
         accessories,
     } = await request.json();
@@ -234,6 +235,7 @@ export async function POST(request) {
             CreatedBy: parseInt(CreatedBy),
             ProblemDescription: ProblemDescription,
             CaseID_Manual: CaseID_Manual,
+            CaseID_Manual_Date: new Date (CaseID_Manual_Date),
             CaseProductNote : CaseNoteProduct,
             ...(Array.isArray(accessories) && accessories.length > 0 && {
               accessory: {

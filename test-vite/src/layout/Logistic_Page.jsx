@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { NotificationCard } from "@/components/NotificationCard";
 import { useNavigate } from "react-router";
 import { CaseField } from "@/pages/services/service-case";
+import { ExportExcelPart } from "@/components/Export-Excel";
 
 
 export default function Logistik() {
@@ -122,7 +123,8 @@ export default function Logistik() {
              <Card className={"rounded-sm col-span-2 row-span-2"}>
                 <CardHeader className={"flex flex-row gap-2 justify-between"}>
                     <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
-                    <div className="flex">
+                    <div className="flex gap-2">
+                    <ExportExcelPart/>
                     <select
                       value={filterStatus}
                       onChange={(e) => {
@@ -199,7 +201,7 @@ export default function Logistik() {
         </CardContent>
 
         {/* Pagination Controls */}
-        <CardFooter className="items-center justify-center flex gap-4">
+        <CardFooter className="items-center flex gap-4">
           <button
             className=" px-2 bg-gray-300 rounded disabled:opacity-50 cursor-pointer"
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
