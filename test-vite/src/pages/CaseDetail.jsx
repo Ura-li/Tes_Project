@@ -335,7 +335,7 @@ export const TabsServiceCaseDetails = ({
   CaseID_Manual: caseForm.CaseID_Manual,
   CaseID_Manual_Date: caseForm.CaseID_Manual_Date,
   StorageLocationStore: caseForm.StorageLocationStore
-})
+   }).some(([_, v]) => v !== undefined && v !== null && String(v).trim() !== "");
   
     const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
     // Only treat entitlement as edited if it has any non-empty value
@@ -1501,8 +1501,6 @@ if (caseDetails.CaseStatus !== "Close") {
     });
     setPhotos(validFiles);
   };
-
-
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (

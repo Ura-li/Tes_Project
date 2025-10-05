@@ -356,6 +356,8 @@ export const ServiceWork = () => {
 
   const [meterReadAvailable, setMeterReadAvailable] = useState(false);
 
+  
+
   const editrole = ['apo', 'admin', 'ce', 'celead']
   let canEditapo;
   let canaddce;
