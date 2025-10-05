@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import ApiCustomer from "@/api";
-
 import * as XLSX from "xlsx";
+import { Button } from "./ui/button";
 
 export const ExportExcel = ({ caseData }) => {
   const [cases, setCases] = useState([]);
@@ -98,23 +98,13 @@ export const ExportExcel = ({ caseData }) => {
     XLSX.writeFile(workbook, "Case Information.xlsx");
   };
   return (
-    <div style={{ padding: "1rem", fontFamily: "Arial, sans-serif" }}>
-      <h2 style={{ color: "#2c3e50" }}>Export Case to Excel</h2>
-      <button
+    <div>
+      <Button
         onClick={exportToExcel}
-        style={{
-          backgroundColor: "#3498db",
-          color: "white",
-          border: "none",
-          padding: "0.7rem 1.5rem",
-          fontSize: "1rem",
-          borderRadius: "0.3rem",
-          cursor: "pointer",
-        }}
-        aria-label="Export data to Excel"
+        className={"bg-blue-400 text-white hover:bg-blue-300 cursor-pointer"} 
       >
         Export to Excel
-      </button>
+      </Button>
     </div>
   );
 };
@@ -129,6 +119,7 @@ export const ExportExcelPart = ({}) => {
       console.log("Json MO Data : ", json)
       const transformed = json.data.map((m) => {
       return {
+       Moid: m.MOID,
        PartNumber: m.materialorderlineitems?.[0]?.PartNumber,
        Description: m.materialorderlineitems?.[0]?.Description,
        SalesOrderNumber: m.SalesOrderNumber,
@@ -145,6 +136,7 @@ export const ExportExcelPart = ({}) => {
   }, []);
 
   const labelPart = MoData.map((items) => ({
+    "ID Material Order": items.Moid,
     "Part Number" : items.PartNumber,
     "Description" : items.Description,
     "Sales Order Number" : items.SalesOrderNumber,
@@ -161,23 +153,13 @@ export const ExportExcelPart = ({}) => {
     XLSX.writeFile(workbook, "Sparepart.xlsx")
   };
   return (
-    <div style={{ padding: "1rem", fontFamily: "Arial, sans-serif" }}>
-      {/* <h2 style={{ color: "#2c3e50" }}>Export Sparepart to Excel</h2> */}
-      <button
+    <div>
+      <Button
         onClick={exportToExcelPart}
-        style={{
-          backgroundColor: "#3498db",
-          color: "white",
-          border: "none",
-          padding: "0.7rem 1.5rem",
-          fontSize: "1rem",
-          borderRadius: "0.3rem",
-          cursor: "pointer",
-        }}
-        aria-label="Export data to Excel"
+        className={"bg-blue-400 text-white hover:bg-blue-300 cursor-pointer"}
       >
         Export to Excel
-      </button>
+      </Button>
     </div>
   )
 }

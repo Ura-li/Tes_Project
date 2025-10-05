@@ -123,8 +123,8 @@ export default function Logistik() {
              <Card className={"rounded-sm col-span-2 row-span-2"}>
                 <CardHeader className={"flex flex-row gap-2 justify-between"}>
                     <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
-                    <div className="flex">
-                  <ExportExcelPart/>
+                    <div className="flex gap-2">
+                    <ExportExcelPart/>
                     <select
                       value={filterStatus}
                       onChange={(e) => {
