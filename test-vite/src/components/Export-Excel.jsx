@@ -34,39 +34,27 @@ export const ExportExcel = ({ caseData }) => {
 
         return {
           CaseID: c.caseinformation.CaseID,
-          site_account: c.caseinformation.contact_information?.site_account?.Company ?? null,
-          contact_information: `${
+          CaseID_Manual: c.caseinformation.CaseID_Manual,
+          ProductTower: c.caseinformation.asset_information?.product_information?.product_type?.ProductTower,
+          Case_Notes:c.caseinformation.casenotes_caseinformation_CaseNoteTocasenotes?.Note,
+          ProductGroup: c.caseinformation.asset_information?.product_information?.product_type?.ProductGroup,     
+          ProductLine: c.caseinformation.asset_information?.product_information?.ProductLine,     
+          ProductType: c.caseinformation.asset_information?.product_information?.product_type?.ProductType,
+          ProductNumber: c.caseinformation.asset_information?.ProductNumber,
+          ProductName: c.caseinformation.asset_information?.product_information?.ProductName,
+          SerialNumber: c.caseinformation.asset_information?.SerialNumber,
+          WarrantyStatus: c.caseinformation.otcCodeTable?.Description,
+          Company_Name: "PT. JAVA ABADI GEMILANG",
+          CE_Name: c.caseinformation.workorder?.[0]?.owner?.Name,
+          CaseType: c.caseinformation.CaseType,
+          CaseStatus: c.caseinformation.CaseStatus,
+          Customer_Company: c.caseinformation.contact_information?.site_account?.Company ?? null, 
+          Customer_Name: `${
             c.caseinformation.contact_information?.FirstName ?? ""
           } ${c.caseinformation.contact_information?.LastName ?? ""}`,
-          asset_information: `${
-            c.caseinformation.asset_information?.product_information?.ProductName ?? ""
-          } - ${c.caseinformation.asset_information?.SerialNumber ?? ""}`,
-          global_trade_status: c.caseinformation.global_trade_check?.global_trade_status,
-          gt_override_reason: c.caseinformation.global_trade_check?.gt_override_reason,
-          gt_details: c.caseinformation.global_trade_check?.gt_details,
-          CaseResolution: c.caseinformation.caseresolution?.caseResolutionCode,
-          CaseSubject: c.caseinformation.CaseSubject,
-          CaseType: c.caseinformation.CaseType,
-          KCI_Flag: c.caseinformation.KCI_Flag,
-          IncomingChannel: c.caseinformation.IncomingChannel,
-          CaseStatus: c.caseinformation.CaseStatus,
-          CasePriority: c.caseinformation.CasePriority,
-          CustomerSeverity: c.caseinformation.CustomerSeverity,
-          CreatedOn: c.caseinformation.CreatedOn,
-          CaseClosedDate: c.caseinformation.CaseClosedDate,
-          SymptomCode: c.caseinformation.SymptomCode,
-          casenotes_caseinformation_CaseNoteTocasenotes:
-            c.caseinformation.casenotes_caseinformation_CaseNoteTocasenotes?.Note,
-          symptom_codes: null,
-          workorder: c.caseinformation.workorder[0]?.WOID,
-          createdByUser: `${c.caseinformation.createdByUser?.Name ?? ""} (${
-            c.caseinformation.createdByUser?.Email ?? ""
-          })`,
-          servicecatalog: null,
-          OTCCode: `${c.caseinformation.otcCodeTable?.OTCCode ?? ""} - ${c.caseinformation.otcCodeTable?.Description ?? ""}`,
-          ProblemDescription: c.caseinformation.ProblemDescription,
-          CaseProductNote: c.caseinformation.CaseProductNote,
-          
+          Customer_City : c.caseinformation.contact_information?.City,
+          Received_Date: c.caseinformation.CreatedOn,
+          Closed_Date: c.caseinformation.CaseClosedDate,
           //  NEW COLUMNS
           Accessories: accessories,
           DurationDays: range,
@@ -78,16 +66,40 @@ export const ExportExcel = ({ caseData }) => {
     fetchCases();
   }, []);
 
+  const labelCase = cases.map((items) => ({
+    "ID Case" : items.CaseID,
+    "Case ID Manual" : items.CaseID_Manual,
+    "Case Note" : items.Case_Notes,
+    "Product Tower" : items.ProductTower,
+    "Product Group" : items.ProductGroup,
+    "Product Line"  : items.ProductLine,
+    "Product Type" : items.ProductType,
+    "Product No" : items.ProductNumber,
+    "Product Name" : items.ProductName,
+    "Serial No" : items.SerialNumber,
+    "Warranty Status" : items.WarrantyStatus,
+    "Company Name" : items.Company_Name,
+    "CE Name" : items.CE_Name,
+    "Case Type" : items.CaseType,
+    "Case Status" : items.CaseStatus,
+    "Customer Company" : items.Customer_Company,
+    "Customer Name" : items.Customer_Name,
+    "Customer City" : items.Customer_City,  
+    "Received Date" : new Date (items.Received_Date),
+    "Closed Date" : new Date (items.Closed_Date),
+    "Duration" : items.DurationDays
+  }))
+
   const exportToExcel = () => {
     console.log(cases);
-    const worksheet = XLSX.utils.json_to_sheet(cases);
+    const worksheet = XLSX.utils.json_to_sheet(labelCase);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Cases");
-    XLSX.writeFile(workbook, "Case_Information.xlsx");
+    XLSX.writeFile(workbook, "Case Information.xlsx");
   };
   return (
     <div style={{ padding: "1rem", fontFamily: "Arial, sans-serif" }}>
-      <h2 style={{ color: "#2c3e50" }}>Export Asset Information to Excel</h2>
+      <h2 style={{ color: "#2c3e50" }}>Export Case to Excel</h2>
       <button
         onClick={exportToExcel}
         style={{
@@ -106,3 +118,66 @@ export const ExportExcel = ({ caseData }) => {
     </div>
   );
 };
+
+export const ExportExcelPart = ({}) => {
+  const [MoData, setMoData] = useState([]);
+
+  useEffect(() => {
+    const fetchMo = async () => {
+      const res = await ApiCustomer.get("/api/mo-detaill");
+      const json = res.data
+      console.log("Json MO Data : ", json)
+      const transformed = json.data.map((m) => {
+      return {
+       PartNumber: m.materialorderlineitems?.[0]?.PartNumber,
+       Description: m.materialorderlineitems?.[0]?.Description,
+       SalesOrderNumber: m.SalesOrderNumber,
+       RMANumber: m.RMANumber,
+       OrderStatus: m.OrderStatus,
+       AWB_InCode: m.AWB_InCode,
+       AWB_OutCode: m.AWB_OutCode
+      }
+      })
+      setMoData(transformed)
+    }
+
+    fetchMo();
+  }, []);
+
+  const labelPart = MoData.map((items) => ({
+    "Part Number" : items.PartNumber,
+    "Description" : items.Description,
+    "Sales Order Number" : items.SalesOrderNumber,
+    "RMA Number" : items.RMANumber,
+    "Order Status" : items.OrderStatus,
+    "AWB In Code" : items.AWB_InCode,
+    "AWB Out Code" : items.AWB_OutCode 
+  }))
+
+  const exportToExcelPart = () => {
+    const worksheet = XLSX.utils.json_to_sheet(labelPart)
+    const workbook  = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sparepart");
+    XLSX.writeFile(workbook, "Sparepart.xlsx")
+  };
+  return (
+    <div style={{ padding: "1rem", fontFamily: "Arial, sans-serif" }}>
+      {/* <h2 style={{ color: "#2c3e50" }}>Export Sparepart to Excel</h2> */}
+      <button
+        onClick={exportToExcelPart}
+        style={{
+          backgroundColor: "#3498db",
+          color: "white",
+          border: "none",
+          padding: "0.7rem 1.5rem",
+          fontSize: "1rem",
+          borderRadius: "0.3rem",
+          cursor: "pointer",
+        }}
+        aria-label="Export data to Excel"
+      >
+        Export to Excel
+      </button>
+    </div>
+  )
+}

@@ -47,10 +47,9 @@ export async function GET(request) {
           ProductNumber: true,
           WarrantyOTCCode: true,
           product_information: {
-            select: {
-              ProductName: true,
-              ProductLine: true,
-            },
+            include: {
+              product_type: true
+            }
           },
         },
       },
@@ -61,6 +60,7 @@ export async function GET(request) {
           LastName: true,
           Email: true,
           Phone: true,
+          City: true,
           site_account: {
             select: { Company: true, Email: true },
           },

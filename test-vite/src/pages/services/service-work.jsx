@@ -517,6 +517,15 @@ export const ServiceWork = () => {
                     </CaseField>
                   </div>
 
+                      <CaseField label="Work Order Description" lock span={3}>
+                    <Input variant={'invisible'}
+                      // value={WOGeneral.WorkOrderDescription}
+                      // onChange={handleWOGeneral('WorkOrderDescription')}
+                      // placeholder="---"
+                      value={workOrders?.caseinformation?.CaseSubject}
+                    />
+                  </CaseField>
+
                   <CaseField label="Work Order Number" lock>
                     <Input
                       variant={"invisible"}
@@ -534,14 +543,7 @@ export const ServiceWork = () => {
                   />
                   </CaseField>
 
-                    <CaseField label="Work Order Description" lock >
-                    <Input variant={'invisible'}
-                      // value={WOGeneral.WorkOrderDescription}
-                      // onChange={handleWOGeneral('WorkOrderDescription')}
-                      // placeholder="---"
-                      value={workOrders?.caseinformation?.CaseSubject}
-                    />
-                  </CaseField>
+                
 
                   <CaseField label="Shipment Country" lock={!canaddce}>
                     <SearchCommandBlock

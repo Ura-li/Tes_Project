@@ -1597,13 +1597,13 @@ if (caseDetails.CaseStatus !== "Close") {
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-3 gap-3 ">
-                <CaseField label="Case Subject"  span={3} childClass={' col-span-3'} >
+                <CaseField label="Case Subject"  span={3} childClass={' col-span-3'} lock={!canEditFd}>
                   <div className="ml-8 w-full">
                     <Textarea
                      value={caseForm?.CaseSubject}
                       onChange={e => onChangeCase("CaseSubject")(e.target.value)}
                      className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base"
-                      readOnly={!canEditFd}
+                     readOnly={!canEditFd}
                     />
                   </div>
                 </CaseField>
@@ -1710,7 +1710,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     />
                 </CaseField>
 
-                  <CaseField label="Problem Description" span={3} lock={!canEditFd}  >
+                  <CaseField label="Problem Description" span={3} lock={!canEditFd}>
                   <div className="ml-8 w-full">
                     <Textarea
                      value={caseForm?.ProblemDescription}
