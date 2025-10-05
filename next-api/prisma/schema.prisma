@@ -317,6 +317,7 @@ model materialorderlineitems {
 
   PartReturnStatusId Int?
   partReturnStatus   PartReturnStatus? @relation(fields: [PartReturnStatusId], references: [ReturnStatusId])
+  GoodReturnReason   GoodReturnReason?  
   DOAReason          String?           @db.VarChar(100)
   PhotoPartUnit      String?           @db.Text()
 
@@ -850,4 +851,16 @@ enum RMAStatus {
   ReturnLogistic
   ReturnDHL
   FullCharge
+}
+
+enum GoodReturnReason {
+  AdminIssue
+  CIDRejected
+  ComplexIssue
+  CustomerCancelRepair
+  OnsiteRemoteArea
+  OtherReason
+  WrongAnalysisCCC
+  WrongAnalysisCE
+  WrongOrderCE
 }
