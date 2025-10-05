@@ -242,6 +242,7 @@ export const ServiceMaterialApo = () => {
   //   canEditapo = materialOrders?.workorder?.caseinformation?.Owner === user?.id && allowedRoles.includes(user?.role); ;
   // }
 
+
   return (
     <div>
       {materialOrders.OrderStatus === "Closed" && (
@@ -366,7 +367,12 @@ export const ServiceMaterialApo = () => {
                       type="text"
                       value={moForm?.SalesOrderNumber || ""}
                       placeholder="---"
-                      onChange={handleMoFormChange("SalesOrderNumber")}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        handleMoFormChange("SalesOrderNumber")(e);
+                        handleMoFormChange("RMANumber")({target: {value}
+                        })
+                      }}
                     />
                   </CaseField>
 
