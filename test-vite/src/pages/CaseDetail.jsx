@@ -247,6 +247,7 @@ export const TabsServiceCaseDetails = ({
     CasePriority: "",
     ProblemDescription:"",
     CaseID_Manual: "",
+    CaseID_Manual_Date: null,
     CaseProductNote: "",
     StorageLocationStore: "",
   });
@@ -323,18 +324,19 @@ export const TabsServiceCaseDetails = ({
     const noteFilled = caseNoteFormData.Note && caseNoteFormData.Note.trim() !== "";
 
     // Consider CASE edited if any field has a non-empty value
-    const caseEdited = Object.entries({
-      CaseType: caseForm.CaseType,
-      CaseStatus: caseForm.CaseStatus,
-      CaseSubject: caseForm.CaseSubject,
-      Owner: caseForm.Owner,
-      CasePriority: caseForm.CasePriority,
-      CaseProductNote: caseForm.CaseProductNote,
-      ProblemDescription: caseForm.ProblemDescription,
-      CaseID_Manual: caseForm.CaseID_Manual,
-      StorageLocationStore: caseForm.StorageLocationStore
-    }).some(([_, v]) => v !== undefined && v !== null && String(v).trim() !== "");
-    
+   const caseEdited = Object.entries({
+  CaseType: caseForm.CaseType,
+  CaseStatus: caseForm.CaseStatus,
+  CaseSubject: caseForm.CaseSubject,
+  Owner: caseForm.Owner,
+  CasePriority: caseForm.CasePriority,
+  CaseProductNote: caseForm.CaseProductNote,
+  ProblemDescription: caseForm.ProblemDescription,
+  CaseID_Manual: caseForm.CaseID_Manual,
+  CaseID_Manual_Date: caseForm.CaseID_Manual_Date,
+  StorageLocationStore: caseForm.StorageLocationStore
+   }).some(([_, v]) => v !== undefined && v !== null && String(v).trim() !== "");
+  
     const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
     // Only treat entitlement as edited if it has any non-empty value
     const entitlementEdited =
@@ -369,15 +371,12 @@ export const TabsServiceCaseDetails = ({
              CreatedBy: user?.id
            });
            dataToUpdate.CaseNote = response.data.data.NoteID;
-
            // Refresh notes table and clear input note
           //  await fetchCaseNotes();
           //  setCaseNoteFormData((prev) => ({ ...prev, Note: "" }));
-
            if (selectedSymptom) {
              dataToUpdate.SymptomCode = selectedSymptom.SymptomCodeID;
            }
-
            savedModules.push("Note");
          }
          break;
@@ -467,6 +466,9 @@ export const TabsServiceCaseDetails = ({
                 }
                 if (caseForm.CaseID_Manual && String(caseForm.CaseID_Manual).trim() !== "") {
                   caseUpdates.CaseID_Manual = caseForm.CaseID_Manual;
+                }
+               if (caseForm.CaseID_Manual_Date) {
+                  caseUpdates.CaseID_Manual_Date = caseForm.CaseID_Manual_Date.toISOString();
                 }
                 if (caseForm.StorageLocationStore && String(caseForm.StorageLocationStore).trim()!== ""){
                   caseUpdates.StorageLocationStore = caseForm.StorageLocationStore
@@ -1593,13 +1595,13 @@ if (caseDetails.CaseStatus !== "Close") {
                 <hr />
               </CardHeader>
               <CardContent className="grid grid-cols-3 gap-3 ">
-                <CaseField label="Case Subject"  span={3} childClass={' col-span-3'} >
+                <CaseField label="Case Subject"  span={3} childClass={' col-span-3'} lock={!canEditFd}>
                   <div className="ml-8 w-full">
                     <Textarea
                      value={caseForm?.CaseSubject}
                       onChange={e => onChangeCase("CaseSubject")(e.target.value)}
                      className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base"
-                      readOnly={!canEditFd}
+                     readOnly={!canEditFd}
                     />
                   </div>
                 </CaseField>
@@ -1609,6 +1611,13 @@ if (caseDetails.CaseStatus !== "Close") {
                       value={caseForm?.CaseID_Manual}
                       onChange={e => onChangeCase("CaseID_Manual")(e.target.value)}
                     />                    
+                </CaseField>
+
+                <CaseField label="Case ID manual Date" className={"mt-2"} childClass={'col-span-2'} span={2} lock={!canEditApo}>  
+                    <DatePicker
+                        value={caseForm?.CaseID_Manual_Date ? new Date(caseForm.CaseID_Manual_Date) : null}
+                        onChange={onChangeCase("CaseID_Manual_Date")}
+                    />               
                 </CaseField>
 
                 {/* detail owner */}
@@ -1699,7 +1708,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     />
                 </CaseField>
 
-                  <CaseField label="Problem Description" span={3} lock={!canEditFd}  >
+                  <CaseField label="Problem Description" span={3} lock={!canEditFd}>
                   <div className="ml-8 w-full">
                     <Textarea
                      value={caseForm?.ProblemDescription}
@@ -1750,7 +1759,7 @@ if (caseDetails.CaseStatus !== "Close") {
 
                   <Accordion type="single" collapsible className=" col-span-2">
                     <AccordionItem value="more-details" className="pl-5">
-                      <AccordionTrigger className={"decoration-transparent border-1 p-2 cursor-pointer"}>More Details</AccordionTrigger>
+                      <AccordionTrigger className={"decoration-transparent border-1 p-2 cursor-pointer"}>More Details . . .</AccordionTrigger>
                       <AccordionContent className={"m-1"}>
                         <div className="grid grid-cols-2  gap-4">
                           <CaseField lock label="Incoming Channel" className={"mt-2"}>
@@ -1911,7 +1920,7 @@ if (caseDetails.CaseStatus !== "Close") {
 
                 <Accordion type="single" collapsible className="col-span-2">
                   <AccordionItem value="more-details" className={"pl-5 "}>
-                    <AccordionTrigger className={"decoration-transparent border p-2 cursor-pointer"}>More Details</AccordionTrigger>
+                    <AccordionTrigger className={"decoration-transparent border p-2 cursor-pointer"}>More Details . . .</AccordionTrigger>
                     <AccordionContent className="m-1">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
                         <CaseField lock label="Submitted By">
@@ -2022,7 +2031,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     label="Log Type"
 
                   >
-                    <Select
+                    {/* <Select
                       value={formData?.LogType}
                       onValueChange={(val) => onChange("LogType", val)}
                     >
@@ -2035,7 +2044,17 @@ if (caseDetails.CaseStatus !== "Close") {
                         <SelectItem value="NotesLog">Notes Log</SelectItem>
                         <SelectItem value="PhoneLog">Phone Log</SelectItem>
                       </SelectContent>
-                    </Select>
+                    </Select> */}
+
+                    <SearchCommandBlock
+                     value={formData?.LogType}
+                     onChange={(val) => onChange("LogType", val)}
+                     options={[
+                      "Notes Log",
+                      "Phone Log"
+                     ]}
+                      placeholder="--Select--"
+                    />
                   </CaseField>
 
                   <CaseField
@@ -2190,24 +2209,21 @@ if (caseDetails.CaseStatus !== "Close") {
                       options={OptionStorage}
                       />
                     </CaseField>
+                    
                     <CaseField label="Serial Number" lock>
                       <Input
                       value={dataFetchAssetInformation?.AssetInformation?.SerialNumber}
                       variant={"invisible"}
                       placeholder={"---"}
+                      className={"hover:text-blue-600 hover:cursor-pointer"}
+                      onClick={() => {
+                      const sn = dataFetchAssetInformation?.AssetInformation?.SerialNumber;
+                      if (sn) {
+                        window.open(`https://partsurfer.hp.com/?searchtext=${sn}`, "_blank");
+                        }
+                      }}
                       />
                     </CaseField>
-
-                    <Button variant="outline" asChild className={'w-full'}>
-                      <a
-                        href={`https://partsurfer.hp.com/?searchtext=${dataFetchAssetInformation?.AssetInformation?.SerialNumber}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        
-                      >
-                        Part Surfer
-                      </a>
-                    </Button>
 
                     <CaseField label="HPI Segment" lock>
                       <Input

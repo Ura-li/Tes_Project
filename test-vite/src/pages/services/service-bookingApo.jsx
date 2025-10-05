@@ -438,22 +438,16 @@ export function ServiceBookingApo ({BookingId , woid}) {
   console.log("booking data is ther ",bookingData?.workorder?.caseinformation)
 
 
-  let canEditapo;
-  let canEditlg;
-  let canEditce;
+  let canEdit;
+  const editByRole = ["ce","celead","admin","apo"]
 
-  if (user?.role === "admin") {
-    canEditapo = true;
-    canEditlg = true;
-    canEditce = true;
-  } else if (bookingData?.workorder?.caseinformation?.Owner) {
-    canEditapo = true;
-    canEditlg = true;
-    canEditce = true;
-    // canEditapo = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "apo" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "lg" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "ce";
-    // canEditlg = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "lg" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "ce" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "apo";
-    // canEditce = bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "ce" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "apo" || bookingData?.workorder?.caseinformation?.Owner === user?.id && user?.role === "lg";
+  if (bookingData?.workorder?.caseinformation?.Owner) {
+    canEdit = editByRole.includes(user?.role)
   }
+  if (bookingData?.workorder?.SystemStatus === "CLOSED_POSTED") {
+    canEdit = false
+  }
+
 
   const [bookingStatusOptions, setBookingStatusOptions] = useState([]);
 
@@ -548,7 +542,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 />
               </CaseField>
-              <CaseField label={"Resource"} span={2} lock={!canEditapo} star>
+              <CaseField label={"Resource"} span={2} lock={!canEdit} star={user.role === "ce"}>
                 <Input
                   variant={"invisible"}
                   placeholder="---"
@@ -616,7 +610,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   )}
                 </CaseField>
               
-              <CaseField label={"Subk Technician Name"} span={2} lock={!canEditapo} star>
+              <CaseField label={"Subk Technician Name"} span={2}  lock={!canEdit} star={user.role === "ce"}>
                 <Input
                   variant={"invisible"}
                   placeholder="---"
@@ -646,7 +640,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   </ul>
                 )}
               </CaseField>
-              <CaseField label={"Subk Technician Learner ID"} lock={!canEditapo} span={2}>
+              <CaseField label={"Subk Technician Learner ID"} lock={!canEdit}  span={2}>
                 <Input
                   variant={"invisible"}
                   value={subkEngineerId}
@@ -671,7 +665,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   </ul>
                 )}
               </CaseField>
-              <CaseField label={"Booking Status"} span={2} star>
+              <CaseField label={"Booking Status"} span={2} lock={!canEdit} star>
                 <Input
                   variant={"invisible"}
                   value={bookingStatusId}
@@ -755,13 +749,13 @@ export function ServiceBookingApo ({BookingId , woid}) {
             </CardContent>
           </Card>
 
-           <Card className="">
+           <Card className="" hidden>
             <CardHeader>
               <CardTitle className="text-lg ">Total Duration</CardTitle>
               <hr />
             </CardHeader>
             <CardContent className="grid items-center grid-cols-3 gap-5">
-              <CaseField label={'Total Duration'} span={2} lock={!canEditce}>
+              <CaseField label={'Total Duration'} span={2} >
                 <Input
                     type="number"
                     value={totalBillableDurationInMinutes}
@@ -770,7 +764,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                     }
                   />
               </CaseField>
-              <CaseField label={'Total Duration in Progress'} span={2} lock={!canEditce}>
+              <CaseField label={'Total Duration in Progress'} span={2} >
                 <Input
                   type="number"
                   value={totalInProgressDurationInMinutes}
@@ -779,7 +773,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 />
               </CaseField>
-              <CaseField label={'Total Break Duration'} span={2} lock={!canEditce}>
+              <CaseField label={'Total Break Duration'} span={2} >
                 <Input
                   type="number"
                   value={totalBreakDurationInMinutes}
@@ -791,6 +785,31 @@ export function ServiceBookingApo ({BookingId , woid}) {
             </CardContent>
           </Card>
 
+          <Card className=" ">
+            <CardHeader>
+              <CardTitle className="text-lg ">SLA Jeopardy</CardTitle>
+              <hr />
+            </CardHeader>
+            <CardContent className="grid grid-cols-3 gap-6">
+              <CaseField label={'Schedule Jeopardy'} span={2} lock>
+              <Input
+                  type="text"
+                  value={scheduleJeopardy}
+                  onChange={(e) => setScheduleJeopardy(e.target.value)}
+                  readOnly
+                />
+              </CaseField>
+              <CaseField label={'Schedule Jeopardy Time'} span={2} lock>
+                <DatePicker value={
+                    scheduleJeopardyTime
+                      ? new Date(scheduleJeopardyTime)
+                      : ""
+                  }
+                  onChange={setScheduleJeopardyTime}></DatePicker>
+              </CaseField> 
+            </CardContent>
+          </Card>
+
           <Card className="break-inside-avoid-column flex gap-2">
             <CardHeader>
               <CardTitle className="text-lg ">
@@ -799,7 +818,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
               <hr />
             </CardHeader>
             <CardContent className="grid grid-cols-3 gap-6">
-              <CaseField label={"Start Time"} span={2} star lock={!canEditapo}>
+              <CaseField label={"Start Time"} span={2} lock={!canEdit} star >
                 <DatePicker
                   value={
                     startTimeUserTime ? new Date(startTimeUserTime) : ""
@@ -809,7 +828,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"End Time"} span={2}  lock={!canEditapo}>
+              <CaseField label={"End Time"} lock={!canEdit} span={2} >
                 {/* {console.log("END TIME IN RETURN LOOPING", endTimeUserTime)} */}
                 <DatePicker
                   value={endTimeUserTime ? new Date(endTimeUserTime) : ""}
@@ -818,17 +837,18 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"Duration"} span={2}  lock={!canEditapo}>
+              <CaseField label={"Duration"} lock={!canEdit} span={2}  >
                 <div className='flex flex-row gap-2'>
                 <Input
                   type="number"
                   value={durationInMinutesUserTime}
                   onChange={(e) => {setDurationInMinutesUserTime(e.target.value ? parseInt(e.target.value, 10) : null)}}
+                  readOnly={!canEdit}
                 />
                 <Label>Hours</Label>
                 </div>
               </CaseField>
-              <CaseField label={"Estimated Arrival Time"} span={2} lock={!canEditapo}>
+              <CaseField label={"Estimated Arrival Time"} lock={!canEdit} span={2} >
                 <DatePicker
                   value={
                     estimatedArrivalTimeUserTime
@@ -840,7 +860,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                   }
                 ></DatePicker>
               </CaseField>
-              <CaseField label={"Actual Arrival Time"} span={2}  lock={!canEditlg}>
+              <CaseField label={"Actual Arrival Time"} lock={!canEdit} span={2}  >
                 <DatePicker
                   
                   value={
@@ -872,25 +892,25 @@ export function ServiceBookingApo ({BookingId , woid}) {
               <hr />
             </CardHeader>
             <CardContent className="grid items-center grid-cols-3 gap-6">
-              <CaseField label={'Start Time (Customer)'} span={2}  lock={!canEditapo}>
+              <CaseField label={'Start Time (Customer)'} lock={!canEdit} span={2}  >
                 <DatePicker 
                   value={startTimeCustomerTime ? new Date(startTimeCustomerTime) : ""}
                   onChange={setStartTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'End TIme (Customer)'} span={2}  lock={!canEditapo}>
+              <CaseField label={'End TIme (Customer)'} lock={!canEdit} span={2}  >
                 <DatePicker 
                   value={endTimeCustomerTime ? new Date(endTimeCustomerTime) : ""}
                   onChange={setEndTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'Estimated Arrival Time (Customer)'} span={2}   lock={!canEditapo}>
+              <CaseField label={'Estimated Arrival Time (Customer)'} lock={!canEdit} span={2}   >
                 <DatePicker 
                   value={estimatedArrivalTimeCustomerTime ? new Date(estimatedArrivalTimeCustomerTime) : ""}
                   onChange={setEstimatedArrivalTimeCustomerTime}
                 />
               </CaseField>
-              <CaseField label={'Actual Arrival Time (Customer)'} span={2}  lock={!canEditlg}>
+              <CaseField label={'Actual Arrival Time (Customer)'} lock={!canEdit} span={2}  >
                 <DatePicker 
                   value={actualArrivalTimeCustomerTime ? new Date(actualArrivalTimeCustomerTime) : ""}
                   onChange={setActualArrivalTimeCustomerTime}
@@ -899,30 +919,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
             </CardContent>
           </Card>
 
- <Card className=" ">
-            <CardHeader>
-              <CardTitle className="text-lg ">SLA Jeopardy</CardTitle>
-              <hr />
-            </CardHeader>
-            <CardContent className="grid grid-cols-3 gap-6">
-              <CaseField label={'Schedule Jeopardy'} span={2} lock>
-              <Input
-                  type="text"
-                  value={scheduleJeopardy}
-                  onChange={(e) => setScheduleJeopardy(e.target.value)}
-                  readOnly
-                />
-              </CaseField>
-              <CaseField label={'Schedule Jeopardy Time'} span={2} lock>
-                <DatePicker value={
-                    scheduleJeopardyTime
-                      ? new Date(scheduleJeopardyTime)
-                      : ""
-                  }
-                  onChange={setScheduleJeopardyTime}></DatePicker>
-              </CaseField> 
-            </CardContent>
-          </Card>
+ 
          
         </TabsContent>
 

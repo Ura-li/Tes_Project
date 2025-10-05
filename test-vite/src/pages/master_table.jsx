@@ -1137,9 +1137,7 @@ const { user } = useAuth();
 
   return (
     <div className="grid p-6 grid-cols-1 w-full h-full bg-gray-200 rounded-2xl">
-      {user?.role === 'admin' ? 
-      <ExportExcel caseData={caseData} />
-      : null}
+     
       {/* <h2 className="mb-4 text-xl font-bold">ID Daily Aging Cases Javag FY</h2> */}
       <h2 className="mb-4 text-2xl font-semibold">View All The Case</h2>
 
@@ -1229,20 +1227,9 @@ const { user } = useAuth();
             ))}
           </select>
         </div>
-        {/* Reset */}
-        <div className="flex items-end">
-          <button
-            onClick={resetFilters}
-            className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
-          >
-            Reset Filters
-          </button>
-        </div>
-      </div>
-
-      {/* Toggle status */}
-      <div className="flex items-center gap-3 mb-4">
-        <Label htmlFor="status">Toggle Status Of Case :</Label>
+         {/* Toggle status */}
+      <div className="flex flex-col">
+        <label htmlFor="status" className="mb-1 text-sm font-medium mb-2">Toggle Status Of Case :</label>
         <Select defaultValue="All" value={openClose} onValueChange={setOpenClose}>
           <SelectTrigger id="status">
             <SelectValue>{openClose}</SelectValue>
@@ -1257,6 +1244,21 @@ const { user } = useAuth();
           </SelectContent>
         </Select>
       </div>
+  {/* Reset */}
+        <div className="flex  gap-2">
+          <Button
+            onClick={resetFilters}
+            className={"bg-blue-400 text-white hover:bg-blue-300 cursor-pointer"}
+          >
+            Reset Filters
+          </Button>
+           {user?.role === 'admin' ? 
+      <ExportExcel caseData={caseData} />
+      : null}
+        </div>
+      </div>
+
+     
 
       {/* Loading & Error */}
       {loading && <p>Loading cases...</p>}

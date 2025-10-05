@@ -388,7 +388,7 @@ export const ServiceMaterialApo = () => {
 
                   <Accordion type="single" collapsible className="col-span-2 md:col-span-4 ">
                     <AccordionItem value="more-detail" >
-                      <AccordionTrigger className=" ">More Detail</AccordionTrigger>
+                      <AccordionTrigger className=" ">More Detail . . .</AccordionTrigger>
                       <AccordionContent className={"p-2"}>
                         
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
