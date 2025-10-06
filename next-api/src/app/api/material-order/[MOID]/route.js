@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 
 export async function GET(request, { params }) {
-  const { MOID: moid } = params;
+  const { MOID: moid } = await params;
 
     if (!moid) {
         return NextResponse.json({
@@ -67,7 +67,7 @@ export async function GET(request, { params }) {
 
 // ======================= PATCH =======================
 export async function PATCH(request, { params }) {
-  const { MOID: moid } = params;
+  const { MOID: moid } = await params;
 
   if (!moid || typeof moid !== "string" || moid.length > 13) {
     return NextResponse.json({
@@ -77,7 +77,35 @@ export async function PATCH(request, { params }) {
   }
 
   try {
+
     const body = await request.json();
+    const moUpdates = body.moUpdates || {}; // prevent crash if undefined
+
+    const {
+      orderNumber: OrderNumber,
+      orderType: OrderType,
+      shippingPriority: ShippingPriority,
+      readyForClosureDate: ReadyForClosureDate,
+      deliveryRequestedDate: DeliveryRequestedDate,
+      collectionRequestedDate: CollectionRequestedDate,
+      promoCode: PromoCode,
+      customerInducedDamage: CustomerInducedDamage,
+      accidentalDamageProtection: AccidentalDamageProtection,
+      defectiveMediaRetention: DefectiveMediaRetention,
+      notificationNumber: NotificationNumber,
+      salesOrderNumber: SalesOrderNumber,
+      parentMO: ParentMOID,
+      isBCPOrder: IsBCPOrder,
+      materialOrderType: MaterialOrderType,
+      eotOrderNumber: EOTOrderNumber,
+      ownerID: OwnerID,
+      createdOn: CreatedOn,
+      orderStatus: OrderStatus,
+      rmaNumber: RMANumber,
+      AWB_InCode,
+      AWB_OutCode,
+      RMAStatus
+    } = moUpdates;
 
     const existingMaterialOrder = await prisma.materialorder.findUnique({
       where: { MOID: moid },
@@ -89,30 +117,8 @@ export async function PATCH(request, { params }) {
         message: "Material Order not found!",
       }, { status: 404 });
     }
-
-    const {
-      OrderNumber,
-      OrderStatus,
-      OrderType,
-      CreatedOn,
-      SalesOrderNumber,
-      RMANumber,
-      ReadyForClosureDate,
-      OwnerID,
-      ShippingPriority,
-      CustomerInducedDamage,
-      AccidentalDamageProtection,
-      DefectiveMediaRetention,
-      DeliveryRequestedDate,
-      CollectionRequestedDate,
-      PromoCode,
-      NotificationNumber,
-      ParentMOID,
-      IsBCPOrder,
-      MaterialOrderType,
-      EOTOrderNumber,
-    //   ResourceId,
-    } = body;
+    console.log(body)
+    console.log("MOBODY : ",moUpdates)
 
     const updatedMaterialOrder = await prisma.materialorder.update({
       where: { MOID: moid },
@@ -137,6 +143,9 @@ export async function PATCH(request, { params }) {
         IsBCPOrder,
         MaterialOrderType,
         EOTOrderNumber,
+        AWB_InCode,
+        AWB_OutCode,
+        RMAStatus,
         // ResourceId,
       },
     });

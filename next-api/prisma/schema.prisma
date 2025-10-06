@@ -317,9 +317,9 @@ model materialorderlineitems {
 
   PartReturnStatusId Int?
   partReturnStatus   PartReturnStatus? @relation(fields: [PartReturnStatusId], references: [ReturnStatusId])
-  GoodReturnReason   GoodReturnReason?  
   DOAReason          String?           @db.VarChar(100)
   PhotoPartUnit      String?           @db.Text()
+  GoodReturnReason   GoodReturnReason?
 
   // Foreign key ke Failure
   FailureId Int?
