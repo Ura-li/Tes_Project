@@ -59,6 +59,11 @@ export const ServiceMaterialApo = () => {
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
   const [MaterialOrder, setMaterialOrder] = useState([]);
+  /**
+   * TODO (WARNING ISSUES) 
+   * REMOVE MO FORM, USE STATE DEFINED ONE. 
+   * this will also change the handle Save Function.
+   */
   const [moForm, setMoForm] = useState({
     SalesOrderNumber: "",
     RMANumber: "",
@@ -80,7 +85,7 @@ export const ServiceMaterialApo = () => {
     accidentalDamageProtection: false,
     defectiveMediaRetention: false,
     notificationNumber: "",
-    salesOrderNumber: "",
+    SalesOrderNumber: "",
     resourceName: "",
     resourceId: "",
     workOrder: null,
@@ -91,6 +96,8 @@ export const ServiceMaterialApo = () => {
     AWB_InCode: "",
     AWB_OutCode: "",
     RMAStatus: null,
+    SalesOrderNumber: "",
+    RMANumber: "",
   });
   // const [collectionRequestedDate, setCollectionRequestedDate] = useState(null);
   // const [readyForClosureDate, setReadyForClosureDate] = useState(null);
@@ -283,16 +290,26 @@ export const ServiceMaterialApo = () => {
   // }
 
   useEffect(() => {
-    console.log("lo",moForm.SalesOrderNumber)
     setMoForm({
       ...moForm,
       RMANumber: moForm.SalesOrderNumber
     })
     setMaterialOrderInformation({
       ...materialOrderInformation,
+      SalesOrderNumber: moForm.SalesOrderNumber,
       RMANumber: moForm.SalesOrderNumber
     })
   },[moForm.SalesOrderNumber])
+
+  /**
+   * TODO : REMOVE THIS LATER IF THE MOFORM IS REMOVED
+   */
+  useEffect(() =>{
+    setMaterialOrderInformation({
+      ...materialOrderInformation,
+      RMANumber: moForm.RMANumber
+    })
+  },[moForm.RMANumber])
   
   return (
     <div>

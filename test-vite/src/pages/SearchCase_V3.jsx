@@ -333,7 +333,7 @@ export default function NewCaseForm() {
   const [companyAddressLine1, setCompanyAddressLine1] = useState("");
   const [companyStateProvince, setCompanyStateProvince] = useState("");
   const [companyCity, setCompanyCity] = useState("");
-  const [companyCountry, setCompanyCountry] = useState("");
+  const [companyCountry, setCompanyCountry] = useState("Indonesia");
   const [companyZipPostalCode, setCompanyZipPostalCode] = useState("");
   const [companyNPWP, setCompanyNPWP] = useState("");
 
@@ -1749,6 +1749,7 @@ export default function NewCaseForm() {
                       <Label className="col-span-1">Country<Label className="text-red-600">*</Label></Label>
                       <Input className="col-span-2" value={companyCountry} onChange={(e) => setCompanyCountry(e.target.value)} />
                     </div>
+                    {companyCountry.toLowerCase() === 'indonesia' ? (
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Province (ID)<Label className="text-red-600">*</Label></Label>
                       <div className="col-span-2">
@@ -1768,25 +1769,53 @@ export default function NewCaseForm() {
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">City (ID)<Label className="text-red-600">*</Label></Label>
-                      <div className="col-span-2">
-                        {/* <SelectBarState
-                          id="CompanyCity"
-                          value={companyCity}
-                          onChange={setCompanyCity}
-                          options={cityCompany}
-                          placeholder="Select a City"
-                        /> */}
-                        <ComboboxDemo
-                          id="CompanyCity"
-                          value={companyCity}
-                          setValue={setCompanyCity}
-                          options={cityCompany}
-                          placeholder="Select a City"
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2 items-center">
+                        <Label className="col-span-1">
+                          State / Region<Label className="text-red-600">*</Label>
+                        </Label>
+                        <Input
+                          className="col-span-2"
+                          value={companyStateProvince}
+                          onChange={(e) => setCompanyStateProvince(e.target.value)}
+                          placeholder="e.g. Tokyo, California, etc."
                         />
                       </div>
-                    </div>
+                    )}
+
+                    {companyCountry.toLowerCase() === "indonesia" ? (
+                      <div className="grid grid-cols-3 gap-2 items-center">
+                        <Label className="col-span-1">City (ID)<Label className="text-red-600">*</Label></Label>
+                        <div className="col-span-2">
+                          {/* <SelectBarState
+                            id="CompanyCity"
+                            value={companyCity}
+                            onChange={setCompanyCity}
+                            options={cityCompany}
+                            placeholder="Select a City"
+                          /> */}
+                          <ComboboxDemo
+                            id="CompanyCity"
+                            value={companyCity}
+                            setValue={setCompanyCity}
+                            options={cityCompany}
+                            placeholder="Select a City"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2 items-center">
+                        <Label className="col-span-1">
+                          City / Area<Label className="text-red-600">*</Label>
+                        </Label>
+                        <Input
+                          className="col-span-2"
+                          value={companyCity}
+                          onChange={(e) => setCompanyCity(e.target.value)}
+                          placeholder="e.g. Jakarta, Berlin, New York..."
+                        />
+                      </div>
+                    )}
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
                       <Input className="col-span-2" value={companyZipPostalCode} onChange={(e) => setCompanyZipPostalCode(e.target.value)} />

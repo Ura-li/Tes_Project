@@ -93,7 +93,7 @@ export async function PATCH(request, { params }) {
       accidentalDamageProtection: AccidentalDamageProtection,
       defectiveMediaRetention: DefectiveMediaRetention,
       notificationNumber: NotificationNumber,
-      salesOrderNumber: SalesOrderNumber,
+      SalesOrderNumber,
       parentMO: ParentMOID,
       isBCPOrder: IsBCPOrder,
       materialOrderType: MaterialOrderType,
@@ -101,11 +101,13 @@ export async function PATCH(request, { params }) {
       ownerID: OwnerID,
       createdOn: CreatedOn,
       orderStatus: OrderStatus,
-      rmaNumber: RMANumber,
+      RMANumber,
       AWB_InCode,
       AWB_OutCode,
       RMAStatus
     } = moUpdates;
+
+    
 
     const existingMaterialOrder = await prisma.materialorder.findUnique({
       where: { MOID: moid },
