@@ -777,6 +777,7 @@ enum MaterialOrderStatus {
   Shipped
   Closed
   Cancelled
+  BackOrdered
 }
 
 enum WorkOrderStatus {

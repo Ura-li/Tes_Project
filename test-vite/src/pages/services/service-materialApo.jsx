@@ -59,6 +59,11 @@ export const ServiceMaterialApo = () => {
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
   const [MaterialOrder, setMaterialOrder] = useState([]);
+  /**
+   * TODO (WARNING ISSUES) 
+   * REMOVE MO FORM, USE STATE DEFINED ONE. 
+   * this will also change the handle Save Function.
+   */
   const [moForm, setMoForm] = useState({
     SalesOrderNumber: "",
     RMANumber: "",
@@ -80,7 +85,7 @@ export const ServiceMaterialApo = () => {
     accidentalDamageProtection: false,
     defectiveMediaRetention: false,
     notificationNumber: "",
-    salesOrderNumber: "",
+    SalesOrderNumber: "",
     resourceName: "",
     resourceId: "",
     workOrder: null,
@@ -91,6 +96,7 @@ export const ServiceMaterialApo = () => {
     AWB_InCode: "",
     AWB_OutCode: "",
     RMAStatus: null,
+    RMANumber: "",
   });
   // const [collectionRequestedDate, setCollectionRequestedDate] = useState(null);
   // const [readyForClosureDate, setReadyForClosureDate] = useState(null);
@@ -181,7 +187,7 @@ export const ServiceMaterialApo = () => {
         accidentalDamageProtection: data.AccidentalDamageProtection || false,
         defectiveMediaRetention: data.DefectiveMediaRetention || false,
         notificationNumber: data.NotificationNumber || "",
-        salesOrderNumber: data.SalesOrderNumber || "",
+        SalesOrderNumber: data.SalesOrderNumber || "",
         resourceName: data.Resource?.Name || "",
         resourceId: data.Resource?.ResourceId || "",
         workOrder: data.WOID || null,
@@ -283,16 +289,27 @@ export const ServiceMaterialApo = () => {
   // }
 
   useEffect(() => {
-    console.log("lo",moForm.SalesOrderNumber)
-    setMoForm({
-      ...moForm,
-      RMANumber: moForm.SalesOrderNumber
-    })
-    setMaterialOrderInformation({
-      ...materialOrderInformation,
-      RMANumber: moForm.SalesOrderNumber
-    })
+    // setMoForm({
+    //   ...moForm,
+    //   RMANumber: moForm.SalesOrderNumber
+    // })
+    console.log("TEST MO FORM : ", moForm.SalesOrderNumber, materialOrderInformation.SalesOrderNumber)
+    setMaterialOrderInformation(prev => ({
+      ...prev,
+      SalesOrderNumber: moForm.SalesOrderNumber,
+      // RMANumber: moForm.SalesOrderNumber
+    }))
   },[moForm.SalesOrderNumber])
+
+  /**
+   * TODO : REMOVE THIS LATER IF THE MOFORM IS REMOVED
+   */
+  useEffect(() =>{
+    setMaterialOrderInformation(prev => ({
+      ...prev,
+      RMANumber: moForm.RMANumber
+    }))
+  },[moForm.RMANumber])
   
   return (
     <div>
@@ -420,10 +437,9 @@ export const ServiceMaterialApo = () => {
                       value={moForm?.SalesOrderNumber || ""}
                       placeholder="---"
                       onChange={(e) => {
-                        const value = e.target.value
-                        handleMoFormChange("SalesOrderNumber")(e);
-                        handleMoFormChange("RMANumber")({target: {value}
-                        })
+                        const val = e.target.value
+                        handleMoFormChange("SalesOrderNumber")(e)
+                        handleMoFormChange("RMANumber")(e)
                       }}
                     />
                   </CaseField>
