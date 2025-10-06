@@ -107,7 +107,7 @@ export async function PATCH(request, { params }) {
       RMAStatus
     } = moUpdates;
 
-    
+    // return console.log("MOUPDATES : ",moUpdates,"\n")
 
     const existingMaterialOrder = await prisma.materialorder.findUnique({
       where: { MOID: moid },

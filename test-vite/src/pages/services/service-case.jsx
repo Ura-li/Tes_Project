@@ -990,8 +990,9 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm, setMoF
       const hasShippingUpdate = updatedLineItems && Object.values(updatedLineItems).some(
         (v) => String(v).toLowerCase() === 'shipped' || String(v).toLowerCase() === 'ordered'
       );
-      const soNumber = (moForm?.SalesOrderNumber ?? materialOrders?.SalesOrderNumber ?? '').toString().trim();
-      const rmaNumber = (moForm?.RMANumber ?? materialOrders?.RMANumber ?? '').toString().trim();
+      const soNumber = (moForm?.SalesOrderNumber ?? materialOrderInformation?.SalesOrderNumber ?? materialOrders?.SalesOrderNumber ?? '').toString().trim();
+      const rmaNumber = (moForm?.RMANumber ?? materialOrderInformation?.RMANumber ?? materialOrders?.RMANumber ?? '').toString().trim();
+      // return console.log(soNumber, moForm, materialOrderInformation);
       if (hasShippingUpdate && (!soNumber || !rmaNumber)) {
         Swal.close();
         return Swal.fire({
