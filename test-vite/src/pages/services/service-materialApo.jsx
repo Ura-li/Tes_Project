@@ -486,14 +486,14 @@ export const ServiceMaterialApo = () => {
                   </CaseField>
 
                   {/* AWB IN CODE */}
-                  <CaseField label={"AWB In Code"} icon>
+                  <CaseField label={"AWB In Code"} icon lock={!canEditapo}>
                     <Input variant="invisible" placeholder="---"               
                       value={materialOrderInformation?.AWB_InCode || null}
                       onChange={handleMaterialOrderChange("AWB_InCode")}
                     />
                   </CaseField>
                   {/* AWB OUT CODE */}
-                  <CaseField label={"AWB Out Code"} icon>
+                  <CaseField label={"AWB Out Code"} icon lock={!canEditapo}>
                     <Input variant="invisible" placeholder="---" 
                       value={materialOrderInformation?.AWB_OutCode || null}
                       onChange={handleMaterialOrderChange("AWB_OutCode")}

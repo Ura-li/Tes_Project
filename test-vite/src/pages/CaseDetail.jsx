@@ -1946,7 +1946,6 @@ if (caseDetails.CaseStatus !== "Close") {
                             <Input
                               variant="invisible"
                               value={caseDetails.CaseID}
-                              
                               hidden
                             />
                           </CaseField>
