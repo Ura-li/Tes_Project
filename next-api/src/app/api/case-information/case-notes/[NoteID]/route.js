@@ -51,7 +51,7 @@ export async function GET(request, {params}) {
 
 export async function  PATCH(request, { params }) {
     setUserIdProvider(() => getTokenUserId(request))
-    const noteID = parseInt(params.noteID);
+    const noteID = parseInt(params.NoteID);
     const { Note, append = false, ...rest } = await request.json();
 
     // Get existing note first

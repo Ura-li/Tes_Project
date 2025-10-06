@@ -23,6 +23,7 @@ export async function GET(request, { params }) {
                     product_type: true
                 }
             },
+            asset_warranty: true,
             WarrantyOTCCode: true
         }
     });
@@ -48,92 +49,182 @@ export async function GET(request, { params }) {
  * TODO 
  * MAKE UPDATE ASSET AND CREATE PRODUCT SEPARATELY
  */
-export async function PATCH(request, { params }) {
-    const {AssetID} = await params;
-    const assetId = parseInt(AssetID);
 
-    try { 
-        const body = await request.json();
-        const { 
-            SerialNumber,  
-            ProductNumber, 
-            SiteAccountID, 
+import fs from "fs";
+import path from "path";
+
+export async function PATCH(request, { params }) {
+    const assetId = parseInt(params.AssetID);
+
+    try {
+        const contentType = request.headers.get("content-type") || "";
+        let body = {};
+        let files = {};
+
+        // --- 1. Parse request based on Content-Type ---
+        if (contentType.includes("multipart/form-data")) {
+            const formData = await request.formData();
+
+            formData.forEach((value, key) => {
+                if (value instanceof File) {
+                    if (!files[key]) files[key] = [];
+                    files[key].push(value);
+                } else {
+                    body[key] = value;
+                }
+            });
+        } else if (contentType.includes("application/json")) {
+            body = await request.json();
+        } else {
+            return NextResponse.json(
+                { success: false, message: "Unsupported content type" },
+                { status: 400 }
+            );
+        }
+
+        // --- 2. Extract fields from body ---
+        const {
+            SerialNumber,
+            ProductNumber,
+            SiteAccountID,
             ContactID,
             Warranty_Status,
-            EOW_Date 
+            EOW_Date,
+            needWarrantyApproval = false,
+            WarrantyApprovalStatus,
+            WarrantyCardDate,
+            EndUserName,
+            EndUserPhone,
+            EndUserAddress,
+            PurchaseDate,
         } = body;
 
-        console.log(body);
-        // Validasi input tidak boleh kosong
-        // if (!SerialNumber || !ProductName || !ProductNumber || !ProductLine) {
-        //     return NextResponse.json({
-        //         success: false,
-        //         message: "All fields are required!"
-        //     }, { status: 400 });
-        // }
+        // --- 3. Save files if any ---
+        const uploadDir = path.join(process.cwd(), "public", "uploads","warranty");
+        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-        // Cek apakah AssetID ada
+        const saveFile = async (file) => {
+            if (!file || typeof file === "string") return null;
+            const bytes = await file.arrayBuffer();
+            const buffer = Buffer.from(bytes);
+            const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+            const filepath = path.join(uploadDir, filename);
+            fs.writeFileSync(filepath, buffer);
+            return `/uploads/warranty/${filename}`; // URL path
+        };
+
+        const popPath = files.POPDocument?.[0]
+            ? await saveFile(files.POPDocument[0])
+            : body.POPDocument && typeof body.POPDocument === "string"
+                ? body.POPDocument
+                : "";
+
+        const warrantyPath = files.WarrantyCard?.[0]
+            ? await saveFile(files.WarrantyCard[0])
+            : body.WarrantyCard && typeof body.WarrantyCard === "string"
+                ? body.WarrantyCard
+                : "";
+
+        const photoPath = files.PhotoUnit?.[0]
+            ? await saveFile(files.PhotoUnit[0])
+            : body.PhotoUnit && typeof body.PhotoUnit === "string"
+                ? body.PhotoUnit
+                : "";
+        // --- 4. Check if asset exists ---
         const existingAsset = await prisma.asset_information.findUnique({
-            where: { AssetID: assetId }
+            where: { AssetID: assetId },
         });
 
         if (!existingAsset) {
-            return NextResponse.json({
-                success: false,
-                message: "Asset not found!"
-            }, { status: 404 });
+            return NextResponse.json(
+                { success: false, message: "Asset not found" },
+                { status: 404 }
+            );
         }
+
+        // --- 5. Build update data ---
         const dataToUpdate = {};
-
-        if (typeof SerialNumber !== "undefined") {
-            dataToUpdate.SerialNumber = SerialNumber;
-        }
-        if (typeof ProductNumber !== "undefined") {
-            dataToUpdate.ProductNumber = ProductNumber;
-        }
-        if (typeof SiteAccountID !== "undefined") {
-            dataToUpdate.SiteAccountID =
-                SiteAccountID === null || SiteAccountID === "" ? null : parseInt(SiteAccountID);
-        }
-        if (typeof ContactID !== "undefined") {
-            dataToUpdate.ContactID =
-                ContactID === null || ContactID === "" ? null : parseInt(ContactID);
-        }
-        if (typeof Warranty_Status !== "undefined") {
+        if (SerialNumber !== undefined) dataToUpdate.SerialNumber = SerialNumber;
+        if (ProductNumber !== undefined) dataToUpdate.ProductNumber = ProductNumber;
+        if (SiteAccountID !== undefined)
+            dataToUpdate.SiteAccountID = SiteAccountID
+                ? parseInt(SiteAccountID)
+                : null;
+        if (ContactID !== undefined)
+            dataToUpdate.ContactID = ContactID ? parseInt(ContactID) : null;
+        if (Warranty_Status !== undefined)
             dataToUpdate.Warranty_Status = Warranty_Status;
-        }
-        if (typeof EOW_Date !== "undefined") {
+        if (EOW_Date !== undefined)
             dataToUpdate.EOW_Date = EOW_Date ? new Date(EOW_Date) : null;
-        }
 
-        if (!Object.keys(dataToUpdate).length) {
-            return NextResponse.json({
-                success: true,
-                message: "No changes applied to asset.",
-                data: existingAsset
-            }, { status: 200 });
-        }
+        // --- 6. Perform database update ---
+        const result = await prisma.$transaction(async (tx) => {
+            const updatedAsset = await tx.asset_information.update({
+                where: { AssetID: assetId },
+                data: dataToUpdate,
+            });
 
-        // Update data
-        const updatedAsset = await prisma.asset_information.update({
-            where: { AssetID: assetId },
-            data: dataToUpdate,
+            // If warranty update is needed
+            if (
+                (needWarrantyApproval === "true" || needWarrantyApproval === true) &&
+                Warranty_Status === "01T"
+            ) {
+                const existingWarranty = await tx.asset_warranty.findFirst({
+                    where: { AssetID: assetId },
+                });
+
+                const warrantyData = {
+                    WarrantyApprovalStatus,
+                    WarrantyCardDate: WarrantyCardDate ? new Date(WarrantyCardDate) : null,
+                    PurchaseDate: PurchaseDate ? new Date(PurchaseDate) : null,
+                    POPDocument: popPath,
+                    WarrantyCard: warrantyPath,
+                    PhotoUnit: photoPath,
+                    EndUserName,
+                    EndUserPhone,
+                    EndUserAddress,
+                };
+
+                if (existingWarranty) {
+                    await tx.asset_warranty.update({
+                        where: { WarrantyID: existingWarranty.WarrantyID },
+                        data: warrantyData,
+                    });
+                } else {
+                    await tx.asset_warranty.create({
+                        data: {
+                            AssetID: assetId,
+                            ...warrantyData,
+                        },
+                    });
+                }
+            }
+
+            return updatedAsset;
         });
 
-        return NextResponse.json({
-            success: true,
-            message: "Data Asset Information Updated!",
-            data: updatedAsset
-        }, { status: 200 });
-
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Data Asset Information Updated!",
+                data: result,
+            },
+            { status: 200 }
+        );
     } catch (error) {
-        return NextResponse.json({
-            success: false,
-            message: "Failed to update asset",
-            error: error.message
-        }, { status: 500 });
+        console.error("PATCH error:", error);
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to update asset",
+                error: error.message,
+            },
+            { status: 500 }
+        );
     }
 }
+
+
 
 
 //delete data

@@ -21,11 +21,13 @@ export async function GET(req) {
             { CaseType: { contains: searchTerm} },
             { site_account: { Company: { contains: searchTerm} } },
             { contact_information: { FirstName: { contains: searchTerm}, LastName: { contains: searchTerm} } },
+            { asset_information: {is : { SerialNumber: { contains: searchTerm} }}},
           ],
         },
         include: {
           site_account: true,
           contact_information: true,
+          asset_information: true,
         },
       });
   
