@@ -5031,6 +5031,24 @@ console.log("Asset Info OTC : ",isOutWarranty)
     );
   };
 
+  const handleUEFICodeChange = (partNumber, value) => {
+    setSelectedPartCatalog((prev) =>
+      prev.map((p) =>
+        p.PartNumber === partNumber ? { ...p, UEFICode: value, UEFI_NO: "" } : p
+      )
+    );
+  };
+
+  const handleUEFINoChange = (partNumber, value) => {
+    setSelectedPartCatalog((prev) =>
+      prev.map((p) =>
+        p.PartNumber === partNumber ? { ...p, UEFI_NO: value } : p
+      )
+    );
+  };
+
+  const showUEFINumberHeader = selectedPartCatalog.some(p => p.UEFICode === "FID");
+
   //handle add part in confirm services
   const [tempSelectedParts, setTempSelectedParts] = useState([]);
   
@@ -5070,8 +5088,21 @@ console.log("Asset Info OTC : ",isOutWarranty)
         description: "PLEASE CHOOSE THE APO PATNER BEFORE CREATING ORDER",
         position: 'top-center'
       })
-
+      return
     } else {
+      // cek apakah ada part yang belum diisi UEFI Code
+      const partWithoutUEFICode = selectedPartCatalog.find(
+        (p) => !p.UEFICode || p.UEFICode.trim() === ""
+      );
+
+      if (partWithoutUEFICode) {
+        toast.warning(`UEFI Code belum diisi untuk part ${partWithoutUEFICode.PartNumber}`, {
+          description: "PLEASE CHOOSE THE UEFI CODE BEFORE CREATING ORDER",
+          position: 'top-center'
+        });
+        return;
+      }
+
       try {
         Swal.fire({
           title: "Creating Order...",
@@ -5193,10 +5224,13 @@ console.log("Asset Info OTC : ",isOutWarranty)
       }
     };
 
-    // Skip warranty step when creating MO from WO
     
 
+    // Skip warranty step when creating MO from WO
     const effectiveStep = ((WOID || serviceCatalogType === 'wo-add-mo') && currentStep === 1) ? 2 : currentStep;
+    
+
+
 
     switch (effectiveStep) {
       case 1:
@@ -5602,6 +5636,10 @@ console.log("Asset Info OTC : ",isOutWarranty)
                     <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
                     <TableHead className={'font-bold text-black'}>Qty</TableHead>
                     <TableHead className={'font-bold text-black'}>CT KEY RETURN</TableHead>
+                    <TableHead className={'font-bold text-black'}>UEFI CODE</TableHead>
+                    {showUEFINumberHeader  && (
+                      <TableHead className={'font-bold text-black'}>UEFI Number</TableHead>
+                    )}
                     <TableHead className={'font-bold text-black'}>Tax</TableHead>
                     <TableHead className={'font-bold text-black'}>Price</TableHead>
                   </TableRow>
@@ -5629,16 +5667,38 @@ console.log("Asset Info OTC : ",isOutWarranty)
                             value={part.RemovedPartNumber || ''}
                             onChange={(e) => handleRemovedPartNumberChange(part.PartNumber, e.target.value)}
                           />
-                        {/* <Input
-                          placeholder="QTY"
-                          min={1}
-                          readOnly
-                          type="number"
-                          value={part.qty}
-                          onChange={(e) => handleQtyChangePartsCatalog(part.PartNumber, e.target.value)}
-                          className="w-16"
-                        /> */}
                         </TableCell>
+                        <TableCell>
+                          <Select
+                            value={part.UEFICode || ""}
+                            onValueChange={(val) => handleUEFICodeChange(part.PartNumber, val)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue placeholder="Select code" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="DHU">DHU</SelectItem>
+                              <SelectItem value="FID">FID</SelectItem>
+                              <SelectItem value="MPS">MPS</SelectItem>
+                              <SelectItem value="PND">PND</SelectItem>
+                              <SelectItem value="PPR">PPR</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                          {part.UEFICode === "FID" ? (
+                            <TableCell>
+                              <Input
+                                placeholder="Enter UEFI No"
+                                value={part.UEFI_NO || ""}
+                                onChange={(e) =>
+                                  handleUEFINoChange(part.PartNumber, e.target.value)
+                                }
+                                className="w-32"
+                              />
+                            </TableCell>
+                          ): (
+                            null
+                          )}
                         <TableCell>{part.Tax}</TableCell>
                         <TableCell>{assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? part.Total : 0}</TableCell>
                       </TableRow>

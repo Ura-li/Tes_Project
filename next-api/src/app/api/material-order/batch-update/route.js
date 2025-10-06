@@ -31,6 +31,7 @@ const CASE_INFO_SELECT = {
 export async function PATCH(request) {
   try {
     const {
+      moUpdates = {},
       updates = {},
       MOID,
       WOID,
@@ -69,6 +70,7 @@ export async function PATCH(request) {
       const originalOrderStatus = materialOrder.OrderStatus;
       const originalSalesOrder = materialOrder.SalesOrderNumber ?? null;
       const originalRmaNumber = materialOrder.RMANumber ?? null;
+      const originalDeliveryRequestedDate = materialOrder.DeliveryRequestedDate ?? null;
 
       const updateEntries = Object.entries(updates ?? {});
       if (updateEntries.length > 0) {
@@ -112,6 +114,13 @@ export async function PATCH(request) {
         (RMANumber || null) !== originalRmaNumber
       ) {
         materialOrderUpdate.RMANumber = RMANumber || null;
+      }
+
+      if (
+        moUpdates.deliveryRequestedDate !== undefined &&
+        (moUpdates.deliveryRequestedDate || null) !== originalDeliveryRequestedDate
+      ) {
+        materialOrderUpdate.DeliveryRequestedDate = moUpdates.deliveryRequestedDate || null;
       }
 
       let updatedOrder = materialOrder;
