@@ -100,6 +100,8 @@ export async function PATCH(request) {
         materialOrderUpdate.OrderStatus = "Submitted";
       } else if (allMatch("New")) {
         materialOrderUpdate.OrderStatus = "New";
+      }else if (allMatch("BackOrdered")) {
+        materialOrderUpdate.OrderStatus = "BackOrdered";
       }
 
       if (

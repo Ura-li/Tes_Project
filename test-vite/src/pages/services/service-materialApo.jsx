@@ -462,7 +462,7 @@ export const ServiceMaterialApo = () => {
 
                   <CaseField
                     label="RMA Status"
-                    // lock={!canEdit}
+                    lock={!canEditapo}
                   >
                     <SearchCommandBlock
                       value={materialOrderInformation?.RMAStatus || null}
@@ -476,7 +476,7 @@ export const ServiceMaterialApo = () => {
                   {/* todo for slamet : ETA DATE di MO yang ngisi APO */}
                   <CaseField
                     label={"ETA Delivery Required Date (Customer Time)"}
-                    
+                    lock={!canEditapo}
                   >
                     {console.log("MATERIAL ORDER INFO ", materialOrderInformation)}
                     <DatePicker
@@ -486,7 +486,7 @@ export const ServiceMaterialApo = () => {
                   </CaseField>
 
                   {/* PART IN CE */}
-                  <CaseField label={"Part IN CE Collection Requested Date"} icon>
+                  <CaseField label={"Part IN CE Collection Requested Date"} icon lock={!canEditapo}>
                     <DatePicker
                       value={materialOrderInformation?.collectionRequestedDate ? new Date(materialOrderInformation?.collectionRequestedDate) : null}
                       onChange={handleMaterialOrderChange("collectionRequestedDate")}
@@ -494,7 +494,7 @@ export const ServiceMaterialApo = () => {
                   </CaseField>
 
                   {/* Part OUT CE */}
-                  <CaseField label={"Part OUT CE Ready For Closure Date"} icon>
+                  <CaseField label={"Part OUT CE Ready For Closure Date"} icon lock={!canEditapo}>
                     <DatePicker
                       value={materialOrderInformation?.readyForClosureDate ? new Date(materialOrderInformation?.readyForClosureDate) : null}
                       onChange={handleMaterialOrderChange("readyForClosureDate")}
@@ -681,6 +681,7 @@ export const ServiceMaterialApo = () => {
                               <SelectItem value="New">New</SelectItem>
                               <SelectItem value="Ordered">Ordered</SelectItem>
                               <SelectItem value="Shipped">Shipped</SelectItem>
+                              <SelectItem value="BackOrdered">BackOrdered</SelectItem>
                               {/* <SelectItem value="Closed">Closed</SelectItem>
                               <SelectItem value="Cancelled">Cancelled</SelectItem> */}
                             </SelectContent>
