@@ -97,9 +97,27 @@ export function UserProfile() {
         }
     };
 
+    const handleOpenSignaturePad = () => {
+        const sigWindow = window.open("/signature-pad", "Signature Pad", "width=600,height=400");
+
+        const handleMessage = (event) => {
+            if (event.data.type === "signature") {
+            const base64Signature = event.data.signature;
+            setFormData((prev) => ({ ...prev, Signature: base64Signature }));
+            setPreview((prev) => ({ ...prev, Signature: base64Signature }));
+            toast.success("Signature captured successfully!", {
+                description: "Signature saved to profile form",
+                position: "top-center",
+            });
+            window.removeEventListener("message", handleMessage);
+            }
+        };
+
+        window.addEventListener("message", handleMessage);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(user);
         const fd = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
             if (value) fd.append(key, value)
@@ -217,7 +235,7 @@ export function UserProfile() {
 
                                     <div className="flex flex-col items-center gap-3">
                                         <label className="text-sm font-medium text-gray-600">Signature</label>
-                                        <Input type="file" name="Signature" onChange={handleChange} />
+                                        {/* <Input type="file" name="Signature" onChange={handleChange} /> */}
                                         {preview.Signature && (
                                             <img
                                                 src={preview.Signature}
@@ -225,6 +243,9 @@ export function UserProfile() {
                                                 className="h-16 object-contain border rounded-md shadow"
                                             />
                                         )}
+                                        <Button type="button" onClick={handleOpenSignaturePad}>
+                                            Write Signature
+                                        </Button>
                                     </div>
                                 </div>
 

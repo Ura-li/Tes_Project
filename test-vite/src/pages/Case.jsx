@@ -53,6 +53,9 @@ useEffect(() => {
       const notes = res.data.data;
       const existingNote = notes.find(note => note.CaseID === caseId);
 
+      const userReqData = await ApiCustomer.get(`/api/user/${user.id}`);
+      const userAttr = userReqData.data.data;
+
       let noteID;
       if (existingNote) {
         noteID = existingNote.NoteID;
