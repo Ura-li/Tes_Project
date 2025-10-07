@@ -219,7 +219,7 @@ export function QuickWOInput ({
   // };
   const user = useAuth();
   let canEdit 
-  const editrole = ['apo','admin','ce','celead']
+  const editrole = ['admin','ce','celead']
 
   if (workOrderData.SystemStatus !== "CLOSED_POSTED") {
     canEdit = editrole.includes(user?.role)
