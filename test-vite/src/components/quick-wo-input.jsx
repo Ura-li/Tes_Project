@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectBarRelated } from "./sc-select";
+import { SearchCommandBlock, SelectBarRelated } from "./sc-select";
 import { Car, Lock, Plus, LockOpen } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import { KeyRound } from "lucide-react";
@@ -29,6 +29,8 @@ import { twMerge } from "tailwind-merge";
 import ApiCustomer from "@/api";
 import DatePicker from "./date-picker";
 import CaseField from "./CaseField";
+import { Textarea } from "./ui/textarea";
+import { useAuth } from "@/context/auth-context";
 // import { CaseField } from "./service-case";
 const spanMap = {
   1: "col-span-1",
@@ -215,9 +217,18 @@ export function QuickWOInput ({
   // //   //   City: ServiceDeliveryAddress.city,
   // //   // });
   // };
+  const user = useAuth();
+  let canEdit 
+  const editrole = ['apo','admin','ce','celead']
+
+  if (workOrderData.SystemStatus !== "CLOSED_POSTED") {
+    canEdit = editrole.includes(user?.role)
+  }else {
+    canEdit = true;
+  }
 
   return (
-      <CardContent>
+    <div className="p-1">
         <Tabs value={tab} onValueChange={setTab}>
           <TabsContent value="wo_input" >
             <Card className="flex-col" hidden>
@@ -331,10 +342,65 @@ export function QuickWOInput ({
                 <CaseField label="Case Priority Index" className={'col-start-5'} lock > <Input className="" value={SLA.casePriorityIndex} readOnly/> </CaseField>
               </CardContent>
             </Card>
+
+            <Card className={"mt-5"}>
+              <CardHeader>
+                <CardTitle className={"text-lg"}>Repair Action</CardTitle>
+                <hr />
+              </CardHeader>
+              <CardContent className={"grid grid-cols-4 gap-2"}>
+                <CaseField label={"Problem category"} star lock={canEdit}>
+                  <SearchCommandBlock
+                  options={[
+                    "Hardware",
+                    "Software"
+                  ]}
+                  />
+                </CaseField>
+                <CaseField label={"Delay code"} star lock={canEdit}>
+                  <SearchCommandBlock
+
+                  />
+                </CaseField>
+                <CaseField label={"Service type"} star lock={canEdit}>
+                  <SearchCommandBlock
+                  options={[
+                    "Cancel Repair",
+                    "CID (Customer Induce Damage)",
+                    "DOA Remanufacture / Refurbishment",
+                    "DOA Verified Defective",
+                    "DOA Verified NTF",
+                    "NFF (No Failure Found)",
+                    "Rebuild Hardware",
+                    "Rerepair",
+                    "Standard Replacement / Failure (Part Used)",
+                    "Third Part Related"
+                  ]}
+                  />
+                </CaseField>
+                <CaseField label={"NMU"} star lock={canEdit}>
+                  <SearchCommandBlock
+                  />
+                </CaseField>
+                <CaseField label={"NMU item"} star lock={canEdit}>
+                  <SearchCommandBlock
+                  />
+                </CaseField>
+                <CaseField label={"Defec desc"} star lock={canEdit}>
+                  <Textarea/>
+                </CaseField>
+                <CaseField label={"CE analysis"} star lock={canEdit}>
+                  <Textarea/>
+                </CaseField>
+                <CaseField label={"Repair Action"} star lock={canEdit}>
+                  <Textarea/>
+                </CaseField>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
         <CardFooter className="flex justify-end">
         </CardFooter>
-      </CardContent>
+        </div>
   );
 };
