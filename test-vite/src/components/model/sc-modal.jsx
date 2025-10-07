@@ -20,6 +20,13 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"
@@ -7773,9 +7780,8 @@ export function BookingDetailsAdd({ onUpdate }) {
     BookingId: "",
     ResourceId: "",
     ResourceAccountId: "",
-    SubkTechnicianId: "",
-    Name: "",
-    Status: "",
+    EngineerId: "",
+    BookingStatusId: "",
     StartTimeCustomerTime: "",
     EndTimeCustomerTime: "",
     EstimatedArrivalTimeCustomerTime: "",
@@ -7791,24 +7797,25 @@ export function BookingDetailsAdd({ onUpdate }) {
   const [bookings, setBookings] = useState([]);
   const [resources, setResources] = useState([]);
   const [accounts, setAccounts] = useState([]);
-  const [technicians, setTechnicians] = useState([]);
-
-  
+  const [engineers, setEngineers] = useState([]);
+  const [statuses, setStatuses] = useState([]);
 
   useEffect(() => {
     const fetchDropdowns = async () => {
       try {
-        const [bookingRes, resourceRes, accountRes, techRes] = await Promise.all([
+        const [bookingRes, resourceRes, accountRes, engineerRes, statusRes] = await Promise.all([
           ApiCustomer.get("/api/booking"),
           ApiCustomer.get("/api/resources"),
           ApiCustomer.get("/api/resource-account"),
-          ApiCustomer.get("/api/subk-technician"),
+          ApiCustomer.get("/api/user?role=ce"),
+          ApiCustomer.get("/api/booking-status")
         ]);
 
         setBookings(bookingRes.data.data || []);
         setResources(resourceRes.data.data || []);
         setAccounts(accountRes.data.data || []);
-        setTechnicians(techRes.data.data || []);
+        setEngineers(engineerRes.data.data || []);
+        setStatuses(statusRes.data.data || []);
       } catch (error) {
         console.error("Dropdown fetch failed:", error);
       }
@@ -7835,7 +7842,8 @@ export function BookingDetailsAdd({ onUpdate }) {
         BookingId: parseInt(formData.BookingId),
         ResourceId: formData.ResourceId || null,
         ResourceAccountId: formData.ResourceAccountId || null,
-        SubkTechnicianId: formData.SubkTechnicianId || null,
+        EngineerId: formData.EngineerId ? parseInt(formData.EngineerId) : null,
+        BookingStatusId: formData.BookingStatusId ? parseInt(formData.BookingStatusId) : null,
         DurationInMinutesUserTime: formData.DurationInMinutesUserTime ? parseInt(formData.DurationInMinutesUserTime) : null,
         ChangedBy: userSubmit.id,
         StartTimeCustomerTime: toFullISOString(formData.StartTimeCustomerTime),
@@ -7881,46 +7889,64 @@ export function BookingDetailsAdd({ onUpdate }) {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Booking Info */}
-          <div>
-            <Label>Booking *</Label>
-            <select id="BookingId" value={formData.BookingId} onChange={handleInputChange} className="w-full p-2 border rounded">
-              <option value="">-- Select Booking --</option>
-              {bookings.map((b) => <option key={b.BookingId} value={b.BookingId}>{b.BookingId} - {b.bookingDetails?.[0]?.ResourceId}</option>)}
-            </select>
+                   <div>
+            <GenericSelector
+              label="Booking *"
+              placeholder="Search Booking..."
+              endpoint="/api/booking"
+              value={bookings.find((b) => b.BookingId === formData.BookingId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, BookingId: item.BookingId }))}
+              valueKey="BookingId"
+              labelKey="BookingId"
+            />
           </div>
 
           <div>
-            <Label>Resource</Label>
-            <select id="ResourceId" value={formData.ResourceId} onChange={handleInputChange} className="w-full p-2 border rounded">
-              <option value="">-- Select Resource --</option>
-              {resources.map((r) => <option key={r.ResourceId} value={r.ResourceId}>{r.Name || r.ResourceId}</option>)}
-            </select>
+            <GenericSelector
+              label="Resource"
+              placeholder="Search Resource..."
+              endpoint="/api/resources"
+              value={resources.find((r) => r.ResourceId === formData.ResourceId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, ResourceId: item.ResourceId }))}
+              valueKey="ResourceId"
+              labelKey="Name"
+            />
           </div>
 
           <div>
-            <Label>Resource Account</Label>
-            <select id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} className="w-full p-2 border rounded">
-              <option value="">-- Select Account --</option>
-              {accounts.map((a) => <option key={a.ResourceAccountId} value={a.ResourceAccountId}>{a.Name || a.ResourceAccountId}</option>)}
-            </select>
+            <GenericSelector
+              label="Resource Account"
+              placeholder="Search Account..."
+              endpoint="/api/resource-account"
+              value={accounts.find((a) => a.ResourceAccountId === formData.ResourceAccountId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, ResourceAccountId: item.ResourceAccountId }))}
+              valueKey="ResourceAccountId"
+              labelKey="Name"
+            />
           </div>
 
           <div>
-            <Label>Subk Technician</Label>
-            <select id="SubkTechnicianId" value={formData.SubkTechnicianId} onChange={handleInputChange} className="w-full p-2 border rounded">
-              <option value="">-- Select Technician --</option>
-              {technicians.map((t) => <option key={t.SubkTechnicianId} value={t.SubkTechnicianId}>{t.Name || t.SubkTechnicianId}</option>)}
-            </select>
+            <GenericSelector
+              label="Engineer"
+              placeholder="Search Engineer..."
+              endpoint="/api/user?role=ce"
+              value={engineers.find((e) => e.IDUser === formData.EngineerId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, EngineerId: item.IDUser }))}
+              valueKey="IDUser"
+              labelKey="Name"
+            />
           </div>
 
           <div>
-            <Label>Name</Label>
-            <Input id="Name" value={formData.Name} onChange={handleInputChange} />
-          </div>
-
-          <div>
-            <Label>Status</Label>
-            <Input id="Status" value={formData.Status} onChange={handleInputChange} />
+            <GenericSelector
+              label="Status"
+              placeholder="Search Status..."
+              endpoint="/api/booking-status"
+              value={statuses.find((s) => s.BookingStatusId === formData.BookingStatusId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, BookingStatusId: item.BookingStatusId }))}
+              valueKey="BookingStatusId"
+              labelKey="Description"
+            />
           </div>
 
           {/* Customer Time */}
@@ -7955,53 +7981,81 @@ export function BookingDetailsAdd({ onUpdate }) {
   );
 }
 
+
 export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [form, setForm] = useState({
-    BookingId: 0,
+
+  const [formData, setFormData] = useState({
+    BookingId: "",
     ResourceId: "",
     ResourceAccountId: "",
-    SubkTechnicianId: "",
-    Name: "",
-    Status: "",
-
-    // Customer Time
+    EngineerId: "",
+    BookingStatusId: "",
     StartTimeCustomerTime: "",
     EndTimeCustomerTime: "",
     EstimatedArrivalTimeCustomerTime: "",
     ActualArrivalTimeCustomerTime: "",
-
-    // User Time
     StartTimeUserTime: "",
     EndTimeUserTime: "",
-    DurationInMinutesUserTime: 0,
+    DurationInMinutesUserTime: "",
     EstimatedArrivalTimeUserTime: "",
     ActualArrivalTimeUserTime: "",
+    ChangedBy: "",
   });
 
+  // Dropdown Data
+  const [bookings, setBookings] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [engineers, setEngineers] = useState([]);
+  const [statuses, setStatuses] = useState([]);
+
+  // Fetch dropdown data
+  useEffect(() => {
+    const fetchDropdowns = async () => {
+      try {
+        const [bookingRes, resourceRes, accountRes, engineerRes, statusRes] = await Promise.all([
+          ApiCustomer.get("/api/booking"),
+          ApiCustomer.get("/api/resources"),
+          ApiCustomer.get("/api/resource-account"),
+          ApiCustomer.get("/api/users?role=ce"),
+          ApiCustomer.get("/api/booking-status"),
+        ]);
+
+        setBookings(bookingRes.data.data || []);
+        setResources(resourceRes.data.data || []);
+        setAccounts(accountRes.data.data || []);
+        setEngineers(engineerRes.data.data || []);
+        setStatuses(statusRes.data.data || []);
+      } catch (error) {
+        console.error("Dropdown fetch failed:", error);
+      }
+    };
+    fetchDropdowns();
+  }, []);
+
+  // Fetch booking detail by ID
   const fetchDetail = async () => {
     try {
       const res = await ApiCustomer.get(`/api/bookingDetails/${BookingDetailId}`);
       const data = res.data.data;
 
-      setForm({
-        BookingId: data.BookingId || 0,
+      setFormData({
+        BookingId: data.BookingId || "",
         ResourceId: data.ResourceId || "",
         ResourceAccountId: data.ResourceAccountId || "",
-        SubkTechnicianId: data.SubkTechnicianId || "",
-        Name: data.Name || "",
-        Status: data.Status || "",
-
+        EngineerId: data.EngineerId || "",
+        BookingStatusId: data.BookingStatusId || "",
         StartTimeCustomerTime: data.StartTimeCustomerTime?.slice(0, 16) || "",
         EndTimeCustomerTime: data.EndTimeCustomerTime?.slice(0, 16) || "",
         EstimatedArrivalTimeCustomerTime: data.EstimatedArrivalTimeCustomerTime?.slice(0, 16) || "",
         ActualArrivalTimeCustomerTime: data.ActualArrivalTimeCustomerTime?.slice(0, 16) || "",
-
         StartTimeUserTime: data.StartTimeUserTime?.slice(0, 16) || "",
         EndTimeUserTime: data.EndTimeUserTime?.slice(0, 16) || "",
         EstimatedArrivalTimeUserTime: data.EstimatedArrivalTimeUserTime?.slice(0, 16) || "",
         ActualArrivalTimeUserTime: data.ActualArrivalTimeUserTime?.slice(0, 16) || "",
-        DurationInMinutesUserTime: data.DurationInMinutesUserTime || 0,
+        DurationInMinutesUserTime: data.DurationInMinutesUserTime || "",
+        ChangedBy: data.ChangedBy || "",
       });
     } catch (error) {
       console.error("Error fetching booking detail:", error);
@@ -8010,69 +8064,37 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
 
   useEffect(() => {
     if (isOpen && BookingDetailId) fetchDetail();
-  }, [isOpen]);
+  }, [isOpen, BookingDetailId]);
 
-  const handleChange = (e) => {
-    const { id, value, type } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [id]: type === "number" ? parseInt(value) || 0 : value,
-    }));
-  };
-
-  const [bookings, setBookings] = useState([]);
-  const [resources, setResources] = useState([]);
-  const [accounts, setAccounts] = useState([]);
-  const [technicians, setTechnicians] = useState([]);
-
-  
-
-  useEffect(() => {
-    const fetchDropdowns = async () => {
-      try {
-        const [bookingRes, resourceRes, accountRes, techRes] = await Promise.all([
-          ApiCustomer.get("/api/booking"),
-          ApiCustomer.get("/api/resources"),
-          ApiCustomer.get("/api/resource-account"),
-          ApiCustomer.get("/api/subk-technician"),
-        ]);
-
-        setBookings(bookingRes.data.data || []);
-        setResources(resourceRes.data.data || []);
-        setAccounts(accountRes.data.data || []);
-        setTechnicians(techRes.data.data || []);
-      } catch (error) {
-        console.error("Dropdown fetch failed:", error);
-      }
-    };
-    fetchDropdowns();
-  }, []);
-
+  // Convert local datetime to full ISO
   const toFullISOString = (value) => {
     if (!value) return null;
     return value.length === 16 ? value + ":00" : value;
   };
 
+  // Submit edited data
   const handleSubmit = async () => {
     const userSubmit = getUserFromToken();
+
     try {
       const payload = {
-        BookingId: parseInt(form.BookingId),
-        ResourceId: form.ResourceId || null,
-        ResourceAccountId: form.ResourceAccountId || null,
-        SubkTechnicianId: form.SubkTechnicianId || null,
-        DurationInMinutesUserTime: form.DurationInMinutesUserTime ? parseInt(form.DurationInMinutesUserTime) : null,
+        BookingId: parseInt(formData.BookingId),
+        ResourceId: formData.ResourceId || null,
+        ResourceAccountId: formData.ResourceAccountId || null,
+        EngineerId: formData.EngineerId ? parseInt(formData.EngineerId) : null,
+        BookingStatusId: formData.BookingStatusId ? parseInt(formData.BookingStatusId) : null,
+        DurationInMinutesUserTime: formData.DurationInMinutesUserTime ? parseInt(formData.DurationInMinutesUserTime) : null,
         ChangedBy: userSubmit.id,
-        StartTimeCustomerTime: toFullISOString(form.StartTimeCustomerTime),
-        EndTimeCustomerTime: toFullISOString(form.EndTimeCustomerTime),
-        EstimatedArrivalTimeCustomerTime: toFullISOString(form.EstimatedArrivalTimeCustomerTime),
-        ActualArrivalTimeCustomerTime: toFullISOString(form.ActualArrivalTimeCustomerTime),
-        StartTimeUserTime: toFullISOString(form.StartTimeUserTime),
-        EndTimeUserTime: toFullISOString(form.EndTimeUserTime),
-        EstimatedArrivalTimeUserTime: toFullISOString(form.EstimatedArrivalTimeUserTime),
-        ActualArrivalTimeUserTime: toFullISOString(form.ActualArrivalTimeUserTime),
+        StartTimeCustomerTime: toFullISOString(formData.StartTimeCustomerTime),
+        EndTimeCustomerTime: toFullISOString(formData.EndTimeCustomerTime),
+        EstimatedArrivalTimeCustomerTime: toFullISOString(formData.EstimatedArrivalTimeCustomerTime),
+        ActualArrivalTimeCustomerTime: toFullISOString(formData.ActualArrivalTimeCustomerTime),
+        StartTimeUserTime: toFullISOString(formData.StartTimeUserTime),
+        EndTimeUserTime: toFullISOString(formData.EndTimeUserTime),
+        EstimatedArrivalTimeUserTime: toFullISOString(formData.EstimatedArrivalTimeUserTime),
+        ActualArrivalTimeUserTime: toFullISOString(formData.ActualArrivalTimeUserTime),
       };
-  
+
       await ApiCustomer.patch(`/api/bookingDetails/${BookingDetailId}`, payload);
       Swal.fire({
         icon: "success",
@@ -8097,117 +8119,116 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
     }
   };
 
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => setIsOpen(true)}>
-          <Pencil />
+        <Button variant="outline" onClick={() => setIsOpen(true)} aria-label="Edit booking detail">
+          <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Edit Booking Detail</DialogTitle>
-          <DialogDescription>Update all necessary fields below.</DialogDescription>
+          <DialogDescription>Perbarui data booking detail di bawah ini.</DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Booking */}
           <div>
-            <label htmlFor="BookingId">Booking ID</label>
-            <select id="BookingId" value={form.BookingId} onChange={handleChange} className="w-full border p-2 rounded">
-              <option value="">-- Select Booking --</option>
-              {bookings.map((b) => <option key={b.BookingId} value={b.BookingId}>{b.BookingId} - {b.bookingDetails?.[0]?.ResourceId}</option>)}
-            </select>
+            <GenericSelector
+              label="Booking *"
+              placeholder="Search Booking..."
+              endpoint="/api/booking"
+              value={bookings.find((b) => b.BookingId === formData.BookingId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, BookingId: item.BookingId }))}
+              valueKey="BookingId"
+              labelKey="BookingId"
+            />
           </div>
+
+          {/* Resource */}
           <div>
-            <label htmlFor="ResourceId">Resource ID</label>
-            <select id="ResourceId" value={form.ResourceId} onChange={handleChange} className="w-full border p-2 rounded">
-              <option value="">-- Select Resource --</option>
-              {resources.map((r) => <option key={r.ResourceId} value={r.ResourceId}>{r.Name || r.ResourceId}</option>)}
-            </select>
+            <GenericSelector
+              label="Resource"
+              placeholder="Search Resource..."
+              endpoint="/api/resources"
+              value={resources.find((r) => r.ResourceId === formData.ResourceId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, ResourceId: item.ResourceId }))}
+              valueKey="ResourceId"
+              labelKey="Name"
+            />
           </div>
+
+          {/* Resource Account */}
           <div>
-            <label htmlFor="ResourceAccountId">Resource Account ID</label>
-             <select id="ResourceAccountId" value={form.ResourceAccountId} onChange={handleChange} className="w-full border p-2 rounded">
-              <option value="">-- Select Account --</option>
-              {accounts.map((a) => <option key={a.ResourceAccountId} value={a.ResourceAccountId}>{a.Name || a.ResourceAccountId}</option>)}
-            </select>
+            <GenericSelector
+              label="Resource Account"
+              placeholder="Search Account..."
+              endpoint="/api/resource-account"
+              value={accounts.find((a) => a.ResourceAccountId === formData.ResourceAccountId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, ResourceAccountId: item.ResourceAccountId }))}
+              valueKey="ResourceAccountId"
+              labelKey="Name"
+            />
           </div>
+
+          {/* Engineer */}
           <div>
-            <label htmlFor="SubkTechnicianId">Subk Technician ID</label>
-            <select id="SubkTechnicianId" value={form.SubkTechnicianId} onChange={handleChange} className="w-full border p-2 rounded">
-              <option value="">-- Select Technician --</option>
-              {technicians.map((t) => <option key={t.SubkTechnicianId} value={t.SubkTechnicianId}>{t.Name || t.SubkTechnicianId}</option>)}
-            </select>
+            <GenericSelector
+              label="Engineer"
+              placeholder="Search Engineer..."
+              endpoint="/api/users?role=ce"
+              value={engineers.find((e) => e.IDUser === formData.EngineerId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, EngineerId: item.IDUser }))}
+              valueKey="IDUser"
+              labelKey="Name"
+            />
           </div>
+
+          {/* Status */}
           <div>
-            <label htmlFor="Name">Name</label>
-            <Input id="Name" value={form.Name} onChange={handleChange} />
+            <GenericSelector
+              label="Status"
+              placeholder="Search Status..."
+              endpoint="/api/booking-status"
+              value={statuses.find((s) => s.BookingStatusId === formData.BookingStatusId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, BookingStatusId: item.BookingStatusId }))}
+              valueKey="BookingStatusId"
+              labelKey="Description"
+            />
           </div>
-          <div>
-            <label htmlFor="Status">Status</label>
-            <Input id="Status" value={form.Status} onChange={handleChange} />
+
+          {/* Customer Time */}
+          <div className="pt-2 border-t md:col-span-2">
+            <p className="mb-1 font-semibold">Customer Time</p>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div><Label>Start Time</Label><Input type="datetime-local" id="StartTimeCustomerTime" value={formData.StartTimeCustomerTime} onChange={handleInputChange} /></div>
+              <div><Label>End Time</Label><Input type="datetime-local" id="EndTimeCustomerTime" value={formData.EndTimeCustomerTime} onChange={handleInputChange} /></div>
+              <div><Label>Estimated Arrival</Label><Input type="datetime-local" id="EstimatedArrivalTimeCustomerTime" value={formData.EstimatedArrivalTimeCustomerTime} onChange={handleInputChange} /></div>
+              <div><Label>Actual Arrival</Label><Input type="datetime-local" id="ActualArrivalTimeCustomerTime" value={formData.ActualArrivalTimeCustomerTime} onChange={handleInputChange} /></div>
+            </div>
+          </div>
+
+          {/* User Time */}
+          <div className="pt-2 border-t md:col-span-2">
+            <p className="mb-1 font-semibold">User Time</p>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div><Label>Start Time</Label><Input type="datetime-local" id="StartTimeUserTime" value={formData.StartTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>End Time</Label><Input type="datetime-local" id="EndTimeUserTime" value={formData.EndTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>Estimated Arrival</Label><Input type="datetime-local" id="EstimatedArrivalTimeUserTime" value={formData.EstimatedArrivalTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>Actual Arrival</Label><Input type="datetime-local" id="ActualArrivalTimeUserTime" value={formData.ActualArrivalTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>Duration (minutes)</Label><Input type="number" id="DurationInMinutesUserTime" value={formData.DurationInMinutesUserTime} onChange={handleInputChange} /></div>
+            </div>
           </div>
         </div>
 
-        {/* Customer Time Section */}
-        <div className="mt-6">
-          <h3 className="mb-2 text-lg font-semibold">Customer Time</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="StartTimeCustomerTime">Start Time</label>
-              <Input id="StartTimeCustomerTime" type="datetime-local" value={form.StartTimeCustomerTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="EndTimeCustomerTime">End Time</label>
-              <Input id="EndTimeCustomerTime" type="datetime-local" value={form.EndTimeCustomerTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="EstimatedArrivalTimeCustomerTime">Estimated Arrival Time</label>
-              <Input id="EstimatedArrivalTimeCustomerTime" type="datetime-local" value={form.EstimatedArrivalTimeCustomerTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="ActualArrivalTimeCustomerTime">Actual Arrival Time</label>
-              <Input id="ActualArrivalTimeCustomerTime" type="datetime-local" value={form.ActualArrivalTimeCustomerTime} onChange={handleChange} />
-            </div>
-          </div>
-        </div>
-
-        {/* User Time Section */}
-        <div className="mt-6">
-          <h3 className="mb-2 text-lg font-semibold">User Time</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="StartTimeUserTime">Start Time</label>
-              <Input id="StartTimeUserTime" type="datetime-local" value={form.StartTimeUserTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="EndTimeUserTime">End Time</label>
-              <Input id="EndTimeUserTime" type="datetime-local" value={form.EndTimeUserTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="EstimatedArrivalTimeUserTime">Estimated Arrival Time</label>
-              <Input id="EstimatedArrivalTimeUserTime" type="datetime-local" value={form.EstimatedArrivalTimeUserTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="ActualArrivalTimeUserTime">Actual Arrival Time</label>
-              <Input id="ActualArrivalTimeUserTime" type="datetime-local" value={form.ActualArrivalTimeUserTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="DurationInMinutesUserTime">Duration (min)</label>
-              <Input id="DurationInMinutesUserTime" type="number" value={form.DurationInMinutesUserTime} onChange={handleChange} />
-            </div>
-          </div>
-        </div>
-
-        {/* <div className="mt-6 grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="ChangedBy">Changed By (User ID)</label>
-            <Input id="ChangedBy" type="number" value={form.ChangedBy} onChange={handleChange} />
-          </div>
-        </div> */}
-
-        <DialogFooter className="pt-4">
+        <DialogFooter className="mt-4">
           <Button onClick={handleSubmit}>Update</Button>
         </DialogFooter>
       </DialogContent>

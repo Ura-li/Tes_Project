@@ -6421,20 +6421,64 @@ export const BookingDetailsTable = () => {
     }
   };
 
+  // fetching user data for createdBy filter
+  const fetchUsers = async () => {
+    try {
+      const response = await ApiCustomer.get("/api/user");
+      if (response.data.success) {
+        setUsers(response.data.data);
+      } else {
+        console.error("Failed to fetch users");
+        setUsers([]);
+      }
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setUsers([]);
+    }
+  };
+
   useEffect(() => {
     fetchBookingDetails();
+    fetchUsers();
   }, []);
 
+  const [users, setUsers] = useState([]);
+  console.log("Users:", users);
+
   // derive unique options
+  // const uniqueStatus = useMemo(() => {
+  //   const all = bookingDetailsData.map((b) => b.Status).filter(Boolean);
+  //   return ["", ...Array.from(new Set(all)).sort()];
+  // }, [bookingDetailsData]);
+
   const uniqueStatus = useMemo(() => {
-    const all = bookingDetailsData.map((b) => b.Status).filter(Boolean);
-    return ["", ...Array.from(new Set(all)).sort()];
-  }, [bookingDetailsData]);
+  const unique = Object.values(
+    bookingDetailsData.reduce((acc, item) => {
+       const status = item?.Status;
+      if (status?.BookingStatusId && status?.Description) {
+        acc[status.BookingStatusId] = {
+          BookingStatusId: status.BookingStatusId,
+          Description: status.Description,
+        };
+      }
+      return acc;
+    }, {})
+  );
+
+  // Optional: sort alphabetically by description
+  return unique.sort((a, b) => a.Description.localeCompare(b.Description));
+}, [bookingDetailsData]);
+
+
+  console.log("bookingDetailsData :", bookingDetailsData);
+  console.log("Unique Status:", uniqueStatus);
 
   const uniqueChangedBy = useMemo(() => {
     const all = bookingDetailsData.map((b) => b.ChangedBy).filter(Boolean);
     return ["", ...Array.from(new Set(all)).sort()];
   }, [bookingDetailsData]);
+
+  console.log("Unique ChangedBy:", uniqueChangedBy);
 
   // filter + search
   const filteredData = bookingDetailsData.filter((item) => {
@@ -6540,9 +6584,9 @@ export const BookingDetailsTable = () => {
           }}
         >
           <option value="">All Status</option>
-          {uniqueStatus.map((v) => (
-            <option key={v} value={v}>
-              {v || "—"}
+          {uniqueStatus.map((status) => (
+            <option key={status.BookingStatusId} value={status.BookingStatusId}>
+              {status.Description || "—"}
             </option>
           ))}
         </select>
@@ -6589,14 +6633,11 @@ export const BookingDetailsTable = () => {
               <th className="border p-3 cursor-pointer" onClick={() => handleSort("ResourceId")}>
                 Resource ID {getSortSymbol("ResourceId")}
               </th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("ResorceAccountId")}>
-                Resource Account ID {getSortSymbol("ResorceAccountId")}
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("ResourceAccountId")}>
+                Resource Account ID {getSortSymbol("ResourceAccountId")}
               </th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("SubkTechnicianId")}>
-                Subk Technician ID {getSortSymbol("SubkTechnicianId")}
-              </th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("Name")}>
-                Name {getSortSymbol("Name")}
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("EngineerId")}>
+                Engineer ID {getSortSymbol("EngineerId")}
               </th>
               <th className="border p-3 cursor-pointer" onClick={() => handleSort("Status")}>
                 Status {getSortSymbol("Status")}
@@ -6625,10 +6666,9 @@ export const BookingDetailsTable = () => {
                   </td>
                   <td className="border p-2">{item.BookingId}</td>
                   <td className="border p-2">{item.ResourceId}</td>
-                  <td className="border p-2">{item.ResorceAccountId}</td>
-                  <td className="border p-2">{item.SubkTechnicianId}</td>
-                  <td className="border p-2">{item.Name}</td>
-                  <td className="border p-2">{item.Status}</td>
+                  <td className="border p-2">{item.ResourceAccountId}</td>
+                  <td className="border p-2">{item.engineer ? item.engineer.Name : "-"}</td>
+                  <td className="border p-2">{item.Status?.Description || "-"}</td>
                   <td className="p-2 text-left border">
                     <div>
                       Start:{" "}
@@ -6682,7 +6722,9 @@ export const BookingDetailsTable = () => {
                         : "-"}
                     </div>
                   </td>
-                  <td className="p-2 border">{item.ChangedBy}</td>
+                  <td className="p-2 border">{
+                    users.find((u) => u.IDUser === item.ChangedBy)?.Username || "-"
+                    }</td>
                   <td className="p-2 border">
                     {new Date(item.ChangedAt).toLocaleDateString("id-ID", {
                       year: "numeric",
