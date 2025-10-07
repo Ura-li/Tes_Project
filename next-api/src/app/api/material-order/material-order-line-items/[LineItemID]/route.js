@@ -117,6 +117,8 @@ export async function PATCH(request, { params }) {
       DOAReason,
       PhotoPartUnit,
       GoodReturnReason,
+      UEFICode,
+      UEFI_NO
     } = body;
 
     const parseNullableInt = (value) => {
@@ -157,6 +159,8 @@ export async function PATCH(request, { params }) {
       RemovedPartNumber,
       RemovedSerialNumber,
       RemovedPartDescription,
+      UEFICode,
+      UEFI_NO
     };
 
     if (FailureId !== undefined) {

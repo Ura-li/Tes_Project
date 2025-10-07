@@ -528,7 +528,10 @@ export const TabsServiceCaseDetails = ({
                   caseUpdates.CaseID_Manual = caseForm.CaseID_Manual;
                 }
                if (caseForm.CaseID_Manual_Date) {
-                  caseUpdates.CaseID_Manual_Date = caseForm.CaseID_Manual_Date.toISOString();
+                  const dateVal = new Date (caseForm.CaseID_Manual_Date);
+                  if (!isNaN(dateVal.getTime())) {
+                    caseUpdates.CaseID_Manual_Date = dateVal.toISOString();
+                  }
                 }
                 if (caseForm.StorageLocationStore && String(caseForm.StorageLocationStore).trim()!== ""){
                   caseUpdates.StorageLocationStore = caseForm.StorageLocationStore
@@ -1943,7 +1946,6 @@ if (caseDetails.CaseStatus !== "Close") {
                             <Input
                               variant="invisible"
                               value={caseDetails.CaseID}
-                              
                               hidden
                             />
                           </CaseField>

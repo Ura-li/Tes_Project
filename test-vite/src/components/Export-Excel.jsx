@@ -36,7 +36,8 @@ export const ExportExcel = ({ caseData }) => {
           CaseID: c.caseinformation.CaseID,
           CaseID_Manual: c.caseinformation.CaseID_Manual,
           ProductTower: c.caseinformation.asset_information?.product_information?.product_type?.ProductTower,
-          Case_Notes:c.caseinformation.casenotes_caseinformation_CaseNoteTocasenotes?.Note,
+          // Case_Notes:c.caseinformation.casenotes_caseinformation_CaseNoteTocasenotes?.Note,
+          Case_Notes:c.caseinformation.CaseProductNote,
           ProductGroup: c.caseinformation.asset_information?.product_information?.product_type?.ProductGroup,     
           ProductLine: c.caseinformation.asset_information?.product_information?.ProductLine,     
           ProductType: c.caseinformation.asset_information?.product_information?.product_type?.ProductType,
@@ -126,7 +127,8 @@ export const ExportExcelPart = ({}) => {
        RMANumber: m.RMANumber,
        OrderStatus: m.OrderStatus,
        AWB_InCode: m.AWB_InCode,
-       AWB_OutCode: m.AWB_OutCode
+       AWB_OutCode: m.AWB_OutCode,
+       ETA_Date : m.DeliveryRequestedDate ? new Date(m.DeliveryRequestedDate) : null
       }
       })
       setMoData(transformed)
@@ -143,7 +145,8 @@ export const ExportExcelPart = ({}) => {
     "RMA Number" : items.RMANumber,
     "Order Status" : items.OrderStatus,
     "AWB In Code" : items.AWB_InCode,
-    "AWB Out Code" : items.AWB_OutCode 
+    "AWB Out Code" : items.AWB_OutCode,
+    "ETA Date" : items.ETA_Date
   }))
 
   const exportToExcelPart = () => {

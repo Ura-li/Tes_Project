@@ -1279,6 +1279,8 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
         DOAReason: MOLineDetails.DOAReason,
         PhotoPartUnit: MOLineDetails.PhotoPartUnit,
         GoodReturnReason: MOLineDetails.GoodReturnReason,
+        UEFICode: MOLineDetails.UEFICode || "",  
+        UEFI_NO : MOLineDetails.UEFI_NO || "",
       });
       if (res.data.success) {
         if (shouldRedirect) {
