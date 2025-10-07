@@ -489,7 +489,7 @@ model User {
   CreatedAt    DateTime  @default(now())
   UpdatedAt    DateTime  @updatedAt
   Phone        String?   @db.VarChar(20)
-  Signature    String?   @db.VarChar(500)
+  Signature    String?   @db.LongText
   ResourceId   String?   @db.VarChar(255)
   resource     Resource? @relation(fields: [ResourceId], references: [ResourceId])
 
