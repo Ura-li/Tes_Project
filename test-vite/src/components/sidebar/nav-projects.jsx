@@ -23,7 +23,8 @@ import { LayoutDashboard } from "lucide-react";
 
 
 export function NavProjects({
-  projects
+  projects,
+  user,
 }) {
   const { isMobile } = useSidebar()
 
@@ -34,6 +35,7 @@ export function NavProjects({
     return location.pathname === url;
   };
 
+
   return (
     <SidebarGroup >
       <SidebarGroupLabel className={'font-bold text-gray-100'}>Main Menu</SidebarGroupLabel>
@@ -41,7 +43,7 @@ export function NavProjects({
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}
           >
-            <SidebarMenuButton asChild tooltip={item.title}    isActive={isActive(item.url)} >
+            <SidebarMenuButton asChild tooltip={item.title}    isActive={isActive(item.url)} hidden={item.only && !(item.only === user.role)}>
               <Link to={item.url} >
                 <item.icon className=''/>
                 <span className="font-medium text-[1rem]">{item.name}</span>
