@@ -56,7 +56,7 @@ export const ServiceMaterialApo = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { moid } = useParams();
-  const {updateDraft } = useDraft(); 
+  const {updateDraft } = useDraft(); // Access updateDraft from the DraftContext
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
   const [MaterialOrder, setMaterialOrder] = useState([]);
@@ -164,6 +164,9 @@ export const ServiceMaterialApo = () => {
     })
   };
 
+
+
+  // Fetch Material Order
   const fetchMaterialOrder = async () => {
     try {
       const res = await ApiCustomer.get(`/api/material-order/${moid}`);
@@ -171,6 +174,7 @@ export const ServiceMaterialApo = () => {
 
       setMaterialOrders(data);
     
+      // Save the material order information to the state
       setMaterialOrderInformation({
         MOID: data.MOID || "",
         orderNumber: data.MOID || "",
@@ -248,6 +252,7 @@ export const ServiceMaterialApo = () => {
       },
     });
 
+    // Run both fetch functions in parallel
     Promise.all([fetchMaterialOrder(), fetchMaterialLineOrdersInMODetail()])
       .then(() => {
         Swal.close();
@@ -577,6 +582,7 @@ export const ServiceMaterialApo = () => {
               </Card>
             </div>
             
+            {/* Booking */}
             <Card className="flex-col mt-5">
               <span className="ml-5 text-xl font-bold">Booking</span>
               <CardContent className="grid">
@@ -606,6 +612,8 @@ export const ServiceMaterialApo = () => {
               </CardContent>
             </Card>
 
+            
+            {/* Material Order Line Items */}
             <Card className="flex-col mt-7">
               <span className="ml-5 text-xl font-bold">
                 Material Order Line Items

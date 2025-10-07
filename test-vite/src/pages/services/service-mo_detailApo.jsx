@@ -86,7 +86,7 @@ const DateHelper = {
 };
 
 export const ServiceMoDetailApo = () => {
-  const { updateDraft } = useDraft(); 
+  const { updateDraft } = useDraft(); // Access updateDraft from the DraftContext
   const {user} = useAuth();
   const { lineItemID } = useParams();
 
