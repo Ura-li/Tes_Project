@@ -571,7 +571,7 @@ useEffect(() => {
   let canEditCE;
   const allowedRoles = ["apo","lg","admin"]
   if (moLineItems?.Status !== "Closed") {
-    canEditCE = user?.role  === "ce"
+    canEditCE = user?.role  === "ce" || user?.role === "celead"
     canEdit = allowedRoles.includes(user?.role)
   } else {
     canEdit = false
@@ -884,8 +884,13 @@ useEffect(() => {
                   <hr />
                 </CardHeader>
                 <CardContent className="grid items-center grid-cols-4 gap-6 m-1">
-                  <CaseField label="Failure Analysis" lock>
-                    <Input variant="invisible" placeholder="---" />
+                  <CaseField label="CT Validation" star={canEditCE} lock={!canEditCE}>
+                    <SearchCommandBlock
+                    options={[
+                      "Pass",
+                      "Fail"
+                    ]}
+                    />
                   </CaseField>
                   
           
@@ -951,19 +956,19 @@ useEffect(() => {
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="Part Used" lock={canEdit}>
+                  <CaseField label="Part Used" star={canEditCE} lock={!canEditCE}>
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={Boolean(MODetailInput.QuantityUsed)}
                         onCheckedChange={handleQuantityUsedToggle}
-                        disabled={canEdit}
+                        disabled={!canEditCE}
                       />
                       <span>{MODetailInput.QuantityUsed ? "Used" : "Not Used"}</span>
                     </div>
                   </CaseField>
 
                   <CaseField label="Part Return Status" 
-                    lock={canEdit}
+                    lock={!canEditCE}
                     >
                     <SearchCommandBlock
                       value={
@@ -974,7 +979,6 @@ useEffect(() => {
                       onChange={handlePartReturnStatusChange}
                       placeholder="Select Part Return Status"
                       options={filteredPartReturnOptions}
-                      // readOnly={!canEdit}
                       renderLabel={renderPartReturnLabel}
                     />
                   </CaseField>

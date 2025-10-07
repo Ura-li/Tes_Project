@@ -500,7 +500,7 @@ export const ServiceWork = () => {
             </TabsList>
           </CardHeader>
 
-          <TabsContent value="wo_summary">
+          <TabsContent value="wo_summary" className={"p-1"}>
             <div className="flex flex-col md:flex-row gap-4">
               <Card className="rounded-md flex-1/3">
                 <CardHeader>
@@ -1595,8 +1595,8 @@ export const ServiceWork = () => {
           </TabsContent>
 
           {workOrders?.WOID && caseInformation?.CaseID && (
-            <TabsContent value="wo_input">
-              <QuickWOInput
+            <TabsContent value="wo_input"> 
+             <QuickWOInput
                 WOID={woid}
                 workOrderData={workOrders}
                 caseInformation={caseInformation}
@@ -1607,7 +1607,6 @@ export const ServiceWork = () => {
               />
             </TabsContent>
           )}
-
         </Tabs>
       </Card>
     </>
