@@ -78,11 +78,9 @@ function formatDateForInput(dateString) {
 
 const DateHelper = {
   fromDB(dateStr) {
-    // DB → UI
     return formatDateForInput(dateStr);
   },
   toDB(dateStr) {
-    // UI → DB
     return dateStr ? new Date(dateStr).toISOString() : null;
   },
 };
@@ -140,7 +138,6 @@ export const ServiceMoDetailApo = () => {
 
   const fetchMoLineItems = async () => {
     try {
-      // Tampilkan loading SweetAlert
       Swal.fire({
         title: "Loading...",
         text: "Please wait a moment",
@@ -158,8 +155,6 @@ export const ServiceMoDetailApo = () => {
       const data = res.data.data;
 
       setMoLineItems(data);
-
-      // Isi state MODetailInput berdasarkan data yang diambil
       setMODetailInput({
         MOID: data.MOID,
         moOrderName: data ? `${data.MOID} - ${data.LineNumber}` : null,
@@ -225,14 +220,6 @@ export const ServiceMoDetailApo = () => {
 
     fetchPartReturnStatuses();
   }, []);
-
-  // const handleChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setMODetailInput((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-  // };
 
   const handleChange = (field) => (eOrValue) => {
     const value = eOrValue?.target ? eOrValue.target.value : eOrValue;
@@ -487,12 +474,12 @@ export const ServiceMoDetailApo = () => {
 
   const [inputValue, setInputValue] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [isFocused, setIsFocused] = useState(false); // Track if input is focused
+  const [isFocused, setIsFocused] = useState(false); 
 
 useEffect(() => {
   ApiCustomer.get("/api/failure/options").then((res) => {
     const defaultOptions = res.data.map((f, index) => ({
-      value: f.FailureId.toString(), // value selalu string
+      value: f.FailureId.toString(), 
       label: (
         <div className="flex flex-col">
           <span className="font-medium">
@@ -509,7 +496,7 @@ useEffect(() => {
     ApiCustomer.get(`/api/failure/${MODetailInput.failureId}`)
       .then((res) => {
         const f = res.data.data;
-        setInputValue(f.FailureId.toString()); // tetap string di state
+        setInputValue(f.FailureId.toString()); 
       })
       .catch(() => {
         
@@ -552,13 +539,12 @@ useEffect(() => {
     console.log("selected.value", selected.value);
   };
 
-  // Handle focus and blur events
   const handleFocus = () => {
     setIsFocused(true);
   };
 
   const handleBlur = () => {
-    setTimeout(() => setIsFocused(false), 150); // Delay to allow click on dropdown
+    setTimeout(() => setIsFocused(false), 150);
   };
 
   const tabs = [
