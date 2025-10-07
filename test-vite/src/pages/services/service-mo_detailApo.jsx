@@ -40,7 +40,6 @@ import { useParams } from "react-router";
 // import Select from 'react-select';
 import debounce from "lodash.debounce";
 import ApiCustomer from "@/api";
-
 import { TabsServiceMOLineItems } from "./service-case";
 import { Description } from "@radix-ui/react-dialog";
 import { useDraft } from "../../components/DraftContext";
@@ -97,7 +96,7 @@ export const ServiceMoDetailApo = () => {
   const [partReturnStatuses, setPartReturnStatuses] = useState([]);
   const [photoUploadPreview, setPhotoUploadPreview] = useState(null);
   const [photoUploadLoading, setPhotoUploadLoading] = useState(false);
-
+  const [previewSrc, setPreviewSrc] = useState(null);
   const [MODetailInput, setMODetailInput] = useState({
     MOID: "",
     moOrderName: "",
@@ -668,22 +667,22 @@ useEffect(() => {
                     />
                   </CaseField>
 
-                  <CaseField label={"UEFI CODE"} lock>
-                    <Input
-                      variant={"invisible"}
-                      value={moLineItems?.UEFICode}
-                      placeholder= "---"
-                      readOnly
+                  <CaseField label={"UEFI CODE"} lock={!canEditCE}>
+                    <SearchCommandBlock
+                      value={MODetailInput.UEFICode}
+                      onChange={handleChange("UEFICode")}
+                      options={["None", "FID", "Non-FID"]}
                     />
                   </CaseField>
-                  {moLineItems?.UEFICode == "FID" && (
-                    <CaseField label={"UEFI Number"} lock>
+
+                  {MODetailInput?.UEFICode == "FID" && (
+                    <CaseField label={"UEFI Number"} lock={!canEditCE}>
                       <Input
                         variant={"invisible"}
-                        value={moLineItems?.UEFI_NO}
+                        value={MODetailInput.UEFI_NO}
                         placeholder= "---"
-                        readOnly
-                      />
+                        onChange={handleChange("UEFI_NO")}
+                        />
                     </CaseField>
                   )}
 
@@ -703,7 +702,7 @@ useEffect(() => {
                   </CaseField>
 
                   
-                  <CaseField label={"Description"}  lock span={3}>
+                  <CaseField label={"Description"}  lock >
                     <textarea
                       className="w-full h-10 pt-2 pl-3 resize-none border-none rounded-md focus:outline-none focus:ring-1"
                       name="description"
@@ -948,24 +947,23 @@ useEffect(() => {
                     />
                   </CaseField>
 
-                  <CaseField label="Part Usage Code" lock>
+                  <CaseField label="Part Usage Code" lock >
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="Part Used">
+                  <CaseField label="Part Used" lock={canEdit}>
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={Boolean(MODetailInput.QuantityUsed)}
                         onCheckedChange={handleQuantityUsedToggle}
-                        // disabled={!canEdit}
+                        disabled={canEdit}
                       />
                       <span>{MODetailInput.QuantityUsed ? "Used" : "Not Used"}</span>
                     </div>
                   </CaseField>
 
                   <CaseField label="Part Return Status" 
-                    star={canEdit} 
-                    // lock={!canEdit}
+                    lock={canEdit}
                     >
                     <SearchCommandBlock
                       value={
@@ -998,39 +996,15 @@ useEffect(() => {
 
                   <CaseField
                     label="Unit Photo"
-                    hide={Boolean(MODetailInput.QuantityUsed)}
-                  >
-                    <div className="flex flex-col gap-2">
+                    hide={Boolean(MODetailInput.QuantityUsed)}>
                       <Input
                         type="file"
                         accept="image/*"
                         onChange={handlePhotoUpload}
                         // disabled={!canEdit || photoUploadLoading}
                       />
-                      {photoUploadLoading && (
-                        <span className="text-sm text-muted-foreground">Uploading photo...</span>
-                      )}
-                      {resolvedPhotoSrc && (
-                        <div className="flex items-start gap-3">
-                          <img
-                            src={resolvedPhotoSrc}
-                            alt="Unit photo preview"
-                            className="max-h-24 rounded border object-cover"
-                          />
-                          {canEdit && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => handleRemovePhoto()}
-                            >
-                              Remove
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </div>
                   </CaseField>
-
+                  
                   <CaseField
                     label="Good Return Reason"
                     star={!MODetailInput.QuantityUsed}
@@ -1045,18 +1019,61 @@ useEffect(() => {
                       // readOnly={!canEdit}
                     />
                   </CaseField>
+                  <div className="col-span-4 flex flex-col gap-2 pl-10">
+                     {photoUploadLoading && (
+        <span className="text-sm text-muted-foreground">Uploading photo...</span>
+      )}
 
-                  <CaseField label="Part Order Consumption Comment" lock>
-                    <Input variant="invisible" placeholder="---" />
+      {/* Thumbnail */}
+      {resolvedPhotoSrc && (
+        <div className="flex items-start gap-3">
+          <img
+            src={resolvedPhotoSrc}
+            alt="Unit photo preview"
+            className="max-h-24 rounded border object-cover cursor-pointer"
+            onClick={() => setPreviewSrc(resolvedPhotoSrc)} // klik untuk preview
+          />
+          {canEdit && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleRemovePhoto}
+            >
+              Remove
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Modal Preview */}
+      {previewSrc && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+          onClick={() => setPreviewSrc(null)} // klik luar untuk tutup
+        >
+          <div className="max-w-3xl max-h-[90vh]">
+            <img
+              src={previewSrc}
+              alt="Preview"
+              className="rounded-lg max-h-[90vh] object-contain"
+            />
+          </div>
+        </div>
+      )}
+                  </div>
+
+                  <CaseField label="Part Order Consumption Comment" lock className={"hidden"} >
+                    <Input variant="invisible" placeholder="---" hidden/>
                   </CaseField>
 
-                  <CaseField label="Removed Part Desc" lock>
+                  <CaseField label="Removed Part Desc" lock className={"hidden"}>
                     <Input
                       variant="invisible"
                       name="removedPartDescription"
                       value={MODetailInput.removedPartDescription}
                       onChange={handleChange}
                       placeholder="---"
+                      hidden
                     />
                   </CaseField>
                 </CardContent>

@@ -20,6 +20,7 @@ const Work = lazy(() => import('./pages/work').then(m => ({ default: m.Work })))
 const MaterialOrder = lazy(() => import('./pages/material_order').then(m => ({ default: m.MaterialOrder })));
 const MoDetail = lazy(() => import('./pages/material_order').then(m => ({ default: m.MoDetail })));
 const FlowCase = lazy(() => import('./pages/FlowCase').then(m => ({ default: m.FlowCase })));
+const ErfCase = lazy(() => import('./pages/ErfCase').then(m => ({default: m.ErfCase})));
 
 const masterTables = {
   Company_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.Company_table }))),
@@ -115,6 +116,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/app/bookings/:bookingid" element={<Bookings />} />
             <Route path="/app/labor" element={<Labor />} />
             <Route path="/app/flowcase" element={<FlowCase />} />
+            <Route path="/app/ErfCase" element={<ErfCase />} />
             <Route path="/app/viewcase" element={<ViewCase />} />
 
 

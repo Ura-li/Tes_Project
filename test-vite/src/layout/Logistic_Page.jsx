@@ -133,7 +133,7 @@ export default function Logistik() {
                       }}
                       className="focus:ring-2 focus:ring-blue-400 ring-2 ring-blue-400 p-1 rounded-sm"
                     >
-                      {["All", "New", "Ordered", "Shipped", "Closed", "Cancelled"].map((status) => (
+                      {["All", "New", "Ordered", "Shipped", "Closed", "BackOrdered", "Cancelled"].map((status) => (
                         <option key={status} value={status}>
                           {status}
                         </option>
@@ -162,6 +162,7 @@ export default function Logistik() {
                       m.OrderStatus  === 'Shipped' ? "text-white bg-yellow-500" : 
                       m.OrderStatus === 'Ordered' ? "text-white bg-blue-500" :
                       m.OrderStatus === 'Closed' ? "text-white bg-gray-500" :
+                      m.OrderStatus === 'BackOrdered' ? "text-white bg-purple-500" :
                       "text-white bg-red-500"} variant="invisible">
                     {m.OrderStatus}
                     </Badge>
