@@ -239,6 +239,32 @@ function getUserFromTokenSafe() {
   }
 }
 
+/**
+ * Utility object for formatting and parsing dates between UI and DB formats.
+ */
+const DateHelper = {
+  /**
+   * Converts a database date string into a UI-compatible format.
+   *
+   * @param {string} dateStr - The ISO date string from the database.
+   * @returns {string} The formatted string for input fields.
+   */
+  fromDB(dateStr) {
+    // DB → UI
+    return formatDateForInput(dateStr);
+  },
+
+  /**
+   * Converts a UI input date string into an ISO format suitable for databases.
+   *
+   * @param {string} dateStr - The input date string (e.g., from a datetime-local input).
+   * @returns {string | null} The ISO-formatted date string, or null if input is empty.
+   */
+  toDB(dateStr) {
+    // UI → DB
+    return dateStr ? new Date(dateStr).toISOString() : null;
+  },
+};
 // ----------------------------
 // Component
 // ----------------------------
@@ -313,7 +339,7 @@ export default function NewCaseForm() {
   const [contactAddressLine1, setContactAddressLine1] = useState("");
   const [contactStateProvince, setContactStateProvince] = useState("");
   const [contactCity, setContactCity] = useState("");
-  const [contactCountry, setContactCountry] = useState("");
+  const [contactCountry, setContactCountry] = useState("Indonesia");
   const [contactZipPostalCode, setContactZipPostalCode] = useState("");
 
   const [usePIC, setUsePIC] = useState(false);
@@ -330,7 +356,7 @@ export default function NewCaseForm() {
   const [companyEmail, setCompanyEmail] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
   const [companyWhatsapp, setCompanyWhatsapp] = useState("");
-  const [companyAddressLine1, setCompanyAddressLine1] = useState("");
+  const [companyAddressLine1, setCompanyAddressLine1] = useState(""); 
   const [companyStateProvince, setCompanyStateProvince] = useState("");
   const [companyCity, setCompanyCity] = useState("");
   const [companyCountry, setCompanyCountry] = useState("Indonesia");
@@ -1089,8 +1115,8 @@ export default function NewCaseForm() {
             PrimaryPhone: companyPhone,
             WhatsappNo: companyWhatsapp,
             AddressLine1: companyAddressLine1,
-            City: companyCity.name, // --> emsifa
-            StateProvince: companyStateProvince.name, // --> emsifa
+            City: companyCity.name ?? companyCity, // --> emsifa
+            StateProvince: companyStateProvince.name ?? companyStateProvince, // --> emsifa
             Country: companyCountry,
             ZipPostalCode: companyZipPostalCode,
             NPWP: companyNPWP
@@ -1300,10 +1326,18 @@ export default function NewCaseForm() {
       navigate(`/app/case/${caseId}`);
     } catch (e) {
       console.error(e);
-      toast.warning(e.response.data.message, {
-        position: "top-center",
-        // className: "p-5"
-      })
+      if (e.response?.status === 400 || e.response?.status === 409) {
+        const msg = e.response?.data?.message || "Invalid input";
+        toast.warning(msg, {
+          position: "top-center",
+        });
+      } else {
+        toast.warning("Something went wrong", {
+          description: e.response?.data?.message || e.message,
+          position: "top-center",
+        });
+      }
+
     } finally {
       setLoading(false);
     }
@@ -1615,53 +1649,75 @@ export default function NewCaseForm() {
                   <Input className="col-span-2" placeholder="Indonesia / other" value={contactCountry} onChange={(e) => setContactCountry(e.target.value)} />
                 </div>
                 {/* Province/City (Indonesia via EMSIFA) */}
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Province<Label className="text-red-600">*</Label></Label>
-                  <div className="col-span-2">
-                    {/* <SelectBarState
-                      id="contactStateProvince"
-                      value={contactStateProvince}
-                      onChange={setContactStateProvince}
-                      options={provContact}
-                      placeholder="Select a Province"
-                    /> */}
-                    <ComboboxDemo
-                      id="contactStateProvince"
-                      value={contactStateProvince}
-                      setValue={setContactStateProvince}
-                      options={provContact}
-                      placeholder="Select a Province"
-                      />
-                    {/* <SelectBar
-                            id="StateProvince"
-                            value={contactStateProvince.name}
-                            onChange={setContactStateProvince}
-                            options={prov}
-                            placeholder="Select a Province"
-                          /> */}
+                {contactCountry.toLowerCase() === 'indonesia' ? (
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">Province<Label className="text-red-600">*</Label></Label>
+                    <div className="col-span-2">
+                      {/* <SelectBarState
+                        id="contactStateProvince"
+                        value={contactStateProvince}
+                        onChange={setContactStateProvince}
+                        options={provContact}
+                        placeholder="Select a Province"
+                      /> */}
+                      <ComboboxDemo
+                        id="contactStateProvince"
+                        value={contactStateProvince}
+                        setValue={setContactStateProvince}
+                        options={provContact}
+                        placeholder="Select a Province"
+                        />
+                    </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">City<Label className="text-red-600">*</Label></Label>
-                  <div className="col-span-2 overflow-hidden">
-                    <ComboboxDemo
-                      id="contactCity"
-                      value={contactCity}
-                      setValue={setContactCity}
-                      options={cityContact}
-                      placeholder="Select a City"
-                      disabled={!contactStateProvince || cityContact.length === 0}
+                ) : (
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">
+                      State / Region<Label className="text-red-600">*</Label>
+                    </Label>
+                    <Input
+                      className="col-span-2"
+                      value={contactStateProvince}
+                      onChange={(e) => setContactStateProvince(e.target.value)}
+                      placeholder="e.g. Tokyo, California, etc."
                     />
-                    {/* <SelectBarState
-                      id="contactCity"
-                      value={contactCity}
-                      onChange={setContactCity}
-                      options={cityContact}
-                      placeholder="Select a City"
-                      disabled={!contactStateProvince || cityContact.length === 0}
-                    /> */}
                   </div>
-                </div>
+                )}
+
+                {contactCountry.toLowerCase() === "indonesia" ? (
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">City<Label className="text-red-600">*</Label></Label>
+                    <div className="col-span-2 overflow-hidden">
+                      <ComboboxDemo
+                        id="contactCity"
+                        value={contactCity}
+                        setValue={setContactCity}
+                        options={cityContact}
+                        placeholder="Select a City"
+                        disabled={!contactStateProvince || cityContact.length === 0}
+                      />
+                      {/* <SelectBarState
+                        id="contactCity"
+                        value={contactCity}
+                        onChange={setContactCity}
+                        options={cityContact}
+                        placeholder="Select a City"
+                        disabled={!contactStateProvince || cityContact.length === 0}
+                      /> */}
+                    </div>
+                  </div>
+                ): (
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">
+                      City / Area<Label className="text-red-600">*</Label>
+                    </Label>
+                    <Input
+                      className="col-span-2"
+                      value={contactCity}
+                      onChange={(e) => setContactCity(e.target.value)}
+                      placeholder="e.g. Jakarta, Berlin, New York..."
+                    />
+                  </div>
+                )}
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
                   <Input className="col-span-2" value={contactZipPostalCode} onChange={(e) => setContactZipPostalCode(e.target.value)} />
