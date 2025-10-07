@@ -653,7 +653,7 @@ useEffect(() => {
                     />
                   </CaseField>
 
-                  <CaseField label={"UEFI CODE"} lock={!canEditCE}>
+                  <CaseField label={"UEFI CODE"} lock>
                     <SearchCommandBlock
                       value={MODetailInput.UEFICode}
                       onChange={handleChange("UEFICode")}
@@ -662,7 +662,7 @@ useEffect(() => {
                   </CaseField>
 
                   {MODetailInput?.UEFICode == "FID" && (
-                    <CaseField label={"UEFI Number"} lock={!canEditCE}>
+                    <CaseField label={"UEFI Number"} lock>
                       <Input
                         variant={"invisible"}
                         value={MODetailInput.UEFI_NO}
