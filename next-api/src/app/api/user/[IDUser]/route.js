@@ -98,25 +98,35 @@ export async function PATCH(request, { params }) {
       updateData.ProfilePhoto = `/uploads/profiles/${uniqueName}`;
     }
 
-    if (Signature) {
-      if(typeof Signature === "object"){
-        const bytes = await Signature.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        const uploadPath = path.join(process.cwd(), "public/uploads/signatures", Signature.name);
-        fs.writeFileSync(uploadPath, buffer);
-        updateData.Signature = `/uploads/signatures/${Signature.name}`;;
-      }else if (typeof Signature === "string" && Signature.startsWith("data:image")) {
-        const base64Data = Signature.replace(/^data:image\/\w+;base64,/, "");
-        const buffer = Buffer.from(base64Data, "base64");
+    /**
+     * REVISION : USE BASE64 INSTEAD FOR SIGNATURE (SEE BELOW THIS COMMENT)
+     */
+    // if (Signature) {
+    //   if(typeof Signature === "object"){
+    //     const bytes = await Signature.arrayBuffer();
+    //     const buffer = Buffer.from(bytes);
+    //     const uploadPath = path.join(process.cwd(), "public/uploads/signatures", Signature.name);
+    //     fs.writeFileSync(uploadPath, buffer);
+    //     updateData.Signature = `/uploads/signatures/${Signature.name}`;;
+    //   }else if (typeof Signature === "string" && Signature.startsWith("data:image")) {
+    //     const base64Data = Signature.replace(/^data:image\/\w+;base64,/, "");
+    //     const buffer = Buffer.from(base64Data, "base64");
 
-        // buat nama unik
-        const uniqueName = `${crypto.randomUUID()}.png`;
-        const uploadPath = path.join(process.cwd(), "public/uploads/signatures", uniqueName);
-        fs.writeFileSync(uploadPath, buffer);
-        updateData.Signature = `/uploads/signatures/${uniqueName}`;
+    //     // buat nama unik
+    //     const uniqueName = `${crypto.randomUUID()}.png`;
+    //     const uploadPath = path.join(process.cwd(), "public/uploads/signatures", uniqueName);
+    //     fs.writeFileSync(uploadPath, buffer);
+    //     updateData.Signature = `/uploads/signatures/${uniqueName}`;
 
-      }
+    //   }
+    // }
+
+
+    if (Signature && Signature.startsWith("data:image")) {
+      // Base64 Save
+      updateData.Signature = Signature;
     }
+    
 
 
     if (Object.keys(updateData).length === 0) {

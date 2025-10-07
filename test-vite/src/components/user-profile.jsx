@@ -62,7 +62,7 @@ export function UserProfile() {
                     })
                     setPreview({
                         ProfilePhoto: res.ProfilePhoto ? `${import.meta.env.VITE_API_BASE_URL}${res.ProfilePhoto}` : null,
-                        Signature: res.Signature ? `${import.meta.env.VITE_API_BASE_URL}${res.Signature}` : null,
+                        Signature: res.Signature ? `${res.Signature}` : null,
                     });
                 }
 
