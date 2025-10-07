@@ -181,8 +181,8 @@ export async function POST(request) {
         CaseResolution,
         CreatedBy,
         ProblemDescription,
-        CaseID_Manual,
-        CaseID_Manual_Date,
+        // CaseID_Manual,
+        // CaseID_Manual_Date,
         CaseNoteProduct,
         accessories,
     } = await request.json();
@@ -234,8 +234,8 @@ export async function POST(request) {
             Owner: parseInt(CreatedBy),
             CreatedBy: parseInt(CreatedBy),
             ProblemDescription: ProblemDescription,
-            CaseID_Manual: CaseID_Manual,
-            CaseID_Manual_Date: new Date (CaseID_Manual_Date),
+            // CaseID_Manual: CaseID_Manual,
+            // CaseID_Manual_Date: new Date (CaseID_Manual_Date),
             CaseProductNote : CaseNoteProduct,
             ...(Array.isArray(accessories) && accessories.length > 0 && {
               accessory: {
