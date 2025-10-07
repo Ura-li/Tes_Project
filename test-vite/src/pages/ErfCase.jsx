@@ -6,11 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { ArrowDown, ArrowUp, ArrowUpDown, File } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
+
 
 export const ErfCase = () => {
     const [caseData, setCaseData] = useState([])
-
+    const navigate = useNavigate();
     const fetchData = async () => {
         try {
             const response = await ApiCustomer.get('/api/case-information')
@@ -28,7 +30,6 @@ export const ErfCase = () => {
     useEffect(() => {
         fetchData();
     }, [])
-    console.log(caseData)
 
     const [selectedFiles, setSelectedFiles] = useState([]);
 
