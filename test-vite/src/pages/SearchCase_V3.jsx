@@ -204,6 +204,7 @@ const CASE_STATUS = [
   "Open",
   "Close",
   "InActive",
+  "NEW_POPDoc"
 ];
 const WARRANTY_STATUS = ["In Warranty", "Out Warranty"];
 
@@ -238,6 +239,32 @@ function getUserFromTokenSafe() {
   }
 }
 
+/**
+ * Utility object for formatting and parsing dates between UI and DB formats.
+ */
+const DateHelper = {
+  /**
+   * Converts a database date string into a UI-compatible format.
+   *
+   * @param {string} dateStr - The ISO date string from the database.
+   * @returns {string} The formatted string for input fields.
+   */
+  fromDB(dateStr) {
+    // DB → UI
+    return formatDateForInput(dateStr);
+  },
+
+  /**
+   * Converts a UI input date string into an ISO format suitable for databases.
+   *
+   * @param {string} dateStr - The input date string (e.g., from a datetime-local input).
+   * @returns {string | null} The ISO-formatted date string, or null if input is empty.
+   */
+  toDB(dateStr) {
+    // UI → DB
+    return dateStr ? new Date(dateStr).toISOString() : null;
+  },
+};
 // ----------------------------
 // Component
 // ----------------------------
@@ -312,7 +339,7 @@ export default function NewCaseForm() {
   const [contactAddressLine1, setContactAddressLine1] = useState("");
   const [contactStateProvince, setContactStateProvince] = useState("");
   const [contactCity, setContactCity] = useState("");
-  const [contactCountry, setContactCountry] = useState("");
+  const [contactCountry, setContactCountry] = useState("Indonesia");
   const [contactZipPostalCode, setContactZipPostalCode] = useState("");
 
   const [usePIC, setUsePIC] = useState(false);
@@ -329,10 +356,10 @@ export default function NewCaseForm() {
   const [companyEmail, setCompanyEmail] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
   const [companyWhatsapp, setCompanyWhatsapp] = useState("");
-  const [companyAddressLine1, setCompanyAddressLine1] = useState("");
+  const [companyAddressLine1, setCompanyAddressLine1] = useState(""); 
   const [companyStateProvince, setCompanyStateProvince] = useState("");
   const [companyCity, setCompanyCity] = useState("");
-  const [companyCountry, setCompanyCountry] = useState("");
+  const [companyCountry, setCompanyCountry] = useState("Indonesia");
   const [companyZipPostalCode, setCompanyZipPostalCode] = useState("");
   const [companyNPWP, setCompanyNPWP] = useState("");
 
@@ -364,10 +391,12 @@ export default function NewCaseForm() {
   const [isNewContact, setIsNewContact] = useState(false);
   const [isNewCompany, setIsNewCompany] = useState(false);
 
+  const [needWarrantyApproval, setNeedWarrantyApproval] = useState(false);
 
 
   // Warranty
   const [warrantySearchValue, setWarrantySearchValue] = useState("");
+  // console.log("warrantySearchValue : ",warrantySearchValue)
   const [warrantyOptions, setWarrantyOptions] = useState([]);
 
   const [selectWarrantyCodeStatus, setSelectWarrantyCodeStatus] = useState("")
@@ -993,6 +1022,15 @@ export default function NewCaseForm() {
    * Performs optional photo upload and action log creation.
    * @returns {Promise<void>}
    */
+  useEffect(() => {
+      if (warrantySearchValue !== "01T" && needWarrantyApproval) {
+    setNeedWarrantyApproval(false);
+  }
+    needWarrantyApproval ? setCaseStatus("NEW_POPDoc")
+      : setCaseStatus("Open")
+      ;
+  }, [warrantySearchValue, needWarrantyApproval])
+
   const onCreateCase = async () => {
     if ((!selectedAsset && !isNewAsset) || (!selectedContact && !isNewContact)) {
       alert("Please select or Create both an Asset and a Contact before creating a case.");
@@ -1077,8 +1115,8 @@ export default function NewCaseForm() {
             PrimaryPhone: companyPhone,
             WhatsappNo: companyWhatsapp,
             AddressLine1: companyAddressLine1,
-            City: companyCity.name, // --> emsifa
-            StateProvince: companyStateProvince.name, // --> emsifa
+            City: companyCity.name ?? companyCity, // --> emsifa
+            StateProvince: companyStateProvince.name ?? companyStateProvince, // --> emsifa
             Country: companyCountry,
             ZipPostalCode: companyZipPostalCode,
             NPWP: companyNPWP
@@ -1140,7 +1178,8 @@ export default function NewCaseForm() {
           ContactID: contactId ?? null ,
           SiteAccountID: companyId ?? null,
           Warranty_Status: warrantySearchValue,
-          EOW_Date: normalizedEowDate
+          EOW_Date: normalizedEowDate,
+          needWarrantyApproval: needWarrantyApproval,
           
         })
         
@@ -1158,7 +1197,8 @@ export default function NewCaseForm() {
           assetPatchPayload.SiteAccountID = companyId;
         }
 
-        if (Object.keys(assetPatchPayload).length) {
+        if (Object.keys(assetPatchPayload).length || needWarrantyApproval) {
+          assetPatchPayload.needWarrantyApproval = needWarrantyApproval;
           await ApiCustomer.patch(`/api/asset-information/${assetId}`, assetPatchPayload);
           setSelectedAsset((prev) => {
             if (!prev) return prev;
@@ -1204,6 +1244,9 @@ export default function NewCaseForm() {
         CaseNoteProduct: caseNote,
         ...(filteredAccessories.length > 0 && { accessories: filteredAccessories }),
       };
+
+      needWarrantyApproval && (payload.CaseStatus = "NEW_POPDoc")
+
 
       
       console.log(payload);
@@ -1283,10 +1326,18 @@ export default function NewCaseForm() {
       navigate(`/app/case/${caseId}`);
     } catch (e) {
       console.error(e);
-      toast.warning(e.response.data.message, {
-        position: "top-center",
-        // className: "p-5"
-      })
+      if (e.response?.status === 400 || e.response?.status === 409) {
+        const msg = e.response?.data?.message || "Invalid input";
+        toast.warning(msg, {
+          position: "top-center",
+        });
+      } else {
+        toast.warning("Something went wrong", {
+          description: e.response?.data?.message || e.message,
+          position: "top-center",
+        });
+      }
+
     } finally {
       setLoading(false);
     }
@@ -1598,53 +1649,75 @@ export default function NewCaseForm() {
                   <Input className="col-span-2" placeholder="Indonesia / other" value={contactCountry} onChange={(e) => setContactCountry(e.target.value)} />
                 </div>
                 {/* Province/City (Indonesia via EMSIFA) */}
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Province<Label className="text-red-600">*</Label></Label>
-                  <div className="col-span-2">
-                    {/* <SelectBarState
-                      id="contactStateProvince"
-                      value={contactStateProvince}
-                      onChange={setContactStateProvince}
-                      options={provContact}
-                      placeholder="Select a Province"
-                    /> */}
-                    <ComboboxDemo
-                      id="contactStateProvince"
-                      value={contactStateProvince}
-                      setValue={setContactStateProvince}
-                      options={provContact}
-                      placeholder="Select a Province"
-                      />
-                    {/* <SelectBar
-                            id="StateProvince"
-                            value={contactStateProvince.name}
-                            onChange={setContactStateProvince}
-                            options={prov}
-                            placeholder="Select a Province"
-                          /> */}
+                {contactCountry.toLowerCase() === 'indonesia' ? (
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">Province<Label className="text-red-600">*</Label></Label>
+                    <div className="col-span-2">
+                      {/* <SelectBarState
+                        id="contactStateProvince"
+                        value={contactStateProvince}
+                        onChange={setContactStateProvince}
+                        options={provContact}
+                        placeholder="Select a Province"
+                      /> */}
+                      <ComboboxDemo
+                        id="contactStateProvince"
+                        value={contactStateProvince}
+                        setValue={setContactStateProvince}
+                        options={provContact}
+                        placeholder="Select a Province"
+                        />
+                    </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">City<Label className="text-red-600">*</Label></Label>
-                  <div className="col-span-2 overflow-hidden">
-                    <ComboboxDemo
-                      id="contactCity"
-                      value={contactCity}
-                      setValue={setContactCity}
-                      options={cityContact}
-                      placeholder="Select a City"
-                      disabled={!contactStateProvince || cityContact.length === 0}
+                ) : (
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">
+                      State / Region<Label className="text-red-600">*</Label>
+                    </Label>
+                    <Input
+                      className="col-span-2"
+                      value={contactStateProvince}
+                      onChange={(e) => setContactStateProvince(e.target.value)}
+                      placeholder="e.g. Tokyo, California, etc."
                     />
-                    {/* <SelectBarState
-                      id="contactCity"
-                      value={contactCity}
-                      onChange={setContactCity}
-                      options={cityContact}
-                      placeholder="Select a City"
-                      disabled={!contactStateProvince || cityContact.length === 0}
-                    /> */}
                   </div>
-                </div>
+                )}
+
+                {contactCountry.toLowerCase() === "indonesia" ? (
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">City<Label className="text-red-600">*</Label></Label>
+                    <div className="col-span-2 overflow-hidden">
+                      <ComboboxDemo
+                        id="contactCity"
+                        value={contactCity}
+                        setValue={setContactCity}
+                        options={cityContact}
+                        placeholder="Select a City"
+                        disabled={!contactStateProvince || cityContact.length === 0}
+                      />
+                      {/* <SelectBarState
+                        id="contactCity"
+                        value={contactCity}
+                        onChange={setContactCity}
+                        options={cityContact}
+                        placeholder="Select a City"
+                        disabled={!contactStateProvince || cityContact.length === 0}
+                      /> */}
+                    </div>
+                  </div>
+                ): (
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">
+                      City / Area<Label className="text-red-600">*</Label>
+                    </Label>
+                    <Input
+                      className="col-span-2"
+                      value={contactCity}
+                      onChange={(e) => setContactCity(e.target.value)}
+                      placeholder="e.g. Jakarta, Berlin, New York..."
+                    />
+                  </div>
+                )}
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
                   <Input className="col-span-2" value={contactZipPostalCode} onChange={(e) => setContactZipPostalCode(e.target.value)} />
@@ -1732,6 +1805,7 @@ export default function NewCaseForm() {
                       <Label className="col-span-1">Country<Label className="text-red-600">*</Label></Label>
                       <Input className="col-span-2" value={companyCountry} onChange={(e) => setCompanyCountry(e.target.value)} />
                     </div>
+                    {companyCountry.toLowerCase() === 'indonesia' ? (
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Province (ID)<Label className="text-red-600">*</Label></Label>
                       <div className="col-span-2">
@@ -1751,25 +1825,53 @@ export default function NewCaseForm() {
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">City (ID)<Label className="text-red-600">*</Label></Label>
-                      <div className="col-span-2">
-                        {/* <SelectBarState
-                          id="CompanyCity"
-                          value={companyCity}
-                          onChange={setCompanyCity}
-                          options={cityCompany}
-                          placeholder="Select a City"
-                        /> */}
-                        <ComboboxDemo
-                          id="CompanyCity"
-                          value={companyCity}
-                          setValue={setCompanyCity}
-                          options={cityCompany}
-                          placeholder="Select a City"
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2 items-center">
+                        <Label className="col-span-1">
+                          State / Region<Label className="text-red-600">*</Label>
+                        </Label>
+                        <Input
+                          className="col-span-2"
+                          value={companyStateProvince}
+                          onChange={(e) => setCompanyStateProvince(e.target.value)}
+                          placeholder="e.g. Tokyo, California, etc."
                         />
                       </div>
-                    </div>
+                    )}
+
+                    {companyCountry.toLowerCase() === "indonesia" ? (
+                      <div className="grid grid-cols-3 gap-2 items-center">
+                        <Label className="col-span-1">City (ID)<Label className="text-red-600">*</Label></Label>
+                        <div className="col-span-2">
+                          {/* <SelectBarState
+                            id="CompanyCity"
+                            value={companyCity}
+                            onChange={setCompanyCity}
+                            options={cityCompany}
+                            placeholder="Select a City"
+                          /> */}
+                          <ComboboxDemo
+                            id="CompanyCity"
+                            value={companyCity}
+                            setValue={setCompanyCity}
+                            options={cityCompany}
+                            placeholder="Select a City"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2 items-center">
+                        <Label className="col-span-1">
+                          City / Area<Label className="text-red-600">*</Label>
+                        </Label>
+                        <Input
+                          className="col-span-2"
+                          value={companyCity}
+                          onChange={(e) => setCompanyCity(e.target.value)}
+                          placeholder="e.g. Jakarta, Berlin, New York..."
+                        />
+                      </div>
+                    )}
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
                       <Input className="col-span-2" value={companyZipPostalCode} onChange={(e) => setCompanyZipPostalCode(e.target.value)} />
@@ -1937,7 +2039,7 @@ export default function NewCaseForm() {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
+              <div className="col-span-2 space-y-2">
                 <Label>Warranty Status</Label>
                 <SearchCommandBlock
                   options={warrantyOptions}
@@ -1955,6 +2057,23 @@ export default function NewCaseForm() {
                 <Label>EOW Date</Label>
                 <Input type="date" value={eowDate} onChange={(e) => setEowDate(e.target.value)} />
               </div>
+              {
+              warrantySearchValue === "01T" &&
+              (
+            <div className="">
+                <Label>Need Warranty Approval</Label>
+                <div className="flex items-center gap-2 mt-2">
+                  <Checkbox
+                    id="needWarrantyApproval"
+                    checked={needWarrantyApproval}
+                    onCheckedChange={(v) => setNeedWarrantyApproval(Boolean(v))}
+                    className={"ring-2 bg-gray-100"}
+                  />
+                  <Label htmlFor="needWarrantyApproval" className={'font-[700]'}>Yes</Label>
+                </div>
+            </div>
+              )
+              }
             </CardContent>
           </Card>
           {/* 5) Accessory */}
@@ -1965,8 +2084,9 @@ export default function NewCaseForm() {
             </CardHeader>
             <CardContent className="space-y-3">
               {accessories.map((row, idx) => (
-                <>
-                <div key={row.id} className="grid grid-cols-12 gap-2 items-center ring-1 p-3 rounded-2xl">
+                
+                  <React.Fragment key={row.id || idx}>
+                <div  className="grid grid-cols-12 gap-2 items-center ring-1 p-3 rounded-2xl">
                   <div className="col-span-12 md:col-span-4">
                     <Label className="text-xs">Accessory Name</Label>
                     <Input
@@ -2001,7 +2121,8 @@ export default function NewCaseForm() {
                   </div>
                 </div>
                   <Separator className="w-full border-2"/>
-                </>
+                </React.Fragment>
+                
               ))}
               <Button type="button" variant="secondary" onClick={addAccessory}>
                 <Plus className="w-4 h-4 mr-2" /> Add Row

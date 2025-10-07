@@ -103,9 +103,7 @@ export function GlobalSearchBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    fetch("/api/socket"); // Initialize the WebSocket server
-  }, []);
+
 
   return (
     <div ref={containerRef} className="relative">
@@ -122,7 +120,7 @@ export function GlobalSearchBar() {
         {loading ? <Loader2 className=' animate-spin'></Loader2> : ""}
       </span>
       {showResults && results && (
-        <div className="absolute bg-white shadow rounded p-2 z-50 w-full">
+        <div className="absolute bg-white shadow rounded p-2 z-50 w-full overflow-scroll max-h-96">
           <div>
             <strong>Cases</strong>
             {results.cases.map(c => (

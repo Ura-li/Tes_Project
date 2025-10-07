@@ -109,6 +109,7 @@ export async function POST(request) {
       const engineerId = wo.OwnerID ?? null;
       let resourceIdFromEngineer = null;
       let resourceAccountIdFromEngineer = null;
+      const rolebooking = ['admin','celead','apo']
 
       if(engineerId){
         const engineer = await tx.user.findUnique({
@@ -120,7 +121,7 @@ export async function POST(request) {
         })
 
         console.log("engineer : ",engineer);
-        if(!engineer || engineer.Role !== 'ce') throw new Error("Owner WO bukan engineer / tidak ditemukan");
+        if(!engineer || rolebooking.includes(!engineer?.Role)) throw new Error("Owner WO bukan engineer / tidak ditemukan");
         
         resourceIdFromEngineer = engineer.ResourceId ?? null;
       }

@@ -1,5 +1,6 @@
 import * as React from "react"
 import {
+  BookMarkedIcon,
   BookOpen,
   Bot,
   FileCog,
@@ -299,6 +300,12 @@ export function AppSidebar({
         title: "Your Cases",
         url: "/app/flowcase",
         icon: PieChart,
+      },
+      {
+        name: "Erf Case",
+        title: "Erf Case",
+        url: "/app/ErfCase",
+        icon: BookMarkedIcon,
       },
       {
         name: "My Work",

@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectBarRelated } from "../../components/sc-select";
+import { SearchCommandBlock, SelectBarRelated } from "../../components/sc-select";
 import { Car, Lock } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import {
@@ -44,6 +44,13 @@ import { AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion";
 import CaseField from "@/components/CaseField";
 import { useAuth } from "@/context/auth-context";
 
+export const RMA_STATUS_OPTIONS = [
+  { value: "InOutCE", label: "In/Out CE" },
+  { value: "ReturnLogistic", label: "Return via Logistic" },
+  { value: "ReturnDHL", label: "Return via DHL" },
+  { value: "FullCharge", label: "Full Charge" },
+];
+
 export const ServiceMaterialApo = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -52,9 +59,14 @@ export const ServiceMaterialApo = () => {
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
   const [MaterialOrder, setMaterialOrder] = useState([]);
+  /**
+   * TODO (WARNING ISSUES) 
+   * REMOVE MO FORM, USE STATE DEFINED ONE. 
+   * this will also change the handle Save Function.
+   */
   const [moForm, setMoForm] = useState({
     SalesOrderNumber: "",
-    RMANumber: ""
+    RMANumber: "",
   })
   const [materialOrderInformation, setMaterialOrderInformation] = useState({
     MOID: "",
@@ -66,14 +78,14 @@ export const ServiceMaterialApo = () => {
     readyForClosureDate: "",
     caseID: "",
     contact: null,
-    deliveryRequestedDateCustomerTime: "",
-    collectionRequestedDate: "",
+    deliveryRequestedDate: null,
+    collectionRequestedDate: null,
     promoCode: "",
     customerInducedDamage: false,
     accidentalDamageProtection: false,
     defectiveMediaRetention: false,
     notificationNumber: "",
-    salesOrderNumber: "",
+    SalesOrderNumber: "",
     resourceName: "",
     resourceId: "",
     workOrder: null,
@@ -81,10 +93,13 @@ export const ServiceMaterialApo = () => {
     isBCPOrder: false,
     materialOrderType: "",
     eotOrderNumber: "",
+    AWB_InCode: "",
+    AWB_OutCode: "",
+    RMAStatus: null,
+    RMANumber: "",
   });
-  const [deliveryRequiredDate, setDeliveryRequiredDate] = useState(null);
-  const [collectionRequestedDate, setCollectionRequestedDate] = useState(null);
-  const [readyForClosureDate, setReadyForClosureDate] = useState(null);
+  // const [collectionRequestedDate, setCollectionRequestedDate] = useState(null);
+  // const [readyForClosureDate, setReadyForClosureDate] = useState(null);
   const [error, setError] = useState(null);
 
   const [updatedLineItems, setUpdatedLineItems] = useState({}); 
@@ -99,18 +114,45 @@ export const ServiceMaterialApo = () => {
   };
 
 
-  const formatDateForInput = (dateString) => {
+  function formatDateForInput(dateString) {
     if (!dateString) return "";
     const date = new Date(dateString);
-    const offset = date.getTimezoneOffset();
-    const localDate = new Date(date.getTime() - offset * 60 * 1000);
-    return localDate.toISOString().slice(0, 16); // Get 'YYYY-MM-DDTHH:MM'
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
+  const DateHelper = {
+    fromDB(dateStr) {
+      // DB → UI
+      return formatDateForInput(dateStr);
+    },
+    toDB(dateStr) {
+      // UI → DB
+      return dateStr ? new Date(dateStr).toISOString() : null;
+    },
   };
 
   const handleMoFormChange = (field) => (e) => {
-  const value = e.target.value;
-  setMoForm((prev) => ({ ...prev, [field]: value }));
-};
+    const value = e.target.value;
+    setMoForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleMaterialOrderChange = (field) => (valueOrEvent) => {
+    const value =
+      valueOrEvent && valueOrEvent.target !== undefined
+        ? valueOrEvent.target.value
+        : valueOrEvent;
+
+    setMaterialOrderInformation((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
 
 
   // Fetch Material Order
@@ -129,15 +171,15 @@ export const ServiceMaterialApo = () => {
         serviceDescription: data.ServiceDescription || "",
         orderType: data.OrderType || "",
         shippingPriority: data.ShippingPriority || "",
-        readyForClosureDate: formatDateForInput(data.ReadyForClosureDate || ""),
+        readyForClosureDate: DateHelper.fromDB(data.ReadyForClosureDate || ""),
         caseID: data.workorder?.CaseID || "",
         contact: data.workorder?.caseinformation?.contact_information
           ? `${data.workorder.caseinformation.contact_information.FirstName} ${data.workorder.caseinformation.contact_information.LastName}`
           : null,
-        deliveryRequestedDateCustomerTime: formatDateForInput(
+        deliveryRequestedDate: DateHelper.fromDB(
           data.DeliveryRequestedDate || ""
         ),
-        collectionRequestedDate: formatDateForInput(
+        collectionRequestedDate: DateHelper.fromDB(
           data.CollectionRequestedDate || ""
         ),
         promoCode: data.PromoCode || "",
@@ -145,7 +187,7 @@ export const ServiceMaterialApo = () => {
         accidentalDamageProtection: data.AccidentalDamageProtection || false,
         defectiveMediaRetention: data.DefectiveMediaRetention || false,
         notificationNumber: data.NotificationNumber || "",
-        salesOrderNumber: data.SalesOrderNumber || "",
+        SalesOrderNumber: data.SalesOrderNumber || "",
         resourceName: data.Resource?.Name || "",
         resourceId: data.Resource?.ResourceId || "",
         workOrder: data.WOID || null,
@@ -153,6 +195,9 @@ export const ServiceMaterialApo = () => {
         isBCPOrder: data.IsBCPOrder || false,
         materialOrderType: data.MaterialOrderType || "",
         eotOrderNumber: data.EOTOrderNumber || "",
+        AWB_InCode: data.AWB_InCode || "",
+        AWB_OutCode: data.AWB_OutCode || "",
+        RMAStatus: data.RMAStatus || null
       });
 
       setMoForm((prev) => ({
@@ -229,6 +274,7 @@ export const ServiceMaterialApo = () => {
   let canEditapo;
   const allowedRoles = ["apo", "lg", "admin"];
 
+    
   if (materialOrders?.OrderStatus === "Closed") {
     canEditapo = false;
   } else {
@@ -242,6 +288,29 @@ export const ServiceMaterialApo = () => {
   //   canEditapo = materialOrders?.workorder?.caseinformation?.Owner === user?.id && allowedRoles.includes(user?.role); ;
   // }
 
+  useEffect(() => {
+    // setMoForm({
+    //   ...moForm,
+    //   RMANumber: moForm.SalesOrderNumber
+    // })
+    console.log("TEST MO FORM : ", moForm.SalesOrderNumber, materialOrderInformation.SalesOrderNumber)
+    setMaterialOrderInformation(prev => ({
+      ...prev,
+      SalesOrderNumber: moForm.SalesOrderNumber,
+      // RMANumber: moForm.SalesOrderNumber
+    }))
+  },[moForm.SalesOrderNumber])
+
+  /**
+   * TODO : REMOVE THIS LATER IF THE MOFORM IS REMOVED
+   */
+  useEffect(() =>{
+    setMaterialOrderInformation(prev => ({
+      ...prev,
+      RMANumber: moForm.RMANumber
+    }))
+  },[moForm.RMANumber])
+  
   return (
     <div>
       {materialOrders.OrderStatus === "Closed" && (
@@ -255,6 +324,7 @@ export const ServiceMaterialApo = () => {
         updatedLineItems={updatedLineItems}
         moForm={moForm}
         setMoForm={setMoForm}
+        materialOrderInformation={materialOrderInformation}
       />
       <Card className="mt-2 rounded-none">
         <CardContent className="p-0">
@@ -329,7 +399,7 @@ export const ServiceMaterialApo = () => {
                       variant={"invisible"}
                       type="text"
                       className=""
-                      value={"---"}
+                      value={materialOrders?.workorder?.serviceCatalog?.warranty_services?.Service_offerID}
                     />
                   </CaseField>
 
@@ -347,7 +417,7 @@ export const ServiceMaterialApo = () => {
                       variant={"invisible"}
                       type="text"
                       className=""
-                      value={"---"}
+                      value={materialOrders?.workorder?.serviceCatalog?.warranty_services?.Service_description}
                     />
                   </CaseField>
 
@@ -366,7 +436,11 @@ export const ServiceMaterialApo = () => {
                       type="text"
                       value={moForm?.SalesOrderNumber || ""}
                       placeholder="---"
-                      onChange={handleMoFormChange("SalesOrderNumber")}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        handleMoFormChange("SalesOrderNumber")(e)
+                        handleMoFormChange("RMANumber")(e)
+                      }}
                     />
                   </CaseField>
 
@@ -386,27 +460,68 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>  
 
+                  <CaseField
+                    label="RMA Status"
+                    lock={!canEditapo}
+                  >
+                    <SearchCommandBlock
+                      value={materialOrderInformation?.RMAStatus || null}
+                      onChange={handleMaterialOrderChange("RMAStatus")}
+                      placeholder="Select RMA Status"
+                      options={RMA_STATUS_OPTIONS}
+                      // readOnly={!canEdit}
+                    />
+                  </CaseField>
+                  
+                  {/* todo for slamet : ETA DATE di MO yang ngisi APO */}
+                  <CaseField
+                    label={"ETA Delivery Required Date (Customer Time)"}
+                    lock={!canEditapo}
+                  >
+                    {console.log("MATERIAL ORDER INFO ", materialOrderInformation)}
+                    <DatePicker
+                      value={materialOrderInformation?.deliveryRequestedDate ? new Date(materialOrderInformation?.deliveryRequestedDate) : null}
+                      onChange={handleMaterialOrderChange("deliveryRequestedDate")}
+                    />
+                  </CaseField>
+
+                  {/* PART IN CE */}
+                  <CaseField label={"Part IN CE Collection Requested Date"} icon lock={!canEditapo}>
+                    <DatePicker
+                      value={materialOrderInformation?.collectionRequestedDate ? new Date(materialOrderInformation?.collectionRequestedDate) : null}
+                      onChange={handleMaterialOrderChange("collectionRequestedDate")}
+                    />
+                  </CaseField>
+
+                  {/* Part OUT CE */}
+                  <CaseField label={"Part OUT CE Ready For Closure Date"} icon lock={!canEditapo}>
+                    <DatePicker
+                      value={materialOrderInformation?.readyForClosureDate ? new Date(materialOrderInformation?.readyForClosureDate) : null}
+                      onChange={handleMaterialOrderChange("readyForClosureDate")}
+                    />
+                  </CaseField>
+
+                  {/* AWB IN CODE */}
+                  <CaseField label={"AWB In Code"} icon lock={!canEditapo}>
+                    <Input variant="invisible" placeholder="---"               
+                      value={materialOrderInformation?.AWB_InCode || null}
+                      onChange={handleMaterialOrderChange("AWB_InCode")}
+                    />
+                  </CaseField>
+                  {/* AWB OUT CODE */}
+                  <CaseField label={"AWB Out Code"} icon lock={!canEditapo}>
+                    <Input variant="invisible" placeholder="---" 
+                      value={materialOrderInformation?.AWB_OutCode || null}
+                      onChange={handleMaterialOrderChange("AWB_OutCode")}
+                    />
+                  </CaseField>
+
                   <Accordion type="single" collapsible className="col-span-2 md:col-span-4 ">
                     <AccordionItem value="more-detail" >
-                      <AccordionTrigger className=" ">More Detail</AccordionTrigger>
+                      <AccordionTrigger className=" ">More Detail . . .</AccordionTrigger>
                       <AccordionContent className={"p-2"}>
                         
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                          <CaseField
-                            label={"Delivery Required Date (Customer Time)"}
-
-                          >
-                            <DatePicker
-                              value={deliveryRequiredDate}
-                              onChange={setDeliveryRequiredDate}
-                            />
-                          </CaseField>
-                          <CaseField label={"Collection Requested Date"} icon>
-                            <DatePicker
-                              value={collectionRequestedDate}
-                              onChange={setCollectionRequestedDate}
-                            />
-                          </CaseField>
                           <CaseField label={"Notification Number"} icon>
                             <Input
                               variant={"invisible"}
@@ -439,12 +554,7 @@ export const ServiceMaterialApo = () => {
                               value={"---"}
                             />
                           </CaseField>
-                          <CaseField label={"Ready For Closure Date"} icon>
-                            <DatePicker
-                              value={readyForClosureDate}
-                              onChange={setReadyForClosureDate}
-                            />
-                          </CaseField>
+                          
                           <CaseField label={"Customer Induced Damage"} icon >
                             <Input
                               variant={"invisible"}
@@ -571,6 +681,7 @@ export const ServiceMaterialApo = () => {
                               <SelectItem value="New">New</SelectItem>
                               <SelectItem value="Ordered">Ordered</SelectItem>
                               <SelectItem value="Shipped">Shipped</SelectItem>
+                              <SelectItem value="BackOrdered">BackOrdered</SelectItem>
                               {/* <SelectItem value="Closed">Closed</SelectItem>
                               <SelectItem value="Cancelled">Cancelled</SelectItem> */}
                             </SelectContent>

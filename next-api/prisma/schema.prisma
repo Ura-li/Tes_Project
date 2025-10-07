@@ -20,7 +20,7 @@ model asset_information {
   site_account        site_account?        @relation(fields: [SiteAccountID], references: [SiteAccountID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_1")
   contact_information contact_information? @relation(fields: [ContactID], references: [ContactID], onDelete: Restrict, onUpdate: Restrict, map: "asset_information_ibfk_2")
   product_information product_information  @relation(fields: [ProductNumber], references: [ProductNumber], onUpdate: Restrict, map: "asset_information_ibfk_3")
-  asset_waranty       asset_warranty[]
+  asset_warranty      asset_warranty[]
   caseinformation     caseinformation[]
   servicecatalog      servicecatalog[]
 
@@ -30,8 +30,18 @@ model asset_information {
 }
 
 model asset_warranty {
-  WarrantyID        Int                @id @default(autoincrement())
-  AssetID           Int?
+  WarrantyID             Int       @id @default(autoincrement())
+  AssetID                Int?
+  WarrantyApprovalStatus String?
+  PurchaseDate           DateTime?
+  WarrantyCardDate       DateTime?
+  POPDocument            String?
+  WarrantyCard           String?
+  PhotoUnit              String?
+  EndUserName            String?
+  EndUserPhone           String?
+  EndUserAddress         String?
+
   asset_information asset_information? @relation(fields: [AssetID], references: [AssetID], onDelete: Restrict, onUpdate: Cascade, map: "asset_warranty_ibfk_1")
 
   @@index([AssetID], map: "AssetID")
@@ -80,6 +90,7 @@ model caseinformation {
   otcCodeTable                                  OTCCodeTable?        @relation(fields: [OTCCode], references: [OTCCode])
   ProblemDescription                            String?              @db.VarChar(255)
   CaseProductNote                               String?              @db.Text
+  ErfDoc                                        String?              @db.Text
   accessory                                     accessory[]
   ActionLog                                     ActionLog[]
   casephotos                                    casephotos[]
@@ -227,16 +238,20 @@ model global_trade_check {
 }
 
 model materialorder {
-  MOID                String              @id @db.VarChar(13)
-  WOID                String?             @db.VarChar(13)
-  OrderNumber         String?             @db.VarChar(100)
-  OrderStatus         MaterialOrderStatus @default(New)
-  OrderType           String?             @db.VarChar(50)
-  CreatedOn           DateTime?           @default(now()) @db.DateTime(0)
-  SalesOrderNumber    String?             @db.VarChar(100)
-  RMANumber           String?             @db.VarChar(100)
-  ReadyForClosureDate DateTime?           @db.DateTime(0)
+  MOID             String              @id @db.VarChar(13)
+  WOID             String?             @db.VarChar(13)
+  OrderNumber      String?             @db.VarChar(100)
+  OrderStatus      MaterialOrderStatus @default(New)
+  OrderType        String?             @db.VarChar(50)
+  CreatedOn        DateTime?           @default(now()) @db.DateTime(0)
+  SalesOrderNumber String?             @db.VarChar(100)
+  RMANumber        String?             @db.VarChar(100)
+  RMAStatus        RMAStatus?
 
+  AWB_InCode  String? @db.VarChar(100)
+  AWB_OutCode String? @db.VarChar(100)
+
+  ReadyForClosureDate        DateTime?         @db.DateTime(0)
   ShippingPriority           ShippingPriority? @default(MEDIUM)
   CustomerInducedDamage      Boolean?          @default(false)
   AccidentalDamageProtection Boolean?          @default(false)
@@ -266,15 +281,16 @@ model materialorder {
 }
 
 model materialorderlineitems {
-  LineItemID  Int                         @id @default(autoincrement())
-  MOID        String?                     @db.VarChar(13)
-  LineNumber  Int?
-  PartNumber  String?                     @db.VarChar(100)
-  Description String?                     @db.Text
-  ATPStatus   String?                     @db.VarChar(50)
-  Quantity    Int?
-  Status      MaterialOrderLineItemStatus @default(New)
-  Price       Decimal?                    @db.Decimal(10, 2)
+  LineItemID   Int                         @id @default(autoincrement())
+  MOID         String?                     @db.VarChar(13)
+  LineNumber   Int?
+  PartNumber   String?                     @db.VarChar(100)
+  Description  String?                     @db.Text
+  ATPStatus    String?                     @db.VarChar(50)
+  Quantity     Int?
+  QuantityUsed Boolean                     @default(true)
+  Status       MaterialOrderLineItemStatus @default(New)
+  Price        Decimal?                    @db.Decimal(10, 2)
 
   // Revisi Tambahan
   FunctionalEquivalence   String?                    @db.VarChar(100)
@@ -296,6 +312,15 @@ model materialorderlineitems {
   RemovedSerialNumber    String? @db.VarChar(100)
   RemovedPartDescription String? @db.Text
 
+  UEFICode UEFICode?
+  UEFI_NO  String?   @db.VarChar(100)
+
+  PartReturnStatusId Int?
+  partReturnStatus   PartReturnStatus? @relation(fields: [PartReturnStatusId], references: [ReturnStatusId])
+  DOAReason          String?           @db.VarChar(100)
+  PhotoPartUnit      String?           @db.Text()
+  GoodReturnReason   GoodReturnReason?
+
   // Foreign key ke Failure
   FailureId Int?
   failure   Failure? @relation(fields: [FailureId], references: [FailureId], onDelete: SetNull)
@@ -312,6 +337,14 @@ model Failure {
   Name        String
   Description String?
 
+  materialorderlineitems materialorderlineitems[]
+}
+
+model PartReturnStatus {
+  ReturnStatusId         Int                      @id @default(autoincrement())
+  StatusName             String
+  StatusQuantityType     Boolean                  @default(true)
+  DOA                    Boolean                  @default(false)
   materialorderlineitems materialorderlineitems[]
 }
 
@@ -456,7 +489,7 @@ model User {
   CreatedAt    DateTime  @default(now())
   UpdatedAt    DateTime  @updatedAt
   Phone        String?   @db.VarChar(20)
-  Signature    String?   @db.VarChar(500)
+  Signature    String?   @db.LongText
   ResourceId   String?   @db.VarChar(255)
   resource     Resource? @relation(fields: [ResourceId], references: [ResourceId])
 
@@ -733,6 +766,7 @@ enum MaterialOrderLineItemStatus {
   Shipped
   Closed
   Cancelled
+  BackOrdered
   EMPTY_ENUM_VALUE @map("")
 }
 
@@ -743,6 +777,7 @@ enum MaterialOrderStatus {
   Shipped
   Closed
   Cancelled
+  BackOrdered
 }
 
 enum WorkOrderStatus {
@@ -802,4 +837,31 @@ enum CollectionInstructionType {
   Pickup
   DropOff
   ThirdParty
+}
+
+enum UEFICode {
+  DHU
+  FID
+  MPS
+  PND
+  PPR
+}
+
+enum RMAStatus {
+  InOutCE
+  ReturnLogistic
+  ReturnDHL
+  FullCharge
+}
+
+enum GoodReturnReason {
+  AdminIssue
+  CIDRejected
+  ComplexIssue
+  CustomerCancelRepair
+  OnsiteRemoteArea
+  OtherReason
+  WrongAnalysisCCC
+  WrongAnalysisCE
+  WrongOrderCE
 }

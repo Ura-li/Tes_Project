@@ -87,10 +87,18 @@ export async function POST(request) {
     const { ProductNumber, ProductName, ProductLine, ProductTypeID, HWPC } = await request.json();
 
     try {
-        if (!ProductNumber || !ProductName) {
+        const missingFields = [];
+
+        if (!ProductNumber || ProductNumber.trim() === "") missingFields.push("ProductNumber");
+        if (!ProductName || ProductName.trim() === "") missingFields.push("ProductName");
+        if (!ProductLine || ProductLine.trim() === "") missingFields.push("ProductLine");
+        if (!HWPC || HWPC.trim() === "") missingFields.push("HWPC"); // typo: HPWC -> HWPC
+        if (!ProductTypeID || isNaN(Number(ProductTypeID))) missingFields.push("Product Tower / Product Group / Product Type");
+
+        if (missingFields.length > 0) {
             return NextResponse.json({
                 success: false,
-                message: "ProductNumber and ProductName are required"
+                message: `Missing required fields: ${missingFields.join(", ")}`
             }, { status: 400 });
         }
 

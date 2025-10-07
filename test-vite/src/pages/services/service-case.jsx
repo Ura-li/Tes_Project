@@ -87,6 +87,28 @@ import { pdf } from '@react-pdf/renderer';
 import ServiceRequestPDF from '../../components/service-request-form'; // adjust path if needed
 import { useAuth } from "@/context/auth-context";
 
+function formatDateForInput(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+const DateHelper = {
+  fromDB(dateStr) {
+    // DB → UI
+    return formatDateForInput(dateStr);
+  },
+  toDB(dateStr) {
+    // UI → DB
+    return dateStr ? new Date(dateStr).toISOString() : null;
+  },
+};
+
 
 export const TabsService = ({
   caseDetails,
@@ -619,6 +641,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
         RecommendedResource: WOGeneral.RecommendedResource || undefined,
         WorkOrderDescription: WOGeneral.WorkOrderDescription || undefined,
         ShipmentState: WOGeneral.ShipmentState || undefined,
+        SystemStatus: WOGeneral.SystemStatus || undefined,
         //SLA
         SLAJeopardy: SLA.slaJeopardy || undefined,
         DueDateCustomer: SLA.dueDateCustomer || undefined,
@@ -726,7 +749,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
       });
       // Role guard: only CE can close Work Order
       const tokenUser = getUserFromToken();
-      if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'ce') {
+      if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'ce' && String(tokenUser.role).toLowerCase() !== 'celead') {
         Swal.close();
         return Swal.fire({
           icon: 'error',
@@ -824,6 +847,27 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
           Owner: workOrders?.caseinformation?.CreatedBy,
           CaseStatus: "FinishRepair"
         })
+
+        const previousOwnerId = workOrders?.caseinformation?.Owner;
+        const newOwnerId = workOrders?.caseinformation?.CreatedBy;
+
+        if (
+          caseChangeStatus.data?.success &&
+          previousOwnerId &&
+          newOwnerId &&
+          String(previousOwnerId) !== String(newOwnerId)
+        ) {
+          await ApiCustomer.post("/api/actionlog", {
+            CaseId: `${workOrders.CaseID}`,
+            ReferenceId: `${workOrders.CaseID}`,
+            model: "CaseOwner",
+            dataOld: String(previousOwnerId ?? ""),
+            dataNew: String(newOwnerId ?? ""),
+            changedBy: token.user.id,
+            logDescription: `Edit : Change Case ${workOrders.CaseID} Owner from ${previousOwnerId} to ${newOwnerId}`,
+          });
+        }
+
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -897,7 +941,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
   );
 };
 
-export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
+export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm, setMoForm, materialOrderInformation }) => {
   const {user} = useAuth();
   const navigate = useNavigate();
   const currentRole = (getUserFromToken()?.role || '').toLowerCase();
@@ -914,7 +958,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
       icon: CopyXIcon,
       label: "Close",
       onClick: () => saveAndCloseMaterialOrder(),
-      hidden: currentRole !== 'ce',
+      hidden: currentRole !== 'ce' && currentRole !== 'celead',
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Cancel Order", hidden: true},
@@ -944,10 +988,11 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
       let res = null;
       // Guard: if any line item update is set to Shipped, require SON and RMA
       const hasShippingUpdate = updatedLineItems && Object.values(updatedLineItems).some(
-        (v) => String(v).toLowerCase() === 'shipped' || String(v).toLowerCase() === 'Ordered'
+        (v) => String(v).toLowerCase() === 'shipped' || String(v).toLowerCase() === 'ordered'
       );
-      const soNumber = (moForm?.SalesOrderNumber ?? materialOrders?.SalesOrderNumber ?? '').toString().trim();
-      const rmaNumber = (moForm?.RMANumber ?? materialOrders?.RMANumber ?? '').toString().trim();
+      const soNumber = (moForm?.SalesOrderNumber ?? materialOrderInformation?.SalesOrderNumber ?? materialOrders?.SalesOrderNumber ?? '').toString().trim();
+      const rmaNumber = (moForm?.RMANumber ?? materialOrderInformation?.RMANumber ?? materialOrders?.RMANumber ?? '').toString().trim();
+      // return console.log(soNumber, moForm, materialOrderInformation);
       if (hasShippingUpdate && (!soNumber || !rmaNumber)) {
         Swal.close();
         return Swal.fire({
@@ -956,25 +1001,35 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, moForm }) => {
           text: 'Before setting a line item to Shipped, fill Sales Order Number and RMA Number.',
         });
       }
-      if(updatedLineItems === null || Object.keys(updatedLineItems).length === 0) {
-        const result = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`,{
-          SalesOrderNumber: moForm.SalesOrderNumber || undefined,
-          RMANumber: moForm.RMANumber || undefined,
-        })
-        res = result;
-      }else{
-        for(const [lineItemID, status] of Object.entries(updatedLineItems)){
-          console.log("user", user);
-          const result = await ApiCustomer.patch(`/api/material-order/batch-update`, {
-            updates: updatedLineItems,
-            MOID: materialOrders.MOID,
-            WOID: materialOrders.WOID,
-            userId: user.id
-          })
-          console.log("update ok",updatedLineItems);
-          res = result;
-        }
+      const formatMaterialOrderInformationForBackend = () => {
+        return {
+          ...materialOrderInformation,
+          deliveryRequestedDate: DateHelper.toDB(materialOrderInformation.deliveryRequestedDate),
+          collectionRequestedDate: DateHelper.toDB(materialOrderInformation.collectionRequestedDate),
+          readyForClosureDate: DateHelper.toDB(materialOrderInformation.readyForClosureDate),
+        };
+      };
 
+      if (!updatedLineItems || Object.keys(updatedLineItems).length === 0) {
+        const payloadMoForm = {
+          SalesOrderNumber: soNumber || undefined,
+          RMANumber: rmaNumber || undefined,
+          moUpdates: formatMaterialOrderInformationForBackend(),
+        }
+        const result = await ApiCustomer.patch(`/api/material-order/${materialOrders.MOID}`, payloadMoForm);
+        res = result;
+      } else {
+        const payload = {
+          moUpdates: formatMaterialOrderInformationForBackend(),
+          updates: updatedLineItems,
+          MOID: materialOrders.MOID,
+          WOID: materialOrders.WOID,
+          userId: user.id,
+          SalesOrderNumber: soNumber || null,
+          RMANumber: rmaNumber || null,
+        };
+        const result = await ApiCustomer.patch(`/api/material-order/batch-update`, payload);
+        res = result;
       }
       console.log("RES : ",res);
       if(res.data) {
@@ -1154,7 +1209,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
       icon: CopyXIcon,
       label: "Close",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
-      hidden: currentRole !== 'ce',
+      hidden: currentRole !== 'ce' && currentRole !== 'celead',
     },
     { icon: StepBack, label: "Cancel", hidden: true },
     { icon: StepBack, label: "Audit", hidden: true },
@@ -1184,6 +1239,29 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           Swal.showLoading();
         }
       });
+      if (
+        MOLineDetails.PartReturnStatusId &&
+        MOLineDetails.PartReturnDOA &&
+        !String(MOLineDetails.DOAReason || '').trim()
+      ) {
+        Swal.close();
+        Swal.fire({
+          icon: 'warning',
+          title: 'Missing DOA Reason',
+          text: 'Please provide a DOA reason when selecting a DOA return status.',
+        });
+        return false;
+      }
+
+      if (!MOLineDetails.QuantityUsed && !MOLineDetails.GoodReturnReason) {
+        Swal.close();
+        Swal.fire({
+          icon: 'warning',
+          title: 'Missing Good Return Reason',
+          text: 'Select a reason for not using the part before saving.',
+        });
+        return false;
+      }
       const res = await ApiCustomer.patch(`/api/material-order/material-order-line-items/${LineItemID}`, {
         Description: MOLineDetails.description,
         PickPackInstructions: MOLineDetails.pickPackInstructions,
@@ -1196,6 +1274,13 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
         RemovedPartNumber: MOLineDetails.removedPartNumber,
         RemovedSerialNumber: MOLineDetails.removedSerialNumber,
         RemovedPartDescription: MOLineDetails.removedPartDescription,
+        QuantityUsed: MOLineDetails.QuantityUsed,
+        PartReturnStatusId: MOLineDetails.PartReturnStatusId ?? null,
+        DOAReason: MOLineDetails.DOAReason,
+        PhotoPartUnit: MOLineDetails.PhotoPartUnit,
+        GoodReturnReason: MOLineDetails.GoodReturnReason,
+        UEFICode: MOLineDetails.UEFICode || "",  
+        UEFI_NO : MOLineDetails.UEFI_NO || "",
       });
       if (res.data.success) {
         if (shouldRedirect) {
@@ -1257,6 +1342,12 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
           icon: 'warning',
           title: 'Missing Required Fields',
           text: 'Fill Failure Code, New CT Key, and Return CT Key before closing the line item.',
+          timer: 3000, // auto close dalam 3 detik
+          timerProgressBar: true, 
+          didOpen: () => {
+            Swal.showLoading();
+          }
+
         });
       }
       const success = await saveMOLI(LineItemID, false);
@@ -1265,6 +1356,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
         `/api/material-order/material-order-line-items/${LineItemID}`,
         {
           Status: "Closed",
+          FailureId: MOLineDetails.failureId,
         }
       );
       if (res.data.success) {

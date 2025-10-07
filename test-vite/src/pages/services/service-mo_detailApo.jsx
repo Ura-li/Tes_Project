@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -40,7 +40,6 @@ import { useParams } from "react-router";
 // import Select from 'react-select';
 import debounce from "lodash.debounce";
 import ApiCustomer from "@/api";
-
 import { TabsServiceMOLineItems } from "./service-case";
 import { Description } from "@radix-ui/react-dialog";
 import { useDraft } from "../../components/DraftContext";
@@ -51,14 +50,53 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import CaseField from "@/components/CaseField";
+import { useAuth } from "@/context/auth-context";
+import { Switch } from "@/components/ui/switch";
+
+const GOOD_RETURN_REASON_OPTIONS = [
+  { value: "AdminIssue", label: "Admin Issue" },
+  { value: "CIDRejected", label: "CID Rejected By SC Team" },
+  { value: "ComplexIssue", label: "Complex Issue" },
+  { value: "CustomerCancelRepair", label: "Customer Cancel Repair / No Response" },
+  { value: "OnsiteRemoteArea", label: "Onsite in Remote Area" },
+  { value: "OtherReason", label: "Other Reason" },
+  { value: "WrongAnalysisCCC", label: "Wrong Analysis by CCC" },
+  { value: "WrongAnalysisCE", label: "Wrong Analysis by CE" },
+  { value: "WrongOrderCE", label: "Wrong Order by CE" },
+];
+
+function formatDateForInput(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+const DateHelper = {
+  fromDB(dateStr) {
+    // DB → UI
+    return formatDateForInput(dateStr);
+  },
+  toDB(dateStr) {
+    // UI → DB
+    return dateStr ? new Date(dateStr).toISOString() : null;
+  },
+};
 
 export const ServiceMoDetailApo = () => {
   const { updateDraft } = useDraft(); // Access updateDraft from the DraftContext
-
+  const {user} = useAuth();
   const { lineItemID } = useParams();
 
   const [moLineItems, setMoLineItems] = useState([]);
-
+  const [partReturnStatuses, setPartReturnStatuses] = useState([]);
+  const [photoUploadPreview, setPhotoUploadPreview] = useState(null);
+  const [photoUploadLoading, setPhotoUploadLoading] = useState(false);
+  const [previewSrc, setPreviewSrc] = useState(null);
   const [MODetailInput, setMODetailInput] = useState({
     MOID: "",
     moOrderName: "",
@@ -88,6 +126,16 @@ export const ServiceMoDetailApo = () => {
     removedPartNumber: "",
     removedSerialNumber: "",
     removedPartDescription: "",
+    UEFICode: "",
+    UEFI_NO : "",
+
+    QuantityUsed : true,
+    PartReturnStatusId : null,
+    PartReturnStatusName : "",
+    PartReturnDOA : false,
+    DOAReason : "",
+    PhotoPartUnit : null,
+    GoodReturnReason : null,
   });
 
   const fetchMoLineItems = async () => {
@@ -110,7 +158,6 @@ export const ServiceMoDetailApo = () => {
       const data = res.data.data;
 
       setMoLineItems(data);
-      console.log("Data lIne Items",data);
 
       // Isi state MODetailInput berdasarkan data yang diambil
       setMODetailInput({
@@ -137,12 +184,21 @@ export const ServiceMoDetailApo = () => {
         mainComponent: data.MainComponent || "",
         gratisFlag: data.GratisFlag || false,
         failureId: data.FailureId || null,
-        failureName: data.Failure?.Name || "",
+        failureName: data.failure?.Name || "",
         atpStatus: data.ATPStatus || "",
         serialNumber: data.SerialNumber || "",
         removedPartNumber: data.RemovedPartNumber || "",
         removedSerialNumber: data.RemovedSerialNumber || "",
         removedPartDescription: data.RemovedPartDescription || "",
+        UEFICode: data.UEFICode || "",
+        UEFI_NO: data.UEFI_NO || "",
+        QuantityUsed: data.QuantityUsed ?? true,
+        PartReturnStatusId: data.PartReturnStatusId ?? null,
+        PartReturnStatusName: data.partReturnStatus?.StatusName || "",
+        PartReturnDOA: data.partReturnStatus?.DOA || false,
+        DOAReason: data.DOAReason || "",
+        PhotoPartUnit: data.PhotoPartUnit || null,
+        GoodReturnReason: data.GoodReturnReason ?? null,
       });
       updateDraft("moliId", data.lineItemID);
     } catch (err) {
@@ -157,6 +213,19 @@ export const ServiceMoDetailApo = () => {
     fetchMoLineItems();
   }, []);
 
+  useEffect(() => {
+    const fetchPartReturnStatuses = async () => {
+      try {
+        const response = await ApiCustomer.get("/api/part-return-status");
+        setPartReturnStatuses(response.data?.data ?? []);
+      } catch (error) {
+        console.error("Failed to fetch Part Return Statuses:", error);
+      }
+    };
+
+    fetchPartReturnStatuses();
+  }, []);
+
   // const handleChange = (e) => {
   //   const { name, value } = e.target;
   //   setMODetailInput((prev) => ({
@@ -167,11 +236,233 @@ export const ServiceMoDetailApo = () => {
 
   const handleChange = (field) => (eOrValue) => {
     const value = eOrValue?.target ? eOrValue.target.value : eOrValue;
-    console.log("Changed:", field, value);
     setMODetailInput((prev) => ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleQuantityUsedToggle = (value) => {
+    setMODetailInput((prev) => {
+      const nextState = { ...prev, QuantityUsed: value };
+      if (prev.PartReturnStatusId !== null) {
+        const matchedStatus = partReturnStatuses.find(
+          (status) =>
+            status.ReturnStatusId === prev.PartReturnStatusId &&
+            status.StatusQuantityType === value,
+        );
+        if (!matchedStatus) {
+          nextState.PartReturnStatusId = null;
+          nextState.PartReturnStatusName = "";
+          nextState.PartReturnDOA = false;
+          nextState.DOAReason = "";
+        }
+      }
+      if (value) {
+        nextState.GoodReturnReason = null;
+      }
+      return nextState;
+    });
+
+    if (value && MODetailInput.PhotoPartUnit) {
+      handleRemovePhoto();
+    }
+  };
+
+  const handlePartReturnStatusChange = (statusId) => {
+    if (!statusId) {
+      setMODetailInput((prev) => ({
+        ...prev,
+        PartReturnStatusId: null,
+        PartReturnStatusName: "",
+        PartReturnDOA: false,
+        DOAReason: "",
+      }));
+      return;
+    }
+
+    const selectedStatus = partReturnStatuses.find(
+      (status) => status.ReturnStatusId.toString() === statusId.toString(),
+    );
+
+    if (!selectedStatus) {
+      return;
+    }
+
+    setMODetailInput((prev) => ({
+      ...prev,
+      PartReturnStatusId: selectedStatus.ReturnStatusId,
+      PartReturnStatusName: selectedStatus.StatusName,
+      PartReturnDOA: selectedStatus.DOA,
+      DOAReason: selectedStatus.DOA ? prev.DOAReason || "" : "",
+    }));
+  };
+
+  const handlePhotoUpload = async (event) => {
+    const file = event.target?.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setPhotoUploadPreview(previewUrl);
+    setPhotoUploadLoading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    if (MODetailInput.PhotoPartUnit) {
+      formData.append("existingPath", MODetailInput.PhotoPartUnit);
+    }
+
+    try {
+      const response = await ApiCustomer.post(
+        `/api/material-order/material-order-line-items/${lineItemID}/upload-photo`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      );
+      const uploadedPath = response.data?.data?.path;
+      if (uploadedPath) {
+        setMODetailInput((prev) => ({
+          ...prev,
+          PhotoPartUnit: uploadedPath,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to upload PhotoPartUnit:", error);
+      Swal.fire(
+        "Upload Failed",
+        error.response?.data?.message || "Failed to upload unit photo.",
+        "error",
+      );
+    } finally {
+      setPhotoUploadLoading(false);
+      setPhotoUploadPreview((prev) => {
+        if (prev) {
+          URL.revokeObjectURL(prev);
+        }
+        return null;
+      });
+      if (event.target) {
+        event.target.value = "";
+      }
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    const currentPath = MODetailInput.PhotoPartUnit;
+
+    setPhotoUploadPreview((prev) => {
+      if (prev) {
+        URL.revokeObjectURL(prev);
+      }
+      return null;
+    });
+    setMODetailInput((prev) => ({
+      ...prev,
+      PhotoPartUnit: null,
+    }));
+
+    const isStoredPath =
+      typeof currentPath === "string" && currentPath.startsWith("/uploads/");
+
+    if (isStoredPath) {
+      try {
+        await ApiCustomer.delete(
+          `/api/material-order/material-order-line-items/${lineItemID}/upload-photo`,
+          { params: { path: currentPath } },
+        );
+      } catch (error) {
+        console.warn("Failed to delete PhotoPartUnit file:", error);
+      }
+    }
+  };
+
+  const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+
+  const resolvedPhotoSrc = useMemo(() => {
+    if (photoUploadPreview) {
+      return photoUploadPreview;
+    }
+
+    const assetPath = MODetailInput.PhotoPartUnit;
+    if (!assetPath) {
+      return null;
+    }
+    if (assetPath.startsWith("http://") || assetPath.startsWith("https://") || assetPath.startsWith("data:")) {
+      return assetPath;
+    }
+    if (assetPath.startsWith("/")) {
+      return `${apiBaseUrl}${assetPath}`;
+    }
+    return `${apiBaseUrl}/${assetPath}`;
+  }, [photoUploadPreview, MODetailInput.PhotoPartUnit, apiBaseUrl]);
+
+  const filteredPartReturnOptions = useMemo(() => {
+    const baseOptions = partReturnStatuses
+      .filter(
+        (status) =>
+          status.StatusQuantityType === Boolean(MODetailInput.QuantityUsed),
+      )
+      .map((status) => ({
+        value: status.ReturnStatusId.toString(),
+        label: status.StatusName,
+        data: status,
+      }));
+
+    const selectedId =
+      MODetailInput.PartReturnStatusId !== null
+        ? MODetailInput.PartReturnStatusId.toString()
+        : null;
+
+    if (selectedId && !baseOptions.some((option) => option.value === selectedId)) {
+      const selectedFromSource = partReturnStatuses.find(
+        (status) => status.ReturnStatusId.toString() === selectedId,
+      );
+
+      if (selectedFromSource) {
+        baseOptions.push({
+          value: selectedFromSource.ReturnStatusId.toString(),
+          label: selectedFromSource.StatusName,
+          data: selectedFromSource,
+        });
+      } else if (MODetailInput.PartReturnStatusName) {
+        baseOptions.push({
+          value: selectedId,
+          label: MODetailInput.PartReturnStatusName,
+          data: { DOA: MODetailInput.PartReturnDOA },
+        });
+      }
+    }
+
+    return baseOptions;
+  }, [
+    partReturnStatuses,
+    MODetailInput.QuantityUsed,
+    MODetailInput.PartReturnStatusId,
+    MODetailInput.PartReturnStatusName,
+    MODetailInput.PartReturnDOA,
+  ]);
+
+  const selectedPartReturnStatus = useMemo(
+    () =>
+      partReturnStatuses.find(
+        (status) => status.ReturnStatusId === MODetailInput.PartReturnStatusId,
+      ) || null,
+    [partReturnStatuses, MODetailInput.PartReturnStatusId],
+  );
+
+  const isDOASelected = Boolean(
+    (selectedPartReturnStatus && selectedPartReturnStatus.DOA) ?? MODetailInput.PartReturnDOA,
+  );
+
+  const renderPartReturnLabel = (option) => {
+    if (typeof option === "string") {
+      return option;
+    }
+    const label = option?.label ?? "";
+    return option?.data?.DOA ? `${label} (DOA)` : label;
   };
 
   const handleUpdate = async () => {
@@ -194,11 +485,98 @@ export const ServiceMoDetailApo = () => {
     }
   };
 
+  const [inputValue, setInputValue] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isFocused, setIsFocused] = useState(false); // Track if input is focused
+
+useEffect(() => {
+  ApiCustomer.get("/api/failure/options").then((res) => {
+    const defaultOptions = res.data.map((f, index) => ({
+      value: f.FailureId.toString(), // value selalu string
+      label: (
+        <div className="flex flex-col">
+          <span className="font-medium">
+            {`${index === 0 ? "55" : index === 1 ? "72" : index === 2 ? "73" : index + 1}`} - {f.Name}
+          </span>
+          <span className="text-xs text-gray-500">{f.Description ?? ""}</span>
+        </div>
+      ),
+    }));
+    setSearchResults(defaultOptions);
+  });
+
+  if (MODetailInput.failureId) {
+    ApiCustomer.get(`/api/failure/${MODetailInput.failureId}`)
+      .then((res) => {
+        const f = res.data.data;
+        setInputValue(f.FailureId.toString()); // tetap string di state
+      })
+      .catch(() => {
+        
+      });
+  }
+}, [MODetailInput.failureId]);
+
+
+  const fetchFailures = debounce((query) => {
+    if (!query || query.length < 2) return;
+    ApiCustomer.get(`/api/failure/options?q=${query}`).then((res) => {
+      const limited = res.data.slice(0, 3).map((f) => ({
+        value: f.FailureId.toString(),
+        label: `${f.Name} — ${f.Description ?? ""}`,
+      }));
+      setSearchResults(limited);
+    });
+  }, 300);
+  
+  const handleInputChange = (value) => {
+    setInputValue(value);
+    fetchFailures(value);
+    setMODetailInput((prev) => ({
+      ...prev,
+      failureId: value ? parseInt(value, 10) : null,
+    }));
+  };
+
+  const handleSelect = (selected) => {
+    setInputValue(selected.label);
+    setSearchResults([
+      selected,
+      ...searchResults.filter((opt) => opt.value !== selected.value),
+    ]);
+    setMODetailInput((prev) => ({
+      ...prev,
+      failureId: selected.value,
+      failureName: selected.label,
+    }));
+    console.log("selected.value", selected.value);
+  };
+
+  // Handle focus and blur events
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => setIsFocused(false), 150); // Delay to allow click on dropdown
+  };
+
   const tabs = [
     { value: "mo_details", label: "MO Details" },
     { value: "mo_failure", label: "Failure & Return Details" },
     { value: "mo_attachments", label: "Attachments" },
   ];
+
+  let canEdit;
+  let canEditCE;
+  const allowedRoles = ["apo","lg","admin"]
+  if (moLineItems?.Status !== "Closed") {
+    canEditCE = user?.role  === "ce"
+    canEdit = allowedRoles.includes(user?.role)
+  } else {
+    canEdit = false
+    canEditCE = false
+  }
 
   return (
     <>
@@ -289,6 +667,25 @@ export const ServiceMoDetailApo = () => {
                     />
                   </CaseField>
 
+                  <CaseField label={"UEFI CODE"} lock={!canEditCE}>
+                    <SearchCommandBlock
+                      value={MODetailInput.UEFICode}
+                      onChange={handleChange("UEFICode")}
+                      options={["None", "FID", "Non-FID"]}
+                    />
+                  </CaseField>
+
+                  {MODetailInput?.UEFICode == "FID" && (
+                    <CaseField label={"UEFI Number"} lock={!canEditCE}>
+                      <Input
+                        variant={"invisible"}
+                        value={MODetailInput.UEFI_NO}
+                        placeholder= "---"
+                        onChange={handleChange("UEFI_NO")}
+                        />
+                    </CaseField>
+                  )}
+
 
                   <CaseField label={"RoHS"} lock>
                     <Input
@@ -305,7 +702,7 @@ export const ServiceMoDetailApo = () => {
                   </CaseField>
 
                   
-                  <CaseField label={"Description"}  lock span={3}>
+                  <CaseField label={"Description"}  lock >
                     <textarea
                       className="w-full h-10 pt-2 pl-3 resize-none border-none rounded-md focus:outline-none focus:ring-1"
                       name="description"
@@ -317,7 +714,7 @@ export const ServiceMoDetailApo = () => {
 
                   <Accordion type="Single" collapsible className="col-span-4">
                     <AccordionItem value="more-details">
-                      <AccordionTrigger className={"decoration-transparent cursor-pointer pl-6"}>More Details</AccordionTrigger>
+                      <AccordionTrigger className={"decoration-transparent cursor-pointer pl-6"}>More Details . . .</AccordionTrigger>
                       <AccordionContent>
                         <div className="grid grid-cols-6 gap-4 p-4">
                           <CaseField label={"Media Handling Part"} lock>
@@ -491,13 +888,40 @@ export const ServiceMoDetailApo = () => {
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
                   
-                  <FailureSelect
-                    failureId={MODetailInput.failureId}
-                    setMODetailInput={setMODetailInput}
-                    readOnly
-                  />
+          
+      <CaseField label={"Failure Code"} star={canEditCE} lock={!canEditCE}>
+      <div className="relative w-full">
+        <SearchCommandBlock
+          name="failureId"
+          value={inputValue}
+          onChange={handleInputChange}
+          placeholder="Search Failure..."
+          options={searchResults}
+          readOnly={!canEditCE}
+        />
 
-                    <CaseField label="Return CT Key" star>
+        {/* Show dropdown only if results exist and input is focused */}
+        {isFocused && (
+          <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg ">
+            {searchResults.length > 0 ? (
+              searchResults.map((opt) => (
+                <li
+                  key={opt.value}
+                  className="p-3 cursor-pointer hover:bg-gray-200"
+                  onMouseDown={() => handleSelect(opt)} // Use onMouseDown to prevent blur before click
+                >
+                  {opt.label}
+                </li>
+              ))
+            ) : (
+              <li className="p-3 text-gray-500">No results found</li>
+            )}
+          </ul>
+        )}
+      </div>
+    </CaseField>
+
+                    <CaseField label="Return CT Key" star={canEditCE} lock={!canEditCE}>
                     <Input
                       variant="invisible"
                       name="removedPartNumber"
@@ -508,14 +932,13 @@ export const ServiceMoDetailApo = () => {
                     />
                   </CaseField>
                   
-                  <CaseField label="New CT Key" star>
+                  <CaseField label="New CT Key" star={canEdit} lock={!canEdit}>
                     <Input
                       variant="invisible"
                       name="removedSerialNumber"
                       value={MODetailInput.removedSerialNumber}
                       onChange={handleChange('removedSerialNumber')}
                       placeholder="---"
-                     
                     />
                   </CaseField>
 
@@ -524,33 +947,139 @@ export const ServiceMoDetailApo = () => {
                     />
                   </CaseField>
 
-                
-
-                  <CaseField label="Part Usage Code" lock>
+                  <CaseField label="Part Usage Code" lock >
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="Part Consumption" lock>
-                    <Input variant="invisible" placeholder="---" />
-                  </CaseField>                
-
-                  <CaseField label="Part Order Consumption Comment" lock>
-                    <Input variant="invisible" placeholder="---" />
+                  <CaseField label="Part Used" lock={canEdit}>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={Boolean(MODetailInput.QuantityUsed)}
+                        onCheckedChange={handleQuantityUsedToggle}
+                        disabled={canEdit}
+                      />
+                      <span>{MODetailInput.QuantityUsed ? "Used" : "Not Used"}</span>
+                    </div>
                   </CaseField>
 
-                  <CaseField label="Removed Part Desc" lock>
+                  <CaseField label="Part Return Status" 
+                    lock={canEdit}
+                    >
+                    <SearchCommandBlock
+                      value={
+                        MODetailInput.PartReturnStatusId !== null
+                          ? MODetailInput.PartReturnStatusId.toString()
+                          : null
+                      }
+                      onChange={handlePartReturnStatusChange}
+                      placeholder="Select Part Return Status"
+                      options={filteredPartReturnOptions}
+                      // readOnly={!canEdit}
+                      renderLabel={renderPartReturnLabel}
+                    />
+                  </CaseField>
+
+                  <CaseField
+                    label="DOA Reason"
+                    star={isDOASelected}
+                    // lock={!canEdit}
+                    hide={!isDOASelected}
+                  >
+                    <Input
+                      variant="invisible"
+                      name="DOAReason"
+                      value={MODetailInput.DOAReason}
+                      onChange={handleChange("DOAReason")}
+                      placeholder="Enter DOA reason"
+                    />
+                  </CaseField>
+
+                  <CaseField
+                    label="Unit Photo"
+                    hide={Boolean(MODetailInput.QuantityUsed)}>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        // disabled={!canEdit || photoUploadLoading}
+                      />
+                  </CaseField>
+                  
+                  <CaseField
+                    label="Good Return Reason"
+                    star={!MODetailInput.QuantityUsed}
+                    hide={Boolean(MODetailInput.QuantityUsed)}
+                    // lock={!canEdit}
+                  >
+                    <SearchCommandBlock
+                      value={MODetailInput.GoodReturnReason}
+                      onChange={handleChange("GoodReturnReason")}
+                      placeholder="Select reason"
+                      options={GOOD_RETURN_REASON_OPTIONS}
+                      // readOnly={!canEdit}
+                    />
+                  </CaseField>
+                  <div className="col-span-4 flex flex-col gap-2 pl-10">
+                     {photoUploadLoading && (
+        <span className="text-sm text-muted-foreground">Uploading photo...</span>
+      )}
+
+      {/* Thumbnail */}
+      {resolvedPhotoSrc && (
+        <div className="flex items-start gap-3">
+          <img
+            src={resolvedPhotoSrc}
+            alt="Unit photo preview"
+            className="max-h-24 rounded border object-cover cursor-pointer"
+            onClick={() => setPreviewSrc(resolvedPhotoSrc)} // klik untuk preview
+          />
+          {canEdit && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleRemovePhoto}
+            >
+              Remove
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Modal Preview */}
+      {previewSrc && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+          onClick={() => setPreviewSrc(null)} // klik luar untuk tutup
+        >
+          <div className="max-w-3xl max-h-[90vh]">
+            <img
+              src={previewSrc}
+              alt="Preview"
+              className="rounded-lg max-h-[90vh] object-contain"
+            />
+          </div>
+        </div>
+      )}
+                  </div>
+
+                  <CaseField label="Part Order Consumption Comment" lock className={"hidden"} >
+                    <Input variant="invisible" placeholder="---" hidden/>
+                  </CaseField>
+
+                  <CaseField label="Removed Part Desc" lock className={"hidden"}>
                     <Input
                       variant="invisible"
                       name="removedPartDescription"
                       value={MODetailInput.removedPartDescription}
                       onChange={handleChange}
                       placeholder="---"
+                      hidden
                     />
                   </CaseField>
                 </CardContent>
               </Card>
 
-              <Card className="rounded-md ">
+              <Card className="rounded-md " hidden>
                 <CardHeader>
                   <CardTitle className="text-lg">Part Return Details</CardTitle>
                   <hr />
@@ -592,8 +1121,8 @@ export const ServiceMoDetailApo = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="mo_attachments">
-              <Card className="flex-col mt-5">
+            <TabsContent value="mo_attachments" className={"p-2"}>
+              <Card className="flex-col">
                 <CardContent className="grid gap-5">
                   <span className="text-xl font-bold">Timeline</span>
                   <CaseField className="flex font-bold">
@@ -603,7 +1132,7 @@ export const ServiceMoDetailApo = () => {
                     ></Input>
                   </CaseField>
                   <span className="text-xl font-bold">Create a note</span>
-                  <CaseField className="">
+                  <div>
                     <Input
                       type="text"
                       className="border-1"
@@ -617,7 +1146,7 @@ export const ServiceMoDetailApo = () => {
                       Add note
                     </Button>
                     <Button variant="outline">Cancel</Button>
-                  </CaseField>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -628,113 +1157,3 @@ export const ServiceMoDetailApo = () => {
   );
 };
 
-const FailureSelect = ({ failureId, setMODetailInput }) => {
-  const [inputValue, setInputValue] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [isFocused, setIsFocused] = useState(false); // Track if input is focused
-
- useEffect(() => {
-  ApiCustomer.get("/api/failure/options").then((res) => {
-    const defaultOptions = res.data.map((f, index) => ({
-      value: f.FailureId.toString(),
-      label: (
-        <div className="flex flex-col">
-          <span className="font-medium">
-            {`${index === 0 ? "55" : index === 1 ? "72" : index === 2 ? "73" : index + 1}`} - {f.Name}
-          </span>
-          <span className="text-xs text-gray-500">{f.Description ?? ""}</span>
-        </div>
-      ),
-    }));
-    setSearchResults(defaultOptions);
-    });
-    if (failureId) {
-      // Ambil data failure berdasarkan ID yang sudah ada
-      ApiCustomer.get(`/api/failure/${failureId}`)
-        .then((res) => {
-          const f = res.data.data;
-          const label = `${f.Name} — ${f.Description ?? ""}`;
-          setInputValue(f.FailureId);
-        })
-        .catch(() => {
-          setInputValue(""); // Kosongkan jika tidak ditemukan
-        });
-    }
-  }, [failureId]);
-
-  const fetchFailures = debounce((query) => {
-    if (!query || query.length < 2) return;
-    ApiCustomer.get(`/api/failure/options?q=${query}`).then((res) => {
-      const limited = res.data.slice(0, 3).map((f) => ({
-        value: f.FailureId.toString(),
-        label: `${f.Name} — ${f.Description ?? ""}`,
-      }));
-      setSearchResults(limited);
-    });
-  }, 300);
-
-  const handleInputChange = (value) => {
-    setInputValue(value);
-    fetchFailures(value);
-    setMODetailInput((prev) => ({
-      ...prev,
-      failureId: value,
-    }));
-  };
-
-  const handleSelect = (selected) => {
-    setInputValue(selected.label);
-    setSearchResults([
-      selected,
-      ...searchResults.filter((opt) => opt.value !== selected.value),
-    ]);
-    setMODetailInput((prev) => ({
-      ...prev,
-      failureId: selected.value,
-      failureName: selected.label,
-    }));
-    console.log("selected.value", selected.value);
-  };
-
-  // Handle focus and blur events
-  const handleFocus = () => {
-    setIsFocused(true);
-  };
-
-  const handleBlur = () => {
-    setTimeout(() => setIsFocused(false), 150); // Delay to allow click on dropdown
-  };
-
-  return (
-    <CaseField label={"Failure Code"} star open>
-      <div className="relative w-full">
-        <SearchCommandBlock
-          name="failureId"
-          value={String(inputValue)}
-          onChange={handleInputChange}
-          placeholder="Search Failure..."
-          options={searchResults}
-        />
-
-        {/* Show dropdown only if results exist and input is focused */}
-        {isFocused && (
-          <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg ">
-            {searchResults.length > 0 ? (
-              searchResults.map((opt) => (
-                <li
-                  key={opt.value}
-                  className="p-3 cursor-pointer hover:bg-gray-200"
-                  onMouseDown={() => handleSelect(opt)} // Use onMouseDown to prevent blur before click
-                >
-                  {opt.label}
-                </li>
-              ))
-            ) : (
-              <li className="p-3 text-gray-500">No results found</li>
-            )}
-          </ul>
-        )}
-      </div>
-    </CaseField>
-  );
-};

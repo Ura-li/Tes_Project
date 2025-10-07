@@ -17,8 +17,26 @@ async function main() {
       ProfilePhoto: 'https://example.com/profile.png',
     },
   });
-
   console.log('✅ Admin user created or already exists');
+
+  
+
+  const statuses = [
+    { StatusName: 'Defective', StatusQuantityType: true, DOA: false },
+    { StatusName: 'DOAFunctional', StatusQuantityType: true, DOA: true },
+    { StatusName: 'DOAPhysical', StatusQuantityType: true, DOA: true },
+    { StatusName: 'NoPartReturn', StatusQuantityType: true, DOA: false },
+
+    { StatusName: 'GoodSealed', StatusQuantityType: false, DOA: false },
+    { StatusName: 'GoodUnsealed', StatusQuantityType: false, DOA: false },
+    { StatusName: 'WPIB', StatusQuantityType: false, DOA: false },
+  ]
+
+  await prisma.partReturnStatus.deleteMany() // kosongkan dulu
+  await prisma.partReturnStatus.createMany({ data: statuses })
+
+  console.log('✅ PartReturnStatus seeded.')
+
 }
 
 main()

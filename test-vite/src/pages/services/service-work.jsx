@@ -166,10 +166,15 @@ export const ServiceWork = () => {
   const statusEnumToLabelWO = {
     OPEN_UNSCHEDULED: 'Open - Unscheduled',
     OPEN_SCHEDULED: 'Open - Scheduled',
-    OPEN_INPROGRES: 'Open - In Progress',
+    REPAIR_PROGRESS: 'Open - In Progress',
     OPEN_COMPLETED: 'Open - Completed',
     CLOSED_POSTED: 'Closed - Posted'
   };
+
+  const statusOptions = Object.entries(statusEnumToLabelWO).map(([value, label]) => ({
+  value, 
+  label, 
+}));
 
   const handleWOGeneral = (field) => (eOrValue) => {
     const value = eOrValue?.target ? eOrValue.target.value : eOrValue;
@@ -389,9 +394,6 @@ export const ServiceWork = () => {
   };
 
 
-
-
-
   return (
     <>
       {workOrders.SystemStatus === "CLOSED_POSTED" && (
@@ -516,6 +518,16 @@ export const ServiceWork = () => {
                       />
                     </CaseField>
                   </div>
+
+                      <CaseField label="Work Order Description" lock span={3}>
+                    <Input variant={'invisible'}
+                      // value={WOGeneral.WorkOrderDescription}
+                      // onChange={handleWOGeneral('WorkOrderDescription')}
+                      // placeholder="---"
+                      value={workOrders?.caseinformation?.CaseSubject}
+                    />
+                  </CaseField>
+
                   <CaseField label="Work Order Number" lock>
                     <Input
                       variant={"invisible"}
@@ -524,30 +536,28 @@ export const ServiceWork = () => {
                       readOnly
                     />
                   </CaseField>
-                  <CaseField label="Patner Case Id" lock>
-                    <Input
+
+                   <CaseField label="System Status" lock={!canaddce}>
+                   <SearchCommandBlock
+                    value={WOGeneral?.SystemStatus}
+                    onChange={(val) => handleWOGeneral('SystemStatus')(val)} 
+                    options={statusOptions}
+                  />
+                  </CaseField>
+
+                
+
+                  <CaseField label="Shipment Country" lock={!canaddce}>
+                    <SearchCommandBlock
                       variant={"invisible"}
-                      className=""
-                      value={"---"}
-                      readOnly
+                      value={WOGeneral.ShipmentCountry}
+                      onChange={handleWOGeneral('ShipmentCountry')}
+                      placeholder="---"
+                      options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"]}
+                      readOnly={!canaddce}
                     />
                   </CaseField>
-                  <CaseField label="System Status" lock>
-                    <Input
-                      variant={"invisible"}
-                      className=""
-                      value={statusEnumToLabelWO[WOGeneral.SystemStatus] || "---"}
-                      readOnly
-                    />
-                  </CaseField>
-                  <CaseField label="Patner Status" lock>
-                    <Input
-                      variant={"invisible"}
-                      className=""
-                      value={"---"}
-                      readOnly
-                    />
-                  </CaseField>
+                
                   <CaseField label="Work Order Type" lock>
                     <Input
                       variant={"invisible"}
@@ -557,6 +567,15 @@ export const ServiceWork = () => {
                       readOnly
                     />
                   </CaseField>
+                   <CaseField label="Shipment State" lock={!canaddce}>
+                    <Input
+                      variant={"invisible"}
+                      value={WOGeneral.ShipmentState}
+                      onChange={handleWOGeneral('ShipmentState')}
+                      placeholder="---"
+                    />
+                  </CaseField>
+                   
                   <CaseField label="Priority" lock>
                     <Input
                       variant={"invisible"}
@@ -565,15 +584,16 @@ export const ServiceWork = () => {
                       onChange={handleWOGeneral('Priority')}
                     />
                   </CaseField>
-                  <CaseField label="Shipment Country" lock>
-                    <SearchCommandBlock
+
+                  <CaseField label="Patner Case Id" lock>
+                    <Input
                       variant={"invisible"}
-                      value={WOGeneral.ShipmentCountry}
-                      onChange={handleWOGeneral('ShipmentCountry')}
-                      placeholder="---"
-                      options={["USA", "Canada", "Indonesia", "UK", "Germany", "France", "Japan", "China", "India", "Australia", "Brazil"]}
+                      className=""
+                      value={"---"}
+                      readOnly
                     />
-                  </CaseField>
+                  </CaseField>                  
+
                   <CaseField label="Recommended Resource" lock>
                     <Input
                       variant={"invisible"}
@@ -583,13 +603,16 @@ export const ServiceWork = () => {
                       readOnly
                     />
                   </CaseField>
-                  <CaseField label="Work Order Description" lock >
-                    <Input variant={'invisible'}
-                      value={WOGeneral.WorkOrderDescription}
-                      onChange={handleWOGeneral('WorkOrderDescription')}
-                      placeholder="---"
+                     
+                    <CaseField label="Patner Status" lock>
+                    <Input
+                      variant={"invisible"}
+                      className=""
+                      value={"---"}
+                      readOnly
                     />
                   </CaseField>
+                  
                   <CaseField label="Sub-Status" lock={KeyRound}>
                     <Input
                       variant={"invisible"}
@@ -602,19 +625,10 @@ export const ServiceWork = () => {
                   <CaseField label="Work Order Instruction" lock >
                     <Input variant={'invisible'} placeholder="---" readOnly />
                   </CaseField>
-                  <CaseField label="Shipment State" lock>
-                    <Input
-                      variant={"invisible"}
-                      value={WOGeneral.ShipmentState}
-                      onChange={handleWOGeneral('ShipmentState')}
-                      placeholder="---"
-
-                    />
-                  </CaseField>
 
                   <Accordion type="single" collapsible className="w-full col-span-2 lg:col-span-4">
                     <AccordionItem value="more-details" className="pl-5">
-                      <AccordionTrigger className="cursor-pointer p-2">More Details</AccordionTrigger>
+                      <AccordionTrigger className="cursor-pointer p-2">More Details . . .</AccordionTrigger>
                       <AccordionContent className={"m-2"}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <CaseField label="Bookable Resource Booking" lock>
@@ -742,7 +756,7 @@ export const ServiceWork = () => {
 
                     <Accordion type="single" collapsible className="w-full col-span-2">
                       <AccordionItem value="more-details">
-                        <AccordionTrigger>More Details</AccordionTrigger>
+                        <AccordionTrigger>More Details . . .</AccordionTrigger>
                         <AccordionContent className={"m-1"}>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                             <CaseField label="Coverage Window Value" lock>

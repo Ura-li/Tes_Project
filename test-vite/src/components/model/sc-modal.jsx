@@ -5026,8 +5026,9 @@ export function BtnModalsServiceCatalog({
     assetForWorkOrderCreation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition;
 
   const isOutWarranty =
-    assetForWorkOrderCreation?.AssetInformation?.WarrantyOTCCode?.OTCCode === "01T";
-
+    assetForWorkOrderCreation?.Warranty_Status === "01T";
+console.log("Asset Info OTC : ",isOutWarranty)
+    
   const filteredWarrantyOffers = warrantyOffer.filter(
     (service) =>
       isOutWarranty
@@ -5061,6 +5062,24 @@ export function BtnModalsServiceCatalog({
       ))
     );
   };
+
+  const handleUEFICodeChange = (partNumber, value) => {
+    setSelectedPartCatalog((prev) =>
+      prev.map((p) =>
+        p.PartNumber === partNumber ? { ...p, UEFICode: value, UEFI_NO: "" } : p
+      )
+    );
+  };
+
+  const handleUEFINoChange = (partNumber, value) => {
+    setSelectedPartCatalog((prev) =>
+      prev.map((p) =>
+        p.PartNumber === partNumber ? { ...p, UEFI_NO: value } : p
+      )
+    );
+  };
+
+  const showUEFINumberHeader = selectedPartCatalog.some(p => p.UEFICode === "FID");
 
   //handle add part in confirm services
   const [tempSelectedParts, setTempSelectedParts] = useState([]);
@@ -5101,8 +5120,21 @@ export function BtnModalsServiceCatalog({
         description: "PLEASE CHOOSE THE APO PATNER BEFORE CREATING ORDER",
         position: 'top-center'
       })
-
+      return
     } else {
+      // cek apakah ada part yang belum diisi UEFI Code
+      const partWithoutUEFICode = selectedPartCatalog.find(
+        (p) => !p.UEFICode || p.UEFICode.trim() === ""
+      );
+
+      if (partWithoutUEFICode) {
+        toast.warning(`UEFI Code belum diisi untuk part ${partWithoutUEFICode.PartNumber}`, {
+          description: "PLEASE CHOOSE THE UEFI CODE BEFORE CREATING ORDER",
+          position: 'top-center'
+        });
+        return;
+      }
+
       try {
         Swal.fire({
           title: "Creating Order...",
@@ -5114,18 +5146,6 @@ export function BtnModalsServiceCatalog({
           user: getUserFromToken()
         }
 
-        let noteCreateOrderLog = '';
-        if(assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
-          noteCreateOrderLog = `[NOTICE] Order Part
-Order Part : ${selectedPartCatalog?.[0]?.PartNumber} - ${selectedPartCatalog?.[0]?.PartDescription}
-Harga : Rp. ${selectedPartCatalog?.[0]?.Price}
-Requested to APO : ${assignApo}`;
-        }else{
-          noteCreateOrderLog = `[NOTICE] Order Part
-Order Part : ${selectedPartCatalog?.[0]?.PartNumber} - ${selectedPartCatalog?.[0]?.PartDescription}
-Requested to APO : ${assignApo}`;
-        }
-        console.log(noteCreateOrderLog);
 
         // If WOID present or special mode, create only MO for existing WO
         const isCreateMOOnly = !!WOID || serviceCatalogType === 'wo-add-mo';
@@ -5153,7 +5173,6 @@ Requested to APO : ${assignApo}`;
               IncidentType: selected,
               OwnerID: data.user.id,
               assignApo: assignApo,
-              notesLog: noteCreateOrderLog,
             });
         console.log(res)
   
@@ -5217,7 +5236,7 @@ Requested to APO : ${assignApo}`;
   
   function renderStepContent() {
     const [currentPage, setCurrentPage] = useState(1);
-    const PAGE_SIZE = 6;
+    const PAGE_SIZE = 3;
     const filteredPartCatalog = partCatalog.filter(part => {
       return (
         part.PartNumber?.toLowerCase().includes(partNumberSearch.toLowerCase()) &&
@@ -5237,15 +5256,24 @@ Requested to APO : ${assignApo}`;
       }
     };
 
-    // Skip warranty step when creating MO from WO
     
 
+    // Skip warranty step when creating MO from WO
     const effectiveStep = ((WOID || serviceCatalogType === 'wo-add-mo') && currentStep === 1) ? 2 : currentStep;
+    
+
+
 
     switch (effectiveStep) {
       case 1:
         return (
-          <DialogContent className="sm:max-w-[fit] sm:max-h-[100vh] flex flex-col justify-center gap-0 p-0 bg-white [&>button]:hidden" >
+          <DialogContent   className="
+    w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
+    max-h-[90vh] overflow-y-auto
+    flex flex-col justify-center
+    gap-0 p-0 bg-white
+    [&>button]:hidden
+  " >
             <DialogHeader>
               <div className="flex items-end justify-end ">
                 <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
@@ -5258,7 +5286,7 @@ Requested to APO : ${assignApo}`;
               <DialogDescription className={'bg-red-200 p-3 font-bold '}>Click Here to Show Service Catalog Error / Warnings</DialogDescription>
               <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
             </DialogHeader>
-            <div className="flex justify-between gap-4 p-2 my-2">
+            <div className="flex justify-between gap-4 p-2 my-2 ">
               <DialogTitle>Step 1: Select From List of Service Options</DialogTitle>
               <div className="grid grid-cols-2 p-2 bg-gray-300 gap-x-10">
                 
@@ -5351,8 +5379,12 @@ Requested to APO : ${assignApo}`;
        
        
         return (
-          <DialogContent className="sm:max-w-[fit] sm:max-h-[fit] flex flex-col  gap-0 p-0 bg-white [&>button]:hidden ">
-            <DialogHeader className={'gap-0'}>
+          <DialogContent className=" w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
+    max-h-[90vh] overflow-y-auto
+    flex flex-col justify-center
+    gap-0 p-0 bg-white
+    [&>button]:hidden rounded-none">
+            <DialogHeader className={"p-2"}>
               <div className="flex items-end justify-end">
                 <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
                 <DialogClose asChild>
@@ -5364,24 +5396,39 @@ Requested to APO : ${assignApo}`;
               <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
               <DialogDescription>Select parts required for the repair.</DialogDescription>
             </DialogHeader>
-            {console.log("EFFECTIF WARANRY SERVUCE",effectiveWarrantyService)}
-            <div className="flex items-start justify-between p-2">
-              <div className="grid flex-1 grid-cols-2 p-2 bg-gray-300 gap-x-2">
-                <p>Service OfferID</p><p>: {effectiveWarrantyService?.Service_offerID ?? '-'}</p>
-                <p>Service Description</p><p>: {effectiveWarrantyService?.Service_description ?? '-'}</p>
-              </div>
-              <div className="flex items-center self-center justify-center flex-1 gap-2 space-x-2 ">
-                <Label htmlFor="orderability">Orderability</Label>
-                <Switch id="orderability" />
-              </div>
-              <div className="grid  grid-cols-2 p-2 bg-gray-300 gap-x-2">
-                <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
-                <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
-                <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-                <p>Warranty Status</p><p>: {assetForWorkOrderCreation?.Warranty_Status} - {assetForWorkOrderCreation?.WarrantyOTCCode?.Description}</p>
-                <p>Currency</p><p>: </p>
-              </div>
-            </div>
+  <div className="flex flex-col sm:flex-row justify-between gap-3">
+  {/* Kolom kiri  */}
+  <div className=" bg-gray-200 p-2 space-y-1 h-[5em]">
+    <div className="flex">
+      <p className="font-medium w-40">Service OfferID</p>
+      <p>: {effectiveWarrantyService?.Service_offerID ?? '-'}</p>
+    </div>
+    <div className="flex">
+      <p className="font-medium w-40">Service Description</p>
+      <p>: {effectiveWarrantyService?.Service_description ?? '-'}</p>
+    </div>
+  </div>
+
+  {/* Kolom kanan  */}
+  <div className=" bg-gray-200 grid grid-cols-2 gap-x-2 gap-y-1 p-2">
+    <p>Product Number</p>
+    <p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
+    <p>Product Name</p>
+    <p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
+    <p>Serial Number</p>
+    <p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
+    <p>Warranty Status</p>
+    <p>: {assetForWorkOrderCreation?.Warranty_Status} - {assetForWorkOrderCreation?.WarrantyOTCCode?.Description}</p>
+    <p>Currency</p>
+    <p>:</p>
+  </div>
+</div>
+
+<div className="flex items-center justify-end mt-3 gap-2">
+  <Label htmlFor="orderability">Orderability</Label>
+  <Switch id="orderability" />
+</div>
+
 
             <Tabs
             defaultValue="parts"
@@ -5555,7 +5602,11 @@ Requested to APO : ${assignApo}`;
   
       case 3:
         return (
-          <DialogContent className="sm:max-w-[fit] sm:max-h-[full] p-0 bg-white [&>button]:hidden ">
+          <DialogContent className="w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
+    max-h-[90vh] overflow-y-auto
+    flex flex-col justify-center
+    gap-0 p-0 bg-white
+    [&>button]:hidden ">
             <DialogHeader>
               <div className="flex items-end justify-end">
                 <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
@@ -5565,8 +5616,11 @@ Requested to APO : ${assignApo}`;
                   </Button>
                 </DialogClose>
               </div>
-              <DialogTitle className={'text-blue-600 text-2xl indent-5'}>Service Catalog</DialogTitle>
+              <div className="space-y-2 p-2">
+              <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
               <DialogDescription>SELECT PARTS REQUIRED FOR THE REPAIR.</DialogDescription>
+              </div>
+
             </DialogHeader>
             <div className="flex justify-end gap-4 p-2 my-2">
               <div className="grid grid-cols-2 p-2 bg-gray-300 gap-x-10">
@@ -5587,7 +5641,7 @@ Requested to APO : ${assignApo}`;
                     <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
                     <TableHead className={'font-bold text-black'}>Qty</TableHead>
                     <TableHead className={'font-bold text-black'}>Tax</TableHead>
-                    <TableHead className={'font-bold text-black'}>Price</TableHead>
+                    <TableHead className={'font-bold text-black'} colSpan={5}>Price</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -5614,6 +5668,10 @@ Requested to APO : ${assignApo}`;
                     <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
                     <TableHead className={'font-bold text-black'}>Qty</TableHead>
                     <TableHead className={'font-bold text-black'}>CT KEY RETURN</TableHead>
+                    <TableHead className={'font-bold text-black'}>UEFI CODE</TableHead>
+                    {showUEFINumberHeader  && (
+                      <TableHead className={'font-bold text-black'}>UEFI Number</TableHead>
+                    )}
                     <TableHead className={'font-bold text-black'}>Tax</TableHead>
                     <TableHead className={'font-bold text-black'}>Price</TableHead>
                   </TableRow>
@@ -5641,16 +5699,38 @@ Requested to APO : ${assignApo}`;
                             value={part.RemovedPartNumber || ''}
                             onChange={(e) => handleRemovedPartNumberChange(part.PartNumber, e.target.value)}
                           />
-                        {/* <Input
-                          placeholder="QTY"
-                          min={1}
-                          readOnly
-                          type="number"
-                          value={part.qty}
-                          onChange={(e) => handleQtyChangePartsCatalog(part.PartNumber, e.target.value)}
-                          className="w-16"
-                        /> */}
                         </TableCell>
+                        <TableCell>
+                          <Select
+                            value={part.UEFICode || ""}
+                            onValueChange={(val) => handleUEFICodeChange(part.PartNumber, val)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue placeholder="Select code" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="DHU">DHU</SelectItem>
+                              <SelectItem value="FID">FID</SelectItem>
+                              <SelectItem value="MPS">MPS</SelectItem>
+                              <SelectItem value="PND">PND</SelectItem>
+                              <SelectItem value="PPR">PPR</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                          {part.UEFICode === "FID" ? (
+                            <TableCell>
+                              <Input
+                                placeholder="Enter UEFI No"
+                                value={part.UEFI_NO || ""}
+                                onChange={(e) =>
+                                  handleUEFINoChange(part.PartNumber, e.target.value)
+                                }
+                                className="w-32"
+                              />
+                            </TableCell>
+                          ): (
+                            null
+                          )}
                         <TableCell>{part.Tax}</TableCell>
                         <TableCell>{assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? part.Total : 0}</TableCell>
                       </TableRow>
@@ -5663,7 +5743,7 @@ Requested to APO : ${assignApo}`;
                   </TableRow>
                   <TableRow className={'bg-blue-400'}>
                     <TableCell colSpan={4}></TableCell>
-                    <TableCell>Total</TableCell>
+                    <TableCell colSpan={2}>Total</TableCell>
                     <TableCell>--</TableCell>
                     <TableCell>--</TableCell>
                   </TableRow>

@@ -889,19 +889,19 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
 
       const response = await ApiCustomer.post('/api/bookings', data);
       //update case
-      const updateCaseStatus = await ApiCustomer.patch(`/api/case-information/${CaseID}`, {
-        CaseStatus: "PartOrder",
-        Owner: selectedLogistic.IDUser
-      })
+      // const updateCaseStatus = await ApiCustomer.patch(`/api/case-information/${CaseID}`, {
+      //   CaseStatus: "PartOrder",
+      //   Owner: selectedLogistic.IDUser
+      // })
 
-      const updateLogCase = await ApiCustomer.post("/api/actionlog",{
-        CaseId: `${caseDetails.CaseID}`,
-        model: "Case",
-        dataOld: caseDetails.CaseStatus,
-        dataNew: "PartOrder",
-        changedBy: data.user.id,
-        logDescription: `Edit: change status from ${caseDetails.CaseStatus} to PartOrder`
-      })
+      // const updateLogCase = await ApiCustomer.post("/api/actionlog",{
+      //   CaseId: `${caseDetails.CaseID}`,
+      //   model: "Case",
+      //   dataOld: caseDetails.CaseStatus,
+      //   dataNew: "PartOrder",
+      //   changedBy: data.user.id,
+      //   logDescription: `Edit: change status from ${caseDetails.CaseStatus} to PartOrder`
+      // })
       const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
         CaseId: `${CaseID}`,
         ReferenceId: `${data.WOID}`,
