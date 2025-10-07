@@ -62,15 +62,6 @@ export const ServiceMaterialApo = () => {
   const [MaterialOrder, setMaterialOrder] = useState([]);
 
   const [rmaWarning, setRmaWarning] = useState("");
-  /**
-   * TODO (WARNING ISSUES) 
-   * REMOVE MO FORM, USE STATE DEFINED ONE. 
-   * this will also change the handle Save Function.
-   */
-  // const [moForm, setMoForm] = useState({
-  //   SalesOrderNumber: "",
-  //   RMANumber: "",
-  // })
   const [materialOrderInformation, setMaterialOrderInformation] = useState({
     MOID: "",
     orderNumber: "",
@@ -101,8 +92,6 @@ export const ServiceMaterialApo = () => {
     RMAStatus: null,
     RMANumber: "",
   });
-  // const [collectionRequestedDate, setCollectionRequestedDate] = useState(null);
-  // const [readyForClosureDate, setReadyForClosureDate] = useState(null);
   const [error, setError] = useState(null);
 
   const [updatedLineItems, setUpdatedLineItems] = useState({}); 
@@ -130,19 +119,14 @@ export const ServiceMaterialApo = () => {
 
   const DateHelper = {
     fromDB(dateStr) {
-      // DB → UI
+      
       return formatDateForInput(dateStr);
     },
     toDB(dateStr) {
-      // UI → DB
+      
       return dateStr ? new Date(dateStr).toISOString() : null;
     },
   };
-
-  // const handleMoFormChange = (field) => (e) => {
-  //   const value = e.target.value;
-  //   setMoForm((prev) => ({ ...prev, [field]: value }));
-  // };
 
   const handleMaterialOrderChange = (field) => (valueOrEvent) => {
     const value =
@@ -228,16 +212,9 @@ export const ServiceMaterialApo = () => {
         RMANumber: data.RMANumber || "",
       });
 
-    //   setMoForm((prev) => ({
-    //   ...prev,
-    //   SalesOrderNumber: data.SalesOrderNumber || "",
-    //   RMANumber: data.RMANumber || ""
-    // }));
-
       console.log("Fetched Material Order:", data);
 
-      // Update the draft with the fetched material order details
-      updateDraft("moid", data.MOID); // Save the entire material order to the draft
+      updateDraft("moid", data.MOID);
     } catch (err) {
       console.error("Failed to fetch material orders:", err);
       setError("Failed to fetch material order data");
@@ -252,7 +229,6 @@ export const ServiceMaterialApo = () => {
     { value: "notes_attaechment", label: "Notes & Attachment", hidden: true },
   ];
 
-  // Fetch Material Line Orders
   const fetchMaterialLineOrdersInMODetail = async () => {
     try {
       const res = await ApiCustomer.get(
@@ -286,7 +262,6 @@ export const ServiceMaterialApo = () => {
       });
   }, [moid]);
 
-  // If error state is set, display error message to user
   if (error) {
     return (
       <div className="error-message">
@@ -310,34 +285,6 @@ export const ServiceMaterialApo = () => {
   }
 
   console.log("tw", materialOrders?.workorder?.caseinformation?.Owner)
-  // if (user?.role === "admin") {
-  //   canEditapo = true;
-  // } else if (materialOrders?.workorder?.caseinformation?.Owner) {
-  //   canEditapo = materialOrders?.workorder?.caseinformation?.Owner === user?.id && allowedRoles.includes(user?.role); ;
-  // }
-
-  // useEffect(() => {
-  //   // setMoForm({
-  //   //   ...moForm,
-  //   //   RMANumber: moForm.SalesOrderNumber
-  //   // })
-  //   console.log("TEST MO FORM : ", moForm.SalesOrderNumber, materialOrderInformation.SalesOrderNumber)
-  //   setMaterialOrderInformation(prev => ({
-  //     ...prev,
-  //     SalesOrderNumber: moForm.SalesOrderNumber,
-  //     // RMANumber: moForm.SalesOrderNumber
-  //   }))
-  // },[moForm.SalesOrderNumber])
-
-  // /**
-  //  * TODO : REMOVE THIS LATER IF THE MOFORM IS REMOVED
-  //  */
-  // useEffect(() =>{
-  //   setMaterialOrderInformation(prev => ({
-  //     ...prev,
-  //     RMANumber: moForm.RMANumber
-  //   }))
-  // },[moForm.RMANumber])
   
   return (
     <div>
@@ -510,7 +457,6 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
                   
-                  {/* todo for slamet : ETA DATE di MO yang ngisi APO */}
                   <CaseField
                     label={"ETA Delivery Required Date (Customer Time)"}
                     lock={!canEditapo}
@@ -522,7 +468,6 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  {/* PART IN CE */}
                   <CaseField label={"Part IN CE Collection Requested Date"} icon lock={!canEditapo}>
                     <DatePicker
                       value={materialOrderInformation?.collectionRequestedDate ? new Date(materialOrderInformation?.collectionRequestedDate) : null}
@@ -530,7 +475,6 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  {/* Part OUT CE */}
                   <CaseField label={"Part OUT CE Ready For Closure Date"} icon lock={!canEditapo}>
                     <DatePicker
                       value={materialOrderInformation?.readyForClosureDate ? new Date(materialOrderInformation?.readyForClosureDate) : null}
@@ -538,14 +482,12 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  {/* AWB IN CODE */}
                   <CaseField label={"AWB In Code"} icon lock={!canEditapo}>
                     <Input variant="invisible" placeholder="---"               
                       value={materialOrderInformation?.AWB_InCode || null}
                       onChange={handleMaterialOrderChange("AWB_InCode")}
                     />
                   </CaseField>
-                  {/* AWB OUT CODE */}
                   <CaseField label={"AWB Out Code"} icon lock={!canEditapo}>
                     <Input variant="invisible" placeholder="---" 
                       value={materialOrderInformation?.AWB_OutCode || null}
@@ -719,12 +661,11 @@ export const ServiceMaterialApo = () => {
                               <SelectItem value="Ordered">Ordered</SelectItem>
                               <SelectItem value="Shipped">Shipped</SelectItem>
                               <SelectItem value="BackOrdered">BackOrdered</SelectItem>
-                              {/* <SelectItem value="Closed">Closed</SelectItem>
-                              <SelectItem value="Cancelled">Cancelled</SelectItem> */}
+                              <SelectItem value="Closed">Closed</SelectItem>
+                              <SelectItem value="Cancelled">Cancelled</SelectItem>
                             </SelectContent>
                           </Select>
                         </TableCell>
-                        {/* <TableCell>{lineitem.Status}</TableCell> */}
                         <TableCell>{lineitem.ATPStatus}</TableCell>
                         <TableCell>{lineitem.PartNumber}</TableCell>
                         <TableCell>{lineitem.Description}</TableCell>
