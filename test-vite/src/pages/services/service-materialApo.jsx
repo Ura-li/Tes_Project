@@ -43,6 +43,7 @@ import { Accordion, AccordionContent } from "@/components/ui/accordion";
 import { AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion";
 import CaseField from "@/components/CaseField";
 import { useAuth } from "@/context/auth-context";
+import { toast } from "sonner";
 
 export const RMA_STATUS_OPTIONS = [
   { value: "InOutCE", label: "In/Out CE" },
@@ -59,15 +60,17 @@ export const ServiceMaterialApo = () => {
   const [materialOrders, setMaterialOrders] = useState([]);
   const [materialLineOrders, setMaterialLineOrders] = useState([]);
   const [MaterialOrder, setMaterialOrder] = useState([]);
+
+  const [rmaWarning, setRmaWarning] = useState("");
   /**
    * TODO (WARNING ISSUES) 
    * REMOVE MO FORM, USE STATE DEFINED ONE. 
    * this will also change the handle Save Function.
    */
-  const [moForm, setMoForm] = useState({
-    SalesOrderNumber: "",
-    RMANumber: "",
-  })
+  // const [moForm, setMoForm] = useState({
+  //   SalesOrderNumber: "",
+  //   RMANumber: "",
+  // })
   const [materialOrderInformation, setMaterialOrderInformation] = useState({
     MOID: "",
     orderNumber: "",
@@ -136,10 +139,10 @@ export const ServiceMaterialApo = () => {
     },
   };
 
-  const handleMoFormChange = (field) => (e) => {
-    const value = e.target.value;
-    setMoForm((prev) => ({ ...prev, [field]: value }));
-  };
+  // const handleMoFormChange = (field) => (e) => {
+  //   const value = e.target.value;
+  //   setMoForm((prev) => ({ ...prev, [field]: value }));
+  // };
 
   const handleMaterialOrderChange = (field) => (valueOrEvent) => {
     const value =
@@ -147,10 +150,34 @@ export const ServiceMaterialApo = () => {
         ? valueOrEvent.target.value
         : valueOrEvent;
 
-    setMaterialOrderInformation((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setMaterialOrderInformation((prev) => {
+      const updated = { ...prev, [field]: value};
+
+      if(field === "SalesOrderNumber"){
+        if(prev.RMANumber && prev.RMANumber.length > 0){
+          if(prev.RMANumber.startsWith(value)){
+            setRmaWarning("");
+          } else{
+            setRmaWarning("⚠️ RMA Number tidak sesuai dengan Sales Order Number");
+          }
+        } else{
+          setRmaWarning("");
+        }
+      }
+
+      if(field === "RMANumber"){
+        if(value && prev.SalesOrderNumber){
+          if(value.startsWith(prev.SalesOrderNumber)){
+            setRmaWarning("");
+          }else{
+            setRmaWarning("⚠️ RMA Number tidak sesuai dengan Sales Order Number")
+          }
+        }else{
+          setRmaWarning("");
+        }
+      }
+      return updated;
+    })
   };
 
 
@@ -197,14 +224,15 @@ export const ServiceMaterialApo = () => {
         eotOrderNumber: data.EOTOrderNumber || "",
         AWB_InCode: data.AWB_InCode || "",
         AWB_OutCode: data.AWB_OutCode || "",
-        RMAStatus: data.RMAStatus || null
+        RMAStatus: data.RMAStatus || null,
+        RMANumber: data.RMANumber || "",
       });
 
-      setMoForm((prev) => ({
-      ...prev,
-      SalesOrderNumber: data.SalesOrderNumber || "",
-      RMANumber: data.RMANumber || ""
-    }));
+    //   setMoForm((prev) => ({
+    //   ...prev,
+    //   SalesOrderNumber: data.SalesOrderNumber || "",
+    //   RMANumber: data.RMANumber || ""
+    // }));
 
       console.log("Fetched Material Order:", data);
 
@@ -288,28 +316,28 @@ export const ServiceMaterialApo = () => {
   //   canEditapo = materialOrders?.workorder?.caseinformation?.Owner === user?.id && allowedRoles.includes(user?.role); ;
   // }
 
-  useEffect(() => {
-    // setMoForm({
-    //   ...moForm,
-    //   RMANumber: moForm.SalesOrderNumber
-    // })
-    console.log("TEST MO FORM : ", moForm.SalesOrderNumber, materialOrderInformation.SalesOrderNumber)
-    setMaterialOrderInformation(prev => ({
-      ...prev,
-      SalesOrderNumber: moForm.SalesOrderNumber,
-      // RMANumber: moForm.SalesOrderNumber
-    }))
-  },[moForm.SalesOrderNumber])
+  // useEffect(() => {
+  //   // setMoForm({
+  //   //   ...moForm,
+  //   //   RMANumber: moForm.SalesOrderNumber
+  //   // })
+  //   console.log("TEST MO FORM : ", moForm.SalesOrderNumber, materialOrderInformation.SalesOrderNumber)
+  //   setMaterialOrderInformation(prev => ({
+  //     ...prev,
+  //     SalesOrderNumber: moForm.SalesOrderNumber,
+  //     // RMANumber: moForm.SalesOrderNumber
+  //   }))
+  // },[moForm.SalesOrderNumber])
 
-  /**
-   * TODO : REMOVE THIS LATER IF THE MOFORM IS REMOVED
-   */
-  useEffect(() =>{
-    setMaterialOrderInformation(prev => ({
-      ...prev,
-      RMANumber: moForm.RMANumber
-    }))
-  },[moForm.RMANumber])
+  // /**
+  //  * TODO : REMOVE THIS LATER IF THE MOFORM IS REMOVED
+  //  */
+  // useEffect(() =>{
+  //   setMaterialOrderInformation(prev => ({
+  //     ...prev,
+  //     RMANumber: moForm.RMANumber
+  //   }))
+  // },[moForm.RMANumber])
   
   return (
     <div>
@@ -322,8 +350,8 @@ export const ServiceMaterialApo = () => {
       <TabsServiceMO 
         materialOrders={materialOrders} 
         updatedLineItems={updatedLineItems}
-        moForm={moForm}
-        setMoForm={setMoForm}
+        // moForm={moForm}
+        // setMoForm={setMoForm}
         materialOrderInformation={materialOrderInformation}
       />
       <Card className="mt-2 rounded-none">
@@ -434,12 +462,16 @@ export const ServiceMaterialApo = () => {
                     <Input
                       variant={"invisible"}
                       type="text"
-                      value={moForm?.SalesOrderNumber || ""}
+                      value={materialOrderInformation?.SalesOrderNumber || ""}
                       placeholder="---"
-                      onChange={(e) => {
-                        const val = e.target.value
-                        handleMoFormChange("SalesOrderNumber")(e)
-                        handleMoFormChange("RMANumber")(e)
+                      onChange={handleMaterialOrderChange("SalesOrderNumber")}
+                      onBlur={() =>{
+                        if (!materialOrderInformation?.RMANumber) {
+                          setMaterialOrderInformation(prev => ({
+                            ...prev,
+                            RMANumber: prev.SalesOrderNumber
+                          }))
+                        }
                       }}
                     />
                   </CaseField>
@@ -455,9 +487,14 @@ export const ServiceMaterialApo = () => {
 
                   <CaseField label="RMA Number" star={canEditapo} lock={!canEditapo}>
                     <Input variant="invisible" placeholder="---" 
-                    value={moForm?.RMANumber || ""}
-                    onChange={handleMoFormChange("RMANumber")}
+                    value={materialOrderInformation?.RMANumber || ""}
+                    onChange={handleMaterialOrderChange("RMANumber")}
                     />
+                    {rmaWarning && (
+                      <span style={{ color: "orange", fontSize: "0.8rem", marginTop: 2 }}>
+                        {rmaWarning}
+                      </span>
+                    )}
                   </CaseField>  
 
                   <CaseField
