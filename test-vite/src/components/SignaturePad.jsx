@@ -26,6 +26,8 @@ export default function SignatureWrite({ onEnd }) {
   const clear = () => sigCanvas.current.clear();
 
   const save = () => {
+    if (sigCanvas.current.isEmpty()) return alert("Please provide a signature first!");
+
     const dataUrl = sigCanvas.current.getCanvas().toDataURL("image/png");
     window.opener.postMessage({ type: "signature", signature: dataUrl }, "*");
     window.close();

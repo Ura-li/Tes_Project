@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
     padding: 30,
-    gap: 5,
+    gap: 3,
     borderRadius: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -200,7 +200,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
           <Text style={styles.label}>Warranty Status</Text>
           <Text style={styles.colon}>:</Text>
           <Text style={[styles.value]}>
-            {caseDetails?.otcCodeTable?.Description ?? 'N/A'}
+            {caseDetails?.asset_information?.WarrantyOTCCode?.Description ?? 'N/A'}
           </Text>
 
           <Text style={styles.label}>Received Date</Text>
@@ -439,9 +439,10 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
       {/* Signature section */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-          <Text style={[styles.textSmall, { marginBottom: 30 }]}>Received By</Text>
+          <Text style={[styles.textSmall, { marginBottom: 10 }]}>Received By</Text>
+          <Image src={caseDetails?.createdByUser?.Signature} style={{ width: 120, height: 60 }} />
           <Text style={styles.textSmall}>--------------------------------------------</Text>
-          <Text style={styles.textSmall}>frondesk-1</Text>
+          <Text style={styles.textSmall}>{caseDetails?.createdByUser?.Name}</Text>
         </View>
 
         <View style={{ flexDirection: 'column', alignItems: 'center' }}>
@@ -456,6 +457,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
               <Image src={customerSignature} style={{ width: 120, height: 60 }} />
             </>
           }
+          <Text style={styles.textSmall}>--------------------------------------------</Text>
           <Text style={styles.textSmall}>{caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
               ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
               : 'N/A'}</Text>

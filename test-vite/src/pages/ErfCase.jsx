@@ -18,9 +18,6 @@ export const ErfCase = () => {
             const response = await ApiCustomer.get('/api/case-information')
             const data = response.data.data.filter(c => c.CaseStatus == 'Close');
             setCaseData(data)
-            toast.success("GOOD WEEL", {
-                position: 'top-right'
-            })
             return data
         } catch (err) {
             console.log("THIS THING GIVE ME ERROR", err)
