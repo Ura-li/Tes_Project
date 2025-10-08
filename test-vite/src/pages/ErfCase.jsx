@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { File } from 'lucide-react'
 import React, { useEffect, useState, useMemo } from 'react'
+import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { useNavigate } from 'react-router'
@@ -14,7 +15,7 @@ export const ErfCase = () => {
   const [caseData, setCaseData] = useState([])
   const [selectedFiles, setSelectedFiles] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
-  const PAGE_SIZE = 6 // jumlah row per halaman
+  const PAGE_SIZE = 6 
 
   const navigate = useNavigate()
 
@@ -23,7 +24,6 @@ export const ErfCase = () => {
       const response = await ApiCustomer.get('/api/case-information')
       const data = response.data.data.filter(c => c.CaseStatus == 'Close')
       setCaseData(data)
-      toast.success("GOOD WEEL", { position: 'top-right' })
       return data
     } catch (err) {
       console.log("THIS THING GIVE ME ERROR", err)

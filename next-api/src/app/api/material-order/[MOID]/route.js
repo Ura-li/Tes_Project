@@ -106,8 +106,9 @@ export async function PATCH(request, { params }) {
       AWB_OutCode,
       RMAStatus
     } = moUpdates;
+    const ChangeOrderStatus = OrderStatus ?? body.OrderStatus
 
-    // return console.log("MOUPDATES : ",moUpdates,"\n")
+    // return console.log("MOUPDATES : ",OrderStatus,"\n")
 
     const existingMaterialOrder = await prisma.materialorder.findUnique({
       where: { MOID: moid },
@@ -126,7 +127,7 @@ export async function PATCH(request, { params }) {
       where: { MOID: moid },
       data: {
         OrderNumber,
-        OrderStatus,
+        OrderStatus: ChangeOrderStatus,
         OrderType,
         CreatedOn,
         SalesOrderNumber,

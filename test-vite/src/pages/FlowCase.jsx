@@ -148,6 +148,20 @@ export const FlowCase = () => {
   const PAGE_SIZE = 6;
   // if the window width size more than 2400px set page size to 12
   const totalPages = Math.ceil(filteredCases.length / PAGE_SIZE);
+  const MAX_PAGES_SHOWN = 3;
+  const getPaginationPages = () => {
+    if (totalPages <= MAX_PAGES_SHOWN) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 2) {
+      return [1, 2, 3];
+    }
+    if (currentPage >= totalPages - 1) {
+      return [totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [currentPage - 1, currentPage, currentPage + 1];
+  };
+  const paginationPages = getPaginationPages();
   const currentPageData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return filteredCases.slice(start, start + PAGE_SIZE);
@@ -241,20 +255,20 @@ export const FlowCase = () => {
                       />
                     </PaginationItem>
 
-                    {Array.from({ length: totalPages }, (_, i) => (
-                      <PaginationItem key={i}>
-                        <PaginationLink
-                          href="#"
-                          isActive={currentPage === i + 1}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(i + 1);
-                          }}
-                        >
-                          {i + 1}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
+                  {paginationPages.map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        href="#"
+                        isActive={currentPage === page}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(page);
+                        }}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
 
                     <PaginationItem>
                       <PaginationNext

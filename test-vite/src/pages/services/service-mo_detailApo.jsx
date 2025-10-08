@@ -78,11 +78,9 @@ function formatDateForInput(dateString) {
 
 const DateHelper = {
   fromDB(dateStr) {
-    // DB → UI
     return formatDateForInput(dateStr);
   },
   toDB(dateStr) {
-    // UI → DB
     return dateStr ? new Date(dateStr).toISOString() : null;
   },
 };
@@ -140,7 +138,6 @@ export const ServiceMoDetailApo = () => {
 
   const fetchMoLineItems = async () => {
     try {
-      // Tampilkan loading SweetAlert
       Swal.fire({
         title: "Loading...",
         text: "Please wait a moment",
@@ -158,8 +155,6 @@ export const ServiceMoDetailApo = () => {
       const data = res.data.data;
 
       setMoLineItems(data);
-
-      // Isi state MODetailInput berdasarkan data yang diambil
       setMODetailInput({
         MOID: data.MOID,
         moOrderName: data ? `${data.MOID} - ${data.LineNumber}` : null,
@@ -225,14 +220,6 @@ export const ServiceMoDetailApo = () => {
 
     fetchPartReturnStatuses();
   }, []);
-
-  // const handleChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setMODetailInput((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-  // };
 
   const handleChange = (field) => (eOrValue) => {
     const value = eOrValue?.target ? eOrValue.target.value : eOrValue;
@@ -487,12 +474,12 @@ export const ServiceMoDetailApo = () => {
 
   const [inputValue, setInputValue] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [isFocused, setIsFocused] = useState(false); // Track if input is focused
+  const [isFocused, setIsFocused] = useState(false); 
 
 useEffect(() => {
   ApiCustomer.get("/api/failure/options").then((res) => {
     const defaultOptions = res.data.map((f, index) => ({
-      value: f.FailureId.toString(), // value selalu string
+      value: f.FailureId.toString(), 
       label: (
         <div className="flex flex-col">
           <span className="font-medium">
@@ -509,7 +496,7 @@ useEffect(() => {
     ApiCustomer.get(`/api/failure/${MODetailInput.failureId}`)
       .then((res) => {
         const f = res.data.data;
-        setInputValue(f.FailureId.toString()); // tetap string di state
+        setInputValue(f.FailureId.toString()); 
       })
       .catch(() => {
         
@@ -552,13 +539,12 @@ useEffect(() => {
     console.log("selected.value", selected.value);
   };
 
-  // Handle focus and blur events
   const handleFocus = () => {
     setIsFocused(true);
   };
 
   const handleBlur = () => {
-    setTimeout(() => setIsFocused(false), 150); // Delay to allow click on dropdown
+    setTimeout(() => setIsFocused(false), 150);
   };
 
   const tabs = [
@@ -571,7 +557,7 @@ useEffect(() => {
   let canEditCE;
   const allowedRoles = ["apo","lg","admin"]
   if (moLineItems?.Status !== "Closed") {
-    canEditCE = user?.role  === "ce"
+    canEditCE = user?.role  === "ce" || user?.role === "celead"
     canEdit = allowedRoles.includes(user?.role)
   } else {
     canEdit = false
@@ -667,7 +653,7 @@ useEffect(() => {
                     />
                   </CaseField>
 
-                  <CaseField label={"UEFI CODE"} lock={!canEditCE}>
+                  <CaseField label={"UEFI CODE"} lock>
                     <SearchCommandBlock
                       value={MODetailInput.UEFICode}
                       onChange={handleChange("UEFICode")}
@@ -676,7 +662,7 @@ useEffect(() => {
                   </CaseField>
 
                   {MODetailInput?.UEFICode == "FID" && (
-                    <CaseField label={"UEFI Number"} lock={!canEditCE}>
+                    <CaseField label={"UEFI Number"} lock>
                       <Input
                         variant={"invisible"}
                         value={MODetailInput.UEFI_NO}
@@ -884,8 +870,13 @@ useEffect(() => {
                   <hr />
                 </CardHeader>
                 <CardContent className="grid items-center grid-cols-4 gap-6 m-1">
-                  <CaseField label="Failure Analysis" lock>
-                    <Input variant="invisible" placeholder="---" />
+                  <CaseField label="CT Validation" star={canEditCE} lock={!canEditCE}>
+                    <SearchCommandBlock
+                    options={[
+                      "Pass",
+                      "Fail"
+                    ]}
+                    />
                   </CaseField>
                   
           
@@ -951,19 +942,19 @@ useEffect(() => {
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
 
-                  <CaseField label="Part Used" lock={canEdit}>
+                  <CaseField label="Part Used" star={canEditCE} lock={!canEditCE}>
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={Boolean(MODetailInput.QuantityUsed)}
                         onCheckedChange={handleQuantityUsedToggle}
-                        disabled={canEdit}
+                        disabled={!canEditCE}
                       />
                       <span>{MODetailInput.QuantityUsed ? "Used" : "Not Used"}</span>
                     </div>
                   </CaseField>
 
                   <CaseField label="Part Return Status" 
-                    lock={canEdit}
+                    lock={!canEditCE}
                     >
                     <SearchCommandBlock
                       value={
@@ -974,7 +965,6 @@ useEffect(() => {
                       onChange={handlePartReturnStatusChange}
                       placeholder="Select Part Return Status"
                       options={filteredPartReturnOptions}
-                      // readOnly={!canEdit}
                       renderLabel={renderPartReturnLabel}
                     />
                   </CaseField>

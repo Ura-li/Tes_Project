@@ -306,6 +306,7 @@ export function AppSidebar({
         title: "Erf Case",
         url: "/app/ErfCase",
         icon: BookMarkedIcon,
+        only: "fd",
       },
       {
         name: "My Work",
@@ -392,7 +393,7 @@ export function AppSidebar({
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent className={'bg-gradient-to-b from-hp-300 via-hp-400 to-hp-500 text-white'}>
-        <NavProjects projects={navrole} />
+        <NavProjects projects={navrole} user={data.user} />
         
         {/* <Separator className={'border-2'}></Separator> */}
         {DropNav}
