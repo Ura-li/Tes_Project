@@ -650,6 +650,14 @@ model workorder {
   caseinformation             caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict, map: "workorder_ibfk_1")
   bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
 
+  // TODO : FIND WTF IS DIS ABOT
+  DelayCode  String?
+  NMU        String?
+  NMUItem    String?
+  CEAnalysis String?
+  DefectDesc String?
+  Repair     String?
+
   @@unique([ServiceCatalogID])
   @@index([CaseID], map: "CaseID")
   @@index([OwnerID])
