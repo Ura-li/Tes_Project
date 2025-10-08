@@ -636,7 +636,7 @@ useEffect(() => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Collection Instructions"} >
+                  <CaseField label={"Collection Instructions"} lock={!canEditCE}>
                     <SearchCommandBlock
                       value={MODetailInput.collectionInstructions}
                       onChange={handleChange("collectionInstructions")}
@@ -954,6 +954,7 @@ useEffect(() => {
                   </CaseField>
 
                   <CaseField label="Part Return Status" 
+                    star={canEditCE}
                     lock={!canEditCE}
                     >
                     <SearchCommandBlock
@@ -986,20 +987,20 @@ useEffect(() => {
 
                   <CaseField
                     label="Unit Photo"
-                    hide={Boolean(MODetailInput.QuantityUsed)}>
+                    hide={Boolean(MODetailInput.QuantityUsed)} lock={!canEditCE}>
                       <Input
                         type="file"
                         accept="image/*"
                         onChange={handlePhotoUpload}
-                        // disabled={!canEdit || photoUploadLoading}
+                        disabled={!canEditCE}
                       />
                   </CaseField>
                   
                   <CaseField
                     label="Good Return Reason"
-                    star={!MODetailInput.QuantityUsed}
+                    star={!MODetailInput.QuantityUsed && canEditCE}
                     hide={Boolean(MODetailInput.QuantityUsed)}
-                    // lock={!canEdit}
+                    lock={!canEditCE}
                   >
                     <SearchCommandBlock
                       value={MODetailInput.GoodReturnReason}

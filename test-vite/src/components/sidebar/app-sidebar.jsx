@@ -348,6 +348,14 @@ export function AppSidebar({
         url: "/app",
         icon: Home,
       },
+    ],
+    default :[
+       {
+        name: "Home",
+        title: "Home",
+        url: "/app",
+        icon: Home,
+      },
       {
         name: "Your Cases",
         title: "Your Cases",
@@ -382,9 +390,11 @@ export function AppSidebar({
     );
   } else if (data.user.role === 'apo' || data.user.role === 'ce' || data.user.role === 'ps' ||  data.user.role === 'celead'){
     navrole = data.apo;
-  } else {
+  } else if (data.user.role === 'lg'){
     navrole = data.lg;
     DropNav = '';
+  } else {
+    navrole = data.default;
   }
 
   return (  
