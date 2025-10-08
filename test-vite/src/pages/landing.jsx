@@ -9,7 +9,7 @@ const ProductStorageLanding = lazy(() => import("../layout/Ps_Page"));
 const LogistikLanding = lazy(() => import("../layout/Logistic_Page"))
 const CeLeadLanding = lazy(() => import("../layout/CeLead_Page") )
 const CashMLanding = lazy(() => import ("../layout/Cm_Page"))
-const ApprovelLanding = lazy(() => import ("../layout/Apv.page"));
+const ApprovelLanding = lazy(() => import ("../layout/Apv_page"));
 // const UserLanding = lazy(() => import("../pages/user/Dashboard"));
 
 export default function Landing() {

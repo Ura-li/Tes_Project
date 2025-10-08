@@ -30,8 +30,8 @@ import ApiCustomer from "@/api";
 import DatePicker from "./date-picker";
 import CaseField from "@/components/CaseField";
 import { Textarea } from "./ui/textarea";
-import { getUserFromToken } from "@/lib/utils/auth";
-
+import { useAuth } from "@/context/auth-context";
+// import { CaseField } from "./service-case";
 const spanMap = {
   1: "col-span-1",
   2: "col-span-2",
@@ -217,8 +217,8 @@ export function QuickWOInput ({
   // //   //   City: ServiceDeliveryAddress.city,
   // //   // });
   // };
-  const user = getUserFromToken();
-  let canEdit;
+  const { user } = useAuth();
+  let canEdit 
   const editrole = ['admin','ce','celead']
 
   if (workOrderData?.SystemStatus !== "CLOSED_POSTED") {
