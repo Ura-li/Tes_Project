@@ -651,12 +651,12 @@ model workorder {
   bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
 
   // TODO : FIND WTF IS DIS ABOT
-  DelayCode  String?
-  NMU        String?
-  NMUItem    String?
-  CEAnalysis String?
-  DefectDesc String?
-  Repair     String?
+  DelayCode    String?
+  NMU          String?
+  NMUItem      String?
+  CEAnalysis   String?
+  DefectDesc   String?
+  RepairAction String?
 
   @@unique([ServiceCatalogID])
   @@index([CaseID], map: "CaseID")
