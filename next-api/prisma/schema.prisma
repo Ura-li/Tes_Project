@@ -88,7 +88,7 @@ model caseinformation {
   caseresolution                                caseresolution?      @relation(fields: [id_csr], references: [id_csr], onDelete: Restrict)
   OTCCode                                       String?              @db.VarChar(5) // Scalar field
   otcCodeTable                                  OTCCodeTable?        @relation(fields: [OTCCode], references: [OTCCode])
-  ProblemDescription                            String?              @db.VarChar(255)
+  ProblemDescription                            String?              @db.Text
   CaseProductNote                               String?              @db.Text
   ErfDoc                                        String?              @db.Text
   accessory                                     accessory[]
