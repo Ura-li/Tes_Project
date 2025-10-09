@@ -87,6 +87,8 @@ import { pdf } from '@react-pdf/renderer';
 import ServiceRequestPDF from '../../components/service-request-form'; // adjust path if needed
 import { useAuth } from "@/context/auth-context";
 
+import RepairActionDialog from "@/components/model/RepairActionModal";
+
 function formatDateForInput(dateString) {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -617,6 +619,10 @@ export const CaseField = ({ label, children, icon, span = 1, className, star }) 
 export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
   const navigate = useNavigate();
   const WOID = workOrders.WOID;
+
+  //modal handle repair action
+  const [openRepairDialog, setOpenRepairDialog] = useState(false);
+
   const handleSave = async () => {
     try {
       Swal.fire({
@@ -703,7 +709,12 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
     {
       icon: CopyX,
       label: "Close",
-      onClick: () => saveAndCloseWorkOrder(),
+      onClick:async () => {
+        const isValid = await validate();
+        if (isValid !== false) {
+          setOpenRepairDialog(true);
+        }
+      },
     },
     { icon: RotateCw, label: "Book", onClick: () => alert("not now"), hidden: true },
     { icon: StepBack, label: "Audit", onClick: () => alert("not now"), hidden: true },
@@ -723,21 +734,76 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
   ];
   // const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   // const hiddenButtons = open ? buttons.slice(-3) : [];
-  const saveAndCloseWorkOrder = async () => {
-  
-    const confirmResult = await Swal.fire({
-      title: "Confirm Save",
-      text: "This will give the order status as CLOSED. Are you sure you want to save changes?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, Save it",
-    });
 
-    if (!confirmResult.isConfirmed) {
-      return;
+  const handleRepairSubmit = async (repairFormData) => {
+
+    // Tutup dialog
+    setOpenRepairDialog(false);
+    // Lanjut proses yang sudah kamu punya
+    await saveAndCloseWorkOrder(repairFormData);
+  };
+
+  const validate = async () => {
+    // Validation: all MO under WO must be Closed
+    try {
+      const moRes = await ApiCustomer.get(`/api/material-order?WOID=${workOrders.WOID}`);
+      const mos = Array.isArray(moRes.data?.data) ? moRes.data.data : [];
+      const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed');
+      if (mosNotClosed.length > 0) {
+        Swal.close();
+        Swal.fire({
+          icon: 'warning',
+          title: 'Material Orders Still Open',
+          text: 'Close all Material Orders before closing the Work Order.',
+        });
+        return false
+      }
+    } catch (e) {
+      Swal.close();
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Failed',
+        text: 'Unable to verify Material Orders for this Work Order.',
+      });
+      return false;
     }
+
+    // Validation: bookings must be Completed. As a proxy, require end, ETA, AAT in Customer Time
+    try {
+      const bRes = await ApiCustomer.get(`/api/bookings?WOID=${workOrders.WOID}`);
+      const bookings = Array.isArray(bRes.data?.data) ? bRes.data.data : [];
+      const notCompleted = bookings.filter(b => {
+        // Prefer explicit status if present
+        const statusText = (b.BookingStatus || b.Status || '').toString().toLowerCase();
+        if (statusText === 'completed') return false;
+        const bd = Array.isArray(b.bookingDetails) && b.bookingDetails[0] ? b.bookingDetails[0] : {};
+        const end = bd?.EndTimeCustomerTime;
+        const eta = bd?.EstimatedArrivalTimeCustomerTime;
+        const aat = bd?.ActualArrivalTimeCustomerTime;
+        return !(end && eta && aat);
+      });
+      if (notCompleted.length > 0) {
+        Swal.close();
+        Swal.fire({
+          icon: 'warning',
+          title: 'Booking Not Completed',
+          text: 'Ensure all bookings have End Time, Estimated Arrival, and Actual Arrival (Customer Time) before closing the Work Order.',
+        });
+        return false;
+      }
+    } catch (e) {
+      Swal.close();
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Failed',
+        text: 'Unable to verify bookings for this Work Order.',
+      });
+      return false;
+    }
+    return true; // if all validations pass
+
+  }
+  const saveAndCloseWorkOrder = async (repairFormData) => {
     try {
       Swal.fire({
         title: "Saving...",
@@ -758,62 +824,18 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
         });
       }
 
-      // Validation: all MO under WO must be Closed
-      try {
-        const moRes = await ApiCustomer.get(`/api/material-order?WOID=${workOrders.WOID}`);
-        const mos = Array.isArray(moRes.data?.data) ? moRes.data.data : [];
-        const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed');
-        if (mosNotClosed.length > 0) {
-          Swal.close();
-          return Swal.fire({
-            icon: 'warning',
-            title: 'Material Orders Still Open',
-            text: 'Close all Material Orders before closing the Work Order.',
-          });
-        }
-      } catch (e) {
-        Swal.close();
-        return Swal.fire({
-          icon: 'error',
-          title: 'Validation Failed',
-          text: 'Unable to verify Material Orders for this Work Order.',
-        });
-      }
-
-      // Validation: bookings must be Completed. As a proxy, require end, ETA, AAT in Customer Time
-      try {
-        const bRes = await ApiCustomer.get(`/api/bookings?WOID=${workOrders.WOID}`);
-        const bookings = Array.isArray(bRes.data?.data) ? bRes.data.data : [];
-        const notCompleted = bookings.filter(b => {
-          // Prefer explicit status if present
-          const statusText = (b.BookingStatus || b.Status || '').toString().toLowerCase();
-          if (statusText === 'completed') return false;
-          const bd = Array.isArray(b.bookingDetails) && b.bookingDetails[0] ? b.bookingDetails[0] : {};
-          const end = bd?.EndTimeCustomerTime;
-          const eta = bd?.EstimatedArrivalTimeCustomerTime;
-          const aat = bd?.ActualArrivalTimeCustomerTime;
-          return !(end && eta && aat);
-        });
-        if (notCompleted.length > 0) {
-          Swal.close();
-          return Swal.fire({
-            icon: 'warning',
-            title: 'Booking Not Completed',
-            text: 'Ensure all bookings have End Time, Estimated Arrival, and Actual Arrival (Customer Time) before closing the Work Order.',
-          });
-        }
-      } catch (e) {
-        Swal.close();
-        return Swal.fire({
-          icon: 'error',
-          title: 'Validation Failed',
-          text: 'Unable to verify bookings for this Work Order.',
-        });
-      }
+      // return console.log("Repair PROM KOOJRN ",repairFormData);
 
       const res = await ApiCustomer.patch(
         `/api/work-order/${workOrders.WOID}`,
         {
+          DelayCode: repairFormData.delayCode,
+          NMUId: repairFormData.nmu,
+          VersionNMU: repairFormData?.Version,
+          NMUItemId: repairFormData?.nmuItem,
+          CEAnalysis: repairFormData.ceAnalysis,
+          DefectDesc: repairFormData.defectDesc,
+          RepairAction: repairFormData.repairAction,
           SystemStatus: "CLOSED_POSTED",
         }
       );
@@ -927,6 +949,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
         {/* <BtnModalsServiceCatalog open={openWorkOrder} setOpen={setOpenWorkOrder} caseDetails={caseDetails}/> */}
       </div>
       <div>
+        
         {/* <ServiceCase 
       caseDetails={caseDetails}
       formData={caseNoteFormData}
@@ -937,6 +960,15 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
       setSelectedSymptom={setSelectedSymptom}
       /> */}
       </div>
+      <RepairActionDialog
+        open={openRepairDialog}
+        onOpenChange={setOpenRepairDialog}
+        onSubmit={handleRepairSubmit}
+        canEdit={true}
+        
+        //data
+        workOrders={workOrders}
+      />
     </>
   );
 };

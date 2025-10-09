@@ -4913,7 +4913,7 @@ export function BtnModalsServiceCatalog({
   }, [WOID]);
 
 
-  const [selected, setSelected] = useState("DepotRepair"); 
+  const [selected, setSelected] = useState(""); 
 
   //handles Warranty Service
   // const [selectedWarrantyServices, setSelectedWarrantyServices] = useState([]);

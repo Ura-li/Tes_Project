@@ -419,27 +419,9 @@ export const ServiceWork = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
               <CardTitle className="text-xl pl-2">
                 {woid}
-                {/* <span className="flex items-center text-sm">
-                  Work Order .
-                  <Select
-                    onValueChange={setSelected}
-                    defaultValue="work_order"
-                    className="shadow-xl"
-                  >
-                    <SelectTrigger className="border-none shadow-none">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="work_order">work order</SelectItem>
-                        <SelectItem value="??">??</SelectItem>
-                        <SelectItem value="!!">!!</SelectItem>
-                        <SelectItem value="**">**</SelectItem>
-                        <SelectItem value="&&">&&</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </span> */}
+                <span className="flex items-center text-sm">
+                  For Case : <Link to={`/app/case/${workOrders.CaseID}`}>{workOrders.CaseID}</Link>
+                </span>
               </CardTitle>
               <CardTitle className="flex flex-row gap-4  items-center">
                 <div className="flex flex-col ">
