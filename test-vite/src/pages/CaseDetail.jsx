@@ -2206,7 +2206,7 @@ if (caseDetails.CaseStatus !== "Close") {
 
                   <CaseField
                     label="Template"
-
+                    lock
                   >
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
@@ -2232,7 +2232,7 @@ if (caseDetails.CaseStatus !== "Close") {
 
                   <CaseField
                     label="Number of Minutes Spent"
-
+                      lock
                   >
                     <Input variant="invisible" placeholder="---" />
                   </CaseField>
