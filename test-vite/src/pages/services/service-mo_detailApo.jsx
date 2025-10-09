@@ -967,8 +967,6 @@ useEffect(() => {
                       placeholder="Select Part Return Status"
                       options={filteredPartReturnOptions}
                       renderLabel={renderPartReturnLabel}
-                      
-                      
                     />
                   </CaseField>
 

@@ -129,7 +129,6 @@
     --color-hp-500: #002d3a;
 }
 
-
 @layer base {
   * {
     @apply border-border outline-ring/50 overscroll-none;
@@ -138,4 +137,3 @@
     @apply bg-background text-foreground;
   }
 }
-
