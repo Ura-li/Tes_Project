@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma from "../../../../../prisma/client";
+import prisma from "../../../../../../prisma/client";
 
 // GET /api/NMU/[id]
 export async function GET(request, { params }) {

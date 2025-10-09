@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma  from "../../../../prisma/client";
+import prisma  from "../../../../../prisma/client";
 
 export async function GET(request) {
     try{
@@ -31,7 +31,7 @@ export async function GET(request) {
         console.log("Final WHERE Condition:", JSON.stringify(whereCondition));
 
         // Hitung jumlah data total
-        const totalCount = await prisma.NMU.count({
+        const totalCount = await prisma.NMUItem.count({
             where: whereCondition
         });
 

@@ -15,14 +15,15 @@ export async function GET(request) {
         let whereCondition = {}
         
             if (search) {
+                const isSearchNumber = !isNaN(search)
                 whereCondition = {
                     AND: [
                     {
                         OR: [
-                        { NMUId: { contains: search } },
-                        { NMUDesc: { contains: search } },
-                        { ItemNeeded: { contains: search } },
-                        { VersionNeeded: { contains: search } },
+                        isSearchNumber ? { NMUId: parseInt(search) } : {}, // hanya jika angka
+                        { NMUDesc: { contains: search } }
+                        // { ItemNeeded: { contains: search } },
+                        // { VersionNeeded: { contains: search } },
                         ]
                     }
                     ]
