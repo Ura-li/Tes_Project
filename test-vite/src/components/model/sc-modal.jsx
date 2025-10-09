@@ -10354,6 +10354,203 @@ export function NmuItemAdd() {
   );
 }
 
+export function NmuItemEdit({ id }) {
+  const [formData, setFormData] = useState({
+    itemName: "",
+    nmuId: "",
+  });
+  console.log("THE vALUE",id)
+
+  const [nmuList, setNmuList] = useState([]);
+
+  // Fetch list NMU untuk dropdown
+  useEffect(() => {
+    const fetchNMU = async () => {
+      try {
+        const res = await ApiCustomer.get("/api/nmu", {
+          params: { limit: 100 },
+        });
+        if (res.data.success) {
+          setNmuList(res.data.data);
+        }
+      } catch (error) {
+        console.error("Gagal ambil data NMU:", error);
+      }
+    };
+
+    fetchNMU();
+  }, []);
+
+  // Fetch data NMUItem untuk edit
+  const fetchNMUItem = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/nmu/nmuitem/${id}`);
+      console.log("TES VALUE OF THE NMU ITEM",res)
+      if (res.data.success) {
+        setFormData({
+          itemName: res.data.data.itemName,
+          nmuId: res.data.data.nmuId,
+        });
+      }
+    } catch (error) {
+      console.error("Gagal ambil data NMU Item:", error);
+    }
+  };
+  useEffect(() => {
+
+    if (id) {
+      fetchNMUItem();
+    }
+  }, [id]);
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.itemName || !formData.nmuId) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Data",
+        text: "Item Name dan NMU wajib diisi.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/nmu/nmuitem/${id}`, formData);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "NMU Item berhasil diperbarui",
+        timer: 1200,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Gagal update NMU Item:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Gagal mengupdate data",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm">Edit</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit NMU Item</DialogTitle>
+          <DialogDescription>Update data NMU Item sesuai kebutuhan.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>Item Name *</Label>
+          <Input
+            id="itemName"
+            value={formData.itemName}
+            onChange={handleInputChange}
+            maxLength={255}
+          />
+
+          <Label>Pilih NMU *</Label>
+          <select
+            id="nmuId"
+            value={formData.nmuId}
+            onChange={handleInputChange}
+            className="w-full border rounded-md p-2"
+          >
+            <option value="">-- Pilih NMU --</option>
+            {nmuList.map((nmu) => (
+              <option key={nmu.NMUId} value={nmu.NMUId}>
+                {nmu.NMUDesc || `NMU ${nmu.NMUId}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={handleSubmit}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function NmuItemDelete({ id, itemName }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      await ApiCustomer.delete(`/api/nmu/nmuitem/${id}`);
+      Swal.fire({
+        icon: "success",
+        title: "Deleted",
+        text: "NMU Item berhasil dihapus",
+        timer: 1200,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Gagal hapus NMU Item:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Gagal menghapus data",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="destructive" className="h-11 rounded-sm">
+          Delete
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Hapus NMU Item</DialogTitle>
+          <DialogDescription>
+            Apakah kamu yakin ingin menghapus item <b>{itemName}</b>?  
+            Data yang sudah dihapus tidak bisa dikembalikan.
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter className="mt-4">
+          <Button variant="outline">Batal</Button>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={loading}
+          >
+            {loading ? "Menghapus..." : "Ya, Hapus"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function FailureAdd () {
   const [formDataFailure, setFormDataFailure] = useState({
    Name: '',	

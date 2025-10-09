@@ -30,7 +30,7 @@ import { ServiceCatalogAdd, ServiceCatalogEdit, ServiceCatalogDelete } from "@/c
 import { OTCAdd, OTCEdit, OTCDelete} from "@/components/model/sc-modal";
 import { CrsAdd, CrsEdit, CrsDelete } from "@/components/model/sc-modal";
 import { NmuAdd, NmuEdit, NmuDelete} from "@/components/model/sc-modal";
-import { NmuItemAdd } from "@/components/model/sc-modal";
+import { NmuItemAdd, NmuItemEdit, NmuItemDelete } from "@/components/model/sc-modal";
 import { FailureAdd, 
   FailureEdit, 
   FailureDelete } from "@/components/model/sc-modal";
@@ -8917,8 +8917,8 @@ export const NmuItemTable = () => {
                     })}
                   </td>
                   <td className="flex items-center justify-center gap-2 p-3 border">
-                    {/* <NmuItemEdit id={item.id} onUpdate={fetchNmuItemData} />
-                    <NmuItemDelete id={item.id} onUpdate={fetchNmuItemData} /> */}
+                    <NmuItemEdit id={item.id} onUpdate={fetchNmuItemData} />
+                    <NmuItemDelete id={item.id} onUpdate={fetchNmuItemData} />
                   </td>
                 </tr>
               ))
