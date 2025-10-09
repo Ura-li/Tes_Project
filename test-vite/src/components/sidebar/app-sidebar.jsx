@@ -181,6 +181,16 @@ export function AppSidebar({
             icon: CheckCircle,
           },
           {
+            title: "NMU",
+            url: "/app/master/NmuTable",
+            icon: FileCog
+          },
+          {
+            title: "NMU Item",
+            url: "/app/master/NmuItemTable",
+            icon: FileCog
+          },
+          {
             title: "Failure Code",
             url: "/app/master/Failure",
             icon: FileCog

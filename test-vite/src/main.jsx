@@ -45,6 +45,8 @@ const masterTables = {
   OTCCodeTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.OTCCodeTable }))),
   CrsTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.CrsTable }))),
   FailureTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.FailureTable }))),
+  NmuTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.NmuTable }))),
+  NmuItemTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.NmuItemTable }))),
   BookingStatusTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.BookingStatusTable }))),
 };
 
@@ -70,6 +72,8 @@ const {
   ServiceCatalogTable,
   OTCCodeTable,
   CrsTable,
+  NmuTable,
+  NmuItemTable,
   FailureTable,
   BookingStatusTable,
 } = masterTables;
@@ -298,6 +302,22 @@ createRoot(document.getElementById("root")).render(
               element={
                 <MasterGateKeeping allow={["admin"]}>
                   <CrsTable />
+                </MasterGateKeeping>
+              }
+            />
+            <Route
+              path="/app/master/NmuTable"
+              element={
+                <MasterGateKeeping allow={["admin"]}>
+                  <NmuTable />
+                </MasterGateKeeping>
+              }
+            />
+            <Route
+              path="/app/master/NmuItemTable"
+              element={
+                <MasterGateKeeping allow={["admin"]}>
+                  <NmuItemTable />
                 </MasterGateKeeping>
               }
             />

@@ -9731,6 +9731,629 @@ export function CrsAdd() {
   );
 }
 
+export function CrsEdit({ id_csr, onUpdate }) {
+  const [formData, setFormData] = useState({
+    caseResolutionCode: "",
+    autoClose: "",
+    caseReadyForClosure: "",
+    readyForCloseDays: "",
+    readyForClosureDate: "",
+    pendingCustomerAction: "",
+    customerRequestedCloseDate: "",
+  });
+
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open || !id_csr) return;
+
+    
+    const fetchData = async () => {
+      try {
+        const response = await ApiCustomer.get(`/api/caseResolution/${id_csr}`);
+        const data = response.data.data;
+
+        const formatDateForInput = (dateString) => {
+          if (!dateString) return "";
+          const date = new Date(dateString);
+          const offset = date.getTimezoneOffset();
+          const localDate = new Date(date.getTime() - offset * 60 * 1000);
+          return localDate.toISOString().slice(0, 16); // ambil 'YYYY-MM-DDTHH:MM'
+        };
+
+        setFormData({
+          caseResolutionCode: data.caseResolutionCode,
+          autoClose: data.autoClose,
+          caseReadyForClosure: data.caseReadyForClosure,
+          readyForCloseDays: data.readyForCloseDays,
+          readyForClosureDate: formatDateForInput(data.readyForClosureDate),
+          pendingCustomerAction: formatDateForInput(data.pendingCustomerAction),
+          customerRequestedCloseDate: formatDateForInput(data.customerRequestedCloseDate),
+        });
+      } catch (error) {
+        console.error("Error fetching Case Resolution:", error);
+        Swal.fire({
+           icon: 'error',
+           title: 'Gagal Mengambil data',
+           allowEscapekey: false,
+           showConfirmButton: false,
+           allowOutsideClick: false
+        }).then(() => {
+          window.location.reload;
+        })
+      }
+    };
+
+    fetchData();
+  }, [id_csr, open]);
+
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.caseResolutionCode || !formData.autoClose || !formData.caseReadyForClosure) {
+      Swal.fire("Incomplete", "Semua field wajib diisi", "warning");
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/caseResolution/${id_csr}`, formData);
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Case Resoluution berhasil diperbarui.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false
+      }).then(() => {
+          onUpdate?.();
+        setOpen(false);
+      });
+    } catch (error) {
+      console.error("Error updating:", error);
+      Swal.fire("Error", "Gagal memperbarui data", "error");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Case Resolution</DialogTitle>
+          <DialogDescription>Update the fields below.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>Case Resolution Code</Label>
+          <Input id="caseResolutionCode" value={formData.caseResolutionCode} onChange={handleInputChange} />
+
+          <Label>Auto Close</Label>
+          <SelectYN
+            id="autoClose"
+            value={formData.autoClose}
+            onValueChange={(value) => handleInputChange({ target: { id: "autoClose", value } })}
+          />
+
+          <Label>Case Ready For Closure</Label>
+          <SelectYN
+            id="caseReadyForClosure"
+            value={formData.caseReadyForClosure}
+            onValueChange={(value) => handleInputChange({ target: { id: "caseReadyForClosure", value } })}
+          />
+
+          <Label>Ready For Close Days</Label>
+          <Input id="readyForCloseDays" type="number" value={formData.readyForCloseDays} onChange={handleInputChange} />
+
+          <Label>Ready For Closure Date</Label>
+          <Input id="readyForClosureDate" type="datetime-local" value={formData.readyForClosureDate} onChange={handleInputChange} />
+
+          <Label>Pending Customer Action</Label>
+          <Input id="pendingCustomerAction" type="datetime-local" value={formData.pendingCustomerAction} onChange={handleInputChange} />
+
+          <Label>Customer Requested Close Date</Label>
+          <Input id="customerRequestedCloseDate" type="datetime-local" value={formData.customerRequestedCloseDate} onChange={handleInputChange} />
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function CrsDelete({ id_csr, onDelete }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Case Resolution ini akan dihapus dan tidak dapat dikembalikan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/caseResolution/${id_csr}`);
+
+        if (response.status === 409 || response.data?.success === false) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data?.message || "Data memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Case Resolution berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.reload();
+          if (onDelete) {
+            onDelete();
+          }
+        });
+      } catch (error) {
+        if (error.response?.status === 409) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data?.message || "Data memiliki relasi dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
+    }
+  };
+    return (
+      <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+        <Trash />
+      </Button>
+    );
+}
+
+export function NmuAdd() {
+  const [formData, setFormData] = useState({
+    NMUDesc: "",
+    ItemNeeded: false,
+    VersionNeeded: false,
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.NMUDesc) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Data",
+        text: "NMU Description is required.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.post("/api/nmu", formData);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "NMU data saved",
+        timer: 1200,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Failed to save NMU:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Failed to save data",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm">Add NMU</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add NMU</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>NMU Description *</Label>
+          <Input
+            id="NMUDesc"
+            value={formData.NMUDesc}
+            onChange={handleInputChange}
+            maxLength={255}
+          />
+
+          <div className="flex items-center gap-2">
+            <input
+              id="ItemNeeded"
+              type="checkbox"
+              checked={formData.ItemNeeded}
+              onChange={handleInputChange}
+            />
+            <Label htmlFor="ItemNeeded">Item Needed</Label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              id="VersionNeeded"
+              type="checkbox"
+              checked={formData.VersionNeeded}
+              onChange={handleInputChange}
+            />
+            <Label htmlFor="VersionNeeded">Version Needed</Label>
+          </div>
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={handleSubmit}>Submit</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function NmuEdit({ NMUId, onUpdate }) {
+  const [desc, setDesc] = useState("");
+  const [itemNeeded, setItemNeeded] = useState(false);
+  const [versionNeeded, setVersionNeeded] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/nmu/${NMUId}`);
+      const data = response.data.data;
+      if (data) {
+        setDesc(data.NMUDesc || "");
+        setItemNeeded(Boolean(data.ItemNeeded));
+        setVersionNeeded(Boolean(data.VersionNeeded));
+      }
+    } catch (error) {
+      console.error("Error fetching NMU data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchData();
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!desc) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Data",
+        text: "Description is required.",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/nmu/${NMUId}`, {
+        NMUDesc: desc,
+        ItemNeeded: itemNeeded,
+        VersionNeeded: versionNeeded,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Updated!",
+        text: "NMU has been updated successfully.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        setIsOpen(false); // Tutup modal setelah update
+        if (onUpdate) onUpdate();
+      });
+    } catch (error) {
+      console.error("Update error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "Failed to update NMU. Please try again.",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil size={16} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit NMU</DialogTitle>
+          <DialogDescription>
+            Update NMU data. Description is required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Input
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            placeholder="NMU Description"
+          />
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={itemNeeded}
+              onChange={(e) => setItemNeeded(e.target.checked)}
+            />
+            <label>Item Needed</label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={versionNeeded}
+              onChange={(e) => setVersionNeeded(e.target.checked)}
+            />
+            <label>Version Needed</label>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function NmuDelete({ NMUId, onUpdate }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Data ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/nmu/${NMUId}`);
+
+        // kalau backend kasih error 409 atau success=false
+        if (response.status === 409 || response.data.success === false) {
+          return Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || 'Data ini memiliki keterkaitan dan tidak dapat dihapus.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Data berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        }).then(() => {
+          if (onUpdate) {
+            onUpdate(); // refresh tabel parent
+          } else {
+            window.location.reload();
+          }
+        });
+
+      } catch (error) {
+        const message = error?.response?.data?.message;
+        if (error?.response?.status === 409) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: message || 'Data ini memiliki keterkaitan dan tidak dapat dihapus.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        }
+      }
+    }
+  };
+  
+  return (
+    <Button 
+      variant="outline" 
+      className="text-red-500 hover:text-red-700" 
+      onClick={handleDelete}
+    >
+      <Trash size={16} />
+    </Button>
+  );  
+}
+
+export function NmuItemAdd() {
+  const [formData, setFormData] = useState({
+    itemName: "",
+    nmuId: "",
+  });
+
+  const [nmuList, setNmuList] = useState([]);
+
+  // Ambil daftar NMU untuk dropdown
+  useEffect(() => {
+    const fetchNMU = async () => {
+      try {
+        const res = await ApiCustomer.get("/api/nmu", {
+          params: { limit: 100 }, // ambil maksimal 100 record NMU
+        });
+        if (res.data.success) {
+          setNmuList(res.data.data);
+        }
+      } catch (error) {
+        console.error("Gagal ambil data NMU:", error);
+      }
+    };
+
+    fetchNMU();
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.itemName || !formData.nmuId) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Data",
+        text: "Item Name dan NMU wajib diisi.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.post("/api/nmu/nmuitem", formData);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "NMU Item berhasil disimpan",
+        timer: 1200,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Gagal simpan NMU Item:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Gagal menyimpan data",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm">Add NMU Item</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add NMU Item</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>Item Name *</Label>
+          <Input
+            id="itemName"
+            value={formData.itemName}
+            onChange={handleInputChange}
+            maxLength={255}
+          />
+
+          <Label>Pilih NMU *</Label>
+          <select
+            id="nmuId"
+            value={formData.nmuId}
+            onChange={handleInputChange}
+            className="w-full border rounded-md p-2"
+          >
+            <option value="">-- Pilih NMU --</option>
+            {nmuList.map((nmu) => (
+              <option key={nmu.NMUId} value={nmu.NMUId}>
+                {nmu.NMUDesc || `NMU ${nmu.NMUId}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={handleSubmit}>Submit</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function FailureAdd () {
   const [formDataFailure, setFormDataFailure] = useState({
    Name: '',	
@@ -10005,215 +10628,7 @@ export function FailureDelete({ FailureId, isModalOpen, setIsModalOpen, onUpdate
   );
 }
 
-export function CrsEdit({ id_csr, onUpdate }) {
-  const [formData, setFormData] = useState({
-    caseResolutionCode: "",
-    autoClose: "",
-    caseReadyForClosure: "",
-    readyForCloseDays: "",
-    readyForClosureDate: "",
-    pendingCustomerAction: "",
-    customerRequestedCloseDate: "",
-  });
 
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open || !id_csr) return;
-
-    
-    const fetchData = async () => {
-      try {
-        const response = await ApiCustomer.get(`/api/caseResolution/${id_csr}`);
-        const data = response.data.data;
-
-        const formatDateForInput = (dateString) => {
-          if (!dateString) return "";
-          const date = new Date(dateString);
-          const offset = date.getTimezoneOffset();
-          const localDate = new Date(date.getTime() - offset * 60 * 1000);
-          return localDate.toISOString().slice(0, 16); // ambil 'YYYY-MM-DDTHH:MM'
-        };
-
-        setFormData({
-          caseResolutionCode: data.caseResolutionCode,
-          autoClose: data.autoClose,
-          caseReadyForClosure: data.caseReadyForClosure,
-          readyForCloseDays: data.readyForCloseDays,
-          readyForClosureDate: formatDateForInput(data.readyForClosureDate),
-          pendingCustomerAction: formatDateForInput(data.pendingCustomerAction),
-          customerRequestedCloseDate: formatDateForInput(data.customerRequestedCloseDate),
-        });
-      } catch (error) {
-        console.error("Error fetching Case Resolution:", error);
-        Swal.fire({
-           icon: 'error',
-           title: 'Gagal Mengambil data',
-           allowEscapekey: false,
-           showConfirmButton: false,
-           allowOutsideClick: false
-        }).then(() => {
-          window.location.reload;
-        })
-      }
-    };
-
-    fetchData();
-  }, [id_csr, open]);
-
-  const handleInputChange = (e) => {
-    const { id, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.caseResolutionCode || !formData.autoClose || !formData.caseReadyForClosure) {
-      Swal.fire("Incomplete", "Semua field wajib diisi", "warning");
-      return;
-    }
-
-    try {
-      await ApiCustomer.patch(`/api/caseResolution/${id_csr}`, formData);
-      Swal.fire({
-        icon: "success",
-        title: "Berhasil!",
-        text: "Case Resoluution berhasil diperbarui.",
-        timer: 1200,
-        timerProgressBar: true,
-        showConfirmButton: false,
-        allowEscapeKey: false
-      }).then(() => {
-          onUpdate?.();
-        setOpen(false);
-      });
-    } catch (error) {
-      console.error("Error updating:", error);
-      Swal.fire("Error", "Gagal memperbarui data", "error");
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => setOpen(true)}>
-          <Pencil />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Case Resolution</DialogTitle>
-          <DialogDescription>Update the fields below.</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3">
-          <Label>Case Resolution Code</Label>
-          <Input id="caseResolutionCode" value={formData.caseResolutionCode} onChange={handleInputChange} />
-
-          <Label>Auto Close</Label>
-          <SelectYN
-            id="autoClose"
-            value={formData.autoClose}
-            onValueChange={(value) => handleInputChange({ target: { id: "autoClose", value } })}
-          />
-
-          <Label>Case Ready For Closure</Label>
-          <SelectYN
-            id="caseReadyForClosure"
-            value={formData.caseReadyForClosure}
-            onValueChange={(value) => handleInputChange({ target: { id: "caseReadyForClosure", value } })}
-          />
-
-          <Label>Ready For Close Days</Label>
-          <Input id="readyForCloseDays" type="number" value={formData.readyForCloseDays} onChange={handleInputChange} />
-
-          <Label>Ready For Closure Date</Label>
-          <Input id="readyForClosureDate" type="datetime-local" value={formData.readyForClosureDate} onChange={handleInputChange} />
-
-          <Label>Pending Customer Action</Label>
-          <Input id="pendingCustomerAction" type="datetime-local" value={formData.pendingCustomerAction} onChange={handleInputChange} />
-
-          <Label>Customer Requested Close Date</Label>
-          <Input id="customerRequestedCloseDate" type="datetime-local" value={formData.customerRequestedCloseDate} onChange={handleInputChange} />
-        </div>
-        <DialogFooter>
-          <Button onClick={handleSubmit}>Update</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-export function CrsDelete({ id_csr, onDelete }) {
-  const handleDelete = async () => {
-    const result = await Swal.fire({
-      title: 'Apakah Anda yakin?',
-      text: "Case Resolution ini akan dihapus dan tidak dapat dikembalikan.",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Ya, hapus!',
-      cancelButtonText: 'Batal',
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const response = await ApiCustomer.delete(`/api/caseResolution/${id_csr}`);
-
-        if (response.status === 409 || response.data?.success === false) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Tidak Bisa Dihapus!',
-            text: response.data?.message || "Data memiliki keterkaitan dan tidak dapat dihapus.",
-            timer: 2000,
-            timerProgressBar: true,
-            showConfirmButton: false,
-          });
-          return;
-        }
-
-        Swal.fire({
-          icon: 'success',
-          title: 'Berhasil!',
-          text: 'Case Resolution berhasil dihapus.',
-          timer: 1500,
-          timerProgressBar: true,
-          showConfirmButton: false,
-        }).then(() => {
-          window.location.reload();
-          if (onDelete) {
-            onDelete();
-          }
-        });
-      } catch (error) {
-        if (error.response?.status === 409) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Tidak Bisa Dihapus!',
-            text: error.response.data?.message || "Data memiliki relasi dan tidak dapat dihapus.",
-            timer: 2000,
-            timerProgressBar: true,
-            showConfirmButton: false,
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Gagal Menghapus!',
-            text: 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.',
-            timer: 2000,
-            timerProgressBar: true,
-            showConfirmButton: false,
-          });
-        }
-      }
-    }
-  };
-    return (
-      <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
-        <Trash />
-      </Button>
-    );
-  }
 
 
 //! Home Page Modals
