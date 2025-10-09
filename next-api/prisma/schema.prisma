@@ -651,10 +651,12 @@ model workorder {
   bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
 
   // TODO : FIND WTF IS DIS ABOT
-  DelayCode    String?
-  NMU          String?
+  DelayCode    DelayCode?
+  NMUId        Int?
+  NMU          NMU?       @relation(fields: [NMUId], references: [NMUId])
   VersionNMU   String?
-  NMUItem      String?
+  NMUItemId    Int?
+  NMUItem      NMUItem?   @relation(fields: [NMUItemId], references: [id])
   CEAnalysis   String?
   DefectDesc   String?
   RepairAction String?
@@ -688,30 +690,30 @@ model ResourceAccount {
 }
 
 model NMU {
-  NMUId Int @id @default(autoincrement())
-  NMUDesc      String?    @db.VarChar(255)
-  ItemNeeded     Boolean    @default(false)
+  NMUId      Int     @id @default(autoincrement())
+  NMUDesc    String? @db.VarChar(255)
+  ItemNeeded Boolean @default(false)
 
-  items        NMUItem[]  @relation("NMUToItems")
+  items NMUItem[] @relation("NMUToItems")
 
-  VersionNeeded Boolean @default(false) 
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  VersionNeeded Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  workorder     workorder[]
 }
-
 
 model NMUItem {
-  id           Int       @id @default(autoincrement())
-  itemName     String     @db.VarChar(255)
+  id       Int    @id @default(autoincrement())
+  itemName String @db.VarChar(255)
 
   // Foreign key ke NMU
-  nmuId        Int
-  nmu          NMU        @relation("NMUToItems", fields: [nmuId], references: [NMUId], onDelete: Cascade)
+  nmuId Int
+  nmu   NMU @relation("NMUToItems", fields: [nmuId], references: [NMUId], onDelete: Cascade)
 
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  workorder workorder[]
 }
-
 
 model workorder_service_delivery {
   ServiceDeliveryID Int       @id @default(autoincrement())
