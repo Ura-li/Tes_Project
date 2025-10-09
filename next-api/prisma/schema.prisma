@@ -650,6 +650,17 @@ model workorder {
   caseinformation             caseinformation? @relation(fields: [CaseID], references: [CaseID], onDelete: Restrict, map: "workorder_ibfk_1")
   bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
 
+  // TODO : FIND WTF IS DIS ABOT
+  DelayCode    DelayCode?
+  NMUId        Int?
+  NMU          NMU?       @relation(fields: [NMUId], references: [NMUId])
+  VersionNMU   String?
+  NMUItemId    Int?
+  NMUItem      NMUItem?   @relation(fields: [NMUItemId], references: [id])
+  CEAnalysis   String?
+  DefectDesc   String?
+  RepairAction String?
+
   @@unique([ServiceCatalogID])
   @@index([CaseID], map: "CaseID")
   @@index([OwnerID])
@@ -676,6 +687,32 @@ model ResourceAccount {
   // Relations
   subkTechnicians SubkTechnician[] // <-- 1 ResourceAccount has many SubkTechnicians
   bookingDetails  BookingDetails[]
+}
+
+model NMU {
+  NMUId      Int     @id @default(autoincrement())
+  NMUDesc    String? @db.VarChar(255)
+  ItemNeeded Boolean @default(false)
+
+  items NMUItem[] @relation("NMUToItems")
+
+  VersionNeeded Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  workorder     workorder[]
+}
+
+model NMUItem {
+  id       Int    @id @default(autoincrement())
+  itemName String @db.VarChar(255)
+
+  // Foreign key ke NMU
+  nmuId Int
+  nmu   NMU @relation("NMUToItems", fields: [nmuId], references: [NMUId], onDelete: Cascade)
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  workorder workorder[]
 }
 
 model workorder_service_delivery {
@@ -864,4 +901,25 @@ enum GoodReturnReason {
   WrongAnalysisCCC
   WrongAnalysisCE
   WrongOrderCE
+}
+
+enum DelayCode {
+  PartBackOrder
+  IntermittentCase
+  CustomerCausedDelay
+  MultipleIssue
+  WarrantySalesDelayApproval
+  EscalationComplexIssue
+  WrongPartOrderorAnalysis
+  CaseHandlingDelay
+  PartDOA
+  NOCEAvailable
+  CutOffTime
+  HPSystemDown
+  ADPInvestigation
+  RecoveryOS
+  UpdateWindows
+  OfficeClosure
+  AMRMonitor
+  TravelDelay
 }
