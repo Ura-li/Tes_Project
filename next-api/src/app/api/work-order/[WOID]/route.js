@@ -26,7 +26,9 @@ export async function GET(request, {params}) {
                   servicecatalog_parts: true,
                   asset_information: true,
                 }
-              }
+              },
+              NMU: true,
+              NMUItem: true,
             }
         });
     
@@ -87,7 +89,14 @@ export async function PATCH(request, { params }) {
         PartnerStatus,
         WorkOrderDescription,
         PartnerNotes,
-        IncomingChannel
+        IncomingChannel,
+        DelayCode,
+        NMUId,
+        VersionNMU,
+        NMUItemId,
+        CEAnalysis,
+        DefectDesc,
+        RepairAction
         } = body;
 
         // if (
@@ -145,6 +154,13 @@ export async function PATCH(request, { params }) {
             WorkOrderDescription: v => v,
             PartnerNotes: v => v,
             IncomingChannel: v => v,
+            DelayCode: v => v,
+            NMUId: v => v,
+            VersionNMU: v => v,
+            NMUItemId: v => v,
+            CEAnalysis: v => v,
+            DefectDesc: v => v,
+            RepairAction: v => v,
           };
           
           

@@ -343,57 +343,36 @@ export function QuickWOInput ({
               </CardContent>
             </Card>
 
+            
             <Card className={"mt-5"}>
               <CardHeader>
                 <CardTitle className={"text-lg"}>Repair Action</CardTitle>
                 <hr />
               </CardHeader>
               <CardContent className={"grid grid-cols-4 gap-2"}>
-                <CaseField label={"Problem category"} star={canEdit} lock={!canEdit}>
-                  <SearchCommandBlock
-                  options={[
-                    "Hardware",
-                    "Software"
-                  ]}
-                  />
+                <CaseField label={"Problem category"} lock>
+                  <Input value={workOrderData?.WorkOrderType || ""}/>
                 </CaseField>
-                <CaseField label={"Delay code"} star={canEdit} lock={!canEdit}>
-                  <SearchCommandBlock
-
-                  />
+                <CaseField label={"Delay code"} lock>
+                  <Input value={workOrderData?.DelayCode || ""}/>
                 </CaseField>
-                <CaseField label={"Service type"} star={canEdit} lock={!canEdit}>
-                  <SearchCommandBlock
-                  options={[
-                    "Cancel Repair",
-                    "CID (Customer Induce Damage)",
-                    "DOA Remanufacture / Refurbishment",
-                    "DOA Verified Defective",
-                    "DOA Verified NTF",
-                    "NFF (No Failure Found)",
-                    "Rebuild Hardware",
-                    "Rerepair",
-                    "Standard Replacement / Failure (Part Used)",
-                    "Third Part Related"
-                  ]}
-                  />
+                <CaseField label={"Service type"} lock>
+                  <Input value={workOrderData?.serviceCatalog?.warranty_services?.Service_description || ""}/>
                 </CaseField>
-                <CaseField label={"NMU"} star={canEdit} lock={!canEdit}>
-                  <SearchCommandBlock
-                  />
+                <CaseField label={"NMU"} lock>
+                  <Input value={workOrderData?.NMU?.NMUDesc}/>
                 </CaseField>
-                <CaseField label={"NMU item"} star={canEdit} lock={!canEdit}>
-                  <SearchCommandBlock
-                  />
+                <CaseField label={"NMU item"} lock>
+                  <Input value={workOrderData?.NMUItem?.itemName} />
                 </CaseField>
-                <CaseField label={"Defec desc"} star={canEdit} lock={!canEdit}>
-                  <Textarea/>
+                <CaseField label={"Defec desc"} lock>
+                  <Textarea value={workOrderData?.DefectDesc}/>
                 </CaseField>
-                <CaseField label={"CE analysis"} star={canEdit} lock={!canEdit}>
-                  <Textarea/>
+                <CaseField label={"CE analysis"} lock>
+                  <Textarea value={workOrderData?.CEAnalysis}/>
                 </CaseField>
-                <CaseField label={"Repair Action"} star={canEdit} lock={!canEdit}>
-                  <Textarea/>
+                <CaseField label={"Repair Action"} lock>
+                  <Textarea value={workOrderData?.RepairAction}/>
                 </CaseField>
               </CardContent>
             </Card>
