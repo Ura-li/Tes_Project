@@ -653,6 +653,7 @@ model workorder {
   // TODO : FIND WTF IS DIS ABOT
   DelayCode    String?
   NMU          String?
+  VersionNMU   String?
   NMUItem      String?
   CEAnalysis   String?
   DefectDesc   String?
