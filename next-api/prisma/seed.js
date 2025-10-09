@@ -37,6 +37,32 @@ async function main() {
 
   console.log('✅ PartReturnStatus seeded.')
 
+  const NMU = [
+    { NMUDesc: 'Bios Recobery (Win+B)', ItemNeeded: false, VersionNeeded: false },
+    { NMUDesc: 'Bios update', ItemNeeded: false, VersionNeeded: true },
+    { NMUDesc: 'CMOS Reset', ItemNeeded: true, VersionNeeded: false},
+    
+  ]
+
+  await prisma.NMU.deleteMany()
+  await prisma.NMU.createMany({ data: NMU });
+
+  const cmosReset = await prisma.NMU.findFirst({
+    where: { NMUDesc: 'CMOS Reset' },
+  });
+
+  // Baru seed NMUItem, relasikan ke CMOS Reset
+  if (cmosReset) {
+    await prisma.NMUItem.create({
+      data: {
+        itemName: 'CMOS Battery',
+        nmuId: cmosReset.NMUId, // relasi ke NMU
+      },
+    });
+  }
+
+  console.log('✅ NMU & NMUItem seeded successfully');
+
 }
 
 main()

@@ -686,6 +686,32 @@ model ResourceAccount {
   bookingDetails  BookingDetails[]
 }
 
+model NMU {
+  NMUId Int @id @default(autoincrement())
+  NMUDesc      String?    @db.VarChar(255)
+  ItemNeeded     Boolean    @default(false)
+
+  items        NMUItem[]  @relation("NMUToItems")
+
+  VersionNeeded Boolean @default(false) 
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+
+model NMUItem {
+  id           Int       @id @default(autoincrement())
+  itemName     String     @db.VarChar(255)
+
+  // Foreign key ke NMU
+  nmuId        Int
+  nmu          NMU        @relation("NMUToItems", fields: [nmuId], references: [NMUId], onDelete: Cascade)
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+
 model workorder_service_delivery {
   ServiceDeliveryID Int       @id @default(autoincrement())
   WOID              String?   @db.VarChar(13)
@@ -872,4 +898,25 @@ enum GoodReturnReason {
   WrongAnalysisCCC
   WrongAnalysisCE
   WrongOrderCE
+}
+
+enum DelayCode {
+  PartBackOrder
+  IntermittentCase
+  CustomerCausedDelay
+  MultipleIssue
+  WarrantySalesDelayApproval
+  EscalationComplexIssue
+  WrongPartOrderorAnalysis
+  CaseHandlingDelay
+  PartDOA
+  NOCEAvailable
+  CutOffTime
+  HPSystemDown
+  ADPInvestigation
+  RecoveryOS
+  UpdateWindows
+  OfficeClosure
+  AMRMonitor
+  TravelDelay
 }
