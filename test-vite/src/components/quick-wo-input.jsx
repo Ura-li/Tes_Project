@@ -28,7 +28,7 @@ import { twMerge } from "tailwind-merge";
 //import API
 import ApiCustomer from "@/api";
 import DatePicker from "./date-picker";
-import CaseField from "./CaseField";
+import CaseField from "@/components/CaseField";
 import { Textarea } from "./ui/textarea";
 import { useAuth } from "@/context/auth-context";
 // import { CaseField } from "./service-case";
@@ -217,14 +217,14 @@ export function QuickWOInput ({
   // //   //   City: ServiceDeliveryAddress.city,
   // //   // });
   // };
-  const user = useAuth();
+  const { user } = useAuth();
   let canEdit 
   const editrole = ['admin','ce','celead']
 
-  if (workOrderData.SystemStatus !== "CLOSED_POSTED") {
-    canEdit = editrole.includes(user?.role)
+  if (workOrderData?.SystemStatus !== "CLOSED_POSTED") {
+    canEdit = editrole.includes(user?.role);
   }else {
-    canEdit = true;
+    canEdit = false;
   }
 
   return (
@@ -349,7 +349,7 @@ export function QuickWOInput ({
                 <hr />
               </CardHeader>
               <CardContent className={"grid grid-cols-4 gap-2"}>
-                <CaseField label={"Problem category"} star lock={canEdit}>
+                <CaseField label={"Problem category"} star={canEdit} lock={!canEdit}>
                   <SearchCommandBlock
                   options={[
                     "Hardware",
@@ -357,12 +357,12 @@ export function QuickWOInput ({
                   ]}
                   />
                 </CaseField>
-                <CaseField label={"Delay code"} star lock={canEdit}>
+                <CaseField label={"Delay code"} star={canEdit} lock={!canEdit}>
                   <SearchCommandBlock
 
                   />
                 </CaseField>
-                <CaseField label={"Service type"} star lock={canEdit}>
+                <CaseField label={"Service type"} star={canEdit} lock={!canEdit}>
                   <SearchCommandBlock
                   options={[
                     "Cancel Repair",
@@ -378,21 +378,21 @@ export function QuickWOInput ({
                   ]}
                   />
                 </CaseField>
-                <CaseField label={"NMU"} star lock={canEdit}>
+                <CaseField label={"NMU"} star={canEdit} lock={!canEdit}>
                   <SearchCommandBlock
                   />
                 </CaseField>
-                <CaseField label={"NMU item"} star lock={canEdit}>
+                <CaseField label={"NMU item"} star={canEdit} lock={!canEdit}>
                   <SearchCommandBlock
                   />
                 </CaseField>
-                <CaseField label={"Defec desc"} star lock={canEdit}>
+                <CaseField label={"Defec desc"} star={canEdit} lock={!canEdit}>
                   <Textarea/>
                 </CaseField>
-                <CaseField label={"CE analysis"} star lock={canEdit}>
+                <CaseField label={"CE analysis"} star={canEdit} lock={!canEdit}>
                   <Textarea/>
                 </CaseField>
-                <CaseField label={"Repair Action"} star lock={canEdit}>
+                <CaseField label={"Repair Action"} star={canEdit} lock={!canEdit}>
                   <Textarea/>
                 </CaseField>
               </CardContent>

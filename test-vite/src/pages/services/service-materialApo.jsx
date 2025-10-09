@@ -405,7 +405,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Sales Order Number"} star={canEditapo} lock={!canEditapo}>
+                  <CaseField label={"Sales Order Number"} star={user?.role === 'apo'} lock={!canEditapo}>
                     <Input
                       variant={"invisible"}
                       type="text"
@@ -432,7 +432,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label="RMA Number" star={canEditapo} lock={!canEditapo}>
+                  <CaseField label="RMA Number" star={user?.role === 'apo'} lock={!canEditapo}>
                     <Input variant="invisible" placeholder="---" 
                     value={materialOrderInformation?.RMANumber || ""}
                     onChange={handleMaterialOrderChange("RMANumber")}
@@ -447,6 +447,7 @@ export const ServiceMaterialApo = () => {
                   <CaseField
                     label="RMA Status"
                     lock={!canEditapo}
+                    star={user?.role === 'lg'}
                   >
                     <SearchCommandBlock
                       value={materialOrderInformation?.RMAStatus || null}
@@ -468,27 +469,27 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Part IN CE Collection Requested Date"} icon lock={!canEditapo}>
+                  <CaseField label={"Part IN CE Collection Requested Date"}  star={user?.role === 'lg'} lock={!canEditapo}>
                     <DatePicker
                       value={materialOrderInformation?.collectionRequestedDate ? new Date(materialOrderInformation?.collectionRequestedDate) : null}
                       onChange={handleMaterialOrderChange("collectionRequestedDate")}
                     />
                   </CaseField>
 
-                  <CaseField label={"Part OUT CE Ready For Closure Date"} icon lock={!canEditapo}>
+                  <CaseField label={"Part OUT CE Ready For Closure Date"} star={user?.role === 'lg'} lock={!canEditapo}>
                     <DatePicker
                       value={materialOrderInformation?.readyForClosureDate ? new Date(materialOrderInformation?.readyForClosureDate) : null}
                       onChange={handleMaterialOrderChange("readyForClosureDate")}
                     />
                   </CaseField>
 
-                  <CaseField label={"AWB In Code"} icon lock={!canEditapo}>
+                  <CaseField label={"AWB In Code"} star={user?.role === 'lg'} lock={!canEditapo}>
                     <Input variant="invisible" placeholder="---"               
                       value={materialOrderInformation?.AWB_InCode || null}
                       onChange={handleMaterialOrderChange("AWB_InCode")}
                     />
                   </CaseField>
-                  <CaseField label={"AWB Out Code"} icon lock={!canEditapo}>
+                  <CaseField label={"AWB Out Code"} star={user?.role === 'lg'} lock={!canEditapo}>
                     <Input variant="invisible" placeholder="---" 
                       value={materialOrderInformation?.AWB_OutCode || null}
                       onChange={handleMaterialOrderChange("AWB_OutCode")}
