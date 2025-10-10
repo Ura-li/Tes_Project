@@ -2445,17 +2445,30 @@ if (caseDetails.CaseStatus !== "Close") {
                     childClass="col-span-1 sm:col-span-2 md:col-span-2"
                     span={2}
                   >
-                    {entitlementStatus.POPDocument ? (
+                    {entitlementStatus?.POPDocument ? (
                       
                       <div className="flex flex-col gap-2">
-                        <a
+                        { typeof entitlementStatus?.POPDocument === "string" ?
+                        (<a
                           href={`${import.meta.env.VITE_API_BASE_URL}${entitlementStatus.POPDocument}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 underline"
                         >
-                          {(entitlementStatus.POPDocument).split('/').pop()}
+                          {(entitlementStatus?.POPDocument).split('/').pop()}
                         </a>
+                        ) : (
+                            <a
+                              href={URL.createObjectURL(entitlementStatus.POPDocument)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 underline"
+                            >
+                              {entitlementStatus?.POPDocument.name}
+                            </a>
+
+                        )
+                          }
                         <Input
                           type="file"
                           onChange={(e) =>
@@ -2494,14 +2507,25 @@ if (caseDetails.CaseStatus !== "Close") {
                     {entitlementStatus.WarrantyCard ? (
 
                       <div className="flex flex-col gap-2">
-                        <a
-                          href={`${import.meta.env.VITE_API_BASE_URL}${entitlementStatus.WarrantyCard}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline"
-                        >
-                          {(entitlementStatus.WarrantyCard).split('/').pop()}
-                        </a>
+                        {typeof entitlementStatus.WarrantyCard === "string" ? (
+                          <a
+                            href={`${import.meta.env.VITE_API_BASE_URL}${entitlementStatus.WarrantyCard}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            {entitlementStatus.WarrantyCard.split('/').pop()}
+                          </a>
+                        ) : (
+                           <a
+                              href={URL.createObjectURL(entitlementStatus.WarrantyCard)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 underline"
+                            >
+                              {entitlementStatus?.WarrantyCard.name}
+                            </a>
+                        )}
                         <Input
                           type="file"
                           onChange={(e) =>
@@ -2540,17 +2564,30 @@ if (caseDetails.CaseStatus !== "Close") {
                     childClass="col-span-1 sm:col-span-2 md:col-span-2"
                     span={2}
                   >
-                    {entitlementStatus.PhotoUnit ? (
+                    {entitlementStatus?.PhotoUnit ? (
 
                       <div className="flex flex-col gap-2">
-                        <a
-                          href={`${import.meta.env.VITE_API_BASE_URL}${entitlementStatus.PhotoUnit}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline"
-                        >
-                          {(entitlementStatus.PhotoUnit).split('/').pop()}
-                        </a>
+                        { typeof entitlementStatus?.PhotUnit === "string" ? (
+                          <a
+                            href={`${import.meta.env.VITE_API_BASE_URL}${entitlementStatus?.PhotoUnit}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            {(entitlementStatus?.PhotoUnit).split('/').pop()}
+                          </a>
+                        ) :
+                          (
+                            <a
+                              href={URL.createObjectURL(entitlementStatus.PhotoUnit)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 underline"
+                            >
+                              {entitlementStatus?.PhotoUnit.name}
+                            </a>
+                        )
+                      }
                         <Input
                           type="file"
                           onChange={(e) =>
