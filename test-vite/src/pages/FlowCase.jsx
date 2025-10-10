@@ -247,6 +247,16 @@ export const FlowCase = () => {
                   <PaginationContent>
                     <PaginationItem>
                       <PaginationPrevious
+                        placeholder='First'
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(totalPages - totalPages + 1);
+                        }}
+                      />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationPrevious
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
@@ -279,6 +289,22 @@ export const FlowCase = () => {
                         }}
                       />
                     </PaginationItem>
+                    <PaginationItem>
+                      <PaginationNext
+                        placeholder='Last'
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(totalPages);
+                        }}
+                      />
+                    </PaginationItem>
+                    <div className="flex gap-3 p-1 items-center">
+                      Total Page
+                      <span className='border-2 p-1 rounded-md shadow-2xl'>
+                        {totalPages}
+                      </span>
+                    </div>
                   </PaginationContent>
                 </Pagination>
                 {error ? <h1 className="text-center text-destructive">Something went wrong</h1> : ""}
