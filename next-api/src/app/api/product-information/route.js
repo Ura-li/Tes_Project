@@ -38,7 +38,8 @@ export async function GET(request) {
                 ? {
                     OR: [
                         { ProductNumber: { contains: search } },
-                        { ProductName: { contains: search } }
+                        { ProductName: { contains: search } },
+                        { HWPC: { contains: search } },
                     ]
                 }
                 : undefined,
@@ -120,7 +121,7 @@ export async function POST(request) {
                 ProductName,
                 ProductLine,
                 ProductTypeID,
-                HWPC
+                HWPC,
             },
         });
 

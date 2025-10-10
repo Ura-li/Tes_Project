@@ -17,7 +17,7 @@ export async function GET(request) {
                 OR: [
                     { BookingId: { equals: parseInt(search) || -1 } },
                     { WOID: { contains: search } },
-                    { BookingStatus: { contains: search } },
+                    { BookingStatus:{ Description: { contains: search } } },
                 ],
             };
         }
@@ -35,6 +35,7 @@ export async function GET(request) {
                 workorder: true,
                 createdByUser: true,
                 bookingDetails: true,
+                BookingStatus: true,
             },
         });
 
@@ -66,7 +67,7 @@ export async function GET(request) {
 export async function POST(request) {
     try {
         const {
-            BookingStatus,
+            BookingStatusId,
             WOID,
             ScheduleJeopardy,
             ScheduleJeopardyTime,
@@ -80,7 +81,7 @@ export async function POST(request) {
 
         const booking = await prisma.bookings.create({
             data: {
-                BookingStatus,
+                BookingStatusId,
                 WOID,
                 ScheduleJeopardy,
                 ScheduleJeopardyTime: ScheduleJeopardyTime ? new Date(ScheduleJeopardyTime) : undefined,
@@ -91,6 +92,9 @@ export async function POST(request) {
                 TotalInProgressDurationInMinutes,
                 TotalBreakDurationInMinutes
             },
+            include: {
+                BookingStatus: true,
+            }
         });
 
         return NextResponse.json({

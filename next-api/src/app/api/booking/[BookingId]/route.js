@@ -17,6 +17,7 @@ export async function GET(request, { params }) {
     include: {
       createdByUser: true,
       workorder: true,
+      BookingStatus: true,
     },
   });
 
