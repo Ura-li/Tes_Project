@@ -2,9 +2,29 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../prisma/client";
     
 // ✅ GET all BookingStatus
-export async function GET() {
+export async function GET(request) {
   try {
-    const bookingStatus = await prisma.BookingStatus.findMany({
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search")?.toLowerCase() || "";
+
+    const bookingStatus = await prisma.bookingStatus.findMany({
+      where: search
+        ? {
+            OR: [
+              {
+                // transform field ke lowercase via Prisma filter
+                Description: {
+                  contains: search, // tanpa mode
+                },
+              },
+              {
+                BookingStatusId: isNaN(parseInt(search))
+                  ? undefined
+                  : parseInt(search),
+              },
+            ],
+          }
+        : undefined,
       orderBy: { BookingStatusId: "asc" },
     });
 

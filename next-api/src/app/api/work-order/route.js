@@ -11,12 +11,18 @@ export async function GET(request) {
         const limit = parseInt(searchParams.get("limit")) || 10;
 
         console.log("Query Params:", { search, page, limit });
-         // Initialize search filters
          let whereCondition = {};
          
-        //  if (search) {
-        //     whereCondition.OR = [...(whereCondition.OR || []), { CaseID: { contains: caseID } }];
-        // }
+        if (search) {
+            whereCondition.OR = [
+                {
+                WOID: { contains: search },
+                },
+                {
+                CaseID: { contains: search },
+                },
+            ];
+        }
         if (caseID) {
             whereCondition.CaseID = caseID;
         }

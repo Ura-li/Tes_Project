@@ -89,7 +89,7 @@ export async function POST(request) {
     const NMUItemData = await prisma.NMUItem.create({
         data:{
             itemName,
-            nmuId
+            nmuId: Number(nmuId),
         },
     });
 

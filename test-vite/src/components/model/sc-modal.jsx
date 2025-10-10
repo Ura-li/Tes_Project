@@ -20,6 +20,13 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"
@@ -932,25 +939,31 @@ function GenericSelector({
   }, [value, labelKey]);
 
   useEffect(() => {
-    if (query.length < 2) {
-      setResults([]);
-      return;
-    }
     const fetchData = async () => {
       try {
-        const res = await ApiCustomer.get(`${endpoint}?search=${query}`);
+        let url = endpoint;
+
+        if (query.length >= 2) {
+          url = `${endpoint}?search=${query}`;
+        }
+
+        const res = await ApiCustomer.get(url);
         setResults(res.data.data || []);
       } catch (err) {
         console.error("Failed to fetch:", err);
       }
     };
-    fetchData();
+
+    if (query.length === 0 || query.length >= 2) {
+      fetchData();
+    }
   }, [query, endpoint]);
+
 
   const handleSelect = (item) => {
     onChange(item);
-    setQuery(item[labelKey]); // tampilkan label di input
-    setOpen(false); // tutup dropdown setelah pilih
+    setQuery(item[labelKey]); 
+    setOpen(false); 
   };
 
   return (
@@ -966,6 +979,7 @@ function GenericSelector({
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 500)} // delay to allow click event on items
       />
 
       {/* Dropdown Results */}
@@ -1100,9 +1114,7 @@ export function AssetEdit({ assetId, onUpdate }) {
             Update the details of the asset. Fields marked with * are required.
           </DialogDescription>
         </DialogHeader>
-
         <div className="flex flex-col gap-4">
-          {/* Serial Number */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">Serial Number*</label>
             <Input
@@ -1112,7 +1124,6 @@ export function AssetEdit({ assetId, onUpdate }) {
             />
           </div>
 
-          {/* Product */}
           <GenericSelector
             value={formData.Product}
             onChange={(p) => handleChange("Product", p)}
@@ -1123,7 +1134,6 @@ export function AssetEdit({ assetId, onUpdate }) {
             label="Product*"
           />
 
-          {/* Site Account */}
           <GenericSelector
             value={formData.SiteAccount}
             onChange={(s) => handleChange("SiteAccount", s)}
@@ -1134,7 +1144,6 @@ export function AssetEdit({ assetId, onUpdate }) {
             label="Site Account"
           />
 
-          {/* Contact */}
           <GenericSelector
             value={formData.Contact}
             onChange={(c) => handleChange("Contact", c)}
@@ -1144,8 +1153,6 @@ export function AssetEdit({ assetId, onUpdate }) {
             placeholder="Search contact..."
             label="Contact"
           />
-
-          {/* Warranty Status */}
           <GenericSelector
             value={formData.Warranty}
             onChange={(w) => handleChange("Warranty", w)}
@@ -1155,8 +1162,6 @@ export function AssetEdit({ assetId, onUpdate }) {
             placeholder="Select warranty status..."
             label="Warranty Status"
           />
-
-          {/* End of Warranty Date */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">End of Warranty Date</label>
             <Input
@@ -1794,7 +1799,8 @@ export function ProductAdd() {
     ProductNumber: '',
     ProductLine: '',
     ProductName: '',
-    ProductTypeID: '', 
+    ProductTypeID: '',
+    HWPC: '', 
   });
 
   // List ProductType untuk dropdown
@@ -1903,6 +1909,16 @@ export function ProductAdd() {
               ))}
             </SelectContent>
           </Select>
+
+          {/* ✅ Tambahan Input HWPC */}
+          <Label>HWPC</Label>
+          <Input
+            type="text"
+            id="HWPC"
+            value={formDataProduct.HWPC}
+            onChange={handlerInputProduct}
+            placeholder="Enter HWPC (optional)"
+          />
         </div>
 
         <DialogFooter>
@@ -1921,6 +1937,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
     ProductLine: "",
     ProductName: "",
     ProductTypeID: "",
+    HWPC: "",
   });
 
   const [productTypes, setProductTypes] = useState([]);
@@ -1939,6 +1956,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
           ProductLine: data.ProductLine,
           ProductName: data.ProductName,
           ProductTypeID: data.ProductTypeID,
+          HWPC: data.HWPC || "",
         });
       } catch (err) {
         console.error("Error fetch product:", err);
@@ -1964,7 +1982,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
   };
 
   const handlerSave = async () => {
-    const { ProductNumber, ProductLine, ProductName, ProductTypeID, oldProductNumber } = formDataProduct;
+    const { ProductNumber, ProductLine, ProductName, ProductTypeID, oldProductNumber, HWPC } = formDataProduct;
     if (!ProductNumber || !ProductLine || !ProductName || !ProductTypeID) {
       Swal.fire({ icon: "warning", title: "Incomplete", text: "Please fill all fields" });
       return;
@@ -1976,18 +1994,23 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
         ProductLine,
         ProductName,
         ProductTypeID,
+        HWPC,
       });
+
 
       Swal.fire({
         icon: "success",
         title: "Updated",
         text: "Product updated successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
+        confirmButtonText: "OK",
+        timer: 1500,
+        timerProgressBar: true,
+}).then(() => {
+  setOpen(false);
+  onUpdate?.();
+});
 
-      setOpen(false);
-      onUpdate?.();
+
     } catch (err) {
       console.error("Error update:", err);
       Swal.fire({ icon: "error", title: "Failed", text: "Update failed, please try again." });
@@ -2038,6 +2061,15 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
               ))}
             </SelectContent>
           </Select>
+
+          <Label>HWPC</Label>
+          <Input
+            type="text"
+            id="HWPC"
+            value={formDataProduct.HWPC}
+            onChange={handlerInputProduct}
+            placeholder="Enter HWPC"
+          />
         </div>
 
         <DialogFooter>
@@ -2302,7 +2334,7 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
         ProductType: productType,
       });
   
-      Swal.fire({
+     await Swal.fire({
         icon: 'success',
         title: 'Success!',
         text: 'Product type updated successfully.',
@@ -7318,9 +7350,12 @@ export function SymptomCodeDelete({ SymptomCodeID, isModalOpen, setIsModalOpen, 
 }
 
 export function BookingsAdd({ onUpdate }) {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+
   const [formData, setFormData] = useState({
-    WOID: "",
-    BookingStatus: "",
+    WOID: null,
+    BookingStatus: null,
     ScheduleJeopardy: false,
     ScheduleJeopardyTime: "",
     DoNotDisturb: false,
@@ -7328,28 +7363,26 @@ export function BookingsAdd({ onUpdate }) {
     TotalBillableDurationInMinutes: "",
     TotalInProgressDurationInMinutes: "",
     TotalBreakDurationInMinutes: "",
-    CreatedBy: "",
+    CreatedBy: user?.id || "", // ✅ otomatis ambil dari auth user
   });
 
-  const [workorders, setWorkorders] = useState([]);
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    const fetchDropdownData = async () => {
+    const fetchUsers = async () => {
       try {
-        const [woRes, userRes] = await Promise.all([
-          ApiCustomer.get("/api/work-order"),
-          ApiCustomer.get("/api/user"),
-        ]);
-        setWorkorders(woRes.data.data || []);
-        setUsers(userRes.data.data || []);
+        const res = await ApiCustomer.get("/api/user");
+        setUsers(res.data.data || []);
       } catch (error) {
-        console.error("Failed to load dropdown data:", error);
+        console.error("Failed to load users:", error);
       }
     };
-
-    fetchDropdownData();
+    fetchUsers();
   }, []);
+
+  const handleChange = (key, value) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleInputChange = (e) => {
     const { id, value, type, checked } = e.target;
@@ -7373,12 +7406,16 @@ export function BookingsAdd({ onUpdate }) {
     }
 
     const dataToSend = {
-      ...formData,
+      WOID: formData.WOID?.WOID || null,
+      BookingStatusId: formData.BookingStatus?.BookingStatusId || null,
+      ScheduleJeopardy: formData.ScheduleJeopardy,
       ScheduleJeopardyTime: formData.ScheduleJeopardyTime ? new Date(formData.ScheduleJeopardyTime) : null,
+      DoNotDisturb: formData.DoNotDisturb,
+      CeScheduleChange: formData.CeScheduleChange,
       TotalBillableDurationInMinutes: formData.TotalBillableDurationInMinutes ? parseInt(formData.TotalBillableDurationInMinutes) : null,
       TotalInProgressDurationInMinutes: formData.TotalInProgressDurationInMinutes ? parseInt(formData.TotalInProgressDurationInMinutes) : null,
       TotalBreakDurationInMinutes: formData.TotalBreakDurationInMinutes ? parseInt(formData.TotalBreakDurationInMinutes) : null,
-      CreatedBy: parseInt(formData.CreatedBy),
+      CreatedBy: parseInt(formData.CreatedBy), // ✅ tetap kirim ID user
     };
 
     try {
@@ -7391,6 +7428,7 @@ export function BookingsAdd({ onUpdate }) {
         timerProgressBar: true,
         showConfirmButton: false,
       }).then(() => {
+        setOpen(false);
         onUpdate?.();
       });
     } catch (error) {
@@ -7407,7 +7445,7 @@ export function BookingsAdd({ onUpdate }) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="ml-2 rounded-sm h-11">Add Booking</Button>
       </DialogTrigger>
@@ -7416,22 +7454,32 @@ export function BookingsAdd({ onUpdate }) {
           <DialogTitle>Add Booking</DialogTitle>
           <DialogDescription>Fields marked with * are required.</DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
-          <Label>WOID *</Label>
-          <select
-            id="WOID"
-            value={formData.WOID}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
-          >
-            <option value="">-- Select WOID --</option>
-            {workorders.map((wo) => (
-              <option key={wo.WOID} value={wo.WOID}>{wo.WOID}</option>
-            ))}
-          </select>
 
-          <Label>Booking Status</Label>
-          <Input id="BookingStatus" value={formData.BookingStatus} onChange={handleInputChange} />
+        <div className="space-y-3">
+          <div className="mb-6" relative>
+            {/* ✅ WOID pakai GenericSelector */}
+            <GenericSelector
+              value={formData.WOID}
+              onChange={(wo) => handleChange("WOID", wo)}
+              endpoint="/api/work-order"
+              labelKey="WOID"
+              valueKey="WOID"
+              placeholder="Search WOID..."
+              label="WOID *"
+              className="z-50"
+            />
+          </div>
+
+          {/* ✅ Booking Status pakai GenericSelector */}
+          <GenericSelector
+            value={formData.BookingStatus}
+            onChange={(bs) => handleChange("BookingStatus", bs)}
+            endpoint="/api/booking-status"
+            labelKey="Description"
+            valueKey="BookingStatusId"
+            placeholder="Search booking status..."
+            label="Booking Status"
+          />
 
           <div className="flex items-center space-x-2">
             <input type="checkbox" id="ScheduleJeopardy" checked={formData.ScheduleJeopardy} onChange={handleInputChange} />
@@ -7460,21 +7508,17 @@ export function BookingsAdd({ onUpdate }) {
           <Label>Total Break Duration (minutes)</Label>
           <Input id="TotalBreakDurationInMinutes" type="number" value={formData.TotalBreakDurationInMinutes} onChange={handleInputChange} />
 
+          {/* ✅ Created By (read-only, tampil nama user) */}
           <Label>Created By *</Label>
-          <select
+          <Input
             id="CreatedBy"
-            value={formData.CreatedBy}
-            onChange={handleInputChange}
-            className="w-full p-2 border rounded"
-          >
-            <option value="">-- Select User --</option>
-            {users.map((user) => (
-              <option key={user.IDUser} value={user.IDUser}>
-                {user.Name || `User ${user.IDUser}`}
-              </option>
-            ))}
-          </select>
+            type="text"
+            value={user?.name || `User ${user?.id}`} // tampilkan nama user
+            readOnly
+            className="w-full p-2 border rounded bg-gray-100 cursor-not-allowed"
+          />
         </div>
+
         <DialogFooter>
           <Button onClick={handleSubmit}>Add</Button>
         </DialogFooter>
@@ -7485,30 +7529,59 @@ export function BookingsAdd({ onUpdate }) {
 
 export function BookingsEdit({ BookingId, onUpdate }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [users, setUsers] = useState([]);
   const [bookingData, setBookingData] = useState({
-    BookingStatus: "",
+    WOID: null,
+    BookingStatus: null,
     ScheduleJeopardy: false,
     ScheduleJeopardyTime: "",
     DoNotDisturb: false,
     CeScheduleChange: false,
-    TotalBillableDurationInMinutes: 0,
-    TotalInProgressDurationInMinutes: 0,
-    TotalBreakDurationInMinutes: 0,
+    TotalBillableDurationInMinutes: "",
+    TotalInProgressDurationInMinutes: "",
+    TotalBreakDurationInMinutes: "",
+    CreatedBy: "",
   });
 
+  // 🔹 Ambil daftar user untuk dropdown "CreatedBy"
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await ApiCustomer.get("/api/user");
+        setUsers(res.data.data || []);
+      } catch (err) {
+        console.error("Failed to load users:", err);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  // 🔹 Ambil data booking berdasarkan ID
   const fetchBookingData = async () => {
     try {
       const res = await ApiCustomer.get(`/api/booking/${BookingId}`);
       const data = res.data.data;
+
       setBookingData({
-        BookingStatus: data.BookingStatus || "",
+        WOID: data.workorder
+            ? { WOID: data.workorder.WOID, label: data.workorder.WOID }
+            : null,
+          BookingStatus: data.BookingStatus
+            ? {
+                BookingStatusId: data.BookingStatus.BookingStatusId,
+                Description: data.BookingStatus.Description,
+              }
+            : null,
         ScheduleJeopardy: data.ScheduleJeopardy || false,
-        ScheduleJeopardyTime: data.ScheduleJeopardyTime?.slice(0, 16) || "",
+        ScheduleJeopardyTime: data.ScheduleJeopardyTime
+          ? data.ScheduleJeopardyTime.slice(0, 16) // format untuk input datetime-local
+          : "",
         DoNotDisturb: data.DoNotDisturb || false,
         CeScheduleChange: data.CeScheduleChange || false,
-        TotalBillableDurationInMinutes: data.TotalBillableDurationInMinutes || 0,
-        TotalInProgressDurationInMinutes: data.TotalInProgressDurationInMinutes || 0,
-        TotalBreakDurationInMinutes: data.TotalBreakDurationInMinutes || 0,
+        TotalBillableDurationInMinutes: data.TotalBillableDurationInMinutes || "",
+        TotalInProgressDurationInMinutes: data.TotalInProgressDurationInMinutes || "",
+        TotalBreakDurationInMinutes: data.TotalBreakDurationInMinutes || "",
+        CreatedBy: data.CreatedBy?.toString() || "", // supaya dropdown CreatedBy ke-select
       });
     } catch (error) {
       console.error("Error fetching booking:", error);
@@ -7519,23 +7592,44 @@ export function BookingsEdit({ BookingId, onUpdate }) {
     if (isOpen) fetchBookingData();
   }, [isOpen]);
 
-  const handleChange = (e) => {
+  // 🔹 Handler input
+  const handleChange = (key, value) => {
+    setBookingData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleInputChange = (e) => {
     const { id, value, type, checked } = e.target;
-  
     setBookingData((prev) => ({
       ...prev,
-      [id]:
-        type === "checkbox"
-          ? checked
-          : type === "number"
-          ? parseInt(value) || 0
-          : value,
+      [id]: type === "checkbox" ? checked : value,
     }));
   };
 
+  // 🔹 Update Booking
   const handleUpdate = async () => {
+    const dataToSend = {
+      WOID: bookingData.WOID?.WOID || null,
+      BookingStatusId: bookingData.BookingStatus?.BookingStatusId || null,
+      ScheduleJeopardy: bookingData.ScheduleJeopardy,
+      ScheduleJeopardyTime: bookingData.ScheduleJeopardyTime
+        ? new Date(bookingData.ScheduleJeopardyTime)
+        : null,
+      DoNotDisturb: bookingData.DoNotDisturb,
+      CeScheduleChange: bookingData.CeScheduleChange,
+      TotalBillableDurationInMinutes: bookingData.TotalBillableDurationInMinutes
+        ? parseInt(bookingData.TotalBillableDurationInMinutes)
+        : null,
+      TotalInProgressDurationInMinutes: bookingData.TotalInProgressDurationInMinutes
+        ? parseInt(bookingData.TotalInProgressDurationInMinutes)
+        : null,
+      TotalBreakDurationInMinutes: bookingData.TotalBreakDurationInMinutes
+        ? parseInt(bookingData.TotalBreakDurationInMinutes)
+        : null,
+      CreatedBy: parseInt(bookingData.CreatedBy),
+    };
+
     try {
-      await ApiCustomer.patch(`/api/booking/${BookingId}`, bookingData);
+      await ApiCustomer.patch(`/api/booking/${BookingId}`, dataToSend);
       Swal.fire({
         icon: "success",
         title: "Updated",
@@ -7569,60 +7663,117 @@ export function BookingsEdit({ BookingId, onUpdate }) {
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>Edit Booking</DialogTitle>
-          <DialogDescription>Update booking status and details below.</DialogDescription>
+          <DialogDescription>Update booking details below.</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <Input id="BookingStatus" value={bookingData.BookingStatus} onChange={handleChange} placeholder="Booking Status" />
+        <div className="space-y-3">
+          {/* ✅ WOID pakai GenericSelector */}
+          <GenericSelector
+            value={
+              bookingData.WOID
+                ? { WOID: bookingData.WOID.WOID, label: bookingData.WOID.WOID }
+                : null
+            }
+            onChange={(wo) => handleChange("WOID", wo)}
+            endpoint="/api/work-order"
+            labelKey="WOID"
+            valueKey="WOID"
+            placeholder="Search WOID..."
+            label="WOID *"
+          />
+
+          <GenericSelector
+            value={
+              bookingData.BookingStatus
+                ? {
+                    BookingStatusId: bookingData.BookingStatus.BookingStatusId,
+                    Description: bookingData.BookingStatus.Description,
+                  }
+                : null
+            }
+            onChange={(bs) => handleChange("BookingStatus", bs)}
+            endpoint="/api/booking-status"
+            labelKey="Description"
+            valueKey="BookingStatusId"
+            placeholder="Search booking status..."
+            label="Booking Status"
+          />
+          
 
           <div className="flex items-center space-x-2">
-            <label htmlFor="ScheduleJeopardy">Schedule Jeopardy</label>
-            <Checkbox
-                id="ScheduleJeopardy"
-                checked={bookingData.ScheduleJeopardy}
-                onCheckedChange={(checked) =>
-                  setBookingData((prev) => ({ ...prev, ScheduleJeopardy: checked }))
-                }
-              />
+            <input
+              type="checkbox"
+              id="ScheduleJeopardy"
+              checked={bookingData.ScheduleJeopardy}
+              onChange={handleInputChange}
+            />
+            <Label htmlFor="ScheduleJeopardy">Schedule Jeopardy</Label>
           </div>
 
+          <Label>Schedule Jeopardy Time</Label>
           <Input
             id="ScheduleJeopardyTime"
             type="datetime-local"
             value={bookingData.ScheduleJeopardyTime}
-            onChange={handleChange}
+            onChange={handleInputChange}
           />
 
           <div className="flex items-center space-x-2">
-            <Checkbox id="DoNotDisturb" checked={bookingData.DoNotDisturb} onChange={handleChange} />
-            <label htmlFor="DoNotDisturb">Do Not Disturb</label>
+            <input
+              type="checkbox"
+              id="DoNotDisturb"
+              checked={bookingData.DoNotDisturb}
+              onChange={handleInputChange}
+            />
+            <Label htmlFor="DoNotDisturb">Do Not Disturb</Label>
           </div>
 
           <div className="flex items-center space-x-2">
-            <Checkbox id="CeScheduleChange" checked={bookingData.CeScheduleChange} onChange={handleChange} />
-            <label htmlFor="CeScheduleChange">CE Schedule Change</label>
+            <input
+              type="checkbox"
+              id="CeScheduleChange"
+              checked={bookingData.CeScheduleChange}
+              onChange={handleInputChange}
+            />
+            <Label htmlFor="CeScheduleChange">CE Schedule Change</Label>
           </div>
 
+          <Label>Total Billable Duration (minutes)</Label>
           <Input
             id="TotalBillableDurationInMinutes"
             type="number"
             value={bookingData.TotalBillableDurationInMinutes}
-            onChange={handleChange}
-            placeholder="Total Billable Duration (min)"
+            onChange={handleInputChange}
           />
+
+          <Label>Total In Progress Duration (minutes)</Label>
           <Input
             id="TotalInProgressDurationInMinutes"
             type="number"
             value={bookingData.TotalInProgressDurationInMinutes}
-            onChange={handleChange}
-            placeholder="In-Progress Duration (min)"
+            onChange={handleInputChange}
           />
+
+          <Label>Total Break Duration (minutes)</Label>
           <Input
             id="TotalBreakDurationInMinutes"
             type="number"
             value={bookingData.TotalBreakDurationInMinutes}
-            onChange={handleChange}
-            placeholder="Break Duration (min)"
+            onChange={handleInputChange}
+          />
+
+          {/* Created By */}
+          <Label>Created By *</Label>
+          <Input
+            id="CreatedBy"
+            type="text"
+            value={
+              // tampilkan nama user dari daftar users
+              users.find((u) => u.IDUser.toString() === bookingData.CreatedBy)?.Name || 
+              `User ${bookingData.CreatedBy}`
+            }
+            readOnly
+            className="w-full p-2 border rounded bg-gray-100 cursor-not-allowed"
           />
         </div>
 
@@ -7709,9 +7860,8 @@ export function BookingDetailsAdd({ onUpdate }) {
     BookingId: "",
     ResourceId: "",
     ResourceAccountId: "",
-    SubkTechnicianId: "",
-    Name: "",
-    Status: "",
+    EngineerId: "",
+    BookingStatusId: "",
     StartTimeCustomerTime: "",
     EndTimeCustomerTime: "",
     EstimatedArrivalTimeCustomerTime: "",
@@ -7727,24 +7877,25 @@ export function BookingDetailsAdd({ onUpdate }) {
   const [bookings, setBookings] = useState([]);
   const [resources, setResources] = useState([]);
   const [accounts, setAccounts] = useState([]);
-  const [technicians, setTechnicians] = useState([]);
-
-  
+  const [engineers, setEngineers] = useState([]);
+  const [statuses, setStatuses] = useState([]);
 
   useEffect(() => {
     const fetchDropdowns = async () => {
       try {
-        const [bookingRes, resourceRes, accountRes, techRes] = await Promise.all([
+        const [bookingRes, resourceRes, accountRes, engineerRes, statusRes] = await Promise.all([
           ApiCustomer.get("/api/booking"),
           ApiCustomer.get("/api/resources"),
           ApiCustomer.get("/api/resource-account"),
-          ApiCustomer.get("/api/subk-technician"),
+          ApiCustomer.get("/api/user?role=ce"),
+          ApiCustomer.get("/api/booking-status")
         ]);
 
         setBookings(bookingRes.data.data || []);
         setResources(resourceRes.data.data || []);
         setAccounts(accountRes.data.data || []);
-        setTechnicians(techRes.data.data || []);
+        setEngineers(engineerRes.data.data || []);
+        setStatuses(statusRes.data.data || []);
       } catch (error) {
         console.error("Dropdown fetch failed:", error);
       }
@@ -7771,7 +7922,8 @@ export function BookingDetailsAdd({ onUpdate }) {
         BookingId: parseInt(formData.BookingId),
         ResourceId: formData.ResourceId || null,
         ResourceAccountId: formData.ResourceAccountId || null,
-        SubkTechnicianId: formData.SubkTechnicianId || null,
+        EngineerId: formData.EngineerId ? parseInt(formData.EngineerId) : null,
+        BookingStatusId: formData.BookingStatusId ? parseInt(formData.BookingStatusId) : null,
         DurationInMinutesUserTime: formData.DurationInMinutesUserTime ? parseInt(formData.DurationInMinutesUserTime) : null,
         ChangedBy: userSubmit.id,
         StartTimeCustomerTime: toFullISOString(formData.StartTimeCustomerTime),
@@ -7817,46 +7969,64 @@ export function BookingDetailsAdd({ onUpdate }) {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Booking Info */}
-          <div>
-            <Label>Booking *</Label>
-            <select id="BookingId" value={formData.BookingId} onChange={handleInputChange} className="w-full p-2 border rounded">
-              <option value="">-- Select Booking --</option>
-              {bookings.map((b) => <option key={b.BookingId} value={b.BookingId}>{b.BookingId} - {b.bookingDetails?.[0]?.ResourceId}</option>)}
-            </select>
+                   <div>
+            <GenericSelector
+              label="Booking *"
+              placeholder="Search Booking..."
+              endpoint="/api/booking"
+              value={bookings.find((b) => b.BookingId === formData.BookingId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, BookingId: item.BookingId }))}
+              valueKey="BookingId"
+              labelKey="BookingId"
+            />
           </div>
 
           <div>
-            <Label>Resource</Label>
-            <select id="ResourceId" value={formData.ResourceId} onChange={handleInputChange} className="w-full p-2 border rounded">
-              <option value="">-- Select Resource --</option>
-              {resources.map((r) => <option key={r.ResourceId} value={r.ResourceId}>{r.Name || r.ResourceId}</option>)}
-            </select>
+            <GenericSelector
+              label="Resource"
+              placeholder="Search Resource..."
+              endpoint="/api/resources"
+              value={resources.find((r) => r.ResourceId === formData.ResourceId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, ResourceId: item.ResourceId }))}
+              valueKey="ResourceId"
+              labelKey="Name"
+            />
           </div>
 
           <div>
-            <Label>Resource Account</Label>
-            <select id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} className="w-full p-2 border rounded">
-              <option value="">-- Select Account --</option>
-              {accounts.map((a) => <option key={a.ResourceAccountId} value={a.ResourceAccountId}>{a.Name || a.ResourceAccountId}</option>)}
-            </select>
+            <GenericSelector
+              label="Resource Account"
+              placeholder="Search Account..."
+              endpoint="/api/resource-account"
+              value={accounts.find((a) => a.ResourceAccountId === formData.ResourceAccountId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, ResourceAccountId: item.ResourceAccountId }))}
+              valueKey="ResourceAccountId"
+              labelKey="Name"
+            />
           </div>
 
           <div>
-            <Label>Subk Technician</Label>
-            <select id="SubkTechnicianId" value={formData.SubkTechnicianId} onChange={handleInputChange} className="w-full p-2 border rounded">
-              <option value="">-- Select Technician --</option>
-              {technicians.map((t) => <option key={t.SubkTechnicianId} value={t.SubkTechnicianId}>{t.Name || t.SubkTechnicianId}</option>)}
-            </select>
+            <GenericSelector
+              label="Engineer"
+              placeholder="Search Engineer..."
+              endpoint="/api/user?role=ce"
+              value={engineers.find((e) => e.IDUser === formData.EngineerId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, EngineerId: item.IDUser }))}
+              valueKey="IDUser"
+              labelKey="Name"
+            />
           </div>
 
           <div>
-            <Label>Name</Label>
-            <Input id="Name" value={formData.Name} onChange={handleInputChange} />
-          </div>
-
-          <div>
-            <Label>Status</Label>
-            <Input id="Status" value={formData.Status} onChange={handleInputChange} />
+            <GenericSelector
+              label="Status"
+              placeholder="Search Status..."
+              endpoint="/api/booking-status"
+              value={statuses.find((s) => s.BookingStatusId === formData.BookingStatusId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, BookingStatusId: item.BookingStatusId }))}
+              valueKey="BookingStatusId"
+              labelKey="Description"
+            />
           </div>
 
           {/* Customer Time */}
@@ -7891,53 +8061,81 @@ export function BookingDetailsAdd({ onUpdate }) {
   );
 }
 
+
 export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [form, setForm] = useState({
-    BookingId: 0,
+
+  const [formData, setFormData] = useState({
+    BookingId: "",
     ResourceId: "",
     ResourceAccountId: "",
-    SubkTechnicianId: "",
-    Name: "",
-    Status: "",
-
-    // Customer Time
+    EngineerId: "",
+    BookingStatusId: "",
     StartTimeCustomerTime: "",
     EndTimeCustomerTime: "",
     EstimatedArrivalTimeCustomerTime: "",
     ActualArrivalTimeCustomerTime: "",
-
-    // User Time
     StartTimeUserTime: "",
     EndTimeUserTime: "",
-    DurationInMinutesUserTime: 0,
+    DurationInMinutesUserTime: "",
     EstimatedArrivalTimeUserTime: "",
     ActualArrivalTimeUserTime: "",
+    ChangedBy: "",
   });
 
+  // Dropdown Data
+  const [bookings, setBookings] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [engineers, setEngineers] = useState([]);
+  const [statuses, setStatuses] = useState([]);
+
+  // Fetch dropdown data
+  useEffect(() => {
+    const fetchDropdowns = async () => {
+      try {
+        const [bookingRes, resourceRes, accountRes, engineerRes, statusRes] = await Promise.all([
+          ApiCustomer.get("/api/booking"),
+          ApiCustomer.get("/api/resources"),
+          ApiCustomer.get("/api/resource-account"),
+          ApiCustomer.get("/api/users?role=ce"),
+          ApiCustomer.get("/api/booking-status"),
+        ]);
+
+        setBookings(bookingRes.data.data || []);
+        setResources(resourceRes.data.data || []);
+        setAccounts(accountRes.data.data || []);
+        setEngineers(engineerRes.data.data || []);
+        setStatuses(statusRes.data.data || []);
+      } catch (error) {
+        console.error("Dropdown fetch failed:", error);
+      }
+    };
+    fetchDropdowns();
+  }, []);
+
+  // Fetch booking detail by ID
   const fetchDetail = async () => {
     try {
       const res = await ApiCustomer.get(`/api/bookingDetails/${BookingDetailId}`);
       const data = res.data.data;
 
-      setForm({
-        BookingId: data.BookingId || 0,
+      setFormData({
+        BookingId: data.BookingId || "",
         ResourceId: data.ResourceId || "",
         ResourceAccountId: data.ResourceAccountId || "",
-        SubkTechnicianId: data.SubkTechnicianId || "",
-        Name: data.Name || "",
-        Status: data.Status || "",
-
+        EngineerId: data.EngineerId || "",
+        BookingStatusId: data.BookingStatusId || "",
         StartTimeCustomerTime: data.StartTimeCustomerTime?.slice(0, 16) || "",
         EndTimeCustomerTime: data.EndTimeCustomerTime?.slice(0, 16) || "",
         EstimatedArrivalTimeCustomerTime: data.EstimatedArrivalTimeCustomerTime?.slice(0, 16) || "",
         ActualArrivalTimeCustomerTime: data.ActualArrivalTimeCustomerTime?.slice(0, 16) || "",
-
         StartTimeUserTime: data.StartTimeUserTime?.slice(0, 16) || "",
         EndTimeUserTime: data.EndTimeUserTime?.slice(0, 16) || "",
         EstimatedArrivalTimeUserTime: data.EstimatedArrivalTimeUserTime?.slice(0, 16) || "",
         ActualArrivalTimeUserTime: data.ActualArrivalTimeUserTime?.slice(0, 16) || "",
-        DurationInMinutesUserTime: data.DurationInMinutesUserTime || 0,
+        DurationInMinutesUserTime: data.DurationInMinutesUserTime || "",
+        ChangedBy: data.ChangedBy || "",
       });
     } catch (error) {
       console.error("Error fetching booking detail:", error);
@@ -7946,69 +8144,37 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
 
   useEffect(() => {
     if (isOpen && BookingDetailId) fetchDetail();
-  }, [isOpen]);
+  }, [isOpen, BookingDetailId]);
 
-  const handleChange = (e) => {
-    const { id, value, type } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [id]: type === "number" ? parseInt(value) || 0 : value,
-    }));
-  };
-
-  const [bookings, setBookings] = useState([]);
-  const [resources, setResources] = useState([]);
-  const [accounts, setAccounts] = useState([]);
-  const [technicians, setTechnicians] = useState([]);
-
-  
-
-  useEffect(() => {
-    const fetchDropdowns = async () => {
-      try {
-        const [bookingRes, resourceRes, accountRes, techRes] = await Promise.all([
-          ApiCustomer.get("/api/booking"),
-          ApiCustomer.get("/api/resources"),
-          ApiCustomer.get("/api/resource-account"),
-          ApiCustomer.get("/api/subk-technician"),
-        ]);
-
-        setBookings(bookingRes.data.data || []);
-        setResources(resourceRes.data.data || []);
-        setAccounts(accountRes.data.data || []);
-        setTechnicians(techRes.data.data || []);
-      } catch (error) {
-        console.error("Dropdown fetch failed:", error);
-      }
-    };
-    fetchDropdowns();
-  }, []);
-
+  // Convert local datetime to full ISO
   const toFullISOString = (value) => {
     if (!value) return null;
     return value.length === 16 ? value + ":00" : value;
   };
 
+  // Submit edited data
   const handleSubmit = async () => {
     const userSubmit = getUserFromToken();
+
     try {
       const payload = {
-        BookingId: parseInt(form.BookingId),
-        ResourceId: form.ResourceId || null,
-        ResourceAccountId: form.ResourceAccountId || null,
-        SubkTechnicianId: form.SubkTechnicianId || null,
-        DurationInMinutesUserTime: form.DurationInMinutesUserTime ? parseInt(form.DurationInMinutesUserTime) : null,
+        BookingId: parseInt(formData.BookingId),
+        ResourceId: formData.ResourceId || null,
+        ResourceAccountId: formData.ResourceAccountId || null,
+        EngineerId: formData.EngineerId ? parseInt(formData.EngineerId) : null,
+        BookingStatusId: formData.BookingStatusId ? parseInt(formData.BookingStatusId) : null,
+        DurationInMinutesUserTime: formData.DurationInMinutesUserTime ? parseInt(formData.DurationInMinutesUserTime) : null,
         ChangedBy: userSubmit.id,
-        StartTimeCustomerTime: toFullISOString(form.StartTimeCustomerTime),
-        EndTimeCustomerTime: toFullISOString(form.EndTimeCustomerTime),
-        EstimatedArrivalTimeCustomerTime: toFullISOString(form.EstimatedArrivalTimeCustomerTime),
-        ActualArrivalTimeCustomerTime: toFullISOString(form.ActualArrivalTimeCustomerTime),
-        StartTimeUserTime: toFullISOString(form.StartTimeUserTime),
-        EndTimeUserTime: toFullISOString(form.EndTimeUserTime),
-        EstimatedArrivalTimeUserTime: toFullISOString(form.EstimatedArrivalTimeUserTime),
-        ActualArrivalTimeUserTime: toFullISOString(form.ActualArrivalTimeUserTime),
+        StartTimeCustomerTime: toFullISOString(formData.StartTimeCustomerTime),
+        EndTimeCustomerTime: toFullISOString(formData.EndTimeCustomerTime),
+        EstimatedArrivalTimeCustomerTime: toFullISOString(formData.EstimatedArrivalTimeCustomerTime),
+        ActualArrivalTimeCustomerTime: toFullISOString(formData.ActualArrivalTimeCustomerTime),
+        StartTimeUserTime: toFullISOString(formData.StartTimeUserTime),
+        EndTimeUserTime: toFullISOString(formData.EndTimeUserTime),
+        EstimatedArrivalTimeUserTime: toFullISOString(formData.EstimatedArrivalTimeUserTime),
+        ActualArrivalTimeUserTime: toFullISOString(formData.ActualArrivalTimeUserTime),
       };
-  
+
       await ApiCustomer.patch(`/api/bookingDetails/${BookingDetailId}`, payload);
       Swal.fire({
         icon: "success",
@@ -8033,117 +8199,116 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
     }
   };
 
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => setIsOpen(true)}>
-          <Pencil />
+        <Button variant="outline" onClick={() => setIsOpen(true)} aria-label="Edit booking detail">
+          <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Edit Booking Detail</DialogTitle>
-          <DialogDescription>Update all necessary fields below.</DialogDescription>
+          <DialogDescription>Perbarui data booking detail di bawah ini.</DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Booking */}
           <div>
-            <label htmlFor="BookingId">Booking ID</label>
-            <select id="BookingId" value={form.BookingId} onChange={handleChange} className="w-full border p-2 rounded">
-              <option value="">-- Select Booking --</option>
-              {bookings.map((b) => <option key={b.BookingId} value={b.BookingId}>{b.BookingId} - {b.bookingDetails?.[0]?.ResourceId}</option>)}
-            </select>
+            <GenericSelector
+              label="Booking *"
+              placeholder="Search Booking..."
+              endpoint="/api/booking"
+              value={bookings.find((b) => b.BookingId === formData.BookingId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, BookingId: item.BookingId }))}
+              valueKey="BookingId"
+              labelKey="BookingId"
+            />
           </div>
+
+          {/* Resource */}
           <div>
-            <label htmlFor="ResourceId">Resource ID</label>
-            <select id="ResourceId" value={form.ResourceId} onChange={handleChange} className="w-full border p-2 rounded">
-              <option value="">-- Select Resource --</option>
-              {resources.map((r) => <option key={r.ResourceId} value={r.ResourceId}>{r.Name || r.ResourceId}</option>)}
-            </select>
+            <GenericSelector
+              label="Resource"
+              placeholder="Search Resource..."
+              endpoint="/api/resources"
+              value={resources.find((r) => r.ResourceId === formData.ResourceId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, ResourceId: item.ResourceId }))}
+              valueKey="ResourceId"
+              labelKey="Name"
+            />
           </div>
+
+          {/* Resource Account */}
           <div>
-            <label htmlFor="ResourceAccountId">Resource Account ID</label>
-             <select id="ResourceAccountId" value={form.ResourceAccountId} onChange={handleChange} className="w-full border p-2 rounded">
-              <option value="">-- Select Account --</option>
-              {accounts.map((a) => <option key={a.ResourceAccountId} value={a.ResourceAccountId}>{a.Name || a.ResourceAccountId}</option>)}
-            </select>
+            <GenericSelector
+              label="Resource Account"
+              placeholder="Search Account..."
+              endpoint="/api/resource-account"
+              value={accounts.find((a) => a.ResourceAccountId === formData.ResourceAccountId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, ResourceAccountId: item.ResourceAccountId }))}
+              valueKey="ResourceAccountId"
+              labelKey="Name"
+            />
           </div>
+
+          {/* Engineer */}
           <div>
-            <label htmlFor="SubkTechnicianId">Subk Technician ID</label>
-            <select id="SubkTechnicianId" value={form.SubkTechnicianId} onChange={handleChange} className="w-full border p-2 rounded">
-              <option value="">-- Select Technician --</option>
-              {technicians.map((t) => <option key={t.SubkTechnicianId} value={t.SubkTechnicianId}>{t.Name || t.SubkTechnicianId}</option>)}
-            </select>
+            <GenericSelector
+              label="Engineer"
+              placeholder="Search Engineer..."
+              endpoint="/api/users?role=ce"
+              value={engineers.find((e) => e.IDUser === formData.EngineerId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, EngineerId: item.IDUser }))}
+              valueKey="IDUser"
+              labelKey="Name"
+            />
           </div>
+
+          {/* Status */}
           <div>
-            <label htmlFor="Name">Name</label>
-            <Input id="Name" value={form.Name} onChange={handleChange} />
+            <GenericSelector
+              label="Status"
+              placeholder="Search Status..."
+              endpoint="/api/booking-status"
+              value={statuses.find((s) => s.BookingStatusId === formData.BookingStatusId)}
+              onChange={(item) => setFormData((prev) => ({ ...prev, BookingStatusId: item.BookingStatusId }))}
+              valueKey="BookingStatusId"
+              labelKey="Description"
+            />
           </div>
-          <div>
-            <label htmlFor="Status">Status</label>
-            <Input id="Status" value={form.Status} onChange={handleChange} />
+
+          {/* Customer Time */}
+          <div className="pt-2 border-t md:col-span-2">
+            <p className="mb-1 font-semibold">Customer Time</p>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div><Label>Start Time</Label><Input type="datetime-local" id="StartTimeCustomerTime" value={formData.StartTimeCustomerTime} onChange={handleInputChange} /></div>
+              <div><Label>End Time</Label><Input type="datetime-local" id="EndTimeCustomerTime" value={formData.EndTimeCustomerTime} onChange={handleInputChange} /></div>
+              <div><Label>Estimated Arrival</Label><Input type="datetime-local" id="EstimatedArrivalTimeCustomerTime" value={formData.EstimatedArrivalTimeCustomerTime} onChange={handleInputChange} /></div>
+              <div><Label>Actual Arrival</Label><Input type="datetime-local" id="ActualArrivalTimeCustomerTime" value={formData.ActualArrivalTimeCustomerTime} onChange={handleInputChange} /></div>
+            </div>
+          </div>
+
+          {/* User Time */}
+          <div className="pt-2 border-t md:col-span-2">
+            <p className="mb-1 font-semibold">User Time</p>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div><Label>Start Time</Label><Input type="datetime-local" id="StartTimeUserTime" value={formData.StartTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>End Time</Label><Input type="datetime-local" id="EndTimeUserTime" value={formData.EndTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>Estimated Arrival</Label><Input type="datetime-local" id="EstimatedArrivalTimeUserTime" value={formData.EstimatedArrivalTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>Actual Arrival</Label><Input type="datetime-local" id="ActualArrivalTimeUserTime" value={formData.ActualArrivalTimeUserTime} onChange={handleInputChange} /></div>
+              <div><Label>Duration (minutes)</Label><Input type="number" id="DurationInMinutesUserTime" value={formData.DurationInMinutesUserTime} onChange={handleInputChange} /></div>
+            </div>
           </div>
         </div>
 
-        {/* Customer Time Section */}
-        <div className="mt-6">
-          <h3 className="mb-2 text-lg font-semibold">Customer Time</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="StartTimeCustomerTime">Start Time</label>
-              <Input id="StartTimeCustomerTime" type="datetime-local" value={form.StartTimeCustomerTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="EndTimeCustomerTime">End Time</label>
-              <Input id="EndTimeCustomerTime" type="datetime-local" value={form.EndTimeCustomerTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="EstimatedArrivalTimeCustomerTime">Estimated Arrival Time</label>
-              <Input id="EstimatedArrivalTimeCustomerTime" type="datetime-local" value={form.EstimatedArrivalTimeCustomerTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="ActualArrivalTimeCustomerTime">Actual Arrival Time</label>
-              <Input id="ActualArrivalTimeCustomerTime" type="datetime-local" value={form.ActualArrivalTimeCustomerTime} onChange={handleChange} />
-            </div>
-          </div>
-        </div>
-
-        {/* User Time Section */}
-        <div className="mt-6">
-          <h3 className="mb-2 text-lg font-semibold">User Time</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="StartTimeUserTime">Start Time</label>
-              <Input id="StartTimeUserTime" type="datetime-local" value={form.StartTimeUserTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="EndTimeUserTime">End Time</label>
-              <Input id="EndTimeUserTime" type="datetime-local" value={form.EndTimeUserTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="EstimatedArrivalTimeUserTime">Estimated Arrival Time</label>
-              <Input id="EstimatedArrivalTimeUserTime" type="datetime-local" value={form.EstimatedArrivalTimeUserTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="ActualArrivalTimeUserTime">Actual Arrival Time</label>
-              <Input id="ActualArrivalTimeUserTime" type="datetime-local" value={form.ActualArrivalTimeUserTime} onChange={handleChange} />
-            </div>
-            <div>
-              <label htmlFor="DurationInMinutesUserTime">Duration (min)</label>
-              <Input id="DurationInMinutesUserTime" type="number" value={form.DurationInMinutesUserTime} onChange={handleChange} />
-            </div>
-          </div>
-        </div>
-
-        {/* <div className="mt-6 grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="ChangedBy">Changed By (User ID)</label>
-            <Input id="ChangedBy" type="number" value={form.ChangedBy} onChange={handleChange} />
-          </div>
-        </div> */}
-
-        <DialogFooter className="pt-4">
+        <DialogFooter className="mt-4">
           <Button onClick={handleSubmit}>Update</Button>
         </DialogFooter>
       </DialogContent>
@@ -9566,6 +9731,826 @@ export function CrsAdd() {
   );
 }
 
+export function CrsEdit({ id_csr, onUpdate }) {
+  const [formData, setFormData] = useState({
+    caseResolutionCode: "",
+    autoClose: "",
+    caseReadyForClosure: "",
+    readyForCloseDays: "",
+    readyForClosureDate: "",
+    pendingCustomerAction: "",
+    customerRequestedCloseDate: "",
+  });
+
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open || !id_csr) return;
+
+    
+    const fetchData = async () => {
+      try {
+        const response = await ApiCustomer.get(`/api/caseResolution/${id_csr}`);
+        const data = response.data.data;
+
+        const formatDateForInput = (dateString) => {
+          if (!dateString) return "";
+          const date = new Date(dateString);
+          const offset = date.getTimezoneOffset();
+          const localDate = new Date(date.getTime() - offset * 60 * 1000);
+          return localDate.toISOString().slice(0, 16); // ambil 'YYYY-MM-DDTHH:MM'
+        };
+
+        setFormData({
+          caseResolutionCode: data.caseResolutionCode,
+          autoClose: data.autoClose,
+          caseReadyForClosure: data.caseReadyForClosure,
+          readyForCloseDays: data.readyForCloseDays,
+          readyForClosureDate: formatDateForInput(data.readyForClosureDate),
+          pendingCustomerAction: formatDateForInput(data.pendingCustomerAction),
+          customerRequestedCloseDate: formatDateForInput(data.customerRequestedCloseDate),
+        });
+      } catch (error) {
+        console.error("Error fetching Case Resolution:", error);
+        Swal.fire({
+           icon: 'error',
+           title: 'Gagal Mengambil data',
+           allowEscapekey: false,
+           showConfirmButton: false,
+           allowOutsideClick: false
+        }).then(() => {
+          window.location.reload;
+        })
+      }
+    };
+
+    fetchData();
+  }, [id_csr, open]);
+
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.caseResolutionCode || !formData.autoClose || !formData.caseReadyForClosure) {
+      Swal.fire("Incomplete", "Semua field wajib diisi", "warning");
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/caseResolution/${id_csr}`, formData);
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Case Resoluution berhasil diperbarui.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowEscapeKey: false
+      }).then(() => {
+          onUpdate?.();
+        setOpen(false);
+      });
+    } catch (error) {
+      console.error("Error updating:", error);
+      Swal.fire("Error", "Gagal memperbarui data", "error");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setOpen(true)}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Case Resolution</DialogTitle>
+          <DialogDescription>Update the fields below.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Label>Case Resolution Code</Label>
+          <Input id="caseResolutionCode" value={formData.caseResolutionCode} onChange={handleInputChange} />
+
+          <Label>Auto Close</Label>
+          <SelectYN
+            id="autoClose"
+            value={formData.autoClose}
+            onValueChange={(value) => handleInputChange({ target: { id: "autoClose", value } })}
+          />
+
+          <Label>Case Ready For Closure</Label>
+          <SelectYN
+            id="caseReadyForClosure"
+            value={formData.caseReadyForClosure}
+            onValueChange={(value) => handleInputChange({ target: { id: "caseReadyForClosure", value } })}
+          />
+
+          <Label>Ready For Close Days</Label>
+          <Input id="readyForCloseDays" type="number" value={formData.readyForCloseDays} onChange={handleInputChange} />
+
+          <Label>Ready For Closure Date</Label>
+          <Input id="readyForClosureDate" type="datetime-local" value={formData.readyForClosureDate} onChange={handleInputChange} />
+
+          <Label>Pending Customer Action</Label>
+          <Input id="pendingCustomerAction" type="datetime-local" value={formData.pendingCustomerAction} onChange={handleInputChange} />
+
+          <Label>Customer Requested Close Date</Label>
+          <Input id="customerRequestedCloseDate" type="datetime-local" value={formData.customerRequestedCloseDate} onChange={handleInputChange} />
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function CrsDelete({ id_csr, onDelete }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Case Resolution ini akan dihapus dan tidak dapat dikembalikan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/caseResolution/${id_csr}`);
+
+        if (response.status === 409 || response.data?.success === false) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data?.message || "Data memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return;
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Case Resolution berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.reload();
+          if (onDelete) {
+            onDelete();
+          }
+        });
+      } catch (error) {
+        if (error.response?.status === 409) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: error.response.data?.message || "Data memiliki relasi dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      }
+    }
+  };
+    return (
+      <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
+        <Trash />
+      </Button>
+    );
+}
+
+export function NmuAdd() {
+  const [formData, setFormData] = useState({
+    NMUDesc: "",
+    ItemNeeded: false,
+    VersionNeeded: false,
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.NMUDesc) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Data",
+        text: "NMU Description is required.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.post("/api/nmu", formData);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "NMU data saved",
+        timer: 1200,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Failed to save NMU:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Failed to save data",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm">Add NMU</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add NMU</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>NMU Description *</Label>
+          <Input
+            id="NMUDesc"
+            value={formData.NMUDesc}
+            onChange={handleInputChange}
+            maxLength={255}
+          />
+
+          <div className="flex items-center gap-2">
+            <input
+              id="ItemNeeded"
+              type="checkbox"
+              checked={formData.ItemNeeded}
+              onChange={handleInputChange}
+            />
+            <Label htmlFor="ItemNeeded">Item Needed</Label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              id="VersionNeeded"
+              type="checkbox"
+              checked={formData.VersionNeeded}
+              onChange={handleInputChange}
+            />
+            <Label htmlFor="VersionNeeded">Version Needed</Label>
+          </div>
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={handleSubmit}>Submit</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function NmuEdit({ NMUId, onUpdate }) {
+  const [desc, setDesc] = useState("");
+  const [itemNeeded, setItemNeeded] = useState(false);
+  const [versionNeeded, setVersionNeeded] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      const response = await ApiCustomer.get(`/api/nmu/${NMUId}`);
+      const data = response.data.data;
+      if (data) {
+        setDesc(data.NMUDesc || "");
+        setItemNeeded(Boolean(data.ItemNeeded));
+        setVersionNeeded(Boolean(data.VersionNeeded));
+      }
+    } catch (error) {
+      console.error("Error fetching NMU data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchData();
+    }
+  }, [isOpen]);
+
+  const handleUpdate = async () => {
+    if (!desc) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Data",
+        text: "Description is required.",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/nmu/${NMUId}`, {
+        NMUDesc: desc,
+        ItemNeeded: itemNeeded,
+        VersionNeeded: versionNeeded,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Updated!",
+        text: "NMU has been updated successfully.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        setIsOpen(false); // Tutup modal setelah update
+        if (onUpdate) onUpdate();
+      });
+    } catch (error) {
+      console.error("Update error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "Failed to update NMU. Please try again.",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil size={16} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit NMU</DialogTitle>
+          <DialogDescription>
+            Update NMU data. Description is required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Input
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            placeholder="NMU Description"
+          />
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={itemNeeded}
+              onChange={(e) => setItemNeeded(e.target.checked)}
+            />
+            <label>Item Needed</label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={versionNeeded}
+              onChange={(e) => setVersionNeeded(e.target.checked)}
+            />
+            <label>Version Needed</label>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function NmuDelete({ NMUId, onUpdate }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Data ini akan dihapus secara permanen dan tidak bisa dibatalkan.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/nmu/${NMUId}`);
+
+        // kalau backend kasih error 409 atau success=false
+        if (response.status === 409 || response.data.success === false) {
+          return Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: response.data.message || 'Data ini memiliki keterkaitan dan tidak dapat dihapus.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Data berhasil dihapus.',
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        }).then(() => {
+          if (onUpdate) {
+            onUpdate(); // refresh tabel parent
+          } else {
+            window.location.reload();
+          }
+        });
+
+      } catch (error) {
+        const message = error?.response?.data?.message;
+        if (error?.response?.status === 409) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Bisa Dihapus!',
+            text: message || 'Data ini memiliki keterkaitan dan tidak dapat dihapus.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus!',
+            text: 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        }
+      }
+    }
+  };
+  
+  return (
+    <Button 
+      variant="outline" 
+      className="text-red-500 hover:text-red-700" 
+      onClick={handleDelete}
+    >
+      <Trash size={16} />
+    </Button>
+  );  
+}
+
+export function NmuItemAdd() {
+  const [formData, setFormData] = useState({
+    itemName: "",
+    nmuId: "",
+  });
+
+  const [nmuList, setNmuList] = useState([]);
+
+  // Ambil daftar NMU untuk dropdown
+  useEffect(() => {
+    const fetchNMU = async () => {
+      try {
+        const res = await ApiCustomer.get("/api/nmu", {
+          params: { limit: 100 }, // ambil maksimal 100 record NMU
+        });
+        if (res.data.success) {
+          setNmuList(res.data.data);
+        }
+      } catch (error) {
+        console.error("Gagal ambil data NMU:", error);
+      }
+    };
+
+    fetchNMU();
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.itemName || !formData.nmuId) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Data",
+        text: "Item Name dan NMU wajib diisi.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.post("/api/nmu/nmuitem", formData);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "NMU Item berhasil disimpan",
+        timer: 1200,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Gagal simpan NMU Item:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Gagal menyimpan data",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm">Add NMU Item</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add NMU Item</DialogTitle>
+          <DialogDescription>Fields marked with * are required.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>Item Name *</Label>
+          <Input
+            id="itemName"
+            value={formData.itemName}
+            onChange={handleInputChange}
+            maxLength={255}
+          />
+
+          <Label>Pilih NMU *</Label>
+          <select
+            id="nmuId"
+            value={formData.nmuId}
+            onChange={handleInputChange}
+            className="w-full border rounded-md p-2"
+          >
+            <option value="">-- Pilih NMU --</option>
+            {nmuList.map((nmu) => (
+              <option key={nmu.NMUId} value={nmu.NMUId}>
+                {nmu.NMUDesc || `NMU ${nmu.NMUId}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={handleSubmit}>Submit</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function NmuItemEdit({ id }) {
+  const [formData, setFormData] = useState({
+    itemName: "",
+    nmuId: "",
+  });
+  console.log("THE vALUE",id)
+
+  const [nmuList, setNmuList] = useState([]);
+
+  // Fetch list NMU untuk dropdown
+  useEffect(() => {
+    const fetchNMU = async () => {
+      try {
+        const res = await ApiCustomer.get("/api/nmu", {
+          params: { limit: 100 },
+        });
+        if (res.data.success) {
+          setNmuList(res.data.data);
+        }
+      } catch (error) {
+        console.error("Gagal ambil data NMU:", error);
+      }
+    };
+
+    fetchNMU();
+  }, []);
+
+  // Fetch data NMUItem untuk edit
+  const fetchNMUItem = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/nmu/nmuitem/${id}`);
+      console.log("TES VALUE OF THE NMU ITEM",res)
+      if (res.data.success) {
+        setFormData({
+          itemName: res.data.data.itemName,
+          nmuId: res.data.data.nmuId,
+        });
+      }
+    } catch (error) {
+      console.error("Gagal ambil data NMU Item:", error);
+    }
+  };
+  useEffect(() => {
+
+    if (id) {
+      fetchNMUItem();
+    }
+  }, [id]);
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.itemName || !formData.nmuId) {
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Data",
+        text: "Item Name dan NMU wajib diisi.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/nmu/nmuitem/${id}`, formData);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "NMU Item berhasil diperbarui",
+        timer: 1200,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Gagal update NMU Item:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Gagal mengupdate data",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-sm">Edit</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit NMU Item</DialogTitle>
+          <DialogDescription>Update data NMU Item sesuai kebutuhan.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>Item Name *</Label>
+          <Input
+            id="itemName"
+            value={formData.itemName}
+            onChange={handleInputChange}
+            maxLength={255}
+          />
+
+          <Label>Pilih NMU *</Label>
+          <select
+            id="nmuId"
+            value={formData.nmuId}
+            onChange={handleInputChange}
+            className="w-full border rounded-md p-2"
+          >
+            <option value="">-- Pilih NMU --</option>
+            {nmuList.map((nmu) => (
+              <option key={nmu.NMUId} value={nmu.NMUId}>
+                {nmu.NMUDesc || `NMU ${nmu.NMUId}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={handleSubmit}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function NmuItemDelete({ id, itemName }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      await ApiCustomer.delete(`/api/nmu/nmuitem/${id}`);
+      Swal.fire({
+        icon: "success",
+        title: "Deleted",
+        text: "NMU Item berhasil dihapus",
+        timer: 1200,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Gagal hapus NMU Item:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Gagal menghapus data",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="destructive" className="h-11 rounded-sm">
+          Delete
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Hapus NMU Item</DialogTitle>
+          <DialogDescription>
+            Apakah kamu yakin ingin menghapus item <b>{itemName}</b>?  
+            Data yang sudah dihapus tidak bisa dikembalikan.
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter className="mt-4">
+          <Button variant="outline">Batal</Button>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={loading}
+          >
+            {loading ? "Menghapus..." : "Ya, Hapus"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function FailureAdd () {
   const [formDataFailure, setFormDataFailure] = useState({
    Name: '',	
@@ -9840,215 +10825,7 @@ export function FailureDelete({ FailureId, isModalOpen, setIsModalOpen, onUpdate
   );
 }
 
-export function CrsEdit({ id_csr, onUpdate }) {
-  const [formData, setFormData] = useState({
-    caseResolutionCode: "",
-    autoClose: "",
-    caseReadyForClosure: "",
-    readyForCloseDays: "",
-    readyForClosureDate: "",
-    pendingCustomerAction: "",
-    customerRequestedCloseDate: "",
-  });
 
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open || !id_csr) return;
-
-    
-    const fetchData = async () => {
-      try {
-        const response = await ApiCustomer.get(`/api/caseResolution/${id_csr}`);
-        const data = response.data.data;
-
-        const formatDateForInput = (dateString) => {
-          if (!dateString) return "";
-          const date = new Date(dateString);
-          const offset = date.getTimezoneOffset();
-          const localDate = new Date(date.getTime() - offset * 60 * 1000);
-          return localDate.toISOString().slice(0, 16); // ambil 'YYYY-MM-DDTHH:MM'
-        };
-
-        setFormData({
-          caseResolutionCode: data.caseResolutionCode,
-          autoClose: data.autoClose,
-          caseReadyForClosure: data.caseReadyForClosure,
-          readyForCloseDays: data.readyForCloseDays,
-          readyForClosureDate: formatDateForInput(data.readyForClosureDate),
-          pendingCustomerAction: formatDateForInput(data.pendingCustomerAction),
-          customerRequestedCloseDate: formatDateForInput(data.customerRequestedCloseDate),
-        });
-      } catch (error) {
-        console.error("Error fetching Case Resolution:", error);
-        Swal.fire({
-           icon: 'error',
-           title: 'Gagal Mengambil data',
-           allowEscapekey: false,
-           showConfirmButton: false,
-           allowOutsideClick: false
-        }).then(() => {
-          window.location.reload;
-        })
-      }
-    };
-
-    fetchData();
-  }, [id_csr, open]);
-
-  const handleInputChange = (e) => {
-    const { id, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.caseResolutionCode || !formData.autoClose || !formData.caseReadyForClosure) {
-      Swal.fire("Incomplete", "Semua field wajib diisi", "warning");
-      return;
-    }
-
-    try {
-      await ApiCustomer.patch(`/api/caseResolution/${id_csr}`, formData);
-      Swal.fire({
-        icon: "success",
-        title: "Berhasil!",
-        text: "Case Resoluution berhasil diperbarui.",
-        timer: 1200,
-        timerProgressBar: true,
-        showConfirmButton: false,
-        allowEscapeKey: false
-      }).then(() => {
-          onUpdate?.();
-        setOpen(false);
-      });
-    } catch (error) {
-      console.error("Error updating:", error);
-      Swal.fire("Error", "Gagal memperbarui data", "error");
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => setOpen(true)}>
-          <Pencil />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Case Resolution</DialogTitle>
-          <DialogDescription>Update the fields below.</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3">
-          <Label>Case Resolution Code</Label>
-          <Input id="caseResolutionCode" value={formData.caseResolutionCode} onChange={handleInputChange} />
-
-          <Label>Auto Close</Label>
-          <SelectYN
-            id="autoClose"
-            value={formData.autoClose}
-            onValueChange={(value) => handleInputChange({ target: { id: "autoClose", value } })}
-          />
-
-          <Label>Case Ready For Closure</Label>
-          <SelectYN
-            id="caseReadyForClosure"
-            value={formData.caseReadyForClosure}
-            onValueChange={(value) => handleInputChange({ target: { id: "caseReadyForClosure", value } })}
-          />
-
-          <Label>Ready For Close Days</Label>
-          <Input id="readyForCloseDays" type="number" value={formData.readyForCloseDays} onChange={handleInputChange} />
-
-          <Label>Ready For Closure Date</Label>
-          <Input id="readyForClosureDate" type="datetime-local" value={formData.readyForClosureDate} onChange={handleInputChange} />
-
-          <Label>Pending Customer Action</Label>
-          <Input id="pendingCustomerAction" type="datetime-local" value={formData.pendingCustomerAction} onChange={handleInputChange} />
-
-          <Label>Customer Requested Close Date</Label>
-          <Input id="customerRequestedCloseDate" type="datetime-local" value={formData.customerRequestedCloseDate} onChange={handleInputChange} />
-        </div>
-        <DialogFooter>
-          <Button onClick={handleSubmit}>Update</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-export function CrsDelete({ id_csr, onDelete }) {
-  const handleDelete = async () => {
-    const result = await Swal.fire({
-      title: 'Apakah Anda yakin?',
-      text: "Case Resolution ini akan dihapus dan tidak dapat dikembalikan.",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Ya, hapus!',
-      cancelButtonText: 'Batal',
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const response = await ApiCustomer.delete(`/api/caseResolution/${id_csr}`);
-
-        if (response.status === 409 || response.data?.success === false) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Tidak Bisa Dihapus!',
-            text: response.data?.message || "Data memiliki keterkaitan dan tidak dapat dihapus.",
-            timer: 2000,
-            timerProgressBar: true,
-            showConfirmButton: false,
-          });
-          return;
-        }
-
-        Swal.fire({
-          icon: 'success',
-          title: 'Berhasil!',
-          text: 'Case Resolution berhasil dihapus.',
-          timer: 1500,
-          timerProgressBar: true,
-          showConfirmButton: false,
-        }).then(() => {
-          window.location.reload();
-          if (onDelete) {
-            onDelete();
-          }
-        });
-      } catch (error) {
-        if (error.response?.status === 409) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Tidak Bisa Dihapus!',
-            text: error.response.data?.message || "Data memiliki relasi dan tidak dapat dihapus.",
-            timer: 2000,
-            timerProgressBar: true,
-            showConfirmButton: false,
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Gagal Menghapus!',
-            text: 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.',
-            timer: 2000,
-            timerProgressBar: true,
-            showConfirmButton: false,
-          });
-        }
-      }
-    }
-  };
-    return (
-      <Button variant="outline" className="text-red-500 hover:text-red-700" onClick={handleDelete}>
-        <Trash />
-      </Button>
-    );
-  }
 
 
 //! Home Page Modals

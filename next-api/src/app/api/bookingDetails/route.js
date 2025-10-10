@@ -17,7 +17,9 @@ export async function GET(request) {
         resource: true,
         resourceaccount: true,
         subkTechnician: true,
-        booking: true
+        booking: true,
+        engineer: true,
+        Status: true,
       }
     });
 
@@ -48,8 +50,8 @@ export async function POST(request) {
       ResourceId,
       ResourceAccountId,
       SubkTechnicianId,
-      Name,
-      Status,
+      EngineerId,
+      BookingStatusId,
       StartTimeCustomerTime,
       EndTimeCustomerTime,
       EstimatedArrivalTimeCustomerTime,
@@ -59,12 +61,15 @@ export async function POST(request) {
       DurationInMinutesUserTime,
       EstimatedArrivalTimeUserTime,
       ActualArrivalTimeUserTime,
+      ChangedBy,
     } = body;
 
-    if (!BookingId || !Name || !Status) {
+    const nameValue = body.Name || `BookingDetail-${BookingId}-${Date.now()}`;
+
+    if (!BookingId || !ChangedBy) {
       return NextResponse.json({
         success: false,
-        message: "BookingId, Name, Status, dan ChangedBy wajib diisi."
+        message: "BookingId dan ChangedBy wajib diisi."
       }, { status: 400 });
     }
 
@@ -77,8 +82,9 @@ export async function POST(request) {
             ResourceId,
             ResourceAccountId,
             SubkTechnicianId,
-            Name,
-            Status,
+            EngineerId,
+            BookingStatusId,
+            Name: nameValue,
             StartTimeCustomerTime: toDateOrNull(StartTimeCustomerTime),
             EndTimeCustomerTime: toDateOrNull(EndTimeCustomerTime),
             EstimatedArrivalTimeCustomerTime: toDateOrNull(EstimatedArrivalTimeCustomerTime),
@@ -90,6 +96,9 @@ export async function POST(request) {
             ActualArrivalTimeUserTime: toDateOrNull(ActualArrivalTimeUserTime),
             ChangedBy,
             ChangedAt: new Date()
+        },
+        include: {
+          Status: true
         }
       });
 
@@ -106,8 +115,9 @@ export async function POST(request) {
           ResourceId,
           ResourceAccountId,
           SubkTechnicianId,
-          Name,
-          Status,
+          EngineerId,
+          BookingStatusId,
+          Name: nameValue,
           StartTimeCustomerTime: toDateOrNull(StartTimeCustomerTime),
           EndTimeCustomerTime: toDateOrNull(EndTimeCustomerTime),
           EstimatedArrivalTimeCustomerTime: toDateOrNull(EstimatedArrivalTimeCustomerTime),

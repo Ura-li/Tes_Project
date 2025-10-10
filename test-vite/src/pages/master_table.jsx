@@ -29,6 +29,8 @@ import { RepairClassCodeAdd, RepairClassCodeEdit, RepairClassCodeDelete } from "
 import { ServiceCatalogAdd, ServiceCatalogEdit, ServiceCatalogDelete } from "@/components/model/sc-modal";
 import { OTCAdd, OTCEdit, OTCDelete} from "@/components/model/sc-modal";
 import { CrsAdd, CrsEdit, CrsDelete } from "@/components/model/sc-modal";
+import { NmuAdd, NmuEdit, NmuDelete} from "@/components/model/sc-modal";
+import { NmuItemAdd, NmuItemEdit, NmuItemDelete } from "@/components/model/sc-modal";
 import { FailureAdd, 
   FailureEdit, 
   FailureDelete } from "@/components/model/sc-modal";
@@ -1265,9 +1267,9 @@ const { user } = useAuth();
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead>
+          <thead className="sticky top-0 bg-gray-200 z-10">
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseID")}>
                 Case ID {getSortSymbol("CaseID")}
@@ -2038,6 +2040,12 @@ export const Product_table = () => {
               <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductTower")}>
                 Product Tower {getSortIcon("ProductTower")}
               </th>
+              <th
+                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                onClick={() => handleSort("HWPC")}
+              >
+                HWPC {getSortIcon("HWPC")}
+              </th>
               <th className="p-3 text-sm font-semibold text-left border">Vendor</th>
               <th className="p-3 text-sm font-semibold text-center border">Actions</th>
             </tr>
@@ -2055,6 +2063,7 @@ export const Product_table = () => {
                   <td className="p-3 border">{p.product_type?.ProductType}</td>
                   <td className="p-3 border">{p.product_type?.ProductGroup}</td>
                   <td className="p-3 border">{p.product_type?.ProductTower}</td>
+                  <td className="p-3 border">{p.HWPC}</td>
                   <td className="p-3 border">-</td>
                   <td className="flex items-center justify-center gap-2 p-3 border">
                     <ProductEdit ProductNumber={p.ProductNumber} onUpdate={fetchAllProducts} />
@@ -6000,7 +6009,7 @@ export const BookingsTable = () => {
 
   // derive unique options
   const uniqueStatus = useMemo(() => {
-    const all = bookingData.map((b) => b.BookingStatus).filter(Boolean);
+    const all = bookingData.map((b) => b.BookingStatus?.Description).filter(Boolean);
     return ["", ...Array.from(new Set(all)).sort()];
   }, [bookingData]);
 
@@ -6014,7 +6023,7 @@ export const BookingsTable = () => {
   // filter + search
   const filteredData = useMemo(() => {
     return bookingData.filter((item) => {
-      const status = item.BookingStatus ?? "";
+      const status = item.BookingStatus ?.Description ?? "";
       const jeopardy = item.ScheduleJeopardy ? "Yes" : "No";
       const createdBy = item.createdByUser?.Username ?? "";
 
@@ -6232,7 +6241,7 @@ export const BookingsTable = () => {
                     {item.BookingId}
                   </td>
                   <td className="p-3 border text-center" onClick={() => navigate(`/app/work/${item.WOID}`)}>{item.WOID}</td>
-                  <td className="p-3 border text-center">{item.BookingStatus || "-"}</td>
+                  <td className="p-3 border text-center">{item.BookingStatus?.Description}</td>
                   <td className="p-3 border text-center">{item.ScheduleJeopardy ? "Yes" : "No"}</td>
                   <td className="p-3 border text-center">
                     {item.ScheduleJeopardyTime
@@ -6416,20 +6425,64 @@ export const BookingDetailsTable = () => {
     }
   };
 
+  // fetching user data for createdBy filter
+  const fetchUsers = async () => {
+    try {
+      const response = await ApiCustomer.get("/api/user");
+      if (response.data.success) {
+        setUsers(response.data.data);
+      } else {
+        console.error("Failed to fetch users");
+        setUsers([]);
+      }
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setUsers([]);
+    }
+  };
+
   useEffect(() => {
     fetchBookingDetails();
+    fetchUsers();
   }, []);
 
+  const [users, setUsers] = useState([]);
+  console.log("Users:", users);
+
   // derive unique options
+  // const uniqueStatus = useMemo(() => {
+  //   const all = bookingDetailsData.map((b) => b.Status).filter(Boolean);
+  //   return ["", ...Array.from(new Set(all)).sort()];
+  // }, [bookingDetailsData]);
+
   const uniqueStatus = useMemo(() => {
-    const all = bookingDetailsData.map((b) => b.Status).filter(Boolean);
-    return ["", ...Array.from(new Set(all)).sort()];
-  }, [bookingDetailsData]);
+  const unique = Object.values(
+    bookingDetailsData.reduce((acc, item) => {
+       const status = item?.Status;
+      if (status?.BookingStatusId && status?.Description) {
+        acc[status.BookingStatusId] = {
+          BookingStatusId: status.BookingStatusId,
+          Description: status.Description,
+        };
+      }
+      return acc;
+    }, {})
+  );
+
+  // Optional: sort alphabetically by description
+  return unique.sort((a, b) => a.Description.localeCompare(b.Description));
+}, [bookingDetailsData]);
+
+
+  console.log("bookingDetailsData :", bookingDetailsData);
+  console.log("Unique Status:", uniqueStatus);
 
   const uniqueChangedBy = useMemo(() => {
     const all = bookingDetailsData.map((b) => b.ChangedBy).filter(Boolean);
     return ["", ...Array.from(new Set(all)).sort()];
   }, [bookingDetailsData]);
+
+  console.log("Unique ChangedBy:", uniqueChangedBy);
 
   // filter + search
   const filteredData = bookingDetailsData.filter((item) => {
@@ -6535,9 +6588,9 @@ export const BookingDetailsTable = () => {
           }}
         >
           <option value="">All Status</option>
-          {uniqueStatus.map((v) => (
-            <option key={v} value={v}>
-              {v || "—"}
+          {uniqueStatus.map((status) => (
+            <option key={status.BookingStatusId} value={status.BookingStatusId}>
+              {status.Description || "—"}
             </option>
           ))}
         </select>
@@ -6584,14 +6637,11 @@ export const BookingDetailsTable = () => {
               <th className="border p-3 cursor-pointer" onClick={() => handleSort("ResourceId")}>
                 Resource ID {getSortSymbol("ResourceId")}
               </th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("ResorceAccountId")}>
-                Resource Account ID {getSortSymbol("ResorceAccountId")}
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("ResourceAccountId")}>
+                Resource Account ID {getSortSymbol("ResourceAccountId")}
               </th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("SubkTechnicianId")}>
-                Subk Technician ID {getSortSymbol("SubkTechnicianId")}
-              </th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("Name")}>
-                Name {getSortSymbol("Name")}
+              <th className="border p-3 cursor-pointer" onClick={() => handleSort("EngineerId")}>
+                Engineer ID {getSortSymbol("EngineerId")}
               </th>
               <th className="border p-3 cursor-pointer" onClick={() => handleSort("Status")}>
                 Status {getSortSymbol("Status")}
@@ -6620,10 +6670,9 @@ export const BookingDetailsTable = () => {
                   </td>
                   <td className="border p-2">{item.BookingId}</td>
                   <td className="border p-2">{item.ResourceId}</td>
-                  <td className="border p-2">{item.ResorceAccountId}</td>
-                  <td className="border p-2">{item.SubkTechnicianId}</td>
-                  <td className="border p-2">{item.Name}</td>
-                  <td className="border p-2">{item.Status}</td>
+                  <td className="border p-2">{item.ResourceAccountId}</td>
+                  <td className="border p-2">{item.engineer ? item.engineer.Name : "-"}</td>
+                  <td className="border p-2">{item.Status?.Description || "-"}</td>
                   <td className="p-2 text-left border">
                     <div>
                       Start:{" "}
@@ -6677,7 +6726,9 @@ export const BookingDetailsTable = () => {
                         : "-"}
                     </div>
                   </td>
-                  <td className="p-2 border">{item.ChangedBy}</td>
+                  <td className="p-2 border">{
+                    users.find((u) => u.IDUser === item.ChangedBy)?.Username || "-"
+                    }</td>
                   <td className="p-2 border">
                     {new Date(item.ChangedAt).toLocaleDateString("id-ID", {
                       year: "numeric",
@@ -8297,6 +8348,626 @@ export const CrsTable = () => {
         </div>
 
         {/* Tombol Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const NmuTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [nmuData, setNmuData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
+
+  // Debounce search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // SORTING STATE
+  const [sortConfig, setSortConfig] = useState({
+    key: "NMUId",
+    direction: "asc",
+  });
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+    setCurrentPage(1);
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key)
+      return <ArrowUpDown size={14} className="inline ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp size={14} className="inline ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown size={14} className="inline ml-1 text-blue-600" />
+    );
+  };
+
+  const fetchNmuData = async () => {
+    Swal.fire({
+      title: "Memuat Data NMU...",
+      text: "Mohon tunggu sebentar...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/nmu");
+      if (response.data.success) {
+        setNmuData(response.data.data);
+      } else {
+        setError("Failed to fetch NMU data");
+      }
+    } catch (err) {
+      console.error("Error fetching NMU data:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+      Swal.close();
+    }
+  };
+
+  useEffect(() => {
+    fetchNmuData();
+  }, []);
+
+  // Filtering logic
+  const filteredData = useMemo(() => {
+    return nmuData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    );
+  }, [nmuData, debouncedSearchTerm]);
+
+  // Sorting logic
+  const sortedData = useMemo(() => {
+    const sortable = [...filteredData];
+    if (sortConfig.key) {
+      sortable.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+
+        if (typeof aValue === "string" || typeof bValue === "string") {
+          return sortConfig.direction === "asc"
+            ? String(aValue).localeCompare(String(bValue))
+            : String(bValue).localeCompare(String(aValue));
+        }
+
+        return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
+      });
+    }
+    return sortable;
+  }, [filteredData, sortConfig]);
+
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
+  const currentData = sortedData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const navigate = useNavigate();
+
+  // Go to page
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
+
+  return (
+    <div className="p-6">
+      <h2 className="mb-6 text-xl font-bold">NMU Master Table</h2>
+
+      {/* Search + Add Button */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <input
+          type="text"
+          placeholder="🔍 Search NMU..."
+          className="w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <NmuAdd onUpdate={fetchNmuData} />
+      </div>
+
+      {loading && <p>Loading data...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Table */}
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
+        <table className="min-w-full relative border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-200">
+            <tr className="text-sm text-gray-700 uppercase">
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("NMUId")}
+              >
+                NMU ID {getSortIcon("NMUId")}
+              </th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("NMUDesc")}
+              >
+                Description {getSortIcon("NMUDesc")}
+              </th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ItemNeeded")}
+              >
+                Item Needed {getSortIcon("ItemNeeded")}
+              </th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("VersionNeeded")}
+              >
+                Version Needed {getSortIcon("VersionNeeded")}
+              </th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("createdAt")}
+              >
+                Created At {getSortIcon("createdAt")}
+              </th>
+              <th className="p-3 text-center border">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.length > 0 ? (
+              currentData.map((item, i) => (
+                <tr
+                  key={item.NMUId}
+                  className={`text-sm hover:bg-gray-100 ${
+                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  }`}
+                >
+                  <td className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + i + 1}
+                  </td>
+                  <td
+                    className="p-3 text-center text-blue-500 border cursor-pointer hover:underline"
+                    onClick={() => navigate(`/app/nmu/${item.NMUId}`)}
+                  >
+                    {item.NMUId}
+                  </td>
+                  <td className="p-3 border text-center">{item.NMUDesc || "-"}</td>
+                  <td className="p-3 border text-center">
+                    {item.ItemNeeded ? "Yes" : "No"}
+                  </td>
+                  <td className="p-3 border text-center">
+                    {item.VersionNeeded ? "Yes" : "No"}
+                  </td>
+                  <td className="p-3 border text-center">
+                    {new Date(item.createdAt).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
+                  <td className="flex items-center justify-center gap-2 p-3 border">
+                    <NmuEdit NMUId={item.NMUId} onUpdate={fetchNmuData} />
+                    <NmuDelete
+                      NMUId={item.NMUId}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchNmuData}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="p-6 text-center text-gray-500">
+                  No entries found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> NMU entries
+        </div>
+
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const NmuItemTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [nmuItemData, setNmuItemData] = useState([]);
+  const [goToPageInput, setGoToPageInput] = useState("");
+
+  // Debounce search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // SORTING STATE
+  const [sortConfig, setSortConfig] = useState({
+    key: "id",
+    direction: "asc",
+  });
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+    setCurrentPage(1);
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key)
+      return <ArrowUpDown size={14} className="inline ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp size={14} className="inline ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown size={14} className="inline ml-1 text-blue-600" />
+    );
+  };
+
+  const fetchNmuItemData = async () => {
+    Swal.fire({
+      title: "Memuat Data NMU Item...",
+      text: "Mohon tunggu sebentar...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiCustomer.get("/api/nmu/nmuitem");
+      if (response.data.success) {
+        setNmuItemData(response.data.data);
+      } else {
+        setError("Failed to fetch NMU Item data");
+      }
+    } catch (err) {
+      console.error("Error fetching NMU Item data:", err);
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+      Swal.close();
+    }
+  };
+
+  useEffect(() => {
+    fetchNmuItemData();
+  }, []);
+
+  // Filtering logic
+  const filteredData = useMemo(() => {
+    return nmuItemData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    );
+  }, [nmuItemData, debouncedSearchTerm]);
+
+  // Sorting logic
+  const sortedData = useMemo(() => {
+    const sortable = [...filteredData];
+    if (sortConfig.key) {
+      sortable.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+
+        if (typeof aValue === "string" || typeof bValue === "string") {
+          return sortConfig.direction === "asc"
+            ? String(aValue).localeCompare(String(bValue))
+            : String(bValue).localeCompare(String(aValue));
+        }
+
+        return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
+      });
+    }
+    return sortable;
+  }, [filteredData, sortConfig]);
+
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
+  const currentData = sortedData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const navigate = useNavigate();
+
+  // Go to page
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
+
+  return (
+    <div className="p-6">
+      <h2 className="mb-6 text-xl font-bold">NMU Item Master Table</h2>
+
+      {/* Search + Add Button */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <input
+          type="text"
+          placeholder="🔍 Search NMU Item..."
+          className="w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <NmuItemAdd onUpdate={fetchNmuItemData} />
+      </div>
+
+      {loading && <p>Loading data...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Table */}
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
+        <table className="min-w-full relative border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-200">
+            <tr className="text-sm text-gray-700 uppercase">
+              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("id")}
+              >
+                Item ID {getSortIcon("id")}
+              </th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("itemName")}
+              >
+                Item Name {getSortIcon("itemName")}
+              </th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("nmuId")}
+              >
+                NMU ID {getSortIcon("nmuId")}
+              </th>
+              <th className="p-3 text-center border">NMU Desc</th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("createdAt")}
+              >
+                Created At {getSortIcon("createdAt")}
+              </th>
+              <th className="p-3 text-center border">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.length > 0 ? (
+              currentData.map((item, i) => (
+                <tr
+                  key={item.id}
+                  className={`text-sm hover:bg-gray-100 ${
+                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  }`}
+                >
+                  <td className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + i + 1}
+                  </td>
+                  <td className="p-3 text-center border">{item.id}</td>
+                  <td className="p-3 text-center border">{item.itemName}</td>
+                  <td className="p-3 text-center border">{item.nmuId}</td>
+                  <td className="p-3 text-center border">
+                    {item.nmu?.NMUDesc || "-"}
+                  </td>
+                  <td className="p-3 border text-center">
+                    {new Date(item.createdAt).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
+                  <td className="flex items-center justify-center gap-2 p-3 border">
+                    <NmuItemEdit id={item.id} onUpdate={fetchNmuItemData} />
+                    <NmuItemDelete id={item.id} onUpdate={fetchNmuItemData} />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="p-6 text-center text-gray-500">
+                  No entries found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        {/* Info */}
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> NMU Item entries
+        </div>
+
+        {/* Pagination + Go to page */}
         {totalPages > 1 && (
           <div className="flex items-center gap-3">
             <button
