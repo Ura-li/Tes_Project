@@ -9,7 +9,6 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
-import { useNavigate } from 'react-router'
 
 export const ErfCase = () => {
   const [caseData, setCaseData] = useState([])
