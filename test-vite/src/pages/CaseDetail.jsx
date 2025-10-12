@@ -2567,7 +2567,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     {entitlementStatus?.PhotoUnit ? (
 
                       <div className="flex flex-col gap-2">
-                        { typeof entitlementStatus?.PhotUnit === "string" ? (
+                        { typeof entitlementStatus?.PhotoUnit === "string" ? (
                           <a
                             href={`${import.meta.env.VITE_API_BASE_URL}${entitlementStatus?.PhotoUnit}`}
                             target="_blank"
