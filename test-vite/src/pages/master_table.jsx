@@ -988,7 +988,6 @@ export const Case_table = () => {
 
     try {
       const response = await ApiCustomer.get(url);
-      console.log("Fetching Data : ",response.data.data)
       if (response.data.success) {
         setCaseData(response.data.data);
       } else {
