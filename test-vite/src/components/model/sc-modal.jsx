@@ -5384,7 +5384,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
     flex flex-col justify-center
     gap-0 p-0 bg-white
     [&>button]:hidden rounded-none">
-            <DialogHeader className={"p-2"}>
+            <DialogHeader className={"p-2 mt-30"}>
               <div className="flex items-end justify-end">
                 <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
                 <DialogClose asChild>
@@ -5743,7 +5743,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
                   </TableRow>
                   <TableRow className={'bg-blue-400'}>
                     <TableCell colSpan={4}></TableCell>
-                    <TableCell colSpan={2}>Total</TableCell>
+                    <TableCell colSpan={3}>Total</TableCell>
                     <TableCell>--</TableCell>
                     <TableCell>--</TableCell>
                   </TableRow>
