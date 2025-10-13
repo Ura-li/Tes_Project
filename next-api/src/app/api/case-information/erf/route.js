@@ -29,22 +29,23 @@ export async function POST(request) {
         for (const file of files) {
             const originalName = file.name;
             const caseId = path.parse(originalName).name; // filename without extension
-
+            
             // ✅ 1. Validate CaseID format (must not be empty, must be alphanumeric)
-            if (!/^[A-Za-z0-9_-]+$/.test(caseId)) {
+            if (!/^[Cc]-\d+$/.test(caseId)) {
                 results.push({
                     file: originalName,
                     status: "failed",
-                    message: `Invalid filename: ${originalName}. Must match a valid CaseID (alphanumeric).`,
+                    message: `Invalid filename: ${originalName}. Must match a valid CaseID (C-[CaseID]).`,
                 });
                 continue;
             }
 
+            
             // ✅ 2. Check if CaseID exists in DB
             const caseExists = await prisma.caseinformation.findUnique({
                 where: { CaseID: caseId },
             });
-
+            
             if (!caseExists) {
                 results.push({
                     file: originalName,
@@ -53,7 +54,6 @@ export async function POST(request) {
                 });
                 continue;
             }
-
             // ✅ 3. Check file size before saving
             const arrayBuffer = await file.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
