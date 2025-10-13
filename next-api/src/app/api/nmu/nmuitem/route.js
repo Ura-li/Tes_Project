@@ -7,6 +7,8 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const search = searchParams.get("search") || "";
 
+        const nmuId = searchParams.get("NMUId") || null;
+        console.log(nmuId)
         const page = parseInt(searchParams.get("page")) || 1;
         const limit = parseInt(searchParams.get("limit")) || 50;
 
@@ -14,18 +16,14 @@ export async function GET(request) {
 
         let whereCondition = {}
         
-            if (search) {
-                whereCondition = {
-                    AND: [
-                    {
-                        OR: [
-                        { itemName: { contains: search } },
-                        { nmuId: { contains: search } },
-                        ]
-                    }
-                    ]
-                }
-            }
+        if (search) {
+            whereCondition.itemName = { contains: search };
+        }
+
+        if (nmuId) {
+            whereCondition.nmuId = Number(nmuId);
+        }
+
 
 
         console.log("Final WHERE Condition:", JSON.stringify(whereCondition));
