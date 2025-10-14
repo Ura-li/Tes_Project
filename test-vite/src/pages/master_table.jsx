@@ -8918,7 +8918,7 @@ export const NmuItemTable = () => {
                   </td>
                   <td className="flex items-center justify-center gap-2 p-3 border">
                     <NmuItemEdit id={item.id} onUpdate={fetchNmuItemData} />
-                    <NmuItemDelete id={item.id} onUpdate={fetchNmuItemData} />
+                    <NmuItemDelete id={item.id} itemName={item.itemName} onUpdate={fetchNmuItemData} />
                   </td>
                 </tr>
               ))

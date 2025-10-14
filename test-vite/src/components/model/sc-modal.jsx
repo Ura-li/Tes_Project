@@ -10354,38 +10354,33 @@ export function NmuItemAdd() {
   );
 }
 
-export function NmuItemEdit({ id }) {
+export function NmuItemEdit({ id, onUpdate }) {
   const [formData, setFormData] = useState({
     itemName: "",
     nmuId: "",
   });
-  console.log("THE vALUE",id)
 
   const [nmuList, setNmuList] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Fetch list NMU untuk dropdown
-  useEffect(() => {
-    const fetchNMU = async () => {
-      try {
-        const res = await ApiCustomer.get("/api/nmu", {
-          params: { limit: 100 },
-        });
-        if (res.data.success) {
-          setNmuList(res.data.data);
-        }
-      } catch (error) {
-        console.error("Gagal ambil data NMU:", error);
+  // Ambil list NMU untuk dropdown
+  const fetchNMU = async () => {
+    try {
+      const res = await ApiCustomer.get("/api/nmu", {
+        params: { limit: 100 },
+      });
+      if (res.data.success) {
+        setNmuList(res.data.data);
       }
-    };
+    } catch (error) {
+      console.error("Gagal ambil data NMU:", error);
+    }
+  };
 
-    fetchNMU();
-  }, []);
-
-  // Fetch data NMUItem untuk edit
+  // Ambil data NMUItem untuk edit
   const fetchNMUItem = async () => {
     try {
       const res = await ApiCustomer.get(`/api/nmu/nmuitem/${id}`);
-      console.log("TES VALUE OF THE NMU ITEM",res)
       if (res.data.success) {
         setFormData({
           itemName: res.data.data.itemName,
@@ -10396,12 +10391,14 @@ export function NmuItemEdit({ id }) {
       console.error("Gagal ambil data NMU Item:", error);
     }
   };
-  useEffect(() => {
 
-    if (id) {
-      fetchNMUItem();
+  // Load data ketika modal dibuka
+  useEffect(() => {
+    if (isOpen) {
+      fetchNMU();
+      if (id) fetchNMUItem();
     }
-  }, [id]);
+  }, [isOpen]);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -10427,19 +10424,20 @@ export function NmuItemEdit({ id }) {
       await ApiCustomer.patch(`/api/nmu/nmuitem/${id}`, formData);
       Swal.fire({
         icon: "success",
-        title: "Success",
-        text: "NMU Item berhasil diperbarui",
+        title: "Updated!",
+        text: "NMU Item berhasil diperbarui.",
         timer: 1200,
         showConfirmButton: false,
       }).then(() => {
-        window.location.reload();
+        setIsOpen(false);
+        if (onUpdate) onUpdate();
       });
     } catch (error) {
       console.error("Gagal update NMU Item:", error);
       Swal.fire({
         icon: "error",
         title: "Failed",
-        text: "Gagal mengupdate data",
+        text: "Gagal mengupdate data.",
         timer: 1500,
         showConfirmButton: false,
       });
@@ -10447,10 +10445,13 @@ export function NmuItemEdit({ id }) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm">Edit</Button>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil size={16} />
+        </Button>
       </DialogTrigger>
+
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit NMU Item</DialogTitle>
@@ -10490,64 +10491,89 @@ export function NmuItemEdit({ id }) {
   );
 }
 
-export function NmuItemDelete({ id, itemName }) {
-  const [loading, setLoading] = useState(false);
-
+export function NmuItemDelete({ id, itemName, onUpdate }) {
   const handleDelete = async () => {
-    setLoading(true);
-    try {
-      await ApiCustomer.delete(`/api/nmu/nmuitem/${id}`);
-      Swal.fire({
-        icon: "success",
-        title: "Deleted",
-        text: "NMU Item berhasil dihapus",
-        timer: 1200,
-        showConfirmButton: false,
-      }).then(() => {
-        window.location.reload();
-      });
-    } catch (error) {
-      console.error("Gagal hapus NMU Item:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Failed",
-        text: "Gagal menghapus data",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-    } finally {
-      setLoading(false);
+    const result = await Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: `Item "${itemName}" akan dihapus secara permanen dan tidak bisa dibatalkan.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/nmu/nmuitem/${id}`);
+
+        // Jika backend mengirim status gagal atau 409 (foreign key constraint)
+        if (response.status === 409 || response.data.success === false) {
+          return Swal.fire({
+            icon: "warning",
+            title: "Tidak Bisa Dihapus!",
+            text:
+              response.data.message ||
+              "Data ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        }
+
+        // ✅ Jika sukses hapus
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "NMU Item berhasil dihapus.",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        }).then(() => {
+          if (onUpdate) {
+            onUpdate(); // refresh tabel parent tanpa reload halaman
+          } else {
+            window.location.reload();
+          }
+        });
+      } catch (error) {
+        const message = error?.response?.data?.message;
+        if (error?.response?.status === 409) {
+          Swal.fire({
+            icon: "warning",
+            title: "Tidak Bisa Dihapus!",
+            text:
+              message ||
+              "Data ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Gagal Menghapus!",
+            text: "Terjadi kesalahan saat menghapus data. Silakan coba lagi.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        }
+      }
     }
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="destructive" className="h-11 rounded-sm">
-          Delete
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Hapus NMU Item</DialogTitle>
-          <DialogDescription>
-            Apakah kamu yakin ingin menghapus item <b>{itemName}</b>?  
-            Data yang sudah dihapus tidak bisa dikembalikan.
-          </DialogDescription>
-        </DialogHeader>
-
-        <DialogFooter className="mt-4">
-          <Button variant="outline">Batal</Button>
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={loading}
-          >
-            {loading ? "Menghapus..." : "Ya, Hapus"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <Button
+      variant="outline"
+      className="text-red-500 hover:text-red-700"
+      onClick={handleDelete}
+    >
+      <Trash size={16} />
+    </Button>
   );
 }
 
