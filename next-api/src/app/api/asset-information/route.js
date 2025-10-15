@@ -167,13 +167,13 @@ export async function POST(request) {
             data: {
                 AssetID: asset_information.AssetID,
                 WarrantyApprovalStatus : "New",
-                WarrantyCardDate: null,
-                POPDocument: null,
-                WarrantyCard: null,
-                PhotoUnit: null,
-                EndUserName: null,
-                EndUserPhone: null,
-                EndUserAddress: null,
+                WarrantyCardDate: "",
+                POPDocument: "",
+                WarrantyCard: "",
+                PhotoUnit: "",
+                EndUserName: "",
+                EndUserPhone: "",
+                EndUserAddress: "",
             }
         });
     }
