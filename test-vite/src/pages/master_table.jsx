@@ -988,7 +988,6 @@ export const Case_table = () => {
 
     try {
       const response = await ApiCustomer.get(url);
-      console.log("Fetching Data : ",response.data.data)
       if (response.data.success) {
         setCaseData(response.data.data);
       } else {
@@ -1069,7 +1068,6 @@ export const Case_table = () => {
             return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
           }
         }
-
         // coba numeric dulu
         const numA = parseFloat(aVal);
         const numB = parseFloat(bVal);
@@ -1144,6 +1142,7 @@ const EnumToLabel = {
   InActive: "In Active",
   Close: "Close",
   Active: "Active",
+  Monitor: "Monitor",
   Pending_Customer_Action: "Pending Customer",
   Quote_Requested: "Quote Requested",
   Pending_Follow_Up: "Pending Follow Up",
@@ -1151,6 +1150,10 @@ const EnumToLabel = {
   Escalated: "Escalated",
   Quote_Approved: "Quote Approved",
   Pending_Quote: "Pending Quote",
+  NEW_AssignCE: "New Assign CE",
+  NEW_AssignAPO: "New Assign APO",
+  NEW_AssignLeader: "New Assign Leader",
+  NEW_AssignPS: "New Assign PS",
   NEW_POPDoc: "POP Document",
   NEW_Warranty: "New Warranty",
   AssignCE: "Assign CE",
@@ -1259,7 +1262,7 @@ const EnumToLabel = {
         </div>
          {/* Toggle status */}
       <div className="flex flex-col">
-        <label htmlFor="status" className="mb-1 text-sm font-medium mb-2">Toggle Status Of Case :</label>
+        <label htmlFor="status" className="mb-2 text-sm font-medium">Toggle Status Of Case :</label>
         <Select defaultValue="All" value={openClose} onValueChange={setOpenClose}>
           <SelectTrigger id="status">
             <SelectValue>{openClose}</SelectValue>
@@ -1282,9 +1285,9 @@ const EnumToLabel = {
           >
             Reset Filters
           </Button>
-           {user?.role === 'admin' ? 
-      <ExportExcel caseData={caseData} />
-      : null}
+           {user?.role === 'admin' || user?.role === 'fd' ? 
+          <ExportExcel caseData={caseData} />
+          : null}
         </div>
       </div>
 
@@ -1362,11 +1365,11 @@ const EnumToLabel = {
                 <td className="p-2 border">{caseItem.SerialNumber}</td>
                 <td className="p-2 border">{caseItem.ProductNumber}</td>
                 <td className="p-2 border">{caseItem.ProductName}</td>
-                <td className="p-2 border">{caseItem.caseinformation?.otcCodeTable?.WarrantyCondition}</td>
-                <td className="p-2 border">{caseItem.caseinformation?.otcCodeTable?.Description}</td>
+                <td className="p-2 border">{caseItem.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition}</td>
+                <td className="p-2 border">{caseItem.caseinformation?.asset_information?.WarrantyOTCCode?.Description}</td>
                 <td className="p-2 border">{caseItem.caseinformation?.CaseType}</td>
                 <td className="p-2 border">{caseItem.CreatedOn}</td>
-                <td className="p-2 border">{caseItem.caseinformation?.CaseID_Manual_Date}</td>
+                <td className="p-2 border">{caseItem.caseinformation?.CaseID_Manual_Date ? new Date(caseItem.caseinformation?.CaseID_Manual_Date).toLocaleString() : "N/A"}</td>
                 <td className="p-2 border">{caseItem.Primary}</td>
                 <td className="p-2 border">{caseItem.CreatedName}</td>
                 <td className="p-2 border">{caseItem.Owner}</td>

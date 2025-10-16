@@ -557,7 +557,7 @@ useEffect(() => {
   let canEditCE;
   const allowedRoles = ["apo","lg","admin"]
   if (moLineItems?.Status !== "Closed") {
-    canEditCE = user?.role  === "ce" || user?.role === "celead"
+    canEditCE = user?.role  === "ce" || user?.role === "celead" || user?.role === "admin"
     canEdit = allowedRoles.includes(user?.role)
   } else {
     canEdit = false
@@ -923,7 +923,7 @@ useEffect(() => {
                     />
                   </CaseField>
                   
-                  <CaseField label="New CT Key" star={canEdit} lock={!canEdit}>
+                  <CaseField label="New CT Key" star={canEditCE} lock={!canEditCE}>
                     <Input
                       variant="invisible"
                       name="removedSerialNumber"

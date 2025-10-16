@@ -1823,7 +1823,7 @@ if (caseDetails.CaseStatus !== "Close") {
                 {/* {assignToForm == true ?? (
                 )} */}
 
-                <CaseField label="Case Type" open className={"mt-2"} childClass={'col-span-2'} span={2} lock={!canEdit} >
+                <CaseField label="Case Type" open className={"mt-2"} childClass={'col-span-2'} span={2} lock={!canEditFd} >
                   <SearchCommandBlock
                     value={caseForm?.CaseType}
                     onChange={onChangeCase("CaseType")}

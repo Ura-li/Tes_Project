@@ -55,7 +55,11 @@ export async function GET(request) {
             {
                 workorder: {
                     include: {
-                        caseinformation: true,
+                        caseinformation: {
+                            include : {
+                                ActionLog: true,
+                            }
+                        }
                     }
                 },
                 materialorderlineitems: true,
