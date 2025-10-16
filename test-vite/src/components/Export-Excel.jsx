@@ -26,11 +26,27 @@ export const ExportExcel = ({ caseData }) => {
           c.caseinformation.CreatedOn &&
           c.caseinformation.CaseClosedDate
         ) {
-          const created = new Date(c.caseinformation.CreatedOn);
+        const created = new Date(c.caseinformation.CreatedOn);
         const closed = new Date(c.caseinformation.CaseClosedDate);
-          const diffTime = Math.abs(closed - created);
-          range = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + " days";
+        const diffTime = Math.abs(closed - created);
+        range = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + " days";
         }
+
+        let jarak;
+        const CreatedCase = new Date(c.caseinformation.CreatedOn);
+
+        const finishRepairLog = c.UpdatedActionLogs.find(
+          log => log.dataNew === "Finish Repair"
+        );
+
+        if (finishRepairLog) {
+          const finisRepair = new Date(finishRepairLog.ChangeAt);
+          const Waktu = Math.abs(CreatedCase - finisRepair);
+          jarak = Math.ceil(Waktu / (1000 * 60 * 60 * 24)) + " days";
+        } else {
+          jarak = "N/A";
+        }
+
 
         return {
           CaseID: c.caseinformation.CaseID || "N/A",
@@ -55,10 +71,13 @@ export const ExportExcel = ({ caseData }) => {
           } ${c.caseinformation.contact_information?.LastName ?? ""}`.trim() || "N/A",
           Customer_City : c.caseinformation.contact_information?.City || "N/A",
           Received_Date: c.caseinformation.CreatedOn ? new Date (c.caseinformation.CreatedOn).toLocaleString() : "N/A",
+          Part_OrderDate: c.UpdatedActionLogs.find(log => log.dataNew === "PartOrder") ? new Date (c.UpdatedActionLogs.find(log => log.dataNew === "PartOrder").ChangeAt).toLocaleString() : "N/A",
+          FinishRepair : finishRepairLog ? new Date (c.UpdatedActionLogs.find(log => log.dataNew === "Finish Repair").ChangeAt).toLocaleString() : "N/A",
           Closed_Date: c.caseinformation.CaseClosedDate ? new Date (c.caseinformation.CaseClosedDate).toLocaleString() : "N/A",
           Case_ID_Manual_Date : c.caseinformation.CaseID_Manual_Date ? new Date (c.caseinformation.CaseID_Manual_Date).toLocaleString() : "N/A",
           //  NEW COLUMNS
           Accessories: accessories,
+          TatFinisRepair : jarak,
           DurationDays: range,
           Delay_Code: c.caseinformation.workorder[0]?.DelayCode || "N/A",
         };
@@ -122,8 +141,11 @@ export const ExportExcel = ({ caseData }) => {
     "Customer Name" : items.Customer_Name,
     "Customer City" : items.Customer_City,  
     "Received Date" : items.Received_Date,
+    "Part Order Date" : items.Part_OrderDate,
+    "Finish Repair Date" : items.FinishRepair,
     "Closed Date" : items.Closed_Date,
     "Case ID Manual Date" : items.Case_ID_Manual_Date,
+    "TAT Finish Repair" : items.TatFinisRepair,
     "TAT E2E" : items.DurationDays,
     "Delay Code" : items.Delay_Code
   }))
