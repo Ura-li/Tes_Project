@@ -80,18 +80,18 @@ export default function FrontDesk_Page() {
       const valueFilterInActiveCase = response.data.data.filter(c => c?.CaseStatus == 'InActive' && c?.caseinformation?.CreatedBy == user.id)
       const valueFilterCloseCase = response.data.data.filter(c => c?.CaseStatus == 'Close' && c?.caseinformation?.CreatedBy == user.id)
       const filtercases = response.data.data.filter(c => c?.CaseStatus !== 'Close' && c?.caseinformation?.Owner == user.id);
-      const rawDate = filtercases[0]?.caseinformation?.ActionLog[0]?.ChangeAt;
-      let newdate;
-      if (rawDate) {
-        const dateObj = rawDate instanceof Date ? rawDate : new Date(rawDate);
-        console.log("Readable:", dateObj.toLocaleString("id-ID"));
-        newdate = dateObj.toLocaleString("id-ID");
-      } else {
-        console.log("No date available");
-      }
+      // const rawDate = filtercases[0]?.caseinformation?.ActionLog[0]?.ChangeAt;
+      // let newdate;
+      // if (rawDate) {
+      //   const dateObj = rawDate instanceof Date ? rawDate : new Date(rawDate);
+      //   console.log("Readable:", dateObj.toLocaleString("id-ID"));
+      //   newdate = dateObj.toLocaleString("id-ID");
+      // } else {
+      //   console.log("No date available");
+      // }
       const sortedCases = filtercases.sort((a, b) => {
-        const dateAraw = a.caseinformation.ActionLog[0]?.ChangeAt;
-        const dateBraw = b.caseinformation.ActionLog[0]?.ChangeAt;
+        const dateAraw = a.UpdateOn;
+        const dateBraw = b.UpdateOn;
 
         const dateA = dateAraw ? (dateAraw instanceof Date ? dateAraw : new Date(dateAraw)) : new Date(0);
         const dateB = dateBraw ? (dateBraw instanceof Date ? dateBraw : new Date(dateBraw)) : new Date(0);
@@ -99,7 +99,6 @@ export default function FrontDesk_Page() {
         return dateB - dateA; // newest first
       });
       const recentCases = sortedCases.slice(0, 3);
-      console.log("Length of the arrays", valuefiltercases);
       
       setCaseData(recentCases);
       setCasevaluedata(valueFilterOpenCase?.length);
@@ -122,11 +121,7 @@ export default function FrontDesk_Page() {
   useEffect(() => {
     fetchData();
   }, []);
-  const tesa = caseData[0]?.caseinformation?.ActionLog[0]?.ChangeAt;
-  const tes_time = tesa instanceof Date ? tesa : new Date(tesa);
-  console.log("testime:", tes_time.toLocaleString("id-ID"));
-  console.log("check created time at ", caseData[0])
-
+ 
   const navigate = useNavigate();
 
 
@@ -236,7 +231,7 @@ export default function FrontDesk_Page() {
                   <p className={cn("font-medium truncate mt-1", !c.CaseSubject && 'text-red-500')}>{c.CaseSubject || "No Subject"}</p>
                   <div className=" text-gray-500 mt-1 flex justify-between">
                     <p className='text-md'>{c.CaseID}</p>
-                    <p className='text-md  font-semibold'>{c.UpdateOn}</p>
+                    <p className='text-md  font-semibold'>{c.UpdateOn ? new Date(c.UpdateOn).toLocaleString("id-ID") : "No Update"}</p>
                   </div>
                 </Card>
               ))}

@@ -38,7 +38,7 @@ function Input({
       type={type}
       data-slot="input"
       className={cn(inputVariants({ variant, className }))}
-      value={safeValue}
+      value={type !== 'file' ? safeValue : value}
       {...props} />
   );
 }

@@ -22,6 +22,7 @@ export function useNotifications(userId) {
 
     // helper to add new notif
     function addNotification(notif) {
+        if (!userId) return;
         // setNotifications(prev => [{ ...notif, userId }, ...prev]);
         const token = Date.now().toString(36) + Math.random().toString(36).slice(2);
         setNotifications(prev => [{ ...notif, userId, token }, ...prev]);
