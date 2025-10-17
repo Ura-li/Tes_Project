@@ -107,19 +107,18 @@ export async function GET(request) {
       },
       accessory: true,
       ActionLog: {
-        // where: {
-        //   CaseId: 
-        //   { 
-        //     not: null 
-        //   }
-        // },
-        // orderBy: {
-        //   ChangeAt: 'desc'
-        // },
-        take: 1,
+        where: {
+
+          
+        },
+        orderBy: {
+          ChangeAt: 'desc'
+        },
       }
     },
   });
+
+
 
   return NextResponse.json(
     {
@@ -129,7 +128,7 @@ export async function GET(request) {
         CaseID: caseData.CaseID,
         // CreatedOn: caseData.CreatedOn,
         CreatedOn: caseData.CreatedOn.toLocaleString("id-ID"),
-        UpdateOn: caseData.ActionLog[0]?.ChangeAt ? new Date(caseData.ActionLog[0].ChangeAt).toLocaleString("id-ID") : "No Update",
+        UpdateOn: caseData.ActionLog[0]?.ChangeAt ,
         // Actionlog: caseData.ActionLog[0]?.ChangeAt,
         CaseSubject: caseData.CaseSubject,
         CustomerAccount:
@@ -148,7 +147,17 @@ export async function GET(request) {
         Owner: caseData.ownerUser?.Name, // Replace with the database owned
         WorkGroup: caseData.ownerUser?.Name, // Replace with the database owned
         CaseStatus: caseData.CaseStatus,
-        caseinformation: caseData,
+         caseinformation: {
+      ...caseData,
+      ActionLog: undefined,
+    },
+        UpdatedActionLogs: caseData?.ActionLog.filter((log) => log.dataOld !== log.dataNew && !(log.logDescription.includes('Owner'))).map((log) => ({
+          ChangeAt: log.ChangeAt,
+          ChangedBy: log.ChangedBy,
+          dataOld: log.dataOld,
+          dataNew: log.dataNew,
+          logDescription: log.logDescription
+        })) || [],
       })),
       value: {
         open: openCount,

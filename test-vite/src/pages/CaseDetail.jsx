@@ -94,6 +94,7 @@ import SignatureWrite from "@/components/SignaturePad";
 import { description } from "@/components/sc-chart";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { set } from "lodash";
 
 /**
  * TODO : 
@@ -234,6 +235,7 @@ export const TabsServiceCaseDetails = ({
   const [selectedSymptom, setSelectedSymptom] = useState(null);
   const [notesList, setNotesList] = useState([]);
   const { open } = useSidebar();
+  const [refreshFetchPage, setRefreshFetchPage] = useState(false)
 
   const [entitlementStatus, setEntitlementStatus] = useState({
     OTCCode: "",
@@ -709,6 +711,7 @@ export const TabsServiceCaseDetails = ({
       Swal.close();
     });
   }
+  setRefreshFetchPage(prev => !prev);
 };
 
 const openPopup = () => {
@@ -1030,6 +1033,7 @@ const openPopup = () => {
             onChangeCsr={handleCsrChange}
             signature={signature}
             setSignature={setSignature}
+            refreshFetchPage={refreshFetchPage}
           />
       </div>
     </>
@@ -1065,7 +1069,8 @@ export const ServiceCase = ({
   onChangeCase,
   setCaseForm,
   signature,
-  setSignature
+  setSignature,
+  refreshFetchPage,
 }) => {
   const { open } = useSidebar();
 
@@ -1455,7 +1460,7 @@ const fetchActionLog = async () => {
     fetchCsr();
     fetchCase();
     fetchActionLog();
-  }, [ caseDetails.CaseID]);
+  }, [ caseDetails.CaseID, refreshFetchPage]);
   useEffect(() => {
     fetchUserAssign();
   }, [assignToForm]);

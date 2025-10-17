@@ -5,11 +5,7 @@ import { toast } from "sonner";
 
 export function GlobalLogListener() {
   const { user, loading } = useAuth();
-
-  if (loading || !user) {
-    return null; // don’t render listener until auth is ready
-  }
-  const { addNotification } = useNotifications(user.id);
+  const { addNotification } = useNotifications(user?.id);
 
   useSocket("log:created", (log) => {
     const notif = {
@@ -38,6 +34,9 @@ export function GlobalLogListener() {
       </div>
     ));
   });
+  if (loading || !user) {
+    return null; // don’t render listener until auth is ready
+  }
 
   return null;
 }
