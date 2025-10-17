@@ -328,6 +328,8 @@ model materialorderlineitems {
   materialorder        materialorder?        @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
   servicecatalog_parts servicecatalog_parts? @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
 
+  CTValidation Boolean?
+
   @@index([MOID], map: "MOID")
   @@index([PartNumber], map: "PartNumber")
 }
