@@ -1081,158 +1081,91 @@ export default function NewCaseForm() {
     try {
       const user = getUserFromTokenSafe();
 
+      const pickLabel = (value) => {
+        if (value && typeof value === "object") {
+          return value.name ?? value.label ?? value.value ?? "";
+        }
+        return value ?? "";
+      };
+
       // Filter out empty accessories (all empty fields)
       const filteredAccessories = accessories.filter(
         (a) => a.name.trim() || a.note.trim() || a.code.trim()
       );
 
-      let assetId = selectedAsset?.AssetID;
-      let assetSN = selectedAsset?.SerialNumber;
-      let productId = selectedProduct?.ProductNumber || productNo;
-      let companyId = selectedCompany?.SiteAccountID;
-      let contactId = selectedContact?.ContactID;
+      const assetSN = selectedAsset?.SerialNumber;
       const normalizedEowDate = eowDate ? new Date(eowDate).toISOString() : null;
+      const existingCompanyId = selectedCompany?.SiteAccountID ?? null;
+      const finalProductNumber =
+        selectedProduct?.ProductNumber || productNo || null;
 
-      if (isNewProduct) {
-        const productRes = await ApiCustomer.post("/api/product-information", {
-          ProductNumber: productNo,
-          ProductName: productName,
-          ProductLine: productLine,
-          HWPC: HWPCCode,
-          vendor: vendor,
-          ProductTypeID: parseInt(productTypeId)
-        })
-        productId = productRes.data?.data?.ProductNumber
-      }
-      if (isNewContact && (showCompanySection)) {
-        if(selectedCompany) {
-          companyId = companyId;
-        }else{
-          console.log("TIS IS A NEW COMPANY")
-          const companyRes = await ApiCustomer.post("/api/site_account", {
+      const needsNewCompany =
+        isNewContact && showCompanySection && !selectedCompany;
+      const companyPayload = needsNewCompany
+        ? {
             Company: companyName,
             Email: companyEmail,
             PrimaryPhone: companyPhone,
             WhatsappNo: companyWhatsapp,
             AddressLine1: companyAddressLine1,
-            City: companyCity.name ?? companyCity, // --> emsifa
-            StateProvince: companyStateProvince.name ?? companyStateProvince, // --> emsifa
+            AddressLine2: "",
+            City: pickLabel(companyCity),
+            StateProvince: pickLabel(companyStateProvince),
             Country: companyCountry,
             ZipPostalCode: companyZipPostalCode,
-            NPWP: companyNPWP
-          })
-          companyId = companyRes.data?.data?.SiteAccountID;
-        };
-      }
-
-
-
-      if (isNewContact) {
-        console.log("TIS IS A NEW Contact")
-        if(usePIC) console.log("TIS IS A PIC")
-        const contactRes = await ApiCustomer.post("/api/contact-information", {
-          SiteAccountID: companyId,
-          Salutation: contactSalutation,
-          FirstName: contactFirstName,
-          LastName: contactLastName,
-          Email: contactEmail,
-          Phone: contactPhone,
-          Mobile: contactMobile,
-          AddressLine1: contactAddressLine1,
-          City: contactCity.name, // --> emsifa
-          StateProvince: contactStateProvince.name, // --> emsifa
-          Country: contactCountry,
-          ZipPostalCode: contactZipPostalCode,
-          PIC_Name: contactPICName,
-          PIC_Email: contactPICEmail,
-          PIC_Phone: contactPICPhone
-        })
-        contactId = contactRes.data?.data?.ContactID;
-      }
-
-      if (!isNewContact) {
-        const contactPatchPayload = {};
-        if (usePIC) {
-          contactPatchPayload.PIC_Name = contactPICName;
-          contactPatchPayload.PIC_Email = contactPICEmail;
-          contactPatchPayload.PIC_Phone = contactPICPhone;
-        }
-        if (companyId && selectedContact?.SiteAccountID == null) {
-          contactPatchPayload.SiteAccountID = companyId;
-        }
-
-        if (Object.keys(contactPatchPayload).length) {
-          await ApiCustomer.patch(`/api/contact-information/${contactId}`, contactPatchPayload);
-          if (contactPatchPayload.SiteAccountID) {
-            setSelectedContact((prev) => (prev ? { ...prev, SiteAccountID: contactPatchPayload.SiteAccountID } : prev));
+            NPWP: companyNPWP,
           }
-        }
-      }
+        : null;
 
-      if (isNewAsset) {
-        console.log(warrantySearchValue)
-        console.log(eowDate)
-        const assetRes = await ApiCustomer.post("/api/asset-information", {
-          SerialNumber: serialQuery,
-          ProductNumber: productId,
-          ContactID: contactId ?? null ,
-          SiteAccountID: companyId ?? null,
-          Warranty_Status: warrantySearchValue,
-          EOW_Date: normalizedEowDate,
-          needWarrantyApproval: needWarrantyApproval,
-          
-        })
-        
-        assetId = assetRes.data?.data?.AssetID
-      } else {
-        const assetPatchPayload = {};
-        if (warrantySearchValue) {
-          assetPatchPayload.Warranty_Status = warrantySearchValue;
-          assetPatchPayload.EOW_Date = normalizedEowDate;
-        }
-        if (selectedAsset?.ContactID == null && contactId) {
-          assetPatchPayload.ContactID = contactId;
-        }
-        if (selectedAsset?.SiteAccountID == null && companyId) {
-          assetPatchPayload.SiteAccountID = companyId;
-        }
+      const productPayload = isNewProduct
+        ? {
+            ProductNumber: productNo,
+            ProductName: productName,
+            ProductLine: productLine,
+            ProductTypeID: productTypeId ? parseInt(productTypeId, 10) : null,
+            HWPC: HWPCCode,
+            vendor,
+          }
+        : null;
 
-        if (Object.keys(assetPatchPayload).length || needWarrantyApproval) {
-          assetPatchPayload.needWarrantyApproval = needWarrantyApproval;
-          await ApiCustomer.patch(`/api/asset-information/${assetId}`, assetPatchPayload);
-          setSelectedAsset((prev) => {
-            if (!prev) return prev;
-            const next = { ...prev };
-            if (Object.prototype.hasOwnProperty.call(assetPatchPayload, "ContactID")) {
-              next.ContactID = assetPatchPayload.ContactID;
-            }
-            if (Object.prototype.hasOwnProperty.call(assetPatchPayload, "SiteAccountID")) {
-              next.SiteAccountID = assetPatchPayload.SiteAccountID;
-            }
-            if (Object.prototype.hasOwnProperty.call(assetPatchPayload, "Warranty_Status")) {
-              next.Warranty_Status = assetPatchPayload.Warranty_Status;
-            }
-            if (Object.prototype.hasOwnProperty.call(assetPatchPayload, "EOW_Date")) {
-              next.EOW_Date = assetPatchPayload.EOW_Date;
-            }
-            return next;
-          });
-        }
-      }
+      const contactPayload = isNewContact
+        ? {
+            Salutation: contactSalutation,
+            FirstName: contactFirstName,
+            LastName: contactLastName,
+            Email: contactEmail,
+            Phone: contactPhone,
+            Mobile: contactMobile,
+            AddressLine1: contactAddressLine1,
+            AddressLine2: "",
+            City: pickLabel(contactCity),
+            StateProvince: pickLabel(contactStateProvince),
+            Country: contactCountry,
+            ZipPostalCode: contactZipPostalCode,
+            PIC_Name: usePIC ? contactPICName : null,
+            PIC_Email: usePIC ? contactPICEmail : null,
+            PIC_Phone: usePIC ? contactPICPhone : null,
+          }
+        : null;
 
+      const contactPicPayload =
+        !isNewContact && usePIC
+          ? {
+              PIC_Name: contactPICName,
+              PIC_Email: contactPICEmail,
+              PIC_Phone: contactPICPhone,
+            }
+          : null;
 
-      
+      const caseStatusValue = needWarrantyApproval ? "NEW_POPDoc" : "New";
 
       /** @type {CaseCreatePayload} */
-      const payload = {
-        AssetID: assetId,
-        ContactID: contactId,
-        SiteAccountID: companyId ?? null,
+      const casePayload = {
         CaseSubject: caseSubject,
         CaseType: caseType,
         KCI_Flag: kciFlag,
         IncomingChannel: "Email",
-        CaseStatus: "New",
+        CaseStatus: caseStatusValue,
         CasePriority: "Medium",
         CustomerSeverity: "Normal",
         CaseClosedDate: null,
@@ -1242,17 +1175,58 @@ export default function NewCaseForm() {
         CreatedBy: user?.id,
         ProblemDescription: problemDesc,
         CaseNoteProduct: caseNote,
-        ...(filteredAccessories.length > 0 && { accessories: filteredAccessories }),
       };
 
-      needWarrantyApproval && (payload.CaseStatus = "NEW_POPDoc")
+      const references = {
+        productNumber: isNewProduct ? null : finalProductNumber,
+        companyId: needsNewCompany ? null : existingCompanyId,
+        contactId: isNewContact ? null : selectedContact?.ContactID ?? null,
+        assetId: isNewAsset ? null : selectedAsset?.AssetID ?? null,
+      };
 
+      const flags = {
+        isNewProduct,
+        isNewCompany: Boolean(companyPayload),
+        isNewContact,
+        isNewAsset,
+        needWarrantyApproval,
+        usePIC,
+        assignCompanyToExistingContact:
+          !isNewContact &&
+          Boolean((companyPayload || existingCompanyId) && selectedContact) &&
+          selectedContact?.SiteAccountID == null,
+        attachContactToExistingAsset:
+          !isNewAsset && selectedAsset?.ContactID == null,
+        attachCompanyToExistingAsset:
+          !isNewAsset &&
+          Boolean(companyPayload || existingCompanyId) &&
+          selectedAsset?.SiteAccountID == null,
+      };
 
-      
-      console.log(payload);
+      const compositePayload = {
+        caseData: casePayload,
+        accessories: filteredAccessories,
+        product: productPayload,
+        company: companyPayload,
+        contact: contactPayload,
+        contactPIC: contactPicPayload,
+        asset: isNewAsset ? { SerialNumber: serialQuery } : null,
+        warranty: { status: warrantySearchValue, eowDate: normalizedEowDate },
+        flags,
+        references,
+      };
 
-      const res = await ApiCustomer.post("/api/case-information", payload);
-      const caseId = res.data?.data?.CaseID;
+      const res = await ApiCustomer.post(
+        "/api/case-information/create-case",
+        compositePayload
+      );
+      const createdCase = res.data?.data?.case;
+      const caseId = createdCase?.CaseID;
+      const createdCaseStatus = createdCase?.CaseStatus;
+
+      if (!caseId) {
+        throw new Error("Case creation failed. Missing CaseID from response.");
+      }
 
       // Optional: upload photos to a local endpoint if present
       if (photos.length > 0) {
@@ -1275,7 +1249,7 @@ export default function NewCaseForm() {
           ReferenceId: `${caseId}`,
           model: "Case",
           dataOld: "New",
-          dataNew: res.data?.data?.CaseStatus,
+          dataNew: createdCaseStatus,
           changedBy: user?.id,
           logDescription: `New Case : ${caseId}`,
         });

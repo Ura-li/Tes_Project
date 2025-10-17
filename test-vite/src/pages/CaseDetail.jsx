@@ -2412,15 +2412,25 @@ if (caseDetails.CaseStatus !== "Close") {
                         getValue={(opt) => opt.OTCCode}
                       />
                     </CaseField>
-                  <CaseField lock={entitlementStatus?.needWarrantyApproval} label="Need warranty approval?"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-3"} span={2}>
+                  <CaseField lock={entitlementStatus?.needWarrantyApproval || !canEditFd} label="Need warranty approval?"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-3"} span={2}>
                     <SelectYN
                       // value={caseDetails.CaseStatus === "NEW_POPDoc" ? (WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition] === 'Out of Warranty' ? "Yes" : WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition] === 'InWarranty' ? "No" : "") : (caseDetails?.IsHWUnderWarranty ? "Yes" : "No")}
                       value={entitlementStatus?.needWarrantyApproval === undefined || entitlementStatus?.needWarrantyApproval === null ? "No" : entitlementStatus?.needWarrantyApproval ? "Yes" : "No"}
-                      onValueChange={(val) =>
-                        handleEntitlementStatus('needWarrantyApproval')(val === "Yes")}
+                      onValueChange={(val) => {
+                        const isNeed = val === "Yes";
+                        handleEntitlementStatus('needWarrantyApproval')(isNeed);
+                          if (isNeed) {
+                            const CmbineOTC = otcCode.find(otc => otc.OTCCode === '01T' && otc.Description === 'Trade (OOW)');
+                            console.log("CmbineOTC:", CmbineOTC);
+                            if (CmbineOTC) {
+                              handleEntitlementStatus("OTCCode")(CmbineOTC.OTCCode);
+                            }
+                          } 
+                        }
+                      }
                     />
                   </CaseField>
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Approval Status"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-3"} span={2}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Approval Status"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-3"} span={2} lock={!canEditFd}>
                     <SelectBar
                       options={
                         [
@@ -2433,11 +2443,12 @@ if (caseDetails.CaseStatus !== "Close") {
                       onChange={handleEntitlementStatus('WarrantyApprovalStatus')}
                     />
                   </CaseField>
-                    <CaseField  label="Warranty Expiration Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                    <CaseField  label="Warranty Expiration Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2} lock={!canEditFd}>
                       <DatePicker
                         variant="icon"
                       value={entitlementStatus?.EOW_Date}
                         onChange={handleEntitlementStatus('EOW_Date')}
+                        readOnly={!canEditFd}
                       ></DatePicker>
                     </CaseField>
                   {/* <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Upload Pop Document" className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
@@ -2449,6 +2460,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     className="col-span-1"
                     childClass="col-span-1 sm:col-span-2 md:col-span-2"
                     span={2}
+                    lock={!canEditFd}
                   >
                     {entitlementStatus?.POPDocument ? (
                       
@@ -2479,6 +2491,7 @@ if (caseDetails.CaseStatus !== "Close") {
                           onChange={(e) =>
                             handleEntitlementStatus("POPDocument")(e.target.files?.[0] || "")
                           }
+                          readOnly={!canEditFd}
                         />
                         
                       </div>
@@ -2488,6 +2501,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         onChange={(e) =>
                           handleEntitlementStatus("POPDocument")(e.target.files?.[0] || "")
                         }
+                        readOnly={!canEditFd}
                       />
                     )}
                   </CaseField>
@@ -2495,11 +2509,12 @@ if (caseDetails.CaseStatus !== "Close") {
 
 
                   
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Purchase date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Purchase date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2} lock={!canEditFd}>
                     <DatePicker
                       variant="icon"
                       value={entitlementStatus?.PurchaseDate}
                       onChange={handleEntitlementStatus('PurchaseDate')}
+                      readOnly={!canEditFd}
                     ></DatePicker>
                   </CaseField>
                   <CaseField
@@ -2508,6 +2523,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     className="col-span-1"
                     childClass="col-span-1 sm:col-span-2 md:col-span-2"
                     span={2}
+                    lock={!canEditFd}
                   >
                     {entitlementStatus.WarrantyCard ? (
 
@@ -2536,6 +2552,7 @@ if (caseDetails.CaseStatus !== "Close") {
                           onChange={(e) =>
                             handleEntitlementStatus("WarrantyCard")(e.target.files?.[0] || "")
                           }
+                          readOnly={!canEditFd}
                         />
 
                       </div>
@@ -2545,6 +2562,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         onChange={(e) =>
                           handleEntitlementStatus("WarrantyCard")(e.target.files?.[0] || "")
                         }
+                        readOnly={!canEditFd}
                       />
                     )}
                   </CaseField>
@@ -2552,11 +2570,12 @@ if (caseDetails.CaseStatus !== "Close") {
                     <Input type="file"  onChange={(e) => onPickWarrantyCards(e.target.files)} />
                   </CaseField> */}
                  
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Card Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Card Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2} lock={!canEditFd}>
                     <DatePicker
                       variant="icon"
                       value={entitlementStatus?.WarrantyCardDate}
                       onChange={handleEntitlementStatus('WarrantyCardDate')}
+                      readOnly={!canEditFd}
                     ></DatePicker>
                   </CaseField>
                   {/* <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Upload Photo Unit" className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
@@ -2568,6 +2587,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     className="col-span-1"
                     childClass="col-span-1 sm:col-span-2 md:col-span-2"
                     span={2}
+                    lock={!canEditFd}
                   >
                     {entitlementStatus?.PhotoUnit ? (
 
@@ -2598,6 +2618,7 @@ if (caseDetails.CaseStatus !== "Close") {
                           onChange={(e) =>
                             handleEntitlementStatus("PhotoUnit")(e.target.files?.[0] || "")
                           }
+                          readOnly={!canEditFd}
                         />
 
                       </div>
@@ -2607,17 +2628,18 @@ if (caseDetails.CaseStatus !== "Close") {
                         onChange={(e) =>
                           handleEntitlementStatus("PhotoUnit")(e.target.files?.[0] || "")
                         }
+                        readOnly={!canEditFd}
                       />
                     )}
                   </CaseField>
                   
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Name"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Name"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2} lock={!canEditFd}>
                     <Input value={entitlementStatus.EndUserName} onChange={(e) => handleEntitlementStatus('EndUserName')(e.target.value)} variant="invisible" placeholder="---" />
                   </CaseField>
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Phone"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Phone"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2} lock={!canEditFd}>
                     <Input value={entitlementStatus.EndUserPhone} onChange={(e) => handleEntitlementStatus('EndUserPhone')(e.target.value)} variant="invisible" placeholder="---" />
                   </CaseField>
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Address"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Address"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2} lock={!canEditFd}>
                     <Textarea value={entitlementStatus.EndUserAddress} onChange={(e) => handleEntitlementStatus('EndUserAddress')(e.target.value)} variant="invisible" placeholder="---" />
                   </CaseField>
                   </CardContent>
