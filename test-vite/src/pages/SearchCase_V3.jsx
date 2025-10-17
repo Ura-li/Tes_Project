@@ -1348,7 +1348,7 @@ export default function NewCaseForm() {
   // ----------------------------
 
   return (
-    <div className="bg-[#F8F9FA]   p-2 space-y-2">
+    <div className="bg-[#e8eaeb]   p-2 space-y-2">
       {/* Header */}
       {/* <div className="flex items-center justify-between pb-4 border-b"> */}
       {/* <div className="sticky top-[3.25rem] z-30  bg-[#0077B6] rounded-b-xl border-b p-3 flex flex-wrap gap-2 justify-between">
