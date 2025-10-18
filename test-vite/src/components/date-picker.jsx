@@ -48,6 +48,7 @@ export default function DatePicker({
   timeFormat = "hh:mm a",
   minDate,
   maxDate,
+  mode = "single"
 }) {
   const [showDatePopover, setShowDatePopover] = useState(false);
   const [showTimePopover, setShowTimePopover] = useState(false);
@@ -60,7 +61,16 @@ export default function DatePicker({
 
   // 🔄 Sync state with external value
   useEffect(() => {
-    if (value && isValid(value)) {
+    if (mode === "range") {
+      const { from, to } = value || {};
+      if (from && to) {
+        setDateInput(`${format(from, dateFormat)} - ${format(to, dateFormat)}`);
+      } else if (from) {
+        setDateInput(`${format(from, dateFormat)} - ...`);
+      } else {
+        setDateInput("");
+      }
+    } else if (value && isValid(value)) {
       setDateInput(format(value, dateFormat));
       setTimeInput(format(value, timeFormat));
       setViewDate(value);
@@ -68,7 +78,7 @@ export default function DatePicker({
       setDateInput("");
       setTimeInput("");
     }
-  }, [value]);
+  }, [value, mode]);
 
   // 🧠 Smart Date Parser (handles MMDDYYYY or MMDDYY)
   const parseFlexibleDate = (input) => {
@@ -96,6 +106,10 @@ export default function DatePicker({
   // 📅 Select from calendar
   const handleDateSelect = (date) => {
     if (!date) return onChange?.(null);
+    if (mode === "range") {
+      onChange?.(date)
+      return;
+    }
     const updated = setMinutes(setHours(date, getHours(value || new Date())), getMinutes(value || new Date()));
     onChange?.(updated);
     setShowDatePopover(false);
@@ -193,7 +207,7 @@ export default function DatePicker({
                 <Button variant={'outline'}  onClick={handlehide}>Month</Button>
               </div>
               <DayPicker
-                mode="single"
+                mode={mode}
                 selected={value}
                 onSelect={handleDateSelect}
                 month={viewDate}
@@ -234,7 +248,7 @@ export default function DatePicker({
       </Popover>
 
       {/* 🕒 Time Picker */}
-      {value && isValid(value) && (
+      {variant !== "Date" && value && isValid(value) && (
         <Popover open={showTimePopover} onOpenChange={setShowTimePopover}>
           <div className="relative w-full">
             <Input
