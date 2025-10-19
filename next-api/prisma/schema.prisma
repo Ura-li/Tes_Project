@@ -611,7 +611,7 @@ model BookingStatus {
   BookingsDetail BookingDetails[]
 }
 
-model workorder {
+model  workorder {
   WOID            String          @id @db.VarChar(13)
   CaseID          String?
   WorkOrderNumber String?         @db.VarChar(100)

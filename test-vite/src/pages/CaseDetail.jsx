@@ -232,6 +232,7 @@ export const TabsServiceCaseDetails = ({
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
   const { user } = useAuth();
+  
   const [selectedSymptom, setSelectedSymptom] = useState(null);
   const [notesList, setNotesList] = useState([]);
   const { open } = useSidebar();
@@ -780,6 +781,17 @@ const openPopup = () => {
     // { icon: StepBack, label: "Complaint",},
     { icon: StepBack, label: "SRF", 
       onClick: async () => {
+        // return console.log(user);
+        await ApiCustomer.post('/api/case-information/case-notes',{
+          LogType: "System Info",
+          ActionType: "Request SRF",
+          Template: "SRF Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] SRF requested by ${user?.role} - ${user?.name || "Unknown User"}`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        })
       const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails} customerSignature={signature} />).toBlob();
       const url = URL.createObjectURL(blob);
         window.open(url); 

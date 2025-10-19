@@ -754,7 +754,7 @@ export default function NewCaseForm() {
       if (!selectedAsset) return;
       try {
         const res = await ApiCustomer.get(`/api/case-information`, {
-          params: { CaseStatus: "Open" },
+          params: { excludeStatuses: ['Close', 'FinishRepair'] },
         });
         const list = res.data?.data ?? [];
 
@@ -1251,8 +1251,18 @@ export default function NewCaseForm() {
       
       console.log(payload);
 
-      const res = await ApiCustomer.post("/api/case-information", payload);
-      const caseId = res.data?.data?.CaseID;
+      // return console.log("Composite payoload", compositePayload)
+      const res = await ApiCustomer.post(
+        "/api/case-information/create-case",
+        compositePayload
+      );
+      const createdCase = res.data?.data?.case;
+      const caseId = createdCase?.CaseID;
+      const createdCaseStatus = createdCase?.CaseStatus;
+
+      if (!caseId) {
+        throw new Error("Case creation failed. Missing CaseID from response.");
+      }
 
       // Optional: upload photos to a local endpoint if present
       if (photos.length > 0) {
