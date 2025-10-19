@@ -71,7 +71,7 @@ export const SearchCommandBlock = ({
         <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2 ring-1"
           onClick={() => {
             if (!readOnly) {
-              onChange(null)
+              onChange("")
               setOpen
 
               setTimeout(() => {

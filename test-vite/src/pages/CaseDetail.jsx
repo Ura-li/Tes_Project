@@ -232,11 +232,12 @@ export const TabsServiceCaseDetails = ({
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
   const { user } = useAuth();
+  
   const [selectedSymptom, setSelectedSymptom] = useState(null);
   const [notesList, setNotesList] = useState([]);
   const { open } = useSidebar();
   const [refreshFetchPage, setRefreshFetchPage] = useState(false)
-
+console.log("CHECK REFRESH STATTUS",refreshFetchPage)
   const [entitlementStatus, setEntitlementStatus] = useState({
     OTCCode: "",
     PurchaseDate: "",
@@ -694,6 +695,7 @@ export const TabsServiceCaseDetails = ({
           allowOutsideClick: false,
           allowEscapeKey: false,
         });
+        setRefreshFetchPage(prev => !prev);
         // window.location.reload();
       }
       return true
@@ -711,7 +713,6 @@ export const TabsServiceCaseDetails = ({
       Swal.close();
     });
   }
-  setRefreshFetchPage(prev => !prev);
 };
 
 const openPopup = () => {
@@ -780,6 +781,17 @@ const openPopup = () => {
     // { icon: StepBack, label: "Complaint",},
     { icon: StepBack, label: "SRF", 
       onClick: async () => {
+        // return console.log(user);
+        await ApiCustomer.post('/api/case-information/case-notes',{
+          LogType: "System Info",
+          ActionType: "Request SRF",
+          Template: "SRF Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] SRF requested by ${user?.role} - ${user?.name || "Unknown User"}`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        })
       const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails} customerSignature={signature} />).toBlob();
       const url = URL.createObjectURL(blob);
         window.open(url); 
@@ -1139,9 +1151,8 @@ export const ServiceCase = ({
   });
   const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
   const [dataWarrantyStatus, setDataWarrantyStatus] = useState()
-  console.log("tes data assets", dataFetchAssetInformation)
   const [ownerUserData, setOwnerUserData] = useState([]);
-
+console.log("CHECK OWENER DATA ",ownerUserData)
   const [workOrders, setWorkOrders] = useState([]);
 
   const [materialOrders, setMaterialOrders] = useState([]);
@@ -1212,8 +1223,9 @@ export const ServiceCase = ({
     try {
       const response = await ApiCustomer.get(`/api/user/${caseDetails.Owner}`)
       setOwnerUserData(response.data.data)
+      console.log("CHECK OWNER FETCH IF ITS WORKS")
     } catch (error) {
-      
+      console.error("WRONG THING IN FETCH OWNER")
     }
   }
 
@@ -1460,6 +1472,7 @@ const fetchActionLog = async () => {
     fetchCsr();
     fetchCase();
     fetchActionLog();
+    console.log("CHECK IF THE FETCH IS WORKS ")
   }, [ caseDetails.CaseID, refreshFetchPage]);
   useEffect(() => {
     fetchUserAssign();
@@ -1488,7 +1501,7 @@ const fetchActionLog = async () => {
       console.log("SEEMS NOT WORK")
     }
   }, [otcCode, dataFetchAssetInformation]);
-  console.log("THe number",dataFetchAssetInformation?.AssetInformation?.asset_warranty.length);
+
   useEffect(() => {
     console.log("Data Asset Info : ", dataFetchAssetInformation);
 

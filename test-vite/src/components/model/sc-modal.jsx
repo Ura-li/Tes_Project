@@ -4920,7 +4920,7 @@ export function BtnModalsServiceCatalog({
       if (data) setAssetForWorkOrderCreation(data);
     });
     fetchDataPartCatalog();
-    fetchUserAssign('apo');
+    fetchUserAssign("");
   }, [caseDetails])
   
   useEffect(() => {
@@ -4980,8 +4980,6 @@ export function BtnModalsServiceCatalog({
   const fetchDataPartCatalog = async () => {
     try{
       const response = await ApiCustomer.get(`/api/service-log/parts-catalog`)
-      console.log("output of respone part-catelog: ",response.data)
-      console.log("response.data.data: ", response.data.data); 
       setPartCatalog(response.data.data)
       return response.data.data
     }catch(e){
@@ -5035,6 +5033,9 @@ console.log("Asset Info OTC : ",isOutWarranty)
         ? service.WarrantyCondition === "OutWarranty"
         : service.WarrantyCondition === "InWarranty"
   );
+  const filteredUserAssign = roleAssign.filter(
+    (user) => isOutWarranty ? user.Role === "cm" : user.Role === "apo"
+  )
   
   //hanlder confirm
   //handler qty price parts
@@ -5177,6 +5178,9 @@ console.log("Asset Info OTC : ",isOutWarranty)
               return { data: { many: true, MOIDs: createdMOIDs } };
             })()
           : await ApiCustomer.post("/api/service-log/create-order", {
+            /**
+             * ASK : IF ORDER IS OUT WARRANTY, ARE THE WO / MO CREATED AUTOMATE TOO, BUT CLOSED IF CANCELLED, OR NEED APPROVE FIRST BY CM?
+             */
               AssetID: assetForWorkOrderCreation.AssetID,
               CaseID: caseDetails.CaseID,
               selectedWarrantyServices,
@@ -5248,7 +5252,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
   
   function renderStepContent() {
     const [currentPage, setCurrentPage] = useState(1);
-    const PAGE_SIZE = 3;
+    const PAGE_SIZE = 5;
     const filteredPartCatalog = partCatalog.filter(part => {
       return (
         part.PartNumber?.toLowerCase().includes(partNumberSearch.toLowerCase()) &&
@@ -5652,7 +5656,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
                     <TableHead className={'font-bold text-black'}>Unit Price</TableHead>
                     <TableHead className={'font-bold text-black'}>Shipping Fee</TableHead>
                     <TableHead className={'font-bold text-black'}>Qty</TableHead>
-                    <TableHead className={'font-bold text-black'}>Tax</TableHead>
+                    {/* <TableHead className={'font-bold text-black'}>Tax</TableHead> */}
                     <TableHead className={'font-bold text-black'} colSpan={5}>Price</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -5666,7 +5670,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
                         <TableCell>{effectiveWarrantyService.CTat_RTime}</TableCell>
                         <TableCell>{effectiveWarrantyService.Shipping_Fee}</TableCell>
                         <TableCell>1</TableCell>
-                        <TableCell>{effectiveWarrantyService.Tax}</TableCell>
+                        {/* <TableCell>{effectiveWarrantyService.Tax}</TableCell> */}
                         <TableCell>{assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? effectiveWarrantyService.Price : 0}</TableCell>
                       </TableRow>
                     {/* )
@@ -5684,7 +5688,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
                     {showUEFINumberHeader  && (
                       <TableHead className={'font-bold text-black'}>UEFI Number</TableHead>
                     )}
-                    <TableHead className={'font-bold text-black'}>Tax</TableHead>
+                    {/* <TableHead className={'font-bold text-black'}>Tax</TableHead> */}
                     <TableHead className={'font-bold text-black'}>Price</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -5743,7 +5747,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
                           ): (
                             null
                           )}
-                        <TableCell>{part.Tax}</TableCell>
+                        {/* <TableCell>{part.Tax}</TableCell> */}
                         <TableCell>{assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? part.Total : 0}</TableCell>
                       </TableRow>
                     )
@@ -5796,7 +5800,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <Label htmlFor="Assign_APO" className={'font-bold whitespace-nowrap'}>SELECT APO : </Label>
+              <Label htmlFor="Assign_APO" className={'font-bold whitespace-nowrap'}>SELECT {isOutWarranty ? "CM" : "APO"} : </Label>
               <SearchCommandBlock 
                 value={assignApo}
                 onChange={(selectedID) =>{
@@ -5804,7 +5808,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
                     setAssignApo(null);
                     return;
                   }
-                  const selectedUser = roleAssign.find(
+                  const selectedUser = filteredUserAssign.find(
                     (user) => user.IDUser === selectedID
                   );
                   if (selectedUser) {
@@ -5812,7 +5816,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
                   }
                 }}
                 placeholder="--Select--"
-                options={roleAssign.map((user) =>({
+                options={filteredUserAssign.map((user) =>({
                   label: user.Name,
                   value: user.IDUser,
                 }))}
