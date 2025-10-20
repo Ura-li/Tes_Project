@@ -1068,7 +1068,6 @@ export const Case_table = () => {
             return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
           }
         }
-
         // coba numeric dulu
         const numA = parseFloat(aVal);
         const numB = parseFloat(bVal);
@@ -1136,6 +1135,38 @@ export const Case_table = () => {
     setGoToPageInput("");
   };
 const { user } = useAuth();
+
+const EnumToLabel = {
+  New : "New",
+  Open: "Open",
+  InActive: "In Active",
+  Close: "Close",
+  Active: "Active",
+  Monitor: "Monitor",
+  Pending_Customer_Action: "Pending Customer",
+  Quote_Requested: "Quote Requested",
+  Pending_Follow_Up: "Pending Follow Up",
+  Pending_Order: "Pending Order",
+  Escalated: "Escalated",
+  Quote_Approved: "Quote Approved",
+  Pending_Quote: "Pending Quote",
+  NEW_AssignCE: "New Assign CE",
+  NEW_AssignAPO: "New Assign APO",
+  NEW_AssignLeader: "New Assign Leader",
+  NEW_AssignPS: "New Assign PS",
+  NEW_POPDoc: "POP Document",
+  NEW_Warranty: "New Warranty",
+  AssignCE: "Assign CE",
+  AssignAPO: "Assign APO",
+  AssignLeader: "Assign Leader",
+  AssignPS: "Assign PS",
+  PartOrder: "Part Order",
+  PartRequest: "Part Request",
+  PartRequestLog: "Part Request Log",
+  PartAvailable: "Part Available",
+  RepairProgress: "Repair Progress",
+  FinishRepair: "Finish Repair"
+}
 
   return (
     <div className="grid p-6 grid-cols-1 w-full h-full bg-gray-200 rounded-2xl">
@@ -1231,7 +1262,7 @@ const { user } = useAuth();
         </div>
          {/* Toggle status */}
       <div className="flex flex-col">
-        <label htmlFor="status" className="mb-1 text-sm font-medium mb-2">Toggle Status Of Case :</label>
+        <label htmlFor="status" className="mb-2 text-sm font-medium">Toggle Status Of Case :</label>
         <Select defaultValue="All" value={openClose} onValueChange={setOpenClose}>
           <SelectTrigger id="status">
             <SelectValue>{openClose}</SelectValue>
@@ -1254,13 +1285,11 @@ const { user } = useAuth();
           >
             Reset Filters
           </Button>
-           {user?.role === 'admin' ? 
-      <ExportExcel caseData={caseData} />
-      : null}
+           {user?.role === 'admin' || user?.role === 'fd' ? 
+          <ExportExcel caseData={caseData} />
+          : null}
         </div>
       </div>
-
-     
 
       {/* Loading & Error */}
       {loading && <p>Loading cases...</p>}
@@ -1269,43 +1298,52 @@ const { user } = useAuth();
       {/* Table */}
       <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
         <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead className="sticky top-0 bg-gray-200 z-10">
+          <thead className="sticky top-0 bg-gray-200 ">
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseID")}>
                 Case ID {getSortSymbol("CaseID")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CreatedOn")}>
-                Created On {getSortSymbol("CreatedOn")}
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseID_Manual")}>
+                Case ID MANUAL {getSortSymbol("CaseID_Manual")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseSubject")}>
                 Case Subject {getSortSymbol("CaseSubject")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CustomerAccount")}>
-                Customer Account {getSortSymbol("CustomerAccount")}
+                Customer Company {getSortSymbol("CustomerAccount")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Primary")}>
-                Primary {getSortSymbol("Primary")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("HW")}>
-                HW {getSortSymbol("HW")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("SerialNumber")}>
-                Serial Number {getSortSymbol("SerialNumber")}
+               <th className="p-2 border cursor-pointer" onClick={() => handleSort("SerialNumber")}>
+                Serial No {getSortSymbol("SerialNumber")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductNumber")}>
-                Product Number {getSortSymbol("ProductNumber")}
+                Product No {getSortSymbol("ProductNumber")}
               </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductName")}>
+                <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductName")}>
                 Product Name {getSortSymbol("ProductName")}
+              </th>
+                <th className="p-2 border cursor-pointer" onClick={() => handleSort("WarrantyType")}>
+                Warranty Type {getSortSymbol("WarrantyType")}
+              </th>
+                <th className="p-2 border cursor-pointer" onClick={() => handleSort("WarrantyStatus")}>
+                Warranty Status {getSortSymbol("WarrantyStatus")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseType")}>
+                Case Type {getSortSymbol("CaseType")}
+              </th>
+                <th className="p-2 border cursor-pointer" onClick={() => handleSort("CreatedOn")}>
+                Created On {getSortSymbol("CreatedOn")}
+              </th>
+                <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseID_Manual_Date")}>
+                Case ID Manual Date {getSortSymbol("CaseID_Manual_Date")}
+              </th>
+              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Primary")}>
+                Customer Name {getSortSymbol("Primary")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CreatedName")}>
                 Created Name {getSortSymbol("CreatedName")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("Owner")}>
                 Owner {getSortSymbol("Owner")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("WorkGroup")}>
-                WorkGroup {getSortSymbol("WorkGroup")}
               </th>
               <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseStatus")}>
                 Case Status {getSortSymbol("CaseStatus")}
@@ -1321,17 +1359,20 @@ const { user } = useAuth();
                 >
                   {caseItem.CaseID}
                 </td>
-                <td className="p-2 border">{caseItem.CreatedOn}</td>
+                <td className="p-2 border">{caseItem.caseinformation?.CaseID_Manual}</td>
                 <td className="p-2 border">{caseItem.CaseSubject}</td>
                 <td className="p-2 border">{caseItem.CustomerAccount}</td>
-                <td className="p-2 border">{caseItem.Primary}</td>
-                <td className="p-2 border">{caseItem.HW}</td>
                 <td className="p-2 border">{caseItem.SerialNumber}</td>
                 <td className="p-2 border">{caseItem.ProductNumber}</td>
                 <td className="p-2 border">{caseItem.ProductName}</td>
+                <td className="p-2 border">{caseItem.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition}</td>
+                <td className="p-2 border">{caseItem.caseinformation?.asset_information?.WarrantyOTCCode?.Description}</td>
+                <td className="p-2 border">{caseItem.caseinformation?.CaseType}</td>
+                <td className="p-2 border">{caseItem.CreatedOn}</td>
+                <td className="p-2 border">{caseItem.caseinformation?.CaseID_Manual_Date ? new Date(caseItem.caseinformation?.CaseID_Manual_Date).toLocaleString() : "N/A"}</td>
+                <td className="p-2 border">{caseItem.Primary}</td>
                 <td className="p-2 border">{caseItem.CreatedName}</td>
                 <td className="p-2 border">{caseItem.Owner}</td>
-                <td className="p-2 border">{caseItem.WorkGroup}</td>
                 <td
                   className={cn(
                     "bg-emerald-300",
@@ -1342,7 +1383,7 @@ const { user } = useAuth();
                         : ""
                   )}
                 >
-                  {caseItem.CaseStatus}
+                 {EnumToLabel[caseItem.CaseStatus]}
                 </td>
               </tr>
             ))}

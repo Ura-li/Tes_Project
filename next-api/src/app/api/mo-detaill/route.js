@@ -55,7 +55,11 @@ export async function GET(request) {
             {
                 workorder: {
                     include: {
-                        caseinformation: true,
+                        caseinformation: {
+                            include : {
+                                ActionLog: true,
+                            }
+                        }
                     }
                 },
                 materialorderlineitems: true,
@@ -65,7 +69,24 @@ export async function GET(request) {
         return NextResponse.json({
             success: true,
             message: "List Data Material Order Information",
-            data: materialorder,
+            data: materialorder.map(m => ({
+                    ...m,
+                    workorder: {
+                        ...m.workorder,
+                        caseinformation: {
+                        ...m.workorder.caseinformation,
+                        UpdatedActionLogs: m.workorder.caseinformation?.ActionLog
+                            ?.filter(log => log.dataOld !== log.dataNew && !log.logDescription.includes("Owner"))
+                            ?.map(log => ({
+                            ChangeAt: log.ChangeAt,
+                            ChangedBy: log.ChangedBy,
+                            dataOld: log.dataOld,
+                            dataNew: log.dataNew,
+                            logDescription: log.logDescription
+                            })) || []
+                        }
+                    }
+                    })),
             totalPages: Math.ceil(totalCount / limit),
             currentPage: page
         },

@@ -217,15 +217,7 @@ export function QuickWOInput ({
   // //   //   City: ServiceDeliveryAddress.city,
   // //   // });
   // };
-  const { user } = useAuth();
-  let canEdit 
-  const editrole = ['admin','ce','celead']
-
-  if (workOrderData?.SystemStatus !== "CLOSED_POSTED") {
-    canEdit = editrole.includes(user?.role);
-  }else {
-    canEdit = false;
-  }
+  
 
   return (
     <div className="p-1">

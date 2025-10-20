@@ -527,8 +527,6 @@ export const ServiceWork = () => {
                   />
                   </CaseField>
 
-                
-
                   <CaseField label="Shipment Country" lock={!canaddce}>
                     <SearchCommandBlock
                       variant={"invisible"}
