@@ -2845,7 +2845,7 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Label htmlFor="Service_description">Service Description *</Label>
+          <Label htmlFor="Service_description">Service Description <Label className="text-red-600">*</Label></Label>
           <Textarea
             id="Service_description"
             value={Service_description}
@@ -6744,11 +6744,13 @@ export function ResourceAccountEdit({ ResourceAccountId, onUpdate, resources }) 
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
+          <Label>Name <Label className="text-red-600">*</Label></Label>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Name*"
           />
+          <Label>Resource <Label className="text-red-600">*</Label></Label>
           <select
             value={resourceId || ""}
             onChange={(e) => setResourceId(e.target.value)}
@@ -6918,7 +6920,7 @@ export function SubkTechnicianAdd() {
           <DialogDescription>Fields marked with * are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Label>SubkTechnicianId *</Label>
+          <Label>SubkTechnicianId</Label>
           <Input id="SubkTechnicianId" value={formData.SubkTechnicianId} onChange={handleInputChange} />
 
           <Label>Name *</Label>
@@ -7223,16 +7225,16 @@ export function SymptomCodeAdd({ onUpdate }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Symptom Code</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Label>SymptomCode *</Label>
+          <Label>SymptomCode <span className="text-red-500">*</span></Label>
           <Input id="SymptomCode" value={formData.SymptomCode} onChange={handleInputChange} />
 
-          <Label>TopCategory *</Label>
+          <Label>TopCategory <span className="text-red-500">*</span></Label>
           <Input id="TopCategory" value={formData.TopCategory} onChange={handleInputChange} />
 
-          <Label>SubCategory *</Label>
+          <Label>SubCategory <span className="text-red-500">*</span></Label>
           <Input id="SubCategory" value={formData.SubCategory} onChange={handleInputChange} />
 
           <Label>QualityCodes</Label>
@@ -7332,12 +7334,16 @@ export function SymptomCodeEdit({ SymptomCodeID, onUpdate }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Symptom Code</DialogTitle>
-          <DialogDescription>Update the details of the symptom code. Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Update the details of the symptom code. Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
+          <Label>Symptom Code <span className="text-red-500">*</span></Label>
           <Input id="SymptomCode" value={symptomData.SymptomCode} onChange={handleChange} placeholder="SymptomCode *" />
+          <Label>Top Category <span className="text-red-500">*</span></Label>
           <Input id="TopCategory" value={symptomData.TopCategory} onChange={handleChange} placeholder="TopCategory *" />
+          <Label>Sub Category <span className="text-red-500">*</span></Label>
           <Input id="SubCategory" value={symptomData.SubCategory} onChange={handleChange} placeholder="SubCategory *" />
+          <Label>Quality Codes</Label>
           <Input id="QualityCodes" value={symptomData.QualityCodes} onChange={handleChange} placeholder="QualityCodes" />
         </div>
         <DialogFooter>
@@ -7522,7 +7528,7 @@ export function BookingsAdd({ onUpdate }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Booking</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
@@ -7535,7 +7541,7 @@ export function BookingsAdd({ onUpdate }) {
               labelKey="WOID"
               valueKey="WOID"
               placeholder="Search WOID..."
-              label="WOID *"
+              label={<><span>WOID</span> <span className="text-red-500">*</span></>}
               className="z-50"
             />
           </div>
@@ -7579,7 +7585,7 @@ export function BookingsAdd({ onUpdate }) {
           <Input id="TotalBreakDurationInMinutes" type="number" value={formData.TotalBreakDurationInMinutes} onChange={handleInputChange} />
 
           {/* ✅ Created By (read-only, tampil nama user) */}
-          <Label>Created By *</Label>
+          <Label>Created By <span className="text-red-500">*</span></Label>
           <Input
             id="CreatedBy"
             type="text"
@@ -7749,7 +7755,7 @@ export function BookingsEdit({ BookingId, onUpdate }) {
             labelKey="WOID"
             valueKey="WOID"
             placeholder="Search WOID..."
-            label="WOID *"
+            label={<><span>WOID</span> <span className="text-red-500">*</span></>}
           />
 
           <GenericSelector
@@ -7833,7 +7839,7 @@ export function BookingsEdit({ BookingId, onUpdate }) {
           />
 
           {/* Created By */}
-          <Label>Created By *</Label>
+          <Label>Created By <span className="text-red-500">*</span></Label>
           <Input
             id="CreatedBy"
             type="text"
@@ -8041,7 +8047,7 @@ export function BookingDetailsAdd({ onUpdate }) {
           {/* Booking Info */}
                    <div>
             <GenericSelector
-              label="Booking *"
+              label={<><span>Booking</span> <span className="text-red-500">*</span></>}
               placeholder="Search Booking..."
               endpoint="/api/booking"
               value={bookings.find((b) => b.BookingId === formData.BookingId)}
@@ -8053,7 +8059,7 @@ export function BookingDetailsAdd({ onUpdate }) {
 
           <div>
             <GenericSelector
-              label="Resource"
+              label={<><span>Resource</span> <span className="text-red-500">*</span></>}
               placeholder="Search Resource..."
               endpoint="/api/resources"
               value={resources.find((r) => r.ResourceId === formData.ResourceId)}
@@ -8065,7 +8071,7 @@ export function BookingDetailsAdd({ onUpdate }) {
 
           <div>
             <GenericSelector
-              label="Resource Account"
+              label={<><span>Resource Account</span> <span className="text-red-500">*</span></>}
               placeholder="Search Account..."
               endpoint="/api/resource-account"
               value={accounts.find((a) => a.ResourceAccountId === formData.ResourceAccountId)}
@@ -8077,7 +8083,7 @@ export function BookingDetailsAdd({ onUpdate }) {
 
           <div>
             <GenericSelector
-              label="Engineer"
+              label={<><span>Engineer</span> <span className="text-red-500">*</span></>}
               placeholder="Search Engineer..."
               endpoint="/api/user?role=ce"
               value={engineers.find((e) => e.IDUser === formData.EngineerId)}
@@ -8089,7 +8095,7 @@ export function BookingDetailsAdd({ onUpdate }) {
 
           <div>
             <GenericSelector
-              label="Status"
+              label={<><span>Status</span> <span className="text-red-500">*</span></>}
               placeholder="Search Status..."
               endpoint="/api/booking-status"
               value={statuses.find((s) => s.BookingStatusId === formData.BookingStatusId)}
@@ -8292,7 +8298,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           {/* Booking */}
           <div>
             <GenericSelector
-              label="Booking *"
+              label={<><span>Booking</span> <span className="text-red-500">*</span></>}
               placeholder="Search Booking..."
               endpoint="/api/booking"
               value={bookings.find((b) => b.BookingId === formData.BookingId)}
@@ -8305,7 +8311,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           {/* Resource */}
           <div>
             <GenericSelector
-              label="Resource"
+              label={<><span>Resource</span> <span className="text-red-500">*</span></>}
               placeholder="Search Resource..."
               endpoint="/api/resources"
               value={resources.find((r) => r.ResourceId === formData.ResourceId)}
@@ -8318,7 +8324,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           {/* Resource Account */}
           <div>
             <GenericSelector
-              label="Resource Account"
+              label={<><span>Resource Account</span> <span className="text-red-500">*</span></>}
               placeholder="Search Account..."
               endpoint="/api/resource-account"
               value={accounts.find((a) => a.ResourceAccountId === formData.ResourceAccountId)}
@@ -8331,7 +8337,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           {/* Engineer */}
           <div>
             <GenericSelector
-              label="Engineer"
+              label={<><span>Engineer</span> <span className="text-red-500">*</span></>}
               placeholder="Search Engineer..."
               endpoint="/api/users?role=ce"
               value={engineers.find((e) => e.IDUser === formData.EngineerId)}
@@ -8344,7 +8350,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           {/* Status */}
           <div>
             <GenericSelector
-              label="Status"
+              label={<><span>Status</span> <span className="text-red-500">*</span></>}
               placeholder="Search Status..."
               endpoint="/api/booking-status"
               value={statuses.find((s) => s.BookingStatusId === formData.BookingStatusId)}
@@ -8524,12 +8530,12 @@ export function BookingStatusAdd({ onUpdate }) {
         <DialogHeader>
           <DialogTitle>Add Booking Status</DialogTitle>
           <DialogDescription>
-            Fields marked with * are required.
+            Fields marked with <span className="text-red-500">*</span> are required.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Description *</Label>
+          <Label>Description <span className="text-red-500">*</span></Label>
           <Input
             type="text"
             id="Description"
@@ -8625,7 +8631,7 @@ export function BookingStatusEdit({ BookingStatusId, onUpdate }) {
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Description *</Label>
+          <Label>Description <span className="text-red-500">*</span></Label>
           <Input
             type="text"
             id="Description"
@@ -8773,20 +8779,20 @@ export function RepairClassCodeAdd() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Repair Class Code</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Code *</Label>
+          <Label>Code <span className="text-red-500">*</span></Label>
           <Input id="Code" value={formData.Code} onChange={handleInputChange} maxLength={3} />
 
-          <Label>Description *</Label>
+          <Label>Description <span className="text-red-500">*</span></Label>
           <Input id="Description" value={formData.Description} onChange={handleInputChange} maxLength={100} />
 
           <Label>Definition</Label>
           <Input id="Definition" value={formData.Definition} onChange={handleInputChange} maxLength={255} />
 
-          <Label>Payment Eligibility *</Label>
+          <Label>Payment Eligibility <span className="text-red-500">*</span></Label>
           <select
             id="PaymentEligibility"
             value={formData.PaymentEligibility}
@@ -8890,16 +8896,19 @@ export function RepairClassCodeEdit({ Code }) {
         </DialogHeader>
 
         <div className="space-y-3">
+          <Label>Description <span className="text-red-500">*</span></Label>
           <Input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Description"
           />
+          <Label>Definition <span className="text-red-500">*</span></Label>
           <Input
             value={definition}
             onChange={(e) => setDefinition(e.target.value)}
             placeholder="Definition"
           />
+          <Label>Payment Eligibility <span className="text-red-500">*</span></Label>
           <select
             value={paymentEligibility}
             onChange={(e) => setPaymentEligibility(e.target.value)}
@@ -9089,10 +9098,10 @@ export function ServiceCatalogAdd() {
       <DialogContent className="max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Service Catalog</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          <Label>Asset *</Label>
+          <Label>Asset <span className="text-red-500">*</span></Label>
           <Select onValueChange={handleSelectChange("AssetID")}>
             <SelectTrigger>
               <SelectValue placeholder="Select Asset ID" />
@@ -9106,7 +9115,7 @@ export function ServiceCatalogAdd() {
             </SelectContent>
           </Select>
 
-          <Label>Service Offer *</Label>
+          <Label>Service Offer <span className="text-red-500">*</span></Label>
           <Select onValueChange={handleSelectChange("Service_offerID")}>
             <SelectTrigger>
               <SelectValue placeholder="Select Service Offer ID" />
@@ -9266,7 +9275,7 @@ export function ServiceCatalogEdit({ ServiceCatalogID, onUpdate }) {
         </DialogHeader>
 
         <div className="space-y-2">
-          <Label>Asset *</Label>
+          <Label>Asset <span className="text-red-500">*</span></Label>
           <Select value={formData.AssetID} onValueChange={handleSelectChange("AssetID")}>
             <SelectTrigger>
               <SelectValue placeholder="Select Asset ID" />
@@ -9280,7 +9289,7 @@ export function ServiceCatalogEdit({ ServiceCatalogID, onUpdate }) {
             </SelectContent>
           </Select>
 
-          <Label>Service Offer *</Label>
+          <Label>Service Offer <span className="text-red-500">*</span></Label>
           <Select value={formData.Service_offerID} onValueChange={handleSelectChange("Service_offerID")}>
             <SelectTrigger>
               <SelectValue placeholder="Select Service Offer ID" />
@@ -9410,6 +9419,300 @@ export function ServiceCatalogDelete({ ServiceCatalogID, onUpdate }) {
   );
 }
 
+export function ServiceTypeAdd() {
+  const [formData, setFormData] = useState({
+    ServiceTypeName: "",
+    ProblemCategory: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.ServiceTypeName || !formData.ProblemCategory) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Both Service Type Name and Problem Category are required.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post("/api/service-type", formData);
+      console.log("✅ Success:", response.data);
+
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Service Type has been successfully added.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("❌ Error saving ServiceType:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to save Service Type. Please try again.",
+        icon: "error",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">
+          Add Service Type
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Service Type</DialogTitle>
+          <DialogDescription>
+            Fields marked with <span className="text-red-500">*</span> are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {/* ServiceTypeName */}
+          <Label>
+            Service Type Name <span className="text-red-600">*</span>
+          </Label>
+          <Input
+            id="ServiceTypeName"
+            value={formData.ServiceTypeName}
+            onChange={handleInputChange}
+          />
+
+          {/* ProblemCategory */}
+          <Label>
+            Problem Category <span className="text-red-600">*</span>
+          </Label>
+          <select
+            id="ProblemCategory"
+            value={formData.ProblemCategory || ""}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border rounded"
+          >
+            <option value="">-- Select Problem Category --</option>
+            <option value="Hardware">Hardware</option>
+            <option value="Software">Software</option>
+          </select>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ServiceTypeEdit({ ServiceTypeId, onUpdate }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    ServiceTypeName: "",
+    ProblemCategory: "",
+  });
+  const [serviceType, setServiceType] = useState(null);
+
+  // 🔹 Ambil data ServiceType by ID
+  const fetchServiceType = async () => {
+    if (!ServiceTypeId) return;
+    try {
+      const res = await ApiCustomer.get(`/api/service-type/${ServiceTypeId}`);
+      const data = res.data.data;
+      setServiceType(data);
+      setFormData({
+        ServiceTypeName: data?.ServiceTypeName || "",
+        ProblemCategory: data?.ProblemCategory || "",
+      });
+    } catch (error) {
+      console.error("Error fetching ServiceType:", error);
+    }
+  };
+
+  // 🔹 Jalankan fetch saat modal dibuka
+  useEffect(() => {
+    if (ServiceTypeId && isOpen) {
+      fetchServiceType();
+    }
+  }, [ServiceTypeId, isOpen]);
+
+  // 🔹 Reset field saat modal ditutup
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({ ServiceTypeName: "", ProblemCategory: "" });
+    }
+  }, [isOpen]);
+
+  // 🔹 Handler untuk update ServiceType
+  const handleUpdate = async () => {
+    if (!formData.ServiceTypeName) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "ServiceType Name is required.",
+        icon: "warning",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/service-type/${ServiceTypeId}`, {
+        ServiceTypeName: formData.ServiceTypeName,
+        ProblemCategory: formData.ProblemCategory || null,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "ServiceType updated successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(() => {
+        onUpdate?.();
+        setIsOpen(false);
+      });
+    } catch (error) {
+      console.error("Error updating ServiceType:", error);
+      Swal.fire({
+        title: "Update Failed",
+        text: "Could not update ServiceType. Please try again.",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchServiceType(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit ServiceType</DialogTitle>
+          <DialogDescription>
+            Update ServiceType details below. Fields marked with <span className="text-red-500">*</span> are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>Service Type Name <span className="text-red-500">*</span></Label>
+          <Input
+            value={formData.ServiceTypeName}
+            onChange={(e) =>
+              setFormData({ ...formData, ServiceTypeName: e.target.value })
+            }
+            placeholder="Service Type Name*"
+          />
+          <Label>Problem Category <span className="text-red-500">*</span></Label>
+          <select
+            value={formData.ProblemCategory || ""}
+            onChange={(e) =>
+              setFormData({ ...formData, ProblemCategory: e.target.value })
+            }
+            className="w-full px-3 py-2 border rounded"
+          >
+            <option value="">-- Select Problem Category --</option>
+            <option value="Hardware">Hardware</option>
+            <option value="Software">Software</option>
+          </select>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ServiceTypeDelete({ ServiceTypeId, onUpdate }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "ServiceType ini akan dihapus dan perubahan tidak bisa dibatalkan.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const response = await ApiCustomer.delete(`/api/service-type/${ServiceTypeId}`);
+
+      if (response.status === 409 || response.data.success === false) {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal menghapus!",
+          text: response.data.message || "ServiceType tidak bisa dihapus karena ada relasi.",
+        });
+        return;
+      }
+
+      await Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "ServiceType berhasil dihapus.",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+
+      if (onUpdate) onUpdate(); 
+    } catch (error) {
+      if (error.response?.status === 409) {
+        Swal.fire({
+          icon: "error",
+          title: "Tidak bisa menghapus!",
+          text: "ServiceType ini memiliki relasi aktif di tabel lain. Harap hapus data terkait terlebih dahulu.",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text:
+            error.response?.data?.message ||
+            "Terjadi kesalahan saat menghapus ServiceType. Silakan coba lagi.",
+        });
+      }
+    }
+  };
+
+  return (
+    <Button
+      variant="outline"
+      className="text-red-500 hover:text-red-700"
+      onClick={handleDelete}
+    >
+      <Trash className="w-4 h-4" />
+    </Button>
+  );
+}
 
 export function OTCAdd({ onUpdate }) {
   const [formData, setFormData] = useState({
@@ -9473,16 +9776,16 @@ export function OTCAdd({ onUpdate }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add OTC Code</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Label>OTC Code</Label>
+          <Label>OTC Code <span className="text-red-500">*</span></Label>
           <Input id="OTCCode" value={formData.OTCCode} onChange={handleInputChange} />
 
-          <Label>Description</Label>
+          <Label>Description <span className="text-red-500">*</span></Label>
           <Input id="Description" value={formData.Description} onChange={handleInputChange} />
 
-          <Label>Warranty Condition *</Label>
+          <Label>Warranty Condition <span className="text-red-500">*</span></Label>
           <select
             id="WarrantyCondition"
             value={formData.WarrantyCondition}
@@ -9592,13 +9895,13 @@ export function OTCEdit({ OTCCode, onUpdate }) {
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>OTC Code</Label>
+          <Label>OTC Code <span className="text-red-500">*</span></Label>
           <Input id="OTCCode" value={formData.OTCCode} disabled />
 
-          <Label>Description</Label>
+          <Label>Description <span className="text-red-500">*</span></Label>
           <Input id="Description" value={formData.Description} onChange={handleInputChange} />
 
-          <Label>Warranty Condition</Label>
+          <Label>Warranty Condition <span className="text-red-500">*</span></Label>
           <select
             id="WarrantyCondition"
             value={formData.WarrantyCondition}
@@ -9760,7 +10063,7 @@ export function CrsAdd() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Case Resolution</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <Label>Case Resolution Code</Label>
@@ -10069,11 +10372,11 @@ export function NmuAdd() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add NMU</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>NMU Description *</Label>
+          <Label>NMU Description <span className="text-red-500">*</span></Label>
           <Input
             id="NMUDesc"
             value={formData.NMUDesc}
@@ -10196,6 +10499,7 @@ export function NmuEdit({ NMUId, onUpdate }) {
         </DialogHeader>
 
         <div className="space-y-3">
+          <Label>NMU Description <span className="text-red-500">*</span></Label>
           <Input
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
@@ -10388,11 +10692,11 @@ export function NmuItemAdd() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add NMU Item</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Item Name *</Label>
+          <Label>Item Name <span className="text-red-500">*</span></Label>
           <Input
             id="itemName"
             value={formData.itemName}
@@ -10400,7 +10704,7 @@ export function NmuItemAdd() {
             maxLength={255}
           />
 
-          <Label>Pilih NMU *</Label>
+          <Label>Pilih NMU <span className="text-red-500">*</span></Label>
           <select
             id="nmuId"
             value={formData.nmuId}
@@ -10529,7 +10833,7 @@ export function NmuItemEdit({ id, onUpdate }) {
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Item Name *</Label>
+          <Label>Item Name <span className="text-red-500">*</span></Label>
           <Input
             id="itemName"
             value={formData.itemName}
@@ -10537,7 +10841,7 @@ export function NmuItemEdit({ id, onUpdate }) {
             maxLength={255}
           />
 
-          <Label>Pilih NMU *</Label>
+          <Label>Pilih NMU <span className="text-red-500">*</span></Label>
           <select
             id="nmuId"
             value={formData.nmuId}
@@ -10720,11 +11024,11 @@ export function FailureAdd () {
        <DialogHeader>
          <DialogTitle>Add Failure Information</DialogTitle>
          <DialogDescription>
-           Add the Failure Fields marked with * are required.
+           Add the Failure Fields marked with <span className="text-red-500">*</span> are required.
          </DialogDescription>
        </DialogHeader>
        <div className="space-y-2">
-       <Label>Name</Label>
+       <Label>Name <span className="text-red-500">*</span></Label>
        <Input type="text" id="Name" className="p-2" value={formDataFailure.Name} onChange={handlerInputFailure} />
 
        <Label>Description</Label>
@@ -10818,7 +11122,7 @@ export function FailureEdit({ FailureId, onUpdate }) {
       <DialogContent className="h-[300px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Failure</DialogTitle>
-          <DialogDescription>Update data Failure. (*) wajib diisi.</DialogDescription>
+          <DialogDescription>Update data Failure. (<span className="text-red-500">*</span>) wajib diisi.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">

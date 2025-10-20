@@ -27,6 +27,7 @@ import { BookingDetailsAdd, BookingDetailsEdit, BookingDetailsDelete } from "@/c
 import { BookingStatusAdd, BookingStatusEdit, BookingStatusDelete} from "@/components/model/sc-modal";
 import { RepairClassCodeAdd, RepairClassCodeEdit, RepairClassCodeDelete } from "@/components/model/sc-modal";
 import { ServiceCatalogAdd, ServiceCatalogEdit, ServiceCatalogDelete } from "@/components/model/sc-modal";
+import { ServiceTypeAdd, ServiceTypeEdit, ServiceTypeDelete } from "@/components/model/sc-modal";
 import { OTCAdd, OTCEdit, OTCDelete} from "@/components/model/sc-modal";
 import { CrsAdd, CrsEdit, CrsDelete } from "@/components/model/sc-modal";
 import { NmuAdd, NmuEdit, NmuDelete} from "@/components/model/sc-modal";
@@ -3707,7 +3708,7 @@ export const Wo_table = () => {
               >
                 Case Priority Index {getSortIcon("CasePriorityIndex")}
               </th>
-              <th
+              {/* <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("PartnerStatus")}
               >
@@ -3742,7 +3743,7 @@ export const Wo_table = () => {
                 onClick={() => handleSort("CaseInformation")}
               >
                 Case Information {getSortIcon("CaseInformation")}
-              </th>
+              </th> */}
               <th className="p-3 text-center border">Actions</th>
             </tr>
           </thead>
@@ -3789,12 +3790,12 @@ export const Wo_table = () => {
                   <td className="p-2 border">{WorkOrderItem.ActiveScheduleDate}</td>
                   <td className="p-2 border">{WorkOrderItem.SLAErrorDescription}</td>
                   <td className="p-2 border">{WorkOrderItem.CasePriorityIndex}</td>
-                  <td className="p-2 border">{WorkOrderItem.PartnerStatus}</td>
+                  {/* <td className="p-2 border">{WorkOrderItem.PartnerStatus}</td>
                   <td className="p-2 border">{WorkOrderItem.WorkOrderDescription}</td>
                   <td className="p-2 border">{WorkOrderItem.PartnerNotes}</td>
                   <td className="p-2 border">{WorkOrderItem.IncomingChannel}</td>
                   <td className="p-2 border">{WorkOrderItem.MaterialOrder}</td>
-                  <td className="p-2 border">{WorkOrderItem.CaseInformation}</td>
+                  <td className="p-2 border">{WorkOrderItem.CaseInformation}</td> */}
                   <td className="flex items-center justify-center gap-2 p-2 border">
                     <WorkOrderEdit WOID={WorkOrderItem.WOID} onUpdate={fetchWorkOrderDataTable} />
                     <WorkOrderDelete
@@ -3909,6 +3910,13 @@ export const User_table = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [goToPageInput, setGoToPageInput] = useState("");
 
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [selectedSignature, setSelectedSignature] = useState(null);
+
+  const handleViewSignature = (signature) => {
+    setSelectedSignature(signature);
+    setShowSignatureModal(true);
+  };
 
   // 🔹 sort state
   const [sortConfig, setSortConfig] = useState({
@@ -4170,7 +4178,11 @@ const sortedData = useMemo(() => {
                   {/* Tampilkan data Phone di sini */}
                   <td className="p-2 border">{UserItem.Phone}</td>
                   {/* Tampilkan data Signature di sini */}
-                  <td className="p-2 border">{UserItem.Signature}</td>
+                  <td className="p-2 border max-w-[150px] truncate" title={UserItem.Signature}>
+                    {UserItem.Signature ?
+                    <img src={`${UserItem.Signature}`} alt="Signature" className="w-10 h-10 mx-auto" />
+                    : "-"}
+                  </td>
                   <td className="p-2 border">
                     {/* {console.log(preview?.ProfilePhoto)} */}
                     {UserItem?.ProfilePhoto ? (
@@ -4205,6 +4217,25 @@ const sortedData = useMemo(() => {
           </tbody>
         </table>
       </div>
+      
+      {showSignatureModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="w-[90%] max-w-md bg-white rounded-2xl shadow-lg p-6">
+              <h3 className="mb-4 text-lg font-semibold text-center">🖋 Signature</h3>
+              <div className="p-3 mb-4 text-sm text-gray-700 bg-gray-100 rounded-md max-h-[300px] overflow-y-auto">
+                {selectedSignature}
+              </div>
+              <div className="flex justify-center">
+                <button
+                  onClick={() => setShowSignatureModal(false)}
+                  className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       {/* 🔹 Bottom controls (Pagination) */}
       <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
@@ -7752,6 +7783,317 @@ export const ServiceCatalogTable = () => {
         </div>
 
         {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const ServiceTypeTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [serviceTypeData, setServiceTypeData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
+
+  // debounce search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // sorting
+  const [sortConfig, setSortConfig] = useState({
+    key: "ServiceTypeId",
+    direction: "asc",
+  });
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+    setCurrentPage(1);
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key)
+      return <ArrowUpDown size={14} className="inline ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp size={14} className="inline ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown size={14} className="inline ml-1 text-blue-600" />
+    );
+  };
+
+  // Fetch Data
+  const fetchServiceTypeData = async () => {
+    Swal.fire({
+      title: "Memuat Data Service Type...",
+      text: "Mohon tunggu sebentar...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await ApiCustomer.get("/api/service-type");
+      if (response.data.success) {
+        setServiceTypeData(response.data.data);
+      } else {
+        setError("Gagal memuat data Service Type");
+      }
+    } catch (err) {
+      console.error("Error fetching ServiceType data:", err);
+      setError("Terjadi kesalahan saat mengambil data");
+    } finally {
+      setLoading(false);
+      Swal.close();
+    }
+  };
+
+  useEffect(() => {
+    fetchServiceTypeData();
+  }, []);
+
+  // Filtering
+  const filteredData = useMemo(() => {
+    return serviceTypeData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    );
+  }, [serviceTypeData, debouncedSearchTerm]);
+
+  // Sorting
+  const sortedData = useMemo(() => {
+    const sortable = [...filteredData];
+    if (sortConfig.key) {
+      sortable.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+
+        if (typeof aValue === "string" || typeof bValue === "string") {
+          return sortConfig.direction === "asc"
+            ? String(aValue).localeCompare(String(bValue))
+            : String(bValue).localeCompare(String(aValue));
+        }
+
+        return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
+      });
+    }
+    return sortable;
+  }, [filteredData, sortConfig]);
+
+  // Pagination
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
+  const currentData = sortedData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  
+
+  const navigate = useNavigate();
+
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
+
+  return (
+    <div className="p-6">
+      <h2 className="mb-6 text-xl font-bold">Service Type Table</h2>
+
+      {/* Search + Add Button */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <input
+          type="text"
+          placeholder="🔍 Search Service Type..."
+          className="w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <ServiceTypeAdd onUpdate={fetchServiceTypeData} />
+      </div>
+
+      {loading && <p>Loading data...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Table */}
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
+        <table className="min-w-full relative border-collapse">
+          <thead className="sticky top-0 z-10 bg-gray-200">
+            <tr className="text-sm text-gray-700 uppercase">
+              <th className="p-3 text-center border">No</th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ServiceTypeId")}
+              >
+                ID {getSortIcon("ServiceTypeId")}
+              </th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ServiceTypeName")}
+              >
+                Service Type Name {getSortIcon("ServiceTypeName")}
+              </th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ProblemCategory")}
+              >
+                Problem Category {getSortIcon("ProblemCategory")}
+              </th>
+              <th
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("createdAt")}
+              >
+                Created At {getSortIcon("createdAt")}
+              </th>
+              <th className="p-3 text-center border">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.length > 0 ? (
+              currentData.map((item, i) => (
+                <tr
+                  key={item.ServiceTypeId}
+                  className={`text-sm hover:bg-gray-100 ${
+                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  }`}
+                >
+                  <td className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + i + 1}
+                  </td>
+                  <td className="p-3 text-center border text-blue-500 cursor-pointer hover:underline">
+                    {item.ServiceTypeId}
+                  </td>
+                  <td className="p-3 text-center border">
+                    {item.ServiceTypeName || "-"}
+                  </td>
+                  <td className="p-3 text-center border">
+                    {item.ProblemCategory || "-"}
+                  </td>
+                  <td className="p-3 text-center border">
+                    {new Date(item.createdAt).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
+                  <td className="flex items-center justify-center gap-2 p-3 border">
+                    <ServiceTypeEdit
+                      ServiceTypeId={item.ServiceTypeId}
+                      onUpdate={fetchServiceTypeData}
+                    />
+                    <ServiceTypeDelete
+                      ServiceTypeId={item.ServiceTypeId}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchServiceTypeData}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="p-6 text-center text-gray-500">
+                  No entries found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> Service Type entries
+        </div>
+
         {totalPages > 1 && (
           <div className="flex items-center gap-3">
             <button
