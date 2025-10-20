@@ -4980,8 +4980,6 @@ export function BtnModalsServiceCatalog({
   const fetchDataPartCatalog = async () => {
     try{
       const response = await ApiCustomer.get(`/api/service-log/parts-catalog`)
-      console.log("output of respone part-catelog: ",response.data)
-      console.log("response.data.data: ", response.data.data); 
       setPartCatalog(response.data.data)
       return response.data.data
     }catch(e){
@@ -5236,7 +5234,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
   
   function renderStepContent() {
     const [currentPage, setCurrentPage] = useState(1);
-    const PAGE_SIZE = 3;
+    const PAGE_SIZE = 5;
     const filteredPartCatalog = partCatalog.filter(part => {
       return (
         part.PartNumber?.toLowerCase().includes(partNumberSearch.toLowerCase()) &&
