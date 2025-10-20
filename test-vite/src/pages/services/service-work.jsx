@@ -363,7 +363,7 @@ export const ServiceWork = () => {
   let canaddce;
   if (workOrders?.SystemStatus !== "CLOSED_POSTED") {
    canEditapo = editrole.includes(user?.role);
-   canaddce = (user?.role === 'ce' || user?.role === 'celead') && user?.id === workOrders?.OwnerID;
+   canaddce = (user?.role === 'ce' || user?.role === 'celead') && user?.id === workOrders?.OwnerID || user?.role === 'admin';
   } else {
     canEditapo = false;
     canaddce = false;
