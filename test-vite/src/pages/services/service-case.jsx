@@ -1307,6 +1307,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
         RemovedSerialNumber: MOLineDetails.removedSerialNumber,
         RemovedPartDescription: MOLineDetails.removedPartDescription,
         QuantityUsed: MOLineDetails.QuantityUsed,
+        CTValidation: MOLineDetails.CTValidation,
         PartReturnStatusId: MOLineDetails.PartReturnStatusId ?? null,
         DOAReason: MOLineDetails.DOAReason,
         PhotoPartUnit: MOLineDetails.PhotoPartUnit,
