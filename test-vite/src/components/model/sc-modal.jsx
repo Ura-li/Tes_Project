@@ -50,8 +50,9 @@ import {
    SelectTrigger,
    SelectValue,
   } from '@/components/ui/select'
-
   
+  import CaseField from "../CaseField";
+
  import { SnInput } from "../sn-input";
 import { Textarea } from "../ui/textarea";
 import { Pencil, Trash } from "lucide-react";
@@ -1116,7 +1117,7 @@ export function AssetEdit({ assetId, onUpdate }) {
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Serial Number*</label>
+            <Label className="text-sm font-medium text-gray-700">Serial Number<Label className="text-red-600">*</Label></Label>
             <Input
               value={formData.SerialNumber}
               onChange={(e) => handleChange("SerialNumber", e.target.value)}
@@ -1404,15 +1405,15 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         {/* Form Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
           <div>
-            <Label htmlFor="Company">Company Name *</Label>
+            <Label htmlFor="Company">Company Name <Label className="text-red-600">*</Label></Label>
             <Input id="Company" autoComplete="organization" value={formData.Company} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="Email">Email *</Label>
+            <Label htmlFor="Email">Email <Label className="text-red-600">*</Label></Label>
             <Input id="Email" type="email" autoComplete="email" value={formData.Email} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="PrimaryPhone">Primary Phone *</Label>
+            <Label htmlFor="PrimaryPhone">Primary Phone <Label className="text-red-600">*</Label></Label>
             <Input id="PrimaryPhone" type="tel" autoComplete="tel" value={formData.PrimaryPhone} onChange={handleChange} />
           </div>
           <div>
@@ -1420,7 +1421,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
             <Input id="WhatsappNo" type="tel" value={formData.WhatsappNo} onChange={handleChange} />
           </div>
           <div className="sm:col-span-2">
-            <Label htmlFor="AddressLine1">Address Line 1 *</Label>
+            <Label htmlFor="AddressLine1">Address Line 1 <Label className="text-red-600">*</Label></Label>
             <Input id="AddressLine1" value={formData.AddressLine1} onChange={handleChange} />
           </div>
           <div className="sm:col-span-2">
@@ -1428,19 +1429,19 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
             <Input id="AddressLine2" value={formData.AddressLine2} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="City">City *</Label>
+            <Label htmlFor="City">City <Label className="text-red-600">*</Label></Label>
             <Input id="City" value={formData.City} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="StateProvince">State/Province</Label>
+            <Label htmlFor="StateProvince">State/Province <Label className="text-red-600">*</Label></Label>
             <Input id="StateProvince" value={formData.StateProvince} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="Country">Country *</Label>
+            <Label htmlFor="Country">Country <Label className="text-red-600">*</Label></Label>
             <Input id="Country" value={formData.Country} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="ZipPostalCode">Zip/Postal Code *</Label>
+            <Label htmlFor="ZipPostalCode">Zip/Postal Code <Label className="text-red-600">*</Label></Label>
             <Input id="ZipPostalCode" value={formData.ZipPostalCode} onChange={handleChange} />
           </div>
         </div>
@@ -1678,63 +1679,63 @@ export function ContactEdit({ contactID, onUpdate }) {
         <div className="max-h-[70vh] overflow-y-auto p-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium">Salutation</label>
+              <Label className="text-sm font-medium">Salutation</Label>
               <Input value={salutation} onChange={(e) => setSalutation(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">First Name *</label>
+              <Label className="text-sm font-medium">First Name <Label className="text-red-600">*</Label></Label>
               <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Last Name *</label>
+              <Label className="text-sm font-medium">Last Name <Label className="text-red-600">*</Label></Label>
               <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Email *</label>
+              <Label className="text-sm font-medium">Email <Label className="text-red-600">*</Label></Label>
               <Input value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Preferred Language</label>
+              <Label className="text-sm font-medium">Preferred Language</Label>
               <Input value={preferredLanguage} onChange={(e) => setPreferredLanguage(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Phone *</label>
+              <Label className="text-sm font-medium">Phone <Label className="text-red-600">*</Label></Label>
               <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Mobile</label>
+              <Label className="text-sm font-medium">Mobile</Label>
               <Input value={mobile} onChange={(e) => setMobile(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Work Phone</label>
+              <Label className="text-sm font-medium">Work Phone</Label>
               <Input value={workPhone} onChange={(e) => setWorkPhone(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Work Extension</label>
+              <Label className="text-sm font-medium">Work Extension</Label>
               <Input value={workExtension} onChange={(e) => setWorkExtension(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Address Line 1</label>
+              <Label className="text-sm font-medium">Address Line 1</Label>
               <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Address Line 2</label>
+              <Label className="text-sm font-medium">Address Line 2</Label>
               <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">City *</label>
+              <Label className="text-sm font-medium">City <Label className="text-red-600">*</Label></Label>
               <Input value={city} onChange={(e) => setCity(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">State / Province</label>
+              <Label className="text-sm font-medium">State / Province <Label className="text-red-600">*</Label></Label>
               <Input value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Country *</label>
+              <Label className="text-sm font-medium">Country <Label className="text-red-600">*</Label></Label>
               <Input value={country} onChange={(e) => setCountry(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Zip / Postal Code *</label>
+              <Label className="text-sm font-medium">Zip / Postal Code <Label className="text-red-600">*</Label></Label>
               <Input value={zipPostalCode} onChange={(e) => setZipPostalCode(e.target.value)} />
             </div>
             <div>
@@ -1876,20 +1877,20 @@ export function ProductAdd() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Product Information</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription><Label>Fields marked with <Label className="text-red-600">*</Label> are required.</Label></DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Product Number *</Label>
+          <Label>Product Number <Label className="text-red-600">*</Label> </Label>
           <Input type="text" id="ProductNumber" value={formDataProduct.ProductNumber} onChange={handlerInputProduct} />
 
-          <Label>Product Line *</Label>
+          <Label>Product Line <Label className="text-red-600">*</Label></Label>
           <Input type="text" id="ProductLine" value={formDataProduct.ProductLine} onChange={handlerInputProduct} />
 
-          <Label>Product Name *</Label>
+          <Label>Product Name <Label className="text-red-600">*</Label></Label>
           <Input type="text" id="ProductName" value={formDataProduct.ProductName} onChange={handlerInputProduct} />
 
-          <Label>Product Type *</Label>
+          <Label>Product Type <Label className="text-red-600">*</Label></Label>
           <Select
             value={formDataProduct.ProductTypeID?.toString() || ""}
             onValueChange={(value) =>
@@ -2031,7 +2032,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Product Number *</Label>
+          <Label>Product Number <Label className="text-red-600">*</Label></Label>
           <Input
             type="text"
             id="ProductNumber"
@@ -2039,13 +2040,13 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
             onChange={handlerInputProduct}
           />
 
-          <Label>Product Line *</Label>
+          <Label>Product Line <Label className="text-red-600">*</Label></Label>
           <Input type="text" id="ProductLine" value={formDataProduct.ProductLine} onChange={handlerInputProduct} />
 
-          <Label>Product Name *</Label>
+          <Label>Product Name <Label className="text-red-600">*</Label></Label>
           <Input type="text" id="ProductName" value={formDataProduct.ProductName} onChange={handlerInputProduct} />
 
-          <Label>Product Type *</Label>
+          <Label>Product Type <Label className="text-red-600">*</Label></Label>
           <Select
             value={formDataProduct.ProductTypeID?.toString() || ""}
             onValueChange={(value) => setFormDataProduct((prev) => ({ ...prev, ProductTypeID: parseInt(value) }))}
@@ -2507,8 +2508,8 @@ export function WarrantyServiceAdd() {
     qty_ws: "",
     Tax: "",
     Total: "",
-    WarrantyCondition: "",   // ✅ Tambah
-    CaseTypeServices: "",    // ✅ Tambah
+    WarrantyCondition: "",   
+    CaseTypeServices: "",    
   });
 
   // Input handler
@@ -2607,7 +2608,7 @@ export function WarrantyServiceAdd() {
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Service Offer ID *</Label>
+          <Label>Service Offer ID <Label className="text-red-600">*</Label></Label>
           <Input
             type="text"
             id="Service_offerID"
@@ -2616,7 +2617,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label htmlFor="Service_description">Service Description *</Label>
+          <Label htmlFor="Service_description">Service Description <Label className="text-red-600">*</Label></Label>
           <Textarea
             id="Service_description"
             placeholder="Masukkan deskripsi servis"
@@ -2625,7 +2626,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label>Customer TAT / Response Time *</Label>
+          <Label>Customer TAT / Response Time <Label className="text-red-600">*</Label></Label>
           <Input
             type="text"
             id="CTat_RTime"
@@ -2634,7 +2635,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label>Price *</Label>
+          <Label>Price <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             id="Price"
@@ -2643,7 +2644,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label>Shipping Fee *</Label>
+          <Label>Shipping Fee <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             id="Shipping_Fee"
@@ -2652,7 +2653,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label>Quantity *</Label>
+          <Label>Quantity <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             id="qty_ws"
@@ -2661,7 +2662,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label>Tax *</Label>
+          <Label>Tax <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             id="Tax"
@@ -2670,7 +2671,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label>Total *</Label>
+          <Label>Total <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             id="Total"
@@ -2680,7 +2681,7 @@ export function WarrantyServiceAdd() {
           />
 
           {/* ✅ Tambahan Field WarrantyCondition */}
-          <Label>Warranty Condition *</Label>
+          <Label>Warranty Condition <Label className="text-red-600">*</Label></Label>
           <select
             id="WarrantyCondition"
             className="w-full p-2 border rounded-lg"
@@ -2851,42 +2852,42 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
             onChange={(e) => setService_description(e.target.value)}
           />
 
-          <Label>Customer TAT / Response Time *</Label>
+          <Label>Customer TAT / Response Time <Label className="text-red-600">*</Label></Label>
           <Input
             type="text"
             value={CTat_RTime}
             onChange={(e) => setCTat_RTime(e.target.value)}
           />
 
-          <Label>Price *</Label>
+          <Label>Price <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             value={Price}
             onChange={(e) => setPrice(e.target.value)}
           />
 
-          <Label>Shipping Fee *</Label>
+          <Label>Shipping Fee <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             value={Shipping_Fee}
             onChange={(e) => setShipping_Fee(e.target.value)}
           />
 
-          <Label>Quantity *</Label>
+          <Label>Quantity <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             value={qty_ws}
             onChange={(e) => setQty_ws(e.target.value)}
           />
 
-          <Label>Tax *</Label>
+          <Label>Tax <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             value={Tax}
             onChange={(e) => setTax(e.target.value)}
           />
 
-          <Label>Total *</Label>
+          <Label>Total <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             value={Total}
@@ -3686,7 +3687,7 @@ export function UserAdd({ onAdd }) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="ml-2 rounded-sm h-11">
-          Tambah User
+          Add User
         </Button>
       </DialogTrigger>
 
@@ -3700,7 +3701,7 @@ export function UserAdd({ onAdd }) {
 
         <div className="space-y-3">
           <div>
-            <Label>Email*</Label>
+            <Label>Email<Label className="text-red-600">*</Label></Label>
             <Input
               type="email"
               value={formData.Email}
@@ -3708,7 +3709,7 @@ export function UserAdd({ onAdd }) {
             />
           </div>
           <div>
-            <Label>Username*</Label>
+            <Label>Username<Label className="text-red-600">*</Label></Label>
             <Input
               type="text"
               value={formData.Username}
@@ -3716,7 +3717,7 @@ export function UserAdd({ onAdd }) {
             />
           </div>
           <div>
-            <Label>Password*</Label>
+            <Label>Password<Label className="text-red-600">*</Label></Label>
             <Input
               type="password"
               value={formData.Password}
@@ -3724,7 +3725,7 @@ export function UserAdd({ onAdd }) {
             />
           </div>
           <div>
-            <Label>Nama*</Label>
+            <Label>Nama <Label className="text-red-600">*</Label></Label>
             <Input
               type="text"
               value={formData.Name}
@@ -3991,7 +3992,7 @@ export function UserEdit({ IDUser, onUpdate }) {
 
         <div className="space-y-3">
           <div>
-            <Label>Email*</Label>
+            <Label>Email<Label className="text-red-600">*</Label></Label>
             <Input
               type="email"
               value={formData.Email}
@@ -3999,7 +4000,7 @@ export function UserEdit({ IDUser, onUpdate }) {
             />
           </div>
           <div>
-            <Label>Username*</Label>
+            <Label>Username<Label className="text-red-600">*</Label></Label>
             <Input
               type="text"
               value={formData.Username}
@@ -4016,7 +4017,7 @@ export function UserEdit({ IDUser, onUpdate }) {
             />
           </div>
           <div>
-            <Label>Name*</Label>
+            <Label>Name<Label className="text-red-600">*</Label></Label>
             <Input
               type="text"
               value={formData.Name}
@@ -4160,12 +4161,12 @@ return (
 );
 };
 
-export function PartAdd () {
+export function PartAdd() {
   const [formData, setFormData] = useState({
-    PartNumber: '',
-    Keyword: '',
-    PartDescription: '',
-    RestrictionReason: '',
+    PartNumber: "",
+    Keyword: "",
+    PartDescription: "",
+    RestrictionReason: "",
     Orderability: false,
     CSR_Flag: false,
     ROHS_Flag: false,
@@ -4202,7 +4203,6 @@ export function PartAdd () {
       return;
     }
 
-    // Convert types before sending
     const payload = {
       ...formData,
       Orderability: Boolean(formData.Orderability),
@@ -4222,7 +4222,7 @@ export function PartAdd () {
     };
 
     try {
-      const res = await ApiCustomer.post(`/api/service-log/parts-catalog`, payload);
+      await ApiCustomer.post(`/api/service-log/parts-catalog`, payload);
       Swal.fire({
         title: "Success!",
         text: "Part successfully added.",
@@ -4244,63 +4244,92 @@ export function PartAdd () {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="ml-2 rounded-sm h-11">Part Add</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Add Part</Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
+
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Add New Part</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Add New Part</DialogTitle>
           <DialogDescription>Fill in all part details below:</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2">
-          <Label>Part Number *</Label>
-          <Input type="text" id="PartNumber" value={formData.PartNumber} onChange={handleChange} />
+        {/* Grid layout untuk input */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <div>
+            <Label>Part Number <Label className="text-red-600">*</Label></Label>
+            <Input type="text" id="PartNumber" value={formData.PartNumber} onChange={handleChange} />
+          </div>
 
-          <Label>Keyword *</Label>
-          <Input type="text" id="Keyword" value={formData.Keyword} onChange={handleChange} />
+          <div>
+            <Label>Keyword <Label className="text-red-600">*</Label></Label>
+            <Input type="text" id="Keyword" value={formData.Keyword} onChange={handleChange} />
+          </div>
 
-          <Label>Part Description *</Label>
-          <Input type="text" id="PartDescription" value={formData.PartDescription} onChange={handleChange} />
+          <div className="sm:col-span-2">
+            <Label>Part Description <Label className="text-red-600">*</Label></Label>
+            <Input type="text" id="PartDescription" value={formData.PartDescription} onChange={handleChange} />
+          </div>
 
-          <Label>Restriction Reason</Label>
-          <Input type="text" id="RestrictionReason" value={formData.RestrictionReason} onChange={handleChange} />
+          <div className="sm:col-span-2">
+            <Label>Restriction Reason</Label>
+            <Input type="text" id="RestrictionReason" value={formData.RestrictionReason} onChange={handleChange} />
+          </div>
 
-          <Label>Price</Label>
-          <Input type="number" id="Price" value={formData.Price} onChange={handleChange} />
+          <div>
+            <Label>Price</Label>
+            <Input type="number" id="Price" value={formData.Price} onChange={handleChange} />
+          </div>
 
-          <Label>Freight Price</Label>
-          <Input type="number" id="FreightPrice" value={formData.FreightPrice} onChange={handleChange} />
+          <div>
+            <Label>Freight Price</Label>
+            <Input type="number" id="FreightPrice" value={formData.FreightPrice} onChange={handleChange} />
+          </div>
 
-          <Label>Shipping Fee</Label>
-          <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} />
+          <div>
+            <Label>Shipping Fee</Label>
+            <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} />
+          </div>
 
-          <Label>Tax</Label>
-          <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} />
+          <div>
+            <Label>Tax</Label>
+            <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} />
+          </div>
 
-          <Label>Total</Label>
-          <Input type="number" id="Total" value={formData.Total} onChange={handleChange} />
-
-          {/* Checkbox flags */}
-          {[
-            "Orderability", "CSR_Flag", "ROHS_Flag", "Returnable_Flag", "HardRoll_Flag",
-            "DangerousGoods_Flag", "LithiumBattery_Flag", "Oversize_Flag", "Heavy_Flag"
-          ].map((flag) => (
-            <div key={flag}>
-              <label className="flex items-center space-x-2">
-                <input type="checkbox" id={flag} checked={formData[flag]} onChange={handleChange} />
-                <span>{flag.replace(/_/g, " ")}</span>
-              </label>
-            </div>
-          ))}
+          <div className="sm:col-span-2">
+            <Label>Total</Label>
+            <Input type="number" id="Total" value={formData.Total} onChange={handleChange} />
+          </div>
         </div>
 
-        <DialogFooter>
-          <Button onClick={handleSubmit}>Submit</Button>
+        {/* Checkbox flags grid */}
+        <div className="mt-6">
+          <h3 className="font-medium mb-2">Flags</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {[
+              "Orderability", "CSR_Flag", "ROHS_Flag", "Returnable_Flag", "HardRoll_Flag",
+              "DangerousGoods_Flag", "LithiumBattery_Flag", "Oversize_Flag", "Heavy_Flag"
+            ].map((flag) => (
+              <label key={flag} className="flex items-center space-x-2 text-sm">
+                <input
+                  type="checkbox"
+                  id={flag}
+                  checked={formData[flag]}
+                  onChange={handleChange}
+                  className="w-4 h-4 accent-blue-600"
+                />
+                <span>{flag.replace(/_/g, " ")}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <DialogFooter className="mt-6">
+          <Button onClick={handleSubmit} className="w-full sm:w-auto">Submit</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export function PartEdit({ PartNumber, onUpdate }) {
   const [formData, setFormData] = useState({});
@@ -4310,8 +4339,8 @@ export function PartEdit({ PartNumber, onUpdate }) {
     PartNumber: "",
     Keyword: "",
     PartDescription: "",
-    Orderability: false,
     RestrictionReason: "",
+    Orderability: false,
     CSR_Flag: false,
     ROHS_Flag: false,
     Returnable_Flag: false,
@@ -4320,13 +4349,14 @@ export function PartEdit({ PartNumber, onUpdate }) {
     LithiumBattery_Flag: false,
     Oversize_Flag: false,
     Heavy_Flag: false,
-    Price: "",
-    FreightPrice: "",
-    Tax: "",
-    Total: "",
-    Shipping_Fee: "",
+    Price: 0,
+    FreightPrice: 0,
+    Shipping_Fee: 0,
+    Tax: 0,
+    Total: 0,
   };
 
+  // 🔹 Fetch data part berdasarkan PartNumber
   const fetchPart = async () => {
     try {
       const res = await ApiCustomer.get(`/api/service-log/parts-catalog/${PartNumber}`);
@@ -4336,87 +4366,78 @@ export function PartEdit({ PartNumber, onUpdate }) {
     }
   };
 
-  const handleChange = (field) => (e) => {
-    const val = e.target.type === "checkbox" ? e.target.checked : e.target.value;
-    setFormData((prev) => ({ ...prev, [field]: val }));
+  const handleChange = (e) => {
+    const { id, type, value, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
+    setFormData((prev) => ({ ...prev, [id]: newValue }));
   };
 
   const handleUpdate = async () => {
-    const {
-      PartNumber, Keyword, PartDescription,
-      Price, FreightPrice, Tax, Shipping_Fee,
-      ...restFlags
-    } = formData;
-  
+    const { PartNumber, Keyword, PartDescription } = formData;
     if (!PartNumber || !Keyword || !PartDescription) {
-      return Swal.fire({
+      Swal.fire({
         icon: "warning",
         title: "Incomplete Data",
-        text: "Lengkapi semua field wajib.",
+        text: "PartNumber, Keyword, dan PartDescription wajib diisi.",
         timer: 1200,
-        timerProgressBar: true,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
+      return;
     }
-  
+
     const updatedData = {
-      PartNumber,
-      Keyword,
-      PartDescription,
-      Price: parseFloat(Price) || 0,
-      FreightPrice: parseFloat(FreightPrice) || 0,
-      Tax: parseFloat(Tax) || 0,
-      Shipping_Fee: parseFloat(Shipping_Fee) || 0,
-      Total:
-        (parseFloat(Price) || 0) +
-        (parseFloat(FreightPrice) || 0) +
-        (parseFloat(Tax) || 0),
-      ...restFlags,
+      ...formData,
+      Orderability: Boolean(formData.Orderability),
+      CSR_Flag: Boolean(formData.CSR_Flag),
+      ROHS_Flag: Boolean(formData.ROHS_Flag),
+      Returnable_Flag: Boolean(formData.Returnable_Flag),
+      HardRoll_Flag: Boolean(formData.HardRoll_Flag),
+      DangerousGoods_Flag: Boolean(formData.DangerousGoods_Flag),
+      LithiumBattery_Flag: Boolean(formData.LithiumBattery_Flag),
+      Oversize_Flag: Boolean(formData.Oversize_Flag),
+      Heavy_Flag: Boolean(formData.Heavy_Flag),
+      Price: Number(formData.Price),
+      FreightPrice: Number(formData.FreightPrice),
+      Shipping_Fee: Number(formData.Shipping_Fee),
+      Tax: Number(formData.Tax),
+      Total: Number(formData.Total),
     };
-  
+
     try {
       Swal.fire({
-        title: "Menyimpan data...",
+        title: "Updating...",
         allowOutsideClick: false,
         allowEscapeKey: false,
-        didOpen: () => Swal.showLoading()
+        didOpen: () => Swal.showLoading(),
       });
-  
+
       await ApiCustomer.patch(`/api/service-log/parts-catalog/${PartNumber}`, updatedData);
-  
-      Swal.close(); 
-  
+      Swal.close();
+
       Swal.fire({
         icon: "success",
-        title: "Berhasil!",
-        text: "Data berhasil diperbarui.",
+        title: "Success!",
+        text: "Part updated successfully.",
         timer: 1500,
-        timerProgressBar: true,
         showConfirmButton: false,
-        allowEscapeKey: false
       }).then(() => {
         onUpdate();
         setIsOpen(false);
       });
-  
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
       Swal.close();
       Swal.fire({
         icon: "error",
-        title: "Gagal!",
-        text: "Perbaruan data gagal!",
+        title: "Update Failed",
+        text: err.response?.data?.message || "Failed to update part.",
         timer: 1500,
-        timerProgressBar: true,
         showConfirmButton: false,
-        allowEscapeKey: false
       });
     }
   };
-  
 
   useEffect(() => {
-    if (PartNumber && isOpen) fetchPart();
+    if (isOpen && PartNumber) fetchPart();
     else if (!isOpen) setFormData(defaultFormData);
   }, [isOpen]);
 
@@ -4427,57 +4448,90 @@ export function PartEdit({ PartNumber, onUpdate }) {
           <Pencil />
         </Button>
       </DialogTrigger>
-      <DialogContent className="h-[500px] overflow-y-auto">
+
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Edit Part</DialogTitle>
-          <DialogDescription>Update data part. (*) wajib diisi.</DialogDescription>
+          <DialogTitle className="text-xl font-semibold">Edit Part</DialogTitle>
+          <DialogDescription>Update detail part di bawah ini:</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3">
-          {[
-            { id: "PartNumber", label: "Part Number", type: "text", readonly: true },
-            { id: "Keyword", label: "Keyword", type: "text", required: true },
-            { id: "PartDescription", label: "Description", type: "textarea", required: true },
-            { id: "RestrictionReason", label: "Restriction Reason", type: "textarea" },
-            { id: "Orderability", label: "Orderable", type: "checkbox" },
-            { id: "CSR_Flag", label: "CSR", type: "checkbox" },
-            { id: "ROHS_Flag", label: "ROHS", type: "checkbox" },
-            { id: "Returnable_Flag", label: "Returnable", type: "checkbox" },
-            { id: "HardRoll_Flag", label: "Hard Roll", type: "checkbox" },
-            { id: "DangerousGoods_Flag", label: "Dangerous Goods", type: "checkbox" },
-            { id: "LithiumBattery_Flag", label: "Lithium Battery", type: "checkbox" },
-            { id: "Oversize_Flag", label: "Oversize", type: "checkbox" },
-            { id: "Heavy_Flag", label: "Heavy", type: "checkbox" },
-            { id: "Price", label: "Price", type: "number" },
-            { id: "FreightPrice", label: "Freight Price", type: "number" },
-            { id: "Tax", label: "Tax", type: "number" },
-            { id: "Shipping_Fee", label: "Shipping Fee", type: "number" },
-          ].map(({ id, label, type, required, readonly }) => (
-            <div key={id}>
-              <Label htmlFor={id}>
-                {label} {required && <span className="text-red-500">*</span>}
-              </Label>
-              {type === "textarea" ? (
-                <Textarea id={id} value={formData[id] || ""} onChange={handleChange(id)} />
-              ) : type === "checkbox" ? (
-                <div className="flex items-center space-x-2">
-                  <input type="checkbox" id={id} checked={!!formData[id]} onChange={handleChange(id)} />
-                  <label htmlFor={id}>{label}</label>
-                </div>
-              ) : (
-                <Input type={type} id={id} value={formData[id] || ""} onChange={handleChange(id)} readOnly={readonly} />
-              )}
-            </div>
-          ))}
+        {/* Grid layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <div>
+            <Label>Part Number <Label className="text-red-600">*</Label></Label>
+            <Input type="text" id="PartNumber" value={formData.PartNumber || ""} readOnly />
+          </div>
+
+          <div>
+            <Label>Keyword <Label className="text-red-600">*</Label></Label>
+            <Input type="text" id="Keyword" value={formData.Keyword || ""} onChange={handleChange} />
+          </div>
+
+          <div className="sm:col-span-2">
+            <Label>Part Description <Label className="text-red-600">*</Label></Label>
+            <Input type="text" id="PartDescription" value={formData.PartDescription || ""} onChange={handleChange} />
+          </div>
+
+          <div className="sm:col-span-2">
+            <Label>Restriction Reason</Label>
+            <Input type="text" id="RestrictionReason" value={formData.RestrictionReason || ""} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label>Price</Label>
+            <Input type="number" id="Price" value={formData.Price || 0} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label>Freight Price</Label>
+            <Input type="number" id="FreightPrice" value={formData.FreightPrice || 0} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label>Shipping Fee</Label>
+            <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee || 0} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label>Tax</Label>
+            <Input type="number" id="Tax" value={formData.Tax || 0} onChange={handleChange} />
+          </div>
+
+          <div className="sm:col-span-2">
+            <Label>Total</Label>
+            <Input type="number" id="Total" value={formData.Total || 0} onChange={handleChange} />
+          </div>
         </div>
 
-        <DialogFooter>
-          <Button onClick={handleUpdate}>Simpan</Button>
+        {/* Flags grid */}
+        <div className="mt-6">
+          <h3 className="font-medium mb-2">Flags</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {[
+              "Orderability", "CSR_Flag", "ROHS_Flag", "Returnable_Flag", "HardRoll_Flag",
+              "DangerousGoods_Flag", "LithiumBattery_Flag", "Oversize_Flag", "Heavy_Flag"
+            ].map((flag) => (
+              <label key={flag} className="flex items-center space-x-2 text-sm">
+                <input
+                  type="checkbox"
+                  id={flag}
+                  checked={!!formData[flag]}
+                  onChange={handleChange}
+                  className="w-4 h-4 accent-blue-600"
+                />
+                <span>{flag.replace(/_/g, " ")}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <DialogFooter className="mt-6">
+          <Button onClick={handleUpdate} className="w-full sm:w-auto">Update</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export function PartDelete ({ PartNumber, isModalOpen, setIsModalOpen, onUpdate }) {
   const handleDelete = async () => {
@@ -4631,10 +4685,10 @@ export function ResourceAdd () {
        </DialogHeader>
        <div className="space-y-2">
 
-       <Label>Resource ID</Label>
+       <Label>Resource ID<Label className="text-red-600">*</Label></Label>
        <Input type="text" id="ResourceId" className="p-2" value={formDataResource.ResourceId} onChange={handlerInputResource} />
 
-       <Label>Name</Label>
+       <Label>Name<Label className="text-red-600">*</Label></Label>
        <Input type="text" id="Name" className="p-2" value={formDataResource.Name} onChange={handlerInputResource} />
        </div>
        <DialogFooter>
@@ -5902,22 +5956,22 @@ export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
-          <Label>Part Number*</Label>
+          <Label>Part Number<Label className="text-red-600">*</Label></Label>
           <Input id="PartNumber" value={formData.PartNumber} onChange={handleChange} />
 
-          <Label>Keyword*</Label>
+          <Label>Keyword<Label className="text-red-600">*</Label></Label>
           <Input id="Keyword" value={formData.Keyword} onChange={handleChange} />
 
-          <Label>Part Description*</Label>
+          <Label>Part Description<Label className="text-red-600">*</Label></Label>
           <Input id="PartDescription" value={formData.PartDescription} onChange={handleChange} />
 
-          <Label>Orderability*</Label>
+          <Label>Orderability<Label className="text-red-600">*</Label></Label>
           <Input id="Orderability" value={formData.Orderability} onChange={handleChange} />
 
           <Label>Restriction Reason</Label>
           <Input id="RestrictionReason" value={formData.RestrictionReason} onChange={handleChange} />
 
-          <Label>Price*</Label>
+          <Label>Price<Label className="text-red-600">*</Label></Label>
           <Input type="number" id="Price" value={formData.Price} onChange={handleChange} />
 
           <Label>Freight Price</Label>
@@ -5926,10 +5980,10 @@ export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen
           <Label>Shipping Fee</Label>
           <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} />
 
-          <Label>Tax*</Label>
+          <Label>Tax<Label className="text-red-600">*</Label></Label>
           <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} />
 
-          <Label>Total*</Label>
+          <Label>Total<Label className="text-red-600">*</Label></Label>
           <Input type="number" id="Total" value={formData.Total} onChange={handleChange} />
 
           <div className="grid grid-cols-2 mt-4 gap-x-4 gap-y-2">
@@ -6554,10 +6608,10 @@ export function ResourceAccountAdd() {
           <DialogDescription>Fields marked with * are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Label>ResourceAccountId *</Label>
+          <Label>ResourceAccountId <Label className="text-red-600">*</Label></Label>
           <Input id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} />
 
-          <Label>Name *</Label>
+          <Label>Name <Label className="text-red-600">*</Label></Label>
           <Input id="Name" value={formData.Name} onChange={handleInputChange} />
 
           <Label>Resource (optional)</Label>

@@ -109,7 +109,7 @@ export const FlowCase = () => {
   })
     .map(c => {
       // Grab the raw CreatedOn
-      const rawCreated = c.caseinformation?.ActionLog[0].ChangeAt;
+      const rawCreated = c?.caseinformation?.ActionLog[0]?.ChangeAt;
       const createdDate = rawCreated ? (rawCreated instanceof Date ? rawCreated : new Date(rawCreated)) : null;
 
       let estimatedTime = null;

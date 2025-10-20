@@ -167,7 +167,7 @@ export async function POST(request) {
             data: {
                 AssetID: asset_information.AssetID,
                 WarrantyApprovalStatus : "New",
-                WarrantyCardDate: "",
+                WarrantyCardDate: null,
                 POPDocument: "",
                 WarrantyCard: "",
                 PhotoUnit: "",

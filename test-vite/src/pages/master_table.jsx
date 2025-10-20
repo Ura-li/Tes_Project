@@ -251,7 +251,7 @@ export const Contact_table = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full">
+    <div className="grid p-6 grid-cols-1 w-full h-full bg-gray-200 rounded-2xl">
       <h2 className="mb-4 text-xl sm:text-2xl font-bold">📊 Contact Management</h2>
 
       {/* Search + Filters */}
@@ -665,7 +665,7 @@ export const Company_table = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 grid grid-flow-row">
       <h2 className="mb-6 text-2xl font-bold">📊 Company Management</h2>
 
       {/* Kontainer Flexbox untuk pencarian dan tombol reset */}
@@ -768,48 +768,48 @@ export const Company_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className=" bg-white rounded-2xl shadow overflow-scroll max-h-150">
-        <table className="w-full relative border-collapse">
+      <div className="relative w-full overflow-x-auto overflow-y-auto max-h-[75vh] bg-white rounded-2xl shadow-md border">
+        <table className="min-w-full border-collapse">
           <thead className="sticky z-10 top-0 bg-gray-100">
             <tr>
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap">No</th>
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Company")}>
-                Company {getSortIcon("Company")}
+                Company  {getSortIcon("Company")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Email")}>
                 Email {getSortIcon("Email")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("PrimaryPhone")}>
                 Primary Phone {getSortIcon("PrimaryPhone")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("WhatsappNo")}>
                 Whatsapp {getSortIcon("WhatsappNo")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("AddressLine1")}>
                 Address Line 1 {getSortIcon("AddressLine1")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("AddressLine2")}>
                 Address Line 2 {getSortIcon("AddressLine2")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Country")}>
                 Country {getSortIcon("Country")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("StateProvince")}>
                 State/Province {getSortIcon("StateProvince")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("City")}>
                 City {getSortIcon("City")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("ZipPostalCode")}>
                 Zip/Postal Code {getSortIcon("ZipPostalCode")}
               </th>
@@ -824,16 +824,16 @@ export const Company_table = () => {
                   <td className="p-3 text-center border">
                     {(currentPage - 1) * itemsPerPage + i + 1}
                   </td>
-                  <td className="p-3 border">{c.Company}</td>
-                  <td className="p-3 border">{c.Email}</td>
-                  <td className="p-3 border">{c.PrimaryPhone}</td>
-                  <td className="p-3 border">{c.WhatsappNo}</td>
-                  <td className="p-3 border">{c.AddressLine1}</td>
-                  <td className="p-3 border">{c.AddressLine2}</td>
-                  <td className="p-3 border">{c.Country}</td>
-                  <td className="p-3 border">{c.StateProvince}</td>
-                  <td className="p-3 border">{c.City}</td>
-                  <td className="p-3 border">{c.ZipPostalCode}</td>
+                  <td className="p-3 text-xs sm:text-sm border whitespace-nowrap overflow-hidden text-ellipsis">{c.Company}</td>
+                  <td className="p-3 text-xs sm:text-sm border whitespace-nowrap overflow-hidden text-ellipsis">{c.Email}</td>
+                  <td className="p-3 text-xs sm:text-sm border whitespace-nowrap overflow-hidden text-ellipsis">{c.PrimaryPhone}</td>
+                  <td className="p-3 text-xs sm:text-sm border whitespace-nowrap overflow-hidden text-ellipsis">{c.WhatsappNo}</td>
+                  <td className="p-3 text-xs sm:text-sm border whitespace-nowrap overflow-hidden text-ellipsis">{c.AddressLine1}</td>
+                  <td className="p-3 text-xs sm:text-sm border whitespace-nowrap overflow-hidden text-ellipsis">{c.AddressLine2}</td>
+                  <td className="p-3 text-xs sm:text-sm border whitespace-nowrap overflow-hidden text-ellipsis">{c.Country}</td>
+                  <td className="p-3 text-xs sm:text-sm border whitespace-nowrap overflow-hidden text-ellipsis">{c.StateProvince}</td>
+                  <td className="p-3 text-xs sm:text-sm border whitespace-nowrap overflow-hidden text-ellipsis">{c.City}</td>
+                  <td className="p-3 text-xs sm:text-sm border whitespace-nowrap overflow-hidden text-ellipsis">{c.ZipPostalCode}</td>
                   <td className="flex items-center justify-center gap-2 p-3 border">
                     <CompanyEdit siteAccountId={c.SiteAccountID} onUpdate={fetchCompanies}/>
                     <CompanyDelete siteAccountId={c.SiteAccountID}
@@ -1629,7 +1629,7 @@ export const Assets_table = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="grid p-6 grid-flow-row">
       <h2 className="mb-6 text-2xl font-bold">📦 Asset Information</h2>
 
       {/* Search + Reset */}
@@ -1666,7 +1666,7 @@ export const Assets_table = () => {
       {error && <p className="mb-2 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-150">
+      <div className="relative w-full overflow-x-auto overflow-y-auto max-h-[75vh] bg-white rounded-2xl shadow-md border">
         <table className="w-full relative border-collapse">
           <thead className="sticky top-0 z-10 bg-gray-100">
             <tr>
@@ -1706,7 +1706,7 @@ export const Assets_table = () => {
               <tr><td colSpan="9" className="p-4 text-center">Loading...</td></tr>
             ) : currentData.length > 0 ? (
               currentData.map((a, idx) => (
-                <tr key={a.AssetID} className="hover:bg-gray-50">
+                <tr key={a.AssetID} className={`hover:bg-blue-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
                   <td className="p-2 text-center border">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
                   <td className="p-2 border">{a.AssetID}</td>
                   <td className="p-2 border">{a.SerialNumber}</td>
@@ -1732,7 +1732,7 @@ export const Assets_table = () => {
             )}
           </tbody>
         </table>
-      </div>
+      </div> 
 
       {/* Bottom controls */}
       <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
@@ -1978,7 +1978,7 @@ export const Product_table = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 grid grid-flow-row">
       <h2 className="mb-6 text-2xl font-bold">📊 Product Management</h2>
 
       {/*search + reset */}
@@ -2017,8 +2017,8 @@ export const Product_table = () => {
       
 
       {/* Table */}
-      <div className=" bg-white rounded-2xl shadow overflow-scroll max-h-150 mt-4">
-        <table className="w-full relative border-collapse">
+      <div className="relative w-full overflow-x-auto overflow-y-auto max-h-[75vh] bg-white rounded-2xl shadow-md border">
+        <table className="min-w-full border-collapse">
           <thead className="sticky z-10 top-0 bg-gray-100">
             <tr>
               <th className="p-3 text-sm font-semibold text-left border">No</th>
@@ -2269,7 +2269,7 @@ export const ProductType_table = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-6grid grid-flow-row">
       <h2 className="mb-4 text-xl font-bold">Product Type Table</h2>
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <input
