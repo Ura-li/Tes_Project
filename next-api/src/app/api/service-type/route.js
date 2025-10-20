@@ -7,6 +7,7 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const search = searchParams.get("search") || "";
 
+        const problemCategory = searchParams.get("ProblemCategory") || null;
         const page = parseInt(searchParams.get("page")) || 1;
         const limit = parseInt(searchParams.get("limit")) || 50;
 
@@ -30,6 +31,10 @@ export async function GET(request) {
                 }
             }
 
+            if(problemCategory){
+                whereCondition.ProblemCategory = problemCategory
+            }
+
 
         console.log("Final WHERE Condition:", JSON.stringify(whereCondition));
 
@@ -49,9 +54,6 @@ export async function GET(request) {
             // skip: skip,
               // take: limit,
             orderBy: { ServiceTypeId: "asc" },
-            include : {
-                items: true
-            }
         });
 
         return NextResponse.json({

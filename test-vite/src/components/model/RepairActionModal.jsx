@@ -25,6 +25,8 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
   const [nmuNotFound, setNMUNotFound] = useState(false)
   const [NMUItemList, setNMUItemList] = useState([]);
   const [nmuItemNotFound, setNMUItemNotFound] = useState(false)
+  const [problemCategory, setProblemCategory] = useState("");
+  const [serviceTypeList, setServiceTypeList] = useState([]);
   const [showDelayCode, setShowDelayCode] = useState(false);
   const [selectedNMU, setSelectedNMU] = useState("");
   const [selectedNMUItem, setSelectedNMUItem] = useState("");
@@ -39,6 +41,17 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
     delayCode : null,
   });
 
+  const fetchServiceType = async (problemCategory) => {
+    try {
+      const res = await ApiCustomer.get(`/api/service-type?ProblemCategory=${problemCategory}`);
+      const list = res.data?.data || [];
+      setServiceTypeList(list)
+      console.log("NKTOL LIST : ",list)
+    } catch (e) {
+      console.error("Search Service Type failed", e);
+      setServiceTypeList([])
+    }
+  }
   const fetchNMU = async () =>{
     try {
       const res = await ApiCustomer.get(`/api/nmu`);
@@ -56,8 +69,6 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
     try {
       const res = await ApiCustomer.get(`/api/nmu/nmuitem?NMUId=${nmu}`);
       const list = res.data?.data || [];
-      console.log("NMU LIST : ",list)
-
       setNMUItemList(list);
       setNMUItemNotFound(list.length === 0);
     } catch (e) {
@@ -68,8 +79,10 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
   }
   useEffect(()=>{
     fetchNMU();
-    
   },[])
+  useEffect(()=>{
+    fetchServiceType(problemCategory)
+  },[problemCategory])
   useEffect(() => {
     setFormData(prev => ({ ...prev, nmuItem: null, Version: "" }));
 
@@ -84,8 +97,6 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
         fetchNMUList(foundNMU.NMUId);
       }
     }
-
-
   }, [formData.nmu]);
 
 
@@ -201,20 +212,41 @@ console.log(formData);
         {step === "form" && (
           <Card className="mt-2">
             <CardContent className="grid grid-cols-4 gap-3">
-              <CaseField label="Problem category" lock>
-                <Input
-                  id="ProblemCategory"
-                  value={workOrders?.WorkOrderType || ""}
-                  onChange={(e) => handleChange("problemCategory", e.target.value)}
+              <CaseField label="Problem category" lock={!canEdit}>
+                <SearchCommandBlock
+                  value={problemCategory}
+                  onChange={(selectedValue)=>{
+                    setProblemCategory(selectedValue)
+                  }}
+                  placeholder="Search Problem Category..."
+                  options={[
+                    "Hardware",
+                    "Software"
+                    ]}
+                  // onSearchInputChange={searchNMU}
+                  readOnly={!canEdit}
                 />
               </CaseField>
 
-              <CaseField label="Service type" lock>
-                <Input
+              <CaseField label="Service type" lock={!canEdit}>
+                <SearchCommandBlock
+                  value={formData.serviceType}
+                  onChange={(selectedValue)=>{
+                    handleChange("serviceType", selectedValue)
+                  }}
+                  placeholder="Search NMU Item..."
+                  options={serviceTypeList.map((item) =>({
+                    label: item.ServiceTypeName,
+                    value: item.ServiceTypeId,
+                  }))}
+                  // onSearchInputChange={searchNMU}
+                  readOnly={!canEdit}
+                />
+                {/* <Input
                   id="ServiceType"
                   value={workOrders?.serviceCatalog?.warranty_services?.Service_description || ""}
                   onChange={(e) => handleChange("serviceType", e.target.value)}
-                />
+                /> */}
               </CaseField>
               <CaseField label="Defec desc" star={canEdit} lock={!canEdit}>
                 <Textarea

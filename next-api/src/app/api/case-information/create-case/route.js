@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../../prisma/client";
 import { generateID } from "@/utils/generateID";
 import { notifySocket } from "../../../../../lib/SocketClient";
+import { sendEmail } from "../../../../../lib/email";
 
 class HttpError extends Error {
   /**
@@ -414,6 +415,72 @@ export async function POST(request) {
         ownerId: result.case.Owner,
       }
     );
+
+    //send Email
+    try {
+      if(result.case.KCI_Flag){
+        const contactInfo = await prisma.contact_information.findUnique({
+          where: {ContactID: result.contactId},
+          select:{
+            Email: true,
+            FirstName: true,
+            LastName: true,
+            PIC_Email: true,
+            PIC_Name: true,
+          }
+        })
+
+        const companyInfo = result.companyId ? await prisma.site_account.findUnique({
+          where: {
+            SiteAccountID: result.companyId
+          },
+          select: { Email: true, Company: true}
+        })
+        : null;
+
+        const to = contactInfo?.Email;
+        const ccList = [
+          contactInfo?.PIC_Email,
+          companyInfo?.Email
+        ].filter(Boolean)
+
+        if(to){
+          const subject = `[Case Created] Case ${result.case.CaseID} - ${result.case.CaseSubject || "No Subject"}`;
+
+          const html = `
+            <div style="font-family: Arial, sans-serif; color: #333;">
+              <h2 style="color: #0b7285;">Thank you for contacting us</h2>
+              <p>Dear ${contactInfo?.FirstName || "Customer"},</p>
+              <p>Your case has been created successfully. Below are the details:</p>
+              <table style="border-collapse: collapse; margin-top: 12px;">
+                <tr><td style="padding: 4px 8px; font-weight: bold;">Case ID:</td><td>${result.case.CaseID}</td></tr>
+                <tr><td style="padding: 4px 8px; font-weight: bold;">Subject:</td><td>${result.case.CaseSubject || "-"}</td></tr>
+                <tr><td style="padding: 4px 8px; font-weight: bold;">Status:</td><td>${result.case.CaseStatus}</td></tr>
+                <tr><td style="padding: 4px 8px; font-weight: bold;">Priority:</td><td>${result.case.CasePriority}</td></tr>
+              </table>
+              <p style="margin-top: 16px;">We will contact you shortly regarding your case.</p>
+              <p>Best regards,<br/>Customer Support Team</p>
+              <hr style="margin: 24px 0; border: none; border-top: 1px solid #ddd;">
+              <p style="font-size: 12px; color: #6c757d;">This message was generated automatically. Please do not reply to this email.</p>
+            </div>
+          `;
+
+          await sendEmail({
+            to,
+            cc: ccList,
+            subject,
+            html,
+            text: `Case ${result.case.CaseID} created successfully.`,
+          });
+
+          console.log(`[Email] Case ${result.case.CaseID} sent to ${to}`);
+        } else{
+          console.warn(`[Email] No recipient found for case ${result.case.CaseID}`);
+        }
+      }
+    } catch (emailError) {
+      console.error("Failed to send KCI email:", emailError);
+    }
 
     return NextResponse.json(
       {

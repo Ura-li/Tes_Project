@@ -14,12 +14,18 @@ export async function GET(request) {
 
   //extract query parameter
   const CaseStatus = searchParams.get("CaseStatus");
+  const excludeStatusesRaw = searchParams.get("excludeStatuses");
+  const excludeStatuses = excludeStatusesRaw ? excludeStatusesRaw.split(',') : null;
   const Owner = searchParams.get("IDUser");
 
   //prisma query filter
   const filters = {};
   if (CaseStatus) {
     filters.CaseStatus = CaseStatus;
+  }else if (excludeStatuses){
+    filters.CaseStatus = {
+      notIn: excludeStatuses,
+    };
   }
   const openCount = await prisma.caseinformation.count({
     where: {

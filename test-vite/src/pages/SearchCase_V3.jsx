@@ -754,7 +754,7 @@ export default function NewCaseForm() {
       if (!selectedAsset) return;
       try {
         const res = await ApiCustomer.get(`/api/case-information`, {
-          params: { CaseStatus: "Open" },
+          params: { excludeStatuses: ['Close', 'FinishRepair'] },
         });
         const list = res.data?.data ?? [];
 
