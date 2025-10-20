@@ -43,12 +43,12 @@ export default function ApoLanding() {
       });
 
     const fetchData = async () => {
+      setLoading(true);
         try {
-          setLoading(true);
-             const response = await ApiCustomer.get('/api/case-information');
+            const response = await ApiCustomer.get('/api/case-information');
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
-            console.log("Fetch user daya : ", user)
+            console.log("Fetch user data : ", user)
             setUserData({
                 ...userData,
                 Username: resFetchUserData.Username,
@@ -67,18 +67,18 @@ export default function ApoLanding() {
       const valueFilterInActiveCase = response.data.data.filter(c => c?.CaseStatus == 'InActive' && c?.caseinformation?.CreatedBy == user.id)
       const valueFilterCloseCase = response.data.data.filter(c => c?.CaseStatus == 'Close' && c?.caseinformation?.CreatedBy == user.id)
       const filtercases = response.data.data.filter(c => c?.CaseStatus !== 'Close' && c?.caseinformation?.Owner == user.id);
-      const rawDate = filtercases[0]?.caseinformation?.ActionLog[0]?.ChangeAt;
-      let newdate;
-      if (rawDate) {
-        const dateObj = rawDate instanceof Date ? rawDate : new Date(rawDate);
-        console.log("Readable:", dateObj.toLocaleString("id-ID"));
-        newdate = dateObj.toLocaleString("id-ID");
-      } else {
-        console.log("No date available");
-      }
+      // const rawDate = filtercases[0]?.caseinformation?.ActionLog[0]?.ChangeAt;
+      // let newdate;
+      // if (rawDate) {
+      //   const dateObj = rawDate instanceof Date ? rawDate : new Date(rawDate);
+      //   console.log("Readable:", dateObj.toLocaleString("id-ID"));
+      //   newdate = dateObj.toLocaleString("id-ID");
+      // } else {
+      //   console.log("No date available");
+      // }
       const sortedCases = filtercases.sort((a, b) => {
-        const dateAraw = a.caseinformation.ActionLog[0]?.ChangeAt;
-        const dateBraw = b.caseinformation.ActionLog[0]?.ChangeAt;
+          const dateAraw = a.UpdateOn;
+        const dateBraw = b.UpdateOn;
 
         const dateA = dateAraw ? (dateAraw instanceof Date ? dateAraw : new Date(dateAraw)) : new Date(0);
         const dateB = dateBraw ? (dateBraw instanceof Date ? dateBraw : new Date(dateBraw)) : new Date(0);
@@ -86,28 +86,25 @@ export default function ApoLanding() {
         return dateB - dateA; // newest first
       });
       const recentCases = sortedCases.slice(0, 4);
-      console.log("Length of the arrays", valuefiltercases);
       
       setCaseData(recentCases);
       setCasevaluedata(valueFilterOpenCase?.length);
       setInactivecasevaluedata(valueFilterInActiveCase?.length)
       setClosecasevaluedata(valueFilterCloseCase?.length);
       return response.data.data;
-            
         } catch (err) {
             Swal.fire({
                    icon: 'error',
                    title: 'Error',
                    text: 'Gagal memuat data. Silakan coba lagi.',
                  });
-                 console.error('Error fetching case data:', error);
-                 throw error;
+                 console.error('Error fetching case data:', err);
+                 throw err;
                } finally {
                  setLoading(false);
                }
     }
-    // fetchData();
-    useEffect(() =>{
+    useEffect(() => {
         fetchData();
     },[])
    

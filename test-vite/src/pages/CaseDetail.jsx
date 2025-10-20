@@ -1551,9 +1551,9 @@ let canEditApo;
 
 const [hideAsignTo, setHideAsignTo] = useState(null)
 if (caseDetails.CaseStatus !== "Close") {
-   canEdit = caseDetails?.Owner === user?.id;
-   canEditFd = user?.role === "fd" ;
-   canEditApo = user?.role === "apo" ;
+   canEdit = caseDetails?.Owner === user?.id || user?.role === 'admin';
+   canEditFd = user?.role === "fd" || user?.role === 'admin';
+   canEditApo = user?.role === "apo" || user?.role === 'admin';
 } else {
    canEdit = false;
    canEditFd = false;
