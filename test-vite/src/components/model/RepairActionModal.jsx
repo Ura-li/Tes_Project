@@ -25,7 +25,9 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
   const [nmuNotFound, setNMUNotFound] = useState(false)
   const [NMUItemList, setNMUItemList] = useState([]);
   const [nmuItemNotFound, setNMUItemNotFound] = useState(false)
-  const [delayCodeList, setDelayCodeList] = useState(null);
+  const [problemCategory, setProblemCategory] = useState("");
+  const [serviceTypeList, setServiceTypeList] = useState([]);
+  const [showDelayCode, setShowDelayCode] = useState(false);
   const [selectedNMU, setSelectedNMU] = useState("");
   const [selectedNMUItem, setSelectedNMUItem] = useState("");
   const [formData, setFormData] = useState({
@@ -39,6 +41,17 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
     delayCode : null,
   });
 
+  const fetchServiceType = async (problemCategory) => {
+    try {
+      const res = await ApiCustomer.get(`/api/service-type?ProblemCategory=${problemCategory}`);
+      const list = res.data?.data || [];
+      setServiceTypeList(list)
+      console.log("NKTOL LIST : ",list)
+    } catch (e) {
+      console.error("Search Service Type failed", e);
+      setServiceTypeList([])
+    }
+  }
   const fetchNMU = async () =>{
     try {
       const res = await ApiCustomer.get(`/api/nmu`);
@@ -52,11 +65,10 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
     }
   }
 
-  const fetchNMUList = async () => {
+  const fetchNMUList = async (nmu) => {
     try {
-      const res = await ApiCustomer.get(`/api/nmu/nmuitem`);
+      const res = await ApiCustomer.get(`/api/nmu/nmuitem?NMUId=${nmu}`);
       const list = res.data?.data || [];
-      console.log("NMU LIST : ",list)
       setNMUItemList(list);
       setNMUItemNotFound(list.length === 0);
     } catch (e) {
@@ -67,22 +79,42 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
   }
   useEffect(()=>{
     fetchNMU();
-    fetchNMUList();
   },[])
+  useEffect(()=>{
+    fetchServiceType(problemCategory)
+  },[problemCategory])
   useEffect(() => {
-    setFormData(prev => ({ ...prev, nmuItem: "" }));
-    setSelectedNMU(NMUList.find(item => item.NMUId === formData.nmu));
-    
-    if (selectedNMU) {
-      setNMUItemNeed(selectedNMU.ItemNeeded)
-      setNMUVersionNeed(selectedNMU.VersionNeeded)
+    setFormData(prev => ({ ...prev, nmuItem: "", Version: "" }));
+
+    const foundNMU = NMUList.find(item => item.NMUId === formData.nmu);
+    setSelectedNMU(foundNMU);
+
+    if (foundNMU) {
+      console.log("THIS CHANGED", foundNMU);
+      setNMUItemNeed(foundNMU.ItemNeeded);
+      setNMUVersionNeed(foundNMU.VersionNeeded);
+      if(foundNMU.ItemNeeded === true){
+        fetchNMUList(foundNMU.NMUId);
+      }
     }
-    // const nmuDesc = NMUList.find()
   }, [formData.nmu]);
+
 
   useEffect(()=>{
     setSelectedNMUItem(NMUItemList.find(item => item.id === formData.nmuItem));
   }, [formData.nmuItem])
+
+  useEffect(()=>{
+    if(!workOrders?.CreatedOn) return;
+
+    const createdDate = new Date(workOrders.CreatedOn);
+    const now = new Date()
+
+    const diffDays = Math.floor((now - createdDate) / (1000*60 *60*24))
+    // console.log("THIS CASE HACE : ",diffDays)
+    // console.log("THIS CASE HACE : ",diffDays > 3)
+    setShowDelayCode(diffDays >= 3);
+  }, [workOrders?.CreatedOn])
 
   /**
    * TODO FOR SLAMET :
@@ -180,20 +212,41 @@ console.log(formData);
         {step === "form" && (
           <Card className="mt-2">
             <CardContent className="grid grid-cols-4 gap-3">
-              <CaseField label="Problem category" lock>
-                <Input
-                  id="ProblemCategory"
-                  value={workOrders?.WorkOrderType || ""}
-                  onChange={(e) => handleChange("problemCategory", e.target.value)}
+              <CaseField label="Problem category" lock={!canEdit}>
+                <SearchCommandBlock
+                  value={problemCategory}
+                  onChange={(selectedValue)=>{
+                    setProblemCategory(selectedValue)
+                  }}
+                  placeholder="Search Problem Category..."
+                  options={[
+                    "Hardware",
+                    "Software"
+                    ]}
+                  // onSearchInputChange={searchNMU}
+                  readOnly={!canEdit}
                 />
               </CaseField>
 
-              <CaseField label="Service type" lock>
-                <Input
+              <CaseField label="Service type" lock={!canEdit}>
+                <SearchCommandBlock
+                  value={formData.serviceType}
+                  onChange={(selectedValue)=>{
+                    handleChange("serviceType", selectedValue)
+                  }}
+                  placeholder="Search NMU Item..."
+                  options={serviceTypeList.map((item) =>({
+                    label: item.ServiceTypeName,
+                    value: item.ServiceTypeId,
+                  }))}
+                  // onSearchInputChange={searchNMU}
+                  readOnly={!canEdit}
+                />
+                {/* <Input
                   id="ServiceType"
                   value={workOrders?.serviceCatalog?.warranty_services?.Service_description || ""}
                   onChange={(e) => handleChange("serviceType", e.target.value)}
-                />
+                /> */}
               </CaseField>
               <CaseField label="Defec desc" star={canEdit} lock={!canEdit}>
                 <Textarea
@@ -214,11 +267,6 @@ console.log(formData);
               </CaseField>
 
               <CaseField label="NMU" lock={!canEdit}>
-                {/* <Input
-                  id="ServiceType"
-                  onChange={(e) => handleChange("nmu", e.target.value)}
-                  // value={workOrders?.serviceCatalog?.warranty_services?.Service_description || ""}
-                  /> */}
                   <SearchCommandBlock
                     value={formData.nmu}
                     onChange={(selectedValue)=>{
@@ -236,7 +284,7 @@ console.log(formData);
               
 
               <CaseField label="NMU Item" lock={!canEdit} 
-              // hide={!NMUItemNeed}
+              hide={!NMUItemNeed}
               >
                 <SearchCommandBlock
                   value={formData.nmuItem}
@@ -254,16 +302,16 @@ console.log(formData);
               </CaseField>
 
               <CaseField label="Version" lock={!canEdit} 
-              // hide={!NMUVersionNeed}
+              hide={!NMUVersionNeed}
               >
                 <Input
                   id="Version"
                   onChange={(e) => handleChange("Version", e.target.value)}
-                  // value={workOrders?.serviceCatalog?.warranty_services?.Service_description || ""}
+                  value={formData.Version}
                 />
               </CaseField>
-
-              <CaseField label="Delay code" star={canEdit} lock={!canEdit}>
+                
+              <CaseField label="Delay code" star={canEdit} lock={!canEdit} hide={!showDelayCode}>
                 <SearchCommandBlock
                   value={delayCodeEnumToLabel[formData.delayCode] || "Search Delay Code"}
                   onChange={(selectedValue)=>{
@@ -292,11 +340,11 @@ console.log(formData);
 
             <div className="space-y-2 bg-gray-50 border rounded p-4 text-sm">
               <p><strong>Problem Category:</strong> {workOrders?.WorkOrderType || ""}</p>
-              <p><strong>Delay Code:</strong> {formData.delayCode}</p>
+              {showDelayCode && (<p><strong>Delay Code:</strong> {formData.delayCode}</p>)}
               <p><strong>Service Type:</strong> {workOrders?.serviceCatalog?.warranty_services?.Service_description || ""}</p>
               <p><strong>NMU:</strong> {selectedNMU.NMUDesc}</p>
-              <p><strong>NMU Item:</strong> {selectedNMUItem.itemName}</p>
-              <p><strong>Version:</strong> {formData.Version}</p>
+              {NMUItemNeed && (<p><strong>NMU Item:</strong> {selectedNMUItem.itemName}</p>)}
+              {NMUVersionNeed && (<p><strong>Version:</strong> {formData.Version}</p>)}
               <p><strong>Defect Desc:</strong> {formData.defectDesc}</p>
               <p><strong>CE Analysis:</strong> {formData.ceAnalysis}</p>
               <p><strong>Repair Action:</strong> {formData.repairAction}</p>

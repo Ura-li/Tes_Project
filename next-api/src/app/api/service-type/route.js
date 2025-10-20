@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma  from "../../../../../prisma/client";
+import prisma  from "../../../../prisma/client";
 
 export async function GET(request) {
     try{
@@ -7,8 +7,7 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const search = searchParams.get("search") || "";
 
-        const nmuId = searchParams.get("NMUId") || null;
-        console.log(nmuId)
+        const problemCategory = searchParams.get("ProblemCategory") || null;
         const page = parseInt(searchParams.get("page")) || 1;
         const limit = parseInt(searchParams.get("limit")) || 50;
 
@@ -16,20 +15,31 @@ export async function GET(request) {
 
         let whereCondition = {}
         
-        if (search) {
-            whereCondition.itemName = { contains: search };
-        }
+            if (search) {
+                const isSearchNumber = !isNaN(search)
+                whereCondition = {
+                    AND: [
+                    {
+                        OR: [
+                        isSearchNumber ? { ServiceTypeId: parseInt(search) } : {}, // hanya jika angka
+                        { ServiceTypeName: { contains: search } }
+                        // { ItemNeeded: { contains: search } },
+                        // { VersionNeeded: { contains: search } },
+                        ]
+                    }
+                    ]
+                }
+            }
 
-        if (nmuId) {
-            whereCondition.nmuId = Number(nmuId);
-        }
-
+            if(problemCategory){
+                whereCondition.ProblemCategory = problemCategory
+            }
 
 
         console.log("Final WHERE Condition:", JSON.stringify(whereCondition));
 
         // Hitung jumlah data total
-        const totalCount = await prisma.NMUItem.count({
+        const totalCount = await prisma.ServiceType.count({
             where: whereCondition
         });
 
@@ -39,20 +49,17 @@ export async function GET(request) {
         const skip = (page - 1) * limit;
 
         // Ambil data dengan filter & pagination
-        const NMUItemData = await prisma.NMUItem.findMany({
+        const ServiceTypeData = await prisma.ServiceType.findMany({
             where: whereCondition,
             // skip: skip,
               // take: limit,
-            orderBy: { id: "asc" },
-            include : {
-                nmu: true
-            }
+            orderBy: { ServiceTypeId: "asc" },
         });
 
         return NextResponse.json({
             success: true,
-            message: "List Data NMU Item",
-            data: NMUItemData,
+            message: "List Data Service Type",
+            data: ServiceTypeData,
             totalPages: Math.ceil(totalCount / limit),
             currentPage: page
         },
@@ -78,24 +85,24 @@ export async function GET(request) {
 export async function POST(request) {
     //get all request
     const { 
-        itemName,
-        nmuId,
+        ServiceTypeName,
+        ProblemCategory,
     } = await request.json();
 
     console.log()
     //create data 
-    const NMUItemData = await prisma.NMUItem.create({
+    const ServiceTypeData = await prisma.ServiceType.create({
         data:{
-            itemName,
-            nmuId: Number(nmuId),
+            ServiceTypeName,
+            ProblemCategory
         },
     });
 
     return NextResponse.json(
         {
             success: true,
-            message: "NMU Item Data Created Successfully!",
-            data: NMUItemData,
+            message: "ServiceType Data Created Successfully!",
+            data: ServiceTypeData,
         },
         { 
             status: 201

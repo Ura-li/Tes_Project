@@ -94,6 +94,7 @@ import SignatureWrite from "@/components/SignaturePad";
 import { description } from "@/components/sc-chart";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { set } from "lodash";
 
 /**
  * TODO : 
@@ -231,10 +232,12 @@ export const TabsServiceCaseDetails = ({
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
   const { user } = useAuth();
+  
   const [selectedSymptom, setSelectedSymptom] = useState(null);
   const [notesList, setNotesList] = useState([]);
   const { open } = useSidebar();
-
+  const [refreshFetchPage, setRefreshFetchPage] = useState(false)
+console.log("CHECK REFRESH STATTUS",refreshFetchPage)
   const [entitlementStatus, setEntitlementStatus] = useState({
     OTCCode: "",
     PurchaseDate: "",
@@ -692,6 +695,7 @@ export const TabsServiceCaseDetails = ({
           allowOutsideClick: false,
           allowEscapeKey: false,
         });
+        setRefreshFetchPage(prev => !prev);
         // window.location.reload();
       }
       return true
@@ -777,6 +781,17 @@ const openPopup = () => {
     // { icon: StepBack, label: "Complaint",},
     { icon: StepBack, label: "SRF", 
       onClick: async () => {
+        // return console.log(user);
+        await ApiCustomer.post('/api/case-information/case-notes',{
+          LogType: "System Info",
+          ActionType: "Request SRF",
+          Template: "SRF Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] SRF requested by ${user?.role} - ${user?.name || "Unknown User"}`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        })
       const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails} customerSignature={signature} />).toBlob();
       const url = URL.createObjectURL(blob);
         window.open(url); 
@@ -1030,6 +1045,7 @@ const openPopup = () => {
             onChangeCsr={handleCsrChange}
             signature={signature}
             setSignature={setSignature}
+            refreshFetchPage={refreshFetchPage}
           />
       </div>
     </>
@@ -1065,7 +1081,8 @@ export const ServiceCase = ({
   onChangeCase,
   setCaseForm,
   signature,
-  setSignature
+  setSignature,
+  refreshFetchPage,
 }) => {
   const { open } = useSidebar();
 
@@ -1134,9 +1151,8 @@ export const ServiceCase = ({
   });
   const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
   const [dataWarrantyStatus, setDataWarrantyStatus] = useState()
-  console.log("tes data assets", dataFetchAssetInformation)
   const [ownerUserData, setOwnerUserData] = useState([]);
-
+console.log("CHECK OWENER DATA ",ownerUserData)
   const [workOrders, setWorkOrders] = useState([]);
 
   const [materialOrders, setMaterialOrders] = useState([]);
@@ -1207,8 +1223,9 @@ export const ServiceCase = ({
     try {
       const response = await ApiCustomer.get(`/api/user/${caseDetails.Owner}`)
       setOwnerUserData(response.data.data)
+      console.log("CHECK OWNER FETCH IF ITS WORKS")
     } catch (error) {
-      
+      console.error("WRONG THING IN FETCH OWNER")
     }
   }
 
@@ -1455,7 +1472,8 @@ const fetchActionLog = async () => {
     fetchCsr();
     fetchCase();
     fetchActionLog();
-  }, [ caseDetails.CaseID]);
+    console.log("CHECK IF THE FETCH IS WORKS ")
+  }, [ caseDetails.CaseID, refreshFetchPage]);
   useEffect(() => {
     fetchUserAssign();
   }, [assignToForm]);
@@ -1483,7 +1501,7 @@ const fetchActionLog = async () => {
       console.log("SEEMS NOT WORK")
     }
   }, [otcCode, dataFetchAssetInformation]);
-  console.log("THe number",dataFetchAssetInformation?.AssetInformation?.asset_warranty.length);
+
   useEffect(() => {
     console.log("Data Asset Info : ", dataFetchAssetInformation);
 
@@ -2407,15 +2425,25 @@ if (caseDetails.CaseStatus !== "Close") {
                         getValue={(opt) => opt.OTCCode}
                       />
                     </CaseField>
-                  <CaseField lock={entitlementStatus?.needWarrantyApproval} label="Need warranty approval?"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-3"} span={2}>
+                  <CaseField lock={entitlementStatus?.needWarrantyApproval || !canEditFd} label="Need warranty approval?"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-3"} span={2}>
                     <SelectYN
                       // value={caseDetails.CaseStatus === "NEW_POPDoc" ? (WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition] === 'Out of Warranty' ? "Yes" : WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition] === 'InWarranty' ? "No" : "") : (caseDetails?.IsHWUnderWarranty ? "Yes" : "No")}
                       value={entitlementStatus?.needWarrantyApproval === undefined || entitlementStatus?.needWarrantyApproval === null ? "No" : entitlementStatus?.needWarrantyApproval ? "Yes" : "No"}
-                      onValueChange={(val) =>
-                        handleEntitlementStatus('needWarrantyApproval')(val === "Yes")}
+                      onValueChange={(val) => {
+                        const isNeed = val === "Yes";
+                        handleEntitlementStatus('needWarrantyApproval')(isNeed);
+                          if (isNeed) {
+                            const CmbineOTC = otcCode.find(otc => otc.OTCCode === '01T' && otc.Description === 'Trade (OOW)');
+                            console.log("CmbineOTC:", CmbineOTC);
+                            if (CmbineOTC) {
+                              handleEntitlementStatus("OTCCode")(CmbineOTC.OTCCode);
+                            }
+                          } 
+                        }
+                      }
                     />
                   </CaseField>
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Approval Status"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-3"} span={2}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Approval Status"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-3"} span={2} lock={!canEditFd}>
                     <SelectBar
                       options={
                         [
@@ -2428,11 +2456,12 @@ if (caseDetails.CaseStatus !== "Close") {
                       onChange={handleEntitlementStatus('WarrantyApprovalStatus')}
                     />
                   </CaseField>
-                    <CaseField  label="Warranty Expiration Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                    <CaseField  label="Warranty Expiration Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2} lock={!canEditFd}>
                       <DatePicker
                         variant="icon"
                       value={entitlementStatus?.EOW_Date}
                         onChange={handleEntitlementStatus('EOW_Date')}
+                        readOnly={!canEditFd}
                       ></DatePicker>
                     </CaseField>
                   {/* <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Upload Pop Document" className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
@@ -2444,6 +2473,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     className="col-span-1"
                     childClass="col-span-1 sm:col-span-2 md:col-span-2"
                     span={2}
+                    lock={!canEditFd}
                   >
                     {entitlementStatus?.POPDocument ? (
                       
@@ -2474,6 +2504,7 @@ if (caseDetails.CaseStatus !== "Close") {
                           onChange={(e) =>
                             handleEntitlementStatus("POPDocument")(e.target.files?.[0] || "")
                           }
+                          readOnly={!canEditFd}
                         />
                         
                       </div>
@@ -2483,6 +2514,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         onChange={(e) =>
                           handleEntitlementStatus("POPDocument")(e.target.files?.[0] || "")
                         }
+                        readOnly={!canEditFd}
                       />
                     )}
                   </CaseField>
@@ -2490,11 +2522,12 @@ if (caseDetails.CaseStatus !== "Close") {
 
 
                   
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Purchase date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Purchase date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2} lock={!canEditFd}>
                     <DatePicker
                       variant="icon"
                       value={entitlementStatus?.PurchaseDate}
                       onChange={handleEntitlementStatus('PurchaseDate')}
+                      readOnly={!canEditFd}
                     ></DatePicker>
                   </CaseField>
                   <CaseField
@@ -2503,6 +2536,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     className="col-span-1"
                     childClass="col-span-1 sm:col-span-2 md:col-span-2"
                     span={2}
+                    lock={!canEditFd}
                   >
                     {entitlementStatus.WarrantyCard ? (
 
@@ -2531,6 +2565,7 @@ if (caseDetails.CaseStatus !== "Close") {
                           onChange={(e) =>
                             handleEntitlementStatus("WarrantyCard")(e.target.files?.[0] || "")
                           }
+                          readOnly={!canEditFd}
                         />
 
                       </div>
@@ -2540,6 +2575,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         onChange={(e) =>
                           handleEntitlementStatus("WarrantyCard")(e.target.files?.[0] || "")
                         }
+                        readOnly={!canEditFd}
                       />
                     )}
                   </CaseField>
@@ -2547,11 +2583,12 @@ if (caseDetails.CaseStatus !== "Close") {
                     <Input type="file"  onChange={(e) => onPickWarrantyCards(e.target.files)} />
                   </CaseField> */}
                  
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Card Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Card Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2} lock={!canEditFd}>
                     <DatePicker
                       variant="icon"
                       value={entitlementStatus?.WarrantyCardDate}
                       onChange={handleEntitlementStatus('WarrantyCardDate')}
+                      readOnly={!canEditFd}
                     ></DatePicker>
                   </CaseField>
                   {/* <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Upload Photo Unit" className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
@@ -2563,6 +2600,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     className="col-span-1"
                     childClass="col-span-1 sm:col-span-2 md:col-span-2"
                     span={2}
+                    lock={!canEditFd}
                   >
                     {entitlementStatus?.PhotoUnit ? (
 
@@ -2593,6 +2631,7 @@ if (caseDetails.CaseStatus !== "Close") {
                           onChange={(e) =>
                             handleEntitlementStatus("PhotoUnit")(e.target.files?.[0] || "")
                           }
+                          readOnly={!canEditFd}
                         />
 
                       </div>
@@ -2602,17 +2641,18 @@ if (caseDetails.CaseStatus !== "Close") {
                         onChange={(e) =>
                           handleEntitlementStatus("PhotoUnit")(e.target.files?.[0] || "")
                         }
+                        readOnly={!canEditFd}
                       />
                     )}
                   </CaseField>
                   
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Name"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Name"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2} lock={!canEditFd}>
                     <Input value={entitlementStatus.EndUserName} onChange={(e) => handleEntitlementStatus('EndUserName')(e.target.value)} variant="invisible" placeholder="---" />
                   </CaseField>
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Phone"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Phone"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2} lock={!canEditFd}>
                     <Input value={entitlementStatus.EndUserPhone} onChange={(e) => handleEntitlementStatus('EndUserPhone')(e.target.value)} variant="invisible" placeholder="---" />
                   </CaseField>
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Address"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Address"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2} lock={!canEditFd}>
                     <Textarea value={entitlementStatus.EndUserAddress} onChange={(e) => handleEntitlementStatus('EndUserAddress')(e.target.value)} variant="invisible" placeholder="---" />
                   </CaseField>
                   </CardContent>

@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router'
 import Swal from 'sweetalert2'
 import { STATUS_LABELS } from './CaseDetail'
 import { Label } from '@/components/ui/label'
+import { format } from 'date-fns'
 
 
 
@@ -27,7 +28,11 @@ export const FlowCase = () => {
   if (loading || !user) {
     return null; // don’t render listener until auth is ready
   }
+  return <FlowCaseData user={user}/>
 
+}
+
+export const FlowCaseData = (user) => {
   const [caseData, setCaseData] = useState([]);
   const [renderer, setRenderer] = useState(false)
   const [error, setError] = useState(false)
@@ -37,21 +42,36 @@ export const FlowCase = () => {
     Email: "",
     Phone: "",
     Id: "",
-    Status: "",  
+    Status: "",
     Type: "",
-    Role: "",     
+    Role: "",
+    RangeTime: {
+      from: undefined,
+      to: undefined
+    },
+    TimeLength: "",
   });
+  const [filterClose, setFilterClose] = useState(true)
 
   const fetchData = async () => {
     setRenderer(true);
     try {
       const response = await ApiCustomer.get('/api/case-information');
-      // console.log("Case INFO LOG : ",response.data.data[23].caseinformation.CreatedBy);
-      // console.log("Case INFO LOG : ",user.id);
-      const filtercases = response.data.data.filter(c => c.CaseStatus !== 'Close' && (c?.caseinformation?.Owner === user.id || c?.caseinformation?.CreatedBy === user.id));
+      const filtercases = response.data.data.filter(c => (c?.caseinformation?.Owner === user.user?.id || c?.caseinformation?.CreatedBy === user.user?.id) && (filterClose ? c.CaseStatus !== 'Close' : c.CaseStatus !== '' ) );
+
+      // const sortedCases = filtercases.sort((a, b) => {
+      //   const dateAraw = a.caseinformation.ActionLog[0]?.ChangeAt;
+      //   const dateBraw = b.caseinformation.ActionLog[0]?.ChangeAt;
+
+      //   const dateA = dateAraw ? (dateAraw instanceof Date ? dateAraw : new Date(dateAraw)) : new Date(0);
+      //   const dateB = dateBraw ? (dateBraw instanceof Date ? dateBraw : new Date(dateBraw)) : new Date(0);
+
+      //   return dateB - dateA; // newest first
+      // });
+
       const sortedCases = filtercases.sort((a, b) => {
-        const dateAraw = a.caseinformation.ActionLog[0]?.ChangeAt;
-        const dateBraw = b.caseinformation.ActionLog[0]?.ChangeAt;
+        const dateAraw = a.UpdateOn;
+        const dateBraw = b.UpdateOn;
 
         const dateA = dateAraw ? (dateAraw instanceof Date ? dateAraw : new Date(dateAraw)) : new Date(0);
         const dateB = dateBraw ? (dateBraw instanceof Date ? dateBraw : new Date(dateBraw)) : new Date(0);
@@ -59,10 +79,6 @@ export const FlowCase = () => {
         return dateB - dateA; // newest first
       });
 
-      // console.log("Filter Case : ",filtercases)
-      // console.log("Case Owner : ", filtercases[1]?.caseinformation?.Owner)
-      // console.log("Case Created By : ", filtercases[1]?.caseinformation?.CreatedBy)
-      // console.log("User ID : ", user.id)
       setCaseData(sortedCases);
       setError(false)
       return response.data.data;
@@ -82,34 +98,94 @@ export const FlowCase = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user.user, filterClose]);
+  console.log("CHECK DATA",filters)
+
+  function parseCreatedOn(dateStr) {
+    const [datePart, timePart] = dateStr.split(', ');
+    const [day, month, year] = datePart.split('/').map(Number);
+    const [hours, minutes, seconds] = timePart.split('.').map(Number);
+    return new Date(year, month - 1, day, hours, minutes, seconds);
+  }
+  function isWithinRange(createdOn, rangeFrom, rangeTo, compareDateOnly = false) {
+    if (compareDateOnly) {
+      // Strip the time (normalize all to midnight local time)
+      const created = new Date(createdOn.getFullYear(), createdOn.getMonth(), createdOn.getDate());
+      const from = new Date(rangeFrom.getFullYear(), rangeFrom.getMonth(), rangeFrom.getDate());
+      const to = new Date(rangeTo.getFullYear(), rangeTo.getMonth(), rangeTo.getDate());
+
+      // Inclusive comparison — includes same-day matches
+      return created >= from && created <= to;
+    } else {
+      // Compare full date-time
+      return createdOn >= rangeFrom && createdOn <= rangeTo;
+    }
+  }
+
 
   // filter logic
   const filteredCases = caseData
-  .filter(c => {
-    const isCreatedBy = c?.caseinformation?.CreatedBy == user.id;
-    const isOwner = c?.Owner == user.id;
-    return (
-      (filters.SerialNumber === "" || c.SerialNumber?.toLowerCase().includes(filters.SerialNumber.toLowerCase())) &&
-      (filters.Company === "" || c.CustomerAccount?.toLowerCase().includes(filters.Company.toLowerCase())) &&
-      (filters.Email === "" || c.caseinformation?.contact_information?.Email?.toLowerCase().includes(filters.Email.toLowerCase())) &&
-      (filters.Phone === "" || c.caseinformation?.contact_information?.Phone?.toLowerCase().includes(filters.Phone.toLowerCase())) &&
-      (filters.Id === "" || c.CaseID.toString().includes(filters.Id)) &&
-      (filters.Status === "" || c.CaseStatus === filters.Status) &&
-      (filters.Type === "" || c.caseinformation?.CaseType === filters.Type) &&
-      (filters.Role === "" || (filters.Role === "CreatedBy" && isCreatedBy) || (filters.Role === "Owner" && isOwner) )
-    );
-  })
-  .sort((a, b) => {
-    const aIsOwner = a.Owner == user.username;
-    const bIsOwner = b.Owner == user.username;
-    if (aIsOwner && !bIsOwner) return -1;
-    if (!aIsOwner && bIsOwner) return 1;
-    return 0;
-  })
+    .filter(c => {
+      const isCreatedBy = c?.caseinformation?.CreatedBy == user.user.id;
+      const isOwner = c?.Owner == user.user.id;
+      const matchesStatus =
+        !filters.Status || c.CaseStatus === filters.Status || c.UpdatedActionLogs?.[0]?.dataNew === filters.Status;
+
+
+      const parseCreatedON = parseCreatedOn(c?.CreatedOn);
+      let isInCreatedRange = true;
+      if (filters.RangeTime?.from && filters.RangeTime?.to && parseCreatedON instanceof Date && !isNaN(parseCreatedON)) {
+        isInCreatedRange = isWithinRange(parseCreatedON, filters.RangeTime.from, filters.RangeTime.to, true);
+      }
+
+        
+      let isInTimeLength = true;
+      const updateDate = c.UpdateOn ? new Date(c.UpdateOn) : null;
+
+      if (filters.TimeLength && updateDate) {
+        const daysAgo = Math.floor((Date.now() - updateDate.getTime()) / (1000 * 60 * 60 * 24));
+        switch (filters.TimeLength) {
+          case "within4":
+            isInTimeLength = daysAgo <= 4;
+            break;
+          case "within8":
+            isInTimeLength = daysAgo > 4 && daysAgo <= 8;
+            break;
+          case "within15":
+            isInTimeLength = daysAgo > 8 && daysAgo <= 15;
+            break;
+          case "over15":
+            isInTimeLength = daysAgo > 15;
+            break;
+          default:
+            isInTimeLength = true;
+        }
+      }
+
+      return (
+        (filters.SerialNumber === "" || c.SerialNumber?.toLowerCase().includes(filters.SerialNumber.toLowerCase())) &&
+        (filters.Company === "" || c.CustomerAccount?.toLowerCase().includes(filters.Company.toLowerCase())) &&
+        (filters.Email === "" || c.caseinformation?.contact_information?.Email?.toLowerCase().includes(filters.Email.toLowerCase())) &&
+        (filters.Phone === "" || c.caseinformation?.contact_information?.Phone?.toLowerCase().includes(filters.Phone.toLowerCase())) &&
+        (filters.Id === "" || c.CaseID.toString().includes(filters.Id)) &&
+        (filters.Status === "" || c.CaseStatus === filters.Status) &&
+        (filters.Type === "" || c.caseinformation?.CaseType === filters.Type) &&
+        (filters.Role === "" || (filters.Role === "CreatedBy" && isCreatedBy) || (filters.Role === "Owner" && isOwner)) &&
+          isInCreatedRange &&
+        isInTimeLength
+      );
+    })
+    .sort((a, b) => {
+      const aIsOwner = a.Owner == user.user.username;
+      const bIsOwner = b.Owner == user.user.username;
+      if (aIsOwner && !bIsOwner) return -1;
+      if (!aIsOwner && bIsOwner) return 1;
+      return 0;
+    })
     .map(c => {
+      
       // Grab the raw CreatedOn
-      const rawCreated = c?.caseinformation?.ActionLog[0]?.ChangeAt;
+      const rawCreated = c.UpdateOn;
       const createdDate = rawCreated ? (rawCreated instanceof Date ? rawCreated : new Date(rawCreated)) : null;
 
       let estimatedTime = null;
@@ -137,12 +213,51 @@ export const FlowCase = () => {
         EstimedTimeFromUpdate: estimatedTime || "No Update",
       };
     })
-  ;
+    ;
 
+  const emptyData = { within4: [], within8: [], within15: [], over15: [] };
+
+  const dataTime = [
+    { status: "Finish Repair", data: { ...emptyData } },
+    { status: "NEW_POPDoc", data: { ...emptyData } },
+    { status: "Close", data: { ...emptyData }, hide: filterClose }
+  ];
+
+
+  const getDaysAgo = (val) => {
+    const date = val ? (val instanceof Date ? val : new Date(val)) : null;
+    if (!date || isNaN(date)) return Infinity;
+    return Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+  };
+  let groupedDataTime = [];
+
+  if (caseData) {
+    groupedDataTime = dataTime.map((t) => {
+      const filt = caseData.filter((data) =>
+        data.UpdatedActionLogs[0]?.dataNew === t.status
+      );
+
+      const groupedCases = {
+        within4: [],
+        within8: [],
+        within15: [],
+        over15: [],
+      };
+
+      filt.forEach((c) => {
+        const days = getDaysAgo(c.UpdateOn);
+        if (days <= 4) groupedCases.within4.push(c);
+        else if (days <= 8) groupedCases.within8.push(c);
+        else if (days <= 15) groupedCases.within15.push(c);
+        else groupedCases.over15.push(c);
+      });
+
+      t.data = groupedCases;
+    });
+  }
+
+console.log("CHECK FULLY DATA",filteredCases)
   const finishedCases = caseData.filter(c => c.CaseStatus === "FinishRepair");
-
-  
-  
   // console.log(caseData)
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 6;
@@ -178,92 +293,100 @@ export const FlowCase = () => {
   const navigate = useNavigate();
   return (
     <>
-    <SidebarProvider defaultOpen className={'min-h-0'}>
+      <SidebarProvider defaultOpen className={'min-h-0'}>
 
-      <SidebarInset>
-        <div className="max-h-screen flex flex-col w-full ">
+        <SidebarInset>
+          <div className="max-h-screen flex flex-col w-full ">
 
             <div className="sticky top-13   bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
               <div className=" flex h-14 w-full  items-center gap-3 px-4 justify-between">
                 <div className="flex items-center gap-2">
                   <Switch checked={filters.Status === "FinishRepair"}
-                  onCheckedChange={(checked) => setFilters({
-                    ...filters,
-                    Status: checked ? "FinishRepair" : "",
-                  })} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500"  id="Finish"/>
+                    onCheckedChange={(checked) => setFilters({
+                      ...filters,
+                      Status: checked ? "FinishRepair" : "",
+                    })} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500" id="Finish" />
                   <Label htmlFor="Finish" className={'font-[700]'}>Show Only Finished Case</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={filterClose === false}
+                    onCheckedChange={(checked) => setFilterClose(
+                      
+                      checked ? false : true,
+                    )} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500" id="Close" />
+                  <Label htmlFor="Close" className={'font-[700]'}>Enabled Closed Case</Label>
                 </div>
                 <h1 className="lg:text-xl md:text-md font-semibold tracking-tight text-sm">Case For You</h1>
                 <SidebarTrigger icon={PanelRight} />
               </div>
             </div>
 
-              <div className="space-y-3 p-5">
-                {renderer ? (
-                  Array.from({ length: 6 }).map((_, i) => (
-                    <Card key={i} className="p-4 shadow-sm">
-                      <Skeleton className="h-6 w-32" />
-                    </Card>
-                  ))
-                ) : (
-                  currentPageData.map((c) => (
-                    <Card
-                      key={c.CaseID}
-                      className={cn("flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4",
+            <div className="space-y-3 p-5">
+              {renderer ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="p-4 shadow-sm">
+                    <Skeleton className="h-6 w-32" />
+                  </Card>
+                ))
+              ) : (
+                currentPageData.map((c) => (
+                  <Card
+                    key={c.CaseID}
+                    className={cn("flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4",
                       c.CaseStatus === "FinishRepair" ? "border-green-300" :
-                      c?.caseinformation.Owner !== user.id ? "border-blue-300" : ''
-                      )}
-                      onClick={() => navigate(`/app/case/${c.CaseID}`)}
-                    >
-                      <div>
-                        <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
-                        <p className="text-sm text-gray-500">{c.SerialNumber} | {c.Primary} | {c.CustomerAccount || "No Company"} | {c.CreatedOn}</p>
+                      c.CaseStatus === "Close" ? "border-red-300 bg-fuchsia-100" :
+                        c?.caseinformation.Owner !== user.user.id ? "border-blue-300" : ''
+                    )}
+                    onClick={() => navigate(`/app/case/${c.CaseID}`)}
+                  >
+                    <div>
+                      <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
+                      <p className="text-sm text-gray-500">{c.SerialNumber} | {c.Primary} | {c.CustomerAccount || "No Company"} | {c.CreatedOn}</p>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="space-x-2">
+                        {c?.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition === "InWarranty" ? (
+                          <Badge className="bg-green-500">IW</Badge>
+                        ) : c?.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? (
+                          <Badge className="bg-red-500">OOW</Badge>
+                        ) : (
+                          <Badge className="bg-gray-500">?</Badge>
+                        )}
+
+                        <Badge className="bg-cyan-600">{c.CaseStatus}</Badge>
+                        <Badge>{c.caseinformation.CaseType}</Badge>
+                        {c?.caseinformation.Owner === user.user.id ? (
+                          <Badge className="bg-purple-500">Owner</Badge>
+                        ) : (
+                          <Badge className="bg-sky-500">CreatedBy</Badge>
+                        )}
                       </div>
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="space-x-2">
-                          {console.log(c?.caseinformation)}
-                      {c?.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition === "InWarranty" ? (
-                        <Badge className="bg-green-500">IW</Badge>
-                      ) : c?.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? (
-                        <Badge className="bg-red-500">OOW</Badge>
-                      ) : (
-                        <Badge className="bg-gray-500">?</Badge>
-                      )}
-                     
-                          <Badge className="bg-cyan-600">{c.CaseStatus}</Badge>
-                          <Badge>{c.caseinformation.CaseType}</Badge>
-                          {c?.caseinformation.Owner === user.id ? (
-                            <Badge className="bg-purple-500">Owner</Badge>
-                          ) : (
-                            <Badge className="bg-sky-500">CreatedBy</Badge>
-                          )}
-                        </div>
-                        {c.EstimedTimeFromUpdate}
-                      </div>
-                    </Card>
-                  ))
-                )}
-                <Pagination className="flex justify-start">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        placeholder='First'
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handlePageChange(totalPages - totalPages + 1);
-                        }}
-                      />
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handlePageChange(currentPage - 1);
-                        }}
-                      />
-                    </PaginationItem>
+                      {c.EstimedTimeFromUpdate}
+                    </div>
+                  </Card>
+                ))
+              )}
+              <Pagination className="flex justify-start">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      placeholder='First'
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(1);
+                      }}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(currentPage - 1);
+                      }}
+                    />
+                  </PaginationItem>
 
                   {paginationPages.map((page) => (
                     <PaginationItem key={page}>
@@ -280,43 +403,44 @@ export const FlowCase = () => {
                     </PaginationItem>
                   ))}
 
-                    <PaginationItem>
-                      <PaginationNext
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handlePageChange(currentPage + 1);
-                        }}
-                      />
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationNext
-                        placeholder='Last'
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handlePageChange(totalPages);
-                        }}
-                      />
-                    </PaginationItem>
-                    <div className="flex gap-3 p-1 items-center">
-                      Total Page
-                      <span className='border-2 p-1 rounded-md shadow-2xl'>
-                        {totalPages}
-                      </span>
-                    </div>
-                  </PaginationContent>
-                </Pagination>
-                {error ? <h1 className="text-center text-destructive">Something went wrong</h1> : ""}
-              </div>
-        </div>
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(currentPage + 1);
+                      }}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext
+                      placeholder='Last'
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(totalPages);
+                      }}
+                    />
+                  </PaginationItem>
+                  <div className="flex gap-3 p-1 items-center">
+                    Total Page
+                    <span className='border-2 p-1 rounded-md shadow-2xl'>
+                      {totalPages}
+                    </span>
+                  </div>
+                </PaginationContent>
+              </Pagination>
+              {error ? <h1 className="text-center text-destructive">Something went wrong</h1> : ""}
+            </div>
+          </div>
 
-      </SidebarInset>
-        <SearchBar filters={filters} setFilters={setFilters} />
+        </SidebarInset>
+        <SearchBar filters={filters} setFilters={setFilters} caseData={caseData} filterClose={filterClose} dataTime={dataTime}/>
 
-    </SidebarProvider>    
+      </SidebarProvider>
     </>
   )
+  
 }
 
 
