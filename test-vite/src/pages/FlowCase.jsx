@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router'
 import Swal from 'sweetalert2'
 import { STATUS_LABELS } from './CaseDetail'
 import { Label } from '@/components/ui/label'
+import { format } from 'date-fns'
 
 
 
@@ -44,7 +45,11 @@ export const FlowCaseData = (user) => {
     Status: "",
     Type: "",
     Role: "",
-    RangeTime: "",
+    RangeTime: {
+      from: undefined,
+      to: undefined
+    },
+    TimeLength: "",
   });
   const [filterClose, setFilterClose] = useState(true)
 
@@ -94,12 +99,69 @@ export const FlowCaseData = (user) => {
   useEffect(() => {
     fetchData();
   }, [user.user, filterClose]);
+  console.log("CHECK DATA",filters)
+
+  function parseCreatedOn(dateStr) {
+    const [datePart, timePart] = dateStr.split(', ');
+    const [day, month, year] = datePart.split('/').map(Number);
+    const [hours, minutes, seconds] = timePart.split('.').map(Number);
+    return new Date(year, month - 1, day, hours, minutes, seconds);
+  }
+  function isWithinRange(createdOn, rangeFrom, rangeTo, compareDateOnly = false) {
+    if (compareDateOnly) {
+      // Strip the time (normalize all to midnight local time)
+      const created = new Date(createdOn.getFullYear(), createdOn.getMonth(), createdOn.getDate());
+      const from = new Date(rangeFrom.getFullYear(), rangeFrom.getMonth(), rangeFrom.getDate());
+      const to = new Date(rangeTo.getFullYear(), rangeTo.getMonth(), rangeTo.getDate());
+
+      // Inclusive comparison — includes same-day matches
+      return created >= from && created <= to;
+    } else {
+      // Compare full date-time
+      return createdOn >= rangeFrom && createdOn <= rangeTo;
+    }
+  }
+
 
   // filter logic
   const filteredCases = caseData
     .filter(c => {
       const isCreatedBy = c?.caseinformation?.CreatedBy == user.user.id;
       const isOwner = c?.Owner == user.user.id;
+      const matchesStatus =
+        !filters.Status || c.CaseStatus === filters.Status || c.UpdatedActionLogs?.[0]?.dataNew === filters.Status;
+
+
+      const parseCreatedON = parseCreatedOn(c?.CreatedOn);
+      let isInCreatedRange = true;
+      if (filters.RangeTime?.from && filters.RangeTime?.to && parseCreatedON instanceof Date && !isNaN(parseCreatedON)) {
+        isInCreatedRange = isWithinRange(parseCreatedON, filters.RangeTime.from, filters.RangeTime.to, true);
+      }
+
+        
+      let isInTimeLength = true;
+      const updateDate = c.UpdateOn ? new Date(c.UpdateOn) : null;
+
+      if (filters.TimeLength && updateDate) {
+        const daysAgo = Math.floor((Date.now() - updateDate.getTime()) / (1000 * 60 * 60 * 24));
+        switch (filters.TimeLength) {
+          case "within4":
+            isInTimeLength = daysAgo <= 4;
+            break;
+          case "within8":
+            isInTimeLength = daysAgo > 4 && daysAgo <= 8;
+            break;
+          case "within15":
+            isInTimeLength = daysAgo > 8 && daysAgo <= 15;
+            break;
+          case "over15":
+            isInTimeLength = daysAgo > 15;
+            break;
+          default:
+            isInTimeLength = true;
+        }
+      }
+
       return (
         (filters.SerialNumber === "" || c.SerialNumber?.toLowerCase().includes(filters.SerialNumber.toLowerCase())) &&
         (filters.Company === "" || c.CustomerAccount?.toLowerCase().includes(filters.Company.toLowerCase())) &&
@@ -108,7 +170,9 @@ export const FlowCaseData = (user) => {
         (filters.Id === "" || c.CaseID.toString().includes(filters.Id)) &&
         (filters.Status === "" || c.CaseStatus === filters.Status) &&
         (filters.Type === "" || c.caseinformation?.CaseType === filters.Type) &&
-        (filters.Role === "" || (filters.Role === "CreatedBy" && isCreatedBy) || (filters.Role === "Owner" && isOwner))
+        (filters.Role === "" || (filters.Role === "CreatedBy" && isCreatedBy) || (filters.Role === "Owner" && isOwner)) &&
+          isInCreatedRange &&
+        isInTimeLength
       );
     })
     .sort((a, b) => {
@@ -119,6 +183,7 @@ export const FlowCaseData = (user) => {
       return 0;
     })
     .map(c => {
+      
       // Grab the raw CreatedOn
       const rawCreated = c.UpdateOn;
       const createdDate = rawCreated ? (rawCreated instanceof Date ? rawCreated : new Date(rawCreated)) : null;
@@ -150,6 +215,48 @@ export const FlowCaseData = (user) => {
     })
     ;
 
+  const emptyData = { within4: [], within8: [], within15: [], over15: [] };
+
+  const dataTime = [
+    { status: "Finish Repair", data: { ...emptyData } },
+    { status: "NEW_POPDoc", data: { ...emptyData } },
+    { status: "Close", data: { ...emptyData }, hide: filterClose }
+  ];
+
+
+  const getDaysAgo = (val) => {
+    const date = val ? (val instanceof Date ? val : new Date(val)) : null;
+    if (!date || isNaN(date)) return Infinity;
+    return Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+  };
+  let groupedDataTime = [];
+
+  if (caseData) {
+    groupedDataTime = dataTime.map((t) => {
+      const filt = caseData.filter((data) =>
+        data.UpdatedActionLogs[0]?.dataNew === t.status
+      );
+
+      const groupedCases = {
+        within4: [],
+        within8: [],
+        within15: [],
+        over15: [],
+      };
+
+      filt.forEach((c) => {
+        const days = getDaysAgo(c.UpdateOn);
+        if (days <= 4) groupedCases.within4.push(c);
+        else if (days <= 8) groupedCases.within8.push(c);
+        else if (days <= 15) groupedCases.within15.push(c);
+        else groupedCases.over15.push(c);
+      });
+
+      t.data = groupedCases;
+    });
+  }
+
+console.log("CHECK FULLY DATA",filteredCases)
   const finishedCases = caseData.filter(c => c.CaseStatus === "FinishRepair");
   // console.log(caseData)
   const [currentPage, setCurrentPage] = useState(1);
@@ -206,8 +313,8 @@ export const FlowCaseData = (user) => {
                     onCheckedChange={(checked) => setFilterClose(
                       
                       checked ? false : true,
-                    )} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500" id="Finish" />
-                  <Label htmlFor="Finish" className={'font-[700]'}>Enabled Closed Case</Label>
+                    )} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500" id="Close" />
+                  <Label htmlFor="Close" className={'font-[700]'}>Enabled Closed Case</Label>
                 </div>
                 <h1 className="lg:text-xl md:text-md font-semibold tracking-tight text-sm">Case For You</h1>
                 <SidebarTrigger icon={PanelRight} />
@@ -267,7 +374,7 @@ export const FlowCaseData = (user) => {
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        handlePageChange(totalPages - totalPages + 1);
+                        handlePageChange(1);
                       }}
                     />
                   </PaginationItem>
@@ -328,7 +435,7 @@ export const FlowCaseData = (user) => {
           </div>
 
         </SidebarInset>
-        <SearchBar filters={filters} setFilters={setFilters} caseData={caseData} filterClose={filterClose} />
+        <SearchBar filters={filters} setFilters={setFilters} caseData={caseData} filterClose={filterClose} dataTime={dataTime}/>
 
       </SidebarProvider>
     </>

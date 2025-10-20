@@ -46,9 +46,9 @@ import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
 
 export const RMA_STATUS_OPTIONS = [
-  { value: "InOutCE", label: "In/Out CE" },
+  { value: "InOutCE", label: "In & On Hand CE" },
   { value: "ReturnLogistic", label: "Return via Logistic" },
-  { value: "ReturnDHL", label: "Return via DHL" },
+  { value: "ReturnDHL", label: "Return to DHL/SC" },
   { value: "FullCharge", label: "Full Charge" },
 ];
 
@@ -461,6 +461,7 @@ export const ServiceMaterialApo = () => {
                   <CaseField
                     label={"ETA Delivery Required Date (Customer Time)"}
                     lock={!canEditapo}
+                    star= {user?.role === 'apo'}
                   >
                     {console.log("MATERIAL ORDER INFO ", materialOrderInformation)}
                     <DatePicker
@@ -469,7 +470,7 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"Part IN CE Collection Requested Date"}  star={user?.role === 'lg'} lock={!canEditapo}>
+                  <CaseField label={"Part on Hand CE Date"}  star={user?.role === 'lg'} lock={!canEditapo}>
                     <DatePicker
                       value={materialOrderInformation?.collectionRequestedDate ? new Date(materialOrderInformation?.collectionRequestedDate) : null}
                       onChange={handleMaterialOrderChange("collectionRequestedDate")}
@@ -483,13 +484,13 @@ export const ServiceMaterialApo = () => {
                     />
                   </CaseField>
 
-                  <CaseField label={"AWB In Code"} star={user?.role === 'lg'} lock={!canEditapo}>
+                  <CaseField label={"AWB no. in"} star={user?.role === 'lg'} lock={!canEditapo}>
                     <Input variant="invisible" placeholder="---"               
                       value={materialOrderInformation?.AWB_InCode || null}
                       onChange={handleMaterialOrderChange("AWB_InCode")}
                     />
                   </CaseField>
-                  <CaseField label={"AWB Out Code"} star={user?.role === 'lg'} lock={!canEditapo}>
+                  <CaseField label={"AWB no. out"} star={user?.role === 'lg'} lock={!canEditapo}>
                     <Input variant="invisible" placeholder="---" 
                       value={materialOrderInformation?.AWB_OutCode || null}
                       onChange={handleMaterialOrderChange("AWB_OutCode")}

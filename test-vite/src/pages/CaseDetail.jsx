@@ -236,7 +236,7 @@ export const TabsServiceCaseDetails = ({
   const [notesList, setNotesList] = useState([]);
   const { open } = useSidebar();
   const [refreshFetchPage, setRefreshFetchPage] = useState(false)
-
+console.log("CHECK REFRESH STATTUS",refreshFetchPage)
   const [entitlementStatus, setEntitlementStatus] = useState({
     OTCCode: "",
     PurchaseDate: "",
@@ -694,6 +694,7 @@ export const TabsServiceCaseDetails = ({
           allowOutsideClick: false,
           allowEscapeKey: false,
         });
+        setRefreshFetchPage(prev => !prev);
         // window.location.reload();
       }
       return true
@@ -711,7 +712,6 @@ export const TabsServiceCaseDetails = ({
       Swal.close();
     });
   }
-  setRefreshFetchPage(prev => !prev);
 };
 
 const openPopup = () => {
@@ -1139,9 +1139,8 @@ export const ServiceCase = ({
   });
   const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
   const [dataWarrantyStatus, setDataWarrantyStatus] = useState()
-  console.log("tes data assets", dataFetchAssetInformation)
   const [ownerUserData, setOwnerUserData] = useState([]);
-
+console.log("CHECK OWENER DATA ",ownerUserData)
   const [workOrders, setWorkOrders] = useState([]);
 
   const [materialOrders, setMaterialOrders] = useState([]);
@@ -1212,8 +1211,9 @@ export const ServiceCase = ({
     try {
       const response = await ApiCustomer.get(`/api/user/${caseDetails.Owner}`)
       setOwnerUserData(response.data.data)
+      console.log("CHECK OWNER FETCH IF ITS WORKS")
     } catch (error) {
-      
+      console.error("WRONG THING IN FETCH OWNER")
     }
   }
 
@@ -1460,6 +1460,7 @@ const fetchActionLog = async () => {
     fetchCsr();
     fetchCase();
     fetchActionLog();
+    console.log("CHECK IF THE FETCH IS WORKS ")
   }, [ caseDetails.CaseID, refreshFetchPage]);
   useEffect(() => {
     fetchUserAssign();
@@ -1488,7 +1489,7 @@ const fetchActionLog = async () => {
       console.log("SEEMS NOT WORK")
     }
   }, [otcCode, dataFetchAssetInformation]);
-  console.log("THe number",dataFetchAssetInformation?.AssetInformation?.asset_warranty.length);
+
   useEffect(() => {
     console.log("Data Asset Info : ", dataFetchAssetInformation);
 
@@ -1828,7 +1829,7 @@ if (caseDetails.CaseStatus !== "Close") {
                 {/* {assignToForm == true ?? (
                 )} */}
 
-                <CaseField label="Case Type" open className={"mt-2"} childClass={'col-span-2'} span={2} lock={!canEdit} >
+                <CaseField label="Case Type" open className={"mt-2"} childClass={'col-span-2'} span={2} lock={!canEditFd} >
                   <SearchCommandBlock
                     value={caseForm?.CaseType}
                     onChange={onChangeCase("CaseType")}
