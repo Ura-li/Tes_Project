@@ -62,7 +62,15 @@ async function main() {
   }
 
   console.log('✅ NMU & NMUItem seeded successfully');
-
+  
+  const ProblemDesc = [
+    {ServiceTypeName: 'Health Check', ProblemCategory: 'Software' },
+    {ServiceTypeName: 'Rebuild Hardware', ProblemCategory: 'Hardware' },
+  ]
+  
+  await prisma.ServiceType.deleteMany();
+  await prisma.ServiceType.createMany({data: ProblemDesc});
+  console.log('✅ Service Type seeded successfully');
 }
 
 main()
