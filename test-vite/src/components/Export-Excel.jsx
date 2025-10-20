@@ -5,6 +5,7 @@ import { autoTable } from "jspdf-autotable";
 import ApiCustomer from "@/api";
 import * as XLSX from "xlsx";
 import { Button } from "./ui/button";
+import { STATUS_ENUM_TO_LABEL } from "@/pages/CaseDetail";
 
 export const ExportExcel = ({ caseData }) => {
   const [cases, setCases] = useState([]);
@@ -88,38 +89,6 @@ export const ExportExcel = ({ caseData }) => {
     fetchCases();
   }, []);
 
-  const EnumToLabel = {
-  New : "New",
-  Open: "Open",
-  InActive: "In Active",
-  Close: "Close",
-  Active: "Active",
-  Monitor: "Monitor",
-  Pending_Customer_Action: "Pending Customer",
-  Quote_Requested: "Quote Requested",
-  Pending_Follow_Up: "Pending Follow Up",
-  Pending_Order: "Pending Order",
-  Escalated: "Escalated",
-  Quote_Approved: "Quote Approved",
-  Pending_Quote: "Pending Quote",
-  NEW_AssignCE: "New Assign CE",
-  NEW_AssignAPO: "New Assign APO",
-  NEW_AssignLeader: "New Assign Leader",
-  NEW_AssignPS: "New Assign PS",
-  NEW_POPDoc: "POP Document",
-  NEW_Warranty: "New Warranty",
-  AssignCE: "Assign CE",
-  AssignAPO: "Assign APO",
-  AssignLeader: "Assign Leader",
-  AssignPS: "Assign PS",
-  PartOrder: "Part Order",
-  PartRequest: "Part Request",
-  PartRequestLog: "Part Request Log",
-  PartAvailable: "Part Available",
-  RepairProgress: "Repair Progress",
-  FinishRepair: "Finish Repair"
-}
-
   const labelCase = cases.map((items) => ({
     "ID Case" : items.CaseID,
     "Case ID Manual" : items.CaseID_Manual,
@@ -136,7 +105,7 @@ export const ExportExcel = ({ caseData }) => {
     "Company Name" : items.Company_Name,
     "CE Name" : items.CE_Name,
     "Case Type" : items.CaseType,
-    "Case Status" : EnumToLabel[items.CaseStatus],
+    "Case Status" : STATUS_ENUM_TO_LABEL[items.CaseStatus],
     "Customer Company" : items.Customer_Company,
     "Customer Name" : items.Customer_Name,
     "Customer City" : items.Customer_City,  
