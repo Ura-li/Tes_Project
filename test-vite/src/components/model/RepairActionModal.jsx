@@ -146,7 +146,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
       { key: "ceAnalysis", label: "CE Analysis" },
       { key: "repairAction", label: "Repair Action" },
       { key: "delayCode", label: "Delay Code", 
-        // condition: NMUVersionNeed 
+        condition: showDelayCode === true
       },
     ];
 
