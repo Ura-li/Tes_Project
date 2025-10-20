@@ -4945,7 +4945,7 @@ export function BtnModalsServiceCatalog({
   }, [WOID]);
 
 
-  const [selected, setSelected] = useState(""); 
+  const [selected, setSelected] = useState("DepotRepair"); 
 
   //handles Warranty Service
   // const [selectedWarrantyServices, setSelectedWarrantyServices] = useState([]);
@@ -5125,6 +5125,17 @@ console.log("Asset Info OTC : ",isOutWarranty)
         (p) => !p.UEFICode || p.UEFICode.trim() === ""
       );
 
+      const partWithoutCT = selectedPartCatalog.find(
+        (p) => !p.RemovedPartNumber || p.RemovedPartNumber.trim() === ""
+      );
+
+      if(partWithoutCT) {
+        toast.warning(`CT BAD belum diisi untuk part ${partWithoutCT.PartNumber}`, {
+          description: "PLEASE FILL TE CT BAD BEFORE CREATING ORDER",
+          position: 'top-center'
+        });
+        return;
+      }
       if (partWithoutUEFICode) {
         toast.warning(`UEFI Code belum diisi untuk part ${partWithoutUEFICode.PartNumber}`, {
           description: "PLEASE CHOOSE THE UEFI CODE BEFORE CREATING ORDER",
@@ -5172,7 +5183,8 @@ console.log("Asset Info OTC : ",isOutWarranty)
               OwnerID: data.user.id,
               assignApo: assignApo,
             });
-        console.log(res)
+        console.log(selected)
+
   
       
         Swal.close(); 

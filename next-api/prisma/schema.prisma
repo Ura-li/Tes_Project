@@ -717,6 +717,14 @@ model NMUItem {
   workorder workorder[]
 }
 
+model ServiceType {
+  ServiceTypeId Int @id @default(autoincrement())
+  ServiceTypeName String? @db.VarChar(255)
+  ProblemCategory ProblemCategory? 
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
 model workorder_service_delivery {
   ServiceDeliveryID Int       @id @default(autoincrement())
   WOID              String?   @db.VarChar(13)
@@ -924,4 +932,9 @@ enum DelayCode {
   OfficeClosure
   AMRMonitor
   TravelDelay
+}
+
+enum ProblemCategory {
+  Hardware
+  Software
 }
