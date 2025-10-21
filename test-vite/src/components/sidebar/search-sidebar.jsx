@@ -128,7 +128,7 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                         <TabsTrigger value="Time" className="w-full justify-center">Time </TabsTrigger>
                     </TabsList>
                 </SidebarHeader>
-                <TabsContent value="search">
+                <TabsContent value="search" className={'max-h-[calc(100vh-8rem)] overflow-y-auto'}>
 
                     <SidebarContent className=" ">
                         <SidebarGroup>

@@ -31,19 +31,39 @@ export const ErfCase = () => {
 
   useEffect(() => {
     fetchData();
-  }, [])
+  }, []);
 
   async function uploadFiles(files) {
-    toast.loading("WAIT FOR THE UPLOAD")
-    const formData = new FormData()
+    console.log("CHECK file", files.length);
+    if (files.length === 0) return;
+    // Precompute once
+    const CASE_IDS = new Set(caseData.map((e) => String(e.CaseID)));
+    const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+
+    const validFiles = [...files].filter((f) => {
+      const base = f.name.replace(/\.[^.]+$/, ""); // "ABC123.png" -> "ABC123"
+
+      if (!CASE_IDS.has(base)) {
+        toast.warning(`Tidak menemukan Case ID untuk ${f.name}`);
+        return false;
+      }
+      if (f.size > MAX_SIZE) {
+        toast.warning(`${f.name} lebih dari 5MB, tidak bisa diupload`);
+        return false;
+      }
+      return true;
+    });
+
+    toast.loading("WAIT FOR THE UPLOAD shit your self");
+    const formData = new FormData();
     for (let file of files) {
-      formData.append("files", file)
+      formData.append("files", file);
     }
 
-    const res = await ApiCustomer.post('/api/case-information/erf', formData, {
+    const res = await ApiCustomer.post("/api/case-information/erf", formData, {
       headers: { "Content-Type": "multipart/form-data" },
-    })
-    console.log(res.data)
+    });
+    console.log(res.data);
   }
 
   // Pagination logic
