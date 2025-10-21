@@ -644,7 +644,7 @@ model BookingStatus {
   BookingsDetail BookingDetails[]
 }
 
-model  workorder {
+model workorder {
   WOID            String          @id @db.VarChar(13)
   CaseID          String?
   WorkOrderNumber String?         @db.VarChar(100)
@@ -686,15 +686,17 @@ model  workorder {
   bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
 
   // TODO : FIND WTF IS DIS ABOT
-  DelayCode    DelayCode?
-  NMUId        Int?
-  NMU          NMU?       @relation(fields: [NMUId], references: [NMUId])
-  VersionNMU   String?
-  NMUItemId    Int?
-  NMUItem      NMUItem?   @relation(fields: [NMUItemId], references: [id])
-  CEAnalysis   String?
-  DefectDesc   String?
-  RepairAction String?
+  ServiceTypeId Int?
+  ServiceType   ServiceType? @relation(fields: [ServiceTypeId], references: [ServiceTypeId], onDelete: Restrict)
+  DelayCode     DelayCode?
+  NMUId         Int?
+  NMU           NMU?         @relation(fields: [NMUId], references: [NMUId])
+  VersionNMU    String?
+  NMUItemId     Int?
+  NMUItem       NMUItem?     @relation(fields: [NMUItemId], references: [id])
+  CEAnalysis    String?
+  DefectDesc    String?
+  RepairAction  String?
 
   @@unique([ServiceCatalogID])
   @@index([CaseID], map: "CaseID")
@@ -756,6 +758,7 @@ model ServiceType {
   ProblemCategory ProblemCategory?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
+  workorder       workorder[]
 }
 
 model workorder_service_delivery {

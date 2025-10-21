@@ -31,7 +31,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
   const [selectedNMU, setSelectedNMU] = useState("");
   const [selectedNMUItem, setSelectedNMUItem] = useState("");
   const [formData, setFormData] = useState({
-    serviceType: "",
+    serviceType: null,
     nmu: null,
     nmuItem: null,
     Version: null,
@@ -234,7 +234,7 @@ console.log(formData);
                   onChange={(selectedValue)=>{
                     handleChange("serviceType", selectedValue)
                   }}
-                  placeholder="Search NMU Item..."
+                  placeholder="Search Service Type Item..."
                   options={serviceTypeList.map((item) =>({
                     label: item.ServiceTypeName,
                     value: item.ServiceTypeId,
