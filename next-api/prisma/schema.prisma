@@ -699,9 +699,9 @@ model workorder {
   VersionNMU    String?
   NMUItemId     Int?
   NMUItem       NMUItem?     @relation(fields: [NMUItemId], references: [id])
-  CEAnalysis    String?
-  DefectDesc    String?
-  RepairAction  String?
+  CEAnalysis    String? @db.Text
+  DefectDesc    String? @db.Text
+  RepairAction  String? @db.Text
 
   @@unique([ServiceCatalogID])
   @@index([CaseID], map: "CaseID")
