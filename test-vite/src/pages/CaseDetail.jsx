@@ -2845,6 +2845,7 @@ if (caseDetails.CaseStatus !== "Close") {
                       <TableRow>
                         <TableHead className="w-[60px]">No</TableHead>
                         <TableHead>ReferenceId</TableHead>
+                        <TableHead>Model</TableHead>
                         <TableHead>Case ID</TableHead>
                         <TableHead>Change By</TableHead>
                         <TableHead>Old Status</TableHead>
@@ -2858,8 +2859,9 @@ if (caseDetails.CaseStatus !== "Close") {
                         actionLogs.map((log, index) => (
                           <TableRow key={log.id || index} className={'text-xs'}>
                             <TableCell>{index + 1}</TableCell>
-                            <TableCell>{log.CaseId}</TableCell>
                             <TableCell>{log.ReferenceId}</TableCell>
+                            <TableCell>{log.model}</TableCell>
+                            <TableCell>{log.CaseId}</TableCell>
                             <TableCell>{log.changedByUser?.Role} - {log.changedByUser?.Name} ({log.changedByUser?.Username})</TableCell>
                             <TableCell>{log.dataOld}</TableCell>
                             <TableCell>{log.dataNew}</TableCell>
