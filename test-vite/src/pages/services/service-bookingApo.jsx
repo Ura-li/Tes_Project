@@ -132,74 +132,72 @@ export function ServiceBookingApo ({BookingId , woid}) {
   const [changedBy, setChangedBy] = useState(1);
 
   
-
-  useEffect(() => {
-    async function fetchBooking() {
-      if (bookingid == ""){
-         Swal.fire({
-      title: 'Memuat data booking...',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      showConfirmButton: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
-      };
-      try {
-        const response = await ApiCustomer.get(`/api/bookings/${bookingid}`);
-        const data = response.data; // <- Harusnya langsung .data, BUKAN .data.booking
-        console.log("data fetch booking : ",data)
-        setBookingData(response.data);
-        
-        // Set field-field yang kamu butuhkan
-        setResourceName(data?.bookingDetails?.[0]?.resource?.Name || "");
-        setResourceId(data?.bookingDetails?.[0]?.resource?.ResourceId || "");
-        setAccountName(data?.bookingDetails?.[0]?.resourceaccount?.Name || "");
-        setAccountId(data?.bookingDetails?.[0]?.resourceaccount?.ResourceAccountId || "");
-        setSubkTechnicianName(data?.bookingDetails?.[0]?.subkTechnician?.Name || "");
-        setSubkTechnicianId(data?.bookingDetails?.[0]?.subkTechnician?.SubkTechnicianId || "");
-        
-        setSubkEngineerName(data?.bookingDetails?.[0]?.engineer?.Name || "");
-        setSubkEngineerId(data?.bookingDetails?.[0]?.engineer?.IDUser || "");
-        
-        setBookingStatusId(data?.BookingStatusId || "");
-        setWorkOrderNumber(data?.workorder?.WorkOrderNumber || "");
-        setRequestedDateTimeCustomer(new Date(data?.workorder?.RequestedDateTimeCustomer || ""));
-        setGuaranteedFixTimeCustomer(new Date(data?.workorder?.GuaranteedFixTimeCustomer || ""));
-        
-        setDoNotDisturb(data?.DoNotDisturb || false);
-        setCeScheduleChange(data?.CeScheduleChange || false);
-        
-        setStartTimeCustomerTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.StartTimeCustomerTime || ""));
-        setEndTimeCustomerTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.EndTimeCustomerTime || ""));
-        setEstimatedArrivalTimeCustomerTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.EstimatedArrivalTimeCustomerTime || ""));
-        setActualArrivalTimeCustomerTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.ActualArrivalTimeCustomerTime || ""));
-        
-        setStartTimeUserTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.StartTimeUserTime || ""));
-        setEndTimeUserTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.EndTimeUserTime || ""));
-        setDurationInMinutesUserTime(data?.bookingDetails?.[0]?.DurationInMinutesUserTime || 0);
-        setEstimatedArrivalTimeUserTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime || ""));
-        setActualArrivalTimeUserTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.ActualArrivalTimeUserTime || ""));
-
-        setScheduleJeopardy(data?.ScheduleJeopardy || false);
-        setScheduleJeopardyTime(DateHelper.fromDB(data?.ScheduleJeopardyTime || ""));
-        
-        setTotalBillableDurationInMinutes(data?.TotalBillableDurationInMinutes || 0);
-        setTotalInProgressDurationInMinutes(data?.TotalInProgressDurationInMinutes || 0);
-        setTotalBreakDurationInMinutes(data?.TotalBreakDurationInMinutes || 0);
-      } catch (error) {
-        console.error("Failed to fetch booking data:", error);
-        Swal.fire({
-        icon: 'error',
-        title: 'Gagal memuat data',
-        text: error.message || 'Terjadi kesalahan saat mengambil data.',
-      });
-      }finally {
-        Swal.close();
-      }
-    }
+async function fetchBooking() {
+  if (bookingid == ""){
+    Swal.fire({
+  title: 'Memuat data booking...',
+  allowOutsideClick: false,
+  allowEscapeKey: false,
+  showConfirmButton: false,
+  didOpen: () => {
+    Swal.showLoading();
+  },
+});
+  };
+  try {
+    const response = await ApiCustomer.get(`/api/bookings/${bookingid}`);
+    const data = response.data; // <- Harusnya langsung .data, BUKAN .data.booking
+    console.log("data fetch booking : ",data)
+    setBookingData(response.data);
     
+    // Set field-field yang kamu butuhkan
+    setResourceName(data?.bookingDetails?.[0]?.resource?.Name || "");
+    setResourceId(data?.bookingDetails?.[0]?.resource?.ResourceId || "");
+    setAccountName(data?.bookingDetails?.[0]?.resourceaccount?.Name || "");
+    setAccountId(data?.bookingDetails?.[0]?.resourceaccount?.ResourceAccountId || "");
+    setSubkTechnicianName(data?.bookingDetails?.[0]?.subkTechnician?.Name || "");
+    setSubkTechnicianId(data?.bookingDetails?.[0]?.subkTechnician?.SubkTechnicianId || "");
+    
+    setSubkEngineerName(data?.bookingDetails?.[0]?.engineer?.Name || "");
+    setSubkEngineerId(data?.bookingDetails?.[0]?.engineer?.IDUser || "");
+    
+    setBookingStatusId(data?.BookingStatusId || "");
+    setWorkOrderNumber(data?.workorder?.WorkOrderNumber || "");
+    setRequestedDateTimeCustomer(new Date(data?.workorder?.RequestedDateTimeCustomer || ""));
+    setGuaranteedFixTimeCustomer(new Date(data?.workorder?.GuaranteedFixTimeCustomer || ""));
+    
+    setDoNotDisturb(data?.DoNotDisturb || false);
+    setCeScheduleChange(data?.CeScheduleChange || false);
+    
+    setStartTimeCustomerTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.StartTimeCustomerTime || ""));
+    setEndTimeCustomerTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.EndTimeCustomerTime || ""));
+    setEstimatedArrivalTimeCustomerTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.EstimatedArrivalTimeCustomerTime || ""));
+    setActualArrivalTimeCustomerTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.ActualArrivalTimeCustomerTime || ""));
+    
+    setStartTimeUserTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.StartTimeUserTime || ""));
+    setEndTimeUserTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.EndTimeUserTime || ""));
+    setDurationInMinutesUserTime(data?.bookingDetails?.[0]?.DurationInMinutesUserTime || 0);
+    setEstimatedArrivalTimeUserTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.EstimatedArrivalTimeUserTime || ""));
+    setActualArrivalTimeUserTime(DateHelper.fromDB(data?.bookingDetails?.[0]?.ActualArrivalTimeUserTime || ""));
+
+    setScheduleJeopardy(data?.ScheduleJeopardy || false);
+    setScheduleJeopardyTime(DateHelper.fromDB(data?.ScheduleJeopardyTime || ""));
+    
+    setTotalBillableDurationInMinutes(data?.TotalBillableDurationInMinutes || 0);
+    setTotalInProgressDurationInMinutes(data?.TotalInProgressDurationInMinutes || 0);
+    setTotalBreakDurationInMinutes(data?.TotalBreakDurationInMinutes || 0);
+  } catch (error) {
+    console.error("Failed to fetch booking data:", error);
+    Swal.fire({
+    icon: 'error',
+    title: 'Gagal memuat data',
+    text: error.message || 'Terjadi kesalahan saat mengambil data.',
+  });
+  }finally {
+    Swal.close();
+  }
+}
+  useEffect(() => {
     if (bookingid) {
       fetchBooking();
     }
@@ -219,7 +217,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
 
   const canCompleteBooking = () => {
     const role = (user?.role || '').toLowerCase();
-    return role === 'ce' || role === 'apo' || role === 'admin';
+    return role === 'ce' || role === 'apo' || role === 'admin' || role === 'celead';
   };
 
   const handleComplete = async () => {
@@ -401,8 +399,9 @@ export function ServiceBookingApo ({BookingId , woid}) {
     }
   }, 500); // 500ms delay
 
+  const [isManualEndEdit, setIsManualEndEdit] = useState(false);
   useEffect(() =>{
-   if (startTimeUserTime && endTimeUserTime) {
+   if (startTimeUserTime && endTimeUserTime && isManualEndEdit) {
       const startTime = new Date(startTimeUserTime);
       const endTime = new Date(endTimeUserTime);
 
@@ -422,18 +421,28 @@ export function ServiceBookingApo ({BookingId , woid}) {
   }, [endTimeUserTime, startTimeUserTime])
 
   useEffect(() => {
-    if (startTimeUserTime && durationInMinutesUserTime != null) {
+    if (startTimeUserTime && durationInMinutesUserTime != null && !isManualEndEdit) {
       const startTime = new Date(startTimeUserTime);
       if (!isNaN(startTime)) {
         const newEndTime = new Date(startTime.getTime() + durationInMinutesUserTime * 60 * 60 * 1000);
         setEndTimeUserTime(newEndTime.toISOString()); 
       }
     }
-  }, [durationInMinutesUserTime]);
+  }, [durationInMinutesUserTime, startTimeUserTime]);
 
-  useEffect(()=>{
-    if(startTimeUserTime) setStartTimeCustomerTime
-  })
+  // useEffect(()=>{
+  //   if(startTimeUserTime) setStartTimeCustomerTime
+  // })
+  const handleEndTimeChange = (value) => {
+    setIsManualEndEdit(true);
+    setEndTimeUserTime(value);
+  };
+
+  const handleDurationUserChange = (value) =>{
+    setIsManualEndEdit(false);
+    setDurationInMinutesUserTime(value);
+  }
+
 
   console.log("booking data is ther ",bookingData?.workorder?.caseinformation)
 
@@ -833,7 +842,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                 <DatePicker
                   value={endTimeUserTime ? new Date(endTimeUserTime) : ""}
                   onChange={
-                    setEndTimeUserTime
+                    handleEndTimeChange
                   }
                 ></DatePicker>
               </CaseField>
@@ -842,7 +851,7 @@ export function ServiceBookingApo ({BookingId , woid}) {
                 <Input
                   type="number"
                   value={durationInMinutesUserTime}
-                  onChange={(e) => {setDurationInMinutesUserTime(e.target.value ? parseInt(e.target.value, 10) : null)}}
+                  onChange={(e) => {handleDurationUserChange(e.target.value ? parseInt(e.target.value, 10) : null)}}
                   readOnly={!canEdit}
                 />
                 <Label>Hours</Label>
