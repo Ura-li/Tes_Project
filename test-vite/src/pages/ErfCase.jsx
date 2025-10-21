@@ -54,9 +54,8 @@ export const ErfCase = () => {
       return true;
     });
 
-    toast.loading("WAIT FOR THE UPLOAD shit your self");
     const formData = new FormData();
-    for (let file of files) {
+    for (let file of validFiles) {
       formData.append("files", file);
     }
 
