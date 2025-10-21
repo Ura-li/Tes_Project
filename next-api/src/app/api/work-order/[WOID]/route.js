@@ -29,6 +29,7 @@ export async function GET(request, {params}) {
               },
               NMU: true,
               NMUItem: true,
+              ServiceType: true,
             }
         });
     

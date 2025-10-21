@@ -246,10 +246,13 @@ model quotationtable {
   Subtotal              Decimal?      @db.Decimal(10, 2) // Total sebelum PPN
   VATAmount             Decimal?      @db.Decimal(10, 2) // Nilai PPN
   QuotationDate         DateTime      @default(now()) @db.DateTime(0)
-  QuotationApprovedDate DateTime      @default(now()) @db.DateTime(0)
+  QuotationApprovedDate DateTime?     @db.DateTime(0)
   UserAssign            Int
   User                  User          @relation("UserQuotationAdmin", fields: [UserAssign], references: [IDUser], onDelete: Restrict)
   QuotationNote         String?       @db.Text
+  SendWa                Boolean       @default(false)
+  SendEmail                Boolean       @default(false)
+  QuoteDecision         QuotationDecision?
 
   GrandTotal         Decimal?             @db.Decimal(10, 2) // Total akhir
   quotation_lineitem quotation_lineitem[]
@@ -265,6 +268,8 @@ model quotation_lineitem {
 
   Price    Decimal @db.Decimal(10, 2) // bisa simpan harga di waktu itu
   Approved Boolean @default(false) // untuk "Part Approved" Yes/No
+
+  @@unique([QuotationNo, LineItemID])
 }
 
 model materialorder {
@@ -978,4 +983,9 @@ enum ProblemCategory {
 enum QuotationType {
   Standard
   Simple
+}
+
+enum QuotationDecision {
+  Approved
+  Rejected
 }

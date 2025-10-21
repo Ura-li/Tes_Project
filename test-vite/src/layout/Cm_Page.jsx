@@ -1,26 +1,39 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import ApiCustomer from "@/api";
 import { useAuth } from "@/context/auth-context";
 import { Badge } from "@/components/ui/badge";
 import { NotificationCard } from "@/components/NotificationCard";
 import { useNavigate } from "react-router";
-import { CaseField } from "@/pages/services/service-case";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import QuotationDialog from "@/components/model/QuotationModal";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 
 export default function CashManagement() {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
     const [userData, setUserData] = useState([]);
     const [preview, setPreview] = useState({
         ProfilePhoto: null,
         Signature: null,
     });
-  
+    const [selectedCase, setSelectedCase] = useState(null);
+    const [showQuotationDialog, setShowQuotationDialog] = useState(false);
+    const [quotationInitialData, setQuotationInitialData] = useState(null);
+    const [quotationMaterialItems, setQuotationMaterialItems] = useState([]);
+    const [quotationLoading, setQuotationLoading] = useState(false);
+    const [quotationSubmitting, setQuotationSubmitting] = useState(false);
+
+    const [caseData, setCaseData] = useState([]);
 
     const fetchData = async () => {
+        setLoading(true);
         try {
- 
+            const resCaseData = await ApiCustomer.get('/api/case-information')
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
 
@@ -39,13 +52,221 @@ export default function CashManagement() {
                 ProfilePhoto: fecthUserData.data.data.ProfilePhoto ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.ProfilePhoto}` : null,
                 Signature: fecthUserData.data.data.Signature ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.Signature}` : null,
             });        
+
+            const filtercases = resCaseData.data.data.filter(c => c?.CaseStatus !== 'Close' && c?.caseinformation?.Owner == user.id);
+            const sortedCases = filtercases.sort((a, b) => {
+                const dateAraw = a.UpdateOn;
+                const dateBraw = b.UpdateOn;
+
+                const dateA = dateAraw ? (dateAraw instanceof Date ? dateAraw : new Date(dateAraw)) : new Date(0);
+                const dateB = dateBraw ? (dateBraw instanceof Date ? dateBraw : new Date(dateBraw)) : new Date(0);
+
+                return dateB - dateA; // newest first
+            });
+            const recentCases = sortedCases.slice(0, 3);
+            setCaseData(recentCases);
+            return resCaseData.data.data;
         } catch (err) {
             console.error(err);
+        } finally {
+            setLoading(false)
         }
     }
     useEffect(() =>{
         fetchData();
     },[])
+
+    useEffect(() => {
+        if (!showQuotationDialog || !selectedCase) return;
+
+        let cancelled = false;
+        const baseLineItems = extractMaterialOrderLineItems(selectedCase);
+        setQuotationMaterialItems(baseLineItems);
+        setQuotationInitialData(null);
+        setQuotationLoading(true);
+
+        const loadQuotation = async () => {
+            try {
+                const response = await ApiCustomer.get(`/api/quotation-information?caseId=${selectedCase.CaseID}`);
+                if (cancelled) return;
+                const quotationPayload = response.data?.data;
+                if (quotationPayload) {
+                    setQuotationInitialData(mapQuotationInitialData(quotationPayload));
+                    setQuotationMaterialItems((prev) =>
+                        mergeLineItemsWithQuotation(prev, quotationPayload.lineItems || []),
+                    );
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    console.error("Failed to fetch quotation:", error);
+                    toast.error(
+                        error.response?.data?.message ?? "Gagal mengambil data quotation.",
+                    );
+                }
+            } finally {
+                if (!cancelled) {
+                    setQuotationLoading(false);
+                }
+            }
+        };
+
+        loadQuotation();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [showQuotationDialog, selectedCase]);
+
+    const handleQuotationOpenChange = (nextOpen) => {
+        setShowQuotationDialog(nextOpen);
+        if (!nextOpen) {
+            setQuotationInitialData(null);
+            setQuotationMaterialItems([]);
+            setQuotationLoading(false);
+            setQuotationSubmitting(false);
+            setSelectedCase(null);
+        }
+    };
+
+    const handleQuotationSubmit = async (payload) => {
+        if (!selectedCase) return;
+        if (!user?.id) {
+            toast.error("User tidak valid. Silakan login kembali.");
+            return;
+        }
+        try {
+            setQuotationSubmitting(true);
+            const apiPayload = {
+                ...payload,
+                userAssign: user.id,
+            };
+            console.log("Sending payload:", apiPayload);
+            const endpoint = payload.quotationNo
+                ? `/api/quotation-information/${payload.quotationNo}`
+                : "/api/quotation-information";
+            const method = payload.quotationNo ? "patch" : "post";
+            const requester =
+                method === "patch"
+                    ? ApiCustomer.patch.bind(ApiCustomer)
+                    : ApiCustomer.post.bind(ApiCustomer);
+
+            await requester(endpoint, apiPayload);
+
+            toast.success(
+                payload.quotationNo
+                    ? "Quotation berhasil diperbarui."
+                    : "Quotation berhasil dibuat.",
+            );
+
+            await fetchData();
+            handleQuotationOpenChange(false);
+        } catch (error) {
+            console.error("Failed to save quotation:", error);
+            const message =
+                error.response?.data?.message ?? "Gagal menyimpan quotation.";
+            toast.error(message);
+        } finally {
+            setQuotationSubmitting(false);
+        }
+    };
+
+    const extractMaterialOrderLineItems = (caseData) => {
+        const workorders = caseData?.caseinformation?.workorder || [];
+        const allLineItems = [];
+
+        workorders.forEach((wo) => {
+            (wo.materialorder || []).forEach((mo) => {
+                (mo.materialorderlineitems || []).forEach((line) => {
+                    const quotationEntry = Array.isArray(line.quotation_lineitem) && line.quotation_lineitem.length > 0
+                        ? line.quotation_lineitem[0]
+                        : undefined;
+
+                    const initialApproved = quotationEntry?.Approved;
+                    const approvedValue =
+                        initialApproved === undefined || initialApproved === null
+                            ? ""
+                            : initialApproved
+                                ? "yes"
+                                : "no";
+
+                    const linePrice =
+                        quotationEntry?.Price ?? line.Price ?? "";
+
+                    allLineItems.push({
+                        lineItemId: line.LineItemID,
+                        moid: mo.MOID,
+                        woid: wo.WOID,
+                        partNumber: line.PartNumber,
+                        description: line.Description,
+                        quantity: line.Quantity ?? "",
+                        price:
+                            linePrice === null || linePrice === undefined
+                                ? ""
+                                : String(linePrice),
+                        partApproved: approvedValue,
+                    });
+                });
+            });
+        });
+
+        return allLineItems;
+    };
+
+    const mergeLineItemsWithQuotation = (baseItems, quotationLineItems = []) => {
+        if (!Array.isArray(baseItems)) return [];
+        const quotationMap = new Map();
+        quotationLineItems.forEach((item) => {
+            if (!item || item.lineItemId === undefined || item.lineItemId === null) return;
+            quotationMap.set(item.lineItemId, item);
+        });
+
+        return baseItems.map((item) => {
+            const override = quotationMap.get(item.lineItemId);
+            if (!override) return item;
+
+            const priceOverride =
+                override.price === undefined || override.price === null
+                    ? item.price
+                    : String(override.price);
+            const approvedOverride =
+                override.approved === undefined || override.approved === null
+                    ? item.partApproved
+                    : override.approved
+                        ? "yes"
+                        : "no";
+
+            return {
+                ...item,
+                price: priceOverride,
+                partApproved: approvedOverride,
+            };
+        });
+    };
+
+    const mapQuotationInitialData = (quotationPayload) => {
+        if (!quotationPayload?.quotation) return null;
+        const q = quotationPayload.quotation;
+
+    return {
+        quotationNo: q.quotationNo,
+        quotationType: q.quotationType ?? "Simple",
+        vatValue:
+            q.vatValue === null || q.vatValue === undefined
+                    ? ""
+                    : String(q.vatValue),
+            quotationNote: q.quotationNote ?? "",
+            laborFee:
+                q.laborFee === null || q.laborFee === undefined
+                    ? ""
+                : String(q.laborFee),
+        quotationDate: q.quotationDate ?? "",
+        quoteApproveDate: q.quoteApproveDate ?? "",
+        sendWa: Boolean(q.sendWa),
+        sendEmail: Boolean(q.sendEmail),
+        quoteDecision: q.quoteDecision ?? "",
+    };
+};
+
 
     return (
         <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3">
@@ -93,17 +314,62 @@ export default function CashManagement() {
                 </span>
             </Card>
 
-             <Card className={"rounded-sm col-span-2 row-span-2"}>
+            <Card className={"rounded-sm col-span-2 row-span-2"}>
                 <CardHeader>
-                    <CardTitle className={"text-2xl"}>Transaction</CardTitle>
+                    <CardTitle className={"text-2xl"}>Quotation</CardTitle>
                 <hr />
                 </CardHeader>
                 <CardContent className={"grid gap-3"}>
-                    <CaseField>
-
-                    </CaseField>
+                    {loading
+                        ? Array.from({ length: 3 }).map((_, i) => (
+                            <Skeleton key={i} className="h-20 w-full rounded-lg" />
+                        ))
+                        : caseData.map((c) => (
+                            <Card
+                                key={c.CaseID}
+                                className="p-3 border-l-4 hover:scale-[0.99] rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400 bg-white cursor-pointer"
+                                onClick={() => navigate(`/app/case/${c.CaseID}`)}
+                            >
+                                <div className="flex flex-wrap items-center gap-2 ">
+                                <Badge
+                                    className={`px-2 py-1 rounded-md text-xs font-medium
+                                    ${c.caseinformation.CasePriority === "High"
+                                        ? "bg-orange-100 text-orange-700"
+                                        : c.caseinformation.CasePriority === "Critical"
+                                        ? "bg-red-100 text-red-700"
+                                        : "bg-gray-200 text-gray-700"
+                                    }`}
+                                >
+                                    {c?.caseinformation.CasePriority || "Low"}
+                                </Badge>
+                                <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
+                                    {c.CaseStatus}
+                                </Badge>
+                                <p className='ml-auto text-xs text-gray-500 '>{c.CreatedOn}</p>
+                                </div>
+                                <p className={cn("font-medium truncate mt-1", !c.CaseSubject && 'text-red-500')}>{c.CaseSubject || "No Subject"}</p>
+                                <div className=" text-gray-500 mt-1 flex justify-between">
+                                <p className='text-md'>{c.CaseID}</p>
+                                <p className='text-md  font-semibold'>{c.UpdateOn ? new Date(c.UpdateOn).toLocaleString("id-ID") : "No Update"}</p>
+                                </div>
+                                {/* TODO FOR SLAMET : ADD A MF COLOR IN DIS BUTON */}
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="top-3 right-3 z-10"
+                                    onClick={(e) => {
+                                        e.stopPropagation(); 
+                                        setSelectedCase(c);
+                                        setQuotationInitialData(null);
+                                        setQuotationMaterialItems(extractMaterialOrderLineItems(c));
+                                        setShowQuotationDialog(true);
+                                    }}
+                                >Process Quotation</Button>
+                            </Card>
+                        )
+                    )}
                 </CardContent>
-        </Card>
+            </Card>
 
             <Card className={"rounded-sm"}>
                 <CardHeader>
@@ -113,6 +379,20 @@ export default function CashManagement() {
                     <NotificationCard />
                 </CardContent>
             </Card> 
+
+            {selectedCase && (
+                <QuotationDialog
+                    open={showQuotationDialog}
+                    onOpenChange={handleQuotationOpenChange}
+                    status={selectedCase.CaseStatus}
+                    materialItems={quotationMaterialItems}
+                    initialData={quotationInitialData || {}}
+                    loading={quotationLoading}
+                    submitting={quotationSubmitting}
+                    onSubmit={handleQuotationSubmit}
+                />
+            )}
+
         </div>
     )
 }
