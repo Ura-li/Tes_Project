@@ -113,10 +113,6 @@ export async function GET(request) {
       },
       accessory: true,
       ActionLog: {
-        where: {
-
-          
-        },
         orderBy: {
           ChangeAt: 'desc'
         },
@@ -154,9 +150,9 @@ export async function GET(request) {
         WorkGroup: caseData.ownerUser?.Name, // Replace with the database owned
         CaseStatus: caseData.CaseStatus,
          caseinformation: {
-      ...caseData,
-      ActionLog: undefined,
-    },
+          ...caseData,
+          // ActionLog: undefined,
+        },
         UpdatedActionLogs: caseData?.ActionLog.filter((log) => log.dataOld !== log.dataNew && !(log.logDescription.includes('Owner'))).map((log) => ({
           ChangeAt: log.ChangeAt,
           ChangedBy: log.ChangedBy,
