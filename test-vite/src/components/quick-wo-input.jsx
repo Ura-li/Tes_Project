@@ -343,13 +343,13 @@ export function QuickWOInput ({
               </CardHeader>
               <CardContent className={"grid grid-cols-4 gap-2"}>
                 <CaseField label={"Problem category"} lock>
-                  <Input value={workOrderData?.WorkOrderType || ""}/>
+                  <Input value={workOrderData?.ServiceType?.ProblemCategory || ""}/>
                 </CaseField>
                 <CaseField label={"Delay code"} lock>
                   <Input value={workOrderData?.DelayCode || ""}/>
                 </CaseField>
                 <CaseField label={"Service type"} lock>
-                  <Input value={workOrderData?.serviceCatalog?.warranty_services?.Service_description || ""}/>
+                  <Input value={workOrderData?.ServiceType?.ServiceTypeName || ""}/>
                 </CaseField>
                 <CaseField label={"NMU"} lock>
                   <Input value={workOrderData?.NMU?.NMUDesc}/>

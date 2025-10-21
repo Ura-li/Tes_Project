@@ -836,6 +836,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
           CEAnalysis: repairFormData.ceAnalysis,
           DefectDesc: repairFormData.defectDesc,
           RepairAction: repairFormData.repairAction,
+          ServiceTypeId: repairFormData.serviceType,
           SystemStatus: "CLOSED_POSTED",
         }
       );
@@ -1356,7 +1357,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
       });
       // Role guard: only CE can close a line item
       const tokenUser = getUserFromToken();
-      if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'ce') {
+      if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'ce' || String(tokenUser.role).toLowerCase() !== 'celead') {
         Swal.close();
         return Swal.fire({
           icon: 'error',
