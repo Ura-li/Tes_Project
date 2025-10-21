@@ -84,7 +84,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
     fetchServiceType(problemCategory)
   },[problemCategory])
   useEffect(() => {
-    setFormData(prev => ({ ...prev, nmuItem: "", Version: "" }));
+    setFormData(prev => ({ ...prev, nmuItem: null, Version: "" }));
 
     const foundNMU = NMUList.find(item => item.NMUId === formData.nmu);
     setSelectedNMU(foundNMU);
