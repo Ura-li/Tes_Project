@@ -136,30 +136,29 @@ export const ServiceMaterialApo = () => {
 
     setMaterialOrderInformation((prev) => {
       const updated = { ...prev, [field]: value};
+      // if(field === "SalesOrderNumber"){
+      //   if(prev.RMANumber && prev.RMANumber.length > 0){
+      //     if(prev.RMANumber.startsWith(value)){
+      //       setRmaWarning("");
+      //     } else{
+      //       setRmaWarning("⚠️ RMA Number tidak sesuai dengan Sales Order Number");
+      //     }
+      //   } else{
+      //     setRmaWarning("");
+      //   }
+      // }
 
-      if(field === "SalesOrderNumber"){
-        if(prev.RMANumber && prev.RMANumber.length > 0){
-          if(prev.RMANumber.startsWith(value)){
-            setRmaWarning("");
-          } else{
-            setRmaWarning("⚠️ RMA Number tidak sesuai dengan Sales Order Number");
-          }
-        } else{
-          setRmaWarning("");
-        }
-      }
-
-      if(field === "RMANumber"){
-        if(value && prev.SalesOrderNumber){
-          if(value.startsWith(prev.SalesOrderNumber)){
-            setRmaWarning("");
-          }else{
-            setRmaWarning("⚠️ RMA Number tidak sesuai dengan Sales Order Number")
-          }
-        }else{
-          setRmaWarning("");
-        }
-      }
+      // if(field === "RMANumber"){
+      //   if(value && prev.SalesOrderNumber){
+      //     if(value.startsWith(prev.SalesOrderNumber)){
+      //       setRmaWarning("");
+      //     }else{
+      //       setRmaWarning("⚠️ RMA Number tidak sesuai dengan Sales Order Number")
+      //     }
+      //   }else{
+      //     setRmaWarning("");
+      //   }
+      // }
       return updated;
     })
   };
@@ -412,14 +411,14 @@ export const ServiceMaterialApo = () => {
                       value={materialOrderInformation?.SalesOrderNumber || ""}
                       placeholder="---"
                       onChange={handleMaterialOrderChange("SalesOrderNumber")}
-                      onBlur={() =>{
-                        if (!materialOrderInformation?.RMANumber) {
-                          setMaterialOrderInformation(prev => ({
-                            ...prev,
-                            RMANumber: prev.SalesOrderNumber
-                          }))
-                        }
-                      }}
+                      // onBlur={() =>{
+                      //   if (!materialOrderInformation?.RMANumber) {
+                      //     setMaterialOrderInformation(prev => ({
+                      //       ...prev,
+                      //       RMANumber: prev.SalesOrderNumber
+                      //     }))
+                      //   }
+                      // }}
                     />
                   </CaseField>
 
@@ -437,11 +436,11 @@ export const ServiceMaterialApo = () => {
                     value={materialOrderInformation?.RMANumber || ""}
                     onChange={handleMaterialOrderChange("RMANumber")}
                     />
-                    {rmaWarning && (
+                    {/* {rmaWarning && (
                       <span style={{ color: "orange", fontSize: "0.8rem", marginTop: 2 }}>
                         {rmaWarning}
                       </span>
-                    )}
+                    )} */}
                   </CaseField>  
 
                   <CaseField

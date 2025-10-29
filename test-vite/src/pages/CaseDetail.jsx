@@ -765,12 +765,12 @@ const openPopup = () => {
     {
       icon: FileSymlink,
       label: "Save & Close",
-      onClick: () => handleSave().then(() => navigate(`/app/viewcase`)),
+      onClick: () => handleSave().then(() => navigate(`/app/`)),
       roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
     },
     {
       icon: CopyX,
-      label: "Close",
+      label: "Close Case",
       onClick: () => saveAndCloseCase(),
       roles: ["admin", "fd"],
     },

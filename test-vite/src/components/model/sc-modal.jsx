@@ -4160,7 +4160,7 @@ return (
 );
 };
 
-export function PartAdd () {
+export function PartAdd (onReload = false) {
   const [formData, setFormData] = useState({
     PartNumber: '',
     Keyword: '',
@@ -4229,7 +4229,9 @@ export function PartAdd () {
         icon: "success",
         timer: 1200,
         showConfirmButton: false,
-      }).then(() => window.location.reload());
+      }).then(() => {
+        if(onReload) window.location.reload()
+      });
     } catch (err) {
       Swal.fire({
         title: "Error!",
