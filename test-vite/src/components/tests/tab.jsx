@@ -853,62 +853,68 @@ export const TabsBooking = ({
   ];
   const visibleButtons = open ? buttons.slice(0, -3) : buttons;
   const hiddenButtons = open ? buttons.slice(-3) : [];
-  const saveAndCloseWorkOrder = async () => {
-    const confirmResult = await Swal.fire({
-      title: "Confirm Save",
-      text: "This will give the order status as CLOSED. Are you sure you want to save changes?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, Save it",
-    });
 
-    if (!confirmResult.isConfirmed) {
-      return; // User canceled
-    }
-    try {
-      Swal.fire({
-        title: "Saving...",
-        text: "Please wait while we update the Work Order.",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-      const res = await ApiCustomer.patch(
-        `/api/work-order/${workOrders.WOID}`,
-        {
-          SystemStatus: "CLOSED_POSTED",
-        }
-      );
-      if (res.data.success) {
-        // Success alert
-        Swal.fire({
-          icon: "success",
-          title: "Updated!",
-          text: res.data.message,
-          timer: 2000,
-          showConfirmButton: false,
-        }).then(() => {
-          navigate(`/app/case/${workOrders.CaseID}`);
-        });
-      } else {
-        // Error from API
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: res.data.message,
-        });
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed to update!",
-        text: error.message || "Something went wrong.",
-      });
-    }
-  };
+  /**
+   * NOTE WARNING : SOMETIMES THIS RUN AND AFFECTED THE WO
+   * FIND OUT WHY
+   * NOW COMMENTED
+   */
+  // const saveAndCloseWorkOrder = async () => {
+  //   const confirmResult = await Swal.fire({
+  //     title: "Confirm Save",
+  //     text: "This will give the order status as CLOSED. Are you sure you want to save changes?",
+  //     icon: "warning",
+  //     showCancelButton: true,
+  //     confirmButtonColor: "#3085d6",
+  //     cancelButtonColor: "#d33",
+  //     confirmButtonText: "Yes, Save it",
+  //   });
+
+  //   if (!confirmResult.isConfirmed) {
+  //     return; // User canceled
+  //   }
+  //   try {
+  //     Swal.fire({
+  //       title: "Saving...",
+  //       text: "Please wait while we update the Work Order.",
+  //       allowOutsideClick: false,
+  //       didOpen: () => {
+  //         Swal.showLoading();
+  //       },
+  //     });
+  //     const res = await ApiCustomer.patch(
+  //       `/api/work-order/${workOrders.WOID}`,
+  //       {
+  //         SystemStatus: "CLOSED_POSTED",
+  //       }
+  //     );
+  //     if (res.data.success) {
+  //       // Success alert
+  //       Swal.fire({
+  //         icon: "success",
+  //         title: "Updated!",
+  //         text: res.data.message,
+  //         timer: 2000,
+  //         showConfirmButton: false,
+  //       }).then(() => {
+  //         navigate(`/app/case/${workOrders.CaseID}`);
+  //       });
+  //     } else {
+  //       // Error from API
+  //       Swal.fire({
+  //         icon: "error",
+  //         title: "Error",
+  //         text: res.data.message,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Failed to update!",
+  //       text: error.message || "Something went wrong.",
+  //     });
+  //   }
+  // };
 
   const refresh = async () => {
     try {

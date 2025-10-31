@@ -113,10 +113,6 @@ export async function GET(request) {
       },
       accessory: true,
       ActionLog: {
-        where: {
-
-          
-        },
         orderBy: {
           ChangeAt: 'desc'
         },

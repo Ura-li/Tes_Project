@@ -42,6 +42,9 @@ export const ErfCase = () => {
 
     const validFiles = [...files].filter((f) => {
       const base = f.name.replace(/\.[^.]+$/, ""); // "ABC123.png" -> "ABC123"
+      console.log(f.name)
+      console.log(base)
+      console.log(CASE_IDS)
 
       if (!CASE_IDS.has(base)) {
         toast.warning(`Tidak menemukan Case ID untuk ${f.name}`);

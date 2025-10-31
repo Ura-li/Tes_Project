@@ -2073,7 +2073,26 @@ export default function NewCaseForm() {
                       value={row.name}
                       onChange={(v) => updateAccessory(row.id, "name", v)}
                       placeholder="Type to search accessory..."
-                      options={["Cable","Adapter","Other"]}
+                      options={[
+                        "Adaptor",
+                        "Battery",
+                        "Carrying Case",
+                        "Floppy Disk Drive",
+                        "Harddisk",
+                        "Ink Catridge",
+                        "Jet Direct Card",
+                        "Keyboard",
+                        "Memory",
+                        "Mouse",
+                        "Optical Disc Drive",
+                        "Others",
+                        "Paper Tray",
+                        "PCMCIA Card",
+                        "Power Cable",
+                        "Power Supply Unit",
+                        "Stylus Pen",
+                        "Toner Catridge"
+                      ]}
                     >
                     </SearchCommandBlock>
                   </div>

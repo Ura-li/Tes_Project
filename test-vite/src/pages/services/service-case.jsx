@@ -1105,7 +1105,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, materialOrderI
       });
       // Role guard: only CE can close MO
       const tokenUser = getUserFromToken();
-      if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'ce') {
+      if (!tokenUser || (String(tokenUser.role).toLowerCase() !== 'ce' && String(tokenUser.role).toLowerCase() !== 'celead')) {
         Swal.close();
         return Swal.fire({
           icon: 'error',
@@ -1357,7 +1357,8 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
       });
       // Role guard: only CE can close a line item
       const tokenUser = getUserFromToken();
-      if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'ce' || String(tokenUser.role).toLowerCase() !== 'celead') {
+      if (!tokenUser || (String(tokenUser.role).toLowerCase() !== 'ce' && String(tokenUser.role).toLowerCase() !== 'celead')) {
+        
         Swal.close();
         return Swal.fire({
           icon: 'error',
