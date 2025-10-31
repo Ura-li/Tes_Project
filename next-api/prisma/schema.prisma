@@ -238,20 +238,20 @@ model global_trade_check {
 }
 
 model quotationtable {
-  QuotationNo           String        @id @db.VarChar(8)
-  QuotationType         QuotationType @default(Simple)
-  Currency              String        @default("IDR") @db.VarChar(8)
-  LaborFee              Int           @default(0)
+  QuotationNo           String             @id @db.VarChar(8)
+  QuotationType         QuotationType      @default(Simple)
+  Currency              String             @default("IDR") @db.VarChar(8)
+  LaborFee              Int                @default(0)
   VatValue              Int?
-  Subtotal              Decimal?      @db.Decimal(10, 2) // Total sebelum PPN
-  VATAmount             Decimal?      @db.Decimal(10, 2) // Nilai PPN
-  QuotationDate         DateTime      @default(now()) @db.DateTime(0)
-  QuotationApprovedDate DateTime?     @db.DateTime(0)
+  Subtotal              Decimal?           @db.Decimal(10, 2) // Total sebelum PPN
+  VATAmount             Decimal?           @db.Decimal(10, 2) // Nilai PPN
+  QuotationDate         DateTime           @default(now()) @db.DateTime(0)
+  QuotationApprovedDate DateTime?          @db.DateTime(0)
   UserAssign            Int
-  User                  User          @relation("UserQuotationAdmin", fields: [UserAssign], references: [IDUser], onDelete: Restrict)
-  QuotationNote         String?       @db.Text
-  SendWa                Boolean       @default(false)
-  SendEmail                Boolean       @default(false)
+  User                  User               @relation("UserQuotationAdmin", fields: [UserAssign], references: [IDUser], onDelete: Restrict)
+  QuotationNote         String?            @db.Text
+  SendWa                Boolean            @default(false)
+  SendEmail             Boolean            @default(false)
   QuoteDecision         QuotationDecision?
 
   GrandTotal         Decimal?             @db.Decimal(10, 2) // Total akhir
@@ -432,24 +432,34 @@ model servicecatalog {
 }
 
 model servicecatalog_parts {
-  PartNumber               String                     @id @db.VarChar(100)
-  Keyword                  String?                    @db.VarChar(100)
-  PartDescription          String?                    @db.Text
-  Orderability             Boolean?
-  RestrictionReason        String?                    @db.Text
-  CSR_Flag                 Boolean?                   @default(false)
-  ROHS_Flag                Boolean?                   @default(false)
-  Returnable_Flag          Boolean?                   @default(false)
-  HardRoll_Flag            Boolean?                   @default(false)
-  DangerousGoods_Flag      Boolean?                   @default(false)
-  LithiumBattery_Flag      Boolean?                   @default(false)
-  Oversize_Flag            Boolean?                   @default(false)
-  Heavy_Flag               Boolean?                   @default(false)
-  Price                    Decimal                    @default(0.00) @db.Decimal(10, 2)
-  FreightPrice             Decimal                    @default(0.00) @db.Decimal(10, 2)
-  Tax                      Decimal                    @default(0.00) @db.Decimal(10, 2)
-  Total                    Decimal                    @default(0.00) @db.Decimal(10, 2)
-  Shipping_Fee             Decimal                    @db.Decimal(10, 2)
+  PartNumber          String                     @id @db.VarChar(100)
+  VendorPartNumber    String?                    @unique @db.VarChar(100)
+  ProductType         product_type_ProductTower?
+  Keyword             String?                    @db.VarChar(100)
+  PartDescription     String?                    @db.Text
+  Orderability        Boolean?
+  RestrictionReason   String?                    @db.Text
+  CSR_Flag            Boolean?                   @default(false)
+  ROHS_Flag           Boolean?                   @default(false)
+  Returnable_Flag     Boolean?                   @default(false)
+  HardRoll_Flag       Boolean?                   @default(false)
+  DangerousGoods_Flag Boolean?                   @default(false)
+  LithiumBattery_Flag Boolean?                   @default(false)
+  Oversize_Flag       Boolean?                   @default(false)
+  Heavy_Flag          Boolean?                   @default(false)
+  //HP ORIGINAL PRICE
+  Price               Decimal                    @default(0.00) @db.Decimal(10, 2)
+  //Exchange Rate
+  FreightPrice        Decimal                    @default(0.00) @db.Decimal(10, 2)
+  Tax                 Decimal                    @default(0.00) @db.Decimal(10, 2)
+  Total               Decimal                    @default(0.00) @db.Decimal(10, 2)
+  Shipping_Fee        Decimal                    @db.Decimal(10, 2)
+
+  PartLaborToPatner Decimal @default(0.00) @db.Decimal(10, 2)
+  ODMOriginalPrice  Decimal @default(0.00) @db.Decimal(10, 2)
+  ODMPatnerPrice    Decimal @default(0.00) @db.Decimal(10, 2)
+  ODMUserPrice      Decimal @default(0.00) @db.Decimal(10, 2)
+
   materialorderlineitems   materialorderlineitems[]
   servicecatalog           servicecatalog[]
   serviceCatalogManytoMany ServiceCatalogManytoMany[]
@@ -699,9 +709,9 @@ model workorder {
   VersionNMU    String?
   NMUItemId     Int?
   NMUItem       NMUItem?     @relation(fields: [NMUItemId], references: [id])
-  CEAnalysis    String? @db.Text
-  DefectDesc    String? @db.Text
-  RepairAction  String? @db.Text
+  CEAnalysis    String?      @db.Text
+  DefectDesc    String?      @db.Text
+  RepairAction  String?      @db.Text
 
   @@unique([ServiceCatalogID])
   @@index([CaseID], map: "CaseID")
