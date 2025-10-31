@@ -34,6 +34,7 @@ export const FlowCase = () => {
 
 export const FlowCaseData = (user) => {
   const [caseData, setCaseData] = useState([]);
+  console.log("what HPPAen IN hERE",caseData)
   const [renderer, setRenderer] = useState(false)
   const [error, setError] = useState(false)
   const [filters, setFilters] = useState({
@@ -58,7 +59,7 @@ export const FlowCaseData = (user) => {
     try {
       const response = await ApiCustomer.get('/api/case-information');
       const filtercases = response.data.data.filter(c => (c?.caseinformation?.Owner === user.user?.id || c?.caseinformation?.CreatedBy === user.user?.id) && (filterClose ? c.CaseStatus !== 'Close' : c.CaseStatus !== '' ) );
-
+      
       // const sortedCases = filtercases.sort((a, b) => {
       //   const dateAraw = a.caseinformation.ActionLog[0]?.ChangeAt;
       //   const dateBraw = b.caseinformation.ActionLog[0]?.ChangeAt;
@@ -99,7 +100,6 @@ export const FlowCaseData = (user) => {
   useEffect(() => {
     fetchData();
   }, [user.user, filterClose]);
-  console.log("CHECK DATA",filters)
 
   function parseCreatedOn(dateStr) {
     const [datePart, timePart] = dateStr.split(', ');
@@ -235,6 +235,7 @@ export const FlowCaseData = (user) => {
     groupedDataTime = dataTime.map((t) => {
       const filt = caseData.filter((data) => {
         const dataStatus = data.UpdatedActionLogs[0]?.dataNew;
+        console.log("FeRdy GIMAnG",dataStatus)
 
         return (
           dataStatus?.replace("Finish Repair","").toLowerCase() ===

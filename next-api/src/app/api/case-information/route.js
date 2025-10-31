@@ -157,12 +157,13 @@ export async function GET(request) {
       ...caseData,
       ActionLog: undefined,
     },
-        UpdatedActionLogs: caseData?.ActionLog.filter((log) => log.dataOld !== log.dataNew && !(log.logDescription.includes('Owner'))).map((log) => ({
+        UpdatedActionLogs: caseData?.ActionLog.filter((log) => log.dataOld !== log.dataNew && log.model !== "CaseOwner" ).map((log) => ({
           ChangeAt: log.ChangeAt,
           ChangedBy: log.ChangedBy,
           dataOld: log.dataOld,
           dataNew: log.dataNew,
-          logDescription: log.logDescription
+          logDescription: log.logDescription,
+          model: log.model,
         })) || [],
       })),
       value: {

@@ -76,7 +76,7 @@ export async function GET(request) {
                         caseinformation: {
                         ...m.workorder.caseinformation,
                         UpdatedActionLogs: m.workorder.caseinformation?.ActionLog
-                            ?.filter(log => log.dataOld !== log.dataNew && !log.logDescription.includes("Owner"))
+                            ?.filter(log => log.dataOld !== log.dataNew && log.model !== "CaseOwner")
                             ?.map(log => ({
                             ChangeAt: log.ChangeAt,
                             ChangedBy: log.ChangedBy,
