@@ -1632,9 +1632,6 @@ if (caseDetails.CaseStatus !== "Close") {
     // setWarrantyCards(validFiles)
     handleEntitlementStatus('WarrantyCard')(validFiles);
   }
-  
-  
-
   const onPickPhotoUnits = (files) => {
     if (!files) return;
     const validFiles = Array.from(files).filter((f) => {
@@ -1672,7 +1669,21 @@ if (caseDetails.CaseStatus !== "Close") {
               {/* Owner */}
               <div className="flex flex-col">
                 <span className="text-blue-600 font-medium">{ownerUserData.Name}</span>
-                <span className="text-muted-foreground">Owner</span>
+                <span className="text-muted-foreground">
+                  {
+                    ownerUserData.Role === 'fd' ? "Owner Fd" : 
+                    ownerUserData.Role === 'ce' ? "Owner Ce" :
+                    ownerUserData.Role === 'celead' ? "Owner Ce Leader" :
+                    ownerUserData.Role === 'lg' ? "Owner Lg" :
+                    ownerUserData.Role === 'apo' ? "Owner Apo" :
+                    ownerUserData.Role === 'cm' ? "Owner Cm" :
+                    ownerUserData.Role === 'admin' ? "Owner Admin" :
+                    ownerUserData.Role === 'ps' ? "Owner Ps" :
+                    ownerUserData.Role === 'apv' ? "Owner Aprovel" :
+                    ownerUserData.Role === 'user' ? "User" :
+                    "None" 
+                  }
+                </span>
               </div>
 
               {/* Queue */}
