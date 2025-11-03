@@ -2965,7 +2965,19 @@ export const Mo_table = () => {
 
   // === Render Section ===
   const navigate = useNavigate();
+  const formatDate = (dateString) => {
+    if (!dateString) return "-"; // jika null atau undefined
+    const date = new Date(dateString);
+    if (isNaN(date)) return dateString; // fallback jika bukan format valid
 
+    return date.toLocaleString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
   return (
     <div className="p-6">
       <h2 className="mb-6 text-2xl font-bold">📊 Material Order Table</h2>
@@ -3137,14 +3149,12 @@ export const Mo_table = () => {
                   <td className="p-3 border">{MaterialOrderItem.OrderNumber}</td>
                   <td className="p-3 border">{MaterialOrderItem.OrderStatus}</td>
                   <td className="p-3 border">{MaterialOrderItem.OrderType}</td>
-                  <td className="p-3 border">{MaterialOrderItem.CreatedOn}</td>
+                  <td className="p-3 border">{formatDate(MaterialOrderItem.CreatedOn)}</td>
                   <td className="p-3 border">
                     {MaterialOrderItem.SalesOrderNumber}
                   </td>
                   <td className="p-3 border">{MaterialOrderItem.RMANumber}</td>
-                  <td className="p-3 border">
-                    {MaterialOrderItem.ReadyForClosureDate}
-                  </td>
+                  <td className="p-3 border">{formatDate(MaterialOrderItem.ReadyForClosureDate)}</td>
                   <td className="p-3 border">{MaterialOrderItem.Owner}</td>
                   <td className="flex items-center justify-center p-3 space-x-2 border">
                     <MaterialOrderEdit
