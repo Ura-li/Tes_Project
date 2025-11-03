@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import ApiCustomer from "@/api";
@@ -12,10 +12,15 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/auth-context";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
+import { usePalette, useColor } from 'color-thief-react';
+
 
 
 export function UserProfile() {
     const {user} = useAuth();
+    const [dominantColor, setDominantColor] = useState([0, 200, 255]); const imgRef = useRef(null);
+    
+
     const [isDialogEditOpen, setIsDialogEditOpen] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -149,12 +154,24 @@ export function UserProfile() {
 
     }
 
+    const { data: dominantHex } = useColor(preview.ProfilePhoto, 'hex', { crossOrigin: 'anonymous' });
+    console.log("Data : ",dominantHex)
     
     return (
         <div className="  flex  justify-center  items-center  h-full ">
             <Card className="relative w-1/2  flex-shrink-0 overflow-hidden rounded-2xl shadow-md p-0 m-0">
                 {/* Header with background */}
-                <CardHeader className="relative flex flex-col items-center justify-center bg-gradient-to-b from-cyan-300 to-cyan-100/80 h-32">
+                
+                {/* <CardHeader className="relative flex flex-col items-center justify-center bg-gradient-to-b from-cyan-300 to-cyan-100/80 h-32"> */}
+                <CardHeader
+                    className="relative flex flex-col items-center justify-center h-32 transition-all duration-700"
+                    style={{
+                        background: dominantHex
+                        ? `linear-gradient(to bottom, ${dominantHex}, ${dominantHex}80)` // warna utama + versi transparan
+                        : 'linear-gradient(to bottom, #67e8f9, #cffafe)', // fallback warna cyan
+                    }}
+                    >
+
                     {!preview.ProfilePhoto && (
                         <div className="absolute -bottom-12 left-1/2 flex h-30 w-30 -translate-x-1/2 items-center justify-center rounded-full border-4 border-white bg-gray-200 text-gray-400 shadow-lg">
                             <span className="text-3xl font-bold">?</span>
@@ -163,6 +180,8 @@ export function UserProfile() {
                     {preview.ProfilePhoto && (
                         <img
                             src={preview.ProfilePhoto}
+                            ref={imgRef}
+                            // crossOrigin="anonymous"
                             alt="Profile Preview"
                             className="absolute -bottom-12 left-1/2 h-30 w-30 -translate-x-1/2 rounded-full border-4 border-white shadow-lg object-cover"
                         />

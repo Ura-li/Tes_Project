@@ -34,7 +34,6 @@ export const ErfCase = () => {
   }, []);
 
   async function uploadFiles(files) {
-    console.log("CHECK file", files.length);
     if (files.length === 0) return;
     // Precompute once
     const CASE_IDS = new Set(caseData.map((e) => String(e.CaseID)));

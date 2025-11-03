@@ -246,10 +246,13 @@ model quotationtable {
   Subtotal              Decimal?      @db.Decimal(10, 2) // Total sebelum PPN
   VATAmount             Decimal?      @db.Decimal(10, 2) // Nilai PPN
   QuotationDate         DateTime      @default(now()) @db.DateTime(0)
-  QuotationApprovedDate DateTime      @default(now()) @db.DateTime(0)
+  QuotationApprovedDate DateTime?     @db.DateTime(0)
   UserAssign            Int
   User                  User          @relation("UserQuotationAdmin", fields: [UserAssign], references: [IDUser], onDelete: Restrict)
   QuotationNote         String?       @db.Text
+  SendWa                Boolean       @default(false)
+  SendEmail                Boolean       @default(false)
+  QuoteDecision         QuotationDecision?
 
   GrandTotal         Decimal?             @db.Decimal(10, 2) // Total akhir
   quotation_lineitem quotation_lineitem[]
@@ -265,6 +268,8 @@ model quotation_lineitem {
 
   Price    Decimal @db.Decimal(10, 2) // bisa simpan harga di waktu itu
   Approved Boolean @default(false) // untuk "Part Approved" Yes/No
+
+  @@unique([QuotationNo, LineItemID])
 }
 
 model materialorder {
@@ -644,7 +649,7 @@ model BookingStatus {
   BookingsDetail BookingDetails[]
 }
 
-model  workorder {
+model workorder {
   WOID            String          @id @db.VarChar(13)
   CaseID          String?
   WorkOrderNumber String?         @db.VarChar(100)
@@ -686,15 +691,17 @@ model  workorder {
   bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
 
   // TODO : FIND WTF IS DIS ABOT
-  DelayCode    DelayCode?
-  NMUId        Int?
-  NMU          NMU?       @relation(fields: [NMUId], references: [NMUId])
-  VersionNMU   String?
-  NMUItemId    Int?
-  NMUItem      NMUItem?   @relation(fields: [NMUItemId], references: [id])
-  CEAnalysis   String?
-  DefectDesc   String?
-  RepairAction String?
+  ServiceTypeId Int?
+  ServiceType   ServiceType? @relation(fields: [ServiceTypeId], references: [ServiceTypeId], onDelete: Restrict)
+  DelayCode     DelayCode?
+  NMUId         Int?
+  NMU           NMU?         @relation(fields: [NMUId], references: [NMUId])
+  VersionNMU    String?
+  NMUItemId     Int?
+  NMUItem       NMUItem?     @relation(fields: [NMUItemId], references: [id])
+  CEAnalysis    String? @db.Text
+  DefectDesc    String? @db.Text
+  RepairAction  String? @db.Text
 
   @@unique([ServiceCatalogID])
   @@index([CaseID], map: "CaseID")
@@ -756,6 +763,7 @@ model ServiceType {
   ProblemCategory ProblemCategory?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
+  workorder       workorder[]
 }
 
 model workorder_service_delivery {
@@ -975,4 +983,9 @@ enum ProblemCategory {
 enum QuotationType {
   Standard
   Simple
+}
+
+enum QuotationDecision {
+  Approved
+  Rejected
 }

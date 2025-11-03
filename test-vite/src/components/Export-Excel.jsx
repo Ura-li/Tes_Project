@@ -164,7 +164,7 @@ export const ExportExcelPart = ({}) => {
        AWB_InCode: m.AWB_InCode || "N/A",
        AWB_OutCode: m.AWB_OutCode || "N/A",
        Part_RequestDate : m.CreatedOn ? new Date (m.CreatedOn).toLocaleString() : "N/A",
-       Part_OrderDate: m.workorder?.caseinformation?.UpdatedActionLogs.find(log => log.dataNew === "PartOrder") ? new Date (m.workorder?.caseinformation?.UpdatedActionLogs.find(log => log.dataNew === "PartOrder").ChangeAt).toLocaleString() : "N/A",
+       Part_OrderDate: m.workorder?.caseinformation?.ActionLog.find(log => log.dataNew === "PartOrder") ? new Date (m.workorder?.caseinformation?.ActionLog.find(log => log.dataNew === "PartOrder").ChangeAt).toLocaleString() : "N/A",
        ETA_Date : m.DeliveryRequestedDate ? new Date(m.DeliveryRequestedDate).toLocaleString() : "N/A",
        Part_InDate: m.workorder?.caseinformation?.UpdatedActionLogs.find(log => log.dataNew === "Shipped") ? new Date (m.workorder?.caseinformation?.UpdatedActionLogs.find(log => log.dataNew === "Shipped").ChangeAt).toLocaleString() : "N/A",
        Part_OnHandCE: m.CollectionRequestedDate ? new Date (m.CollectionRequestedDate).toLocaleString() : "N/A",

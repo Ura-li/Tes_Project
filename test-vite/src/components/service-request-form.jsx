@@ -309,7 +309,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) =>
       </Section>
 
       {/* Product Section */}
-      <Section title="Customer">
+      <Section title="Product">
         {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text> */}
         <View style={{ display: 'flex', flexDirection: 'row', columnGap: 5 }}>
           <View style={styles.leftSection}>
