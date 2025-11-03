@@ -158,8 +158,11 @@ async function fetchBooking() {
     setSubkTechnicianName(data?.bookingDetails?.[0]?.subkTechnician?.Name || "");
     setSubkTechnicianId(data?.bookingDetails?.[0]?.subkTechnician?.SubkTechnicianId || "");
     
-    setSubkEngineerName(data?.bookingDetails?.[0]?.engineer?.Name || "");
-    setSubkEngineerId(data?.bookingDetails?.[0]?.engineer?.IDUser || "");
+    // setSubkEngineerName(data?.bookingDetails?.[0]?.engineer?.Name || "");
+    // setSubkEngineerId(data?.bookingDetails?.[0]?.engineer?.IDUser || "");
+
+    setSubkEngineerName(data?.bookingDetails[0]?.subkTechnician?.Name || "");
+    setSubkEngineerId(data?.bookingDetails[0]?.subkTechnician?.SubkTechnicianId || "");
     
     setBookingStatusId(data?.BookingStatusId || "");
     setWorkOrderNumber(data?.workorder?.WorkOrderNumber || "");
@@ -268,7 +271,8 @@ async function fetchBooking() {
       ...bookingData, // keep all original fields
       ResourceId: resourceId,
       ResourceAccountId: accountId,
-      SubkTechnicianId: null,
+      Name: subkEngineerName,
+      SubkTechnicianId: subkEngineerId,
       EngineerId: subkEngineerId,
       StartTimeCustomerTime: DateHelper.toDB(startTimeCustomerTime || null),
       EndTimeCustomerTime: DateHelper.toDB(endTimeCustomerTime || null),
@@ -375,8 +379,9 @@ async function fetchBooking() {
     }
   
     try {
-      const response = await ApiCustomer.get(`/api/user?resource=${resourceId}`);
-      console.log("SubukTechl : ",response.data);
+      // const response = await ApiCustomer.get(`/api/user?resource=${resourceId}`);
+      const response = await ApiCustomer.get('/api/subk-technician');
+      console.log("SubkTechl : ",response.data);
       setSearchResultsSubkTechnician(response.data.data);
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
@@ -544,8 +549,7 @@ async function fetchBooking() {
                   placeholder="---"
                   value={
                     resourceId !== "" ||
-                    bookingData?.bookingDetails?.[0]?.resource?.resourceId !==
-                      ""
+                    bookingData?.bookingDetails?.[0]?.resource?.resourceId !== ""
                       ? resourceName
                       : "---"
                   }
@@ -631,7 +635,7 @@ async function fetchBooking() {
                   }}
                 />
                 {searchResultsSubkTechnician.length > 0 && (
-                  <ul className="absolute z-10 w-full mt-1 bg-white border">
+                  <ul className="absolute z-10 w-73 rounded-sm mt-20 bg-white border">
                     {searchResultsSubkTechnician.map((tech) => (
                       <li
                         key={tech.SubkTechnicianId}
@@ -639,7 +643,7 @@ async function fetchBooking() {
                         onClick={() => {
                           console.log("USER IN SUBK CLICK : ",tech);
                           setSubkEngineerName(tech.Name);
-                          setSubkEngineerId(tech.IDUser);
+                          setSubkEngineerId(tech.SubkTechnicianId);
                           setSearchResultsSubkTechnician([]); // Clear suggestions
                         }}
                       >
