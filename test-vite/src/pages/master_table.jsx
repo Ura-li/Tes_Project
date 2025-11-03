@@ -4174,7 +4174,7 @@ const sortedData = useMemo(() => {
                   {/* Tampilkan data Phone di sini */}
                   <td className="p-2 border">{UserItem.Phone}</td>
                   {/* Tampilkan data Signature di sini */}
-                  <td className="p-2 border">{UserItem.Signature}</td>
+                  <td className="p-2 border"><img src={UserItem.Signature} /></td>
                   <td className="p-2 border">
                     {/* {console.log(preview?.ProfilePhoto)} */}
                     {UserItem?.ProfilePhoto ? (
