@@ -381,8 +381,24 @@ async function fetchBooking() {
     try {
       // const response = await ApiCustomer.get(`/api/user?resource=${resourceId}`);
       const response = await ApiCustomer.get('/api/subk-technician');
-      console.log("SubkTechl : ",response.data);
-      setSearchResultsSubkTechnician(response.data.data);
+      const allTechs = response.data.data;
+
+      let filtered = [];
+
+      if (resourceId === "IDY_SB Mangga Dua") {
+        filtered = allTechs.filter((tech) =>
+      tech.resourceAccount?.ResourceId === "IDY_SB Mangga Dua" &&
+      tech.Name.toLowerCase().includes(keyword.toLowerCase()));
+      } else if (resourceId === "IDY_SB Kokas") {
+         filtered = allTechs.filter((tech) =>
+      tech.resourceAccount?.ResourceId === "IDY_SB Kokas" &&
+      tech.Name.toLowerCase().includes(keyword.toLowerCase()));
+      } else {
+        filtered = allTechs.filter((tech) =>
+      tech.Name.toLowerCase().includes(keyword.toLowerCase()));
+      }
+      
+      setSearchResultsSubkTechnician(filtered);
     } catch (error) {
       console.error("Error fetching Subk Technician search:", error);
     }
