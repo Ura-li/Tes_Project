@@ -251,7 +251,7 @@ model quotationtable {
   User                  User          @relation("UserQuotationAdmin", fields: [UserAssign], references: [IDUser], onDelete: Restrict)
   QuotationNote         String?       @db.Text
   SendWa                Boolean       @default(false)
-  SendEmail                Boolean       @default(false)
+  SendEmail             Boolean       @default(false)
   QuoteDecision         QuotationDecision?
 
   GrandTotal         Decimal?             @db.Decimal(10, 2) // Total akhir
@@ -874,6 +874,7 @@ enum WorkOrderStatus {
   OPEN_COMPLETED
   REPAIR_PROGRESS
   CLOSED_POSTED
+  CLOSED_CANCELLED
 }
 
 enum WarrantyCondition {
@@ -894,6 +895,7 @@ enum CaseStatus {
   Pending_Order
   Escalated
   Quote_Approved
+  Quote_Rejected
   Pending_Quote
   NEW_AssignCE
   NEW_AssignAPO
@@ -911,6 +913,7 @@ enum CaseStatus {
   PartAvailable
   RepairProgress
   FinishRepair
+  CancelRepair
 }
 
 enum ShippingPriority {

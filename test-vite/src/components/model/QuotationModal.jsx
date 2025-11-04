@@ -34,6 +34,9 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { SearchCommandBlock } from "../sc-select";
+import ApiCustomer from "@/api";
+import { toast } from "sonner";
 
 const formatDateForInput = (value) => {
   const date = value ? new Date(value) : new Date();
@@ -134,16 +137,25 @@ const normaliseLineItems = (items = [], prevItems = []) => {
   });
 };
 
+const copyToClipboard = (value) => {
+  if (!value) return;
+  navigator.clipboard.writeText(value);
+  toast.success(`Copied: ${value}`); // kalau kamu pakai react-hot-toast
+};
+
 export const QuotationDialog = ({
   open,
   onOpenChange,
+  caseId,
   status,
   materialItems = [],
   onSubmit,
   initialData = {},
   loading = false,
   submitting = false,
+  createdBy
 }) => {
+  
   const isQuoteRequested = status === "Quote_Requested";
   const isPendingQuote = status === "Pending_Quote";
   const existingQuotationNo = initialData?.quotationNo ?? null;
@@ -151,6 +163,17 @@ export const QuotationDialog = ({
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [lineErrors, setLineErrors] = useState({});
+
+  const [roleAssign, setRoleAssign] = useState([]);
+
+  const fetchUserAssign = async (role) => {
+    try {
+      const res = await ApiCustomer.get(`/api/user?role=${role}`);
+      setRoleAssign(res.data.data);
+    } catch (err) {
+      console.error("Error fetching role: ", err);
+    }
+  };
 
   const defaultFormState = useMemo(() => {
     const quotationDate =
@@ -182,6 +205,7 @@ export const QuotationDialog = ({
       quoteApproveDate,
       quoteDecision: mappedDecision,
       lineItems: normaliseLineItems(materialItems),
+      userAssign: initialData.userAssign ?? undefined
     };
   }, [
     initialData,
@@ -196,7 +220,12 @@ export const QuotationDialog = ({
     setForm(defaultFormState);
     setFieldErrors({});
     setLineErrors({});
+    fetchUserAssign('apo');
   }, [defaultFormState]);
+
+  const filteredUserAssign = roleAssign.filter(
+    (user) => user.Role === "apo"
+  )
 
   const syncLineItems = useCallback(
     (items) => {
@@ -329,6 +358,7 @@ export const QuotationDialog = ({
       sendWa: form.sendWa,
       sendEmail: form.sendEmail,
       quoteDecision: quoteDecisionValue,
+      userAssign: form.userAssign ?? createdBy.id,
       lineItems: form.lineItems.map((item) => ({
         lineItemId: item.internalId,
         price: item.price,
@@ -336,6 +366,8 @@ export const QuotationDialog = ({
         partApproved: isPendingQuote ? item.partApproved : undefined,
       })),
       status,
+      caseId,
+      createdBy: createdBy.id
     };
 
     onSubmit?.(payload);
@@ -489,7 +521,40 @@ export const QuotationDialog = ({
                   )}
                 </CaseField>
               )}
-
+              {form.quoteDecision === "approve" && (
+                <CaseField
+                  label="Select APO"
+                  star={form.quoteDecision === "approve"}
+                  childClass="flex flex-col gap-2 items-start w-full"
+                >
+                  <SearchCommandBlock 
+                    value={form.userAssign}
+                    onChange={(selectedID) =>{
+                      if(selectedID === null) {
+                        handleFieldChange("userAssign", value);
+                        return;
+                      }
+                      const selectedUser = filteredUserAssign.find(
+                        (user) => user.IDUser === selectedID
+                      );
+                      if (selectedUser) {
+                        handleFieldChange("userAssign", selectedUser.IDUser);
+                      }
+                    }}
+                    placeholder="--Select--"
+                    options={filteredUserAssign.map((user) =>({
+                      label: user.Name,
+                      value: user.IDUser,
+                    }))}
+                    renderLabel={(opt) => opt.label}
+                    getValue={(opt) => opt.value}
+                    className={'border-2 ring-1 ring-gray-200 bg-slate-100'}
+                  />
+                  {fieldErrors.userAssign && (
+                    <p className="text-xs text-red-500">{fieldErrors.userAssign}</p>
+                  )}
+                </CaseField>
+              )}
               <CaseField
                 label="Quotation Note"
                 span={2}
@@ -574,11 +639,11 @@ export const QuotationDialog = ({
                         const errors = lineErrors[item.internalId] || {};
                         return (
                           <TableRow key={item.internalId}>
-                            <TableCell className="max-w-[180px]">
+                            <TableCell className="max-w-[180px]" onClick={() => copyToClipboard(item.partNumber)}>
                               {item.partNumber || "-"}
                             </TableCell>
-                            <TableCell className="max-w-[240px]">
-                              <span className="line-clamp-2">
+                            <TableCell className="max-w-[240px]" onClick={() => copyToClipboard(item.description)}>
+                              <span className="line-clamp-2" >
                                 {item.description || "-"}
                               </span>
                             </TableCell>
