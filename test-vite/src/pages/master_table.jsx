@@ -1050,44 +1050,65 @@ export const Case_table = () => {
     return new Date(year, month - 1, day, hours, minutes, seconds);
   };
 
-  // 🔹 Sorting
-  const sortedData = useMemo(() => {
-    const sorted = [...filteredData];
-    if (sortConfig.key) {
-      sorted.sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
+const sortedData = useMemo(() => {
+  const sorted = [...filteredData];
+  if (sortConfig.key) {
+    sorted.sort((a, b) => {
+      let aVal, bVal;
 
-        if (aVal === null || aVal === undefined) aVal = "";
-        if (bVal === null || bVal === undefined) bVal = "";
+      // 🔹 Deteksi nested path manual
+      switch (sortConfig.key) {
+        case "CaseID_Manual":
+          aVal = a.caseinformation?.CaseID_Manual;
+          bVal = b.caseinformation?.CaseID_Manual;
+          break;
+        case "CaseID_Manual_Date":
+          aVal = a.caseinformation?.CaseID_Manual_Date;
+          bVal = b.caseinformation?.CaseID_Manual_Date;
+          break;
+        case "WarrantyType":
+          aVal = a.caseinformation?.otcCodeTable?.WarrantyCondition;
+          bVal = b.caseinformation?.otcCodeTable?.WarrantyCondition;
+          break;
+        case "WarrantyStatus":
+          aVal = a.caseinformation?.otcCodeTable?.Description;
+          bVal = b.caseinformation?.otcCodeTable?.Description;
+          break;
+        default:
+          aVal = a[sortConfig.key];
+          bVal = b[sortConfig.key];
+      }
 
-        // ✅ Khusus CreatedOn: parse manual
-        if (sortConfig.key === "CreatedOn") {
-          const dateA = parseCustomDate(aVal);
-          const dateB = parseCustomDate(bVal);
-          if (dateA && dateB) {
-            return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
-          }
+      if (aVal === null || aVal === undefined) aVal = "";
+      if (bVal === null || bVal === undefined) bVal = "";
+
+      // 🔹 Parse tanggal khusus
+      if (sortConfig.key === "CreatedOn") {
+        const dateA = parseCustomDate(aVal);
+        const dateB = parseCustomDate(bVal);
+        if (dateA && dateB) {
+          return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
         }
+      }
 
-        // coba numeric dulu
-        const numA = parseFloat(aVal);
-        const numB = parseFloat(bVal);
-        if (!isNaN(numA) && !isNaN(numB)) {
-          return sortConfig.direction === "asc" ? numA - numB : numB - numA;
-        }
+      // 🔹 Coba numeric sort
+      const numA = parseFloat(aVal);
+      const numB = parseFloat(bVal);
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return sortConfig.direction === "asc" ? numA - numB : numB - numA;
+      }
 
-        // fallback string
-        if (typeof aVal === "string") aVal = aVal.toLowerCase();
-        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+      // 🔹 String fallback
+      if (typeof aVal === "string") aVal = aVal.toLowerCase();
+      if (typeof bVal === "string") bVal = bVal.toLowerCase();
 
-        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-      });
-    }
-    return sorted;
-  }, [filteredData, sortConfig]);
+      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
+  return sorted;
+}, [filteredData, sortConfig]);
 
   // 🔹 Pagination
   const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
@@ -9270,7 +9291,12 @@ export const NmuItemTable = () => {
               >
                 NMU ID {getSortIcon("nmuId")}
               </th>
-              <th className="p-3 text-center border">NMU Desc</th>
+              <th
+                className="p-3 border cursor-pointer text-center"
+                onClick={() => handleSort("nmu.NMUDesc")}
+              >
+                NMU Desc {getSortIcon("nmu.NMUDesc")}
+              </th>
               <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("createdAt")}
