@@ -128,6 +128,7 @@ export const ServiceMoDetailApo = () => {
     UEFI_NO : "",
 
     QuantityUsed : true,
+    CTValidation: true,
     PartReturnStatusId : null,
     PartReturnStatusName : "",
     PartReturnDOA : false,
@@ -188,6 +189,7 @@ export const ServiceMoDetailApo = () => {
         UEFICode: data.UEFICode || "",
         UEFI_NO: data.UEFI_NO || "",
         QuantityUsed: data.QuantityUsed ?? true,
+        CTValidation: data.CTValidation ?? true,
         PartReturnStatusId: data.PartReturnStatusId ?? null,
         PartReturnStatusName: data.partReturnStatus?.StatusName || "",
         PartReturnDOA: data.partReturnStatus?.DOA || false,
@@ -557,7 +559,7 @@ useEffect(() => {
   let canEditCE;
   const allowedRoles = ["apo","lg","admin"]
   if (moLineItems?.Status !== "Closed") {
-    canEditCE = user?.role  === "ce" || user?.role === "celead"
+    canEditCE = user?.role  === "ce" || user?.role === "celead" || user?.role === "admin"
     canEdit = allowedRoles.includes(user?.role)
   } else {
     canEdit = false
@@ -872,24 +874,30 @@ useEffect(() => {
                 <CardContent className="grid items-center grid-cols-4 gap-6 m-1">
                   <CaseField label="CT Validation" star={canEditCE} lock={!canEditCE}>
                     <SearchCommandBlock
+                    value={MODetailInput.CTValidation === true ? "Pass" : MODetailInput.CTValidation === false ? "Fail" : ""}
+                    onChange={(val) => {
+                      handleChange("CTValidation")(
+                        val === 'Pass' ? true : val === 'Fail' ? false : null
+                      )
+                    }}
                     options={[
-                      "Pass",
-                      "Fail"
+                      'Pass',
+                      'Fail'
                     ]}
                     />
                   </CaseField>
                   
           
-      <CaseField label={"Failure Code"} star={canEditCE} lock={!canEditCE}>
-      <div className="relative w-full">
-        <SearchCommandBlock
-          name="failureId"
-          value={inputValue}
-          onChange={handleInputChange}
-          placeholder="Search Failure..."
-          options={searchResults}
-          readOnly={!canEditCE}
-        />
+                <CaseField label={"Failure Code"} star={canEditCE} lock={!canEditCE}>
+                <div className="relative w-full">
+                  <SearchCommandBlock
+                    name="failureId"
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    placeholder="Search Failure..."
+                    options={searchResults}
+                    readOnly={!canEditCE}
+                  />
 
         {/* Show dropdown only if results exist and input is focused */}
         {isFocused && (
@@ -923,7 +931,7 @@ useEffect(() => {
                     />
                   </CaseField>
                   
-                  <CaseField label="New CT Key" star={canEdit} lock={!canEdit}>
+                  <CaseField label="New CT Key" star={canEditCE} lock={!canEditCE}>
                     <Input
                       variant="invisible"
                       name="removedSerialNumber"

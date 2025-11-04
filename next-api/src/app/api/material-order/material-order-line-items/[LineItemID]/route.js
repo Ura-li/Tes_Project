@@ -118,7 +118,8 @@ export async function PATCH(request, { params }) {
       PhotoPartUnit,
       GoodReturnReason,
       UEFICode,
-      UEFI_NO
+      UEFI_NO,
+      CTValidation
     } = body;
 
     const parseNullableInt = (value) => {
@@ -140,6 +141,12 @@ export async function PATCH(request, { params }) {
       return Boolean(value);
     };
 
+    const CTValidBool = (value) => {
+      if (value === true || value === 'true' || value === 'Pass') return true;
+      if (value === false || value === 'false' || value === 'Fail') return false;
+      return null;
+    } 
+
     const failureIdValue = parseNullableInt(FailureId);
     const partReturnStatusIdValue = parseNullableInt(PartReturnStatusId);
 
@@ -160,7 +167,8 @@ export async function PATCH(request, { params }) {
       RemovedSerialNumber,
       RemovedPartDescription,
       UEFICode,
-      UEFI_NO
+      UEFI_NO,
+      CTValidation
     };
 
     if (FailureId !== undefined) {
@@ -173,6 +181,11 @@ export async function PATCH(request, { params }) {
       if (quantityUsedBool) {
         updateData.GoodReturnReason = null;
       }
+    }
+
+    if (CTValidation !== undefined) {
+      const CTvalidBool = CTValidBool(CTValidation);
+      updateData.CTValidation = CTvalidBool;
     }
 
     if (PartReturnStatusId !== undefined) {

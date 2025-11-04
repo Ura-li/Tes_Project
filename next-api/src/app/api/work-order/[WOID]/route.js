@@ -29,6 +29,7 @@ export async function GET(request, {params}) {
               },
               NMU: true,
               NMUItem: true,
+              ServiceType: true,
             }
         });
     
@@ -96,7 +97,8 @@ export async function PATCH(request, { params }) {
         NMUItemId,
         CEAnalysis,
         DefectDesc,
-        RepairAction
+        RepairAction,
+        ServiceTypeId,
         } = body;
 
         // if (
@@ -161,6 +163,7 @@ export async function PATCH(request, { params }) {
             CEAnalysis: v => v,
             DefectDesc: v => v,
             RepairAction: v => v,
+            ServiceTypeId: v => v
           };
           
           

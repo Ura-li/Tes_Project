@@ -237,6 +237,41 @@ model global_trade_check {
   caseinformation caseinformation[]
 }
 
+model quotationtable {
+  QuotationNo           String        @id @db.VarChar(8)
+  QuotationType         QuotationType @default(Simple)
+  Currency              String        @default("IDR") @db.VarChar(8)
+  LaborFee              Int           @default(0)
+  VatValue              Int?
+  Subtotal              Decimal?      @db.Decimal(10, 2) // Total sebelum PPN
+  VATAmount             Decimal?      @db.Decimal(10, 2) // Nilai PPN
+  QuotationDate         DateTime      @default(now()) @db.DateTime(0)
+  QuotationApprovedDate DateTime?     @db.DateTime(0)
+  UserAssign            Int
+  User                  User          @relation("UserQuotationAdmin", fields: [UserAssign], references: [IDUser], onDelete: Restrict)
+  QuotationNote         String?       @db.Text
+  SendWa                Boolean       @default(false)
+  SendEmail                Boolean       @default(false)
+  QuoteDecision         QuotationDecision?
+
+  GrandTotal         Decimal?             @db.Decimal(10, 2) // Total akhir
+  quotation_lineitem quotation_lineitem[]
+}
+
+model quotation_lineitem {
+  id          Int    @id @default(autoincrement())
+  QuotationNo String @db.VarChar(8)
+  LineItemID  Int
+
+  quotation quotationtable         @relation(fields: [QuotationNo], references: [QuotationNo], onDelete: Cascade)
+  lineItem  materialorderlineitems @relation(fields: [LineItemID], references: [LineItemID], onDelete: Cascade)
+
+  Price    Decimal @db.Decimal(10, 2) // bisa simpan harga di waktu itu
+  Approved Boolean @default(false) // untuk "Part Approved" Yes/No
+
+  @@unique([QuotationNo, LineItemID])
+}
+
 model materialorder {
   MOID             String              @id @db.VarChar(13)
   WOID             String?             @db.VarChar(13)
@@ -328,7 +363,8 @@ model materialorderlineitems {
   materialorder        materialorder?        @relation(fields: [MOID], references: [MOID], onDelete: Restrict, map: "materialorderlineitems_ibfk_1")
   servicecatalog_parts servicecatalog_parts? @relation(fields: [PartNumber], references: [PartNumber], onDelete: Restrict, map: "materialorderlineitems_ibfk_2")
 
-  CTValidation Boolean?
+  CTValidation       Boolean?
+  quotation_lineitem quotation_lineitem[]
 
   @@index([MOID], map: "MOID")
   @@index([PartNumber], map: "PartNumber")
@@ -506,6 +542,8 @@ model User {
 
   // Case notes created by this user
   caseNotes_created casenotes[] @relation("UserCreatedCaseNotes")
+
+  quotationtable quotationtable[] @relation("UserQuotationAdmin")
 }
 
 model warranty_services {
@@ -611,7 +649,7 @@ model BookingStatus {
   BookingsDetail BookingDetails[]
 }
 
-model  workorder {
+model workorder {
   WOID            String          @id @db.VarChar(13)
   CaseID          String?
   WorkOrderNumber String?         @db.VarChar(100)
@@ -653,15 +691,17 @@ model  workorder {
   bookings                    Bookings[]       @relation("WorkOrderBookingsCase")
 
   // TODO : FIND WTF IS DIS ABOT
-  DelayCode    DelayCode?
-  NMUId        Int?
-  NMU          NMU?       @relation(fields: [NMUId], references: [NMUId])
-  VersionNMU   String?
-  NMUItemId    Int?
-  NMUItem      NMUItem?   @relation(fields: [NMUItemId], references: [id])
-  CEAnalysis   String?
-  DefectDesc   String?
-  RepairAction String?
+  ServiceTypeId Int?
+  ServiceType   ServiceType? @relation(fields: [ServiceTypeId], references: [ServiceTypeId], onDelete: Restrict)
+  DelayCode     DelayCode?
+  NMUId         Int?
+  NMU           NMU?         @relation(fields: [NMUId], references: [NMUId])
+  VersionNMU    String?
+  NMUItemId     Int?
+  NMUItem       NMUItem?     @relation(fields: [NMUItemId], references: [id])
+  CEAnalysis    String? @db.Text
+  DefectDesc    String? @db.Text
+  RepairAction  String? @db.Text
 
   @@unique([ServiceCatalogID])
   @@index([CaseID], map: "CaseID")
@@ -718,11 +758,12 @@ model NMUItem {
 }
 
 model ServiceType {
-  ServiceTypeId Int @id @default(autoincrement())
-  ServiceTypeName String? @db.VarChar(255)
-  ProblemCategory ProblemCategory? 
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  ServiceTypeId   Int              @id @default(autoincrement())
+  ServiceTypeName String?          @db.VarChar(255)
+  ProblemCategory ProblemCategory?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  workorder       workorder[]
 }
 
 model workorder_service_delivery {
@@ -937,4 +978,14 @@ enum DelayCode {
 enum ProblemCategory {
   Hardware
   Software
+}
+
+enum QuotationType {
+  Standard
+  Simple
+}
+
+enum QuotationDecision {
+  Approved
+  Rejected
 }

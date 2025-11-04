@@ -1794,141 +1794,141 @@ export function ContactDelete ({ contactID }) {
   );
 };
 
-export function ProductAdd() {
-  // Form Product
-  const [formDataProduct, setFormDataProduct] = useState({
-    ProductNumber: '',
-    ProductLine: '',
-    ProductName: '',
-    ProductTypeID: '',
-    HWPC: '', 
-  });
+  export function ProductAdd() {
+    // Form Product
+    const [formDataProduct, setFormDataProduct] = useState({
+      ProductNumber: '',
+      ProductLine: '',
+      ProductName: '',
+      ProductTypeID: '',
+      HWPC: '', 
+    });
 
-  // List ProductType untuk dropdown
-  const [productTypes, setProductTypes] = useState([]);
+    // List ProductType untuk dropdown
+    const [productTypes, setProductTypes] = useState([]);
 
-  // Ambil data product type saat pertama render
-  useEffect(() => {
-    async function fetchProductTypes() {
-      try {
-        const response = await ApiCustomer.get("/api/product-type");
-        setProductTypes(response.data.data || []);
-      } catch (err) {
-        console.error("Failed to fetch product types:", err);
+    // Ambil data product type saat pertama render
+    useEffect(() => {
+      async function fetchProductTypes() {
+        try {
+          const response = await ApiCustomer.get("/api/product-type");
+          setProductTypes(response.data.data || []);
+        } catch (err) {
+          console.error("Failed to fetch product types:", err);
+        }
       }
-    }
-    fetchProductTypes();
-  }, []);
+      fetchProductTypes();
+    }, []);
 
-  // Input Handler
-  const handlerInputProduct = (e) => {
-    const { id, value } = e.target;
-    setFormDataProduct(prev => ({ ...prev, [id]: value }));
+    // Input Handler
+    const handlerInputProduct = (e) => {
+      const { id, value } = e.target;
+      setFormDataProduct(prev => ({ ...prev, [id]: value }));
+    };
+
+    // Submit Handler
+    const handlerProduct = async () => {
+      const { ProductNumber, ProductLine, ProductName, ProductTypeID } = formDataProduct;
+
+      if (!ProductNumber || !ProductLine || !ProductName || !ProductTypeID) {
+        Swal.fire({
+          title: "Incomplete Data",
+          text: "Please fill in all fields before submitting.",
+          icon: "warning",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        });
+        return;
+      }
+
+      try {
+        const response = await ApiCustomer.post("/api/product-information", formDataProduct);
+        console.log("Success:", response.data);
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Product berhasil disimpan.',
+          timer: 1200,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        }).then(() => window.location.reload());
+      } catch (err) {
+        console.error("Error saving product:", err);
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to save Product. Please try again.",
+          icon: "error",
+          timer: 1200,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        });
+      }
+    };
+
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline" className="ml-2 rounded-sm h-11">Product Add</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Product Information</DialogTitle>
+            <DialogDescription>Fields marked with * are required.</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <Label>Product Number *</Label>
+            <Input type="text" id="ProductNumber" value={formDataProduct.ProductNumber} onChange={handlerInputProduct} />
+
+            <Label>Product Line *</Label>
+            <Input type="text" id="ProductLine" value={formDataProduct.ProductLine} onChange={handlerInputProduct} />
+
+            <Label>Product Name *</Label>
+            <Input type="text" id="ProductName" value={formDataProduct.ProductName} onChange={handlerInputProduct} />
+
+            <Label>Product Type *</Label>
+            <Select
+              value={formDataProduct.ProductTypeID?.toString() || ""}
+              onValueChange={(value) =>
+                setFormDataProduct((prev) => ({
+                  ...prev,
+                  ProductTypeID: parseInt(value),
+                }))
+            }>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Product Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {productTypes.map((type) => (
+                  <SelectItem key={type.ProductTypeID} value={type.ProductTypeID.toString()}>
+                    {type.ProductType}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* ✅ Tambahan Input HWPC */}
+            <Label>HWPC</Label>
+            <Input
+              type="text"
+              id="HWPC"
+              value={formDataProduct.HWPC}
+              onChange={handlerInputProduct}
+              placeholder="Enter HWPC (optional)"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button onClick={handlerProduct}>Add</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
   };
-
-  // Submit Handler
-  const handlerProduct = async () => {
-    const { ProductNumber, ProductLine, ProductName, ProductTypeID } = formDataProduct;
-
-    if (!ProductNumber || !ProductLine || !ProductName || !ProductTypeID) {
-      Swal.fire({
-        title: "Incomplete Data",
-        text: "Please fill in all fields before submitting.",
-        icon: "warning",
-        timer: 1500,
-        timerProgressBar: true,
-        showConfirmButton: false,
-        allowEscapeKey: false,
-      });
-      return;
-    }
-
-    try {
-      const response = await ApiCustomer.post("/api/product-information", formDataProduct);
-      console.log("Success:", response.data);
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: 'Product berhasil disimpan.',
-        timer: 1200,
-        timerProgressBar: true,
-        showConfirmButton: false,
-        allowEscapeKey: false,
-      }).then(() => window.location.reload());
-    } catch (err) {
-      console.error("Error saving product:", err);
-      Swal.fire({
-        title: "Error!",
-        text: "Failed to save Product. Please try again.",
-        icon: "error",
-        timer: 1200,
-        timerProgressBar: true,
-        showConfirmButton: false,
-        allowEscapeKey: false,
-      });
-    }
-  };
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="ml-2 rounded-sm h-11">Product Add</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add Product Information</DialogTitle>
-          <DialogDescription><Label>Fields marked with <Label className="text-red-600">*</Label> are required.</Label></DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-3">
-          <Label>Product Number <Label className="text-red-600">*</Label> </Label>
-          <Input type="text" id="ProductNumber" value={formDataProduct.ProductNumber} onChange={handlerInputProduct} />
-
-          <Label>Product Line <Label className="text-red-600">*</Label></Label>
-          <Input type="text" id="ProductLine" value={formDataProduct.ProductLine} onChange={handlerInputProduct} />
-
-          <Label>Product Name <Label className="text-red-600">*</Label></Label>
-          <Input type="text" id="ProductName" value={formDataProduct.ProductName} onChange={handlerInputProduct} />
-
-          <Label>Product Type <Label className="text-red-600">*</Label></Label>
-          <Select
-            value={formDataProduct.ProductTypeID?.toString() || ""}
-            onValueChange={(value) =>
-              setFormDataProduct((prev) => ({
-                ...prev,
-                ProductTypeID: parseInt(value),
-              }))
-          }>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Product Type" />
-            </SelectTrigger>
-            <SelectContent>
-              {productTypes.map((type) => (
-                <SelectItem key={type.ProductTypeID} value={type.ProductTypeID.toString()}>
-                  {type.ProductType}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* ✅ Tambahan Input HWPC */}
-          <Label>HWPC</Label>
-          <Input
-            type="text"
-            id="HWPC"
-            value={formDataProduct.HWPC}
-            onChange={handlerInputProduct}
-            placeholder="Enter HWPC (optional)"
-          />
-        </div>
-
-        <DialogFooter>
-          <Button onClick={handlerProduct}>Add</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
 
 export function ProductEdit({ ProductNumber, onUpdate }) {
   const [open, setOpen] = useState(false);

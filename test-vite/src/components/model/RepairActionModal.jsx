@@ -31,7 +31,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
   const [selectedNMU, setSelectedNMU] = useState("");
   const [selectedNMUItem, setSelectedNMUItem] = useState("");
   const [formData, setFormData] = useState({
-    serviceType: "",
+    serviceType: null,
     nmu: null,
     nmuItem: null,
     Version: null,
@@ -84,7 +84,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
     fetchServiceType(problemCategory)
   },[problemCategory])
   useEffect(() => {
-    setFormData(prev => ({ ...prev, nmuItem: "", Version: "" }));
+    setFormData(prev => ({ ...prev, nmuItem: null, Version: "" }));
 
     const foundNMU = NMUList.find(item => item.NMUId === formData.nmu);
     setSelectedNMU(foundNMU);
@@ -157,7 +157,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
       { key: "ceAnalysis", label: "CE Analysis" },
       { key: "repairAction", label: "Repair Action" },
       { key: "delayCode", label: "Delay Code", 
-        condition: showDelayCode === true 
+        condition: showDelayCode === true
       },
     ];
 
@@ -234,7 +234,7 @@ console.log(formData);
                   onChange={(selectedValue)=>{
                     handleChange("serviceType", selectedValue)
                   }}
-                  placeholder="Search NMU Item..."
+                  placeholder="Search Service Type Item..."
                   options={serviceTypeList.map((item) =>({
                     label: item.ServiceTypeName,
                     value: item.ServiceTypeId,
@@ -342,7 +342,7 @@ console.log(formData);
               <p><strong>Problem Category:</strong> {workOrders?.WorkOrderType || ""}</p>
               {showDelayCode && (<p><strong>Delay Code:</strong> {formData.delayCode}</p>)}
               <p><strong>Service Type:</strong> {workOrders?.serviceCatalog?.warranty_services?.Service_description || ""}</p>
-              <p><strong>NMU:</strong> {selectedNMU.NMUDesc}</p>
+              {selectedNMU && (<p><strong>NMU:</strong> {selectedNMU.NMUDesc}</p>)}
               {NMUItemNeed && (<p><strong>NMU Item:</strong> {selectedNMUItem.itemName}</p>)}
               {NMUVersionNeed && (<p><strong>Version:</strong> {formData.Version}</p>)}
               <p><strong>Defect Desc:</strong> {formData.defectDesc}</p>

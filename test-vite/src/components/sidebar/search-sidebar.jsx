@@ -128,7 +128,7 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                         <TabsTrigger value="Time" className="w-full justify-center">Time </TabsTrigger>
                     </TabsList>
                 </SidebarHeader>
-                <TabsContent value="search">
+                <TabsContent value="search" className={'max-h-[calc(100vh-8rem)] overflow-y-auto'}>
 
                     <SidebarContent className=" ">
                         <SidebarGroup>
@@ -226,10 +226,31 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                                                 <TableHead className={''}> &gt; 15  </TableHead>
                                             </TableRow>
                                             <TableRow>
-                                                <TableCell className={'p-2'} onClick={''}>{dataTime[idx]?.data?.within4?.length || ''}</TableCell>
+                                                {/* <TableCell className={'p-2'} onClick={''}>{dataTime[idx]?.data?.within4?.length || ''}</TableCell>
                                                 <TableCell className={'p-2'} onClick={''}>{dataTime[idx]?.data?.within8?.length || ''} </TableCell>
                                                 <TableCell className={'p-2'} onClick={''}>{dataTime[idx]?.data?.within15?.length || ''} </TableCell>
-                                                <TableCell className={'p-2'} onClick={''}>{dataTime[idx]?.data?.over15?.length || ''} </TableCell>
+                                                <TableCell className={'p-2'} onClick={''}>{dataTime[idx]?.data?.over15?.length || ''} </TableCell> */}
+                                                {["within4","within8","within15","over15"].map((key) => (
+                                                    <TableCell
+                                                        key={key}
+                                                        className={cn(
+                                                             "p-2 text-center cursor-pointer hover:bg-teal-100",
+                                                             filters.Status === e.status && filters.TimeLength === key && "bg-teal-300"
+                                                        )}
+                                                        onClick={() => {
+                                                            const sameClick = filters.Status === e.status && filters.TimeLength === key;
+                                                            if (sameClick) {
+                                                                handleChange("Status", "");
+                                                                handleChange("TimeLength", "");
+                                                            }else {
+                                                             handleChange("Status", e.status);
+                                                             handleChange("TimeLength", key);
+                                                            }
+                                                        }}
+                                                    >
+                                                        {dataTime[idx]?.data?.[key]?.length || 0}
+                                                    </TableCell>
+                                                ))}
                                             </TableRow>
                                         </TableBody>
                                     </Table>

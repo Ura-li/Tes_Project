@@ -113,7 +113,7 @@ useEffect(() => {
   }
   return (
     <>
-    {user.role === 'admin' ? (
+    {/* {user.role === 'admin' ? (
       <TabsService
         caseDetails={caseDetails}
         setCaseDetails={setCaseDetails}
@@ -121,7 +121,7 @@ useEffect(() => {
         caseNoteFormData={caseNoteFormData}
         setCaseNoteFormData={setCaseNoteFormData}
       /> 
-    )  : (
+    )  : ( */}
       <TabsServiceCaseDetails
           caseDetails={caseDetails}
           setCaseDetails={setCaseDetails}
@@ -129,8 +129,8 @@ useEffect(() => {
           caseNoteFormData={caseNoteFormData}
           setCaseNoteFormData={setCaseNoteFormData}
       /> 
-    )
-    }
+    {/* )
+    } */}
     </>
   );
 };

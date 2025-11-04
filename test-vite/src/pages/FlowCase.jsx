@@ -34,6 +34,7 @@ export const FlowCase = () => {
 
 export const FlowCaseData = (user) => {
   const [caseData, setCaseData] = useState([]);
+  console.log("what HPPAen IN hERE",caseData)
   const [renderer, setRenderer] = useState(false)
   const [error, setError] = useState(false)
   const [filters, setFilters] = useState({
@@ -58,7 +59,7 @@ export const FlowCaseData = (user) => {
     try {
       const response = await ApiCustomer.get('/api/case-information');
       const filtercases = response.data.data.filter(c => (c?.caseinformation?.Owner === user.user?.id || c?.caseinformation?.CreatedBy === user.user?.id) && (filterClose ? c.CaseStatus !== 'Close' : c.CaseStatus !== '' ) );
-
+      
       // const sortedCases = filtercases.sort((a, b) => {
       //   const dateAraw = a.caseinformation.ActionLog[0]?.ChangeAt;
       //   const dateBraw = b.caseinformation.ActionLog[0]?.ChangeAt;
@@ -99,7 +100,6 @@ export const FlowCaseData = (user) => {
   useEffect(() => {
     fetchData();
   }, [user.user, filterClose]);
-  console.log("CHECK DATA",filters)
 
   function parseCreatedOn(dateStr) {
     const [datePart, timePart] = dateStr.split(', ');
@@ -146,16 +146,16 @@ export const FlowCaseData = (user) => {
         const daysAgo = Math.floor((Date.now() - updateDate.getTime()) / (1000 * 60 * 60 * 24));
         switch (filters.TimeLength) {
           case "within4":
-            isInTimeLength = daysAgo <= 4;
+            isInTimeLength = daysAgo < 4;
             break;
           case "within8":
-            isInTimeLength = daysAgo > 4 && daysAgo <= 8;
+            isInTimeLength = daysAgo >= 4 && daysAgo < 8;
             break;
           case "within15":
-            isInTimeLength = daysAgo > 8 && daysAgo <= 15;
+            isInTimeLength = daysAgo >= 8 && daysAgo < 15;
             break;
           case "over15":
-            isInTimeLength = daysAgo > 15;
+            isInTimeLength = daysAgo >= 15;
             break;
           default:
             isInTimeLength = true;
@@ -218,7 +218,7 @@ export const FlowCaseData = (user) => {
   const emptyData = { within4: [], within8: [], within15: [], over15: [] };
 
   const dataTime = [
-    { status: "Finish Repair", data: { ...emptyData } },
+    { status: "FinishRepair", data: { ...emptyData } },
     { status: "NEW_POPDoc", data: { ...emptyData } },
     { status: "Close", data: { ...emptyData }, hide: filterClose }
   ];
@@ -233,8 +233,15 @@ export const FlowCaseData = (user) => {
 
   if (caseData) {
     groupedDataTime = dataTime.map((t) => {
-      const filt = caseData.filter((data) =>
-        data.UpdatedActionLogs[0]?.dataNew === t.status
+      const filt = caseData.filter((data) => {
+        const dataStatus = data.UpdatedActionLogs[0]?.dataNew;
+        console.log("FeRdy GIMAnG",dataStatus)
+
+        return (
+          dataStatus?.replace("Finish Repair","").toLowerCase() ===
+          t.status?.replace("FinishRepair","").toLowerCase()
+        )
+      }
       );
 
       const groupedCases = {
@@ -246,13 +253,14 @@ export const FlowCaseData = (user) => {
 
       filt.forEach((c) => {
         const days = getDaysAgo(c.UpdateOn);
-        if (days <= 4) groupedCases.within4.push(c);
-        else if (days <= 8) groupedCases.within8.push(c);
-        else if (days <= 15) groupedCases.within15.push(c);
+        if (days < 4) groupedCases.within4.push(c);
+        else if (days < 8) groupedCases.within8.push(c);
+        else if (days < 15) groupedCases.within15.push(c);
         else groupedCases.over15.push(c);
       });
 
       t.data = groupedCases;
+      return t;
     });
   }
 
@@ -296,19 +304,16 @@ console.log("CHECK FULLY DATA",filteredCases)
       <SidebarProvider defaultOpen className={'min-h-0'}>
 
         <SidebarInset>
-          <div className="max-h-screen flex flex-col w-full ">
-
-            <div className="sticky top-13   bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
-              <div className=" flex h-14 w-full  items-center gap-3 px-4 justify-between">
-                <div className="flex items-center gap-2">
+          <div className="max-h-screen flex flex-col w-full">
+            <div className="sticky top-13  bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
+              <div className=" flex h-14 w-full items-center gap-3 px-4  place-content-between">
+                <div className='flex gap-3 items-center'>
                   <Switch checked={filters.Status === "FinishRepair"}
                     onCheckedChange={(checked) => setFilters({
                       ...filters,
                       Status: checked ? "FinishRepair" : "",
                     })} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500" id="Finish" />
                   <Label htmlFor="Finish" className={'font-[700]'}>Show Only Finished Case</Label>
-                </div>
-                <div className="flex items-center gap-2">
                   <Switch checked={filterClose === false}
                     onCheckedChange={(checked) => setFilterClose(
                       
@@ -436,7 +441,6 @@ console.log("CHECK FULLY DATA",filteredCases)
 
         </SidebarInset>
         <SearchBar filters={filters} setFilters={setFilters} caseData={caseData} filterClose={filterClose} dataTime={dataTime}/>
-
       </SidebarProvider>
     </>
   )
