@@ -1152,7 +1152,6 @@ export const ServiceCase = ({
   const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
   const [dataWarrantyStatus, setDataWarrantyStatus] = useState()
   const [ownerUserData, setOwnerUserData] = useState([]);
-console.log("CHECK OWENER DATA ",ownerUserData)
   const [workOrders, setWorkOrders] = useState([]);
 
   const [materialOrders, setMaterialOrders] = useState([]);
