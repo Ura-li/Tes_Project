@@ -94,7 +94,7 @@ import SignatureWrite from "@/components/SignaturePad";
 import { description } from "@/components/sc-chart";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { set } from "lodash";
+import { map, set } from "lodash";
 
 /**
  * TODO : 
@@ -1112,11 +1112,21 @@ export const ServiceCase = ({
     }
   }, [caseDetails]);
 
+  // const allRoleTabs = ["admin","fd", "apo","ce","lg","celead","ps"];
+  
+  let hiddenTab;
+  if (caseDetails.asset_information?.WarrantyOTCCode.Description !== "Trade (OOW)") {
+    hiddenTab = true
+  }else {
+    hiddenTab = false
+  }
+
   const tabs = [
-    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg","celead","ps"]},
-    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg","celead","ps"]},
-    { value: "doc_photo", label: "Document Photo" , roles:["admin", "apo","ce","celead","ps","fd","lg"]},
-    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg","celead","ps"]},
+    { value: "case_info", label: "Case & Customer"},
+    { value: "ci_asset", label: "Assets , WO and MO"},
+    { value: "quotation", label: "OOW Information", hidden: hiddenTab},
+    { value: "doc_photo", label: "Document Photo" },
+    { value: "action_log", label: "Action Log"},
     // { value: "customer,add,entitement", label: "Asset & Entitement", roles:["admin"]},
     // { value: "ci_notes", label: "Notes & Information", roles:["admin"]},
     // { value: "ci_activitas", label: "Activities", disable: true, roles:["admin"]},
@@ -1129,10 +1139,10 @@ export const ServiceCase = ({
 
   const { user } = useAuth();
 
-  const visibleTabs = useMemo(
-    () => tabs.filter(tab => tab.roles.includes(user.role)),
-    [user.role]
-  );
+  // const visibleTabs = useMemo(
+  //   () => tabs.filter(tab => tab.roles.includes(user.role)),
+  //   [user.role]
+  // );
 
   // const visibleTabs = open ? tabs.slice(0, -2) : tabs;
   // const hiddenTabs = open
@@ -1723,7 +1733,7 @@ if (caseDetails.CaseStatus !== "Close") {
           {/* TABS */}
           <div className=" border-t bg-gray-50 w-full overflow-x-auto">
             <TabsList className="sm:w-full w-fit flex gap-4 h-fit p-0 ">
-              {visibleTabs.map((tab, index) =>
+              {tabs.map((tab, index) =>
                 tab.component ? (
                   <div key={index}>{tab.component}</div>
                 ) : (
@@ -2325,8 +2335,6 @@ if (caseDetails.CaseStatus !== "Close") {
 
                 </CardContent>
               </Card>
-
-
           </TabsContent>
 
           <TabsContent value="ci_asset">
@@ -3022,7 +3030,100 @@ if (caseDetails.CaseStatus !== "Close") {
       </CardContent>
     </Card>
   </div>
-</TabsContent>
+         </TabsContent>
+
+         <TabsContent value="quotation">
+            <div className="grid grid-cols-1 p-3 gap-3">
+               <Card className={"flex-col col-span-2"}>
+                <CardHeader>
+                  <CardTitle className={"text-lg"}>Quotation Information</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent className={"flex flex-col gap-4"}>
+                <div className="grid grid-cols-2 border-2 p-2 rounded-sm">
+                 <CaseField label={"Quotation no"} lock> 
+                  <Input 
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.QuotationNo}
+                  />
+                 </CaseField>
+                  <CaseField label={"Quotation amount"} lock> 
+                  <Input 
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal}
+                  />
+                 </CaseField>
+                   <CaseField label={"Quotation amount + VAT"} lock> 
+                  <Input 
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal}
+                  />
+                 </CaseField>
+                 <CaseField label={"Quotation request date"} lock> 
+                  <DatePicker 
+                    value={new Date(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate)}
+                  />
+                 </CaseField>
+                  <CaseField label={"Quotation date"} lock> 
+                  <DatePicker 
+                    value={new Date(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationApprovedDate)}
+                  />
+                 </CaseField>
+                </div>
+                <div className="grid grid-cols-2 border-2 p-2 rounded-sm">
+                 {caseDetails.workorder[0]?.materialorder.map((quo, i) => (
+                   <div key={quo.MOID}>
+                    <span className="font-bold">Sparepart {i+1}</span>
+                    <div className="grid grid-cols-2">
+                    <CaseField label={"Vendor part no"} lock>
+                      <Input
+                        value={"-"}
+                      />
+                    </CaseField>
+                    <CaseField label={"HP part no"} lock>
+                      <Input
+                        value={quo.materialorderlineitems[0]?.PartNumber}
+                      />
+                    </CaseField>
+                    <CaseField label={"Part name"} lock>
+                      <Input
+                        value={quo.materialorderlineitems[0]?.Description}
+                      />
+                    </CaseField>
+                    <CaseField label={"QTY"} lock>
+                      <Input
+                        value={quo.materialorderlineitems[0]?.Quantity}
+                      />
+                    </CaseField>
+                    <CaseField label={"Part category"} lock>
+                      <Input
+                        value={quo.materialorderlineitems[0]?.Description}
+                      />
+                    </CaseField>
+                    <CaseField label={"Part approved"} lock>
+                      <Input
+                        value={quo.materialorderlineitems[0]?.quotation_lineitem[0]?.Approved === true ? "Yes" : "No"}
+                      />
+                    </CaseField>
+                    <CaseField label={"Bad CT code"} lock>
+                      <Input
+                        value={quo.materialorderlineitems[0]?.RemovedPartNumber}
+                      />
+                    </CaseField>
+                    </div>
+                   </div>
+                  ))}
+                </div>
+                </CardContent>
+              </Card>
+             
+              <Card className={"flex-col col-span-2"}>
+                <CardHeader>
+                  <CardTitle className={"text-lg"}>Invoice Information</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>         
         </Tabs>
       </Card>
     </>

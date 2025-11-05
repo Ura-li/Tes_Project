@@ -60,7 +60,13 @@ export async function GET(request, { params }) {
                             owner: true,
                             materialorderlineitems: {
                                 include: {
-                                    servicecatalog_parts: true
+                                    servicecatalog_parts: true,
+                                    quotation_lineitem: {
+                                        include:{
+                                            quotation: true
+                                        }
+                                    }
+
                                 }
                             }
                         }
