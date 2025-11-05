@@ -66,7 +66,10 @@ export async function PATCH(request, { params }) {
       userAssign,
       currency,
       lineItems = [],
+      caseId,
+      createdBy
     } = body;
+    // return console.log(body);
 
     if (!Array.isArray(lineItems) || lineItems.length === 0) {
       return NextResponse.json(
@@ -167,6 +170,28 @@ export async function PATCH(request, { params }) {
       );
     }
 
+    let targetStatusCase = ''
+    if (requireApproval) {
+      const statusMap = {
+        Approved: 'Quote_Approved',
+        Rejected: 'Quote_Rejected',
+      };
+
+      targetStatusCase = statusMap[decisionValue] || 'Quote_Approved';
+    } else {
+      targetStatusCase = 'Pending_Quote';
+    }
+
+    const includeChangedBy = {
+      changedByUser: {
+          select: {
+              IDUser: true,
+              Name: true,
+              Email: true,
+          },
+      },
+    };
+
     const quotation = await prisma.$transaction(async (tx) => {
       const existingLineItems = await tx.quotation_lineitem.findMany({
         where: { QuotationNo },
@@ -187,9 +212,9 @@ export async function PATCH(request, { params }) {
           GrandTotal: totals.grandTotal,
           QuotationDate: parseDate(quotationDate) ?? new Date(),
           QuotationApprovedDate: parseDate(quoteApproveDate),
-          ...(userAssign !== undefined && {
-            UserAssign: Number.parseInt(userAssign, 10),
-          }),
+          // ...(userAssign !== undefined && {
+          //   UserAssign: Number.parseInt(userAssign, 10),
+          // }),
           QuotationNote: quotationNote ?? null,
           ...(sendWa !== undefined && { SendWa: Boolean(sendWa) }),
           ...(sendEmail !== undefined && { SendEmail: Boolean(sendEmail) }),
@@ -240,6 +265,66 @@ export async function PATCH(request, { params }) {
           }),
         ),
       );
+
+      const caseUpdateData = { CaseStatus: targetStatusCase };
+      if(targetStatusCase !== "Pending_Quote"){
+        caseUpdateData.Owner = userAssign
+
+        // await tx.ActionLog.create({
+        //   data: {
+        //     CaseID_toActionLog: {
+        //       connect: { CaseID: caseId },
+        //     },
+        //     ReferenceId: QuotationNo,
+        //     model: "Quotation Log",
+        //     dataOld: status,
+        //     dataNew: targetStatusCase,
+        //     changedByUser: createdBy
+        //       ? {
+        //           connect: { IDUser: createdBy },
+        //         }
+        //       : undefined,
+        //     logDescription: `Edit: change status from ${status} to ${targetStatusCase}`,
+        //   },
+        //   include: includeChangedBy,
+        // });
+      }
+      await tx.caseinformation.update({
+        where: { CaseID: caseId },
+        data: caseUpdateData,
+      })
+
+      await tx.casenotes.create({
+        data: {
+          CaseID: caseId,
+          LogType: "NotesLog",
+          ActionType: "Action Plan",
+          Template: "",
+          VisibleExternally: true,
+          MinutesSpent: 0,
+          Note: `[QUOTATION] ${quotationType} Quotation ${QuotationNo} ${decisionValue}`,
+          CreatedBy: createdBy ?? Number.parseInt(userAssign, 10) ?? null,
+        },
+      });
+
+      await tx.ActionLog.create({
+        data: {
+          CaseID_toActionLog: {
+            connect: { CaseID: caseId },
+          },
+          ReferenceId: QuotationNo,
+          model: "Quotation Log",
+          dataOld: status,
+          dataNew: targetStatusCase,
+          changedByUser: createdBy
+            ? {
+                connect: { IDUser: createdBy },
+              }
+            : undefined,
+          logDescription: `Edit: change status from ${status} to ${targetStatusCase}`,
+        },
+        include: includeChangedBy,
+      });
 
       return tx.quotationtable.findUnique({
         where: { QuotationNo: updated.QuotationNo },

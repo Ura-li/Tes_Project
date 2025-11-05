@@ -265,6 +265,7 @@ export async function POST(request) {
             }
 
             const caseUpdateData = { CaseStatus: "PartRequest" };
+            if(isOutWarranty) caseUpdateData.CaseStatus = "Quotation_Requested"
             if (assignApoId !== null) {
                 caseUpdateData.Owner = assignApoId;
             }

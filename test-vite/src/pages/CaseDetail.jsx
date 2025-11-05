@@ -1113,10 +1113,10 @@ export const ServiceCase = ({
   }, [caseDetails]);
 
   const tabs = [
-    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg","celead","ps"]},
-    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg","celead","ps"]},
-    { value: "doc_photo", label: "Document Photo" , roles:["admin", "apo","ce","celead","ps","fd","lg"]},
-    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg","celead","ps"]},
+    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg","celead","ps", "cm"]},
+    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg","celead","ps", "cm"]},
+    { value: "doc_photo", label: "Document Photo" , roles:["admin", "apo","ce","celead","ps","fd","lg", "cm"]},
+    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg","celead","ps", "cm"]},
     // { value: "customer,add,entitement", label: "Asset & Entitement", roles:["admin"]},
     // { value: "ci_notes", label: "Notes & Information", roles:["admin"]},
     // { value: "ci_activitas", label: "Activities", disable: true, roles:["admin"]},

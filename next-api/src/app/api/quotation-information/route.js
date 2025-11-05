@@ -31,7 +31,7 @@ export async function GET(request) {
             success: false,
             message: "Quotation tidak ditemukan.",
           },
-          { status: 404 },
+          { status: 404 }
         );
       }
 
@@ -66,7 +66,7 @@ export async function GET(request) {
             success: false,
             message: "Case tidak ditemukan.",
           },
-          { status: 404 },
+          { status: 404 }
         );
       }
 
@@ -144,9 +144,10 @@ export async function GET(request) {
     return NextResponse.json(
       {
         success: false,
-        message: "Parameter pencarian tidak valid. Gunakan 'quotationNo' atau 'caseId'.",
+        message:
+          "Parameter pencarian tidak valid. Gunakan 'quotationNo' atau 'caseId'.",
       },
-      { status: 400 },
+      { status: 400 }
     );
   } catch (error) {
     console.error("Error fetching quotation:", error);
@@ -156,7 +157,7 @@ export async function GET(request) {
         message: "Terjadi kesalahan saat mengambil data quotation.",
         error: error.message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -164,6 +165,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
+    // return console.log(body);
     const {
       status,
       quotationType = "Simple",
@@ -178,6 +180,8 @@ export async function POST(request) {
       userAssign,
       currency = "IDR",
       lineItems = [],
+      caseId,
+      createdBy
     } = body;
 
     if (!userAssign) {
@@ -186,7 +190,7 @@ export async function POST(request) {
           success: false,
           message: "UserAssign wajib disertakan.",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -196,7 +200,7 @@ export async function POST(request) {
           success: false,
           message: "Line item wajib disertakan.",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -204,7 +208,7 @@ export async function POST(request) {
     let normalizedLineItems;
     try {
       normalizedLineItems = lineItems.map((item) =>
-        normalizeLineItemPayload(item, requireApproval),
+        normalizeLineItemPayload(item, requireApproval)
       );
     } catch (validationError) {
       return NextResponse.json(
@@ -212,7 +216,7 @@ export async function POST(request) {
           success: false,
           message: validationError.message,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -221,7 +225,9 @@ export async function POST(request) {
       const lowered = String(value).toLowerCase();
       if (lowered === "approved" || lowered === "approve") return "Approved";
       if (lowered === "rejected" || lowered === "reject") return "Rejected";
-      throw new Error("Nilai quoteDecision tidak valid. Gunakan approve atau reject.");
+      throw new Error(
+        "Nilai quoteDecision tidak valid. Gunakan approve atau reject."
+      );
     };
 
     let decisionValue = null;
@@ -233,7 +239,7 @@ export async function POST(request) {
           success: false,
           message: validationError.message,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -243,8 +249,20 @@ export async function POST(request) {
           success: false,
           message: "Quote decision wajib dipilih ketika status Pending Quote.",
         },
-        { status: 400 },
+        { status: 400 }
       );
+    }
+
+    let targetStatusCase = ''
+    if (requireApproval) {
+      const statusMap = {
+        Approved: 'Quote_Approved',
+        Rejected: 'Quote_Rejected',
+      };
+
+      targetStatusCase = statusMap[decisionValue] || 'Quote_Approved';
+    } else {
+      targetStatusCase = 'Pending_Quote';
     }
 
     const lineItemIds = normalizedLineItems.map((item) => item.lineItemId);
@@ -256,7 +274,7 @@ export async function POST(request) {
           success: false,
           message: "Terdapat line item duplikat pada permintaan.",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -271,25 +289,40 @@ export async function POST(request) {
           success: false,
           message: "Beberapa line item tidak ditemukan di material order.",
         },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
     const quantityMap = new Map(
-      relatedLineItems.map((item) => [item.LineItemID, item.Quantity ?? 1]),
+      relatedLineItems.map((item) => [item.LineItemID, item.Quantity ?? 1])
     );
 
     const totals = calculateTotals(
       normalizedLineItems,
       quantityMap,
       laborFee,
-      vatValue,
+      vatValue
     );
 
-    console.log("User Assign : ",userAssign)
-    console.log("Body : ",body)
+    console.log("User Assign : ", userAssign);
+    console.log("Body : ", body);
+
+    const includeChangedBy = {
+      changedByUser: {
+          select: {
+              IDUser: true,
+              Name: true,
+              Email: true,
+          },
+      },
+    };
     const quotation = await prisma.$transaction(async (tx) => {
-      const quotationNo = await generateID("Q-", "quotationtable", "QuotationNo", tx);
+      const quotationNo = await generateID(
+        "Q-",
+        "quotationtable",
+        "QuotationNo",
+        tx
+      );
 
       await tx.quotationtable.create({
         data: {
@@ -297,9 +330,10 @@ export async function POST(request) {
           QuotationType: quotationType,
           Currency: currency,
           LaborFee: Number.parseInt(laborFee ?? 0, 10) || 0,
-          VatValue: vatValue !== undefined && vatValue !== null && vatValue !== ""
-            ? Number.parseInt(vatValue, 10)
-            : null,
+          VatValue:
+            vatValue !== undefined && vatValue !== null && vatValue !== ""
+              ? Number.parseInt(vatValue, 10)
+              : null,
           Subtotal: totals.subtotal,
           VATAmount: totals.vatAmount,
           GrandTotal: totals.grandTotal,
@@ -318,8 +352,8 @@ export async function POST(request) {
           tx.materialorderlineitems.update({
             where: { LineItemID: item.lineItemId },
             data: { Price: item.price },
-          }),
-        ),
+          })
+        )
       );
 
       await tx.quotation_lineitem.createMany({
@@ -329,6 +363,59 @@ export async function POST(request) {
           Price: item.price,
           Approved: item.approved,
         })),
+      });
+
+      const caseUpdateData = { CaseStatus: targetStatusCase };
+      if(targetStatusCase !== "Pending_Quote"){
+        caseUpdateData.ownerUser = user?.id
+      }
+      await tx.caseinformation.update({
+        where: { CaseID: caseId },
+        data: caseUpdateData,
+      })
+
+      await tx.casenotes.create({
+        data: {
+          CaseID: caseId,
+          LogType: "NotesLog",
+          ActionType: "Action Plan",
+          Template: "",
+          VisibleExternally: true,
+          MinutesSpent: 0,
+          Note: `[QUOTATION] New ${quotationType} Quotation : ${quotationNo}`,
+          CreatedBy: createdBy ?? Number.parseInt(userAssign, 10) ?? null,
+        },
+      });
+      await tx.casenotes.create({
+        data: {
+          CaseID: caseId,
+          LogType: "NotesLog",
+          ActionType: "Action Plan",
+          Template: "",
+          VisibleExternally: true,
+          MinutesSpent: 0,
+          Note: quotationNote,
+          CreatedBy: createdBy ?? Number.parseInt(userAssign, 10) ?? null,
+        },
+      });
+
+      await tx.ActionLog.create({
+        data: {
+          CaseID_toActionLog: {
+            connect: { CaseID: caseId },
+          },
+          ReferenceId: quotationNo,
+          model: "Quotation Log",
+          dataOld: status,
+          dataNew: targetStatusCase,
+          changedByUser: createdBy
+            ? {
+                connect: { IDUser: createdBy },
+              }
+            : undefined,
+          logDescription: `Edit: change status from ${status} to ${targetStatusCase}`,
+        },
+        include: includeChangedBy,
       });
 
       return tx.quotationtable.findUnique({
@@ -347,7 +434,7 @@ export async function POST(request) {
         message: "Quotation berhasil dibuat.",
         data: mapQuotationResponse(quotation),
       },
-      { status: 201 },
+      { status: 201 }
     );
   } catch (error) {
     console.error("Error creating quotation:", error);
@@ -357,7 +444,7 @@ export async function POST(request) {
         message: "Gagal membuat quotation.",
         error: error.message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
