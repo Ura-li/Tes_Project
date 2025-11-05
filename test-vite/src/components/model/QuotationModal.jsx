@@ -370,6 +370,7 @@ export const QuotationDialog = ({
       createdBy: createdBy.id
     };
 
+    // if(quoteDecisionValue === 'Rejected') pa
     onSubmit?.(payload);
   };
 
