@@ -2,7 +2,7 @@ export function parseNoteText(note) {
   if (!note) return null;
 
   // Regex cari [WARNING] dan potong kalimatnya
-  const parts = note.split(/(\[WARNING\]|\[NOTICE\]|\[PRINT\])/g);
+  const parts = note.split(/(\[WARNING\]|\[NOTICE\]|\[PRINT\]|\[QUOTATION\])/g);
 
   return parts.map((part, idx) => {
     if (part === "[WARNING]") {
@@ -21,6 +21,12 @@ export function parseNoteText(note) {
       return(
         <span key={idx} className="text-green-400 font-semibold">
           ⚠️ PRINT
+        </span>
+      )
+    } else if(part === "[QUOTATION]"){
+      return(
+        <span key={idx} className="text-gray-400 font-semibold">
+          ⚠️ QUOTATION NOTICE
         </span>
       )
     }
