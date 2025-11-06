@@ -15,7 +15,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import Swal from 'sweetalert2';
-
+import { STATUS_ENUM_TO_LABEL } from '@/pages/CaseDetail';
 
 
 export default function FrontDesk_Page() {
@@ -224,7 +224,7 @@ export default function FrontDesk_Page() {
                       {c?.caseinformation.CasePriority || "Low"}
                     </Badge>
                     <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
-                      {c.CaseStatus}
+                      {STATUS_ENUM_TO_LABEL[c.CaseStatus]}
                     </Badge>
                     <p className='ml-auto text-xs text-gray-500 '>{c.CreatedOn}</p>
                   </div>

@@ -500,7 +500,6 @@ export const QuotationDialog = ({
                     <p className="text-xs text-red-500">{fieldErrors.laborFee}</p>
                   )}
                 </CaseField>
-              )}
               {form.quoteDecision === "approve" && (
                 <CaseField
                   label="Select APO"
@@ -563,6 +562,7 @@ export const QuotationDialog = ({
                     placeholder="Catatan tambahan untuk quotation"
                     className="min-h-[120px]"
                   />
+                  </label>
                 </CaseField>
                 <CaseField
                   label="Pilihan Tambahan"

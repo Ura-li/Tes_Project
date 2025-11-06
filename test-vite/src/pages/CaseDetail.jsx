@@ -131,6 +131,7 @@ export const STATUS_ENUM_TO_LABEL = {
   Pending_Order: "Pending Order",
   Escalated: "Escalated",
   Quote_Approved: "Quote Approved",
+  Quote_Rejected: "Quote Rejected",
   Pending_Quote: "Pending Quote",
   NEW_AssignFD: "New Assign To FD",
   NEW_AssignCE: "New Assign To CE",
@@ -162,6 +163,7 @@ const BASE_STATUS_KEYS = [
   "Pending_Order",
   "Escalated",
   "Quote_Approved",
+  "Quote_Rejected",
   "Pending_Quote",
 ];
 
@@ -237,7 +239,7 @@ export const TabsServiceCaseDetails = ({
   const [notesList, setNotesList] = useState([]);
   const { open } = useSidebar();
   const [refreshFetchPage, setRefreshFetchPage] = useState(false)
-console.log("CHECK REFRESH STATTUS",refreshFetchPage)
+  console.log("CHECK REFRESH STATTUS",refreshFetchPage)
   const [entitlementStatus, setEntitlementStatus] = useState({
     OTCCode: "",
     PurchaseDate: "",
@@ -254,6 +256,11 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
   })
 
   entitlementStatus.needWarrantyApproval  ? console.log("THIS IS TRUE") : console.log("NOPE NOT TODAYS");
+
+  const [productForm, setProductForm] = useState({
+    HWPC: "",
+    ProductTypeID: caseDetails.asset_information?.product_information?.pProductTypeID,
+  })
 
   const [caseForm, setCaseForm] = useState({
     CaseType: "",
@@ -290,8 +297,6 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
 
   const [signature, setSignature] = useState(null);
 
-
-
   const handleCaseDetails = (field) => (value) => {
     setCaseDetails((prev) => ({ ...prev, [field]: value }));
   }
@@ -309,6 +314,10 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
     });
   };
 
+  const handleProductChange = (field) => (value) => {
+    setProductForm((prev) => ({ ...prev, [field]: value }));
+  };
+  
   const handleGtcChange = (field) => (value) => {
     setGtcForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -364,7 +373,9 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
 
     const csrEdited = csrForm && Object.keys(csrForm).length > 0;
 
-    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseEdited;
+    const productEdited = productForm && Object.keys(productForm).length > 0;
+
+    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseEdited || productEdited;
 
     if (!hasIntentToSave) {
       alert("Tidak ada data yang disimpan.");
@@ -373,11 +384,11 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
 
     let savedModules = [];
     const dataToUpdate = {};
-    for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE']) {
+    for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE', 'PRODUCT']) {
       console.log(target);
       switch (target) {
 
-       case 'NOTE':
+        case 'NOTE':
          if (noteFilled) {
            const response = await ApiCustomer.post("/api/case-information/case-notes", {
              LogType: caseNoteFormData.LogType,
@@ -482,6 +493,17 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
               dataToUpdate.id_csr = response.data.data.id_csr;
             }
             savedModules.push("CSR");
+          }
+          break;
+
+        case 'PRODUCT':
+          if (productEdited) {
+             await ApiCustomer.patch(`/api/product-information/${caseDetails.asset_information.product_information.ProductNumber}`, {
+              ...productForm,
+              HWPC:productForm.HWPC || "",
+              ProductTypeID: productForm.ProductTypeID
+            });
+            savedModules.push("PRODUCT")
           }
           break;
 
@@ -1046,18 +1068,14 @@ const openPopup = () => {
             signature={signature}
             setSignature={setSignature}
             refreshFetchPage={refreshFetchPage}
+            productForm={productForm}
+            setProductForm={setProductForm}
+            handleProductChange={handleProductChange}
           />
       </div>
     </>
   );
 };
-
-
-
-
-
-
-
 
 export const ServiceCase = ({
   caseDetails,
@@ -1083,6 +1101,9 @@ export const ServiceCase = ({
   signature,
   setSignature,
   refreshFetchPage,
+  productForm,
+  setProductForm,
+  handleProductChange
 }) => {
   const { open } = useSidebar();
 
@@ -1167,7 +1188,6 @@ export const ServiceCase = ({
   const [materialOrders, setMaterialOrders] = useState([]);
 
   const [actionLogs, setActionLogs] = useState([]);
-
 
 
   const fetchCustomerData = async () => {
@@ -1283,6 +1303,15 @@ export const ServiceCase = ({
     }
   }
 
+  const fetchProduct = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/product-information/${caseDetails.asset_information.product_information.ProductNumber}`)
+      setProductForm(res.data.data)
+    }catch(err) {
+      console.error("Gagal Fetching Product Information",err)
+    }
+  }
+
   const [caseTipe, setCaseTipe] = useState([
     {
       CaseType : "Administrative"
@@ -1363,7 +1392,7 @@ export const ServiceCase = ({
 
 
 
-   const statusEnumToLabelWO = {
+  const statusEnumToLabelWO = {
   OPEN_UNSCHEDULED: 'Open - Unscheduled',
   OPEN_SCHEDULED: 'Open - Scheduled',
   OPEN_INPROGRES: 'Open - In Progress',
@@ -1463,7 +1492,7 @@ const fetchActionLog = async () => {
     const actionlog = await ApiCustomer.get(`/api/actionlog?caseId=${caseDetails.CaseID}`)
     setActionLogs(actionlog.data.data)
   } catch (error) {
-    console.error("Error fetching ActionLog:", err);
+    console.error("Error fetching ActionLog:", error);
   }
 }
   // const location = useLocation();
@@ -1474,7 +1503,7 @@ const fetchActionLog = async () => {
     fetchCustomerData();
     fetchAssetInformation();
     fetchOwnerUserData();
-
+    fetchProduct();
     fetchWorkOrders();
     fetchCaseNotes();
     fetchGtc(); 
@@ -1569,16 +1598,19 @@ const fetchSymptomCodes = async (term) => {
 let canEdit;
 let canEditFd;
 let canEditApo;
+let canEditCe;
 
 const [hideAsignTo, setHideAsignTo] = useState(null)
 if (caseDetails.CaseStatus !== "Close") {
    canEdit = caseDetails?.Owner === user?.id || user?.role === 'admin';
    canEditFd = user?.role === "fd" || user?.role === 'admin';
    canEditApo = user?.role === "apo" || user?.role === 'admin';
+   canEditCe = user?.role === "ce" || user?.role === "celead" || user?.role === 'admin';
 } else {
    canEdit = false;
    canEditFd = false;
    canEditApo = false;
+   canEditCe = false;
 }
 
 
@@ -2412,11 +2444,12 @@ if (caseDetails.CaseStatus !== "Close") {
                       />
                     </CaseField>
 
-                    <CaseField label="HWPC Code" lock >
+                    <CaseField label="HWPC Code" lock={!canEditCe}>
                       <Input 
-                      value={dataFetchAssetInformation?.AssetInformation?.product_information?.HWPC}
+                      value={productForm?.HWPC}
                       variant="invisible" 
                       placeholder="---" 
+                      onChange={(e) => handleProductChange("HWPC") (e.target.value)}
                       />
                     </CaseField>
   
@@ -3040,20 +3073,30 @@ if (caseDetails.CaseStatus !== "Close") {
                   <hr />
                 </CardHeader>
                 <CardContent className={"flex flex-col gap-4"}>
-                <div className="grid grid-cols-2 border-2 p-2 rounded-sm">
+                <div className="grid grid-cols-2 border-2 p-2 rounded-sm gap-2">
                  <CaseField label={"Quotation no"} lock> 
                   <Input 
-                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.QuotationNo}
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.QuotationNo || "---"}
+                  />
+                 </CaseField>
+                 <CaseField label={"Quotation type"} lock> 
+                  <Input 
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationType || "---"}
                   />
                  </CaseField>
                   <CaseField label={"Quotation amount"} lock> 
                   <Input 
-                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal}
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal || "---"}
+                  />
+                 </CaseField>
+                 <CaseField label={"VAT value (%)"} lock> 
+                  <Input 
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue || "---"}
                   />
                  </CaseField>
                    <CaseField label={"Quotation amount + VAT"} lock> 
                   <Input 
-                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal}
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal || "---"}
                   />
                  </CaseField>
                  <CaseField label={"Quotation request date"} lock> 
@@ -3066,8 +3109,13 @@ if (caseDetails.CaseStatus !== "Close") {
                     value={new Date(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationApprovedDate)}
                   />
                  </CaseField>
+                  <CaseField label={"Quote decision"} lock> 
+                  <Input 
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuoteDecision || "---"}
+                  />
+                 </CaseField>
                 </div>
-                <div className="grid grid-cols-2 border-2 p-2 rounded-sm">
+                <div className="grid grid-cols-2 border-2 p-2 rounded-sm gap-2">
                  {caseDetails.workorder[0]?.materialorder.map((quo, i) => (
                    <div key={quo.MOID}>
                     <span className="font-bold">Sparepart {i+1}</span>
@@ -3094,7 +3142,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     </CaseField>
                     <CaseField label={"Part category"} lock>
                       <Input
-                        value={quo.materialorderlineitems[0]?.Description}
+                        value={quo.materialorderlineitems[0]?.servicecatalog_parts?.Keyword}
                       />
                     </CaseField>
                     <CaseField label={"Part approved"} lock>
