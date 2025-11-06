@@ -365,6 +365,20 @@ export async function PATCH(request, { params }) {
         },
       });
 
+      if(quotationNote !== null) {
+        await tx.casenotes.create({
+          data: {
+            CaseID: caseId,
+            LogType: "System Info",
+            ActionType: "Quotation Request",
+            Template: "",
+            VisibleExternally: true,
+            MinutesSpent: 0,
+            Note: quotationNote,
+            CreatedBy: createdBy ?? Number.parseInt(userAssign, 10) ?? null,
+          },
+        });
+      }
       await tx.ActionLog.create({
         data: {
           CaseID_toActionLog: {

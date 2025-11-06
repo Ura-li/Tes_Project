@@ -96,7 +96,7 @@ const normaliseLineItems = (items = [], prevItems = []) => {
       item?.partApproved ??
       item?.Approved ??
       previous.partApproved ??
-      "";
+      "yes";
 
     if (partApprovedValue === null || partApprovedValue === undefined) {
       partApprovedValue = "";
@@ -194,7 +194,7 @@ export const QuotationDialog = ({
     return {
       quotationType: initialData.quotationType ?? "Simple",
       vatValue: initialData.vatValue ?? "",
-      quotationNote: initialData.quotationNote ?? "",
+      quotationNote: null,
       laborFee: initialData.laborFee ?? "",
       quotationDate,
       useNewQuotationNo:
@@ -373,6 +373,7 @@ export const QuotationDialog = ({
     // if(quoteDecisionValue === 'Rejected') pa
     onSubmit?.(payload);
   };
+  console.log("Form ",form)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -397,6 +398,22 @@ export const QuotationDialog = ({
           <Card className={'h-65'}>
             <CardContent className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div className="grid grid-cols-4 gap-2">
+                
+                <CaseField
+                  label="Quotation Date"
+                  star
+                  className={'gap-0'}
+                  >
+                  <Input
+                    type="date"
+                    disabled={formDisabled}
+                    value={form.quotationDate}
+                    onChange={(e) => handleFieldChange("quotationDate", e.target.value)}
+                  />
+                  {fieldErrors.quotationDate && (
+                    <p className="text-xs text-red-500">{fieldErrors.quotationDate}</p>
+                  )}
+                </CaseField>
                 {isPendingQuote && (
                   <CaseField
                     label="Quote Approve Date"
@@ -423,7 +440,7 @@ export const QuotationDialog = ({
                   label="Quotation Type"
                   star
                   className={'gap-0'}
-                >
+                  >
                   <Select
                     disabled={formDisabled}
                     value={form.quotationType}
@@ -441,53 +458,11 @@ export const QuotationDialog = ({
                     <p className="text-xs text-red-500">{fieldErrors.quotationType}</p>
                   )}
                 </CaseField>
+
                 <CaseField
-                  label="Quotation Date"
-                  star
-                  className={'gap-0'}
-                >
-                  <Input
-                    type="date"
-                    disabled={formDisabled}
-                    value={form.quotationDate}
-                    onChange={(e) => handleFieldChange("quotationDate", e.target.value)}
-                  />
-                  {fieldErrors.quotationDate && (
-                    <p className="text-xs text-red-500">{fieldErrors.quotationDate}</p>
-                  )}
-                </CaseField>
-                
-                {isPendingQuote && (
-                  <CaseField
-                    label="Quotation Decision"
-                    star
-                    className={'gap-0'}
-                  >
-                    <Select
-                      disabled={formDisabled}
-                      value={form.quoteDecision}
-                      onValueChange={(value) => handleFieldChange("quoteDecision", value)}
-                    >
-                      <SelectTrigger className="w-full" disabled={formDisabled}>
-                        <SelectValue placeholder="Pilih keputusan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="approve">Approve</SelectItem>
-                        <SelectItem value="reject">Reject</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {fieldErrors.quoteDecision && (
-                      <p className="text-xs text-red-500">
-                        {fieldErrors.quoteDecision}
-                      </p>
-                    )}
-                  </CaseField>
-                )}
-                   <CaseField
                   label="Labor Fee"
                   star
-                  className={'gap-0 col-span-2 gap-x-5'}
-                  span={2}
+                  className={'gap-0'}
                 >
                   <Input
                     disabled={formDisabled}
@@ -522,6 +497,68 @@ export const QuotationDialog = ({
                     )}
                   </CaseField>
                 )}
+
+                {isPendingQuote && (
+                  <CaseField
+                    label="Quotation Decision"
+                    star
+                    className={'gap-0'}
+                  >
+                    <Select
+                      disabled={formDisabled}
+                      value={form.quoteDecision}
+                      onValueChange={(value) => handleFieldChange("quoteDecision", value)}
+                    >
+                      <SelectTrigger className="w-full" disabled={formDisabled}>
+                        <SelectValue placeholder="Pilih keputusan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="approve">Approve</SelectItem>
+                        <SelectItem value="reject">Reject</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {fieldErrors.quoteDecision && (
+                      <p className="text-xs text-red-500">
+                        {fieldErrors.quoteDecision}
+                      </p>
+                    )}
+                  </CaseField>
+                )}
+                
+                {form.quoteDecision === "approve" && (
+                <CaseField
+                  label="Select APO"
+                  star={form.quoteDecision === "approve"}
+                  className="gap-0"
+                >
+                  <SearchCommandBlock 
+                    value={form.userAssign}
+                    onChange={(selectedID) =>{
+                      if(selectedID === null) {
+                        handleFieldChange("userAssign", value);
+                        return;
+                      }
+                      const selectedUser = filteredUserAssign.find(
+                        (user) => user.IDUser === selectedID
+                      );
+                      if (selectedUser) {
+                        handleFieldChange("userAssign", selectedUser.IDUser);
+                      }
+                    }}
+                    placeholder="--Select--"
+                    options={filteredUserAssign.map((user) =>({
+                      label: user.Name,
+                      value: user.IDUser,
+                    }))}
+                    renderLabel={(opt) => opt.label}
+                    getValue={(opt) => opt.value}
+                    className={'border-2 ring-1 ring-gray-200 bg-slate-100'}
+                  />
+                  {fieldErrors.userAssign && (
+                    <p className="text-xs text-red-500">{fieldErrors.userAssign}</p>
+                  )}
+                </CaseField>
+              )}
                 
               </div>
 
