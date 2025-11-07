@@ -95,7 +95,7 @@ import { description } from "@/components/sc-chart";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { map, set } from "lodash";
-
+import QuotationDialog from "@/components/model/QuotationModal";
 /**
  * TODO : 
  * ADDING THIS FUNCTION GLOBALLY OR MAKE THE CASE DETAIL INTO ONE
@@ -234,7 +234,7 @@ export const TabsServiceCaseDetails = ({
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
   const { user } = useAuth();
-  
+
   const [selectedSymptom, setSelectedSymptom] = useState(null);
   const [notesList, setNotesList] = useState([]);
   const { open } = useSidebar();
@@ -259,7 +259,7 @@ export const TabsServiceCaseDetails = ({
 
   const [productForm, setProductForm] = useState({
     HWPC: "",
-    ProductTypeID: caseDetails.asset_information?.product_information?.pProductTypeID,
+    ProductTypeID: caseDetails.asset_information?.product_information?.ProductTypeID,
   })
 
   const [caseForm, setCaseForm] = useState({
@@ -351,16 +351,16 @@ export const TabsServiceCaseDetails = ({
 
     // Consider CASE edited if any field has a non-empty value
    const caseEdited = Object.entries({
-  CaseType: caseForm.CaseType,
-  CaseStatus: caseForm.CaseStatus,
-  CaseSubject: caseForm.CaseSubject,
-  Owner: caseForm.Owner,
-  CasePriority: caseForm.CasePriority,
-  CaseProductNote: caseForm.CaseProductNote,
-  ProblemDescription: caseForm.ProblemDescription,
-  CaseID_Manual: caseForm.CaseID_Manual,
-  CaseID_Manual_Date: caseForm.CaseID_Manual_Date,
-  StorageLocationStore: caseForm.StorageLocationStore
+    CaseType: caseForm.CaseType,
+    CaseStatus: caseForm.CaseStatus,
+    CaseSubject: caseForm.CaseSubject,
+    Owner: caseForm.Owner,
+    CasePriority: caseForm.CasePriority,
+    CaseProductNote: caseForm.CaseProductNote,
+    ProblemDescription: caseForm.ProblemDescription,
+    CaseID_Manual: caseForm.CaseID_Manual,
+    CaseID_Manual_Date: caseForm.CaseID_Manual_Date,
+    StorageLocationStore: caseForm.StorageLocationStore
    }).some(([_, v]) => v !== undefined && v !== null && String(v).trim() !== "");
   
     const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
@@ -777,18 +777,18 @@ const openPopup = () => {
       icon: CircleChevronLeft,
       label: "",
       onClick: () => navigate(`/app/viewcase`),
-      roles: ["admin", "fd","user", "apo", "ce","lg","celead","spv","ps"]
+      roles: ["admin", "fd","user", "apo", "ce","lg","celead","spv","ps","cm"]
     },
     // { icon: SquareArrowOutUpRight, label: "",},
     { icon: Save, label: "Save", 
       onClick: () => handleSave(), 
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps","cm"],
     },
     {
       icon: FileSymlink,
       label: "Save & Close",
       onClick: () => handleSave().then(() => navigate(`/app/`)),
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps","cm"],
     },
     {
       icon: CopyX,
@@ -798,9 +798,9 @@ const openPopup = () => {
     },
     { icon: RotateCw, label: "Refresh", 
       onClick: () => window.location.reload(),
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps"],
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps","cm"],
     },
-    // { icon: StepBack, label: "Complaint",},
+    // { icon: StepBack, label: "Quotation",onClick: () => openDialog(),  roles: ["admin","cm"]},
     { icon: StepBack, label: "SRF", 
       onClick: async () => {
         // return console.log(user);
@@ -901,7 +901,6 @@ const openPopup = () => {
       return; 
     }
     try {
-      
       Swal.fire({
         title: "Saving...",
         text: "Please wait while we update the Case.",
@@ -994,6 +993,12 @@ const openPopup = () => {
       });
     }
   };
+
+  // const [openDialongQuotation, setOpenDialogQuotation] = useState(false);
+  // const openDialog = async () => {
+  //   setOpenDialogQuotation(true);
+  // }
+
   return (
     <>
       <div className="flex items-center border-1 sticky top-15 z-5 bg-gray-50 overflow-auto">
@@ -1035,7 +1040,7 @@ const openPopup = () => {
             <btn.icon/>
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
-        ))  }
+        ))}
         <BtnModalsServiceCatalog 
           open={openWorkOrder}
           setOpen={setOpenWorkOrder}
@@ -1043,7 +1048,16 @@ const openPopup = () => {
           serviceCatalogType={serviceCatalogType}
         />
       </div>
-        <div>
+      <div>
+        {/* <QuotationDialog
+          open={openDialongQuotation}
+          onOpenChange={openDialog}
+          caseId={caseDetails?.CaseID}
+          status={caseDetails?.CaseStatus}
+          
+        /> */}
+      </div>
+      <div>
           <ServiceCase
             caseDetails={caseDetails}
             formData={caseNoteFormData}
@@ -1892,7 +1906,6 @@ if (caseDetails.CaseStatus !== "Close") {
                   </CaseField>
                 {/* {assignToForm == true ?? (
                 )} */}
-
                 <CaseField label="Case Type" open className={"mt-2"} childClass={'col-span-2'} span={2} lock={!canEditFd} >
                   <SearchCommandBlock
                     value={caseForm?.CaseType}
