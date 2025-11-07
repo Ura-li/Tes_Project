@@ -9213,10 +9213,13 @@ export const NmuItemTable = () => {
   // Sorting logic
   const sortedData = useMemo(() => {
     const sortable = [...filteredData];
+    const getNestedValue = (obj, key) => {
+      return key.split(".").reduce((acc, part) => acc && acc[part], obj);
+    };
     if (sortConfig.key) {
       sortable.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
+        const aValue = getNestedValue(a, sortConfig.key);
+        const bValue = getNestedValue(b, sortConfig.key);
 
         if (aValue === null || aValue === undefined) return 1;
         if (bValue === null || bValue === undefined) return -1;
