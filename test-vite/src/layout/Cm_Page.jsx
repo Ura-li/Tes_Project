@@ -385,9 +385,9 @@ export default function CashManagement() {
                 <QuotationDialog
                     open={showQuotationDialog}
                     onOpenChange={handleQuotationOpenChange}
+                    materialItems={quotationMaterialItems}
                     caseId={selectedCase.CaseID}
                     status={selectedCase.CaseStatus}
-                    materialItems={quotationMaterialItems}
                     initialData={quotationInitialData || {}}
                     loading={quotationLoading}
                     submitting={quotationSubmitting}

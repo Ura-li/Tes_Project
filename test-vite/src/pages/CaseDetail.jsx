@@ -1,4 +1,4 @@
-import React, { use, useMemo } from "react";
+import React, { use, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -58,6 +58,7 @@ import {
   Briefcase,
   CopyX,
   NotebookPen,
+  MessageSquareText,
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -800,7 +801,7 @@ const openPopup = () => {
       onClick: () => window.location.reload(),
       roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps","cm"],
     },
-    // { icon: StepBack, label: "Quotation",onClick: () => openDialog(),  roles: ["admin","cm"]},
+    { icon: MessageSquareText, label: "Quotation",onClick: () => handleQuotationOpenChange(),  roles: ["admin","cm"]},
     { icon: StepBack, label: "SRF", 
       onClick: async () => {
         // return console.log(user);
@@ -994,10 +995,167 @@ const openPopup = () => {
     }
   };
 
-  // const [openDialongQuotation, setOpenDialogQuotation] = useState(false);
-  // const openDialog = async () => {
-  //   setOpenDialogQuotation(true);
-  // }
+  // Modal Quotation
+  const [openDialogQuotation, setOpenDialogQuotation] = useState(false);
+  const [quotationInitialData, setQuotationInitialData] = useState(null);
+  const [quotationMaterialItems, setQuotationMaterialItems] = useState([]);
+  const [quotationLoading, setQuotationLoading] = useState(false);
+  const [quotationSubmitting, setQuotationSubmitting] = useState(false);
+
+
+  const fieldMO = (caseDetails) => {
+    const workorders = caseDetails?.workorder || [];
+    const Allitems = [];
+
+    workorders.forEach((wo) => {
+            (wo.materialorder || []).forEach((mo) => {
+                (mo.materialorderlineitems || []).forEach((line) => {
+                    const quotationEntry = Array.isArray(line.quotation_lineitem) && line.quotation_lineitem.length > 0
+                        ? line.quotation_lineitem[0]
+                        : undefined;
+
+                    const initialApproved = quotationEntry?.Approved;
+                    const approvedValue =
+                        initialApproved === undefined || initialApproved === null
+                            ? ""
+                            : initialApproved
+                                ? "yes"
+                                : "no";
+
+                    const linePrice =
+                        quotationEntry?.Price ?? line.Price ?? "";
+
+                    Allitems.push({
+                        lineItemId: line.LineItemID,
+                        moid: mo.MOID,
+                        woid: wo.WOID,
+                        partNumber: line.PartNumber,
+                        description: line.Description,
+                        quantity: line.Quantity ?? "",
+                        price:
+                            linePrice === null || linePrice === undefined
+                                ? ""
+                                : String(linePrice),
+                        partApproved: approvedValue,
+                    });
+                });
+            });
+        });
+    return Allitems;
+  }
+
+  useEffect(() => {
+    if (!openDialogQuotation || !caseDetails)  return;
+
+    let cancelled = false;
+
+    setQuotationInitialData(null);
+    setQuotationLoading(true)
+
+    const loadQuotation = async () => {
+            try {
+                const response = await ApiCustomer.get(`/api/quotation-information?caseId=${caseDetails.CaseID}`);
+                if (cancelled) return;
+                const quotationPayload = response.data.data;
+                if (quotationPayload) {
+                    setQuotationInitialData(mapQuotationInitialData(quotationPayload));
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    console.error("Failed to fetch quotation:", error);
+                    toast.error(
+                        error.response?.data?.message ?? "Gagal mengambil data quotation.",
+                    );
+                }
+            } finally {
+                if (!cancelled) {
+                    setQuotationLoading(false);
+                }
+            }
+    };
+
+    loadQuotation();
+
+    return () => {
+        cancelled = true;
+    };
+    },[openDialogQuotation, caseDetails]);
+
+    const handleQuotationOpenChange = (nextOpen = true) => {
+        setOpenDialogQuotation(nextOpen);
+        if (!nextOpen) {
+          setQuotationInitialData(null);
+          setQuotationLoading(false);
+          setQuotationSubmitting(false);          
+        }
+    };
+
+      const handleQuotationSubmit = async (payload) => {
+            if (!caseDetails) return;
+            if (!user?.id) {
+                toast.error("User tidak valid. Silakan login kembali.");
+                return;
+            }
+            try {
+                setQuotationSubmitting(true);
+                // return console.log("Submit : ",payload)
+                const apiPayload = {
+                    ...payload,
+                    userAssign: user.id !== payload?.userAssign ? payload.userAssign : user.id,
+                };
+                console.log("Sending payload:", apiPayload);
+                const endpoint = payload.quotationNo
+                    ? `/api/quotation-information/${payload.quotationNo}`
+                    : "/api/quotation-information";
+                const method = payload.quotationNo ? "patch" : "post";
+                const requester =
+                    method === "patch"
+                        ? ApiCustomer.patch.bind(ApiCustomer)
+                        : ApiCustomer.post.bind(ApiCustomer);
+    
+                await requester(endpoint, apiPayload);
+    
+                toast.success(
+                    payload.quotationNo
+                        ? "Quotation berhasil diperbarui."
+                        : "Quotation berhasil dibuat.",
+                );
+    
+                handleQuotationOpenChange(false);
+            } catch (error) {
+                console.error("Failed to save quotation:", error);
+                const message =
+                    error.response?.data?.message ?? "Gagal menyimpan quotation.";
+                toast.error(message);
+            } finally {
+                setQuotationSubmitting(false);
+            }
+        };
+    
+    
+        const mapQuotationInitialData = (quotationPayload) => {
+            if (!quotationPayload?.quotation) return null;
+            const q = quotationPayload.quotation;
+    
+        return {
+            quotationNo: q.quotationNo,
+            quotationType: q.quotationType ?? "Simple",
+            vatValue:
+                q.vatValue === null || q.vatValue === undefined
+                        ? ""
+                        : String(q.vatValue),
+                quotationNote: q.quotationNote ?? "",
+                laborFee:
+                    q.laborFee === null || q.laborFee === undefined
+                        ? ""
+                    : String(q.laborFee),
+                quotationDate: q.quotationDate ?? "",
+                quoteApproveDate: q.quoteApproveDate ?? "",
+                sendWa: Boolean(q.sendWa),
+                sendEmail: Boolean(q.sendEmail),
+                quoteDecision: q.quoteDecision ?? "",
+        };
+    };
 
   return (
     <>
@@ -1049,13 +1207,18 @@ const openPopup = () => {
         />
       </div>
       <div>
-        {/* <QuotationDialog
-          open={openDialongQuotation}
-          onOpenChange={openDialog}
-          caseId={caseDetails?.CaseID}
-          status={caseDetails?.CaseStatus}
-          
-        /> */}
+        <QuotationDialog
+          open={openDialogQuotation}
+          onOpenChange={handleQuotationOpenChange}
+          materialItems={fieldMO(caseDetails)}
+          caseId={caseDetails.CaseID}
+          status={caseDetails.CaseStatus}
+          initialData={quotationInitialData || {}}
+          loading={quotationLoading}
+          submitting={quotationSubmitting}
+          onSubmit={handleQuotationSubmit}
+          createdBy={user}
+        />
       </div>
       <div>
           <ServiceCase
@@ -1555,10 +1718,10 @@ const fetchActionLog = async () => {
   }, [otcCode, dataFetchAssetInformation]);
 
   useEffect(() => {
-    console.log("Data Asset Info : ", dataFetchAssetInformation);
+    // console.log("Data Asset Info : ", dataFetchAssetInformation);
 
-    console.log("Fetch Data Customer Success : ", dataFetchCustomerData);
-    console.log("Fetch Data User ", ownerUserData);
+    // console.log("Fetch Data Customer Success : ", dataFetchCustomerData);
+    // console.log("Fetch Data User ", ownerUserData);
   }, [ownerUserData]);
 
 
@@ -1589,10 +1752,10 @@ const fetchActionLog = async () => {
   };
 
 useEffect(() =>{
-  console.log("Data Asset Info : ",dataFetchAssetInformation)
+  // console.log("Data Asset Info : ",dataFetchAssetInformation)
   
-  console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
-  console.log("Fetch Data User ", ownerUserData)
+  // console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
+  // console.log("Fetch Data User ", ownerUserData)
 }, [ownerUserData])
 
 const fetchSymptomCodes = async (term) => {
