@@ -1,5 +1,3 @@
-// ServiceRequestPDF.js
-import React from "react";
 import {
   Document,
   Page,
@@ -10,10 +8,10 @@ import {
   Font,
   Link,
 } from "@react-pdf/renderer";
+import React from "react";
 
-// Example custom font (optional)
 Font.register({
-  family: "Helvetica",
+  family: "Helvetice",
   fonts: [{ src: "https://fonts.gstatic.com/s/helvetica/Helvetica.ttf" }],
 });
 
@@ -31,103 +29,115 @@ const styles = StyleSheet.create({
     margin: "auto",
     flexDirection: "column",
   },
+
   sectionHeader: {
     fontSize: 11,
     fontWeight: "bold",
   },
+
   textSmall: {
     fontSize: 9,
   },
+
   textCenter: {
     textAlign: "center",
   },
+
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(8, 1fr)",
   },
+
   grid2: {
     display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
+    gridTemplateColumns: "repeat(4, 1hr)",
   },
+
   bold: {
     fontWeight: "bold",
   },
+
   qrCode: {
     width: 45,
     height: 45,
   },
+
   logo: {
-    width: 60,
-    height: 60,
+    width: 45,
+    height: 45,
   },
-  link: {
-    fontSize: 7,
-    color: "blue",
-  },
-  disclaimerText: {
-    fontSize: 7,
-    marginBottom: 5,
-  },
+
   leftSection: {
     flex: 1,
     flexDirection: "row",
     flexWrap: "wrap",
     rowGap: 2,
   },
-  rightSection: {
+
+  righSection: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-  rightSection2: {
+
+  righSection2: {
     flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    rowGap: 2,
+    flexDirection: "center",
+    justifyContent: "center",
   },
+
   label: {
     width: "30%",
     fontSize: 9,
   },
+
   label2: {
     width: "20%",
     fontSize: 9,
   },
+
   value: {
     width: "68%",
-    fontSize: 9,
+    fontSize: 3,
   },
+
   colon: {
     width: "2%",
-    fontSize: 9,
+    fontSize: 2,
   },
+
   value2: {
     width: "80%",
     fontSize: 9,
   },
+
   table: {
     width: "100%",
     borderWidth: 1,
     borderColor: "#ccc",
   },
+
   tableRow: {
     flexDirection: "row",
   },
+
   tableHeader: {
     backgroundColor: "#e5e7eb",
   },
-  tableCell: {
+
+  TableCell: {
     flex: 1,
     borderRightWidth: 1,
-    borderBottomWidth: 1,
+    borderButtomWidth: 1,
     borderColor: "#ccc",
     padding: 2,
     fontSize: 7,
   },
+
   tableHeaderCell: {
     flex: 1,
     borderRightWidth: 1,
-    borderBottomWidth: 1,
+    borderButtomWidth: 1,
     borderColor: "#ccc",
     padding: 2,
     fontSize: 7,
@@ -141,17 +151,18 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 4,
     marginVertical: 10,
-    paddingTop: 12, // extra space so the title doesn't overlap content
+    paddingTop: 12,
+    position: 12,
     position: "relative",
   },
 
   sectionTitle: {
     position: "absolute",
-    top: -8, // moves the heading above the border
+    top: -8,
     left: 10,
     fontSize: 10,
     fontWeight: "bold",
-    backgroundColor: "white", // covers the border behind text
+    backgroundColor: "white",
     paddingHorizontal: 4,
   },
 
@@ -168,7 +179,7 @@ const Section = ({ title, children }) => (
   </View>
 );
 
-const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
+export const QuatationInvoice = ({ caseDetails, customerSignature }) => (
   <Document>
     <Page style={styles.container}>
       <View
@@ -194,7 +205,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
             Telp : (+6221) 081318521007 / 081318521006 - HP : 0811970666
           </Text>
         </View>
-        <Text style={[styles.sectionHeader]}>SERVICE REQUEST FORM</Text>
+        <Text style={[styles.sectionHeader]}>QUOTATION / PROFORMA INVOICE</Text>
       </View>
 
       <Section title="Case Info">
@@ -241,7 +252,6 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
         </View>
       </Section>
 
-      {/* Customer Section */}
       <Section title="Customer">
         {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Customer</Text> */}
         <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
@@ -334,7 +344,6 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
         </View>
       </Section>
 
-      {/* Product Section */}
       <Section title="Product">
         {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text> */}
         <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
@@ -383,177 +392,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
           </View>
         </View>
       </Section>
-
-      <View style={[styles.tableRow, styles.tableHeader, { marginTop: 10 }]}>
-        <Text style={styles.tableHeaderCell}>Accessories</Text>
-        <Text style={styles.tableHeaderCell}>Note</Text>
-        <Text style={styles.tableHeaderCell}>CT/ SN Code</Text>
-      </View>
-      {caseDetails?.accessory?.length > 0 ? (
-        caseDetails.accessory.map((item, index) => (
-          <View style={styles.tableRow} key={index}>
-            <Text style={styles.tableCell}>{item.Accessories ?? "N/A"}</Text>
-            <Text style={styles.tableCell}>{item.Note ?? "N/A"}</Text>
-            <Text style={styles.tableCell}>{item.CT_SNCode ?? "N/A"}</Text>
-          </View>
-        ))
-      ) : (
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>No Data</Text>
-          <Text style={styles.tableCell}>-</Text>
-          <Text style={styles.tableCell}>-</Text>
-        </View>
-      )}
-
-      <Text style={[styles.textSmall, { fontWeight: "bold" }]}>
-        Notification and confirmation
-      </Text>
-      <View style={{ display: "flex", flexDirection: "row" }}>
-        <View style={styles.leftSection}>
-          <Text style={styles.label2}>Unit Garansi</Text>
-          <Text style={[styles.value2]}>
-            :Lamanya pengerjaan perbaikan sekitar 3 hari kerja (tergantung
-            tersedianya suku cadang)
-          </Text>
-          <Text style={styles.label2}>Unit Tidak Garansi</Text>
-          <Text style={[styles.value2]}>
-            : • Biaya pengecekan dibayar di muka dan tidak dapat dikembalikan.{" "}
-          </Text>
-          <Text style={styles.label2}></Text>
-          <Text style={[styles.value2]}>
-            • Surat Penawaran Perbaikan akan dikirim sekitar 3 hari kerja
-            setelah peralatan diterima. Lamanya pengerjaan perbaikan sekitar 3
-            hari kerja setelah persetujuan atas Surat Penawaran Perbaikan
-            (tergantung tersedianya suku cadang)
-          </Text>
-        </View>
-      </View>
-      <Text style={[styles.sectionHeader, styles.textCenter]}>
-        Disclaimer Statement
-      </Text>
-
-      <View style={{}}>
-        <Text style={[styles.bold, styles.textSmall]}>
-          Informasi Untuk Pelanggan :
-        </Text>
-        <Text style={[styles.bold, styles.textSmall]}>
-          Saya{" "}
-          {caseDetails?.contact_information?.FirstName ||
-          caseDetails?.contact_information?.LastName
-            ? `${caseDetails?.contact_information?.FirstName || ""} ${
-                caseDetails?.contact_information?.LastName || ""
-              }`.trim()
-            : "Customer"}{" "}
-          yang bertanda tangan di bawah ini menyetujui bahwa:
-        </Text>
-        <Text style={[styles.bold, styles.textSmall]}>
-          Data yang tersimpan dalam peralatan dapat terhapus selama proses
-          perbaikan peralatan berlangsung. Pada saat dilakukan system atau
-          operating system recovery, setting peralatan akan berubah mengikuti
-          setting awal dari pabrik.
-        </Text>
-        <Text style={styles.textSmall}>
-          Walaupun HP selalu melakukan pencegahan terhadap kerusakan pada Data
-          atau terhapusnya Data, kami sangat menyarankan Pelanggan untuk
-          melakukan Backup Data sendiri sebelum peralatan disampaikan kepada
-          kami. Dengan demikian pelanggan mempunyai Backup Data untuk melakukan
-          Data Recovery jika selama proses perbaikan peralatan berlangsung Data
-          pelanggan terhapus oleh System atau Operating System.
-        </Text>
-        <Text style={styles.textSmall}>
-          HP tidak memberikan jaminan proteksi Data pelanggan dan HP tidak
-          bertanggungjawab jika terjadi kerusakan pada Data atau terhapusnya
-          Data dari peralatan pelanggan.
-        </Text>
-      </View>
-
-      {/* Signature section */}
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <View style={{ flexDirection: "column", alignItems: "center" }}>
-          <Text style={[styles.textSmall, { marginBottom: 10 }]}>
-            Received By
-          </Text>
-          <Image
-            src={caseDetails?.createdByUser?.Signature}
-            style={{ width: 120, height: 60 }}
-          />
-          <Text style={styles.textSmall}>
-            --------------------------------------------
-          </Text>
-          <Text style={styles.textSmall}>
-            {caseDetails?.createdByUser?.Name}
-          </Text>
-        </View>
-        <View style={{ flexDirection: "column", alignItems: "center" }}>
-          <Image src="/random_qr.png" style={styles.qrCode} />
-          <Text style={[styles.textSmall, styles.bold]}>
-            Check Repair Status
-          </Text>
-        </View>
-        <View style={{ flexDirection: "column", alignItems: "center" }}>
-          {!customerSignature ? (
-            <>
-              <Text style={[styles.textSmall, { marginBottom: 30 }]}>
-                Received By
-              </Text>
-              <Text style={styles.textSmall}>
-                --------------------------------------------
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text style={[styles.textSmall, { marginBottom: 10 }]}>
-                Received By
-              </Text>
-              <Image
-                src={customerSignature}
-                style={{ width: 120, height: 60 }}
-              />
-            </>
-          )}
-          <Text style={styles.textSmall}>
-            --------------------------------------------
-          </Text>
-          <Text style={styles.textSmall}>
-            {caseDetails?.contact_information?.FirstName ||
-            caseDetails?.contact_information?.LastName
-              ? `${caseDetails?.contact_information?.FirstName || ""} ${
-                  caseDetails?.contact_information?.LastName || ""
-                }`.trim()
-              : "N/A"}
-          </Text>
-        </View>
-      </View>
-
-      <Text style={styles.textSmall}>
-        • Check status service silahkan klik{" "}
-        <Link style={styles.link} src="https://hp.care/digital-ID">
-          https://hp.care/digital-ID
-        </Link>{" "}
-        or scan the QR code above.
-      </Text>
-
-      <Text style={styles.textSmall}>
-        • Apabila pelayanan kami kurang memuaskan untuk case{" "}
-        {caseDetails?.CaseID ?? "N/A"}, silahkan sampaikan melalui email ke{" "}
-        <Link style={styles.link} src="mailto:escalation.id@hp.com">
-          escalation.id@hp.com
-        </Link>
-      </Text>
-
-      <Text style={[styles.textSmall, { marginBottom: 20 }]}>
-        • Apabila dikemudian hari membutuhkan bantuan teknis, silahkan klik{" "}
-        <Link style={styles.link} src="https://hp.care/digital-ID">
-          https://hp.care/digital-ID
-        </Link>
-      </Text>
-      <Text style={{ borderBottom: "1px solid #ccc" }}></Text>
-      <Text style={styles.textSmall}>
-        Tanda tangan Anda merupakan persetujuan terhadap syarat-syarat perbaikan
-        di balik halaman ini
-      </Text>
+      
     </Page>
   </Document>
 );
-
-export default ServiceRequestPDF;
