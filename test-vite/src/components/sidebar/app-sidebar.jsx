@@ -358,6 +358,12 @@ export function AppSidebar({
         url: "/app",
         icon: Home,
       },
+      {
+        name: "View Case",
+        title: "View Case",
+        url: "/app/viewcase",
+        icon: Pin
+      },
     ],
     default :[
        {
@@ -374,8 +380,6 @@ export function AppSidebar({
       },
     ]
   }
-
-
 
   let navrole ;
   
@@ -398,9 +402,9 @@ export function AppSidebar({
         activeClassName="bg-cyan-800 text-white"
       />
     );
-  } else if (data.user.role === 'apo' || data.user.role === 'ce' || data.user.role === 'ps' ||  data.user.role === 'celead'){
+  } else if (data.user.role === 'apo' || data.user.role === 'ce'  ||  data.user.role === 'celead' || data.user?.role === 'apv' || data.user?.role === 'cm'){
     navrole = data.apo;
-  } else if (data.user.role === 'lg'){
+  } else if (data.user.role === 'lg' || data.user.role === 'ps'){
     navrole = data.lg;
     DropNav = '';
   } else {

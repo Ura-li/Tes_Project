@@ -136,9 +136,10 @@ export default function CashManagement() {
         }
         try {
             setQuotationSubmitting(true);
+            // return console.log("Submit : ",payload)
             const apiPayload = {
                 ...payload,
-                userAssign: user.id,
+                userAssign: user.id !== payload?.userAssign ? payload.userAssign : user.id,
             };
             console.log("Sending payload:", apiPayload);
             const endpoint = payload.quotationNo
@@ -384,12 +385,14 @@ export default function CashManagement() {
                 <QuotationDialog
                     open={showQuotationDialog}
                     onOpenChange={handleQuotationOpenChange}
-                    status={selectedCase.CaseStatus}
                     materialItems={quotationMaterialItems}
+                    caseId={selectedCase.CaseID}
+                    status={selectedCase.CaseStatus}
                     initialData={quotationInitialData || {}}
                     loading={quotationLoading}
                     submitting={quotationSubmitting}
                     onSubmit={handleQuotationSubmit}
+                    createdBy={user}
                 />
             )}
 

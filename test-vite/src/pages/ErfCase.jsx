@@ -62,6 +62,12 @@ export const ErfCase = () => {
       headers: { "Content-Type": "multipart/form-data" },
     });
     console.log(res.data);
+
+    if (res.data.success) {
+      toast.info(`Upload ERF Successs`)
+    }else {
+      toast.warning("Gagal upload ERF")
+    }
   }
 
   // Pagination logic
