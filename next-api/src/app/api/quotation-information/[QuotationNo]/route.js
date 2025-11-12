@@ -112,8 +112,31 @@ export async function PATCH(request, { params }) {
 
     const relatedLineItems = await prisma.materialorderlineitems.findMany({
       where: { LineItemID: { in: uniqueLineItemIds } },
-      select: { LineItemID: true, Quantity: true },
+      select: {
+        LineItemID: true,
+        Quantity: true,
+        materialorder: {
+          select: {
+            MOID: true,
+            workorder: {
+              select: {
+                CaseID: true,
+                WOID: true,
+                owner: {
+                  select: {
+                    IDUser: true,
+                    Name: true,
+                    Role: true,
+                    Username: true
+                  }
+                }
+              }
+            }
+          },
+        },
+      },
     });
+
 
     if (relatedLineItems.length !== uniqueLineItemIds.length) {
       return NextResponse.json(
@@ -124,6 +147,8 @@ export async function PATCH(request, { params }) {
         { status: 404 },
       );
     }
+
+    
 
     const quantityMap = new Map(
       relatedLineItems.map((item) => [item.LineItemID, item.Quantity ?? 1]),
@@ -182,6 +207,8 @@ export async function PATCH(request, { params }) {
       targetStatusCase = 'Pending_Quote';
     }
 
+    
+
     const includeChangedBy = {
       changedByUser: {
           select: {
@@ -191,12 +218,43 @@ export async function PATCH(request, { params }) {
           },
       },
     };
+    
 
     const quotation = await prisma.$transaction(async (tx) => {
       const existingLineItems = await tx.quotation_lineitem.findMany({
         where: { QuotationNo },
         select: { id: true, LineItemID: true },
       });
+
+      const caseInfo = await prisma.caseinformation.findUnique({
+        where: { CaseID: caseId },
+        select: {
+            CaseStatus: true,
+            Owner: true,
+            CreatedBy: true,
+            ownerUser: {
+                select: {
+                    IDUser: true,
+                    Name: true,
+                },
+            },
+        }
+      })
+
+      const newOwnerUser = userAssign !== null
+        ? await prisma.user.findUnique({
+            where: { IDUser: userAssign },
+            select: {
+                IDUser: true,
+                Name: true,
+            },
+        })
+        : null;
+
+      const oldOwnerName = caseInfo.ownerUser?.Name ?? (caseInfo.Owner != null ? String(caseInfo.Owner) : "-");
+      const newOwnerName = newOwnerUser?.Name ?? (userAssign != null ? String(userAssign) : "-");
+
+      
 
       const updated = await tx.quotationtable.update({
         where: { QuotationNo },
@@ -270,24 +328,24 @@ export async function PATCH(request, { params }) {
       if(targetStatusCase !== "Pending_Quote"){
         caseUpdateData.Owner = userAssign
 
-        // await tx.ActionLog.create({
-        //   data: {
-        //     CaseID_toActionLog: {
-        //       connect: { CaseID: caseId },
-        //     },
-        //     ReferenceId: QuotationNo,
-        //     model: "Quotation Log",
-        //     dataOld: status,
-        //     dataNew: targetStatusCase,
-        //     changedByUser: createdBy
-        //       ? {
-        //           connect: { IDUser: createdBy },
-        //         }
-        //       : undefined,
-        //     logDescription: `Edit: change status from ${status} to ${targetStatusCase}`,
-        //   },
-        //   include: includeChangedBy,
-        // });
+        await tx.ActionLog.create({
+          data: {
+            CaseID_toActionLog: {
+              connect: { CaseID: caseId },
+            },
+            ReferenceId: caseId,
+            model: "CaseOwner",
+            dataOld: oldOwnerName,
+            dataNew: newOwnerName,
+            changedByUser: createdBy
+              ? {
+                  connect: { IDUser: createdBy },
+                }
+              : undefined,
+            logDescription: `Edit: change owner from ${oldOwnerName} to ${newOwnerName}`,
+          },
+          include: includeChangedBy,
+        });
       }
       await tx.caseinformation.update({
         where: { CaseID: caseId },
@@ -307,6 +365,20 @@ export async function PATCH(request, { params }) {
         },
       });
 
+      if(quotationNote !== null) {
+        await tx.casenotes.create({
+          data: {
+            CaseID: caseId,
+            LogType: "System Info",
+            ActionType: "Quotation Request",
+            Template: "",
+            VisibleExternally: true,
+            MinutesSpent: 0,
+            Note: quotationNote,
+            CreatedBy: createdBy ?? Number.parseInt(userAssign, 10) ?? null,
+          },
+        });
+      }
       await tx.ActionLog.create({
         data: {
           CaseID_toActionLog: {

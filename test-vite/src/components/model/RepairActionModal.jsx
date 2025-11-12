@@ -46,7 +46,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
       const res = await ApiCustomer.get(`/api/service-type?ProblemCategory=${problemCategory}`);
       const list = res.data?.data || [];
       setServiceTypeList(list)
-      console.log("NKTOL LIST : ",list)
+      console.log("LIST : ",list)
     } catch (e) {
       console.error("Search Service Type failed", e);
       setServiceTypeList([])

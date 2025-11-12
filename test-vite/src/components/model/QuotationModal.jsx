@@ -96,7 +96,7 @@ const normaliseLineItems = (items = [], prevItems = []) => {
       item?.partApproved ??
       item?.Approved ??
       previous.partApproved ??
-      "";
+      "yes";
 
     if (partApprovedValue === null || partApprovedValue === undefined) {
       partApprovedValue = "";
@@ -143,7 +143,7 @@ const copyToClipboard = (value) => {
   toast.success(`Copied: ${value}`); // kalau kamu pakai react-hot-toast
 };
 
-export const QuotationDialog = ({
+const QuotationDialog = ({
   open,
   onOpenChange,
   caseId,
@@ -194,7 +194,7 @@ export const QuotationDialog = ({
     return {
       quotationType: initialData.quotationType ?? "Simple",
       vatValue: initialData.vatValue ?? "",
-      quotationNote: initialData.quotationNote ?? "",
+      quotationNote: null,
       laborFee: initialData.laborFee ?? "",
       quotationDate,
       useNewQuotationNo:
@@ -221,6 +221,7 @@ export const QuotationDialog = ({
     setFieldErrors({});
     setLineErrors({});
     fetchUserAssign('apo');
+    {console.log("KOntol",form, initialData)}
   }, [defaultFormState]);
 
   const filteredUserAssign = roleAssign.filter(
@@ -239,7 +240,7 @@ export const QuotationDialog = ({
 
   useEffect(() => {
     syncLineItems(materialItems);
-  }, [materialItems, syncLineItems]);
+  }, [syncLineItems]);
 
   useEffect(() => {
     setForm((prev) => ({
@@ -370,8 +371,10 @@ export const QuotationDialog = ({
       createdBy: createdBy.id
     };
 
+    // if(quoteDecisionValue === 'Rejected') pa
     onSubmit?.(payload);
   };
+  console.log("Form ",form)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -393,223 +396,205 @@ export const QuotationDialog = ({
               Memuat data quotation...
             </div>
           )}
-          <Card className={'h-65'}>
-            <CardContent className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <div className="grid grid-cols-4 gap-2">
-                {isPendingQuote && (
-                  <CaseField
-                    label="Quote Approve Date"
-                    star
-                    className={'gap-0'}
-                  >
-                    <Input
-                      type="date"
-                      disabled={formDisabled}
-                      value={form.quoteApproveDate}
-                      onChange={(e) =>
-                        handleFieldChange("quoteApproveDate", e.target.value)
-                      }
-                    />
-                    {fieldErrors.quoteApproveDate && (
-                      <p className="text-xs text-red-500">
-                        {fieldErrors.quoteApproveDate}
-                      </p>
-                    )}
-                  </CaseField>
-                )}
+           <Card>
+      <CardContent className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* LEFT SIDE */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* all your CaseFields on the left */}
+          <CaseField label="Quotation Date" star>
+            <Input
+              type="date"
+              disabled={formDisabled}
+              value={form.quotationDate}
+              onChange={(e) => handleFieldChange("quotationDate", e.target.value)}
+            />
+            {fieldErrors.quotationDate && (
+              <p className="text-xs text-red-500">{fieldErrors.quotationDate}</p>
+            )}
+          </CaseField>
 
-                <CaseField
-                  label="Quotation Type"
-                  star
-                  className={'gap-0'}
-                >
-                  <Select
-                    disabled={formDisabled}
-                    value={form.quotationType}
-                    onValueChange={(value) => handleFieldChange("quotationType", value)}
-                  >
-                    <SelectTrigger className="w-full" disabled={formDisabled}>
-                      <SelectValue placeholder="Pilih tipe quotation" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Simple">Simple</SelectItem>
-                      <SelectItem value="Standard">Standard</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {fieldErrors.quotationType && (
-                    <p className="text-xs text-red-500">{fieldErrors.quotationType}</p>
-                  )}
-                </CaseField>
-                <CaseField
-                  label="Quotation Date"
-                  star
-                  className={'gap-0'}
-                >
-                  <Input
-                    type="date"
-                    disabled={formDisabled}
-                    value={form.quotationDate}
-                    onChange={(e) => handleFieldChange("quotationDate", e.target.value)}
-                  />
-                  {fieldErrors.quotationDate && (
-                    <p className="text-xs text-red-500">{fieldErrors.quotationDate}</p>
-                  )}
-                </CaseField>
-                
-                {isPendingQuote && (
-                  <CaseField
-                    label="Quotation Decision"
-                    star
-                    className={'gap-0'}
-                  >
-                    <Select
-                      disabled={formDisabled}
-                      value={form.quoteDecision}
-                      onValueChange={(value) => handleFieldChange("quoteDecision", value)}
-                    >
-                      <SelectTrigger className="w-full" disabled={formDisabled}>
-                        <SelectValue placeholder="Pilih keputusan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="approve">Approve</SelectItem>
-                        <SelectItem value="reject">Reject</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {fieldErrors.quoteDecision && (
-                      <p className="text-xs text-red-500">
-                        {fieldErrors.quoteDecision}
-                      </p>
-                    )}
-                  </CaseField>
-                )}
-                   <CaseField
-                  label="Labor Fee"
-                  star
-                  className={'gap-0 col-span-2 gap-x-5'}
-                  span={2}
-                >
-                  <Input
-                    disabled={formDisabled}
-                    value={form.laborFee}
-                    onChange={(e) => handleFieldChange("laborFee", e.target.value)}
-                    placeholder="Masukkan biaya labor"
-                    type="number"
-                    min="0"
-                  />
-                  {fieldErrors.laborFee && (
-                    <p className="text-xs text-red-500">{fieldErrors.laborFee}</p>
-                  )}
-                </CaseField>
+          {isPendingQuote && (
+            <CaseField label="Quote Approve Date" star>
+              <Input
+                type="date"
+                disabled={formDisabled}
+                value={form.quoteApproveDate}
+                onChange={(e) =>
+                  handleFieldChange("quoteApproveDate", e.target.value)
+                }
+              />
+              {fieldErrors.quoteApproveDate && (
+                <p className="text-xs text-red-500">{fieldErrors.quoteApproveDate}</p>
               )}
-              {form.quoteDecision === "approve" && (
-                <CaseField
-                  label="Select APO"
-                  star={form.quoteDecision === "approve"}
-                  childClass="flex flex-col gap-2 items-start w-full"
-                >
-                  <SearchCommandBlock 
-                    value={form.userAssign}
-                    onChange={(selectedID) =>{
-                      if(selectedID === null) {
-                        handleFieldChange("userAssign", value);
-                        return;
-                      }
-                      const selectedUser = filteredUserAssign.find(
-                        (user) => user.IDUser === selectedID
-                      );
-                      if (selectedUser) {
-                        handleFieldChange("userAssign", selectedUser.IDUser);
-                      }
-                    }}
-                    placeholder="--Select--"
-                    options={filteredUserAssign.map((user) =>({
-                      label: user.Name,
-                      value: user.IDUser,
-                    }))}
-                    renderLabel={(opt) => opt.label}
-                    getValue={(opt) => opt.value}
-                    className={'border-2 ring-1 ring-gray-200 bg-slate-100'}
-                  />
-                  {fieldErrors.userAssign && (
-                    <p className="text-xs text-red-500">{fieldErrors.userAssign}</p>
-                  )}
-                </CaseField>
-              )}
-              <CaseField
-                label="Quotation Note"
-                span={2}
-                childClass="flex flex-col gap-2 w-full"
-              >
-                <Textarea
-                  disabled={formDisabled}
-                  value={form.quotationNote}
-                  onChange={(e) => handleFieldChange("quotationNote", e.target.value)}
-                  placeholder="Catatan tambahan untuk quotation"
-                  className="min-h-[120px]"
-                />
-              </CaseField>
+            </CaseField>
+          )}
 
-              <CaseField
-                label="Pilihan Tambahan"
-                span={2}
-                childClass="flex flex-col gap-3 items-start"
+          <CaseField label="Quotation Type" star>
+            <Select
+              disabled={formDisabled}
+              value={form.quotationType}
+              onValueChange={(value) => handleFieldChange("quotationType", value)}
+            >
+              <SelectTrigger className="w-full" disabled={formDisabled}>
+                <SelectValue placeholder="Pilih tipe quotation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Simple">Simple</SelectItem>
+                <SelectItem value="Standard">Standard</SelectItem>
+              </SelectContent>
+            </Select>
+            {fieldErrors.quotationType && (
+              <p className="text-xs text-red-500">{fieldErrors.quotationType}</p>
+            )}
+          </CaseField>
+
+          <CaseField label="Labor Fee" star>
+            
+            <Input
+              disabled={formDisabled}
+              value={form.laborFee}
+              onChange={(e) => handleFieldChange("laborFee", e.target.value)}
+              placeholder="Masukkan biaya labor"
+              type="number"
+              min="0"
+            />
+            {fieldErrors.laborFee && (
+              <p className="text-xs text-red-500">{fieldErrors.laborFee}</p>
+            )}
+          </CaseField>
+
+          {form.quotationType === "Standard" && (
+            <CaseField label="VAT Value (%)" star>
+              <Input
+                disabled={formDisabled}
+                value={form.vatValue}
+                onChange={(e) => handleFieldChange("vatValue", e.target.value)}
+                placeholder="Contoh: 10"
+                type="number"
+                min="0"
+              />
+              {fieldErrors.vatValue && (
+                <p className="text-xs text-red-500">{fieldErrors.vatValue}</p>
+              )}
+            </CaseField>
+          )}
+
+          {isPendingQuote && (
+            <CaseField label="Quotation Decision" star>
+              <Select
+                disabled={formDisabled}
+                value={form.quoteDecision}
+                onValueChange={(value) => handleFieldChange("quoteDecision", value)}
               >
-                <label className="flex items-center gap-2 text-sm font-medium">
-                  <Checkbox
-                    id="useNewQuotationNo"
-                    disabled={formDisabled}
-                    value={form.quotationNote}
-                    onChange={(e) => handleFieldChange("quotationNote", e.target.value)}
-                    placeholder="Catatan tambahan untuk quotation"
-                    className="min-h-[120px]"
-                  />
-                </CaseField>
-                <CaseField
-                  label="Pilihan Tambahan"
-                  span={2}
-                  childClass="flex gap-3 items-start justify-center"
-                  className={'justify-center'}
-                >
-                  <label className="flex items-center gap-2 text-sm font-medium">
-                    <Checkbox
-                    className={'border-fuchsia-400'}
-                      id="useNewQuotationNo"
-                      disabled={formDisabled}
-                      checked={form.useNewQuotationNo}
-                      onCheckedChange={(checked) =>
-                        handleCheckboxChange("useNewQuotationNo", checked)
-                      }
-                    />
-                    <span>Use new Quotation No</span>
-                  </label>
-                  <label className="flex items-center gap-2 text-sm font-medium">
-                    <Checkbox
-                    className={'border-fuchsia-400'}
-                      id="sendWa"
-                      disabled={formDisabled}
-                      checked={form.sendWa}
-                      onCheckedChange={(checked) =>
-                        handleCheckboxChange("sendWa", checked)
-                      }
-                    />
-                    <span>Send WA</span>
-                  </label>
-                  <label className="flex items-center gap-2 text-sm font-medium">
-                    <Checkbox
-                    className={'border-fuchsia-400'}
-                      id="sendEmail"
-                      disabled={formDisabled}
-                      checked={form.sendEmail}
-                      onCheckedChange={(checked) =>
-                        handleCheckboxChange("sendEmail", checked)
-                      }
-                    />
-                    <span>Send Email</span>
-                  </label>
-                </CaseField>
-              </div>
-            </CardContent>
-          </Card>
+                <SelectTrigger className="w-full" disabled={formDisabled}>
+                  <SelectValue placeholder="pilih" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="approve">Approve</SelectItem>
+                  <SelectItem value="reject">Reject</SelectItem>
+                </SelectContent>
+              </Select>
+              {fieldErrors.quoteDecision && (
+                <p className="text-xs text-red-500">{fieldErrors.quoteDecision}</p>
+              )}
+            </CaseField>
+          )}
+
+          {form.quoteDecision === "approve" && (
+            <CaseField label="Select APO" star>
+              <SearchCommandBlock
+                value={form.userAssign}
+                onChange={(selectedID) => {
+                  if (selectedID === null) {
+                    handleFieldChange("userAssign", value);
+                    return;
+                  }
+                  const selectedUser = filteredUserAssign.find(
+                    (user) => user.IDUser === selectedID
+                  );
+                  if (selectedUser) {
+                    handleFieldChange("userAssign", selectedUser.IDUser);
+                  }
+                }}
+                placeholder="--Select--"
+                options={filteredUserAssign.map((user) => ({
+                  label: user.Name,
+                  value: user.IDUser,
+                }))}
+                renderLabel={(opt) => opt.label}
+                getValue={(opt) => opt.value}
+                className={"border-2 ring-1 ring-gray-200 bg-slate-100"}
+              />
+              {fieldErrors.userAssign && (
+                <p className="text-xs text-red-500">{fieldErrors.userAssign}</p>
+              )}
+            </CaseField>
+          )}
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="flex flex-col gap-4">
+          <CaseField
+            label="Catatan Tambahan"
+            span={2}
+            childClass="flex flex-col gap-3 items-start"
+          >
+            <Textarea
+              disabled={formDisabled}
+              value={form.quotationNote}
+              onChange={(e) =>
+                handleFieldChange("quotationNote", e.target.value)
+              }
+              placeholder="Catatan tambahan untuk quotation"
+              className="min-h-[120px] w-full"
+            />
+          </CaseField>
+
+          <CaseField
+            label="Pilihan Tambahan"
+            span={2}
+            childClass="flex gap-3 items-start justify-start"
+          >
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <Checkbox
+                className={"border-fuchsia-400"}
+                id="useNewQuotationNo"
+                disabled={formDisabled}
+                checked={form.useNewQuotationNo}
+                onCheckedChange={(checked) =>
+                  handleCheckboxChange("useNewQuotationNo", checked)
+                }
+              />
+              <span>Use new Quotation No</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <Checkbox
+                className={"border-fuchsia-400"}
+                id="sendWa"
+                disabled={formDisabled}
+                checked={form.sendWa}
+                onCheckedChange={(checked) =>
+                  handleCheckboxChange("sendWa", checked)
+                }
+              />
+              <span>Send WA</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <Checkbox
+                className={"border-fuchsia-400"}
+                id="sendEmail"
+                disabled={formDisabled}
+                checked={form.sendEmail}
+                onCheckedChange={(checked) =>
+                  handleCheckboxChange("sendEmail", checked)
+                }
+              />
+              <span>Send Email</span>
+            </label>
+          </CaseField>
+        </div>
+      </CardContent>
+    </Card>
 
           <Card>
             <CardHeader>

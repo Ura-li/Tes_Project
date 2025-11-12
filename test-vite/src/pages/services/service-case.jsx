@@ -708,7 +708,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
     },
     {
       icon: CopyX,
-      label: "Close",
+      label: "Close WO",
       onClick:async () => {
         const isValid = await validate();
         if (isValid !== false) {
@@ -989,7 +989,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, materialOrderI
     { icon: FileSymlink, label: "Save & Close", onClick: () => saveMaterialOrder().then(() => navigate(`/app/work/${materialOrders.WOID}`))},
     {
       icon: CopyXIcon,
-      label: "Close",
+      label: "Close MO",
       onClick: () => saveAndCloseMaterialOrder(),
       hidden: currentRole !== 'ce' && currentRole !== 'celead',
     },
@@ -1240,7 +1240,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
     { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
     {
       icon: CopyXIcon,
-      label: "Close",
+      label: "Close MO Line Items",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
       hidden: currentRole !== 'ce' && currentRole !== 'celead',
     },
