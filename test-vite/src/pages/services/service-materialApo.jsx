@@ -581,7 +581,7 @@ export const ServiceMaterialApo = () => {
                   </Accordion>
                 </CardContent>
               </Card>
-            </div>
+           
             
             {/* Booking */}
             <Card className="flex-col mt-5">
@@ -683,6 +683,7 @@ export const ServiceMaterialApo = () => {
                 </Table>
               </CardContent>
             </Card>
+             </div>
 
             <TabsContent value="mo_info"></TabsContent>
 
