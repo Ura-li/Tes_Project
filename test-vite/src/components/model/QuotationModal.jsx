@@ -143,7 +143,7 @@ const copyToClipboard = (value) => {
   toast.success(`Copied: ${value}`); // kalau kamu pakai react-hot-toast
 };
 
-export const QuotationDialog = ({
+const QuotationDialog = ({
   open,
   onOpenChange,
   caseId,
@@ -221,7 +221,7 @@ export const QuotationDialog = ({
     setFieldErrors({});
     setLineErrors({});
     fetchUserAssign('apo');
-  }, [defaultFormState]);
+  }, []);
 
   const filteredUserAssign = roleAssign.filter(
     (user) => user.Role === "apo"
@@ -239,7 +239,7 @@ export const QuotationDialog = ({
 
   useEffect(() => {
     syncLineItems(materialItems);
-  }, [materialItems, syncLineItems]);
+  }, [syncLineItems]);
 
   useEffect(() => {
     setForm((prev) => ({
@@ -468,7 +468,7 @@ export const QuotationDialog = ({
                       onValueChange={(value) => handleFieldChange("quoteDecision", value)}
                     >
                       <SelectTrigger className="w-full" disabled={formDisabled}>
-                        <SelectValue placeholder="Pilih keputusan" />
+                        <SelectValue placeholder="pilih"/>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="approve">Approve</SelectItem>
@@ -500,7 +500,6 @@ export const QuotationDialog = ({
                     <p className="text-xs text-red-500">{fieldErrors.laborFee}</p>
                   )}
                 </CaseField>
-              )}
               {form.quoteDecision === "approve" && (
                 <CaseField
                   label="Select APO"
@@ -563,6 +562,7 @@ export const QuotationDialog = ({
                     placeholder="Catatan tambahan untuk quotation"
                     className="min-h-[120px]"
                   />
+                  </label>
                 </CaseField>
                 <CaseField
                   label="Pilihan Tambahan"

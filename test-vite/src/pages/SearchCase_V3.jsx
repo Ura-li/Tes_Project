@@ -382,7 +382,7 @@ export default function NewCaseForm() {
   const [productTypeId, setProductTypeId] = useState(undefined);
   const [productLine, setProductLine] = useState("");
   const [productNo, setProductNo] = useState("");
-  const [HWPCCode, setHWPCCode] = useState("");
+  // const [HWPCCode, setHWPCCode] = useState("");
   const [productName, setProductName] = useState("");
   const [vendor, setVendor] = useState("");
 
@@ -658,7 +658,7 @@ export default function NewCaseForm() {
       setProductNo(p.ProductNumber);
       setProductName(p.ProductName);
       setProductLine(p.ProductLine || "");
-      setHWPCCode(p.HWPC || "");
+      // setHWPCCode(p.HWPC || "");
       setVendor(p.vendor || "");
       if (p.product_type) {
         setProductTower(p.product_type.ProductTower || "");
@@ -1123,7 +1123,7 @@ export default function NewCaseForm() {
             ProductName: productName,
             ProductLine: productLine,
             ProductTypeID: productTypeId ? parseInt(productTypeId, 10) : null,
-            HWPC: HWPCCode,
+            // HWPC: HWPCCode,
             vendor,
           }
         : null;
@@ -1923,7 +1923,7 @@ export default function NewCaseForm() {
                           setProductNo(p.ProductNumber);
                           setProductName(p.ProductName);
                           setProductLine(p.ProductLine || "");
-                          setHWPCCode(p.HWPC || "");
+                          // setHWPCCode(p.HWPC || "");
                           setVendor(p.vendor || "");
                           setProductTypeId(p.ProductTypeID);
                         }}
@@ -1961,12 +1961,12 @@ export default function NewCaseForm() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
+                {/* <div>
                   <div>
                   <Label>HWPC Code<Label className="text-red-600">*</Label></Label>
                   <Input value={HWPCCode} onChange={(e) => setHWPCCode(e.target.value)} />
                 </div>
-                </div>
+                </div> */}
                 {productTower && productGroup && (
                   <div className="flex flex-col gap-2">
                     <span>Product Type <label className="text-red-600">*</label></span>

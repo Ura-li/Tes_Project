@@ -104,7 +104,7 @@ export async function GET(request) {
           materialorder: {
             include: {
               materialorderlineitems: true,
-              owner: true
+              owner: true,
             }
           },
           owner: true
