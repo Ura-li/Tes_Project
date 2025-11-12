@@ -6,14 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { NotificationCard } from "@/components/NotificationCard";
 import { useNavigate } from "react-router";
 import { CaseField } from "@/pages/services/service-case";
-import { ExportExcelPart } from "@/components/Export-Excel";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 export default function Approvel() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [userData, setUserData] = useState([]);
-    const [MoData, setMoData] = useState([]);
+    const [CaseData, setCaseData] = useState([]);
     const [preview, setPreview] = useState({
         ProfilePhoto: null,
         Signature: null,  
@@ -21,18 +21,17 @@ export default function Approvel() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [filterStatus, setFilterStatus] = useState("All");
-  
+  const [loading, setLoading] = useState(false);
 
     const fetchData = async () => {
+        setLoading(true);
         try {
-            const fetchMo = await ApiCustomer.get('/api/mo-detaill');
-            setMoData(fetchMo.data.data);      
+            const fetchCase = await ApiCustomer.get('/api/case-information');
+            setCaseData(fetchCase.data.data);      
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
 
-            console.log("Fetch user data : ", fecthUserData)
-            console.log("Fetch MO Data : ", fetchMo.data.data)
-
+            console.log("Fetch Case Data : ", fetchCase.data.data)
             setUserData({
                 ...userData,
                 Username: resFetchUserData.Username,
@@ -46,10 +45,12 @@ export default function Approvel() {
                 ProfilePhoto: fecthUserData.data.data.ProfilePhoto ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.ProfilePhoto}` : null,
                 Signature: fecthUserData.data.data.Signature ? `${import.meta.env.VITE_API_BASE_URL}${fecthUserData.data.data.Signature}` : null,
             });
-          const valueFilterPartOrder = fetchMo.data.data.filter(m =>  m?.materialorderlineitems?.[0]?.LineItemID)
-         setMoData(valueFilterPartOrder)            
+          const valueFilterCase = fetchCase.data.data.filter(c =>  c?.CaseStatus === "NEW_POPDoc")
+         setCaseData(valueFilterCase)            
         } catch (err) {
             console.error(err);
+        }finally {
+            setLoading(false);
         }
     }
     useEffect(() =>{
@@ -57,15 +58,15 @@ export default function Approvel() {
     },[])
 
     const filteredData =
-    filterStatus === "All" ? MoData
-      : MoData.filter(
-          (m) =>
-            m.OrderStatus === filterStatus
+    filterStatus === "All" ? CaseData
+      : CaseData.filter(
+          (c) =>
+            c.CaseStatus === filterStatus
         );
    
    const sortedData = [...filteredData].sort((a,b) => {
-    const orderA = a.MOID;
-    const orderB = b.MOID;
+    const orderA = a.CaseID;
+    const orderB = b.CaseID;
     return orderB.localeCompare(orderA);
   })
   console.log("Sorted Data:", sortedData);
@@ -121,11 +122,9 @@ export default function Approvel() {
             </Card>
 
              <Card className={"rounded-sm col-span-2 row-span-2"}>
-                <div hidden>
                 <CardHeader className={"flex flex-row gap-2 justify-between"}>
-                    <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
-                    <div className="flex gap-2">
-                    <ExportExcelPart/>
+                    <CardTitle className={"text-2xl"}>Approval</CardTitle>
+                    {/* <div className="flex gap-2">
                     <select
                       value={filterStatus}
                       onChange={(e) => {
@@ -140,67 +139,56 @@ export default function Approvel() {
                         </option>
                       ))}
                     </select>
-                  </div>
+                  </div> */}
                 </CardHeader>
                 <CardContent className={"grid gap-5 "}>
-                 {currentData.length > 0 ? (
-            currentData.map((m) => (
-              <div
-                key={m.MOID}
-                className="rounded-sm hover:bg-gray-50 cursor-pointer  ring-1  ring-gray-400 px-2 py-1"
-                onClick={() =>
-                  navigate(
-                    `/app/material-order/${m.MOID}`
-                  )
-                }
-              >
-                <CardHeader className="p-1 px-2">
-                  <div className="flex flex-row justify-between ">
-                  <CardTitle className={"flex flex-row gap-2 items-center"}>
-                    {m.MOID} 
-                    <Badge className={
-                      m.OrderStatus === 'New' ? "text-white bg-green-500" : 
-                      m.OrderStatus  === 'Shipped' ? "text-white bg-yellow-500" : 
-                      m.OrderStatus === 'Ordered' ? "text-white bg-blue-500" :
-                      m.OrderStatus === 'Closed' ? "text-white bg-gray-500" :
-                      m.OrderStatus === 'BackOrdered' ? "text-white bg-purple-500" :
-                      "text-white bg-red-500"} variant="invisible">
-                    {m.OrderStatus}
-                    </Badge>
-                  </CardTitle>
-                  <CardTitle className={"text-sm text-gray-500"}>
-                    {
-                      m.workorder?.caseinformation?.CaseID
-                    }
-                  </CardTitle>          
-                  </div>
-                   <hr className="border-1 border-gray-500 rounded-md"/>
-                </CardHeader>
-                <CardContent className="flex justify-between px-2">
-                  <div className="space-y-1">
-                  <CaseField className={"text-md"}>
-                   <span> Part Number - Part Description</span>
-                  </CaseField>
-                  <CaseField className={"text-md"}>
-                    {m.materialorderlineitems?.[0]?.PartNumber} / {m.materialorderlineitems?.[0]?.Description}
-                  </CaseField>
-                  </div>
+                {loading ? Array.from({ length:4 }).map((_,i) => (
+                  <Skeleton key={i} className="h-20 w-full rounded-md"/>
+                )) : currentData.map((c) => (
+                    <div
+                      key={c.CaseID}
+                      className="rounded-sm hover:bg-gray-50 cursor-pointer  ring-1  ring-gray-400 px-2 py-1"
+                      onClick={() =>
+                        navigate(
+                          `/app/case/${c.CaseID}`
+                        )
+                      }
+                    >
+                      <CardHeader className="p-1 px-2">
+                        <div className="flex flex-row justify-between ">
+                        <CardTitle className={"flex flex-row gap-2 items-center"}>
+                          {c.CaseID} 
+                          <Badge className="bg-green-400" variant="invisible">
+                          {c.CaseStatus === 'NEW_POPDoc' ? "New" : "none" }
+                          </Badge>
+                        </CardTitle>        
+                          <span className="font-bold text-gray-500">{c.CreatedOn}</span>
+                        </div>
+                        <hr className="border-1 border-gray-500 rounded-md"/>
+                      </CardHeader>
+                      <CardContent className="flex justify-between px-2">
+                        <div className="space-y-1">
+                        <CaseField className={"text-md"}>
+                        <span> Product Name</span>
+                        </CaseField>
+                        <CaseField className={"text-md"}>
+                          {c.ProductName} 
+                        </CaseField>
+                        </div>
 
-                  <div className="flex flex-col items-end text-right gap-1">
-                  <CaseField className="flex gap-1 items-center">
-                    <span>SO Number - RMA Number</span>
-                  </CaseField>
-                  <CaseField className="flex gap-1 items-center">
-                    {m.SalesOrderNumber} / {m.RMANumber}
-                  </CaseField>
-                  </div>
-                </CardContent>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400">No Open Orders found</p>
-          )}
-        </CardContent>
+                        <div className="flex flex-col items-end text-right gap-1">
+                        <CaseField className="flex gap-1 items-center">
+                          <span>Product Number - Serial Number</span>
+                        </CaseField>
+                        <CaseField className="flex gap-1 items-center">
+                          {c.ProductNumber} / {c.SerialNumber}
+                        </CaseField>
+                        </div>
+                      </CardContent>
+                    </div>
+                  ))
+              }
+              </CardContent>
 
         {/* Pagination Controls */}
         <CardFooter className="items-center flex gap-4">
@@ -222,8 +210,6 @@ export default function Approvel() {
             Next
           </button>
         </CardFooter>
-                </div>
-                
         </Card>
 
             <Card className={"rounded-sm"}>

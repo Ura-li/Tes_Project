@@ -221,7 +221,7 @@ const QuotationDialog = ({
     setFieldErrors({});
     setLineErrors({});
     fetchUserAssign('apo');
-  }, []);
+  }, [defaultFormState]);
 
   const filteredUserAssign = roleAssign.filter(
     (user) => user.Role === "apo"

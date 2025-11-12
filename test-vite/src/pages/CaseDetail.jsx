@@ -777,8 +777,8 @@ const openPopup = () => {
     {
       icon: CircleChevronLeft,
       label: "",
-      onClick: () => navigate(`/app/viewcase`),
-      roles: ["admin", "fd","user", "apo", "ce","lg","celead","spv","ps","cm"]
+      onClick: () => navigate(`/app/`),
+      roles: ["admin", "fd","user", "apo", "ce","lg","celead","spv","ps","cm","apv"]
     },
     // { icon: SquareArrowOutUpRight, label: "",},
     { icon: Save, label: "Save", 
@@ -799,7 +799,7 @@ const openPopup = () => {
     },
     { icon: RotateCw, label: "Refresh", 
       onClick: () => window.location.reload(),
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps","cm"],
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps","cm","apv"],
     },
     { icon: MessageSquareText, label: "Quotation",onClick: () => handleQuotationOpenChange(),  roles: ["admin","cm"]},
     { icon: StepBack, label: "SRF", 
@@ -2027,7 +2027,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         
                         if(enumValue.startsWith("NEW_Assign")) {
                           const role = extractRoleFromStatus(enumValue);
-  // console.log("Extracted role:", role)
+                          
                           console.log("Mapped enum:", role);
                           
                           if(role) {
@@ -3343,7 +3343,28 @@ if (caseDetails.CaseStatus !== "Close") {
                   <CardTitle className={"text-lg"}>Invoice Information</CardTitle>
                   <hr />
                 </CardHeader>
-                <CardContent>
+                <CardContent className={"grid grid-cols-2"}>
+                  <CaseField label={"Invoice no"}  lock>
+                    <Input/>
+                  </CaseField>
+                  <CaseField label={"Invoice amount"} lock>
+                    <Input/>
+                  </CaseField>
+                  <CaseField label={"Invoice amount + VAT"} lock>
+                    <Input/>
+                  </CaseField>
+                  <CaseField label={"Amount received"} lock>
+                    <Input/>
+                  </CaseField>
+                  <CaseField label={"Payment type"} lock>
+                    <Input/>
+                  </CaseField>
+                  <CaseField label={"Amount received date"} lock>
+                    <Input/>
+                  </CaseField>
+                  <CaseField label={"Amount diff. reason"} lock>
+                    <Input/>
+                  </CaseField>
                 </CardContent>
               </Card>
             </div>

@@ -991,7 +991,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, materialOrderI
       icon: CopyXIcon,
       label: "Close MO",
       onClick: () => saveAndCloseMaterialOrder(),
-      hidden: currentRole !== 'ce' && currentRole !== 'celead',
+      hidden: currentRole !== 'ce' || currentRole !== 'celead' || currentRole !== 'admin' ,
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Cancel Order", hidden: true},

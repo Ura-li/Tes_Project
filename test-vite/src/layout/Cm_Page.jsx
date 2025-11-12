@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import QuotationDialog from "@/components/model/QuotationModal";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { STATUS_ENUM_TO_LABEL } from "@/pages/CaseDetail";
 
 
 export default function CashManagement() {
@@ -344,7 +345,7 @@ export default function CashManagement() {
                                     {c?.caseinformation.CasePriority || "Low"}
                                 </Badge>
                                 <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
-                                    {c.CaseStatus}
+                                    {STATUS_ENUM_TO_LABEL[c.CaseStatus]}
                                 </Badge>
                                 <p className='ml-auto text-xs text-gray-500 '>{c.CreatedOn}</p>
                                 </div>
@@ -354,7 +355,7 @@ export default function CashManagement() {
                                 <p className='text-md  font-semibold'>{c.UpdateOn ? new Date(c.UpdateOn).toLocaleString("id-ID") : "No Update"}</p>
                                 </div>
                                 {/* TODO FOR SLAMET : ADD A MF COLOR IN DIS BUTON */}
-                                <Button
+                                {/* <Button
                                     size="sm"
                                     variant="outline"
                                     className="top-3 right-3 z-10"
@@ -365,7 +366,7 @@ export default function CashManagement() {
                                         setQuotationMaterialItems(extractMaterialOrderLineItems(c));
                                         setShowQuotationDialog(true);
                                     }}
-                                >Process Quotation</Button>
+                                >Process Quotation</Button> */}
                             </Card>
                         )
                     )}
