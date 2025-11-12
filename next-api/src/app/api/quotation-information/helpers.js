@@ -57,7 +57,7 @@ export const normalizeLineItemPayload = (raw, requireApproval) => {
   return {
     lineItemId,
     price: new Prisma.Decimal(priceNumber),
-    approved: partApproved ?? false,
+    approved: partApproved ?? true,
   };
 };
 
