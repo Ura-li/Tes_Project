@@ -4,7 +4,7 @@ import { ServiceWork } from './services/service-work'
 export const Work = () => {
   return (
     <div>
-        <ServiceWork></ServiceWork>
+      <ServiceWork></ServiceWork>
     </div>
   )
 }

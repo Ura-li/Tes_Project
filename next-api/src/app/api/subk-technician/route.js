@@ -32,6 +32,7 @@ export async function GET(request) {
             // take: limit,
             orderBy: { Name: "asc" },
             include: {
+                bookingDetails: true,
                 resourceAccount: true, // include relation to ResourceAccount
             },
         });

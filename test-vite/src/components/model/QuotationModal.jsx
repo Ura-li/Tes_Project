@@ -143,7 +143,7 @@ const copyToClipboard = (value) => {
   toast.success(`Copied: ${value}`); // kalau kamu pakai react-hot-toast
 };
 
-export const QuotationDialog = ({
+const QuotationDialog = ({
   open,
   onOpenChange,
   caseId,
@@ -221,7 +221,7 @@ export const QuotationDialog = ({
     setFieldErrors({});
     setLineErrors({});
     fetchUserAssign('apo');
-  }, [defaultFormState]);
+  }, []);
 
   const filteredUserAssign = roleAssign.filter(
     (user) => user.Role === "apo"
@@ -239,7 +239,7 @@ export const QuotationDialog = ({
 
   useEffect(() => {
     syncLineItems(materialItems);
-  }, [materialItems, syncLineItems]);
+  }, [syncLineItems]);
 
   useEffect(() => {
     setForm((prev) => ({
@@ -510,7 +510,7 @@ export const QuotationDialog = ({
                       onValueChange={(value) => handleFieldChange("quoteDecision", value)}
                     >
                       <SelectTrigger className="w-full" disabled={formDisabled}>
-                        <SelectValue placeholder="Pilih keputusan" />
+                        <SelectValue placeholder="pilih"/>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="approve">Approve</SelectItem>
@@ -524,8 +524,25 @@ export const QuotationDialog = ({
                     )}
                   </CaseField>
                 )}
-                
-                {form.quoteDecision === "approve" && (
+                   <CaseField
+                  label="Labor Fee"
+                  star
+                  className={'gap-0 col-span-2 gap-x-5'}
+                  span={2}
+                >
+                  <Input
+                    disabled={formDisabled}
+                    value={form.laborFee}
+                    onChange={(e) => handleFieldChange("laborFee", e.target.value)}
+                    placeholder="Masukkan biaya labor"
+                    type="number"
+                    min="0"
+                  />
+                  {fieldErrors.laborFee && (
+                    <p className="text-xs text-red-500">{fieldErrors.laborFee}</p>
+                  )}
+                </CaseField>
+              {form.quoteDecision === "approve" && (
                 <CaseField
                   label="Select APO"
                   star={form.quoteDecision === "approve"}
@@ -562,20 +579,21 @@ export const QuotationDialog = ({
                 
               </div>
 
-              <div className="">
-                <CaseField
-                  label="Quotation Note"
-                  span={2}
-                  childClass="flex flex-col gap-2 w-full justify-center"
-                  className={'justify-center'}
-                >
-                  <Textarea
+              <CaseField
+                label="Pilihan Tambahan"
+                span={2}
+                childClass="flex flex-col gap-3 items-start"
+              >
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <Checkbox
+                    id="useNewQuotationNo"
                     disabled={formDisabled}
                     value={form.quotationNote}
                     onChange={(e) => handleFieldChange("quotationNote", e.target.value)}
                     placeholder="Catatan tambahan untuk quotation"
                     className="min-h-[120px]"
                   />
+                  </label>
                 </CaseField>
                 <CaseField
                   label="Pilihan Tambahan"

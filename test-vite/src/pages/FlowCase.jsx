@@ -16,7 +16,7 @@ import { PanelRight } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import Swal from 'sweetalert2'
-import { STATUS_LABELS } from './CaseDetail'
+import { STATUS_ENUM_TO_LABEL } from './CaseDetail'
 import { Label } from '@/components/ui/label'
 import { format } from 'date-fns'
 
@@ -358,7 +358,7 @@ console.log("CHECK FULLY DATA",filteredCases)
                           <Badge className="bg-gray-500">?</Badge>
                         )}
 
-                        <Badge className="bg-cyan-600">{c.CaseStatus}</Badge>
+                        <Badge className="bg-cyan-600">{STATUS_ENUM_TO_LABEL[c.CaseStatus]}</Badge>
                         <Badge>{c.caseinformation.CaseType}</Badge>
                         {c?.caseinformation.Owner === user.user.id ? (
                           <Badge className="bg-purple-500">Owner</Badge>
