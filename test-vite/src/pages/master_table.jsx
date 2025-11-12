@@ -773,44 +773,44 @@ export const Company_table = () => {
         <table className="min-w-full border-collapse">
           <thead className="sticky z-10 top-0 bg-gray-100">
             <tr>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap">No</th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer whitespace-nowrap">No</th>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Company")}>
                 Company  {getSortIcon("Company")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Email")}>
                 Email {getSortIcon("Email")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("PrimaryPhone")}>
                 Primary Phone {getSortIcon("PrimaryPhone")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("WhatsappNo")}>
                 Whatsapp {getSortIcon("WhatsappNo")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("AddressLine1")}>
                 Address Line 1 {getSortIcon("AddressLine1")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("AddressLine2")}>
                 Address Line 2 {getSortIcon("AddressLine2")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Country")}>
                 Country {getSortIcon("Country")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("StateProvince")}>
                 State/Province {getSortIcon("StateProvince")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("City")}>
                 City {getSortIcon("City")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer whitespace-nowrap"
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("ZipPostalCode")}>
                 Zip/Postal Code {getSortIcon("ZipPostalCode")}
               </th>
@@ -2085,32 +2085,31 @@ export const Product_table = () => {
         <table className="min-w-full border-collapse">
           <thead className="sticky z-10 top-0 bg-gray-100">
             <tr>
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductNumber")}>
+              <th className="p-3 text-sm font-semibold text-center border">No</th>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("ProductNumber")}>
                 Product Number {getSortIcon("ProductNumber")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductLine")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("ProductLine")}>
                 Product Line {getSortIcon("ProductLine")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductName")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("ProductName")}>
                 Product Name {getSortIcon("ProductName")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductType")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("ProductType")}>
                 Product Type {getSortIcon("ProductType")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductGroup")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("ProductGroup")}>
                 Product Group {getSortIcon("ProductGroup")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductTower")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("ProductTower")}>
                 Product Tower {getSortIcon("ProductTower")}
               </th>
               <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("HWPC")}
               >
                 HWPC {getSortIcon("HWPC")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border">Vendor</th>
               <th className="p-3 text-sm font-semibold text-center border">Actions</th>
             </tr>
           </thead>
@@ -2128,7 +2127,6 @@ export const Product_table = () => {
                   <td className="p-3 border">{p.product_type?.ProductGroup}</td>
                   <td className="p-3 border">{p.product_type?.ProductTower}</td>
                   <td className="p-3 border">{p.HWPC}</td>
-                  <td className="p-3 border">-</td>
                   <td className="flex items-center justify-center gap-2 p-3 border">
                     <ProductEdit ProductNumber={p.ProductNumber} onUpdate={fetchAllProducts} />
                     <ProductDelete ProductNumber={p.ProductNumber} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onUpdate={fetchAllProducts}/>
@@ -2359,25 +2357,25 @@ export const ProductType_table = () => {
             <tr className="text-sm text-gray-700 uppercase bg-gray-200">
               <th className="p-3 font-semibold text-center border">No</th> {/* ✅ ADDED: Kolom Nomor */}
               <th
-                className="p-3 font-semibold text-left border cursor-pointer"
+                className="p-3 font-semibold text-center border cursor-pointer"
                 onClick={() => requestSort("ProductTypeID")}
               >
                 ProductType ID {renderSortArrow("ProductTypeID")}
               </th>
               <th
-                className="p-3 font-semibold text-left border cursor-pointer"
+                className="p-3 font-semibold text-center border cursor-pointer"
                 onClick={() => requestSort("ProductTower")}
               >
                 Product Tower {renderSortArrow("ProductTower")}
               </th>
               <th
-                className="p-3 font-semibold text-left border cursor-pointer"
+                className="p-3 font-semibold text-center border cursor-pointer"
                 onClick={() => requestSort("ProductGroup")}
               >
                 Product Group {renderSortArrow("ProductGroup")}
               </th>
               <th
-                className="p-3 font-semibold text-left border cursor-pointer"
+                className="p-3 font-semibold text-center border cursor-pointer"
                 onClick={() => requestSort("ProductType")}
               >
                 Product Type {renderSortArrow("ProductType")}
@@ -2651,59 +2649,59 @@ export const WarrantyService_table = () => {
         <table className="w-full relative border-collapse">
           <thead className="sticky z-10 top-0 bg-gray-100">
             <tr>
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
+              <th className="p-3 text-sm font-semibold text-center border">No</th>
               <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Service_offerID")}
               >
                 Service offerID {renderSortIcon("Service_offerID")}
               </th>
               <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Service_description")}
               >
                 Service description {renderSortIcon("Service_description")}
               </th>
               <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("CTat_RTime")}
               >
                 Customer Tat {renderSortIcon("CTat_RTime")}
               </th>
               <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Price")}
               >
                 Price {renderSortIcon("Price")}
               </th>
               <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Shipping_Fee")}
               >
                 Shipping Fee {renderSortIcon("Shipping_Fee")}
               </th>
               <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("qty_ws")}
               >
                 Quantity {renderSortIcon("qty_ws")}
               </th>
               <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Tax")}
               >
                 Tax {renderSortIcon("Tax")}
               </th>
               <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Total")}
               >
                 Total {renderSortIcon("Total")}
               </th>
-              <th onClick={() => handleSort("WarrantyCondition")} className="p-3 text-sm font-semibold text-left border cursor-pointer">
+              <th onClick={() => handleSort("WarrantyCondition")} className="p-3 text-sm font-semibold text-center border cursor-pointer">
                 Warranty Condition {renderSortIcon("WarrantyCondition")}
               </th>
-              <th onClick={() => handleSort("CaseTypeServices")} className="p-3 text-sm font-semibold text-left border cursor-pointer">
+              <th onClick={() => handleSort("CaseTypeServices")} className="p-3 text-sm font-semibold text-center border cursor-pointer">
                 Case Type {renderSortIcon("CaseTypeServices")}
               </th>
               <th className="p-3 text-sm font-semibold text-center border">
@@ -3612,25 +3610,25 @@ export const Wo_table = () => {
               >
                 Work Order Type {getSortIcon("WorkOrderType")}
               </th>
-              <th
+              {/* <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Priority")}
               >
                 Priority {getSortIcon("Priority")}
-              </th>
+              </th> */}
               <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SystemStatus")}
               >
                 System Status {getSortIcon("SystemStatus")}
               </th>
-              <th
+              {/* <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SubStatus")}
               >
                 Sub Status {getSortIcon("SubStatus")}
-              </th>
-              <th
+              </th> */}
+              {/* <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("PreferredDay")}
               >
@@ -3641,7 +3639,7 @@ export const Wo_table = () => {
                 onClick={() => handleSort("PreferredTime")}
               >
                 Preferred Time {getSortIcon("PreferredTime")}
-              </th>
+              </th> */}
               <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("ShipmentCountry")}
@@ -3666,30 +3664,30 @@ export const Wo_table = () => {
               >
                 Owner {getSortIcon("Owner")}
               </th>
-              <th
+              {/* <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SLAJeopardy")}
               >
                 SLAJeopardy {getSortIcon("SLAJeopardy")}
-              </th>
+              </th> */}
               <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("DueDateCustomer")}
               >
                 DueDate Customer {getSortIcon("DueDateCustomer")}
               </th>
-              <th
+              {/* <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("CoverageWindow")}
               >
                 Coverage Window {getSortIcon("CoverageWindow")}
-              </th>
-              <th
+              </th> */}
+              {/* <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Response")}
               >
                 Response {getSortIcon("Response")}
-              </th>
+              </th> */}
               <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("OTCCode")}
@@ -3720,24 +3718,24 @@ export const Wo_table = () => {
               >
                 Latest Start DateTime Customer {getSortIcon("LatestStartDateTimeCustomer")}
               </th>
-              <th
+              {/* <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SLAReschedule")}
               >
                 SLAReschedule {getSortIcon("SLAReschedule")}
-              </th>
+              </th> */}
               <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("ActiveScheduleDate")}
               >
                 Active Schedule Date {getSortIcon("ActiveScheduleDate")}
               </th>
-              <th
+              {/* <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SLAErrorDescription")}
               >
                 SLA Error Description {getSortIcon("SLAErrorDescription")}
-              </th>
+              </th> */}
               <th
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("CasePriorityIndex")}
@@ -3804,27 +3802,27 @@ export const Wo_table = () => {
                     {WorkOrderItem.CaseID}
                   </td>
                   <td className="p-2 border">{WorkOrderItem.WorkOrderType}</td>
-                  <td className="p-2 border">{WorkOrderItem.Priority}</td>
+                  {/* <td className="p-2 border">{WorkOrderItem.Priority}</td> */}
                   <td className="p-2 border">{WorkOrderItem.SystemStatus}</td>
-                  <td className="p-2 border">{WorkOrderItem.SubStatus}</td>
+                  {/* <td className="p-2 border">{WorkOrderItem.SubStatus}</td>
                   <td className="p-2 border">{WorkOrderItem.PreferredDay}</td>
-                  <td className="p-2 border">{WorkOrderItem.PreferredTime}</td>
+                  <td className="p-2 border">{WorkOrderItem.PreferredTime}</td> */}
                   <td className="p-2 border">{WorkOrderItem.ShipmentCountry}</td>
                   <td className="p-2 border">{WorkOrderItem.ShipmentState}</td>
                   <td className="p-2 border">{WorkOrderItem.CreatedOn}</td>
                   <td className="p-2 border">{WorkOrderItem.Owner}</td>
-                  <td className="p-2 border">{WorkOrderItem.SLAJeopardy}</td>
+                  {/* <td className="p-2 border">{WorkOrderItem.SLAJeopardy}</td> */}
                   <td className="p-2 border">{WorkOrderItem.DueDateCustomer}</td>
-                  <td className="p-2 border">{WorkOrderItem.CoverageWindow}</td>
-                  <td className="p-2 border">{WorkOrderItem.Response}</td>
+                  {/* <td className="p-2 border">{WorkOrderItem.CoverageWindow}</td>
+                  <td className="p-2 border">{WorkOrderItem.Response}</td> */}
                   <td className="p-2 border">{WorkOrderItem.OTCCode}</td>
                   <td className="p-2 border">{WorkOrderItem.RequestedDateTimeCustomer}</td>
                   <td className="p-2 border">{WorkOrderItem.GuaranteedFixTimeCustomer}</td>
                   <td className="p-2 border">{WorkOrderItem.EarlyStartDateTimeCustomer}</td>
                   <td className="p-2 border">{WorkOrderItem.LatestStartDateTimeCustomer}</td>
-                  <td className="p-2 border">{WorkOrderItem.SLAReschedule}</td>
+                  {/* <td className="p-2 border">{WorkOrderItem.SLAReschedule}</td> */}
                   <td className="p-2 border">{WorkOrderItem.ActiveScheduleDate}</td>
-                  <td className="p-2 border">{WorkOrderItem.SLAErrorDescription}</td>
+                  {/* <td className="p-2 border">{WorkOrderItem.SLAErrorDescription}</td> */}
                   <td className="p-2 border">{WorkOrderItem.CasePriorityIndex}</td>
                   {/* <td className="p-2 border">{WorkOrderItem.PartnerStatus}</td>
                   <td className="p-2 border">{WorkOrderItem.WorkOrderDescription}</td>
@@ -6524,7 +6522,8 @@ export const BookingDetailsTable = () => {
       Swal.close();
     }
   };
-
+  
+  const [users, setUsers] = useState([]);
   // fetching user data for createdBy filter
   const fetchUsers = async () => {
     try {
@@ -6545,9 +6544,6 @@ export const BookingDetailsTable = () => {
     fetchBookingDetails();
     fetchUsers();
   }, []);
-
-  const [users, setUsers] = useState([]);
-  console.log("Users:", users);
 
   // derive unique options
   // const uniqueStatus = useMemo(() => {
@@ -6826,7 +6822,9 @@ export const BookingDetailsTable = () => {
                         : "-"}
                     </div>
                   </td>
-                  <td className="p-2 border">{
+                  <td className="p-2 border">
+                    {/* {console.log("users :", users)} */}
+                    {
                     users.find((u) => u.IDUser === item.ChangedBy)?.Username || "-"
                     }</td>
                   <td className="p-2 border">
@@ -7697,32 +7695,32 @@ export const ServiceCatalogTable = () => {
           {/* Header tabel dengan sticky class */}
           <thead className="sticky top-0 bg-gray-100 z-10">
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("ServiceCatalogID")}>
+              <th className="p-3 text-sm font-semibold text-center border">No</th>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("ServiceCatalogID")}>
                 Service Catalog ID {renderSortIcon("ServiceCatalogID")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("AssetID")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("AssetID")}>
                 Asset ID {renderSortIcon("AssetID")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Service_offerID")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("Service_offerID")}>
                 Service Offer ID {renderSortIcon("Service_offerID")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("PartNumber")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("PartNumber")}>
                 Part Number {renderSortIcon("PartNumber")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("WarrantyStatus")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("WarrantyStatus")}>
                 Warranty Status {renderSortIcon("WarrantyStatus")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Currency")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("Currency")}>
                 Currency {renderSortIcon("Currency")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Price")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("Price")}>
                 Price {renderSortIcon("Price")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Tax")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("Tax")}>
                 Tax {renderSortIcon("Tax")}
               </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Total")}>
+              <th className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("Total")}>
                 Total {renderSortIcon("Total")}
               </th>
               <th className="p-3 text-sm font-semibold text-center border">Actions</th>
