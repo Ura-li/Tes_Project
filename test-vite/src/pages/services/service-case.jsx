@@ -748,7 +748,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
     try {
       const moRes = await ApiCustomer.get(`/api/material-order?WOID=${workOrders.WOID}`);
       const mos = Array.isArray(moRes.data?.data) ? moRes.data.data : [];
-      const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed');
+      const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed' && String(mo.OrderStatus).toLowerCase() !== 'cancelled');
       if (mosNotClosed.length > 0) {
         Swal.close();
         Swal.fire({

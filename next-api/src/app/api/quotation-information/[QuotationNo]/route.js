@@ -96,6 +96,7 @@ export async function PATCH(request, { params }) {
         { status: 400 },
       );
     }
+    
 
     const lineItemIds = normalizedLineItems.map((item) => item.lineItemId);
     const uniqueLineItemIds = [...new Set(lineItemIds)];
@@ -201,8 +202,8 @@ export async function PATCH(request, { params }) {
         Approved: 'Quote_Approved',
         Rejected: 'Quote_Rejected',
       };
-
       targetStatusCase = statusMap[decisionValue] || 'Quote_Approved';
+
     } else {
       targetStatusCase = 'Pending_Quote';
     }
@@ -218,6 +219,8 @@ export async function PATCH(request, { params }) {
           },
       },
     };
+    
+    // return console.log(relatedLineItems)
     
 
     const quotation = await prisma.$transaction(async (tx) => {
@@ -304,6 +307,30 @@ export async function PATCH(request, { params }) {
           }),
         ),
       );
+
+      if (decisionValue === 'Rejected') {
+        await tx.materialorderlineitems.updateMany({
+          where: {
+            LineItemID: {
+              in: normalizedLineItems.map((item) => item.lineItemId),
+            },
+          },
+          data: {
+            Status: 'Cancelled',
+          },
+        });
+
+        await tx.materialorder.updateMany({
+          where: {
+            MOID: {
+              in: relatedLineItems.map((item) => item.materialorder?.MOID),
+            }
+          },
+          data:{
+            OrderStatus: 'Cancelled'
+          }
+        })
+      }
 
       const obsoleteIds = existingLineItems
         .filter((item) => !incomingIds.has(item.LineItemID))

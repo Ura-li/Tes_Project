@@ -94,7 +94,7 @@ import { parseNoteText } from "@/lib/utils.jsx";
 import SignatureWrite from "@/components/SignaturePad";
 import { description } from "@/components/sc-chart";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, formatAccountingRupiah } from "@/lib/utils";
 import { map, set } from "lodash";
 import QuotationDialog from "@/components/model/QuotationModal";
 /**
@@ -801,7 +801,7 @@ const openPopup = () => {
       onClick: () => window.location.reload(),
       roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps","cm"],
     },
-    { icon: MessageSquareText, label: "Quotation",onClick: () => handleQuotationOpenChange(),  roles: ["admin","cm"]},
+    { icon: MessageSquareText, label: "Quotation",onClick: () => handleQuotationOpenChange(true),  roles: ["admin","cm"]},
     { icon: StepBack, label: "SRF", 
       onClick: async () => {
         // return console.log(user);
@@ -1103,6 +1103,10 @@ const openPopup = () => {
                     ...payload,
                     userAssign: user.id !== payload?.userAssign ? payload.userAssign : user.id,
                 };
+                if(apiPayload.quoteDecision === "Rejected"){
+                  apiPayload.userAssign = caseDetails.workorder[0]?.OwnerID;
+                }
+                
                 console.log("Sending payload:", apiPayload);
                 const endpoint = payload.quotationNo
                     ? `/api/quotation-information/${payload.quotationNo}`
@@ -3262,29 +3266,33 @@ if (caseDetails.CaseStatus !== "Close") {
                  </CaseField>
                   <CaseField label={"Quotation amount"} lock> 
                   <Input 
-                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal || "---"}
+                    value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal)}
                   />
                  </CaseField>
                  <CaseField label={"VAT value (%)"} lock> 
                   <Input 
-                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue || "---"}
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue 
+                      ? caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue + "%" 
+                      : "---"}
                   />
                  </CaseField>
                    <CaseField label={"Quotation amount + VAT"} lock> 
                   <Input 
-                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal || "---"}
+                    value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal)}
                   />
                  </CaseField>
-                 <CaseField label={"Quotation request date"} lock> 
+                 <CaseField label={"Quotation Request date"} lock> 
                   <DatePicker 
                     value={new Date(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate)}
                   />
                  </CaseField>
-                  <CaseField label={"Quotation date"} lock> 
-                  <DatePicker 
-                    value={new Date(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationApprovedDate)}
-                  />
-                 </CaseField>
+                 {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationApprovedDate !== null && (
+                  <CaseField label={"Quotation Response date"} lock> 
+                    <DatePicker 
+                      value={new Date(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationApprovedDate)}
+                    />
+                  </CaseField>
+                 )}
                   <CaseField label={"Quote decision"} lock> 
                   <Input 
                     value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuoteDecision || "---"}

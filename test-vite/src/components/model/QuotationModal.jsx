@@ -221,7 +221,6 @@ const QuotationDialog = ({
     setFieldErrors({});
     setLineErrors({});
     fetchUserAssign('apo');
-    {console.log("KOntol",form, initialData)}
   }, [defaultFormState]);
 
   const filteredUserAssign = roleAssign.filter(
@@ -242,6 +241,8 @@ const QuotationDialog = ({
     syncLineItems(materialItems);
   }, [syncLineItems]);
 
+
+
   useEffect(() => {
     setForm((prev) => ({
       ...prev,
@@ -252,6 +253,26 @@ const QuotationDialog = ({
       quoteDecision: isPendingQuote ? prev.quoteDecision : "",
     }));
   }, [isPendingQuote, isQuoteRequested]);
+
+  useEffect(() =>{
+    if(form.quoteDecision === "reject") {
+      setForm((prevForm) => ({
+        ...prevForm,
+        lineItems: prevForm.lineItems.map((item) => ({
+          ...item,
+          partApproved: "no",
+        })),
+      }));
+    }else{
+      setForm((prevForm) => ({
+        ...prevForm,
+        lineItems: prevForm.lineItems.map((item) => ({
+          ...item,
+          partApproved: "yes",
+        })),
+      }));
+    }
+  }, [form.quoteDecision])
 
   const handleFieldChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -346,20 +367,21 @@ const QuotationDialog = ({
         ? "Approved"
         : "Rejected"
       : null;
-
-    const payload = {
-      quotationNo: existingQuotationNo,
-      quotationType: form.quotationType,
-      vatValue: form.vatValue,
-      quotationNote: form.quotationNote,
-      laborFee: form.laborFee,
-      quotationDate: form.quotationDate,
-      quoteApproveDate: isPendingQuote ? form.quoteApproveDate : null,
-      useNewQuotationNo: form.useNewQuotationNo,
-      sendWa: form.sendWa,
-      sendEmail: form.sendEmail,
-      quoteDecision: quoteDecisionValue,
-      userAssign: form.userAssign ?? createdBy.id,
+    
+      
+      const payload = {
+        quotationNo: existingQuotationNo,
+        quotationType: form.quotationType,
+        vatValue: form.vatValue,
+        quotationNote: form.quotationNote,
+        laborFee: form.laborFee,
+        quotationDate: form.quotationDate,
+        quoteApproveDate: isPendingQuote ? form.quoteApproveDate : null,
+        useNewQuotationNo: form.useNewQuotationNo,
+        sendWa: form.sendWa,
+        sendEmail: form.sendEmail,
+        quoteDecision: quoteDecisionValue,
+        userAssign: form.userAssign ?? createdBy.id,
       lineItems: form.lineItems.map((item) => ({
         lineItemId: item.internalId,
         price: item.price,
@@ -370,11 +392,13 @@ const QuotationDialog = ({
       caseId,
       createdBy: createdBy.id
     };
-
+    
+    // console.log("ON PAYLOAD KONT", form)
+    // return console.log("ON PAYLOAD KONT", payload)
+    
     // if(quoteDecisionValue === 'Rejected') pa
     onSubmit?.(payload);
   };
-  console.log("Form ",form)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
