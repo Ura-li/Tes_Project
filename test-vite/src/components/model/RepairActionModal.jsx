@@ -17,7 +17,7 @@ import { debounce } from "lodash";
 import { SearchCommandBlock } from "../sc-select";
 import ApiCustomer from "@/api";
 import { toast } from "sonner";
-export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, workOrders }) => {
+export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCancelWo, workOrders }) => {
   const [step, setStep] = useState("form");
   const [NMUList, setNMUList] = useState([]);
   const [NMUItemNeed, setNMUItemNeed] = useState(false);
@@ -39,6 +39,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, work
     ceAnalysis: "",
     repairAction: "",
     delayCode : null,
+    cancelReason: "",
   });
 
   const fetchServiceType = async (problemCategory) => {
@@ -212,6 +213,14 @@ console.log(formData);
         {step === "form" && (
           <Card className="mt-2">
             <CardContent className="grid grid-cols-4 gap-3">
+              {onCancelWo !== false && (
+                <CaseField label="Cancel Reason" lock={!canEdit} span={3} star={onCancelWo}>
+                  <Textarea
+                    onChange={(e) => handleChange("cancelReason", e.target.value)}
+                  />
+                </CaseField>
+              )}
+
               <CaseField label="Problem category" lock={!canEdit}>
                 <SearchCommandBlock
                   value={problemCategory}

@@ -97,6 +97,7 @@ import { toast } from "sonner";
 import { cn, formatAccountingRupiah } from "@/lib/utils";
 import { map, set } from "lodash";
 import QuotationDialog from "@/components/model/QuotationModal";
+import InvoiceDialog from "@/components/model/InvoiceModal"
 /**
  * TODO : 
  * ADDING THIS FUNCTION GLOBALLY OR MAKE THE CASE DETAIL INTO ONE
@@ -147,6 +148,7 @@ export const STATUS_ENUM_TO_LABEL = {
   PartAvailable: "Part Available",
   RepairProgress: "Repair Progress",
   FinishRepair: "Finish Repair",
+  CancelRepair: "Cancel Repair",
 };
 
 export const STATUS_LABELS = Object.keys(STATUS_ENUM_TO_LABEL);

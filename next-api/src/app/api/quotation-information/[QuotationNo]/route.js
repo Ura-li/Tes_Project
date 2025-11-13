@@ -307,8 +307,13 @@ export async function PATCH(request, { params }) {
           }),
         ),
       );
+      const rejectedLineItemIds = normalizedLineItems
+        .filter((item) => !item.approved)
+        .map((item) => item.lineItemId);
+      
 
       if (decisionValue === 'Rejected') {
+        
         await tx.materialorderlineitems.updateMany({
           where: {
             LineItemID: {
@@ -327,6 +332,29 @@ export async function PATCH(request, { params }) {
             }
           },
           data:{
+            OrderStatus: 'Cancelled'
+          }
+        })
+      } else if(rejectedLineItemIds.length > 0){
+        await tx.materialorderlineitems.updateMany({
+          where: {
+            LineItemID: { in: rejectedLineItemIds },
+          },
+          data:{
+            Status: 'Cancelled'
+          }
+        })
+
+        await tx.materialorder.updateMany({
+          where:{
+            MOID: {
+              in: relatedLineItems
+                .filter((item) => rejectedLineItemIds.includes(item.LineItemID))
+                .map((item) => item.materialorder?.MOID)
+                .filter((moid) => moid != null),
+            }
+          },
+          data: {
             OrderStatus: 'Cancelled'
           }
         })

@@ -99,6 +99,8 @@ export async function PATCH(request, { params }) {
         DefectDesc,
         RepairAction,
         ServiceTypeId,
+        CancelReason,
+        IsCancel
         } = body;
 
         // if (
@@ -163,7 +165,9 @@ export async function PATCH(request, { params }) {
             CEAnalysis: v => v,
             DefectDesc: v => v,
             RepairAction: v => v,
-            ServiceTypeId: v => v
+            ServiceTypeId: v => v,
+            CancelReason: v => v,
+            IsCancel: v => v
           };
           
           

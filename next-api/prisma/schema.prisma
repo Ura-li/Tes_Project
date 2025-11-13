@@ -237,6 +237,26 @@ model global_trade_check {
   caseinformation caseinformation[]
 }
 
+model invoicetable {
+  InvoiceNo         String         @id @db.VarChar(8)
+  QuotationNo       String         @db.VarChar(8)
+  quotation         quotationtable @relation(fields: [QuotationNo], references: [QuotationNo], onDelete: Restrict)
+  AmountReceive     Decimal        @default(0)
+  AmountDiff        Decimal        @default(0)
+  AmountDiffReason  String?        @db.Text
+  PaymentType       String?        @db.VarChar(20)
+  AmountReceiveDate DateTime       @default(now()) @db.DateTime(0)
+  AmountReceiveNote String?        @db.Text
+
+  SendWa      Boolean @default(false)
+  SendEmail   Boolean @default(false)
+  SendInvoice Boolean @default(false)
+  SendERF     Boolean @default(false)
+
+  CreatedBy     Int
+  CreatedByUser User @relation("UserInvoiceAdmin", fields: [CreatedBy], references: [IDUser], onDelete: Restrict)
+}
+
 model quotationtable {
   QuotationNo           String             @id @db.VarChar(8)
   QuotationType         QuotationType      @default(Simple)
@@ -256,6 +276,7 @@ model quotationtable {
 
   GrandTotal         Decimal?             @db.Decimal(10, 2) // Total akhir
   quotation_lineitem quotation_lineitem[]
+  invoicetable       invoicetable[]
 }
 
 model quotation_lineitem {
@@ -554,6 +575,7 @@ model User {
   caseNotes_created casenotes[] @relation("UserCreatedCaseNotes")
 
   quotationtable quotationtable[] @relation("UserQuotationAdmin")
+  invoicetable   invoicetable[]   @relation("UserInvoiceAdmin")
 }
 
 model warranty_services {
@@ -712,6 +734,9 @@ model workorder {
   CEAnalysis    String?      @db.Text
   DefectDesc    String?      @db.Text
   RepairAction  String?      @db.Text
+
+  IsCancel     Boolean @default(false)
+  CancelReason String? @db.Text
 
   @@unique([ServiceCatalogID])
   @@index([CaseID], map: "CaseID")
@@ -897,6 +922,7 @@ enum CaseStatus {
   Open
   InActive
   Close
+  Cancel //KELUPAAN KONTOL
   Active
   Monitor
   Pending_Customer_Action
