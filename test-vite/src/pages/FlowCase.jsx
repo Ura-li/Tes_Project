@@ -219,7 +219,7 @@ export const FlowCaseData = (user) => {
 
   const dataTime = [
     { status: "FinishRepair", data: { ...emptyData }, hide: user.user.role === "fd" || user.user.role === "admin" ? false : true },
-    { status: "NEW_POPDoc", data: { ...emptyData }, hide: user.user.role === "ps" || user.user.role === "admin" ? false : true },
+    { status: "NEW_POPDoc", data: { ...emptyData }, hide: user.user.role === "ps" || user.user.role === "fd" || user.user.role === "admin" ? false : true },
     { status: "NEW_AssignPS", data: { ...emptyData }, hide: user.user.role === "ps" || user.user.role === "admin" ? false : true },
     { status: "NEW_AssignCE", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
     { status: "Quote_Approved", data: { ...emptyData }, hide: user.user.role === "cm" || user.user.role === "admin" ? false : true},
