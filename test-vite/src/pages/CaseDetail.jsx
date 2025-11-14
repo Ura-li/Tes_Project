@@ -94,7 +94,7 @@ import { parseNoteText } from "@/lib/utils.jsx";
 import SignatureWrite from "@/components/SignaturePad";
 import { description } from "@/components/sc-chart";
 import { toast } from "sonner";
-import { cn, formatAccountingRupiah } from "@/lib/utils";
+import { cn, formatAccountingRupiah, formatDate } from "@/lib/utils";
 import { map, set } from "lodash";
 import QuotationDialog from "@/components/model/QuotationModal";
 import InvoiceDialog from "@/components/model/InvoiceModal"
@@ -299,6 +299,18 @@ export const TabsServiceCaseDetails = ({
   });
 
   const [signature, setSignature] = useState(null);
+
+  // Modal Quotation
+  const [openDialogQuotation, setOpenDialogQuotation] = useState(false);
+  const [quotationInitialData, setQuotationInitialData] = useState(null);
+  const [quotationMaterialItems, setQuotationMaterialItems] = useState([]);
+  const [quotationLoading, setQuotationLoading] = useState(false);
+  const [quotationSubmitting, setQuotationSubmitting] = useState(false);
+
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [invoiceData, setInvoiceData] = useState(null);
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
+  const [invoiceSubmitting, setInvoiceSubmitting] = useState(false);
 
   const handleCaseDetails = (field) => (value) => {
     setCaseDetails((prev) => ({ ...prev, [field]: value }));
@@ -870,6 +882,110 @@ const openPopup = () => {
     setOpenWorkOrder(true);
     setServiceCatalogType(type)
   };
+
+  const fetchInvoiceData = useCallback(async () => {
+    if (!caseDetails?.CaseID) return null;
+    setInvoiceLoading(true);
+    try {
+      const response = await ApiCustomer.get(
+        `/api/invoice-information?caseId=${caseDetails.CaseID}`
+      );
+      const payload = response.data?.data ?? null;
+      setInvoiceData(payload);
+      return payload;
+    } catch (error) {
+      console.error("Failed to fetch invoice:", error);
+      toast.error(
+        error.response?.data?.message ?? "Gagal mengambil data invoice."
+      );
+      return null;
+    } finally {
+      setInvoiceLoading(false);
+    }
+  }, [caseDetails?.CaseID]);
+
+  useEffect(() => {
+    if (!caseDetails?.CaseID) return;
+    fetchInvoiceData();
+  }, [caseDetails?.CaseID, fetchInvoiceData]);
+
+  const handleInvoiceOpenChange = (nextOpen = true) => {
+    setInvoiceDialogOpen(nextOpen);
+    if (nextOpen) {
+      fetchInvoiceData();
+    } else {
+      setInvoiceSubmitting(false);
+    }
+  };
+
+  const handleInvoiceSubmit = async (payload) => {
+    if (!caseDetails?.CaseID) return;
+    if (!user?.id) {
+      toast.error("User tidak valid. Silakan login kembali.");
+      return;
+    }
+    try {
+      setInvoiceSubmitting(true);
+      const hasInvoice = Boolean(payload.invoiceNo);
+      const endpoint = hasInvoice
+        ? `/api/invoice-information/${payload.invoiceNo}`
+        : "/api/invoice-information";
+      const method = hasInvoice ? "patch" : "post";
+      const requester =
+        method === "patch"
+          ? ApiCustomer.patch.bind(ApiCustomer)
+          : ApiCustomer.post.bind(ApiCustomer);
+
+      const requestBody = {
+        ...payload,
+      };
+
+      if (!hasInvoice) {
+        requestBody.createdBy = user.id;
+      }
+
+      const response = await requester(endpoint, requestBody);
+      setInvoiceData(response.data?.data ?? null);
+      toast.success(
+        hasInvoice
+          ? "Invoice berhasil diperbarui."
+          : "Invoice berhasil dibuat."
+      );
+      setInvoiceDialogOpen(false);
+      await fetchInvoiceData();
+    } catch (error) {
+      console.error("Failed to save invoice:", error);
+      const message =
+        error.response?.data?.message ?? "Gagal menyimpan invoice.";
+      toast.error(message);
+    } finally {
+      setInvoiceSubmitting(false);
+    }
+  };
+
+  const ensureInvoiceBeforeClose = async () => {
+    const data = await fetchInvoiceData();
+    if (!data) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Quotation belum tersedia",
+        text: "Buat quotation beserta invoice sebelum menutup case.",
+      });
+      return false;
+    }
+    if (!data.invoice) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Invoice belum tersedia",
+        text: "Input invoice terlebih dahulu sebelum menutup case.",
+        confirmButtonText: "Input Invoice",
+      });
+      handleInvoiceOpenChange(true);
+      return false;
+    }
+    return true;
+  };
+
   const saveAndCloseCase = async () => {
     // Role guard: only FD can close a Case
     const tokenUser = getUserFromToken();
@@ -889,6 +1005,11 @@ const openPopup = () => {
   //   });
   //   return;
   // }
+
+    const invoiceReady = await ensureInvoiceBeforeClose();
+    if (!invoiceReady) {
+      return;
+    }
 
     const confirmResult = await Swal.fire({
       title: "Confirm Save",
@@ -997,12 +1118,7 @@ const openPopup = () => {
     }
   };
 
-  // Modal Quotation
-  const [openDialogQuotation, setOpenDialogQuotation] = useState(false);
-  const [quotationInitialData, setQuotationInitialData] = useState(null);
-  const [quotationMaterialItems, setQuotationMaterialItems] = useState([]);
-  const [quotationLoading, setQuotationLoading] = useState(false);
-  const [quotationSubmitting, setQuotationSubmitting] = useState(false);
+
 
 
   const fieldMO = (caseDetails) => {
@@ -1163,6 +1279,18 @@ const openPopup = () => {
         };
     };
 
+  const invoiceSummary = invoiceData?.invoice;
+  const invoiceQuotation = invoiceData?.quotation;
+  const invoiceNotificationLabel =
+    [
+      invoiceSummary?.sendInvoice && "Invoice",
+      invoiceSummary?.sendWa && "WA",
+      invoiceSummary?.sendEmail && "Email",
+      invoiceSummary?.sendErf && "ERF",
+    ]
+      .filter(Boolean)
+      .join(", ") || "-";
+
   return (
     <>
       <div className="flex items-center border-1 sticky top-15 z-5 bg-gray-50 overflow-auto">
@@ -1227,6 +1355,17 @@ const openPopup = () => {
         />
       </div>
       <div>
+        <InvoiceDialog
+          open={invoiceDialogOpen}
+          onOpenChange={handleInvoiceOpenChange}
+          quotation={invoiceData?.quotation}
+          invoice={invoiceData?.invoice}
+          loading={invoiceLoading}
+          submitting={invoiceSubmitting}
+          onSubmit={handleInvoiceSubmit}
+        />
+      </div>
+      <div>
           <ServiceCase
             caseDetails={caseDetails}
             formData={caseNoteFormData}
@@ -1254,6 +1393,10 @@ const openPopup = () => {
             productForm={productForm}
             setProductForm={setProductForm}
             handleProductChange={handleProductChange}
+            invoiceLoading={invoiceLoading}
+            invoiceSummary={invoiceSummary}
+            invoiceQuotation={invoiceQuotation}
+            invoiceNotificationLabel={invoiceNotificationLabel}
           />
       </div>
     </>
@@ -1286,7 +1429,11 @@ export const ServiceCase = ({
   refreshFetchPage,
   productForm,
   setProductForm,
-  handleProductChange
+  handleProductChange,
+  invoiceLoading,
+  invoiceSummary,
+  invoiceQuotation,
+  invoiceNotificationLabel,
 }) => {
   const { open } = useSidebar();
 
@@ -3349,11 +3496,101 @@ if (caseDetails.CaseStatus !== "Close") {
               </Card>
              
               <Card className={"flex-col col-span-2"}>
-                <CardHeader>
-                  <CardTitle className={"text-lg"}>Invoice Information</CardTitle>
+                <CardHeader className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className={"text-lg"}>Invoice Information</CardTitle>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleInvoiceOpenChange(true)}
+                      disabled={invoiceLoading || caseDetails?.CaseStatus === "Close"}
+                    >
+                      {invoiceSummary ? "Edit Invoice" : "Buat Invoice"}
+                    </Button>
+                  </div>
                   <hr />
                 </CardHeader>
                 <CardContent>
+                  {invoiceLoading ? (
+                    <p className="text-sm text-muted-foreground">
+                      Memuat data invoice...
+                    </p>
+                  ) : invoiceSummary ? (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <CaseField label={"Quotation No"} lock>
+                        <Input value={invoiceQuotation?.quotationNo || "-"} readOnly />
+                      </CaseField>
+                      <CaseField label={"Invoice No"} lock>
+                        <Input value={invoiceSummary.invoiceNo} readOnly />
+                      </CaseField>
+                      <CaseField label={"Subtotal"} lock>
+                        <Input
+                          value={formatAccountingRupiah(invoiceQuotation?.subtotal)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Grand Total"} lock>
+                        <Input
+                          value={formatAccountingRupiah(invoiceQuotation?.grandTotal)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Amount Receive"} lock>
+                        <Input
+                          value={formatAccountingRupiah(invoiceSummary.amountReceive)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Amount Difference"} lock>
+                        <Input
+                          value={formatAccountingRupiah(invoiceSummary.amountDiff)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField
+                        label={"Alasan Selisih"}
+                        lock
+                        hide={!invoiceSummary.amountDiffReason}
+                      >
+                        <Input
+                          value={invoiceSummary.amountDiffReason || "-"}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Payment Type"} lock>
+                        <Input value={invoiceSummary.paymentType || "-"} readOnly />
+                      </CaseField>
+                      <CaseField label={"Tanggal Terima"} lock>
+                        <Input
+                          value={formatDate(invoiceSummary.amountReceiveDate)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Notifikasi"} lock>
+                        <Input value={invoiceNotificationLabel} readOnly />
+                      </CaseField>
+                      <CaseField label={"Catatan"} lock span={2}>
+                        <Textarea
+                          value={invoiceSummary.amountReceiveNote || "-"}
+                          rows={3}
+                          readOnly
+                        />
+                      </CaseField>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                      <p>Belum ada invoice untuk case ini.</p>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="w-fit"
+                        onClick={() => handleInvoiceOpenChange(true)}
+                        disabled={caseDetails?.CaseStatus === "Close"}
+                      >
+                        Buat Invoice
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
