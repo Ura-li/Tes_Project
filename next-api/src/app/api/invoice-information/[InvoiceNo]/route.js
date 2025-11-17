@@ -9,6 +9,11 @@ import {
 } from "../helpers";
 
 export async function PATCH(request, { params }) {
+  return NextResponse.json(
+    { success: false, message: "Belum ada patch. heheh" },
+    { status: 402 }
+  );
+  // return console.log("PATCH",request)
   try {
     const invoiceNo = params?.InvoiceNo;
     if (!invoiceNo) {

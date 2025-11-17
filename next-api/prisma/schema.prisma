@@ -241,8 +241,8 @@ model invoicetable {
   InvoiceNo         String         @id @db.VarChar(8)
   QuotationNo       String         @db.VarChar(8)
   quotation         quotationtable @relation(fields: [QuotationNo], references: [QuotationNo], onDelete: Restrict)
-  AmountReceive     Decimal        @default(0)
-  AmountDiff        Decimal        @default(0)
+  AmountReceive     Decimal        @default(0) @db.Decimal(12, 2) //AWKOAKOWKAOWKOAWK LUPA NAMBAHIN LIMIT DECIMAL AJG
+  AmountDiff        Decimal        @default(0) @db.Decimal(12, 2)
   AmountDiffReason  String?        @db.Text
   PaymentType       String?        @db.VarChar(20)
   AmountReceiveDate DateTime       @default(now()) @db.DateTime(0)

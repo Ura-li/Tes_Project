@@ -786,6 +786,7 @@ const openPopup = () => {
 
   // Deprecated: previously used for single textarea notes display
   // Replaced by notesList table
+  const [cancelState, setCancelState] = useState(false);
 
   const buttons = [
     {
@@ -808,7 +809,13 @@ const openPopup = () => {
     {
       icon: CopyX,
       label: "Close Case",
-      onClick: () => saveAndCloseCase(),
+      onClick: () => saveAndCloseCase(false),
+      roles: ["admin", "fd"],
+    },
+    {
+      icon: CopyX,
+      label: "Cancel Case",
+      onClick: () => saveAndCloseCase(true),
       roles: ["admin", "fd"],
     },
     { icon: RotateCw, label: "Refresh", 
@@ -938,6 +945,7 @@ const openPopup = () => {
 
       const requestBody = {
         ...payload,
+        caseId : caseDetails?.CaseID
       };
 
       if (!hasInvoice) {
@@ -953,6 +961,10 @@ const openPopup = () => {
       );
       setInvoiceDialogOpen(false);
       await fetchInvoiceData();
+      //do what after submit??
+      // IDK, just add the save and close again, maybe
+      // --miku21
+      saveAndCloseCase(cancelState);
     } catch (error) {
       console.error("Failed to save invoice:", error);
       const message =
@@ -974,6 +986,10 @@ const openPopup = () => {
       return false;
     }
     if (!data.invoice) {
+      /**
+       * TODO FOR SLAMET : 
+       * MAKE TIS CONFIRMATION INTO SOMETHING ELSE
+       */
       await Swal.fire({
         icon: "warning",
         title: "Invoice belum tersedia",
@@ -986,7 +1002,9 @@ const openPopup = () => {
     return true;
   };
 
-  const saveAndCloseCase = async () => {
+
+  const saveAndCloseCase = async (cancell = false) => {
+    setCancelState(cancell); //default initialization
     // Role guard: only FD can close a Case
     const tokenUser = getUserFromToken();
     if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'fd') {
@@ -1005,15 +1023,22 @@ const openPopup = () => {
   //   });
   //   return;
   // }
+  // return console.log(caseDetails?.asset_information?.WarrantyOTCCode?.WarrantyCondition);
+  if(caseDetails?.asset_information?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
 
     const invoiceReady = await ensureInvoiceBeforeClose();
     if (!invoiceReady) {
       return;
     }
+  }
 
+
+
+  const targetStatus = cancell ? "CANCEL" : "CLOSED"
+  const targetSystemCaseStatus = cancell ? "Cancel" : "Close"
     const confirmResult = await Swal.fire({
       title: "Confirm Save",
-      text: "This will give the Case status as CLOSED. Are you sure you want to save changes?",
+      text: "This will give the Case status as "+targetStatus+". Are you sure you want to save changes?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -1038,7 +1063,7 @@ const openPopup = () => {
       try {
         const woRes = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
         const workOrders = Array.isArray(woRes.data?.data) ? woRes.data.data : [];
-        const openWOs = workOrders.filter(wo => String(wo.SystemStatus).toUpperCase() !== 'CLOSED_POSTED');
+        const openWOs = workOrders.filter(wo => String(wo.SystemStatus).toUpperCase() !== 'CLOSED_POSTED' && String(wo.SystemStatus).toUpperCase() !== 'CLOSED_CANCELLED');
         if (openWOs.length > 0) {
           Swal.close();
           return Swal.fire({
@@ -1051,7 +1076,7 @@ const openPopup = () => {
         for (const wo of workOrders) {
           const moRes = await ApiCustomer.get(`/api/material-order?WOID=${wo.WOID}`);
           const mos = Array.isArray(moRes.data?.data) ? moRes.data.data : [];
-          const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed');
+          const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed' && String(mo.OrderStatus).toLowerCase() !== 'cancelled');
           if (mosNotClosed.length > 0) {
             Swal.close();
             return Swal.fire({
@@ -1074,7 +1099,7 @@ const openPopup = () => {
       const res = await ApiCustomer.patch(
         `/api/case-information/${caseDetails.CaseID}`,
         {
-          CaseStatus: "Close",
+          CaseStatus: targetSystemCaseStatus,
           CaseClosedDate: new Date().toISOString(), 
         }
       );

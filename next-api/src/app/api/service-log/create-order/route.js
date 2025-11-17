@@ -179,9 +179,11 @@ export async function POST(request) {
                     },
                 });
 
+                const noteWarranty = isOutWarranty ? 'Request Quotation' : "Order"
+
                 const noteLines = [
-                    "[NOTICE] Order Part",
-                    `Order Part : ${part.PartNumber ?? "-"} - ${part.PartDescription ?? "-"}`
+                    "[NOTICE] "+noteWarranty+" Part",
+                    `${noteWarranty} Part : ${part.PartNumber ?? "-"} - ${part.PartDescription ?? "-"}`
                 ];
 
                 if (isOutWarranty && part.Price !== undefined && part.Price !== null && part.Price !== "") {
@@ -206,7 +208,8 @@ export async function POST(request) {
                         ? String(materialOrderOwnerID)
                         : "-";
 
-                noteLines.push(`Requested to APO : ${requestedRecipient}`);
+                const targetQuotation = isOutWarranty ? "CM" : "APO"
+                noteLines.push(`Requested to ${targetQuotation} : ${requestedRecipient}`);
 
                 const noteText = noteLines.join("\n");
 
@@ -264,8 +267,12 @@ export async function POST(request) {
                 });
             }
 
+            
+            console.log("IS OUT WARRANRY ", isOutWarranty)
             const caseUpdateData = { CaseStatus: "PartRequest" };
             if(isOutWarranty) caseUpdateData.CaseStatus = "Quote_Requested"
+
+            console.log("IS OUT WARRANRY ", caseUpdateData)
             if (assignApoId !== null) {
                 caseUpdateData.Owner = assignApoId;
             }
@@ -304,13 +311,13 @@ export async function POST(request) {
                     },
                     model: "Case",
                     dataOld: previousCaseStatus,
-                    dataNew: "Part Request",
+                    dataNew: caseUpdateData.CaseStatus,
                     changedByUser: ownerIdNumber
                         ? {
                               connect: { IDUser: ownerIdNumber },
                           }
                         : undefined,
-                    logDescription: `Edit: change status from ${previousCaseStatus} to Part Request`,
+                    logDescription: `Edit: change status from ${previousCaseStatus} to ${caseUpdateData.CaseStatus}`,
                 },
                 include: includeChangedBy,
             });

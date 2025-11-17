@@ -343,7 +343,7 @@ console.log(formData);
         {step === "confirm" && (
           <div className="mt-4 space-y-4">
             <p className="text-sm text-muted-foreground">
-                <span className="text-red-600 font-semibold">⚠️ WARNING : Status Work Order akan berubah menjadi CLOSED_POSTED</span>
+                <span className="text-red-600 font-semibold">⚠️ WARNING : Status Work Order akan berubah menjadi {onCancelWo ? "CLOSED_CANCEL" : "CLOSED_POSTED"}</span>
               <br />Berikut adalah data yang akan dikirim:
             </p>
 

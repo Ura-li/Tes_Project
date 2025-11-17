@@ -370,6 +370,11 @@ export async function PATCH(request, { params }) {
         });
       }
 
+      /**
+       * NOTE : THIS TEMPORARY ADAPTABLE TABLE FUNCTION NOT WORKING
+       * FIND OUT WHY
+       * THE PRICE WAS NOT UPDATED
+       */
       await Promise.all(
         normalizedLineItems.map((item) =>
           tx.materialorderlineitems.update({

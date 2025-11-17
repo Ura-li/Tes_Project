@@ -256,8 +256,8 @@ const InvoiceDialog = ({
 
           <CaseField label="Amount Difference" lock>
             <Input
-              value={form.amountDiff}
-              onChange={(e) => handleChange("amountDiff", e.target.value)}
+              value={formatAccountingRupiah(form.amountDiff)}
+              readOnly
             />
           </CaseField>
 
