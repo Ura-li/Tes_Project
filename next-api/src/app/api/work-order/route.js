@@ -30,6 +30,7 @@ export async function GET(request) {
         const workorder = await prisma.workorder.findMany({
             where: whereCondition,
             include: {
+                owner: true,
                 caseinformation: {
                     include: {
                         site_account: true,

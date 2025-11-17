@@ -1509,9 +1509,8 @@ export const Assets_table = () => {
   const [goToPageInput, setGoToPageInput] = useState("");
 
   // dropdown filters
-  const [selectedProductName, setSelectedProductName] = useState("");
-  const [selectedProductNumber, setSelectedProductNumber] = useState("");
   const [selectedProductLine, setSelectedProductLine] = useState("");
+  const [selectedWarrantyStatus, setSelectedWarrantyStatus] = useState("");
 
   // sorting
   const [sortConfig, setSortConfig] = useState({ key: "AssetID", direction: "asc" });
@@ -1570,44 +1569,53 @@ export const Assets_table = () => {
   }, []);
 
   // unique filters
-  const uniqueProductNames = useMemo(
-    () => ["", ...new Set(assets.map(a => a?.product_information?.ProductName).filter(Boolean).sort())],
-    [assets]
-  );
-  const uniqueProductNumbers = useMemo(
-    () => ["", ...new Set(assets.map(a => a?.ProductNumber).filter(Boolean).sort())],
-    [assets]
-  );
   const uniqueProductLines = useMemo(
     () => ["", ...new Set(assets.map(a => a?.product_information?.ProductLine).filter(Boolean).sort())],
     [assets]
   );
+  const uniqueWarrantyStatus = useMemo(
+    () => ["", ...new Set(assets.map(a => a?.Warranty_Status).filter(Boolean).sort())],
+    [assets]
+  );
 
-  // filtering (search + dropdowns)
+
   useEffect(() => {
-    const q = debouncedSearchTerm.trim().toLowerCase();
-    const next = assets.filter(a => {
-      const pn = a?.product_information?.ProductName ?? "";
-      const pl = a?.product_information?.ProductLine ?? "";
-      const num = a?.ProductNumber ?? "";
+  const q = debouncedSearchTerm.trim().toLowerCase();
 
-      const fName   = !selectedProductName  || pn === selectedProductName;
-      const fNumber = !selectedProductNumber|| num === selectedProductNumber;
-      const fLine   = !selectedProductLine  || pl === selectedProductLine;
-      if (!(fName && fNumber && fLine)) return false;
+  const next = assets.filter(a => {
+    const productLine = a?.product_information?.ProductLine ?? "";
+    const warranty = a?.Warranty_Status ?? "";
 
-      if (!q) return true;
-      const haystack = [a?.AssetID, a?.SerialNumber, a?.SiteAccountID, a?.ContactID,       a?.product_information?.ProductName,
-      a?.product_information?.ProductLine,
+    // FILTER: Product Line
+    const fLine = !selectedProductLine || productLine === selectedProductLine;
+
+    // FILTER: Warranty
+    const fWarranty = !selectedWarrantyStatus || warranty === selectedWarrantyStatus;
+
+    if (!(fLine && fWarranty)) return false;
+
+    // SEARCH
+    if (!q) return true;
+
+    const haystack = [
+      a?.AssetID,
+      a?.SerialNumber,
       a?.ProductNumber,
-      a?.site_account?.Company, `${a?.contact_information?.FirstName ?? ""} ${a?.contact_information?.LastName ?? ""}` ,pn, pl, num, a?.Warranty_Status, a?.EOW_Date ? new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(a.EOW_Date))
-        : ""]
-        .map(v => (v ?? "").toString().toLowerCase()).join(" ");
-      return haystack.includes(q);
-    });
+      productLine,
+      warranty,
+      a?.site_account?.Company,
+      `${a?.contact_information?.FirstName ?? ""} ${a?.contact_information?.LastName ?? ""}`,
+    ]
+      .map(v => (v ?? "").toString().toLowerCase())
+      .join(" ");
+
+    return haystack.includes(q);
+  });
+
     setFilteredAssets(next);
     setCurrentPage(1);
-  }, [debouncedSearchTerm, assets, selectedProductName, selectedProductNumber, selectedProductLine]);
+  }, [debouncedSearchTerm, assets, selectedProductLine, selectedWarrantyStatus]);
+
 
   // sorting function
   const sortedAssets = useMemo(() => {
@@ -1684,9 +1692,8 @@ export const Assets_table = () => {
   };
 
   const resetFilters = () => {
-    setSelectedProductName("");
-    setSelectedProductNumber("");
     setSelectedProductLine("");
+    setSelectedWarrantyStatus("");
     setSearchTerm("");
     setCurrentPage(1);
     setSortConfig({ key: "AssetID", direction: "asc" });
@@ -1709,22 +1716,37 @@ export const Assets_table = () => {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 mb-6">
-        <select className="p-2 border rounded" value={selectedProductName} onChange={(e) => setSelectedProductName(e.target.value)}>
-          <option value="">Filter by Product Name</option>
-          {uniqueProductNames.map(v => <option key={v} value={v}>{v || "—"}</option>)}
-        </select>
-        <select className="p-2 border rounded" value={selectedProductNumber} onChange={(e) => setSelectedProductNumber(e.target.value)}>
-          <option value="">Filter by Product Number</option>
-          {uniqueProductNumbers.map(v => <option key={v} value={v}>{v || "—"}</option>)}
-        </select>
-        <select className="p-2 border rounded" value={selectedProductLine} onChange={(e) => setSelectedProductLine(e.target.value)}>
+        
+        {/* Product Line */}
+        <select 
+          className="p-2 border rounded" 
+          value={selectedProductLine} 
+          onChange={(e) => setSelectedProductLine(e.target.value)}
+        >
           <option value="">Filter by Product Line</option>
-          {uniqueProductLines.map(v => <option key={v} value={v}>{v || "—"}</option>)}
+          {uniqueProductLines.map(v => (
+            <option key={v} value={v}>{v || "—"}</option>
+          ))}
         </select>
-          <button
+
+        {/* Warranty Status */}
+        <select 
+          className="p-2 border rounded" 
+          value={selectedWarrantyStatus} 
+          onChange={(e) => setSelectedWarrantyStatus(e.target.value)}
+        >
+          <option value="">Filter by Warranty Status</option>
+          {uniqueWarrantyStatus.map(v => (
+            <option key={v} value={v}>{v || "—"}</option>
+          ))}
+        </select>
+
+        <button
           onClick={resetFilters}
           className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
-        >Reset Filter</button>
+        >
+          Reset Filter
+        </button>
       </div>
 
       {error && <p className="mb-2 text-red-500">{error}</p>}
@@ -2854,7 +2876,7 @@ export const Mo_table = () => {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [goToPageInput, setGoToPageInput] = useState("");
 
   // Sorting
@@ -3056,7 +3078,7 @@ export const Mo_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table with Sticky Header and Scroll */}
-      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[400px]">
+      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[800px]">
         <table className="w-full relative border-collapse">
           <thead className="sticky z-10 top-0 bg-gray-100">
             <tr>
@@ -3224,7 +3246,6 @@ export const Mo_table = () => {
               }
             }}
           >
-            <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={25}>25</option>
             <option value={50}>50</option>
@@ -3308,6 +3329,24 @@ export const Wo_table = () => {
     direction: "asc",
   });
 
+  const formatDate = (value) => {
+    if (!value) return "-";
+
+
+    const date = new Date(value);
+
+    // Cek apakah valid date
+    if (isNaN(date.getTime())) return value;
+
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date);
+  };
+
   const navigate = useNavigate();
 
   // Ambil unique values untuk dropdown filter, menggunakan useMemo untuk performa
@@ -3342,7 +3381,7 @@ export const Wo_table = () => {
   const uniqueOwner = useMemo(
     () => [
       "",
-      ...new Set(WorkOrderData.map((d) => d.Owner).filter(Boolean)),
+      ...new Set(WorkOrderData.map((d) => d.owner?.Name).filter(Boolean)),
     ],
     [WorkOrderData]
   );
@@ -3415,7 +3454,7 @@ export const Wo_table = () => {
       const matchSystemStatus = filterSystemStatus ? item.SystemStatus === filterSystemStatus : true;
       const matchShipmentCountry = filterShipmentCountry ? item.ShipmentCountry === filterShipmentCountry : true;
       const matchShipmentState = filterShipmentState ? item.ShipmentState === filterShipmentState : true;
-      const matchOwner = filterOwner ? item.Owner === filterOwner : true;
+      const matchOwner = filterOwner ? item.owner?.Name === filterOwner : true;
 
       return (
         matchSearch &&
@@ -3443,7 +3482,11 @@ export const Wo_table = () => {
       sorted.sort((a, b) => {
         const aVal = a[sortConfig.key];
         const bVal = b[sortConfig.key];
-
+      if (sortConfig.key === "ownerName") {
+        return sortConfig.direction === "asc"
+          ? a.owner?.Name?.localeCompare(b.owner?.Name)
+          : b.owner?.Name?.localeCompare(a.owner?.Name);
+      }
         if (typeof aVal === 'number' && typeof bVal === 'number') {
             return sortConfig.direction === "asc" ? aVal - bVal : bVal - aVal;
         }
@@ -3660,9 +3703,9 @@ export const Wo_table = () => {
               </th>
               <th
                 className="p-3 text-center border cursor-pointer"
-                onClick={() => handleSort("Owner")}
+                onClick={() => handleSort("ownerName")}
               >
-                Owner {getSortIcon("Owner")}
+                Owner {getSortIcon("ownerName")}
               </th>
               {/* <th
                 className="p-3 text-center border cursor-pointer"
@@ -3809,19 +3852,19 @@ export const Wo_table = () => {
                   <td className="p-2 border">{WorkOrderItem.PreferredTime}</td> */}
                   <td className="p-2 border">{WorkOrderItem.ShipmentCountry}</td>
                   <td className="p-2 border">{WorkOrderItem.ShipmentState}</td>
-                  <td className="p-2 border">{WorkOrderItem.CreatedOn}</td>
-                  <td className="p-2 border">{WorkOrderItem.Owner}</td>
+                  <td className="p-2 border">{formatDate(WorkOrderItem.CreatedOn)}</td>
+                  <td className="p-2 border">{WorkOrderItem.owner?.Name}</td>
                   {/* <td className="p-2 border">{WorkOrderItem.SLAJeopardy}</td> */}
-                  <td className="p-2 border">{WorkOrderItem.DueDateCustomer}</td>
+                  <td className="p-2 border">{formatDate(WorkOrderItem.DueDateCustomer)}</td>
                   {/* <td className="p-2 border">{WorkOrderItem.CoverageWindow}</td>
                   <td className="p-2 border">{WorkOrderItem.Response}</td> */}
                   <td className="p-2 border">{WorkOrderItem.OTCCode}</td>
-                  <td className="p-2 border">{WorkOrderItem.RequestedDateTimeCustomer}</td>
-                  <td className="p-2 border">{WorkOrderItem.GuaranteedFixTimeCustomer}</td>
-                  <td className="p-2 border">{WorkOrderItem.EarlyStartDateTimeCustomer}</td>
-                  <td className="p-2 border">{WorkOrderItem.LatestStartDateTimeCustomer}</td>
+                  <td className="p-2 border">{formatDate(WorkOrderItem.RequestedDateTimeCustomer)}</td>
+                  <td className="p-2 border">{formatDate(WorkOrderItem.GuaranteedFixTimeCustomer)}</td>
+                  <td className="p-2 border">{formatDate(WorkOrderItem.EarlyStartDateTimeCustomer)}</td>
+                  <td className="p-2 border">{formatDate(WorkOrderItem.LatestStartDateTimeCustomer)}</td>
                   {/* <td className="p-2 border">{WorkOrderItem.SLAReschedule}</td> */}
-                  <td className="p-2 border">{WorkOrderItem.ActiveScheduleDate}</td>
+                  <td className="p-2 border">{formatDate(WorkOrderItem.ActiveScheduleDate)}</td>
                   {/* <td className="p-2 border">{WorkOrderItem.SLAErrorDescription}</td> */}
                   <td className="p-2 border">{WorkOrderItem.CasePriorityIndex}</td>
                   {/* <td className="p-2 border">{WorkOrderItem.PartnerStatus}</td>
@@ -4042,7 +4085,6 @@ const sortedData = useMemo(() => {
         aVal = a[sortConfig.key];
         bVal = b[sortConfig.key];
       }
-
       // Handle null/undefined
       if (aVal === null || aVal === undefined) aVal = "";
       if (bVal === null || bVal === undefined) bVal = "";
