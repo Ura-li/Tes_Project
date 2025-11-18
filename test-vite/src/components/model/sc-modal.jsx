@@ -5263,6 +5263,20 @@ console.log("Asset Info OTC : ",isOutWarranty)
       );
     });
     const totalPages = Math.ceil(filteredPartCatalog.length / PAGE_SIZE);
+    const MAX_PAGES_SHOWN = 3;
+  const getPaginationPages = () => {
+    if (totalPages <= MAX_PAGES_SHOWN) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 2) {
+      return [1, 2, 3];
+    }
+    if (currentPage >= totalPages - 1) {
+      return [totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [currentPage - 1, currentPage, currentPage + 1];
+  };
+  const paginationPages = getPaginationPages();
     const currentPageData = useMemo(() => {
       const start = (currentPage - 1) * PAGE_SIZE;
       return filteredPartCatalog.slice(start, start + PAGE_SIZE);
@@ -5574,17 +5588,17 @@ console.log("Asset Info OTC : ",isOutWarranty)
                               />
                             </PaginationItem>
 
-                            {Array.from({ length: totalPages }, (_, i) => (
-                              <PaginationItem key={i}>
+                            {paginationPages.map((pages) => (
+                              <PaginationItem key={pages}>
                                 <PaginationLink
                                   href="#"
-                                  isActive={currentPage === i + 1}
+                                  isActive={currentPage === pages}
                                   onClick={(e) => {
                                     e.preventDefault();
-                                    handlePageChange(i + 1);
+                                    handlePageChange(pages);
                                   }}
                                 >
-                                  {i + 1}
+                                  {pages}
                                 </PaginationLink>
                               </PaginationItem>
                             ))}

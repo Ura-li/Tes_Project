@@ -63,7 +63,7 @@ export default function CashManagement() {
 
                 return dateB - dateA; // newest first
             });
-            const recentCases = sortedCases.slice(0, 3);
+            const recentCases = sortedCases.slice(0, 5);
             setCaseData(recentCases);
             return resCaseData.data.data;
         } catch (err) {
@@ -136,10 +136,11 @@ export default function CashManagement() {
         }
         try {
             setQuotationSubmitting(true);
-            // return console.log("Submit : ",payload)
+            const targetAssignUser = payload.quoteDecision === "Rejected" ? selectedCase.caseinformation.workorder[0].OwnerID : user.id !== payload?.userAssign ? payload.userAssign : user.id
+            // return console.log("Submit : ",targetAssignUser)
             const apiPayload = {
                 ...payload,
-                userAssign: user.id !== payload?.userAssign ? payload.userAssign : user.id,
+                userAssign: targetAssignUser,
             };
             console.log("Sending payload:", apiPayload);
             const endpoint = payload.quotationNo
