@@ -165,15 +165,16 @@ const QuotationDialog = ({
   const [lineErrors, setLineErrors] = useState({});
 
   const [roleAssign, setRoleAssign] = useState([]);
+  const [isDirty, setIsDirty] = useState(false);
 
-  const fetchUserAssign = async (role) => {
+  const fetchUserAssign = useCallback(async (role) => {
     try {
       const res = await ApiCustomer.get(`/api/user?role=${role}`);
       setRoleAssign(res.data.data);
     } catch (err) {
       console.error("Error fetching role: ", err);
     }
-  };
+  }, []);
 
   const defaultFormState = useMemo(() => {
     const quotationDate =
@@ -216,12 +217,25 @@ const QuotationDialog = ({
 
   const [form, setForm] = useState(defaultFormState);
 
-  useEffect(() => {
+  const resetForm = useCallback(() => {
     setForm(defaultFormState);
     setFieldErrors({});
     setLineErrors({});
-    fetchUserAssign('apo');
+    setIsDirty(false);
   }, [defaultFormState]);
+
+  useEffect(() => {
+    fetchUserAssign("apo");
+  }, [fetchUserAssign]);
+
+  useEffect(() => {
+    if (isDirty) return;
+    resetForm();
+  }, [defaultFormState, isDirty, resetForm]);
+
+  useEffect(() => {
+    setIsDirty(false);
+  }, [caseId, status]);
 
   const filteredUserAssign = roleAssign.filter(
     (user) => user.Role === "apo"
@@ -241,6 +255,8 @@ const QuotationDialog = ({
     syncLineItems(materialItems);
   }, [syncLineItems]);
 
+
+
   useEffect(() => {
     setForm((prev) => ({
       ...prev,
@@ -252,8 +268,32 @@ const QuotationDialog = ({
     }));
   }, [isPendingQuote, isQuoteRequested]);
 
+  useEffect(() =>{
+    if(form.quoteDecision === "reject") {
+      setForm((prevForm) => ({
+        ...prevForm,
+        lineItems: prevForm.lineItems.map((item) => ({
+          ...item,
+          partApproved: "no",
+        })),
+      }));
+    }else{
+      setForm((prevForm) => ({
+        ...prevForm,
+        lineItems: prevForm.lineItems.map((item) => ({
+          ...item,
+          partApproved: "yes",
+        })),
+      }));
+    }
+  }, [form.quoteDecision])
+
   const handleFieldChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => {
+      if (prev[field] === value) return prev;
+      setIsDirty(true);
+      return { ...prev, [field]: value };
+    });
     setFieldErrors((prev) => {
       if (!prev[field]) return prev;
       const next = { ...prev };
@@ -267,12 +307,19 @@ const QuotationDialog = ({
   };
 
   const handleLineItemChange = (internalId, field, value) => {
-    setForm((prev) => ({
-      ...prev,
-      lineItems: prev.lineItems.map((item) =>
-        item.internalId === internalId ? { ...item, [field]: value } : item
-      ),
-    }));
+    setForm((prev) => {
+      let hasChanged = false;
+      const nextLineItems = prev.lineItems.map((item) => {
+        if (item.internalId !== internalId) return item;
+        if (item[field] === value) return item;
+        hasChanged = true;
+        return { ...item, [field]: value };
+      });
+
+      if (!hasChanged) return prev;
+      setIsDirty(true);
+      return { ...prev, lineItems: nextLineItems };
+    });
 
     setLineErrors((prev) => {
       const existing = prev[internalId];
@@ -336,7 +383,7 @@ const QuotationDialog = ({
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (formDisabled) return;
     if (!validateForm()) return;
 
@@ -345,20 +392,21 @@ const QuotationDialog = ({
         ? "Approved"
         : "Rejected"
       : null;
-
-    const payload = {
-      quotationNo: existingQuotationNo,
-      quotationType: form.quotationType,
-      vatValue: form.vatValue,
-      quotationNote: form.quotationNote,
-      laborFee: form.laborFee,
-      quotationDate: form.quotationDate,
-      quoteApproveDate: isPendingQuote ? form.quoteApproveDate : null,
-      useNewQuotationNo: form.useNewQuotationNo,
-      sendWa: form.sendWa,
-      sendEmail: form.sendEmail,
-      quoteDecision: quoteDecisionValue,
-      userAssign: form.userAssign ?? createdBy.id,
+    
+      
+      const payload = {
+        quotationNo: existingQuotationNo,
+        quotationType: form.quotationType,
+        vatValue: form.vatValue,
+        quotationNote: form.quotationNote,
+        laborFee: form.laborFee,
+        quotationDate: form.quotationDate,
+        quoteApproveDate: isPendingQuote ? form.quoteApproveDate : null,
+        useNewQuotationNo: form.useNewQuotationNo,
+        sendWa: form.sendWa,
+        sendEmail: form.sendEmail,
+        quoteDecision: quoteDecisionValue,
+        userAssign: form.userAssign ?? createdBy.id,
       lineItems: form.lineItems.map((item) => ({
         lineItemId: item.internalId,
         price: item.price,
@@ -369,11 +417,18 @@ const QuotationDialog = ({
       caseId,
       createdBy: createdBy.id
     };
-
+    
+    // console.log("ON PAYLOAD KONT", form)
+    // return console.log("ON PAYLOAD KONT", payload)
+    
     // if(quoteDecisionValue === 'Rejected') pa
-    onSubmit?.(payload);
+    try {
+      await Promise.resolve(onSubmit?.(payload));
+      resetForm();
+    } catch (error) {
+      console.error("Failed to submit quotation:", error);
+    }
   };
-  console.log("Form ",form)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

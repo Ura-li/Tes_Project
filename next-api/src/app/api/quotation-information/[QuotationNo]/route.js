@@ -96,6 +96,7 @@ export async function PATCH(request, { params }) {
         { status: 400 },
       );
     }
+    
 
     const lineItemIds = normalizedLineItems.map((item) => item.lineItemId);
     const uniqueLineItemIds = [...new Set(lineItemIds)];
@@ -201,8 +202,8 @@ export async function PATCH(request, { params }) {
         Approved: 'Quote_Approved',
         Rejected: 'Quote_Rejected',
       };
-
       targetStatusCase = statusMap[decisionValue] || 'Quote_Approved';
+
     } else {
       targetStatusCase = 'Pending_Quote';
     }
@@ -218,6 +219,8 @@ export async function PATCH(request, { params }) {
           },
       },
     };
+    
+    // return console.log(relatedLineItems)
     
 
     const quotation = await prisma.$transaction(async (tx) => {
@@ -304,6 +307,58 @@ export async function PATCH(request, { params }) {
           }),
         ),
       );
+      const rejectedLineItemIds = normalizedLineItems
+        .filter((item) => !item.approved)
+        .map((item) => item.lineItemId);
+      
+
+      if (decisionValue === 'Rejected') {
+        
+        await tx.materialorderlineitems.updateMany({
+          where: {
+            LineItemID: {
+              in: normalizedLineItems.map((item) => item.lineItemId),
+            },
+          },
+          data: {
+            Status: 'Cancelled',
+          },
+        });
+
+        await tx.materialorder.updateMany({
+          where: {
+            MOID: {
+              in: relatedLineItems.map((item) => item.materialorder?.MOID),
+            }
+          },
+          data:{
+            OrderStatus: 'Cancelled'
+          }
+        })
+      } else if(rejectedLineItemIds.length > 0){
+        await tx.materialorderlineitems.updateMany({
+          where: {
+            LineItemID: { in: rejectedLineItemIds },
+          },
+          data:{
+            Status: 'Cancelled'
+          }
+        })
+
+        await tx.materialorder.updateMany({
+          where:{
+            MOID: {
+              in: relatedLineItems
+                .filter((item) => rejectedLineItemIds.includes(item.LineItemID))
+                .map((item) => item.materialorder?.MOID)
+                .filter((moid) => moid != null),
+            }
+          },
+          data: {
+            OrderStatus: 'Cancelled'
+          }
+        })
+      }
 
       const obsoleteIds = existingLineItems
         .filter((item) => !incomingIds.has(item.LineItemID))
@@ -315,6 +370,11 @@ export async function PATCH(request, { params }) {
         });
       }
 
+      /**
+       * NOTE : THIS TEMPORARY ADAPTABLE TABLE FUNCTION NOT WORKING
+       * FIND OUT WHY
+       * THE PRICE WAS NOT UPDATED
+       */
       await Promise.all(
         normalizedLineItems.map((item) =>
           tx.materialorderlineitems.update({
