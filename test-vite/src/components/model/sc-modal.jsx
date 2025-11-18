@@ -5265,7 +5265,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
   const MAX_PAGES_SHOWN = 3;
 
     const totalPages = Math.ceil(filteredPartCatalog.length / PAGE_SIZE);
-    const MAX_PAGES_SHOWN = 3;
+    
   const getPaginationPages = () => {
     if (totalPages <= MAX_PAGES_SHOWN) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -5283,20 +5283,6 @@ console.log("Asset Info OTC : ",isOutWarranty)
       const start = (currentPage - 1) * PAGE_SIZE;
       return filteredPartCatalog.slice(start, start + PAGE_SIZE);
     }, [filteredPartCatalog, currentPage]);
-
-      const getPaginationPages = () => {
-    if (totalPages <= MAX_PAGES_SHOWN) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-    if (currentPage <= 2) {
-      return [1, 2, 3];
-    }
-    if (currentPage >= totalPages - 1) {
-      return [totalPages - 2, totalPages - 1, totalPages];
-    }
-    return [currentPage - 1, currentPage, currentPage + 1];
-  };
-  const paginationPages = getPaginationPages();
 
     const handlePageChange = (page) => {
       if (page >= 1 && page <= totalPages) {
