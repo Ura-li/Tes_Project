@@ -1422,6 +1422,7 @@ const openPopup = () => {
             invoiceSummary={invoiceSummary}
             invoiceQuotation={invoiceQuotation}
             invoiceNotificationLabel={invoiceNotificationLabel}
+            handleInvoiceOpenChange={handleInvoiceOpenChange}
           />
       </div>
     </>
@@ -1459,6 +1460,7 @@ export const ServiceCase = ({
   invoiceSummary,
   invoiceQuotation,
   invoiceNotificationLabel,
+  handleInvoiceOpenChange
 }) => {
   const { open } = useSidebar();
 
@@ -3181,7 +3183,7 @@ if (caseDetails.CaseStatus !== "Close") {
                             <TableCell></TableCell>
                             <TableCell>{work.owner?.Name}</TableCell>
                             <TableCell>{work.owner?.Name}</TableCell>
-                            <TableCell>{work.CreatedOn}</TableCell>
+                            <TableCell>{formatDate(work.CreatedOn)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -3214,18 +3216,25 @@ if (caseDetails.CaseStatus !== "Close") {
                           <TableRow 
                           key={material.MOID}
                           onClick = {() => navigate(`/app/material-order/${material.MOID}`)}
-                          className="cursor-pointer hover:bg-gray-300"
+                           className={
+                            material.OrderStatus === "New" ? "cursor-pointer bg-green-100" :
+                            material.OrderStatus === "Shipped" ? "cursor-pointer bg-yellow-100" :
+                            material.OrderStatus === "Ordered" ? "cursor-pointer bg-blue-100" :
+                            material.OrderStatus === "Closed" ? "cursor-pointer bg-gray-100" :
+                            material.OrderStatus === "BackOrdered" ? "cursor-pointer bg-purple-100" 
+                            : "cursor-pointer bg-red-100"
+                          }
                           >
                             <TableCell className="font-medium">
                                 {material.MOID} on {material.WOID}
                             </TableCell>
                             <TableCell>{material.workorder?.CaseID}</TableCell>
-                            <TableCell>{material.CreatedOn}</TableCell>
+                            <TableCell>{formatDate(material.CreatedOn)}</TableCell>
                             <TableCell>{material.OrderStatus}</TableCell>
                             <TableCell>{material.OrderType}</TableCell>
                             <TableCell>{material.owner?.Name}</TableCell>
                             <TableCell>{material.WOID}</TableCell>
-                            <TableCell>{material.ReadyForClosureDate}</TableCell>
+                            <TableCell>{formatDate(material.ReadyForClosureDate)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>

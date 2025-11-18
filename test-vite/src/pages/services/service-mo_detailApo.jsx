@@ -558,7 +558,7 @@ useEffect(() => {
   let canEdit;
   let canEditCE;
   const allowedRoles = ["apo","lg","admin"]
-  if (moLineItems?.Status !== "Closed") {
+  if (moLineItems?.Status !== "Closed" && moLineItems?.Status !== "Cancelled") {
     canEditCE = user?.role  === "ce" || user?.role === "celead" || user?.role === "admin"
     canEdit = allowedRoles.includes(user?.role)
   } else {
@@ -568,12 +568,17 @@ useEffect(() => {
 
   return (
     <>
-      {moLineItems.Status === "Closed" && (
+      {moLineItems.Status === "Closed" ? (
         <div className="p-4 my-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
-          This material order line item is <strong>read-only</strong> because it
-          is <strong>Closed</strong>.
+          This material order line is <strong>read-only</strong> because it is{" "}
+          <strong>Closed</strong>.
+          </div>
+          ) : moLineItems.Status === "Cancelled" ? (
+        <div className="p-4 my-2 text-red-700 bg-red-100 border-l-4 border-red-500">
+          This material order line is <strong>read-only</strong> because it is{" "}
+          <strong>Cancelled</strong>.
         </div>
-      )}
+      ) : null}
       {moLineItems.MOID ? (
         <TabsServiceMOLineItems
           MOLineDetails={MODetailInput}

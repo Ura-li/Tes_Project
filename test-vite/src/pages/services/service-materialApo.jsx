@@ -44,6 +44,7 @@ import { AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion";
 import CaseField from "@/components/CaseField";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/utils";
 
 export const RMA_STATUS_OPTIONS = [
   { value: "InOutCE", label: "In & On Hand CE" },
@@ -269,15 +270,13 @@ export const ServiceMaterialApo = () => {
     );
   }
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    return new Date(dateString).toLocaleString();
-  };
+   
+
   let canEditapo;
   const allowedRoles = ["apo", "lg", "admin"];
 
     
-  if (materialOrders?.OrderStatus === "Closed") {
+  if (materialOrders?.OrderStatus === "Closed" || materialOrders?.OrderStatus === "Cancelled") {
     canEditapo = false;
   } else {
     canEditapo = allowedRoles.includes(user?.role);
@@ -287,12 +286,17 @@ export const ServiceMaterialApo = () => {
   
   return (
     <div>
-      {materialOrders.OrderStatus === "Closed" && (
+      {materialOrders.OrderStatus === "Closed" ? (
         <div className="p-4 my-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
           This material order is <strong>read-only</strong> because it is{" "}
           <strong>Closed</strong>.
+          </div>
+          ) : materialOrders.OrderStatus === "Cancelled" ? (
+        <div className="p-4 my-2 text-red-700 bg-red-100 border-l-4 border-red-500">
+          This material order is <strong>read-only</strong> because it is{" "}
+          <strong>Cancelled</strong>.
         </div>
-      )}
+      ) : null}
       <TabsServiceMO 
         materialOrders={materialOrders} 
         updatedLineItems={updatedLineItems}
@@ -600,13 +604,23 @@ export const ServiceMaterialApo = () => {
                   </TableHeader>
 
                   <TableBody>
-                    <TableRow key={materialOrders.MOID}>
+                    <TableRow key={materialOrders.MOID}
+                    className={
+                        materialOrders.OrderStatus === "New" ? "cursor-pointer bg-green-100" :
+                        materialOrders.OrderStatus === "Shipped" ? "cursor-pointer bg-yellow-100" :
+                        materialOrders.OrderStatus === "Ordered" ? "cursor-pointer bg-blue-100" :
+                        materialOrders.OrderStatus === "Closed" ? "cursor-pointer bg-gray-100" :
+                        materialOrders.OrderStatus === "BackOrdered" ? "cursor-pointer bg-purple-100" 
+                        : "cursor-pointer bg-red-100"
+                      }
+                    
+                    >
                       <TableCell>{materialOrders.MOID}</TableCell>
                       <TableCell>{materialOrders.workorder?.CaseID}</TableCell>
                       <TableCell>{formatDate(materialOrders.CreatedOn)}</TableCell>
                       <TableCell>{materialOrders.OrderStatus}</TableCell>
                       <TableCell>{materialOrders.OrderType}</TableCell>
-                      <TableCell>{materialOrders.ReadyForClosureDate}</TableCell>
+                      <TableCell>{formatDate(materialOrders.ReadyForClosureDate)}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -643,7 +657,14 @@ export const ServiceMaterialApo = () => {
                       <TableRow 
                       key={lineitem.LineItemID}
                       onClick={() => navigate(`/app/mo_detail/${lineitem.LineItemID}`)}
-                      className="cursor-pointer hover:bg-gray-300"
+                      className={
+                        lineitem.Status === "New" ? "cursor-pointer bg-green-100" :
+                        lineitem.Status === "Shipped" ? "cursor-pointer bg-yellow-100" :
+                        lineitem.Status === "Ordered" ? "cursor-pointer bg-blue-100" :
+                        lineitem.Status === "Closed" ? "cursor-pointer bg-gray-100" :
+                        lineitem.Status === "BackOrdered" ? "cursor-pointer bg-purple-100" 
+                        : "cursor-pointer bg-red-100"
+                      }
                       >
                         <TableCell className="font-medium">
                             {lineitem.MOID} - {lineitem.LineNumber}

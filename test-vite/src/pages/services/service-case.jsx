@@ -720,7 +720,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
     },
     {
       icon: CopyX,
-      label: "Cancel WOKONTOL",
+      label: "Cancel WO",
       onClick:async () => {
         const isValid = await validate();
         if (isValid !== false) {
