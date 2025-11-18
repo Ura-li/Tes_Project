@@ -94,9 +94,10 @@ import { parseNoteText } from "@/lib/utils.jsx";
 import SignatureWrite from "@/components/SignaturePad";
 import { description } from "@/components/sc-chart";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, formatAccountingRupiah, formatDate } from "@/lib/utils";
 import { map, set } from "lodash";
 import QuotationDialog from "@/components/model/QuotationModal";
+import InvoiceDialog from "@/components/model/InvoiceModal"
 /**
  * TODO : 
  * ADDING THIS FUNCTION GLOBALLY OR MAKE THE CASE DETAIL INTO ONE
@@ -147,6 +148,7 @@ export const STATUS_ENUM_TO_LABEL = {
   PartAvailable: "Part Available",
   RepairProgress: "Repair Progress",
   FinishRepair: "Finish Repair",
+  CancelRepair: "Cancel Repair",
 };
 
 export const STATUS_LABELS = Object.keys(STATUS_ENUM_TO_LABEL);
@@ -297,6 +299,18 @@ export const TabsServiceCaseDetails = ({
   });
 
   const [signature, setSignature] = useState(null);
+
+  // Modal Quotation
+  const [openDialogQuotation, setOpenDialogQuotation] = useState(false);
+  const [quotationInitialData, setQuotationInitialData] = useState(null);
+  const [quotationMaterialItems, setQuotationMaterialItems] = useState([]);
+  const [quotationLoading, setQuotationLoading] = useState(false);
+  const [quotationSubmitting, setQuotationSubmitting] = useState(false);
+
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [invoiceData, setInvoiceData] = useState(null);
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
+  const [invoiceSubmitting, setInvoiceSubmitting] = useState(false);
 
   const handleCaseDetails = (field) => (value) => {
     setCaseDetails((prev) => ({ ...prev, [field]: value }));
@@ -772,6 +786,7 @@ const openPopup = () => {
 
   // Deprecated: previously used for single textarea notes display
   // Replaced by notesList table
+  const [cancelState, setCancelState] = useState(false);
 
   const buttons = [
     {
@@ -794,14 +809,20 @@ const openPopup = () => {
     {
       icon: CopyX,
       label: "Close Case",
-      onClick: () => saveAndCloseCase(),
+      onClick: () => saveAndCloseCase(false),
+      roles: ["admin", "fd"],
+    },
+    {
+      icon: CopyX,
+      label: "Cancel Case",
+      onClick: () => saveAndCloseCase(true),
       roles: ["admin", "fd"],
     },
     { icon: RotateCw, label: "Refresh", 
       onClick: () => window.location.reload(),
       roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps","cm"],
     },
-    { icon: MessageSquareText, label: "Quotation",onClick: () => handleQuotationOpenChange(),  roles: ["admin","cm"]},
+    { icon: MessageSquareText, label: "Quotation",onClick: () => handleQuotationOpenChange(true),  roles: ["admin","cm"]},
     { icon: StepBack, label: "SRF", 
       onClick: async () => {
         // return console.log(user);
@@ -868,7 +889,122 @@ const openPopup = () => {
     setOpenWorkOrder(true);
     setServiceCatalogType(type)
   };
-  const saveAndCloseCase = async () => {
+
+  const fetchInvoiceData = useCallback(async () => {
+    if (!caseDetails?.CaseID) return null;
+    setInvoiceLoading(true);
+    try {
+      const response = await ApiCustomer.get(
+        `/api/invoice-information?caseId=${caseDetails.CaseID}`
+      );
+      const payload = response.data?.data ?? null;
+      setInvoiceData(payload);
+      return payload;
+    } catch (error) {
+      console.error("Failed to fetch invoice:", error);
+      toast.error(
+        error.response?.data?.message ?? "Gagal mengambil data invoice."
+      );
+      return null;
+    } finally {
+      setInvoiceLoading(false);
+    }
+  }, [caseDetails?.CaseID]);
+
+  useEffect(() => {
+    if (!caseDetails?.CaseID) return;
+    fetchInvoiceData();
+  }, [caseDetails?.CaseID, fetchInvoiceData]);
+
+  const handleInvoiceOpenChange = (nextOpen = true) => {
+    setInvoiceDialogOpen(nextOpen);
+    if (nextOpen) {
+      fetchInvoiceData();
+    } else {
+      setInvoiceSubmitting(false);
+    }
+  };
+
+  const handleInvoiceSubmit = async (payload) => {
+    if (!caseDetails?.CaseID) return;
+    if (!user?.id) {
+      toast.error("User tidak valid. Silakan login kembali.");
+      return;
+    }
+    try {
+      setInvoiceSubmitting(true);
+      const hasInvoice = Boolean(payload.invoiceNo);
+      const endpoint = hasInvoice
+        ? `/api/invoice-information/${payload.invoiceNo}`
+        : "/api/invoice-information";
+      const method = hasInvoice ? "patch" : "post";
+      const requester =
+        method === "patch"
+          ? ApiCustomer.patch.bind(ApiCustomer)
+          : ApiCustomer.post.bind(ApiCustomer);
+
+      const requestBody = {
+        ...payload,
+        caseId : caseDetails?.CaseID
+      };
+
+      if (!hasInvoice) {
+        requestBody.createdBy = user.id;
+      }
+
+      const response = await requester(endpoint, requestBody);
+      setInvoiceData(response.data?.data ?? null);
+      toast.success(
+        hasInvoice
+          ? "Invoice berhasil diperbarui."
+          : "Invoice berhasil dibuat."
+      );
+      setInvoiceDialogOpen(false);
+      await fetchInvoiceData();
+      //do what after submit??
+      // IDK, just add the save and close again, maybe
+      // --miku21
+      saveAndCloseCase(cancelState);
+    } catch (error) {
+      console.error("Failed to save invoice:", error);
+      const message =
+        error.response?.data?.message ?? "Gagal menyimpan invoice.";
+      toast.error(message);
+    } finally {
+      setInvoiceSubmitting(false);
+    }
+  };
+
+  const ensureInvoiceBeforeClose = async () => {
+    const data = await fetchInvoiceData();
+    if (!data) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Quotation belum tersedia",
+        text: "Buat quotation beserta invoice sebelum menutup case.",
+      });
+      return false;
+    }
+    if (!data.invoice) {
+      /**
+       * TODO FOR SLAMET : 
+       * MAKE TIS CONFIRMATION INTO SOMETHING ELSE
+       */
+      await Swal.fire({
+        icon: "warning",
+        title: "Invoice belum tersedia",
+        text: "Input invoice terlebih dahulu sebelum menutup case.",
+        confirmButtonText: "Input Invoice",
+      });
+      handleInvoiceOpenChange(true);
+      return false;
+    }
+    return true;
+  };
+
+
+  const saveAndCloseCase = async (cancell = false) => {
+    setCancelState(cancell); //default initialization
     // Role guard: only FD can close a Case
     const tokenUser = getUserFromToken();
     if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'fd') {
@@ -887,10 +1023,22 @@ const openPopup = () => {
   //   });
   //   return;
   // }
+  // return console.log(caseDetails?.asset_information?.WarrantyOTCCode?.WarrantyCondition);
+  if(caseDetails?.asset_information?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
 
+    const invoiceReady = await ensureInvoiceBeforeClose();
+    if (!invoiceReady) {
+      return;
+    }
+  }
+
+
+
+  const targetStatus = cancell ? "CANCEL" : "CLOSED"
+  const targetSystemCaseStatus = cancell ? "Cancel" : "Close"
     const confirmResult = await Swal.fire({
       title: "Confirm Save",
-      text: "This will give the Case status as CLOSED. Are you sure you want to save changes?",
+      text: "This will give the Case status as "+targetStatus+". Are you sure you want to save changes?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -915,7 +1063,7 @@ const openPopup = () => {
       try {
         const woRes = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
         const workOrders = Array.isArray(woRes.data?.data) ? woRes.data.data : [];
-        const openWOs = workOrders.filter(wo => String(wo.SystemStatus).toUpperCase() !== 'CLOSED_POSTED');
+        const openWOs = workOrders.filter(wo => String(wo.SystemStatus).toUpperCase() !== 'CLOSED_POSTED' && String(wo.SystemStatus).toUpperCase() !== 'CLOSED_CANCELLED');
         if (openWOs.length > 0) {
           Swal.close();
           return Swal.fire({
@@ -928,7 +1076,7 @@ const openPopup = () => {
         for (const wo of workOrders) {
           const moRes = await ApiCustomer.get(`/api/material-order?WOID=${wo.WOID}`);
           const mos = Array.isArray(moRes.data?.data) ? moRes.data.data : [];
-          const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed');
+          const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed' && String(mo.OrderStatus).toLowerCase() !== 'cancelled');
           if (mosNotClosed.length > 0) {
             Swal.close();
             return Swal.fire({
@@ -951,7 +1099,7 @@ const openPopup = () => {
       const res = await ApiCustomer.patch(
         `/api/case-information/${caseDetails.CaseID}`,
         {
-          CaseStatus: "Close",
+          CaseStatus: targetSystemCaseStatus,
           CaseClosedDate: new Date().toISOString(), 
         }
       );
@@ -995,12 +1143,7 @@ const openPopup = () => {
     }
   };
 
-  // Modal Quotation
-  const [openDialogQuotation, setOpenDialogQuotation] = useState(false);
-  const [quotationInitialData, setQuotationInitialData] = useState(null);
-  const [quotationMaterialItems, setQuotationMaterialItems] = useState([]);
-  const [quotationLoading, setQuotationLoading] = useState(false);
-  const [quotationSubmitting, setQuotationSubmitting] = useState(false);
+
 
 
   const fieldMO = (caseDetails) => {
@@ -1103,6 +1246,10 @@ const openPopup = () => {
                     ...payload,
                     userAssign: user.id !== payload?.userAssign ? payload.userAssign : user.id,
                 };
+                if(apiPayload.quoteDecision === "Rejected"){
+                  apiPayload.userAssign = caseDetails.workorder[0]?.OwnerID;
+                }
+                
                 console.log("Sending payload:", apiPayload);
                 const endpoint = payload.quotationNo
                     ? `/api/quotation-information/${payload.quotationNo}`
@@ -1156,6 +1303,18 @@ const openPopup = () => {
                 quoteDecision: q.quoteDecision ?? "",
         };
     };
+
+  const invoiceSummary = invoiceData?.invoice;
+  const invoiceQuotation = invoiceData?.quotation;
+  const invoiceNotificationLabel =
+    [
+      invoiceSummary?.sendInvoice && "Invoice",
+      invoiceSummary?.sendWa && "WA",
+      invoiceSummary?.sendEmail && "Email",
+      invoiceSummary?.sendErf && "ERF",
+    ]
+      .filter(Boolean)
+      .join(", ") || "-";
 
   return (
     <>
@@ -1221,6 +1380,17 @@ const openPopup = () => {
         />
       </div>
       <div>
+        <InvoiceDialog
+          open={invoiceDialogOpen}
+          onOpenChange={handleInvoiceOpenChange}
+          quotation={invoiceData?.quotation}
+          invoice={invoiceData?.invoice}
+          loading={invoiceLoading}
+          submitting={invoiceSubmitting}
+          onSubmit={handleInvoiceSubmit}
+        />
+      </div>
+      <div>
           <ServiceCase
             caseDetails={caseDetails}
             formData={caseNoteFormData}
@@ -1248,6 +1418,10 @@ const openPopup = () => {
             productForm={productForm}
             setProductForm={setProductForm}
             handleProductChange={handleProductChange}
+            invoiceLoading={invoiceLoading}
+            invoiceSummary={invoiceSummary}
+            invoiceQuotation={invoiceQuotation}
+            invoiceNotificationLabel={invoiceNotificationLabel}
           />
       </div>
     </>
@@ -1280,7 +1454,11 @@ export const ServiceCase = ({
   refreshFetchPage,
   productForm,
   setProductForm,
-  handleProductChange
+  handleProductChange,
+  invoiceLoading,
+  invoiceSummary,
+  invoiceQuotation,
+  invoiceNotificationLabel,
 }) => {
   const { open } = useSidebar();
 
@@ -3262,29 +3440,33 @@ if (caseDetails.CaseStatus !== "Close") {
                  </CaseField>
                   <CaseField label={"Quotation amount"} lock> 
                   <Input 
-                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal || "---"}
+                    value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal)}
                   />
                  </CaseField>
                  <CaseField label={"VAT value (%)"} lock> 
                   <Input 
-                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue || "---"}
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue 
+                      ? caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue + "%" 
+                      : "---"}
                   />
                  </CaseField>
                    <CaseField label={"Quotation amount + VAT"} lock> 
                   <Input 
-                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal || "---"}
+                    value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal)}
                   />
                  </CaseField>
-                 <CaseField label={"Quotation request date"} lock> 
+                 <CaseField label={"Quotation Request date"} lock> 
                   <DatePicker 
                     value={new Date(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate)}
                   />
                  </CaseField>
-                  <CaseField label={"Quotation date"} lock> 
-                  <DatePicker 
-                    value={new Date(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationApprovedDate)}
-                  />
-                 </CaseField>
+                 {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationApprovedDate !== null && (
+                  <CaseField label={"Quotation Response date"} lock> 
+                    <DatePicker 
+                      value={new Date(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationApprovedDate)}
+                    />
+                  </CaseField>
+                 )}
                   <CaseField label={"Quote decision"} lock> 
                   <Input 
                     value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuoteDecision || "---"}
@@ -3339,11 +3521,101 @@ if (caseDetails.CaseStatus !== "Close") {
               </Card>
              
               <Card className={"flex-col col-span-2"}>
-                <CardHeader>
-                  <CardTitle className={"text-lg"}>Invoice Information</CardTitle>
+                <CardHeader className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className={"text-lg"}>Invoice Information</CardTitle>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleInvoiceOpenChange(true)}
+                      disabled={invoiceLoading || caseDetails?.CaseStatus === "Close"}
+                    >
+                      {invoiceSummary ? "Edit Invoice" : "Buat Invoice"}
+                    </Button>
+                  </div>
                   <hr />
                 </CardHeader>
                 <CardContent>
+                  {invoiceLoading ? (
+                    <p className="text-sm text-muted-foreground">
+                      Memuat data invoice...
+                    </p>
+                  ) : invoiceSummary ? (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <CaseField label={"Quotation No"} lock>
+                        <Input value={invoiceQuotation?.quotationNo || "-"} readOnly />
+                      </CaseField>
+                      <CaseField label={"Invoice No"} lock>
+                        <Input value={invoiceSummary.invoiceNo} readOnly />
+                      </CaseField>
+                      <CaseField label={"Subtotal"} lock>
+                        <Input
+                          value={formatAccountingRupiah(invoiceQuotation?.subtotal)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Grand Total"} lock>
+                        <Input
+                          value={formatAccountingRupiah(invoiceQuotation?.grandTotal)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Amount Receive"} lock>
+                        <Input
+                          value={formatAccountingRupiah(invoiceSummary.amountReceive)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Amount Difference"} lock>
+                        <Input
+                          value={formatAccountingRupiah(invoiceSummary.amountDiff)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField
+                        label={"Alasan Selisih"}
+                        lock
+                        hide={!invoiceSummary.amountDiffReason}
+                      >
+                        <Input
+                          value={invoiceSummary.amountDiffReason || "-"}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Payment Type"} lock>
+                        <Input value={invoiceSummary.paymentType || "-"} readOnly />
+                      </CaseField>
+                      <CaseField label={"Tanggal Terima"} lock>
+                        <Input
+                          value={formatDate(invoiceSummary.amountReceiveDate)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Notifikasi"} lock>
+                        <Input value={invoiceNotificationLabel} readOnly />
+                      </CaseField>
+                      <CaseField label={"Catatan"} lock span={2}>
+                        <Textarea
+                          value={invoiceSummary.amountReceiveNote || "-"}
+                          rows={3}
+                          readOnly
+                        />
+                      </CaseField>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                      <p>Belum ada invoice untuk case ini.</p>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="w-fit"
+                        onClick={() => handleInvoiceOpenChange(true)}
+                        disabled={caseDetails?.CaseStatus === "Close"}
+                      >
+                        Buat Invoice
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
