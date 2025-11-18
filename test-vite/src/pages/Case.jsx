@@ -7,10 +7,7 @@ import { TabsService } from '../pages/services/service-case'
 import { useDraft } from '../components/DraftContext';
 import { useAuth } from '@/context/auth-context';
 import { TabsServiceCaseDetails } from './CaseDetail';
-import { TabsServiceCaseDetailsApo } from './CaseDetailApo';
-import { TabsServiceCaseDetailsCe } from './CaseDetailCe';
-import { TabsServiceCaseDetailsCeLead } from './CaseDetailCeLead';
-import { TabsServiceCaseDetailsLg } from './CaseDetailLg';
+
 
 
 export const Case = () => {

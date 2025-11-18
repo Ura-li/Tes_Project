@@ -1,5 +1,3 @@
-// ServiceRequestPDF.js
-import React from "react";
 import {
   Document,
   Page,
@@ -10,47 +8,49 @@ import {
   Font,
   Link,
 } from "@react-pdf/renderer";
+import React from "react";
 
-// Example custom font (optional)
 Font.register({
-  family: "Helvetica",
+  family: "Helvetice",
   fonts: [{ src: "https://fonts.gstatic.com/s/helvetica/Helvetica.ttf" }],
 });
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     padding: 30,
-    gap: 3,
+    gap: 0,
     borderRadius: 5,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    maxWidth: "600px",
-    margin: "auto",
-    flexDirection: "column",
+    maxWidth: '600px',
+    margin: 'auto',
+    flexDirection: 'column',
+    marginBottom: 0
   },
   sectionHeader: {
     fontSize: 11,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   textSmall: {
     fontSize: 9,
+    color: 'gray',
   },
   textCenter: {
-    textAlign: "center",
+    textAlign: 'center',
   },
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(8, 1fr)",
+    display: 'grid',
+    gridTemplateColumns: 'repeat(8, 1fr)',
   },
   grid2: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
   },
   bold: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   qrCode: {
     width: 45,
@@ -60,67 +60,57 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
   },
-  link: {
-    fontSize: 7,
-    color: "blue",
-  },
-  disclaimerText: {
-    fontSize: 7,
-    marginBottom: 5,
-  },
+  
   leftSection: {
     flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     rowGap: 2,
   },
   rightSection: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rightSection2: {
     flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     rowGap: 2,
   },
   label: {
-    width: "30%",
+    width: '30%', 
     fontSize: 9,
   },
   label2: {
-    width: "20%",
+    width: '20%', 
     fontSize: 9,
   },
   value: {
-    width: "68%",
+    width: '68%',
     fontSize: 9,
   },
   colon: {
-    width: "2%",
+    width: '2%',
     fontSize: 9,
   },
   value2: {
-    width: "80%",
+    width: '80%',
     fontSize: 9,
   },
-  table: {
-    width: "100%",
+table: {
+    width: '100%',
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
   },
   tableRow: {
-    flexDirection: "row",
-  },
-  tableHeader: {
-    backgroundColor: "#e5e7eb",
+    flexDirection: 'row',
   },
   tableCell: {
-    flex: 1,
+    flex: 1,                     // default equal width (good for 3-col table)
     borderRightWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     padding: 2,
     fontSize: 7,
   },
@@ -128,30 +118,53 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRightWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#000',
     padding: 2,
     fontSize: 7,
-    textAlign: "center",
-    backgroundColor: "#f3f4f6",
-    fontWeight: "bold",
-  },
+    textAlign: 'center',
+    fontWeight: 'bold',
+    backgroundColor: '#f3f4f6', 
 
+  },
+  alignRight: { textAlign: 'right' },
+  
+
+  /* ===== extra styles ONLY for the 7-column “parts” table ===== */
+  partsColNo: { flex: 0.7 },
+  partsColVendor: { flex: 1.5 },
+  partsColHp: { flex: 1.6 },
+  partsColPartName: { flex: 3 },
+  partsColQty: { flex: 0.8 },
+  partsColUnitPrice: { flex: 1.2 },
+  partsColTotalPrice: { flex: 1.2 },
+
+  // flex sums (0.7+1.5+1.6+3+0.8 = 7.6, all cols = 10)
+  partsColSpan5: { flex: 8 },  // No + Vendor + HP + Part Name + QTY
+  partsColSpan6: { flex: 9.2 },  // above + Unit Price
+
+  alignRight: {
+    textAlign: 'right',
+  },
+  alignCenter: {
+    textAlign: 'center',
+  },
+  
   sectionContainer: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     borderRadius: 4,
     marginVertical: 10,
     paddingTop: 12, // extra space so the title doesn't overlap content
-    position: "relative",
+    position: 'relative',
   },
 
   sectionTitle: {
-    position: "absolute",
+    position: 'absolute',
     top: -8, // moves the heading above the border
     left: 10,
     fontSize: 10,
-    fontWeight: "bold",
-    backgroundColor: "white", // covers the border behind text
+    fontWeight: 'bold',
+    backgroundColor: 'white', // covers the border behind text
     paddingHorizontal: 4,
   },
 
@@ -159,18 +172,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingBottom: 8,
   },
+
+
 });
 
 const Section = ({ title, children }) => (
   <View style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
-    <View style={styles.sectionContent}>{children}</View>
+    <View style={styles.sectionContent} break>{children}</View>
   </View>
 );
 
-const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
+export const QuotationInvoice = ({
+  caseDetails,
+  customerSignature,
+  materialItems = {},
+  initialData = {},
+}) => (
   <Document>
-    <Page style={styles.container}>
+    <Page  size="A4" style={styles.container}>
       <View
         style={{
           flexDirection: "row",
@@ -194,12 +214,22 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
             Telp : (+6221) 081318521007 / 081318521006 - HP : 0811970666
           </Text>
         </View>
-        <Text style={[styles.sectionHeader]}>SERVICE REQUEST FORM</Text>
+        <Text style={[styles.sectionHeader]}>QUOTATION / PROFORMA INVOICE</Text>
       </View>
 
       <Section title="Case Info">
         <View style={{ display: "flex", flexDirection: "row" }}>
           <View style={styles.leftSection}>
+            <Text style={[styles.label, { fontWeight: "bold", fontSize: 13 }]}>
+              Quotation no.
+            </Text>
+            <Text style={[styles.colon, { fontWeight: "bold", fontSize: 10 }]}>
+              :
+            </Text>
+            <Text style={[styles.value, { fontWeight: "bold", fontSize: 10 }]}>
+              {initialData?.quotationNo ?? null}
+            </Text>
+
             <Text style={styles.label}>Case Type</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>{caseDetails?.CaseType ?? "N/A"}</Text>
@@ -216,6 +246,14 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
             <Text style={[styles.value]}>
               {caseDetails?.CreatedOn
                 ? new Date(caseDetails.CreatedOn).toLocaleDateString()
+                : "N/A"}
+            </Text>
+
+            <Text style={styles.label}>Quotation Date</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {initialData?.quotationDate
+                ? new Date(initialData.quotationDate).toLocaleDateString()
                 : "N/A"}
             </Text>
 
@@ -241,7 +279,6 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
         </View>
       </Section>
 
-      {/* Customer Section */}
       <Section title="Customer">
         {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Customer</Text> */}
         <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
@@ -334,7 +371,6 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
         </View>
       </Section>
 
-      {/* Product Section */}
       <Section title="Product">
         {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text> */}
         <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
@@ -384,7 +420,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
         </View>
       </Section>
 
-      <View style={[styles.tableRow, styles.tableHeader, { marginTop: 10 }]}>
+      <View style={[styles.tableRow, styles.tableHeader, { marginTop: 20 }]}>
         <Text style={styles.tableHeaderCell}>Accessories</Text>
         <Text style={styles.tableHeaderCell}>Note</Text>
         <Text style={styles.tableHeaderCell}>CT/ SN Code</Text>
@@ -399,161 +435,214 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
         ))
       ) : (
         <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>No Data</Text>
+          <Text style={styles.tableCell}>-</Text>
           <Text style={styles.tableCell}>-</Text>
           <Text style={styles.tableCell}>-</Text>
         </View>
       )}
 
-      <Text style={[styles.textSmall, { fontWeight: "bold" }]}>
-        Notification and confirmation
-      </Text>
-      <View style={{ display: "flex", flexDirection: "row" }}>
-        <View style={styles.leftSection}>
-          <Text style={styles.label2}>Unit Garansi</Text>
-          <Text style={[styles.value2]}>
-            :Lamanya pengerjaan perbaikan sekitar 3 hari kerja (tergantung
-            tersedianya suku cadang)
+      {/* PARTS TABLE */}
+      <View style={[styles.table, { marginTop: 20 }]}>
+        {/* Header */}
+        <View style={styles.tableRow}>
+          <Text style={[styles.tableHeaderCell, styles.partsColNo]}>No</Text>
+          <Text style={[styles.tableHeaderCell, styles.partsColVendor]}>
+            Vendor Part No
           </Text>
-          <Text style={styles.label2}>Unit Tidak Garansi</Text>
-          <Text style={[styles.value2]}>
-            : • Biaya pengecekan dibayar di muka dan tidak dapat dikembalikan.{" "}
+          <Text style={[styles.tableHeaderCell, styles.partsColHp]}>
+            HP Part No
           </Text>
-          <Text style={styles.label2}></Text>
-          <Text style={[styles.value2]}>
-            • Surat Penawaran Perbaikan akan dikirim sekitar 3 hari kerja
-            setelah peralatan diterima. Lamanya pengerjaan perbaikan sekitar 3
-            hari kerja setelah persetujuan atas Surat Penawaran Perbaikan
-            (tergantung tersedianya suku cadang)
+          <Text style={[styles.tableHeaderCell, styles.partsColPartName]}>
+            Part Name
+          </Text>
+          <Text style={[styles.tableHeaderCell, styles.partsColQty]}>QTY</Text>
+          <Text style={[styles.tableHeaderCell, styles.partsColUnitPrice]}>
+            Unit Price
+          </Text>
+          <Text style={[styles.tableHeaderCell, styles.partsColTotalPrice]}>
+            Total Price
           </Text>
         </View>
-      </View>
-      <Text style={[styles.sectionHeader, styles.textCenter]}>
-        Disclaimer Statement
-      </Text>
 
-      <View style={{}}>
-        <Text style={[styles.bold, styles.textSmall]}>
-          Informasi Untuk Pelanggan :
-        </Text>
-        <Text style={[styles.bold, styles.textSmall]}>
-          Saya{" "}
-          {caseDetails?.contact_information?.FirstName ||
-          caseDetails?.contact_information?.LastName
-            ? `${caseDetails?.contact_information?.FirstName || ""} ${
-                caseDetails?.contact_information?.LastName || ""
-              }`.trim()
-            : "Customer"}{" "}
-          yang bertanda tangan di bawah ini menyetujui bahwa:
-        </Text>
-        <Text style={[styles.bold, styles.textSmall]}>
-          Data yang tersimpan dalam peralatan dapat terhapus selama proses
-          perbaikan peralatan berlangsung. Pada saat dilakukan system atau
-          operating system recovery, setting peralatan akan berubah mengikuti
-          setting awal dari pabrik.
-        </Text>
-        <Text style={styles.textSmall}>
-          Walaupun HP selalu melakukan pencegahan terhadap kerusakan pada Data
-          atau terhapusnya Data, kami sangat menyarankan Pelanggan untuk
-          melakukan Backup Data sendiri sebelum peralatan disampaikan kepada
-          kami. Dengan demikian pelanggan mempunyai Backup Data untuk melakukan
-          Data Recovery jika selama proses perbaikan peralatan berlangsung Data
-          pelanggan terhapus oleh System atau Operating System.
-        </Text>
-        <Text style={styles.textSmall}>
-          HP tidak memberikan jaminan proteksi Data pelanggan dan HP tidak
-          bertanggungjawab jika terjadi kerusakan pada Data atau terhapusnya
-          Data dari peralatan pelanggan.
-        </Text>
-      </View>
+        {/* Body */}
+        {caseDetails?.workorder?.length > 0 ? (
+          caseDetails.workorder.map((item, index) => {
+            const line =
+              item.materialorder?.[0]?.materialorderlineitems?.[0] || {};
+            return (
+              <View style={styles.tableRow} key={index}>
+                <Text
+                  style={[
+                    styles.tableCell,
+                    styles.partsColNo,
+                    styles.alignCenter,
+                  ]}
+                >
+                  {index + 1}
+                </Text>
 
-      {/* Signature section */}
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <View style={{ flexDirection: "column", alignItems: "center" }}>
-          <Text style={[styles.textSmall, { marginBottom: 10 }]}>
-            Received By
+                <Text style={[styles.tableCell, styles.partsColVendor]}>
+                  {/* Vendor part no here if available */}
+                </Text>
+
+                <Text style={[styles.tableCell, styles.partsColHp]}>
+                  {line.PartNumber ?? "N/A"}
+                </Text>
+
+                <Text style={[styles.tableCell, styles.partsColPartName]}>
+                  {line.Description ?? "N/A"}
+                </Text>
+
+                <Text style={[styles.tableCell, styles.partsColQty]}>
+                  {line.Quantity ?? "N/A"}
+                </Text>
+
+                <Text style={[styles.tableCell, styles.partsColUnitPrice]}>
+                  {/* line.UnitPrice ?? '.00' */}
+                  .00
+                </Text>
+
+                <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+                  {/* line.TotalPrice ?? '.00' */}
+                  .00
+                </Text>
+              </View>
+            );
+          })
+        ) : (
+          <View style={styles.tableRow}>
+            <Text style={[styles.tableCell, styles.partsColNo]} />
+            <Text style={[styles.tableCell, styles.partsColVendor]} />
+            <Text style={[styles.tableCell, styles.partsColHp]} />
+            <Text style={[styles.tableCell, styles.partsColPartName]} />
+            <Text style={[styles.tableCell, styles.partsColQty]} />
+            <Text style={[styles.tableCell, styles.partsColUnitPrice]} />
+            <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
+          </View>
+        )}
+
+        {/* Footer rows – perfectly aligned with header columns */}
+
+        {/* Labor Fee: colspan=5 */}
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan5, styles.alignRight]}
+          >
+            Labor Fee :
           </Text>
-          <Image
-            src={caseDetails?.createdByUser?.Signature}
-            style={{ width: 120, height: 60 }}
-          />
-          <Text style={styles.textSmall}>
-            --------------------------------------------
-          </Text>
-          <Text style={styles.textSmall}>
-            {caseDetails?.createdByUser?.Name}
-          </Text>
+          <Text style={[styles.tableCell, styles.partsColUnitPrice]} />
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
         </View>
-        <View style={{ flexDirection: "column", alignItems: "center" }}>
-          <Image src="/random_qr.png" style={styles.qrCode} />
-          <Text style={[styles.textSmall, styles.bold]}>
-            Check Repair Status
+
+        {/* Sub Total: colspan=6 */}
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan6, styles.alignRight]}
+          >
+            Sub Total :
           </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
         </View>
-        <View style={{ flexDirection: "column", alignItems: "center" }}>
-          {!customerSignature ? (
-            <>
-              <Text style={[styles.textSmall, { marginBottom: 30 }]}>
-                Received By
-              </Text>
-              <Text style={styles.textSmall}>
-                --------------------------------------------
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text style={[styles.textSmall, { marginBottom: 10 }]}>
-                Received By
-              </Text>
-              <Image
-                src={customerSignature}
-                style={{ width: 120, height: 60 }}
-              />
-            </>
-          )}
-          <Text style={styles.textSmall}>
-            --------------------------------------------
+
+        {/* Total: colspan=6 */}
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan6, styles.alignRight]}
+          >
+            Total :
           </Text>
-          <Text style={styles.textSmall}>
-            {caseDetails?.contact_information?.FirstName ||
-            caseDetails?.contact_information?.LastName
-              ? `${caseDetails?.contact_information?.FirstName || ""} ${
-                  caseDetails?.contact_information?.LastName || ""
-                }`.trim()
-              : "N/A"}
-          </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
         </View>
       </View>
 
-      <Text style={styles.textSmall}>
-        • Check status service silahkan klik{" "}
-        <Link style={styles.link} src="https://hp.care/digital-ID">
-          https://hp.care/digital-ID
-        </Link>{" "}
-        or scan the QR code above.
-      </Text>
-
-      <Text style={styles.textSmall}>
-        • Apabila pelayanan kami kurang memuaskan untuk case{" "}
-        {caseDetails?.CaseID ?? "N/A"}, silahkan sampaikan melalui email ke{" "}
-        <Link style={styles.link} src="mailto:escalation.id@hp.com">
-          escalation.id@hp.com
-        </Link>
-      </Text>
-
-      <Text style={[styles.textSmall, { marginBottom: 20 }]}>
-        • Apabila dikemudian hari membutuhkan bantuan teknis, silahkan klik{" "}
-        <Link style={styles.link} src="https://hp.care/digital-ID">
-          https://hp.care/digital-ID
-        </Link>
-      </Text>
-      <Text style={{ borderBottom: "1px solid #ccc" }}></Text>
-      <Text style={styles.textSmall}>
-        Tanda tangan Anda merupakan persetujuan terhadap syarat-syarat perbaikan
-        di balik halaman ini
-      </Text>
+      <View style={{ display: "flex", flexDirection: "row", columnGap: 2 }} >
+        <View style={styles.leftSection} >
+          <Text style={{ fontSize: 10, width: "10%", fontWeight: "bold" }}>
+            Note
+          </Text>
+          <Text style={styles.colon}>:</Text>
+          <Text style={[styles.value]}>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo
+            ipsam necessitatibus dolor labore beatae earum nam neque praesentium
+            sunt suscipit, quis perspiciatis. Obcaecati iure excepturi mollitia
+            similique in accusantium exercitationem.
+          </Text>
+        </View>
+      </View>
+        <Section title="Terms and Conditions" >
+          <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
+            <View style={styles.leftSection}>
+              <Text style={styles.label}>Validity</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                N / A
+              </Text>
+              <Text style={styles.label}>Delivery Time</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                N / A
+              </Text>
+              <Text style={styles.label}>Payment</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                N / A
+              </Text>
+              <Text style={styles.label}>Warranty</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                N / A
+              </Text>
+              <Text style={styles.label}>Cancellation Fee</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                N / A
+              </Text>
+              <Text style={styles.label}>Others</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                N / A
+              </Text>
+            </View>
+          </View>
+        </Section>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+          
+        >
+          <View style={{ flexDirection: "column", alignItems: "center" }} >
+            <Text style={[styles.textSmall, { marginBottom: 10 }]}>
+              Received By
+            </Text>
+     <Image src={caseDetails?.createdByUser?.Signature} style={{ width: 120, height: 50 }} />
+            <Text style={styles.textSmall}>
+              --------------------------------------------
+            </Text>
+            <Text style={styles.textSmall}>
+              {caseDetails?.createdByUser?.Name}
+            </Text>
+          </View>
+          <View style={{ flexDirection: "column", alignItems: "center" }} >
+            <Text style={[styles.textSmall, { marginBottom: 10 }]}>
+              Received By
+            </Text>
+            <Image src={customerSignature} style={{ width: 120, height: 50 }} />
+            <Text style={styles.textSmall}>
+              --------------------------------------------
+            </Text>
+            <Text style={styles.textSmall}>
+              {caseDetails?.contact_information?.FirstName ||
+              caseDetails?.contact_information?.LastName
+                ? `${caseDetails?.contact_information?.FirstName || ""} ${
+                    caseDetails?.contact_information?.LastName || ""
+                  }`.trim()
+                : "N/A"}
+            </Text>
+          </View>
+       
+      </View>
     </Page>
   </Document>
 );
-
-export default ServiceRequestPDF;

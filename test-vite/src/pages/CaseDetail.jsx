@@ -59,6 +59,7 @@ import {
   CopyX,
   NotebookPen,
   MessageSquareText,
+  CoinsIcon,
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -98,6 +99,8 @@ import { cn, formatAccountingRupiah, formatDate } from "@/lib/utils";
 import { map, set } from "lodash";
 import QuotationDialog from "@/components/model/QuotationModal";
 import InvoiceDialog from "@/components/model/InvoiceModal"
+import { QuotationInvoice } from "@/components/QuatationInvoice";
+
 /**
  * TODO : 
  * ADDING THIS FUNCTION GLOBALLY OR MAKE THE CASE DETAIL INTO ONE
@@ -796,15 +799,17 @@ const openPopup = () => {
       roles: ["admin", "fd","user", "apo", "ce","lg","celead","spv","ps","cm","apv"]
     },
     // { icon: SquareArrowOutUpRight, label: "",},
-    { icon: Save, label: "Save", 
-      onClick: () => handleSave(), 
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps","cm"],
+    {
+      icon: Save,
+      label: "Save",
+      onClick: () => handleSave(),
+      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"],
     },
     {
       icon: FileSymlink,
       label: "Save & Close",
       onClick: () => handleSave().then(() => navigate(`/app/`)),
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps","cm"],
+      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"],
     },
     {
       icon: CopyX,
@@ -818,56 +823,99 @@ const openPopup = () => {
       onClick: () => saveAndCloseCase(true),
       roles: ["admin", "fd"],
     },
-    { icon: RotateCw, label: "Refresh", 
+    {
+      icon: RotateCw,
+      label: "Refresh",
       onClick: () => window.location.reload(),
       roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps","cm","apv"],
     },
-    { icon: MessageSquareText, label: "Quotation",onClick: () => handleQuotationOpenChange(true),  roles: ["admin","cm"]},
-    { icon: StepBack, label: "SRF", 
+    {
+      icon: MessageSquareText,
+      label: "Quotation",
+      onClick: () => handleQuotationOpenChange(),
+      roles: ["admin", "cm"],
+    },
+    {
+      icon: StepBack,
+      label: "SRF",
       onClick: async () => {
         // return console.log(user);
-        await ApiCustomer.post('/api/case-information/case-notes',{
+        await ApiCustomer.post("/api/case-information/case-notes", {
           LogType: "System Info",
           ActionType: "Request SRF",
           Template: "SRF Requested",
           VisibleExternally: false,
           MinutesSpent: 0,
-          Note: `[PRINT] SRF requested by ${user?.role} - ${user?.name || "Unknown User"}`,
+          Note: `[PRINT] SRF requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
           CaseID: caseDetails?.CaseID,
           CreatedBy: user?.id,
-        })
-      const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails} customerSignature={signature} />).toBlob();
-      const url = URL.createObjectURL(blob);
-        window.open(url); 
-      // const link = document.createElement('a');
-      // link.href = url;
-      // link.download = 'Service_Request_Form.pdf';
-      // document.body.appendChild(link);
-      // link.click();
-      // document.body.removeChild(link);
-    }, 
-    roles: ["admin", "fd","user", "spv"]
-  },
-    { icon: StepBack, label: "ERF", 
-      onClick: async () => {
-        const blob = await pdf(<EquipmentReciptForm caseDetails={caseDetails} customerSignature={signature} />).toBlob();
+        });
+        const blob = await pdf(
+          <ServiceRequestPDF
+            caseDetails={caseDetails}
+            customerSignature={signature}
+          />
+        ).toBlob();
         const url = URL.createObjectURL(blob);
-        window.open(url); 
+        window.open(url);
+        // const link = document.createElement('a');
+        // link.href = url;
+        // link.download = 'Service_Request_Form.pdf';
+        // document.body.appendChild(link);
+        // link.click();
+        // document.body.removeChild(link);
       },
-    roles: ["admin", "fd","user", "spv"]
-  },
-  { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), 
-    roles: ["admin",   "ce", "celead", ],
-    hidden: caseDetails?.CaseStatus === "Close" ? true : false
-  },
+      roles: ["admin", "fd", "user", "spv"],
+    },
     {
-      icon: NotebookPen, label: "Signature Customer",
+      icon: StepBack,
+      label: "ERF",
+      onClick: async () => {
+        const blob = await pdf(
+          <EquipmentReciptForm
+            caseDetails={caseDetails}
+            customerSignature={signature}
+          />
+        ).toBlob();
+        const url = URL.createObjectURL(blob);
+        window.open(url);
+      },
+      roles: ["admin", "fd", "user", "spv"],
+    },
+    {
+      icon: StepBack,
+      label: "Service Order",
+      onClick: () => openServiceCatalog("serviceorder"),
+      roles: ["admin", "ce", "celead"],
+      hidden: caseDetails?.CaseStatus === "Close" ? true : false,
+    },
+    {
+      icon: NotebookPen,
+      label: "Signature Customer",
       onClick: () => {
         handleOpenSignaturePad();
       },
-      roles: ["admin", "fd", "user", "spv"]
+      roles: ["admin", "fd", "user", "spv"],
     },
-    // { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR"), hidden: true },
+    {
+      icon: CoinsIcon,
+      label: "Quotation Invoice",
+       onClick: async () => {
+        const blob = await pdf(
+          <QuotationInvoice
+            caseDetails={caseDetails}
+            customerSignature={signature}
+            materialItems={fieldMO(caseDetails)}
+            initialData={quotationInitialData || {}}
+          />
+        ).toBlob();
+        const url = URL.createObjectURL(blob);
+        window.open(url); 
+      },
+      roles: ["admin", "fd", "user", "spv", "cm"],
+    },
     // { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder"), hidden:true },
     // { icon: StepBack, label: "Sales Offer", hidden:true},
     // { icon: StepBack, label: "Close Case", hidden:true },
@@ -1145,6 +1193,7 @@ const openPopup = () => {
 
 
 
+  console.log("CHECK DAtA initial quotation",quotationInitialData)
 
   const fieldMO = (caseDetails) => {
     const workorders = caseDetails?.workorder || [];
@@ -1254,7 +1303,7 @@ const openPopup = () => {
                 const endpoint = payload.quotationNo
                     ? `/api/quotation-information/${payload.quotationNo}`
                     : "/api/quotation-information";
-                const method = payload.quotationNo ? "patch" : "post";
+                const method = payload.quotationNo ? "patch" : "post";  
                 const requester =
                     method === "patch"
                         ? ApiCustomer.patch.bind(ApiCustomer)
@@ -1377,6 +1426,8 @@ const openPopup = () => {
           submitting={quotationSubmitting}
           onSubmit={handleQuotationSubmit}
           createdBy={user}
+          signature={signature}
+          caseDetails={caseDetails}
         />
       </div>
       <div>
@@ -1655,7 +1706,7 @@ export const ServiceCase = ({
     try{
       const res = await ApiCustomer.get('/api/otc-code')
       setOtcCode(res.data.data)
-    }catch(e){
+    }catch(err){
       console.error("Failed to fetch OTC Code:", err);
     }
   }
