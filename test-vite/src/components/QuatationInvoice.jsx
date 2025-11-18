@@ -252,8 +252,8 @@ export const QuotationInvoice = ({
             <Text style={styles.label}>Quotation Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
-              {caseDetails?.CreatedOn
-                ? new Date(caseDetails.CreatedOn).toLocaleDateString()
+              {initialData?.quotationDate
+                ? new Date(initialData.quotationDate).toLocaleDateString()
                 : "N/A"}
             </Text>
 
@@ -575,35 +575,32 @@ export const QuotationInvoice = ({
               <Text style={styles.label}>Validity</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                {caseDetails?.asset_information?.SerialNumber ?? "N/A"}
+                N / A
               </Text>
               <Text style={styles.label}>Delivery Time</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                {caseDetails?.asset_information?.ProductNumber ?? "N/A"}
+                N / A
               </Text>
               <Text style={styles.label}>Payment</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                {caseDetails?.asset_information?.product_information
-                  ?.ProductName ?? "N/A"}
+                N / A
               </Text>
               <Text style={styles.label}>Warranty</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                {caseDetails?.asset_information?.product_information
-                  ?.ProductName ?? "N/A"}
+                N / A
               </Text>
               <Text style={styles.label}>Cancellation Fee</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                {caseDetails?.asset_information?.product_information
-                  ?.ProductName ?? "N/A"}
+                N / A
               </Text>
               <Text style={styles.label}>Others</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                what 
+                N / A
               </Text>
             </View>
           </View>
