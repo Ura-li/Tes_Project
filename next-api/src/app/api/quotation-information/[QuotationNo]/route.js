@@ -96,6 +96,7 @@ export async function PATCH(request, { params }) {
         { status: 400 },
       );
     }
+    
 
     const lineItemIds = normalizedLineItems.map((item) => item.lineItemId);
     const uniqueLineItemIds = [...new Set(lineItemIds)];
@@ -112,8 +113,31 @@ export async function PATCH(request, { params }) {
 
     const relatedLineItems = await prisma.materialorderlineitems.findMany({
       where: { LineItemID: { in: uniqueLineItemIds } },
-      select: { LineItemID: true, Quantity: true },
+      select: {
+        LineItemID: true,
+        Quantity: true,
+        materialorder: {
+          select: {
+            MOID: true,
+            workorder: {
+              select: {
+                CaseID: true,
+                WOID: true,
+                owner: {
+                  select: {
+                    IDUser: true,
+                    Name: true,
+                    Role: true,
+                    Username: true
+                  }
+                }
+              }
+            }
+          },
+        },
+      },
     });
+
 
     if (relatedLineItems.length !== uniqueLineItemIds.length) {
       return NextResponse.json(
@@ -124,6 +148,8 @@ export async function PATCH(request, { params }) {
         { status: 404 },
       );
     }
+
+    
 
     const quantityMap = new Map(
       relatedLineItems.map((item) => [item.LineItemID, item.Quantity ?? 1]),
@@ -176,11 +202,13 @@ export async function PATCH(request, { params }) {
         Approved: 'Quote_Approved',
         Rejected: 'Quote_Rejected',
       };
-
       targetStatusCase = statusMap[decisionValue] || 'Quote_Approved';
+
     } else {
       targetStatusCase = 'Pending_Quote';
     }
+
+    
 
     const includeChangedBy = {
       changedByUser: {
@@ -191,12 +219,45 @@ export async function PATCH(request, { params }) {
           },
       },
     };
+    
+    // return console.log(relatedLineItems)
+    
 
     const quotation = await prisma.$transaction(async (tx) => {
       const existingLineItems = await tx.quotation_lineitem.findMany({
         where: { QuotationNo },
         select: { id: true, LineItemID: true },
       });
+
+      const caseInfo = await prisma.caseinformation.findUnique({
+        where: { CaseID: caseId },
+        select: {
+            CaseStatus: true,
+            Owner: true,
+            CreatedBy: true,
+            ownerUser: {
+                select: {
+                    IDUser: true,
+                    Name: true,
+                },
+            },
+        }
+      })
+
+      const newOwnerUser = userAssign !== null
+        ? await prisma.user.findUnique({
+            where: { IDUser: userAssign },
+            select: {
+                IDUser: true,
+                Name: true,
+            },
+        })
+        : null;
+
+      const oldOwnerName = caseInfo.ownerUser?.Name ?? (caseInfo.Owner != null ? String(caseInfo.Owner) : "-");
+      const newOwnerName = newOwnerUser?.Name ?? (userAssign != null ? String(userAssign) : "-");
+
+      
 
       const updated = await tx.quotationtable.update({
         where: { QuotationNo },
@@ -246,6 +307,58 @@ export async function PATCH(request, { params }) {
           }),
         ),
       );
+      const rejectedLineItemIds = normalizedLineItems
+        .filter((item) => !item.approved)
+        .map((item) => item.lineItemId);
+      
+
+      if (decisionValue === 'Rejected') {
+        
+        await tx.materialorderlineitems.updateMany({
+          where: {
+            LineItemID: {
+              in: normalizedLineItems.map((item) => item.lineItemId),
+            },
+          },
+          data: {
+            Status: 'Cancelled',
+          },
+        });
+
+        await tx.materialorder.updateMany({
+          where: {
+            MOID: {
+              in: relatedLineItems.map((item) => item.materialorder?.MOID),
+            }
+          },
+          data:{
+            OrderStatus: 'Cancelled'
+          }
+        })
+      } else if(rejectedLineItemIds.length > 0){
+        await tx.materialorderlineitems.updateMany({
+          where: {
+            LineItemID: { in: rejectedLineItemIds },
+          },
+          data:{
+            Status: 'Cancelled'
+          }
+        })
+
+        await tx.materialorder.updateMany({
+          where:{
+            MOID: {
+              in: relatedLineItems
+                .filter((item) => rejectedLineItemIds.includes(item.LineItemID))
+                .map((item) => item.materialorder?.MOID)
+                .filter((moid) => moid != null),
+            }
+          },
+          data: {
+            OrderStatus: 'Cancelled'
+          }
+        })
+      }
 
       const obsoleteIds = existingLineItems
         .filter((item) => !incomingIds.has(item.LineItemID))
@@ -257,6 +370,11 @@ export async function PATCH(request, { params }) {
         });
       }
 
+      /**
+       * NOTE : THIS TEMPORARY ADAPTABLE TABLE FUNCTION NOT WORKING
+       * FIND OUT WHY
+       * THE PRICE WAS NOT UPDATED
+       */
       await Promise.all(
         normalizedLineItems.map((item) =>
           tx.materialorderlineitems.update({
@@ -270,24 +388,24 @@ export async function PATCH(request, { params }) {
       if(targetStatusCase !== "Pending_Quote"){
         caseUpdateData.Owner = userAssign
 
-        // await tx.ActionLog.create({
-        //   data: {
-        //     CaseID_toActionLog: {
-        //       connect: { CaseID: caseId },
-        //     },
-        //     ReferenceId: QuotationNo,
-        //     model: "Quotation Log",
-        //     dataOld: status,
-        //     dataNew: targetStatusCase,
-        //     changedByUser: createdBy
-        //       ? {
-        //           connect: { IDUser: createdBy },
-        //         }
-        //       : undefined,
-        //     logDescription: `Edit: change status from ${status} to ${targetStatusCase}`,
-        //   },
-        //   include: includeChangedBy,
-        // });
+        await tx.ActionLog.create({
+          data: {
+            CaseID_toActionLog: {
+              connect: { CaseID: caseId },
+            },
+            ReferenceId: caseId,
+            model: "CaseOwner",
+            dataOld: oldOwnerName,
+            dataNew: newOwnerName,
+            changedByUser: createdBy
+              ? {
+                  connect: { IDUser: createdBy },
+                }
+              : undefined,
+            logDescription: `Edit: change owner from ${oldOwnerName} to ${newOwnerName}`,
+          },
+          include: includeChangedBy,
+        });
       }
       await tx.caseinformation.update({
         where: { CaseID: caseId },
@@ -307,6 +425,20 @@ export async function PATCH(request, { params }) {
         },
       });
 
+      if(quotationNote !== null) {
+        await tx.casenotes.create({
+          data: {
+            CaseID: caseId,
+            LogType: "System Info",
+            ActionType: "Quotation Request",
+            Template: "",
+            VisibleExternally: true,
+            MinutesSpent: 0,
+            Note: quotationNote,
+            CreatedBy: createdBy ?? Number.parseInt(userAssign, 10) ?? null,
+          },
+        });
+      }
       await tx.ActionLog.create({
         data: {
           CaseID_toActionLog: {

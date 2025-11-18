@@ -34,7 +34,6 @@ export const ErfCase = () => {
   }, []);
 
   async function uploadFiles(files) {
-    console.log("CHECK file", files.length);
     if (files.length === 0) return;
     // Precompute once
     const CASE_IDS = new Set(caseData.map((e) => String(e.CaseID)));
@@ -42,9 +41,6 @@ export const ErfCase = () => {
 
     const validFiles = [...files].filter((f) => {
       const base = f.name.replace(/\.[^.]+$/, ""); // "ABC123.png" -> "ABC123"
-      console.log(f.name)
-      console.log(base)
-      console.log(CASE_IDS)
 
       if (!CASE_IDS.has(base)) {
         toast.warning(`Tidak menemukan Case ID untuk ${f.name}`);
@@ -66,6 +62,12 @@ export const ErfCase = () => {
       headers: { "Content-Type": "multipart/form-data" },
     });
     console.log(res.data);
+
+    if (res.data.success) {
+      toast.info(`Upload ERF Successs`)
+    }else {
+      toast.warning("Gagal upload ERF")
+    }
   }
 
   // Pagination logic

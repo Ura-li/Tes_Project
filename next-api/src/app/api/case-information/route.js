@@ -103,7 +103,15 @@ export async function GET(request) {
         include: {
           materialorder: {
             include: {
-              materialorderlineitems: true,
+              materialorderlineitems: {
+                include :{
+                  quotation_lineitem :{
+                    include: {
+                      quotation: true
+                    }
+                  }
+                }
+              },
               owner: true
             }
           },

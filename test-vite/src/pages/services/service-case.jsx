@@ -622,6 +622,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
 
   //modal handle repair action
   const [openRepairDialog, setOpenRepairDialog] = useState(false);
+  const [onCancelWo, setOnCancelWo] = useState(false)
 
   const handleSave = async () => {
     try {
@@ -708,10 +709,22 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
     },
     {
       icon: CopyX,
-      label: "Close",
+      label: "Close WO",
       onClick:async () => {
         const isValid = await validate();
         if (isValid !== false) {
+          setOnCancelWo(false);
+          setOpenRepairDialog(true);
+        }
+      },
+    },
+    {
+      icon: CopyX,
+      label: "Cancel WOKONTOL",
+      onClick:async () => {
+        const isValid = await validate();
+        if (isValid !== false) {
+          setOnCancelWo(true);
           setOpenRepairDialog(true);
         }
       },
@@ -748,7 +761,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
     try {
       const moRes = await ApiCustomer.get(`/api/material-order?WOID=${workOrders.WOID}`);
       const mos = Array.isArray(moRes.data?.data) ? moRes.data.data : [];
-      const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed');
+      const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed' && String(mo.OrderStatus).toLowerCase() !== 'cancelled');
       if (mosNotClosed.length > 0) {
         Swal.close();
         Swal.fire({
@@ -804,6 +817,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
 
   }
   const saveAndCloseWorkOrder = async (repairFormData) => {
+    // return console.log(repairFormData);
     try {
       Swal.fire({
         title: "Saving...",
@@ -826,6 +840,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
 
       // return console.log("Repair PROM KOOJRN ",repairFormData);
 
+      const statusTarget = onCancelWo ? "CLOSED_CANCELLED" : "CLOSED_POSTED";
       const res = await ApiCustomer.patch(
         `/api/work-order/${workOrders.WOID}`,
         {
@@ -837,7 +852,9 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
           DefectDesc: repairFormData.defectDesc,
           RepairAction: repairFormData.repairAction,
           ServiceTypeId: repairFormData.serviceType,
-          SystemStatus: "CLOSED_POSTED",
+          CancelReason: repairFormData.cancelReason,
+          SystemStatus: statusTarget,
+          IsCancel: onCancelWo
         }
       );
       if (res.data.success) {
@@ -856,19 +873,20 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
         })
         // console.log("wololo",workOrders)
         //update log customer
+        const statusCaseTarget = onCancelWo ? "CancelRepair" : "FinishRepair";
         const caseLog = await ApiCustomer.post("/api/actionlog",{
           CaseId: `${workOrders.CaseID}`,
           ReferenceId: `${workOrders.CaseID}`,
           model: "Case",
           dataOld: workOrders?.caseinformation?.CaseStatus,
-          dataNew: "Finish Repair",
+          dataNew: statusCaseTarget,
           changedBy: token.user.id,
-          logDescription: `Edit : Changed Case Status ${workOrders.CaseID} from ${workOrders?.caseinformation?.CaseStatus} to Finish Repair`
+          logDescription: `Edit : Changed Case Status ${workOrders.CaseID} from ${workOrders?.caseinformation?.CaseStatus} to ${statusCaseTarget}`
         })
         //update Case status
         const caseChangeStatus = await ApiCustomer.patch(`/api/case-information/${workOrders.CaseID}`,{
           Owner: workOrders?.caseinformation?.CreatedBy,
-          CaseStatus: "FinishRepair"
+          CaseStatus: statusCaseTarget
         })
 
         const previousOwnerId = workOrders?.caseinformation?.Owner;
@@ -966,6 +984,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
         onOpenChange={setOpenRepairDialog}
         onSubmit={handleRepairSubmit}
         canEdit={true}
+        onCancelWo={onCancelWo}
         
         //data
         workOrders={workOrders}
@@ -989,7 +1008,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, materialOrderI
     { icon: FileSymlink, label: "Save & Close", onClick: () => saveMaterialOrder().then(() => navigate(`/app/work/${materialOrders.WOID}`))},
     {
       icon: CopyXIcon,
-      label: "Close",
+      label: "Close MO",
       onClick: () => saveAndCloseMaterialOrder(),
       hidden: currentRole !== 'ce' && currentRole !== 'celead',
     },
@@ -1240,7 +1259,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
     { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
     {
       icon: CopyXIcon,
-      label: "Close",
+      label: "Close MO Line Items",
       onClick: () => saveAndCloseMaterialLineItemsOrder(),
       hidden: currentRole !== 'ce' && currentRole !== 'celead',
     },

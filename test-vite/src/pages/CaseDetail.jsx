@@ -1,4 +1,4 @@
-import React, { use, useMemo } from "react";
+import React, { use, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -58,6 +58,7 @@ import {
   Briefcase,
   CopyX,
   NotebookPen,
+  MessageSquareText,
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -93,9 +94,10 @@ import { parseNoteText } from "@/lib/utils.jsx";
 import SignatureWrite from "@/components/SignaturePad";
 import { description } from "@/components/sc-chart";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { set } from "lodash";
-
+import { cn, formatAccountingRupiah, formatDate } from "@/lib/utils";
+import { map, set } from "lodash";
+import QuotationDialog from "@/components/model/QuotationModal";
+import InvoiceDialog from "@/components/model/InvoiceModal"
 /**
  * TODO : 
  * ADDING THIS FUNCTION GLOBALLY OR MAKE THE CASE DETAIL INTO ONE
@@ -131,6 +133,7 @@ export const STATUS_ENUM_TO_LABEL = {
   Pending_Order: "Pending Order",
   Escalated: "Escalated",
   Quote_Approved: "Quote Approved",
+  Quote_Rejected: "Quote Rejected",
   Pending_Quote: "Pending Quote",
   NEW_AssignFD: "New Assign To FD",
   NEW_AssignCE: "New Assign To CE",
@@ -145,6 +148,7 @@ export const STATUS_ENUM_TO_LABEL = {
   PartAvailable: "Part Available",
   RepairProgress: "Repair Progress",
   FinishRepair: "Finish Repair",
+  CancelRepair: "Cancel Repair",
 };
 
 export const STATUS_LABELS = Object.keys(STATUS_ENUM_TO_LABEL);
@@ -162,6 +166,7 @@ const BASE_STATUS_KEYS = [
   "Pending_Order",
   "Escalated",
   "Quote_Approved",
+  "Quote_Rejected",
   "Pending_Quote",
 ];
 
@@ -232,12 +237,12 @@ export const TabsServiceCaseDetails = ({
   const navigate = useNavigate();
   const [openWorkOrder, setOpenWorkOrder] = useState(false);
   const { user } = useAuth();
-  
+
   const [selectedSymptom, setSelectedSymptom] = useState(null);
   const [notesList, setNotesList] = useState([]);
   const { open } = useSidebar();
   const [refreshFetchPage, setRefreshFetchPage] = useState(false)
-console.log("CHECK REFRESH STATTUS",refreshFetchPage)
+  console.log("CHECK REFRESH STATTUS",refreshFetchPage)
   const [entitlementStatus, setEntitlementStatus] = useState({
     OTCCode: "",
     PurchaseDate: "",
@@ -254,6 +259,11 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
   })
 
   entitlementStatus.needWarrantyApproval  ? console.log("THIS IS TRUE") : console.log("NOPE NOT TODAYS");
+
+  const [productForm, setProductForm] = useState({
+    HWPC: "",
+    ProductTypeID: caseDetails.asset_information?.product_information?.ProductTypeID,
+  })
 
   const [caseForm, setCaseForm] = useState({
     CaseType: "",
@@ -290,7 +300,17 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
 
   const [signature, setSignature] = useState(null);
 
+  // Modal Quotation
+  const [openDialogQuotation, setOpenDialogQuotation] = useState(false);
+  const [quotationInitialData, setQuotationInitialData] = useState(null);
+  const [quotationMaterialItems, setQuotationMaterialItems] = useState([]);
+  const [quotationLoading, setQuotationLoading] = useState(false);
+  const [quotationSubmitting, setQuotationSubmitting] = useState(false);
 
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [invoiceData, setInvoiceData] = useState(null);
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
+  const [invoiceSubmitting, setInvoiceSubmitting] = useState(false);
 
   const handleCaseDetails = (field) => (value) => {
     setCaseDetails((prev) => ({ ...prev, [field]: value }));
@@ -309,6 +329,10 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
     });
   };
 
+  const handleProductChange = (field) => (value) => {
+    setProductForm((prev) => ({ ...prev, [field]: value }));
+  };
+  
   const handleGtcChange = (field) => (value) => {
     setGtcForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -342,16 +366,16 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
 
     // Consider CASE edited if any field has a non-empty value
    const caseEdited = Object.entries({
-  CaseType: caseForm.CaseType,
-  CaseStatus: caseForm.CaseStatus,
-  CaseSubject: caseForm.CaseSubject,
-  Owner: caseForm.Owner,
-  CasePriority: caseForm.CasePriority,
-  CaseProductNote: caseForm.CaseProductNote,
-  ProblemDescription: caseForm.ProblemDescription,
-  CaseID_Manual: caseForm.CaseID_Manual,
-  CaseID_Manual_Date: caseForm.CaseID_Manual_Date,
-  StorageLocationStore: caseForm.StorageLocationStore
+    CaseType: caseForm.CaseType,
+    CaseStatus: caseForm.CaseStatus,
+    CaseSubject: caseForm.CaseSubject,
+    Owner: caseForm.Owner,
+    CasePriority: caseForm.CasePriority,
+    CaseProductNote: caseForm.CaseProductNote,
+    ProblemDescription: caseForm.ProblemDescription,
+    CaseID_Manual: caseForm.CaseID_Manual,
+    CaseID_Manual_Date: caseForm.CaseID_Manual_Date,
+    StorageLocationStore: caseForm.StorageLocationStore
    }).some(([_, v]) => v !== undefined && v !== null && String(v).trim() !== "");
   
     const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
@@ -364,7 +388,9 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
 
     const csrEdited = csrForm && Object.keys(csrForm).length > 0;
 
-    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseEdited;
+    const productEdited = productForm && Object.keys(productForm).length > 0;
+
+    const hasIntentToSave = noteFilled || gtcEdited || entitlementEdited || csrEdited || caseEdited || productEdited;
 
     if (!hasIntentToSave) {
       alert("Tidak ada data yang disimpan.");
@@ -373,11 +399,11 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
 
     let savedModules = [];
     const dataToUpdate = {};
-    for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE']) {
+    for (const target of ['NOTE', 'GTC', 'ENTITLEMENT', 'CSR', 'CASE', 'PRODUCT']) {
       console.log(target);
       switch (target) {
 
-       case 'NOTE':
+        case 'NOTE':
          if (noteFilled) {
            const response = await ApiCustomer.post("/api/case-information/case-notes", {
              LogType: caseNoteFormData.LogType,
@@ -482,6 +508,17 @@ console.log("CHECK REFRESH STATTUS",refreshFetchPage)
               dataToUpdate.id_csr = response.data.data.id_csr;
             }
             savedModules.push("CSR");
+          }
+          break;
+
+        case 'PRODUCT':
+          if (productEdited) {
+             await ApiCustomer.patch(`/api/product-information/${caseDetails.asset_information.product_information.ProductNumber}`, {
+              ...productForm,
+              HWPC:productForm.HWPC || "",
+              ProductTypeID: productForm.ProductTypeID
+            });
+            savedModules.push("PRODUCT")
           }
           break;
 
@@ -749,36 +786,43 @@ const openPopup = () => {
 
   // Deprecated: previously used for single textarea notes display
   // Replaced by notesList table
+  const [cancelState, setCancelState] = useState(false);
 
   const buttons = [
     {
       icon: CircleChevronLeft,
       label: "",
       onClick: () => navigate(`/app/viewcase`),
-      roles: ["admin", "fd","user", "apo", "ce","lg","celead","spv","ps"]
+      roles: ["admin", "fd","user", "apo", "ce","lg","celead","spv","ps","cm"]
     },
     // { icon: SquareArrowOutUpRight, label: "",},
     { icon: Save, label: "Save", 
       onClick: () => handleSave(), 
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps","cm"],
     },
     {
       icon: FileSymlink,
       label: "Save & Close",
-      onClick: () => handleSave().then(() => navigate(`/app/viewcase`)),
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps"],
+      onClick: () => handleSave().then(() => navigate(`/app/`)),
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps","cm"],
     },
     {
       icon: CopyX,
-      label: "Close",
-      onClick: () => saveAndCloseCase(),
+      label: "Close Case",
+      onClick: () => saveAndCloseCase(false),
+      roles: ["admin", "fd"],
+    },
+    {
+      icon: CopyX,
+      label: "Cancel Case",
+      onClick: () => saveAndCloseCase(true),
       roles: ["admin", "fd"],
     },
     { icon: RotateCw, label: "Refresh", 
       onClick: () => window.location.reload(),
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps"],
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps","cm"],
     },
-    // { icon: StepBack, label: "Complaint",},
+    { icon: MessageSquareText, label: "Quotation",onClick: () => handleQuotationOpenChange(true),  roles: ["admin","cm"]},
     { icon: StepBack, label: "SRF", 
       onClick: async () => {
         // return console.log(user);
@@ -845,7 +889,122 @@ const openPopup = () => {
     setOpenWorkOrder(true);
     setServiceCatalogType(type)
   };
-  const saveAndCloseCase = async () => {
+
+  const fetchInvoiceData = useCallback(async () => {
+    if (!caseDetails?.CaseID) return null;
+    setInvoiceLoading(true);
+    try {
+      const response = await ApiCustomer.get(
+        `/api/invoice-information?caseId=${caseDetails.CaseID}`
+      );
+      const payload = response.data?.data ?? null;
+      setInvoiceData(payload);
+      return payload;
+    } catch (error) {
+      console.error("Failed to fetch invoice:", error);
+      toast.error(
+        error.response?.data?.message ?? "Gagal mengambil data invoice."
+      );
+      return null;
+    } finally {
+      setInvoiceLoading(false);
+    }
+  }, [caseDetails?.CaseID]);
+
+  useEffect(() => {
+    if (!caseDetails?.CaseID) return;
+    fetchInvoiceData();
+  }, [caseDetails?.CaseID, fetchInvoiceData]);
+
+  const handleInvoiceOpenChange = (nextOpen = true) => {
+    setInvoiceDialogOpen(nextOpen);
+    if (nextOpen) {
+      fetchInvoiceData();
+    } else {
+      setInvoiceSubmitting(false);
+    }
+  };
+
+  const handleInvoiceSubmit = async (payload) => {
+    if (!caseDetails?.CaseID) return;
+    if (!user?.id) {
+      toast.error("User tidak valid. Silakan login kembali.");
+      return;
+    }
+    try {
+      setInvoiceSubmitting(true);
+      const hasInvoice = Boolean(payload.invoiceNo);
+      const endpoint = hasInvoice
+        ? `/api/invoice-information/${payload.invoiceNo}`
+        : "/api/invoice-information";
+      const method = hasInvoice ? "patch" : "post";
+      const requester =
+        method === "patch"
+          ? ApiCustomer.patch.bind(ApiCustomer)
+          : ApiCustomer.post.bind(ApiCustomer);
+
+      const requestBody = {
+        ...payload,
+        caseId : caseDetails?.CaseID
+      };
+
+      if (!hasInvoice) {
+        requestBody.createdBy = user.id;
+      }
+
+      const response = await requester(endpoint, requestBody);
+      setInvoiceData(response.data?.data ?? null);
+      toast.success(
+        hasInvoice
+          ? "Invoice berhasil diperbarui."
+          : "Invoice berhasil dibuat."
+      );
+      setInvoiceDialogOpen(false);
+      await fetchInvoiceData();
+      //do what after submit??
+      // IDK, just add the save and close again, maybe
+      // --miku21
+      saveAndCloseCase(cancelState);
+    } catch (error) {
+      console.error("Failed to save invoice:", error);
+      const message =
+        error.response?.data?.message ?? "Gagal menyimpan invoice.";
+      toast.error(message);
+    } finally {
+      setInvoiceSubmitting(false);
+    }
+  };
+
+  const ensureInvoiceBeforeClose = async () => {
+    const data = await fetchInvoiceData();
+    if (!data) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Quotation belum tersedia",
+        text: "Buat quotation beserta invoice sebelum menutup case.",
+      });
+      return false;
+    }
+    if (!data.invoice) {
+      /**
+       * TODO FOR SLAMET : 
+       * MAKE TIS CONFIRMATION INTO SOMETHING ELSE
+       */
+      await Swal.fire({
+        icon: "warning",
+        title: "Invoice belum tersedia",
+        text: "Input invoice terlebih dahulu sebelum menutup case.",
+        confirmButtonText: "Input Invoice",
+      });
+      handleInvoiceOpenChange(true);
+      return false;
+    }
+    return true;
+  };
+
+
+  const saveAndCloseCase = async (cancell = false) => {
+    setCancelState(cancell); //default initialization
     // Role guard: only FD can close a Case
     const tokenUser = getUserFromToken();
     if (!tokenUser || String(tokenUser.role).toLowerCase() !== 'fd') {
@@ -864,10 +1023,22 @@ const openPopup = () => {
   //   });
   //   return;
   // }
+  // return console.log(caseDetails?.asset_information?.WarrantyOTCCode?.WarrantyCondition);
+  if(caseDetails?.asset_information?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
 
+    const invoiceReady = await ensureInvoiceBeforeClose();
+    if (!invoiceReady) {
+      return;
+    }
+  }
+
+
+
+  const targetStatus = cancell ? "CANCEL" : "CLOSED"
+  const targetSystemCaseStatus = cancell ? "Cancel" : "Close"
     const confirmResult = await Swal.fire({
       title: "Confirm Save",
-      text: "This will give the Case status as CLOSED. Are you sure you want to save changes?",
+      text: "This will give the Case status as "+targetStatus+". Are you sure you want to save changes?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -879,7 +1050,6 @@ const openPopup = () => {
       return; 
     }
     try {
-      
       Swal.fire({
         title: "Saving...",
         text: "Please wait while we update the Case.",
@@ -893,7 +1063,7 @@ const openPopup = () => {
       try {
         const woRes = await ApiCustomer.get(`/api/work-order?CaseID=${caseDetails.CaseID}`);
         const workOrders = Array.isArray(woRes.data?.data) ? woRes.data.data : [];
-        const openWOs = workOrders.filter(wo => String(wo.SystemStatus).toUpperCase() !== 'CLOSED_POSTED');
+        const openWOs = workOrders.filter(wo => String(wo.SystemStatus).toUpperCase() !== 'CLOSED_POSTED' && String(wo.SystemStatus).toUpperCase() !== 'CLOSED_CANCELLED');
         if (openWOs.length > 0) {
           Swal.close();
           return Swal.fire({
@@ -906,7 +1076,7 @@ const openPopup = () => {
         for (const wo of workOrders) {
           const moRes = await ApiCustomer.get(`/api/material-order?WOID=${wo.WOID}`);
           const mos = Array.isArray(moRes.data?.data) ? moRes.data.data : [];
-          const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed');
+          const mosNotClosed = mos.filter(mo => String(mo.OrderStatus).toLowerCase() !== 'closed' && String(mo.OrderStatus).toLowerCase() !== 'cancelled');
           if (mosNotClosed.length > 0) {
             Swal.close();
             return Swal.fire({
@@ -929,7 +1099,7 @@ const openPopup = () => {
       const res = await ApiCustomer.patch(
         `/api/case-information/${caseDetails.CaseID}`,
         {
-          CaseStatus: "Close",
+          CaseStatus: targetSystemCaseStatus,
           CaseClosedDate: new Date().toISOString(), 
         }
       );
@@ -972,6 +1142,180 @@ const openPopup = () => {
       });
     }
   };
+
+
+
+
+  const fieldMO = (caseDetails) => {
+    const workorders = caseDetails?.workorder || [];
+    const Allitems = [];
+
+    workorders.forEach((wo) => {
+            (wo.materialorder || []).forEach((mo) => {
+                (mo.materialorderlineitems || []).forEach((line) => {
+                    const quotationEntry = Array.isArray(line.quotation_lineitem) && line.quotation_lineitem.length > 0
+                        ? line.quotation_lineitem[0]
+                        : undefined;
+
+                    const initialApproved = quotationEntry?.Approved;
+                    const approvedValue =
+                        initialApproved === undefined || initialApproved === null
+                            ? ""
+                            : initialApproved
+                                ? "yes"
+                                : "no";
+
+                    const linePrice =
+                        quotationEntry?.Price ?? line.Price ?? "";
+
+                    Allitems.push({
+                        lineItemId: line.LineItemID,
+                        moid: mo.MOID,
+                        woid: wo.WOID,
+                        partNumber: line.PartNumber,
+                        description: line.Description,
+                        quantity: line.Quantity ?? "",
+                        price:
+                            linePrice === null || linePrice === undefined
+                                ? ""
+                                : String(linePrice),
+                        partApproved: approvedValue,
+                    });
+                });
+            });
+        });
+    return Allitems;
+  }
+
+  useEffect(() => {
+    if (!openDialogQuotation || !caseDetails)  return;
+
+    let cancelled = false;
+
+    setQuotationInitialData(null);
+    setQuotationLoading(true)
+
+    const loadQuotation = async () => {
+            try {
+                const response = await ApiCustomer.get(`/api/quotation-information?caseId=${caseDetails.CaseID}`);
+                if (cancelled) return;
+                const quotationPayload = response.data.data;
+                if (quotationPayload) {
+                    setQuotationInitialData(mapQuotationInitialData(quotationPayload));
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    console.error("Failed to fetch quotation:", error);
+                    toast.error(
+                        error.response?.data?.message ?? "Gagal mengambil data quotation.",
+                    );
+                }
+            } finally {
+                if (!cancelled) {
+                    setQuotationLoading(false);
+                }
+            }
+    };
+
+    loadQuotation();
+
+    return () => {
+        cancelled = true;
+    };
+    },[openDialogQuotation, caseDetails]);
+
+    const handleQuotationOpenChange = (nextOpen = true) => {
+        setOpenDialogQuotation(nextOpen);
+        if (!nextOpen) {
+          setQuotationInitialData(null);
+          setQuotationLoading(false);
+          setQuotationSubmitting(false);          
+        }
+    };
+
+      const handleQuotationSubmit = async (payload) => {
+            if (!caseDetails) return;
+            if (!user?.id) {
+                toast.error("User tidak valid. Silakan login kembali.");
+                return;
+            }
+            try {
+                setQuotationSubmitting(true);
+                // return console.log("Submit : ",payload)
+                const apiPayload = {
+                    ...payload,
+                    userAssign: user.id !== payload?.userAssign ? payload.userAssign : user.id,
+                };
+                if(apiPayload.quoteDecision === "Rejected"){
+                  apiPayload.userAssign = caseDetails.workorder[0]?.OwnerID;
+                }
+                
+                console.log("Sending payload:", apiPayload);
+                const endpoint = payload.quotationNo
+                    ? `/api/quotation-information/${payload.quotationNo}`
+                    : "/api/quotation-information";
+                const method = payload.quotationNo ? "patch" : "post";
+                const requester =
+                    method === "patch"
+                        ? ApiCustomer.patch.bind(ApiCustomer)
+                        : ApiCustomer.post.bind(ApiCustomer);
+    
+                await requester(endpoint, apiPayload);
+    
+                toast.success(
+                    payload.quotationNo
+                        ? "Quotation berhasil diperbarui."
+                        : "Quotation berhasil dibuat.",
+                );
+    
+                handleQuotationOpenChange(false);
+            } catch (error) {
+                console.error("Failed to save quotation:", error);
+                const message =
+                    error.response?.data?.message ?? "Gagal menyimpan quotation.";
+                toast.error(message);
+            } finally {
+                setQuotationSubmitting(false);
+            }
+        };
+    
+    
+        const mapQuotationInitialData = (quotationPayload) => {
+            if (!quotationPayload?.quotation) return null;
+            const q = quotationPayload.quotation;
+    
+        return {
+            quotationNo: q.quotationNo,
+            quotationType: q.quotationType ?? "Simple",
+            vatValue:
+                q.vatValue === null || q.vatValue === undefined
+                        ? ""
+                        : String(q.vatValue),
+                quotationNote: q.quotationNote ?? "",
+                laborFee:
+                    q.laborFee === null || q.laborFee === undefined
+                        ? ""
+                    : String(q.laborFee),
+                quotationDate: q.quotationDate ?? "",
+                quoteApproveDate: q.quoteApproveDate ?? "",
+                sendWa: Boolean(q.sendWa),
+                sendEmail: Boolean(q.sendEmail),
+                quoteDecision: q.quoteDecision ?? "",
+        };
+    };
+
+  const invoiceSummary = invoiceData?.invoice;
+  const invoiceQuotation = invoiceData?.quotation;
+  const invoiceNotificationLabel =
+    [
+      invoiceSummary?.sendInvoice && "Invoice",
+      invoiceSummary?.sendWa && "WA",
+      invoiceSummary?.sendEmail && "Email",
+      invoiceSummary?.sendErf && "ERF",
+    ]
+      .filter(Boolean)
+      .join(", ") || "-";
+
   return (
     <>
       <div className="flex items-center border-1 sticky top-15 z-5 bg-gray-50 overflow-auto">
@@ -1013,7 +1357,7 @@ const openPopup = () => {
             <btn.icon/>
             {btn.label && <span className="text-md">{btn.label}</span>}
           </Button>
-        ))  }
+        ))}
         <BtnModalsServiceCatalog 
           open={openWorkOrder}
           setOpen={setOpenWorkOrder}
@@ -1021,7 +1365,32 @@ const openPopup = () => {
           serviceCatalogType={serviceCatalogType}
         />
       </div>
-        <div>
+      <div>
+        <QuotationDialog
+          open={openDialogQuotation}
+          onOpenChange={handleQuotationOpenChange}
+          materialItems={fieldMO(caseDetails)}
+          caseId={caseDetails.CaseID}
+          status={caseDetails.CaseStatus}
+          initialData={quotationInitialData || {}}
+          loading={quotationLoading}
+          submitting={quotationSubmitting}
+          onSubmit={handleQuotationSubmit}
+          createdBy={user}
+        />
+      </div>
+      <div>
+        <InvoiceDialog
+          open={invoiceDialogOpen}
+          onOpenChange={handleInvoiceOpenChange}
+          quotation={invoiceData?.quotation}
+          invoice={invoiceData?.invoice}
+          loading={invoiceLoading}
+          submitting={invoiceSubmitting}
+          onSubmit={handleInvoiceSubmit}
+        />
+      </div>
+      <div>
           <ServiceCase
             caseDetails={caseDetails}
             formData={caseNoteFormData}
@@ -1046,18 +1415,18 @@ const openPopup = () => {
             signature={signature}
             setSignature={setSignature}
             refreshFetchPage={refreshFetchPage}
+            productForm={productForm}
+            setProductForm={setProductForm}
+            handleProductChange={handleProductChange}
+            invoiceLoading={invoiceLoading}
+            invoiceSummary={invoiceSummary}
+            invoiceQuotation={invoiceQuotation}
+            invoiceNotificationLabel={invoiceNotificationLabel}
           />
       </div>
     </>
   );
 };
-
-
-
-
-
-
-
 
 export const ServiceCase = ({
   caseDetails,
@@ -1083,6 +1452,13 @@ export const ServiceCase = ({
   signature,
   setSignature,
   refreshFetchPage,
+  productForm,
+  setProductForm,
+  handleProductChange,
+  invoiceLoading,
+  invoiceSummary,
+  invoiceQuotation,
+  invoiceNotificationLabel,
 }) => {
   const { open } = useSidebar();
 
@@ -1112,11 +1488,21 @@ export const ServiceCase = ({
     }
   }, [caseDetails]);
 
+  // const allRoleTabs = ["admin","fd", "apo","ce","lg","celead","ps"];
+  
+  let hiddenTab;
+  if (caseDetails.asset_information?.WarrantyOTCCode.Description !== "Trade (OOW)") {
+    hiddenTab = true
+  }else {
+    hiddenTab = false
+  }
+
   const tabs = [
-    { value: "case_info", label: "Case & Customer", roles:["admin","fd", "apo","ce","lg","celead","ps", "cm"]},
-    { value: "ci_asset", label: "Assets , WO and MO" ,roles:["admin","fd", "apo","ce","lg","celead","ps", "cm"]},
-    { value: "doc_photo", label: "Document Photo" , roles:["admin", "apo","ce","celead","ps","fd","lg", "cm"]},
-    { value: "action_log", label: "Action Log", roles:["admin","fd", "apo","ce","lg","celead","ps", "cm"]},
+    { value: "case_info", label: "Case & Customer"},
+    { value: "ci_asset", label: "Assets , WO and MO"},
+    { value: "quotation", label: "OOW Information", hidden: hiddenTab},
+    { value: "doc_photo", label: "Document Photo" },
+    { value: "action_log", label: "Action Log"},
     // { value: "customer,add,entitement", label: "Asset & Entitement", roles:["admin"]},
     // { value: "ci_notes", label: "Notes & Information", roles:["admin"]},
     // { value: "ci_activitas", label: "Activities", disable: true, roles:["admin"]},
@@ -1129,10 +1515,10 @@ export const ServiceCase = ({
 
   const { user } = useAuth();
 
-  const visibleTabs = useMemo(
-    () => tabs.filter(tab => tab.roles.includes(user.role)),
-    [user.role]
-  );
+  // const visibleTabs = useMemo(
+  //   () => tabs.filter(tab => tab.roles.includes(user.role)),
+  //   [user.role]
+  // );
 
   // const visibleTabs = open ? tabs.slice(0, -2) : tabs;
   // const hiddenTabs = open
@@ -1152,13 +1538,11 @@ export const ServiceCase = ({
   const [dataFetchAssetInformation, setDataFetchAssetInformation] = useState();
   const [dataWarrantyStatus, setDataWarrantyStatus] = useState()
   const [ownerUserData, setOwnerUserData] = useState([]);
-console.log("CHECK OWENER DATA ",ownerUserData)
   const [workOrders, setWorkOrders] = useState([]);
 
   const [materialOrders, setMaterialOrders] = useState([]);
 
   const [actionLogs, setActionLogs] = useState([]);
-
 
 
   const fetchCustomerData = async () => {
@@ -1274,6 +1658,15 @@ console.log("CHECK OWENER DATA ",ownerUserData)
     }
   }
 
+  const fetchProduct = async () => {
+    try {
+      const res = await ApiCustomer.get(`/api/product-information/${caseDetails.asset_information.product_information.ProductNumber}`)
+      setProductForm(res.data.data)
+    }catch(err) {
+      console.error("Gagal Fetching Product Information",err)
+    }
+  }
+
   const [caseTipe, setCaseTipe] = useState([
     {
       CaseType : "Administrative"
@@ -1354,7 +1747,7 @@ console.log("CHECK OWENER DATA ",ownerUserData)
 
 
 
-   const statusEnumToLabelWO = {
+  const statusEnumToLabelWO = {
   OPEN_UNSCHEDULED: 'Open - Unscheduled',
   OPEN_SCHEDULED: 'Open - Scheduled',
   OPEN_INPROGRES: 'Open - In Progress',
@@ -1454,7 +1847,7 @@ const fetchActionLog = async () => {
     const actionlog = await ApiCustomer.get(`/api/actionlog?caseId=${caseDetails.CaseID}`)
     setActionLogs(actionlog.data.data)
   } catch (error) {
-    console.error("Error fetching ActionLog:", err);
+    console.error("Error fetching ActionLog:", error);
   }
 }
   // const location = useLocation();
@@ -1465,7 +1858,7 @@ const fetchActionLog = async () => {
     fetchCustomerData();
     fetchAssetInformation();
     fetchOwnerUserData();
-
+    fetchProduct();
     fetchWorkOrders();
     fetchCaseNotes();
     fetchGtc(); 
@@ -1503,10 +1896,10 @@ const fetchActionLog = async () => {
   }, [otcCode, dataFetchAssetInformation]);
 
   useEffect(() => {
-    console.log("Data Asset Info : ", dataFetchAssetInformation);
+    // console.log("Data Asset Info : ", dataFetchAssetInformation);
 
-    console.log("Fetch Data Customer Success : ", dataFetchCustomerData);
-    console.log("Fetch Data User ", ownerUserData);
+    // console.log("Fetch Data Customer Success : ", dataFetchCustomerData);
+    // console.log("Fetch Data User ", ownerUserData);
   }, [ownerUserData]);
 
 
@@ -1537,10 +1930,10 @@ const fetchActionLog = async () => {
   };
 
 useEffect(() =>{
-  console.log("Data Asset Info : ",dataFetchAssetInformation)
+  // console.log("Data Asset Info : ",dataFetchAssetInformation)
   
-  console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
-  console.log("Fetch Data User ", ownerUserData)
+  // console.log("Fetch Data Customer Success : ",dataFetchCustomerData)
+  // console.log("Fetch Data User ", ownerUserData)
 }, [ownerUserData])
 
 const fetchSymptomCodes = async (term) => {
@@ -1560,16 +1953,19 @@ const fetchSymptomCodes = async (term) => {
 let canEdit;
 let canEditFd;
 let canEditApo;
+let canEditCe;
 
 const [hideAsignTo, setHideAsignTo] = useState(null)
 if (caseDetails.CaseStatus !== "Close") {
    canEdit = caseDetails?.Owner === user?.id || user?.role === 'admin';
    canEditFd = user?.role === "fd" || user?.role === 'admin';
    canEditApo = user?.role === "apo" || user?.role === 'admin';
+   canEditCe = user?.role === "ce" || user?.role === "celead" || user?.role === 'admin';
 } else {
    canEdit = false;
    canEditFd = false;
    canEditApo = false;
+   canEditCe = false;
 }
 
 
@@ -1632,9 +2028,6 @@ if (caseDetails.CaseStatus !== "Close") {
     // setWarrantyCards(validFiles)
     handleEntitlementStatus('WarrantyCard')(validFiles);
   }
-  
-  
-
   const onPickPhotoUnits = (files) => {
     if (!files) return;
     const validFiles = Array.from(files).filter((f) => {
@@ -1672,7 +2065,21 @@ if (caseDetails.CaseStatus !== "Close") {
               {/* Owner */}
               <div className="flex flex-col">
                 <span className="text-blue-600 font-medium">{ownerUserData.Name}</span>
-                <span className="text-muted-foreground">Owner</span>
+                <span className="text-muted-foreground">
+                  {
+                    ownerUserData.Role === 'fd' ? "Owner Fd" : 
+                    ownerUserData.Role === 'ce' ? "Owner Ce" :
+                    ownerUserData.Role === 'celead' ? "Owner Ce Leader" :
+                    ownerUserData.Role === 'lg' ? "Owner Lg" :
+                    ownerUserData.Role === 'apo' ? "Owner Apo" :
+                    ownerUserData.Role === 'cm' ? "Owner Cm" :
+                    ownerUserData.Role === 'admin' ? "Owner Admin" :
+                    ownerUserData.Role === 'ps' ? "Owner Ps" :
+                    ownerUserData.Role === 'apv' ? "Owner Aprovel" :
+                    ownerUserData.Role === 'user' ? "User" :
+                    "None" 
+                  }
+                </span>
               </div>
 
               {/* Queue */}
@@ -1713,7 +2120,7 @@ if (caseDetails.CaseStatus !== "Close") {
           {/* TABS */}
           <div className=" border-t bg-gray-50 w-full overflow-x-auto">
             <TabsList className="sm:w-full w-fit flex gap-4 h-fit p-0 ">
-              {visibleTabs.map((tab, index) =>
+              {tabs.map((tab, index) =>
                 tab.component ? (
                   <div key={index}>{tab.component}</div>
                 ) : (
@@ -1840,7 +2247,6 @@ if (caseDetails.CaseStatus !== "Close") {
                   </CaseField>
                 {/* {assignToForm == true ?? (
                 )} */}
-
                 <CaseField label="Case Type" open className={"mt-2"} childClass={'col-span-2'} span={2} lock={!canEditFd} >
                   <SearchCommandBlock
                     value={caseForm?.CaseType}
@@ -2315,8 +2721,6 @@ if (caseDetails.CaseStatus !== "Close") {
 
                 </CardContent>
               </Card>
-
-
           </TabsContent>
 
           <TabsContent value="ci_asset">
@@ -2394,11 +2798,12 @@ if (caseDetails.CaseStatus !== "Close") {
                       />
                     </CaseField>
 
-                    <CaseField label="HWPC Code" lock >
+                    <CaseField label="HWPC Code" lock={!canEditCe}>
                       <Input 
-                      value={dataFetchAssetInformation?.AssetInformation?.product_information?.HWPC}
+                      value={productForm?.HWPC}
                       variant="invisible" 
                       placeholder="---" 
+                      onChange={(e) => handleProductChange("HWPC") (e.target.value)}
                       />
                     </CaseField>
   
@@ -3012,7 +3417,209 @@ if (caseDetails.CaseStatus !== "Close") {
       </CardContent>
     </Card>
   </div>
-</TabsContent>
+         </TabsContent>
+
+         <TabsContent value="quotation">
+            <div className="grid grid-cols-1 p-3 gap-3">
+               <Card className={"flex-col col-span-2"}>
+                <CardHeader>
+                  <CardTitle className={"text-lg"}>Quotation Information</CardTitle>
+                  <hr />
+                </CardHeader>
+                <CardContent className={"flex flex-col gap-4"}>
+                <div className="grid grid-cols-2 border-2 p-2 rounded-sm gap-2">
+                 <CaseField label={"Quotation no"} lock> 
+                  <Input 
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.QuotationNo || "---"}
+                  />
+                 </CaseField>
+                 <CaseField label={"Quotation type"} lock> 
+                  <Input 
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationType || "---"}
+                  />
+                 </CaseField>
+                  <CaseField label={"Quotation amount"} lock> 
+                  <Input 
+                    value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal)}
+                  />
+                 </CaseField>
+                 <CaseField label={"VAT value (%)"} lock> 
+                  <Input 
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue 
+                      ? caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue + "%" 
+                      : "---"}
+                  />
+                 </CaseField>
+                   <CaseField label={"Quotation amount + VAT"} lock> 
+                  <Input 
+                    value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal)}
+                  />
+                 </CaseField>
+                 <CaseField label={"Quotation Request date"} lock> 
+                  <DatePicker 
+                    value={new Date(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate)}
+                  />
+                 </CaseField>
+                 {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationApprovedDate !== null && (
+                  <CaseField label={"Quotation Response date"} lock> 
+                    <DatePicker 
+                      value={new Date(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationApprovedDate)}
+                    />
+                  </CaseField>
+                 )}
+                  <CaseField label={"Quote decision"} lock> 
+                  <Input 
+                    value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuoteDecision || "---"}
+                  />
+                 </CaseField>
+                </div>
+                <div className="grid grid-cols-2 border-2 p-2 rounded-sm gap-2">
+                 {caseDetails.workorder[0]?.materialorder.map((quo, i) => (
+                   <div key={quo.MOID}>
+                    <span className="font-bold">Sparepart {i+1}</span>
+                    <div className="grid grid-cols-2">
+                    <CaseField label={"Vendor part no"} lock>
+                      <Input
+                        value={"-"}
+                      />
+                    </CaseField>
+                    <CaseField label={"HP part no"} lock>
+                      <Input
+                        value={quo.materialorderlineitems[0]?.PartNumber}
+                      />
+                    </CaseField>
+                    <CaseField label={"Part name"} lock>
+                      <Input
+                        value={quo.materialorderlineitems[0]?.Description}
+                      />
+                    </CaseField>
+                    <CaseField label={"QTY"} lock>
+                      <Input
+                        value={quo.materialorderlineitems[0]?.Quantity}
+                      />
+                    </CaseField>
+                    <CaseField label={"Part category"} lock>
+                      <Input
+                        value={quo.materialorderlineitems[0]?.servicecatalog_parts?.Keyword}
+                      />
+                    </CaseField>
+                    <CaseField label={"Part approved"} lock>
+                      <Input
+                        value={quo.materialorderlineitems[0]?.quotation_lineitem[0]?.Approved === true ? "Yes" : "No"}
+                      />
+                    </CaseField>
+                    <CaseField label={"Bad CT code"} lock>
+                      <Input
+                        value={quo.materialorderlineitems[0]?.RemovedPartNumber}
+                      />
+                    </CaseField>
+                    </div>
+                   </div>
+                  ))}
+                </div>
+                </CardContent>
+              </Card>
+             
+              <Card className={"flex-col col-span-2"}>
+                <CardHeader className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className={"text-lg"}>Invoice Information</CardTitle>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleInvoiceOpenChange(true)}
+                      disabled={invoiceLoading || caseDetails?.CaseStatus === "Close"}
+                    >
+                      {invoiceSummary ? "Edit Invoice" : "Buat Invoice"}
+                    </Button>
+                  </div>
+                  <hr />
+                </CardHeader>
+                <CardContent>
+                  {invoiceLoading ? (
+                    <p className="text-sm text-muted-foreground">
+                      Memuat data invoice...
+                    </p>
+                  ) : invoiceSummary ? (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <CaseField label={"Quotation No"} lock>
+                        <Input value={invoiceQuotation?.quotationNo || "-"} readOnly />
+                      </CaseField>
+                      <CaseField label={"Invoice No"} lock>
+                        <Input value={invoiceSummary.invoiceNo} readOnly />
+                      </CaseField>
+                      <CaseField label={"Subtotal"} lock>
+                        <Input
+                          value={formatAccountingRupiah(invoiceQuotation?.subtotal)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Grand Total"} lock>
+                        <Input
+                          value={formatAccountingRupiah(invoiceQuotation?.grandTotal)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Amount Receive"} lock>
+                        <Input
+                          value={formatAccountingRupiah(invoiceSummary.amountReceive)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Amount Difference"} lock>
+                        <Input
+                          value={formatAccountingRupiah(invoiceSummary.amountDiff)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField
+                        label={"Alasan Selisih"}
+                        lock
+                        hide={!invoiceSummary.amountDiffReason}
+                      >
+                        <Input
+                          value={invoiceSummary.amountDiffReason || "-"}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Payment Type"} lock>
+                        <Input value={invoiceSummary.paymentType || "-"} readOnly />
+                      </CaseField>
+                      <CaseField label={"Tanggal Terima"} lock>
+                        <Input
+                          value={formatDate(invoiceSummary.amountReceiveDate)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Notifikasi"} lock>
+                        <Input value={invoiceNotificationLabel} readOnly />
+                      </CaseField>
+                      <CaseField label={"Catatan"} lock span={2}>
+                        <Textarea
+                          value={invoiceSummary.amountReceiveNote || "-"}
+                          rows={3}
+                          readOnly
+                        />
+                      </CaseField>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                      <p>Belum ada invoice untuk case ini.</p>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="w-fit"
+                        onClick={() => handleInvoiceOpenChange(true)}
+                        disabled={caseDetails?.CaseStatus === "Close"}
+                      >
+                        Buat Invoice
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>         
         </Tabs>
       </Card>
     </>

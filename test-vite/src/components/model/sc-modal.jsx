@@ -4160,7 +4160,7 @@ return (
 );
 };
 
-export function PartAdd () {
+export function PartAdd (onReload = false) {
   const [formData, setFormData] = useState({
     PartNumber: '',
     Keyword: '',
@@ -4229,7 +4229,9 @@ export function PartAdd () {
         icon: "success",
         timer: 1200,
         showConfirmButton: false,
-      }).then(() => window.location.reload());
+      }).then(() => {
+        if(onReload) window.location.reload()
+      });
     } catch (err) {
       Swal.fire({
         title: "Error!",
@@ -5263,6 +5265,20 @@ console.log("Asset Info OTC : ",isOutWarranty)
   const MAX_PAGES_SHOWN = 3;
 
     const totalPages = Math.ceil(filteredPartCatalog.length / PAGE_SIZE);
+    const MAX_PAGES_SHOWN = 3;
+  const getPaginationPages = () => {
+    if (totalPages <= MAX_PAGES_SHOWN) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 2) {
+      return [1, 2, 3];
+    }
+    if (currentPage >= totalPages - 1) {
+      return [totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [currentPage - 1, currentPage, currentPage + 1];
+  };
+  const paginationPages = getPaginationPages();
     const currentPageData = useMemo(() => {
       const start = (currentPage - 1) * PAGE_SIZE;
       return filteredPartCatalog.slice(start, start + PAGE_SIZE);
@@ -5598,17 +5614,17 @@ console.log("Asset Info OTC : ",isOutWarranty)
                               />
                             </PaginationItem>
 
-                            {paginationPages.map((i) => (
-                              <PaginationItem key={i}>
+                            {paginationPages.map((pages) => (
+                              <PaginationItem key={pages}>
                                 <PaginationLink
                                   href="#"
-                                  isActive={currentPage === i}
+                                  isActive={currentPage === pages}
                                   onClick={(e) => {
                                     e.preventDefault();
-                                    handlePageChange(i);
+                                    handlePageChange(pages);
                                   }}
                                 >
-                                  {i}
+                                  {pages}
                                 </PaginationLink>
                               </PaginationItem>
                             ))}
