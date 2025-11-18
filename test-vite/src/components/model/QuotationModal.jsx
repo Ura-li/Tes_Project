@@ -37,6 +37,9 @@ import {
 import { SearchCommandBlock } from "../sc-select";
 import ApiCustomer from "@/api";
 import { toast } from "sonner";
+import { Separator } from "../ui/separator";
+import { pdf } from "@react-pdf/renderer";
+import { QuotationInvoice } from "../QuatationInvoice";
 
 const formatDateForInput = (value) => {
   const date = value ? new Date(value) : new Date();
@@ -153,7 +156,9 @@ const QuotationDialog = ({
   initialData = {},
   loading = false,
   submitting = false,
-  createdBy
+  createdBy,
+  signature,
+  caseDetails
 }) => {
   
   const isQuoteRequested = status === "Quote_Requested";
@@ -432,92 +437,141 @@ const QuotationDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-6xl bg-white flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Quotation Detail</DialogTitle>
-          <DialogDescription>
-            Sesuaikan informasi quotation berdasarkan status case.
-          </DialogDescription>
+      <DialogContent className="min-w-6xl bg-white flex flex-col h-150 gap-1 ">
+        <DialogHeader
+          className={"flex flex-row justify-between gap-4 px-10 py-4  border-b"}
+        >
+          <div>
+            <DialogTitle>Quotation Detail</DialogTitle>
+            <DialogDescription>
+              Sesuaikan informasi quotation berdasarkan status case.
+            </DialogDescription>
+          </div>
           {existingQuotationNo && (
-            <p className="text-sm font-medium text-muted-foreground">
-              Quotation No: {existingQuotationNo}
-            </p>
+            <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-md font-medium text-muted-foreground bg-muted/60">
+              <span className="uppercase tracking-wide text-[10px] text-muted-foreground/70">
+                Quotation No
+              </span>
+              <span>{existingQuotationNo}</span>
+            </div>
           )}
         </DialogHeader>
 
-          {loading && (
-            <div className="rounded-md border border-dashed border-muted-foreground/40 bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
-              Memuat data quotation...
-            </div>
-          )}
-           <Card>
-      <CardContent className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* LEFT SIDE */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* all your CaseFields on the left */}
-          <CaseField label="Quotation Date" star>
-            <Input
-              type="date"
-              disabled={formDisabled}
-              value={form.quotationDate}
-              onChange={(e) => handleFieldChange("quotationDate", e.target.value)}
-            />
-            {fieldErrors.quotationDate && (
-              <p className="text-xs text-red-500">{fieldErrors.quotationDate}</p>
-            )}
-          </CaseField>
+        {loading && (
+          <div className="rounded-md border border-dashed border-muted-foreground/40 bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+            Memuat data quotation...
+          </div>
+        )}
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Informasi Quotation</CardTitle>
+            </CardHeader>
 
-          {isPendingQuote && (
-            <CaseField label="Quote Approve Date" star>
-              <Input
-                type="date"
-                disabled={formDisabled}
-                value={form.quoteApproveDate}
-                onChange={(e) =>
-                  handleFieldChange("quoteApproveDate", e.target.value)
-                }
-              />
-              {fieldErrors.quoteApproveDate && (
-                <p className="text-xs text-red-500">{fieldErrors.quoteApproveDate}</p>
-              )}
-            </CaseField>
-          )}
+            <CardContent className="gap-6  columns-2">
+              {/* LEFT COLUMN: MAIN FIELDS */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-1 flex-1">
+                {isPendingQuote && (
+                  <CaseField label="Quote Approve Date" star className="gap-1">
+                    <Input
+                      type="date"
+                      disabled={formDisabled}
+                      value={form.quoteApproveDate}
+                      onChange={(e) =>
+                        handleFieldChange("quoteApproveDate", e.target.value)
+                      }
+                    />
+                    {fieldErrors.quoteApproveDate && (
+                      <p className="text-xs text-red-500">
+                        {fieldErrors.quoteApproveDate}
+                      </p>
+                    )}
+                  </CaseField>
+                )}
 
-          <CaseField label="Quotation Type" star>
-            <Select
-              disabled={formDisabled}
-              value={form.quotationType}
-              onValueChange={(value) => handleFieldChange("quotationType", value)}
-            >
-              <SelectTrigger className="w-full" disabled={formDisabled}>
-                <SelectValue placeholder="Pilih tipe quotation" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Simple">Simple</SelectItem>
-                <SelectItem value="Standard">Standard</SelectItem>
-              </SelectContent>
-            </Select>
-            {fieldErrors.quotationType && (
-              <p className="text-xs text-red-500">{fieldErrors.quotationType}</p>
-            )}
-          </CaseField>
+                <CaseField label="Quotation Type" star className="gap-1">
+                  <Select
+                    disabled={formDisabled}
+                    value={form.quotationType}
+                    onValueChange={(value) =>
+                      handleFieldChange("quotationType", value)
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Pilih tipe quotation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Simple">Simple</SelectItem>
+                      <SelectItem value="Standard">Standard</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {fieldErrors.quotationType && (
+                    <p className="text-xs text-red-500">
+                      {fieldErrors.quotationType}
+                    </p>
+                  )}
+                </CaseField>
 
-          <CaseField label="Labor Fee" star>
-            
-            <Input
-              disabled={formDisabled}
-              value={form.laborFee}
-              onChange={(e) => handleFieldChange("laborFee", e.target.value)}
-              placeholder="Masukkan biaya labor"
-              type="number"
-              min="0"
-            />
-            {fieldErrors.laborFee && (
-              <p className="text-xs text-red-500">{fieldErrors.laborFee}</p>
-            )}
-          </CaseField>
+                <CaseField label="Quotation Date" star className="gap-1">
+                  <Input
+                    type="date"
+                    disabled={formDisabled}
+                    value={form.quotationDate}
+                    onChange={(e) =>
+                      handleFieldChange("quotationDate", e.target.value)
+                    }
+                  />
+                  {fieldErrors.quotationDate && (
+                    <p className="text-xs text-red-500">
+                      {fieldErrors.quotationDate}
+                    </p>
+                  )}
+                </CaseField>
 
-          {form.quotationType === "Standard" && (
+                {isPendingQuote && (
+                  <CaseField label="Quotation Decision" star className="gap-1">
+                    <Select
+                      disabled={formDisabled}
+                      value={form.quoteDecision}
+                      onValueChange={(value) =>
+                        handleFieldChange("quoteDecision", value)
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Pilih keputusan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="approve">Approve</SelectItem>
+                        <SelectItem value="reject">Reject</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {fieldErrors.quoteDecision && (
+                      <p className="text-xs text-red-500">
+                        {fieldErrors.quoteDecision}
+                      </p>
+                    )}
+                  </CaseField>
+                )}
+
+                <CaseField label="Labor Fee" star className="gap-1">
+                  <Input
+                    disabled={formDisabled}
+                    value={form.laborFee}
+                    onChange={(e) =>
+                      handleFieldChange("laborFee", e.target.value)
+                    }
+                    placeholder="Masukkan biaya labor"
+                    type="number"
+                    min="0"
+                  />
+                  {fieldErrors.laborFee && (
+                    <p className="text-xs text-red-500">
+                      {fieldErrors.laborFee}
+                    </p>
+                  )}
+                </CaseField>
+
+                 {form.quotationType === "Standard" && (
             <CaseField label="VAT Value (%)" star>
               <Input
                 disabled={formDisabled}
@@ -533,122 +587,111 @@ const QuotationDialog = ({
             </CaseField>
           )}
 
-          {isPendingQuote && (
-            <CaseField label="Quotation Decision" star>
-              <Select
-                disabled={formDisabled}
-                value={form.quoteDecision}
-                onValueChange={(value) => handleFieldChange("quoteDecision", value)}
-              >
-                <SelectTrigger className="w-full" disabled={formDisabled}>
-                  <SelectValue placeholder="pilih" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="approve">Approve</SelectItem>
-                  <SelectItem value="reject">Reject</SelectItem>
-                </SelectContent>
-              </Select>
-              {fieldErrors.quoteDecision && (
-                <p className="text-xs text-red-500">{fieldErrors.quoteDecision}</p>
-              )}
-            </CaseField>
-          )}
 
-          {form.quoteDecision === "approve" && (
-            <CaseField label="Select APO" star>
-              <SearchCommandBlock
-                value={form.userAssign}
-                onChange={(selectedID) => {
-                  if (selectedID === null) {
-                    handleFieldChange("userAssign", value);
-                    return;
-                  }
-                  const selectedUser = filteredUserAssign.find(
-                    (user) => user.IDUser === selectedID
-                  );
-                  if (selectedUser) {
-                    handleFieldChange("userAssign", selectedUser.IDUser);
-                  }
-                }}
-                placeholder="--Select--"
-                options={filteredUserAssign.map((user) => ({
-                  label: user.Name,
-                  value: user.IDUser,
-                }))}
-                renderLabel={(opt) => opt.label}
-                getValue={(opt) => opt.value}
-                className={"border-2 ring-1 ring-gray-200 bg-slate-100"}
-              />
-              {fieldErrors.userAssign && (
-                <p className="text-xs text-red-500">{fieldErrors.userAssign}</p>
-              )}
-            </CaseField>
-          )}
-        </div>
+                {form.quoteDecision === "approve" && (
+                  <CaseField
+                    label="Select APO"
+                    star
+                    childClass="flex flex-col items-start w-full"
+                    className="gap-1"
+                  >
+                    <SearchCommandBlock
+                      value={form.userAssign}
+                      onChange={(selectedID) => {
+                        if (selectedID === null) {
+                          handleFieldChange("userAssign", "");
+                          return;
+                        }
+                        const selectedUser = filteredUserAssign.find(
+                          (user) => user.IDUser === selectedID
+                        );
+                        if (selectedUser) {
+                          handleFieldChange("userAssign", selectedUser.IDUser);
+                        }
+                      }}
+                      placeholder="--Select--"
+                      options={filteredUserAssign.map((user) => ({
+                        label: user.Name,
+                        value: user.IDUser,
+                      }))}
+                      renderLabel={(opt) => opt.label}
+                      getValue={(opt) => opt.value}
+                      className="border border-gray-200 bg-slate-100"
+                    />
+                    {fieldErrors.userAssign && (
+                      <p className="text-xs text-red-500">
+                        {fieldErrors.userAssign}
+                      </p>
+                    )}
+                  </CaseField>
+                )}
+              </div>
 
-        {/* RIGHT SIDE */}
-        <div className="flex flex-col gap-4">
-          <CaseField
-            label="Catatan Tambahan"
-            span={2}
-            childClass="flex flex-col gap-3 items-start"
-          >
-            <Textarea
-              disabled={formDisabled}
-              value={form.quotationNote}
-              onChange={(e) =>
-                handleFieldChange("quotationNote", e.target.value)
-              }
-              placeholder="Catatan tambahan untuk quotation"
-              className="min-h-[120px] w-full"
-            />
-          </CaseField>
+              {/* RIGHT COLUMN: NOTE & OPTIONS */}
+              <div className="flex flex-col gap-4  break-inside-avoid">
+                <CaseField
+                  label="Quotation Note"
+                  span={2}
+                  childClass="flex flex-col gap-2 w-full"
+                >
+                  <Textarea
+                    disabled={formDisabled}
+                    value={form.quotationNote}
+                    onChange={(e) =>
+                      handleFieldChange("quotationNote", e.target.value)
+                    }
+                    placeholder="Catatan tambahan untuk quotation"
+                    className="min-h-[120px]"
+                  />
+                </CaseField>
 
-          <CaseField
-            label="Pilihan Tambahan"
-            span={2}
-            childClass="flex gap-3 items-start justify-start"
-          >
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <Checkbox
-                className={"border-fuchsia-400"}
-                id="useNewQuotationNo"
-                disabled={formDisabled}
-                checked={form.useNewQuotationNo}
-                onCheckedChange={(checked) =>
-                  handleCheckboxChange("useNewQuotationNo", checked)
-                }
-              />
-              <span>Use new Quotation No</span>
-            </label>
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <Checkbox
-                className={"border-fuchsia-400"}
-                id="sendWa"
-                disabled={formDisabled}
-                checked={form.sendWa}
-                onCheckedChange={(checked) =>
-                  handleCheckboxChange("sendWa", checked)
-                }
-              />
-              <span>Send WA</span>
-            </label>
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <Checkbox
-                className={"border-fuchsia-400"}
-                id="sendEmail"
-                disabled={formDisabled}
-                checked={form.sendEmail}
-                onCheckedChange={(checked) =>
-                  handleCheckboxChange("sendEmail", checked)
-                }
-              />
-              <span>Send Email</span>
-            </label>
-          </CaseField>
-        </div>
-      </CardContent>
-    </Card>
+                <CaseField
+                  label="Pilihan Tambahan"
+                  span={2}
+                  childClass="flex flex-col gap-2 justify-start items-start! "
+                >
+                  <label className="flex items-center gap-2 text-sm font-medium">
+                    <Checkbox
+                      className="border-fuchsia-400"
+                      id="useNewQuotationNo"
+                      disabled={formDisabled}
+                      checked={form.useNewQuotationNo}
+                      onCheckedChange={(checked) =>
+                        handleCheckboxChange("useNewQuotationNo", checked)
+                      }
+                    />
+                    <span>Use new Quotation No</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 text-sm font-medium">
+                    <Checkbox
+                      className="border-fuchsia-400"
+                      id="sendWa"
+                      disabled={formDisabled}
+                      checked={form.sendWa}
+                      onCheckedChange={(checked) =>
+                        handleCheckboxChange("sendWa", checked)
+                      }
+                    />
+                    <span>Send WA</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 text-sm font-medium">
+                    <Checkbox
+                      className="border-fuchsia-400"
+                      id="sendEmail"
+                      disabled={formDisabled}
+                      checked={form.sendEmail}
+                      onCheckedChange={(checked) =>
+                        handleCheckboxChange("sendEmail", checked)
+                      }
+                    />
+                    <span>Send Email</span>
+                  </label>
+                </CaseField>
+              </div>
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader>
@@ -669,7 +712,9 @@ const QuotationDialog = ({
                         <TableHead className="w-24">Qty</TableHead>
                         <TableHead className="w-40">Price *</TableHead>
                         {isPendingQuote && (
-                          <TableHead className="w-40">Part Approved *</TableHead>
+                          <TableHead className="w-40">
+                            Part Approved *
+                          </TableHead>
                         )}
                       </TableRow>
                     </TableHeader>
@@ -678,11 +723,17 @@ const QuotationDialog = ({
                         const errors = lineErrors[item.internalId] || {};
                         return (
                           <TableRow key={item.internalId}>
-                            <TableCell className="max-w-[180px]" onClick={() => copyToClipboard(item.partNumber)}>
+                            <TableCell
+                              className="max-w-[180px]"
+                              onClick={() => copyToClipboard(item.partNumber)}
+                            >
                               {item.partNumber || "-"}
                             </TableCell>
-                            <TableCell className="max-w-[240px]" onClick={() => copyToClipboard(item.description)}>
-                              <span className="line-clamp-2" >
+                            <TableCell
+                              className="max-w-[240px]"
+                              onClick={() => copyToClipboard(item.description)}
+                            >
+                              <span className="line-clamp-2">
                                 {item.description || "-"}
                               </span>
                             </TableCell>
@@ -750,8 +801,9 @@ const QuotationDialog = ({
               )}
             </CardContent>
           </Card>
+        </div>
 
-        <DialogFooter className="mt-6">
+        <DialogFooter className="border-t px-2 py-2 m-0">
           <DialogClose asChild>
             <Button variant="secondary" disabled={submitting}>
               Cancel
@@ -759,6 +811,23 @@ const QuotationDialog = ({
           </DialogClose>
           <Button onClick={handleSubmit} disabled={formDisabled}>
             {submitting ? "Menyimpan..." : "Simpan Quotation"}
+          </Button>
+          <Button
+            onClick={async () => {
+              const blob = await pdf(
+                <QuotationInvoice
+                  caseDetails={caseDetails}
+                  customerSignature={signature}
+                  materialItems={materialItems}
+                  initialData={initialData || {}}
+                />
+              ).toBlob();
+              const url = URL.createObjectURL(blob);
+              window.open(url);
+            }}
+            disabled={formDisabled}
+          >
+          Print Quotation Invoice
           </Button>
         </DialogFooter>
       </DialogContent>

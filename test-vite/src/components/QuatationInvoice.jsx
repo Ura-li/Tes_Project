@@ -17,152 +17,154 @@ Font.register({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     padding: 30,
-    gap: 3,
+    gap: 0,
     borderRadius: 5,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    maxWidth: "600px",
-    margin: "auto",
-    flexDirection: "column",
+    maxWidth: '600px',
+    margin: 'auto',
+    flexDirection: 'column',
+    marginBottom: 0
   },
-
   sectionHeader: {
     fontSize: 11,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
-
   textSmall: {
     fontSize: 9,
+    color: 'gray',
   },
-
   textCenter: {
-    textAlign: "center",
+    textAlign: 'center',
   },
-
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(8, 1fr)",
+    display: 'grid',
+    gridTemplateColumns: 'repeat(8, 1fr)',
   },
-
   grid2: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1hr)",
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
   },
-
   bold: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
-
   qrCode: {
     width: 45,
     height: 45,
   },
-
   logo: {
-    width: 45,
-    height: 45,
+    width: 60,
+    height: 60,
   },
-
+  
   leftSection: {
     flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     rowGap: 2,
   },
-
-  righSection: {
+  rightSection: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-
-  righSection2: {
+  rightSection2: {
     flex: 1,
-    flexDirection: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    rowGap: 2,
   },
-
   label: {
-    width: "30%",
+    width: '30%', 
     fontSize: 9,
   },
-
   label2: {
-    width: "20%",
+    width: '20%', 
     fontSize: 9,
   },
-
   value: {
-    width: "68%",
-    fontSize: 3,
-  },
-
-  colon: {
-    width: "2%",
-    fontSize: 2,
-  },
-
-  value2: {
-    width: "80%",
+    width: '68%',
     fontSize: 9,
   },
-
-  table: {
-    width: "100%",
+  colon: {
+    width: '2%',
+    fontSize: 9,
+  },
+  value2: {
+    width: '80%',
+    fontSize: 9,
+  },
+table: {
+    width: '100%',
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
   },
-
   tableRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
   },
-
-  tableHeader: {
-    backgroundColor: "#e5e7eb",
-  },
-
-  TableCell: {
-    flex: 1,
+  tableCell: {
+    flex: 1,                     // default equal width (good for 3-col table)
     borderRightWidth: 1,
-    borderButtomWidth: 1,
-    borderColor: "#ccc",
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
     padding: 2,
     fontSize: 7,
   },
-
   tableHeaderCell: {
     flex: 1,
     borderRightWidth: 1,
-    borderButtomWidth: 1,
-    borderColor: "#ccc",
+    borderBottomWidth: 1,
+    borderColor: '#000',
     padding: 2,
     fontSize: 7,
-    textAlign: "center",
-    backgroundColor: "#f3f4f6",
-    fontWeight: "bold",
-  },
+    textAlign: 'center',
+    fontWeight: 'bold',
+    backgroundColor: '#f3f4f6', 
 
+  },
+  alignRight: { textAlign: 'right' },
+  
+
+  /* ===== extra styles ONLY for the 7-column “parts” table ===== */
+  partsColNo: { flex: 0.7 },
+  partsColVendor: { flex: 1.5 },
+  partsColHp: { flex: 1.6 },
+  partsColPartName: { flex: 3 },
+  partsColQty: { flex: 0.8 },
+  partsColUnitPrice: { flex: 1.2 },
+  partsColTotalPrice: { flex: 1.2 },
+
+  // flex sums (0.7+1.5+1.6+3+0.8 = 7.6, all cols = 10)
+  partsColSpan5: { flex: 8 },  // No + Vendor + HP + Part Name + QTY
+  partsColSpan6: { flex: 9.2 },  // above + Unit Price
+
+  alignRight: {
+    textAlign: 'right',
+  },
+  alignCenter: {
+    textAlign: 'center',
+  },
+  
   sectionContainer: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     borderRadius: 4,
     marginVertical: 10,
-    paddingTop: 12,
-    position: 12,
-    position: "relative",
+    paddingTop: 12, // extra space so the title doesn't overlap content
+    position: 'relative',
   },
 
   sectionTitle: {
-    position: "absolute",
-    top: -8,
+    position: 'absolute',
+    top: -8, // moves the heading above the border
     left: 10,
     fontSize: 10,
-    fontWeight: "bold",
-    backgroundColor: "white",
+    fontWeight: 'bold',
+    backgroundColor: 'white', // covers the border behind text
     paddingHorizontal: 4,
   },
 
@@ -170,18 +172,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingBottom: 8,
   },
+
+
 });
 
 const Section = ({ title, children }) => (
   <View style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
-    <View style={styles.sectionContent}>{children}</View>
+    <View style={styles.sectionContent} break>{children}</View>
   </View>
 );
 
-export const QuatationInvoice = ({ caseDetails, customerSignature }) => (
+export const QuotationInvoice = ({
+  caseDetails,
+  customerSignature,
+  materialItems = {},
+  initialData = {},
+}) => (
   <Document>
-    <Page style={styles.container}>
+    <Page  size="A4" style={styles.container}>
       <View
         style={{
           flexDirection: "row",
@@ -211,6 +220,16 @@ export const QuatationInvoice = ({ caseDetails, customerSignature }) => (
       <Section title="Case Info">
         <View style={{ display: "flex", flexDirection: "row" }}>
           <View style={styles.leftSection}>
+            <Text style={[styles.label, { fontWeight: "bold", fontSize: 13 }]}>
+              Quotation no.
+            </Text>
+            <Text style={[styles.colon, { fontWeight: "bold", fontSize: 10 }]}>
+              :
+            </Text>
+            <Text style={[styles.value, { fontWeight: "bold", fontSize: 10 }]}>
+              {initialData?.quotationNo ?? null}
+            </Text>
+
             <Text style={styles.label}>Case Type</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>{caseDetails?.CaseType ?? "N/A"}</Text>
@@ -223,6 +242,14 @@ export const QuatationInvoice = ({ caseDetails, customerSignature }) => (
             </Text>
 
             <Text style={styles.label}>Received Date</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.CreatedOn
+                ? new Date(caseDetails.CreatedOn).toLocaleDateString()
+                : "N/A"}
+            </Text>
+
+            <Text style={styles.label}>Quotation Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
               {caseDetails?.CreatedOn
@@ -392,7 +419,233 @@ export const QuatationInvoice = ({ caseDetails, customerSignature }) => (
           </View>
         </View>
       </Section>
-      
+
+      <View style={[styles.tableRow, styles.tableHeader, { marginTop: 20 }]}>
+        <Text style={styles.tableHeaderCell}>Accessories</Text>
+        <Text style={styles.tableHeaderCell}>Note</Text>
+        <Text style={styles.tableHeaderCell}>CT/ SN Code</Text>
+      </View>
+      {caseDetails?.accessory?.length > 0 ? (
+        caseDetails.accessory.map((item, index) => (
+          <View style={styles.tableRow} key={index}>
+            <Text style={styles.tableCell}>{item.Accessories ?? "N/A"}</Text>
+            <Text style={styles.tableCell}>{item.Note ?? "N/A"}</Text>
+            <Text style={styles.tableCell}>{item.CT_SNCode ?? "N/A"}</Text>
+          </View>
+        ))
+      ) : (
+        <View style={styles.tableRow}>
+          <Text style={styles.tableCell}>-</Text>
+          <Text style={styles.tableCell}>-</Text>
+          <Text style={styles.tableCell}>-</Text>
+        </View>
+      )}
+
+      {/* PARTS TABLE */}
+      <View style={[styles.table, { marginTop: 20 }]}>
+        {/* Header */}
+        <View style={styles.tableRow}>
+          <Text style={[styles.tableHeaderCell, styles.partsColNo]}>No</Text>
+          <Text style={[styles.tableHeaderCell, styles.partsColVendor]}>
+            Vendor Part No
+          </Text>
+          <Text style={[styles.tableHeaderCell, styles.partsColHp]}>
+            HP Part No
+          </Text>
+          <Text style={[styles.tableHeaderCell, styles.partsColPartName]}>
+            Part Name
+          </Text>
+          <Text style={[styles.tableHeaderCell, styles.partsColQty]}>QTY</Text>
+          <Text style={[styles.tableHeaderCell, styles.partsColUnitPrice]}>
+            Unit Price
+          </Text>
+          <Text style={[styles.tableHeaderCell, styles.partsColTotalPrice]}>
+            Total Price
+          </Text>
+        </View>
+
+        {/* Body */}
+        {caseDetails?.workorder?.length > 0 ? (
+          caseDetails.workorder.map((item, index) => {
+            const line =
+              item.materialorder?.[0]?.materialorderlineitems?.[0] || {};
+            return (
+              <View style={styles.tableRow} key={index}>
+                <Text
+                  style={[
+                    styles.tableCell,
+                    styles.partsColNo,
+                    styles.alignCenter,
+                  ]}
+                >
+                  {index + 1}
+                </Text>
+
+                <Text style={[styles.tableCell, styles.partsColVendor]}>
+                  {/* Vendor part no here if available */}
+                </Text>
+
+                <Text style={[styles.tableCell, styles.partsColHp]}>
+                  {line.PartNumber ?? "N/A"}
+                </Text>
+
+                <Text style={[styles.tableCell, styles.partsColPartName]}>
+                  {line.Description ?? "N/A"}
+                </Text>
+
+                <Text style={[styles.tableCell, styles.partsColQty]}>
+                  {line.Quantity ?? "N/A"}
+                </Text>
+
+                <Text style={[styles.tableCell, styles.partsColUnitPrice]}>
+                  {/* line.UnitPrice ?? '.00' */}
+                  .00
+                </Text>
+
+                <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+                  {/* line.TotalPrice ?? '.00' */}
+                  .00
+                </Text>
+              </View>
+            );
+          })
+        ) : (
+          <View style={styles.tableRow}>
+            <Text style={[styles.tableCell, styles.partsColNo]} />
+            <Text style={[styles.tableCell, styles.partsColVendor]} />
+            <Text style={[styles.tableCell, styles.partsColHp]} />
+            <Text style={[styles.tableCell, styles.partsColPartName]} />
+            <Text style={[styles.tableCell, styles.partsColQty]} />
+            <Text style={[styles.tableCell, styles.partsColUnitPrice]} />
+            <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
+          </View>
+        )}
+
+        {/* Footer rows – perfectly aligned with header columns */}
+
+        {/* Labor Fee: colspan=5 */}
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan5, styles.alignRight]}
+          >
+            Labor Fee :
+          </Text>
+          <Text style={[styles.tableCell, styles.partsColUnitPrice]} />
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
+        </View>
+
+        {/* Sub Total: colspan=6 */}
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan6, styles.alignRight]}
+          >
+            Sub Total :
+          </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
+        </View>
+
+        {/* Total: colspan=6 */}
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan6, styles.alignRight]}
+          >
+            Total :
+          </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
+        </View>
+      </View>
+
+      <View style={{ display: "flex", flexDirection: "row", columnGap: 2 }} >
+        <View style={styles.leftSection} >
+          <Text style={{ fontSize: 10, width: "10%", fontWeight: "bold" }}>
+            Note
+          </Text>
+          <Text style={styles.colon}>:</Text>
+          <Text style={[styles.value]}>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo
+            ipsam necessitatibus dolor labore beatae earum nam neque praesentium
+            sunt suscipit, quis perspiciatis. Obcaecati iure excepturi mollitia
+            similique in accusantium exercitationem.
+          </Text>
+        </View>
+      </View>
+        <Section title="Terms and Conditions" >
+          <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
+            <View style={styles.leftSection}>
+              <Text style={styles.label}>Validity</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                {caseDetails?.asset_information?.SerialNumber ?? "N/A"}
+              </Text>
+              <Text style={styles.label}>Delivery Time</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                {caseDetails?.asset_information?.ProductNumber ?? "N/A"}
+              </Text>
+              <Text style={styles.label}>Payment</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                {caseDetails?.asset_information?.product_information
+                  ?.ProductName ?? "N/A"}
+              </Text>
+              <Text style={styles.label}>Warranty</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                {caseDetails?.asset_information?.product_information
+                  ?.ProductName ?? "N/A"}
+              </Text>
+              <Text style={styles.label}>Cancellation Fee</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                {caseDetails?.asset_information?.product_information
+                  ?.ProductName ?? "N/A"}
+              </Text>
+              <Text style={styles.label}>Others</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                what 
+              </Text>
+            </View>
+          </View>
+        </Section>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+          
+        >
+          <View style={{ flexDirection: "column", alignItems: "center" }} >
+            <Text style={[styles.textSmall, { marginBottom: 10 }]}>
+              Received By
+            </Text>
+     <Image src={caseDetails?.createdByUser?.Signature} style={{ width: 120, height: 50 }} />
+            <Text style={styles.textSmall}>
+              --------------------------------------------
+            </Text>
+            <Text style={styles.textSmall}>
+              {caseDetails?.createdByUser?.Name}
+            </Text>
+          </View>
+          <View style={{ flexDirection: "column", alignItems: "center" }} >
+            <Text style={[styles.textSmall, { marginBottom: 10 }]}>
+              Received By
+            </Text>
+            <Image src={customerSignature} style={{ width: 120, height: 50 }} />
+            <Text style={styles.textSmall}>
+              --------------------------------------------
+            </Text>
+            <Text style={styles.textSmall}>
+              {caseDetails?.contact_information?.FirstName ||
+              caseDetails?.contact_information?.LastName
+                ? `${caseDetails?.contact_information?.FirstName || ""} ${
+                    caseDetails?.contact_information?.LastName || ""
+                  }`.trim()
+                : "N/A"}
+            </Text>
+          </View>
+       
+      </View>
     </Page>
   </Document>
 );

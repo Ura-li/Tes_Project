@@ -10,8 +10,6 @@ import { cn } from "@/lib/utils";
 import QuotationDialog from "@/components/model/QuotationModal";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { QuatationInvoice } from "@/components/QuatationInvoice";
-import { pdf } from "@react-pdf/renderer";
 
 
 export default function CashManagement() {
@@ -324,7 +322,7 @@ export default function CashManagement() {
 
             <hr />
           </CardHeader>
-          <CardContent className={"grid gap-3"}>
+          <CardContent className={"grid gap-3 overflow-y-auto"}>
             {loading
               ? Array.from({ length: 3 }).map((_, i) => (
                   <Skeleton key={i} className="h-20 w-full rounded-lg" />
