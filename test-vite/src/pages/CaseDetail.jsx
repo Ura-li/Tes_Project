@@ -935,8 +935,31 @@ const openPopup = () => {
             initialData={quotationInitialData || {}}
           />
         ).toBlob();
-        const url = URL.createObjectURL(blob);
-        window.open(url); 
+         const fileName = `Quotation-${
+           quotationInitialData?.quotationNo ||
+           caseDetails?.CaseID ||
+           "document"
+         }.pdf`;
+
+         const url = URL.createObjectURL(blob);
+
+         // Open a new tab/window
+         const newWindow = window.open("", "_blank");
+
+         if (!newWindow) return;
+
+         // Set the tab title
+         newWindow.document.title = fileName;
+
+         // Fill with a minimal HTML shell and embed the PDF
+         newWindow.document.body.style.margin = "0";
+         const iframe = newWindow.document.createElement("iframe");
+         iframe.src = url;
+         iframe.style.border = "none";
+         iframe.style.width = "100%";
+         iframe.style.height = "100vh";
+
+         newWindow.document.body.appendChild(iframe);
       },
       roles: ["admin", "fd", "user", "spv", "cm"],
     },
