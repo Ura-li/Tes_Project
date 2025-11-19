@@ -19,8 +19,8 @@ Font.register({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "white",
-    padding: 30,
+    backgroundColor: 'white',
+    padding: 32,
     gap: 3,
     borderRadius: 5,
     shadowColor: "#000",
@@ -36,10 +36,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   textSmall: {
-    fontSize: 9,
+    fontSize: 8,
+    textAlign: 'justify',
   },
   textCenter: {
     textAlign: "center",
+    textDecoration: "underline"
   },
   grid: {
     display: "grid",
@@ -53,8 +55,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   qrCode: {
-    width: 45,
-    height: 45,
+    width: 50,
+    height: 50,
   },
   logo: {
     width: 60,
@@ -92,6 +94,7 @@ const styles = StyleSheet.create({
   label2: {
     width: "20%",
     fontSize: 9,
+    fontWeight: 'bold',
   },
   value: {
     width: "68%",
@@ -102,52 +105,51 @@ const styles = StyleSheet.create({
     fontSize: 9,
   },
   value2: {
-    width: "80%",
-    fontSize: 9,
+    width: '80%',
+    fontSize: 8,
+  },
+  value3: {
+    width: '2%',
+    fontSize: 8,
+  },
+  value4: {
+    width: '78%',
+    fontSize: 8,
+    textAlign: 'justify',
+    textIndent: -5,
   },
   table: {
     width: "100%",
-    borderWidth: 1,
-    borderColor: "#ccc",
+    marginBottom: 8,
+    fontSize: 7,
   },
   tableRow: {
     flexDirection: "row",
   },
-  tableHeader: {
-    backgroundColor: "#e5e7eb",
-  },
   tableCell: {
     flex: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
+    borderWidth: 1,
+    padding: 4,
     borderColor: "#ccc",
-    padding: 2,
-    fontSize: 7,
   },
   tableHeaderCell: {
-    flex: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
-    padding: 2,
-    fontSize: 7,
-    textAlign: "center",
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "#DEDED1",
     fontWeight: "bold",
+    textAlign: "center",
+    borderColor: "#ccc",
   },
-
   sectionContainer: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 4,
-    marginVertical: 10,
+    marginVertical: 4,
     paddingTop: 12, // extra space so the title doesn't overlap content
     position: "relative",
   },
 
   sectionTitle: {
-    position: "absolute",
-    top: -8, // moves the heading above the border
+    position: 'absolute',
+    top: -6, // moves the heading above the border
     left: 10,
     fontSize: 10,
     fontWeight: "bold",
@@ -161,12 +163,40 @@ const styles = StyleSheet.create({
   },
 });
 
-const Section = ({ title, children }) => (
+const Section = ({ title, children}) => (
   <View style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.sectionContent}>{children}</View>
   </View>
 );
+
+const List = ({ items }) => (
+  <View>
+    {items.map((item, index) => (
+      <Text key={index} style={styles.value4}>
+        • {item}
+      </Text>
+    ))}
+  </View>
+)
+
+const Table = ({ data }) => (
+  <View style={styles.table}>
+    {data.map((row, rowIndex) => (
+      <View key={rowIndex} style={styles.tableRow}>
+        {row.map((cell, cellIndex) => (
+          <Text
+            key={cellIndex}
+            style={[styles.tableCell, rowIndex === 0 && styles.tableHeaderCell]}
+          >
+            {cell}
+          </Text>
+        ))}
+      </View>
+    ))}
+  </View>
+);
+
 
 const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
   <Document>
@@ -384,88 +414,53 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
         </View>
       </Section>
 
-      <View style={[styles.tableRow, styles.tableHeader, { marginTop: 10 }]}>
-        <Text style={styles.tableHeaderCell}>Accessories</Text>
-        <Text style={styles.tableHeaderCell}>Note</Text>
-        <Text style={styles.tableHeaderCell}>CT/ SN Code</Text>
-      </View>
-      {caseDetails?.accessory?.length > 0 ? (
-        caseDetails.accessory.map((item, index) => (
-          <View style={styles.tableRow} key={index}>
-            <Text style={styles.tableCell}>{item.Accessories ?? "N/A"}</Text>
-            <Text style={styles.tableCell}>{item.Note ?? "N/A"}</Text>
-            <Text style={styles.tableCell}>{item.CT_SNCode ?? "N/A"}</Text>
+      {/* Accessories Table */}
+      <Table data={[
+        ["Accessories", "Note", "CT / SN Code"],
+        ...(caseDetails?.accessory?.length > 0
+          ? caseDetails.accessory.map((item) => [
+              item.Accessories ?? "N/A",
+              item.Note ?? "N/A",
+              item.CT_SNCode ?? "N/A",
+            ])
+          : [["No Data", "-", "-"]]),
+      ]} />
+        
+      <Section title="Notification and confirmation" >
+        <View style={{ display: 'flex', flexDirection: 'row'}}>
+          <View style={styles.leftSection}>
+            <Text style={styles.label2}>Unit Garansi</Text>
+            <Text style={[styles.value2]}>: Lamanya pengerjaan perbaikan sekitar 3 hari kerja (tergantung tersedianya suku cadang)</Text>
+            <Text style={styles.label2}>Unit Tidak Garansi</Text>
+            <Text style={styles.value3}>: </Text>
+            <List items={[
+              'Biaya pengecekan dibayar di muka dan tidak dapat dikembalikan.',
+              'Surat Penawaran Perbaikan akan dikirim sekitar 3 hari kerja setelah peralatan diterima. Lamanya pengerjaan perbaikan sekitar 3 hari kerja setelah persetujuan atas Surat Penawaran Perbaikan (tergantung tersedianya suku cadang)'
+            ]} /> 
           </View>
-        ))
-      ) : (
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>No Data</Text>
-          <Text style={styles.tableCell}>-</Text>
-          <Text style={styles.tableCell}>-</Text>
         </View>
-      )}
+        <Text style={[styles.sectionHeader, styles.textCenter,]}>Disclaimer Statement</Text>
 
-      <Text style={[styles.textSmall, { fontWeight: "bold" }]}>
-        Notification and confirmation
-      </Text>
-      <View style={{ display: "flex", flexDirection: "row" }}>
-        <View style={styles.leftSection}>
-          <Text style={styles.label2}>Unit Garansi</Text>
-          <Text style={[styles.value2]}>
-            :Lamanya pengerjaan perbaikan sekitar 3 hari kerja (tergantung
-            tersedianya suku cadang)
+        <View>
+          <Text style={[styles.bold, styles.textSmall]}>Informasi Untuk Pelanggan :</Text>
+          <Text style={[styles.bold, styles.textSmall]}>Saya {caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
+            ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
+            : 'Customer'} yang bertanda tangan di bawah ini menyetujui bahwa:</Text>
+          <Text style={[styles.bold, styles.textSmall]}>
+            Data yang tersimpan dalam peralatan dapat terhapus selama proses perbaikan peralatan berlangsung. Pada saat dilakukan system atau
+            operating system recovery, setting peralatan akan berubah mengikuti setting awal dari pabrik.
           </Text>
-          <Text style={styles.label2}>Unit Tidak Garansi</Text>
-          <Text style={[styles.value2]}>
-            : • Biaya pengecekan dibayar di muka dan tidak dapat dikembalikan.{" "}
+          <Text style={styles.textSmall}>
+            Walaupun HP selalu melakukan pencegahan terhadap kerusakan pada Data atau terhapusnya Data, kami sangat menyarankan Pelanggan untuk melakukan
+            Backup Data sendiri sebelum peralatan disampaikan kepada kami. Dengan demikian pelanggan mempunyai Backup Data untuk melakukan Data Recovery jika
+            selama proses perbaikan peralatan berlangsung Data pelanggan terhapus oleh System atau Operating System.
           </Text>
-          <Text style={styles.label2}></Text>
-          <Text style={[styles.value2]}>
-            • Surat Penawaran Perbaikan akan dikirim sekitar 3 hari kerja
-            setelah peralatan diterima. Lamanya pengerjaan perbaikan sekitar 3
-            hari kerja setelah persetujuan atas Surat Penawaran Perbaikan
-            (tergantung tersedianya suku cadang)
+          <Text style={styles.textSmall}>
+            HP tidak memberikan jaminan proteksi Data pelanggan dan HP tidak bertanggung jawab jika terjadi kerusakan pada Data atau terhapusnya Data dari peralatan
+            pelanggan.
           </Text>
         </View>
-      </View>
-      <Text style={[styles.sectionHeader, styles.textCenter]}>
-        Disclaimer Statement
-      </Text>
-
-      <View style={{}}>
-        <Text style={[styles.bold, styles.textSmall]}>
-          Informasi Untuk Pelanggan :
-        </Text>
-        <Text style={[styles.bold, styles.textSmall]}>
-          Saya{" "}
-          {caseDetails?.contact_information?.FirstName ||
-          caseDetails?.contact_information?.LastName
-            ? `${caseDetails?.contact_information?.FirstName || ""} ${
-                caseDetails?.contact_information?.LastName || ""
-              }`.trim()
-            : "Customer"}{" "}
-          yang bertanda tangan di bawah ini menyetujui bahwa:
-        </Text>
-        <Text style={[styles.bold, styles.textSmall]}>
-          Data yang tersimpan dalam peralatan dapat terhapus selama proses
-          perbaikan peralatan berlangsung. Pada saat dilakukan system atau
-          operating system recovery, setting peralatan akan berubah mengikuti
-          setting awal dari pabrik.
-        </Text>
-        <Text style={styles.textSmall}>
-          Walaupun HP selalu melakukan pencegahan terhadap kerusakan pada Data
-          atau terhapusnya Data, kami sangat menyarankan Pelanggan untuk
-          melakukan Backup Data sendiri sebelum peralatan disampaikan kepada
-          kami. Dengan demikian pelanggan mempunyai Backup Data untuk melakukan
-          Data Recovery jika selama proses perbaikan peralatan berlangsung Data
-          pelanggan terhapus oleh System atau Operating System.
-        </Text>
-        <Text style={styles.textSmall}>
-          HP tidak memberikan jaminan proteksi Data pelanggan dan HP tidak
-          bertanggungjawab jika terjadi kerusakan pada Data atau terhapusnya
-          Data dari peralatan pelanggan.
-        </Text>
-      </View>
+        </Section>
 
       {/* Signature section */}
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -490,38 +485,13 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
             Check Repair Status
           </Text>
         </View>
-        <View style={{ flexDirection: "column", alignItems: "center" }}>
-          {!customerSignature ? (
-            <>
-              <Text style={[styles.textSmall, { marginBottom: 30 }]}>
-                Received By
-              </Text>
-              <Text style={styles.textSmall}>
-                --------------------------------------------
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text style={[styles.textSmall, { marginBottom: 10 }]}>
-                Received By
-              </Text>
-              <Image
-                src={customerSignature}
-                style={{ width: 120, height: 60 }}
-              />
-            </>
-          )}
-          <Text style={styles.textSmall}>
-            --------------------------------------------
-          </Text>
-          <Text style={styles.textSmall}>
-            {caseDetails?.contact_information?.FirstName ||
-            caseDetails?.contact_information?.LastName
-              ? `${caseDetails?.contact_information?.FirstName || ""} ${
-                  caseDetails?.contact_information?.LastName || ""
-                }`.trim()
-              : "N/A"}
-          </Text>
+        <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+          <Text style={[styles.textSmall, { marginBottom: 10 }]}>Received By</Text>
+          <Image src={customerSignature} style={{ width: 120, height: 60 }} />
+          <Text style={styles.textSmall}>--------------------------------------------</Text>
+          <Text style={styles.textSmall}>{caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
+              ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
+              : 'N/A'}</Text>
         </View>
       </View>
 

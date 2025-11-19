@@ -22,7 +22,7 @@ Font.register({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
-    padding: 30,
+    padding: 32,
     gap: 3,
     borderRadius: 5,
     shadowColor: '#000',
@@ -39,7 +39,6 @@ const styles = StyleSheet.create({
   },
   textSmall: {
     fontSize: 9,
-    color: 'gray',
   },
   textCenter: {
     textAlign: 'center',
@@ -108,49 +107,38 @@ const styles = StyleSheet.create({
     width: '80%',
     fontSize: 9,
   },
-  table: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ccc',
+   table: {
+    width: "100%",
+    marginBottom: 8,
+    fontSize: 7,
   },
   tableRow: {
-    flexDirection: 'row',
-  },
-  tableHeader: {
-    backgroundColor: '#e5e7eb', 
+    flexDirection: "row",
   },
   tableCell: {
     flex: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
-    padding: 2,
-    fontSize: 7,
+    borderWidth: 1,
+    padding: 4,
+    borderColor: "#ccc",
   },
   tableHeaderCell: {
-    flex: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
-    padding: 2,
-    fontSize: 7,
-    textAlign: 'center',
-    backgroundColor: '#f3f4f6', 
-    fontWeight: 'bold',
+    backgroundColor: "#DEDED1",
+    fontWeight: "bold",
+    textAlign: "center",
+    borderColor: "#ccc",
   },
-
   sectionContainer: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 4,
-    marginVertical: 10,
+    marginVertical: 4,
     paddingTop: 12, // extra space so the title doesn't overlap content
     position: 'relative',
   },
 
   sectionTitle: {
     position: 'absolute',
-    top: -8, // moves the heading above the border
+    top: -6, // moves the heading above the border
     left: 10,
     fontSize: 10,
     fontWeight: 'bold',
@@ -172,6 +160,24 @@ const Section = ({ title, children }) => (
     <View style={styles.sectionContent}>{children}</View>
   </View>
 );
+
+const Table = ({ data }) => (
+  <View style={styles.table}>
+    {data.map((row, rowIndex) => (
+      <View key={rowIndex} style={styles.tableRow}>
+        {row.map((cell, cellIndex) => (
+          <Text
+            key={cellIndex}
+            style={[styles.tableCell, rowIndex === 0 && styles.tableHeaderCell]}
+          >
+            {cell}
+          </Text>
+        ))}
+      </View>
+    ))}
+  </View>
+);
+
 const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
 
 (
@@ -354,52 +360,32 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
         </View>
       </View>
       </Section>
-      <View style={[styles.tableRow, styles.tableHeader, { marginTop: 20 }]}>
-        <Text style={styles.tableHeaderCell}>Accessories</Text>
-        <Text style={styles.tableHeaderCell}>Note</Text>
-        <Text style={styles.tableHeaderCell}>CT/ SN Code</Text>
-      </View>
-      {caseDetails?.accessory?.length > 0 ? (
-        caseDetails.accessory.map((item, index) => (
-          <View style={styles.tableRow} key={index}>
-            <Text style={styles.tableCell}>{item.Accessories ?? 'N/A'}</Text>
-            <Text style={styles.tableCell}>{item.Note ?? 'N/A'}</Text>
-            <Text style={styles.tableCell}>{item.CT_SNCode ?? 'N/A'}</Text>
-          </View>
-        ))
-      ) : (
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>No Data</Text>
-          <Text style={styles.tableCell}>-</Text>
-          <Text style={styles.tableCell}>-</Text>
-        </View>
-      )}
 
-      <View style={[styles.tableRow, styles.tableHeader, { marginTop: 20 }]}>
-        <Text style={styles.tableHeaderCell}>NO</Text>
-        <Text style={styles.tableHeaderCell}>Vendor part NO</Text>
-        <Text style={styles.tableHeaderCell}>HP Part NO</Text>
-        <Text style={styles.tableHeaderCell}>Part Name</Text>
-        <Text style={styles.tableHeaderCell}>NEW CT Code</Text>
-        <Text style={styles.tableHeaderCell}>QTY</Text>
-      </View>
-      {caseDetails?.workorder?.length > 0 ? (
-        caseDetails.workorder.map((item, index) => (
-          <View style={styles.tableRow} key={index}>
-            <Text style={[styles.tableCell,{ textAlign: 'center'}]}>{index + 1}</Text>
-            <Text style={styles.tableCell}></Text>
-            <Text style={styles.tableCell}>{item.materialorder[0].materialorderlineitems[0].PartNumber ?? 'N/A'}</Text>
-            <Text style={styles.tableCell}>{item.materialorder[0].materialorderlineitems[0].Description ?? 'N/A'}</Text>  
-            <Text style={styles.tableCell}>{item.materialorder[0].materialorderlineitems[0].RemovedSerialNumber ?? 'N/A'}</Text>  
-            <Text style={styles.tableCell}>{item.materialorder[0].materialorderlineitems[0].Quantity ?? 'N/A'}</Text>  
-          </View>
-        ))
-      ) : (
-        <>
-        </>
-      )}
+      {/* Accessories Table */}
+      <Table data={[
+        ["Accessories", "Note", "CT / SN Code"],
+        ...(caseDetails?.accessory?.length > 0
+          ? caseDetails.accessory.map((item) => [
+              item.Accessories ?? "N/A",
+              item.Note ?? "N/A",
+              item.CT_SNCode ?? "N/A",
+            ])
+          : [["No Data", "-", "-"]]),
+      ]} />
 
+      <Table data={[
+        ["NO", "Vendor part NO", "HP Part NO", "Part Name", "NEW CT Code", "QTY"],
+        ...(caseDetails?.workorder?.length > 0 ? caseDetails.workorder.map((item, index ) => [
+          index + 1,
+          'N/A',
+          item.materialorder[0].materialorderlineitems[0].PartNumber ?? 'N/A',
+          item.materialorder[0].materialorderlineitems[0].Description ?? 'N/A',
+          item.materialorder[0].materialorderlineitems[0].RemovedSerialNumber ?? 'N/A',
+          item.materialorder[0].materialorderlineitems[0].Quantity ?? 'N/A',
+        ]) : [["No Data", "-", "-", "-","-", "-"]]),
+      ]}/>
 
+    
       <Text style={[styles.textSmall, { fontWeight: 'bold', color: 'black' }]}>Repair Action : </Text>
       {/* <View style={{ display: 'flex', flexDirection: 'row' }}>
 
@@ -446,18 +432,9 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
         </View>
 
         <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-          {!customerSignature ?
-            <>
-              <Text style={[styles.textSmall, { marginBottom: 30 }]}>Received By</Text>
-              <Text style={styles.textSmall}>--------------------------------------------</Text>
-            </>
-            :
-            <>
-              <Text style={[styles.textSmall, { marginBottom: 10 }]}>Received By</Text>
-              <Image src={customerSignature} style={{ width: 120, height: 60 }} />
-            </>
-          }
-         
+          <Text style={[styles.textSmall, { marginBottom: 10 }]}>Received By</Text>
+          <Image src={customerSignature} style={{ width: 120, height: 60 }} />
+          <Text style={styles.textSmall}>--------------------------------------------</Text>
           <Text style={styles.textSmall}>{caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
               ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
               : 'N/A'}</Text>

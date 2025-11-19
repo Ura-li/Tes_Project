@@ -2445,9 +2445,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     value={
                       dataFetchCustomerData?.Type == "SiteAccount"
                         ? dataFetchCustomerData?.SiteAccount?.Company
-                        : dataFetchCustomerData?.MainAccount?.FirstName +
-                          " " +
-                          dataFetchCustomerData?.MainAccount?.LastName
+                        : dataFetchCustomerData?.MainAccount?.FirstName && dataFetchCustomerData?.MainAccount?.LastName ? dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName : "---"
                     }
                     readOnly
                   />
@@ -2455,7 +2453,12 @@ if (caseDetails.CaseStatus !== "Close") {
                 <CaseField label="Primary Contact" lock>
                   <Input
                     variant="invisible"
-                    value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
+                    value = {
+                      dataFetchCustomerData.MainAccount?.Salutation && dataFetchCustomerData.MainAccount?.FirstName && dataFetchCustomerData.MainAccount?.LastName ?
+                      `${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}` : 
+                      dataFetchCustomerData.MainAccount?.FirstName && dataFetchCustomerData.MainAccount?.LastName ?
+                      `${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}` : "---"
+                    }
                     readOnly
                   />
                 </CaseField>
@@ -2465,7 +2468,7 @@ if (caseDetails.CaseStatus !== "Close") {
                 <CaseField label=" Primary Email" lock>
                   <Input
                     variant="invisible"
-                    value={dataFetchCustomerData.MainAccount?.Email}
+                    value={dataFetchCustomerData.MainAccount?.Email ? dataFetchCustomerData.MainAccount?.Email : "---"}
                     placeholder="---"
                     readOnly
                   />
@@ -2476,7 +2479,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     value={
                       dataFetchCustomerData?.Type == "SiteAccount"
                         ? dataFetchCustomerData?.SiteAccount?.Country
-                        : dataFetchCustomerData?.MainAccount?.Country
+                        : dataFetchCustomerData?.MainAccount?.Country ? dataFetchCustomerData?.MainAccount?.Country : "---"
                     }
                     readOnly
                   />                  
@@ -2485,7 +2488,7 @@ if (caseDetails.CaseStatus !== "Close") {
                   <span className="pl-3">
                   {dataFetchCustomerData?.Type == "SiteAccount"
                     ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone
-                    : dataFetchCustomerData?.MainAccount?.Phone}
+                    : dataFetchCustomerData?.MainAccount?.Phone ? dataFetchCustomerData?.MainAccount?.Phone : "---"}
                   </span>
                 </CaseField>
                 <CaseField label="Region" lock>
@@ -2494,7 +2497,8 @@ if (caseDetails.CaseStatus !== "Close") {
                   placeholder="---"  
                   value={dataFetchCustomerData?.Type == "SiteAccount"
                     ? dataFetchCustomerData?.SiteAccount?.City + " - " + dataFetchCustomerData?.SiteAccount?.StateProvince
-                    : dataFetchCustomerData?.MainAccount?.City + " - " + dataFetchCustomerData?.MainAccount?.StateProvince}/>
+                    : dataFetchCustomerData?.MainAccount?.City && dataFetchCustomerData?.MainAccount?.StateProvince ? dataFetchCustomerData?.MainAccount?.City + " - " + dataFetchCustomerData?.MainAccount?.StateProvince : "---"
+                    }/>
                 </CaseField>
                 <CaseField label="Is Partner" lock>
                   <Input variant="invisible" placeholder="---" />
