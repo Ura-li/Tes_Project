@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
 });
 
 const Section = ({ title, children}) => (
-  <View style={styles.sectionContainer}>
+  <View minPresenceAhead={120} style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.sectionContent}>{children}</View>
   </View>
@@ -200,7 +200,7 @@ const Table = ({ data }) => (
 
 const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
   <Document>
-    <Page style={styles.container}>
+    <Page size="A4" style={styles.container}>
       <View
         style={{
           flexDirection: "row",
@@ -413,7 +413,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
           </View>
         </View>
       </Section>
-
+      
       {/* Accessories Table */}
       <Table data={[
         ["Accessories", "Note", "CT / SN Code"],
@@ -460,7 +460,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
             pelanggan.
           </Text>
         </View>
-        </Section>
+      </Section>
 
       {/* Signature section */}
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>

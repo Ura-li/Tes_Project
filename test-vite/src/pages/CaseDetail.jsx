@@ -873,6 +873,18 @@ const openPopup = () => {
       icon: StepBack,
       label: "ERF",
       onClick: async () => {
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          LogType: "System Info",
+          ActionType: "Request ERF",
+          Template: "ERF Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] ERF requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        });
         const blob = await pdf(
           <EquipmentReciptForm
             caseDetails={caseDetails}
@@ -903,6 +915,18 @@ const openPopup = () => {
       icon: CoinsIcon,
       label: "Quotation Invoice",
        onClick: async () => {
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          LogType: "System Info",
+          ActionType: "Request QUOTATION INVOICE",
+          Template: "QUOTATION INVOICE Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] QUOTATION INVOICE requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        });
         const blob = await pdf(
           <QuotationInvoice
             caseDetails={caseDetails}

@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
 });
 
 const Section = ({ title, children }) => (
-  <View style={styles.sectionContainer}>
+  <View minPresenceAhead={120} style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.sectionContent}>{children}</View>
   </View>
@@ -182,7 +182,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
 
 (
   <Document>
-    <Page style={styles.container}>
+    <Page size="A4" style={styles.container}>
       <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', marginBottom: 4, padding: 3  }}>
         <Image src="/hp.png" style={[styles.logo,{padding: 2  }]} />
         <View>

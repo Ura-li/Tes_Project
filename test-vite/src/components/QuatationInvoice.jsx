@@ -28,7 +28,6 @@ const styles = StyleSheet.create({
     maxWidth: '600px',
     margin: 'auto',
     flexDirection: 'column',
-    marginBottom: 0
   },
   sectionHeader: {
     fontSize: 11,
@@ -52,8 +51,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   qrCode: {
-    width: 45,
-    height: 45,
+    width: 50,
+    height: 50,
   },
   logo: {
     width: 60,
@@ -176,9 +175,9 @@ table: {
 });
 
 const Section = ({ title, children }) => (
-  <View style={styles.sectionContainer}>
+  <View minPresenceAhead={100} style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
-    <View style={styles.sectionContent} break>{children}</View>
+    <View style={styles.sectionContent}>{children}</View>
   </View>
 );
 
