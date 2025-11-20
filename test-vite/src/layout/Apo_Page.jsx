@@ -8,6 +8,7 @@ import { useSocket } from '@/hooks/useSocket';
 import { useNavigate } from 'react-router';
 import Swal from 'sweetalert2';
 import { Skeleton } from "@/components/ui/skeleton";
+import { STATUS_ENUM_TO_LABEL } from "@/pages/CaseDetail";
 
 export default function ApoLanding() {
     const { user } = useAuth();
@@ -184,7 +185,7 @@ export default function ApoLanding() {
                       {c?.caseinformation.CasePriority || "Low"}
                     </Badge>
                     <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
-                      {c.CaseStatus}
+                      {STATUS_ENUM_TO_LABEL[c.CaseStatus]}
                     </Badge>
                   </div>
                   <p className="font-medium truncate mt-1">{c.CaseSubject}</p>

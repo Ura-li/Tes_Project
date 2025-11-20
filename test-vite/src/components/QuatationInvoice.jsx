@@ -18,8 +18,8 @@ Font.register({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
-    padding: 30,
-    gap: 0,
+    padding: 32,
+    gap: 3,
     borderRadius: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -28,15 +28,13 @@ const styles = StyleSheet.create({
     maxWidth: '600px',
     margin: 'auto',
     flexDirection: 'column',
-    marginBottom: 0
   },
   sectionHeader: {
     fontSize: 11,
     fontWeight: 'bold',
   },
   textSmall: {
-    fontSize: 9,
-    color: 'gray',
+    fontSize: 8,
   },
   textCenter: {
     textAlign: 'center',
@@ -53,8 +51,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   qrCode: {
-    width: 45,
-    height: 45,
+    width: 50,
+    height: 50,
   },
   logo: {
     width: 60,
@@ -140,7 +138,7 @@ table: {
 
   // flex sums (0.7+1.5+1.6+3+0.8 = 7.6, all cols = 10)
   partsColSpan5: { flex: 8 },  // No + Vendor + HP + Part Name + QTY
-  partsColSpan6: { flex: 9.2 },  // above + Unit Price
+  partsColSpan6: { flex: 9.3 },  // above + Unit Price
 
   alignRight: {
     textAlign: 'right',
@@ -153,14 +151,14 @@ table: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 4,
-    marginVertical: 10,
+    marginVertical: 4,
     paddingTop: 12, // extra space so the title doesn't overlap content
     position: 'relative',
   },
 
   sectionTitle: {
     position: 'absolute',
-    top: -8, // moves the heading above the border
+    top: -6, // moves the heading above the border
     left: 10,
     fontSize: 10,
     fontWeight: 'bold',
@@ -177,9 +175,9 @@ table: {
 });
 
 const Section = ({ title, children }) => (
-  <View style={styles.sectionContainer}>
+  <View minPresenceAhead={100} style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
-    <View style={styles.sectionContent} break>{children}</View>
+    <View style={styles.sectionContent}>{children}</View>
   </View>
 );
 
@@ -220,7 +218,7 @@ export const QuotationInvoice = ({
       <Section title="Case Info">
         <View style={{ display: "flex", flexDirection: "row" }}>
           <View style={styles.leftSection}>
-            <Text style={[styles.label, { fontWeight: "bold", fontSize: 13 }]}>
+            <Text style={[styles.label, { fontWeight: "bold", fontSize: 12 }]}>
               Quotation no.
             </Text>
             <Text style={[styles.colon, { fontWeight: "bold", fontSize: 10 }]}>
@@ -420,7 +418,7 @@ export const QuotationInvoice = ({
         </View>
       </Section>
 
-      <View style={[styles.tableRow, styles.tableHeader, { marginTop: 20 }]}>
+      <View style={[styles.tableRow, styles.tableHeader]}>
         <Text style={styles.tableHeaderCell}>Accessories</Text>
         <Text style={styles.tableHeaderCell}>Note</Text>
         <Text style={styles.tableHeaderCell}>CT/ SN Code</Text>
@@ -442,7 +440,7 @@ export const QuotationInvoice = ({
       )}
 
       {/* PARTS TABLE */}
-      <View style={[styles.table, { marginTop: 20 }]}>
+      <View style={[styles.table, { marginTop: 10 }]}>
         {/* Header */}
         <View style={styles.tableRow}>
           <Text style={[styles.tableHeaderCell, styles.partsColNo]}>No</Text>
@@ -610,13 +608,12 @@ export const QuotationInvoice = ({
             flexDirection: "row",
             justifyContent: "space-between",
           }}
-          
         >
           <View style={{ flexDirection: "column", alignItems: "center" }} >
             <Text style={[styles.textSmall, { marginBottom: 10 }]}>
               Received By
             </Text>
-     <Image src={caseDetails?.createdByUser?.Signature} style={{ width: 120, height: 50 }} />
+            <Image src={caseDetails?.createdByUser?.Signature} style={{ width: 120, height: 60 }} />
             <Text style={styles.textSmall}>
               --------------------------------------------
             </Text>
@@ -628,7 +625,7 @@ export const QuotationInvoice = ({
             <Text style={[styles.textSmall, { marginBottom: 10 }]}>
               Received By
             </Text>
-            <Image src={customerSignature} style={{ width: 120, height: 50 }} />
+            <Image src={customerSignature} style={{ width: 120, height: 60 }} />
             <Text style={styles.textSmall}>
               --------------------------------------------
             </Text>

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import QuotationDialog from "@/components/model/QuotationModal";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { STATUS_ENUM_TO_LABEL } from "@/pages/CaseDetail";
 
 
 export default function CashManagement() {
@@ -344,53 +345,37 @@ export default function CashManagement() {
                                         ? "bg-red-100 text-red-700"
                                         : "bg-gray-200 text-gray-700"
                                     }`}
-                      >
-                        {c?.caseinformation.CasePriority || "Low"}
-                      </Badge>
-                      <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
-                        {c.CaseStatus}
-                      </Badge>
-                      <p className="ml-auto text-xs text-gray-500 ">
-                        {c.CreatedOn}
-                      </p>
-                    </div>
-                    <p
-                      className={cn(
-                        "font-medium truncate mt-1",
-                        !c.CaseSubject && "text-red-500"
-                      )}
-                    >
-                      {c.CaseSubject || "No Subject"}
-                    </p>
-                    <div className=" text-gray-500 mt-1 flex justify-between">
-                      <p className="text-md">{c.CaseID}</p>
-                      <p className="text-md  font-semibold">
-                        {c.UpdateOn
-                          ? new Date(c.UpdateOn).toLocaleString("id-ID")
-                          : "No Update"}
-                      </p>
-                    </div>
-                    {/* TODO FOR SLAMET : ADD A MF COLOR IN DIS BUTON */}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="top-3 right-3 z-10"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedCase(c);
-                        setQuotationInitialData(null);
-                        setQuotationMaterialItems(
-                          extractMaterialOrderLineItems(c)
-                        );
-                        setShowQuotationDialog(true);
-                      }}
-                    >
-                      Process Quotation
-                    </Button>
-                  </Card>
-                ))}
-          </CardContent>
-        </Card>
+                                >
+                                    {c?.caseinformation.CasePriority || "Low"}
+                                </Badge>
+                                <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
+                                    {STATUS_ENUM_TO_LABEL[c.CaseStatus]}
+                                </Badge>
+                                <p className='ml-auto text-xs text-gray-500 '>{c.CreatedOn}</p>
+                                </div>
+                                <p className={cn("font-medium truncate mt-1", !c.CaseSubject && 'text-red-500')}>{c.CaseSubject || "No Subject"}</p>
+                                <div className=" text-gray-500 mt-1 flex justify-between">
+                                <p className='text-md'>{c.CaseID}</p>
+                                <p className='text-md  font-semibold'>{c.UpdateOn ? new Date(c.UpdateOn).toLocaleString("id-ID") : "No Update"}</p>
+                                </div>
+                                {/* TODO FOR SLAMET : ADD A MF COLOR IN DIS BUTON */}
+                                {/* <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="top-3 right-3 z-10"
+                                    onClick={(e) => {
+                                        e.stopPropagation(); 
+                                        setSelectedCase(c);
+                                        setQuotationInitialData(null);
+                                        setQuotationMaterialItems(extractMaterialOrderLineItems(c));
+                                        setShowQuotationDialog(true);
+                                    }}
+                                >Process Quotation</Button> */}
+                            </Card>
+                        )
+                    )}
+                </CardContent>
+            </Card>
 
         <Card className={"rounded-sm"}>
           <CardHeader>

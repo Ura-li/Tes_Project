@@ -142,7 +142,7 @@ export const STATUS_ENUM_TO_LABEL = {
   NEW_AssignCE: "New Assign To CE",
   NEW_AssignLeader: "New Assign To Leader",
   NEW_AssignAPO: "New Assign To APO",
-  NEW_AssignPS: "New Assign To Product Store",
+  NEW_AssignPS: "New Assign To PS",
   NEW_POPDoc: "New Needed POP Document",
   NEW_Warranty: "New Warranty Approval",
   PartRequest: "Part Request",
@@ -795,19 +795,8 @@ const openPopup = () => {
     {
       icon: CircleChevronLeft,
       label: "",
-      onClick: () => navigate(`/app/viewcase`),
-      roles: [
-        "admin",
-        "fd",
-        "user",
-        "apo",
-        "ce",
-        "lg",
-        "celead",
-        "spv",
-        "ps",
-        "cm",
-      ],
+      onClick: () => navigate(`/app/`),
+      roles: ["admin", "fd","user", "apo", "ce","lg","celead","spv","ps","cm","apv"]
     },
     // { icon: SquareArrowOutUpRight, label: "",},
     {
@@ -838,18 +827,7 @@ const openPopup = () => {
       icon: RotateCw,
       label: "Refresh",
       onClick: () => window.location.reload(),
-      roles: [
-        "admin",
-        "fd",
-        "user",
-        "apo",
-        "ce",
-        "lg",
-        "celead",
-        "spv",
-        "ps",
-        "cm",
-      ],
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps","cm","apv"],
     },
     {
       icon: MessageSquareText,
@@ -895,6 +873,18 @@ const openPopup = () => {
       icon: StepBack,
       label: "ERF",
       onClick: async () => {
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          LogType: "System Info",
+          ActionType: "Request ERF",
+          Template: "ERF Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] ERF requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        });
         const blob = await pdf(
           <EquipmentReciptForm
             caseDetails={caseDetails}
@@ -925,6 +915,18 @@ const openPopup = () => {
       icon: CoinsIcon,
       label: "Quotation Invoice",
        onClick: async () => {
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          LogType: "System Info",
+          ActionType: "Request QUOTATION INVOICE",
+          Template: "QUOTATION INVOICE Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] QUOTATION INVOICE requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        });
         const blob = await pdf(
           <QuotationInvoice
             caseDetails={caseDetails}
@@ -1495,6 +1497,7 @@ const openPopup = () => {
             invoiceSummary={invoiceSummary}
             invoiceQuotation={invoiceQuotation}
             invoiceNotificationLabel={invoiceNotificationLabel}
+            handleInvoiceOpenChange={handleInvoiceOpenChange}
           />
       </div>
     </>
@@ -1532,6 +1535,7 @@ export const ServiceCase = ({
   invoiceSummary,
   invoiceQuotation,
   invoiceNotificationLabel,
+  handleInvoiceOpenChange
 }) => {
   const { open } = useSidebar();
 
@@ -2278,7 +2282,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         
                         if(enumValue.startsWith("NEW_Assign")) {
                           const role = extractRoleFromStatus(enumValue);
-  // console.log("Extracted role:", role)
+                          
                           console.log("Mapped enum:", role);
                           
                           if(role) {
@@ -2465,9 +2469,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     value={
                       dataFetchCustomerData?.Type == "SiteAccount"
                         ? dataFetchCustomerData?.SiteAccount?.Company
-                        : dataFetchCustomerData?.MainAccount?.FirstName +
-                          " " +
-                          dataFetchCustomerData?.MainAccount?.LastName
+                        : dataFetchCustomerData?.MainAccount?.FirstName && dataFetchCustomerData?.MainAccount?.LastName ? dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName : "---"
                     }
                     readOnly
                   />
@@ -2475,7 +2477,12 @@ if (caseDetails.CaseStatus !== "Close") {
                 <CaseField label="Primary Contact" lock>
                   <Input
                     variant="invisible"
-                    value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
+                    value = {
+                      dataFetchCustomerData.MainAccount?.Salutation && dataFetchCustomerData.MainAccount?.FirstName && dataFetchCustomerData.MainAccount?.LastName ?
+                      `${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}` : 
+                      dataFetchCustomerData.MainAccount?.FirstName && dataFetchCustomerData.MainAccount?.LastName ?
+                      `${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}` : "---"
+                    }
                     readOnly
                   />
                 </CaseField>
@@ -2485,7 +2492,7 @@ if (caseDetails.CaseStatus !== "Close") {
                 <CaseField label=" Primary Email" lock>
                   <Input
                     variant="invisible"
-                    value={dataFetchCustomerData.MainAccount?.Email}
+                    value={dataFetchCustomerData.MainAccount?.Email ? dataFetchCustomerData.MainAccount?.Email : "---"}
                     placeholder="---"
                     readOnly
                   />
@@ -2496,7 +2503,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     value={
                       dataFetchCustomerData?.Type == "SiteAccount"
                         ? dataFetchCustomerData?.SiteAccount?.Country
-                        : dataFetchCustomerData?.MainAccount?.Country
+                        : dataFetchCustomerData?.MainAccount?.Country ? dataFetchCustomerData?.MainAccount?.Country : "---"
                     }
                     readOnly
                   />                  
@@ -2505,7 +2512,7 @@ if (caseDetails.CaseStatus !== "Close") {
                   <span className="pl-3">
                   {dataFetchCustomerData?.Type == "SiteAccount"
                     ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone
-                    : dataFetchCustomerData?.MainAccount?.Phone}
+                    : dataFetchCustomerData?.MainAccount?.Phone ? dataFetchCustomerData?.MainAccount?.Phone : "---"}
                   </span>
                 </CaseField>
                 <CaseField label="Region" lock>
@@ -2514,7 +2521,8 @@ if (caseDetails.CaseStatus !== "Close") {
                   placeholder="---"  
                   value={dataFetchCustomerData?.Type == "SiteAccount"
                     ? dataFetchCustomerData?.SiteAccount?.City + " - " + dataFetchCustomerData?.SiteAccount?.StateProvince
-                    : dataFetchCustomerData?.MainAccount?.City + " - " + dataFetchCustomerData?.MainAccount?.StateProvince}/>
+                    : dataFetchCustomerData?.MainAccount?.City && dataFetchCustomerData?.MainAccount?.StateProvince ? dataFetchCustomerData?.MainAccount?.City + " - " + dataFetchCustomerData?.MainAccount?.StateProvince : "---"
+                    }/>
                 </CaseField>
                 <CaseField label="Is Partner" lock>
                   <Input variant="invisible" placeholder="---" />
@@ -3254,7 +3262,7 @@ if (caseDetails.CaseStatus !== "Close") {
                             <TableCell></TableCell>
                             <TableCell>{work.owner?.Name}</TableCell>
                             <TableCell>{work.owner?.Name}</TableCell>
-                            <TableCell>{work.CreatedOn}</TableCell>
+                            <TableCell>{formatDate(work.CreatedOn)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -3287,18 +3295,25 @@ if (caseDetails.CaseStatus !== "Close") {
                           <TableRow 
                           key={material.MOID}
                           onClick = {() => navigate(`/app/material-order/${material.MOID}`)}
-                          className="cursor-pointer hover:bg-gray-300"
+                           className={
+                            material.OrderStatus === "New" ? "cursor-pointer bg-green-100" :
+                            material.OrderStatus === "Shipped" ? "cursor-pointer bg-yellow-100" :
+                            material.OrderStatus === "Ordered" ? "cursor-pointer bg-blue-100" :
+                            material.OrderStatus === "Closed" ? "cursor-pointer bg-gray-100" :
+                            material.OrderStatus === "BackOrdered" ? "cursor-pointer bg-purple-100" 
+                            : "cursor-pointer bg-red-100"
+                          }
                           >
                             <TableCell className="font-medium">
                                 {material.MOID} on {material.WOID}
                             </TableCell>
                             <TableCell>{material.workorder?.CaseID}</TableCell>
-                            <TableCell>{material.CreatedOn}</TableCell>
+                            <TableCell>{formatDate(material.CreatedOn)}</TableCell>
                             <TableCell>{material.OrderStatus}</TableCell>
                             <TableCell>{material.OrderType}</TableCell>
                             <TableCell>{material.owner?.Name}</TableCell>
                             <TableCell>{material.WOID}</TableCell>
-                            <TableCell>{material.ReadyForClosureDate}</TableCell>
+                            <TableCell>{formatDate(material.ReadyForClosureDate)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>

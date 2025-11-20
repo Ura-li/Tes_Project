@@ -72,6 +72,7 @@ import { Accordion, AccordionContent } from "@/components/ui/accordion";
 import { AccordionHeader, AccordionItem, AccordionTrigger } from "@radix-ui/react-accordion";
 import CaseField from "@/components/CaseField";
 import { map } from "lodash";
+import { formatDate } from "@/lib/utils";
 
 export const ServiceWork = () => {
   const user = getUserFromToken();
@@ -304,11 +305,6 @@ export const ServiceWork = () => {
   useEffect(() => {
     console.log("Data Fetch Customer Data in WO : ", dataFetchCustomerData);
   }, [dataFetchCustomerData]);
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    return new Date(dateString).toLocaleString();
-  };
 
   // const fetchBookings = async () => {
   //   try {
@@ -712,7 +708,7 @@ export const ServiceWork = () => {
                     <CaseField label="Warranty Status" lock>
                       <Input
                         variant={"invisible"}
-                        value={workOrders?.caseinformation?.otcCodeTable?.Description || "---"}
+                        value={workOrders.caseinformation?.otcCodeTable?.Description || "---"}
                         placeholder="---"
 
                       />
@@ -1007,7 +1003,14 @@ export const ServiceWork = () => {
                           <TableRow 
                           key={material.MOID}
                           onClick={() => navigate(`/app/material-order/${material.MOID}`)}
-                           className="cursor-pointer hover:bg-gray-300"
+                           className={
+                            material.OrderStatus === "New" ? "cursor-pointer bg-green-100" :
+                            material.OrderStatus === "Shipped" ? "cursor-pointer bg-yellow-100" :
+                            material.OrderStatus === "Ordered" ? "cursor-pointer bg-blue-100" :
+                            material.OrderStatus === "Closed" ? "cursor-pointer bg-gray-100" :
+                            material.OrderStatus === "BackOrdered" ? "cursor-pointer bg-purple-100" 
+                            : "cursor-pointer bg-red-100"
+                          }
                           >
                             <TableCell className="font-medium">
                                 {material.MOID} on {material.WOID}
@@ -1017,7 +1020,7 @@ export const ServiceWork = () => {
                             <TableCell>{material.OrderStatus}</TableCell>
                             <TableCell>{material.OrderType}</TableCell>
                             <TableCell>
-                              {material.ReadyForClosureDate}
+                              {formatDate(material.ReadyForClosureDate)}
                             </TableCell>
                           </TableRow>
                         ))
