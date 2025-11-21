@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import QuotationDialog from "@/components/model/QuotationModal";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { STATUS_ENUM_TO_LABEL } from "@/pages/CaseDetail";
 
 
 export default function CashManagement() {
@@ -271,73 +272,76 @@ export default function CashManagement() {
 
 
     return (
-        <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3">
-            <Card className={"rounded-sm"}>
-                <CardHeader className={"grid grid-cols-2 items-start"}>
-                    {!preview.ProfilePhoto && (
-                    <div className="flex justify-start">
-                        <div className="w-30 h-30 rounded-full border-4 border-white shadow-md text-center">
-                        <span className="text-3xl font-bold">?</span>
-                        </div>
-                    </div>
-                    )}
-                    {preview.ProfilePhoto && (
-                    <div className="flex justify-start">
-                        <img
-                        src={preview.ProfilePhoto}
-                        alt="Profile Preview"
-                        className="w-30 h-30 rounded-full border-4 border-white shadow-md text-center"
-                        />
-                    </div>
-                    )}
-                    {/* <div className="flex justify-start">
+      <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3">
+        <Card className={"rounded-sm"}>
+          <CardHeader className={"grid grid-cols-2 items-start"}>
+            {!preview.ProfilePhoto && (
+              <div className="flex justify-start">
+                <div className="w-30 h-30 rounded-full border-4 border-white shadow-md text-center">
+                  <span className="text-3xl font-bold">?</span>
+                </div>
+              </div>
+            )}
+            {preview.ProfilePhoto && (
+              <div className="flex justify-start">
+                <img
+                  src={preview.ProfilePhoto}
+                  alt="Profile Preview"
+                  className="w-30 h-30 rounded-full border-4 border-white shadow-md text-center"
+                />
+              </div>
+            )}
+            {/* <div className="flex justify-start">
                         <img  
                             src={user?.avatar || "/default-avatar.png"}
                             alt="avatar"
                             className="w-30 h-30 rounded-full border-4 border-white shadow-md text-center"
                         />
                     </div> */}
-                    <div className="flex justify-end">
-                    <Badge
-                        variant={"outline"}
-                        className={user.role === "lg" ? "bg-amber-200" : "bg-gray-200"}
-                        >
-                        {user.role}
-                    </Badge>
-                    </div>
-                </CardHeader>
-                <CardContent className={"ml-4 flex gap-1 flex-col"}>
-                    <CardTitle className={"text-xl"}>{user?.name || "User"}</CardTitle>
-                    <span className="text-gray-400">{user?.email}</span> 
-                    <span className='text-sm text-gray-500'>{userData.Phone}</span>
-                </CardContent>
-                <span className="text-xs text-center text-gray-500 ">
-                    Latest Login: {new Date().toLocaleString()}
-                </span>
-            </Card>
+            <div className="flex justify-end">
+              <Badge
+                variant={"outline"}
+                className={user.role === "lg" ? "bg-amber-200" : "bg-gray-200"}
+              >
+                {user.role}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className={"ml-4 flex gap-1 flex-col"}>
+            <CardTitle className={"text-xl"}>{user?.name || "User"}</CardTitle>
+            <span className="text-gray-400">{user?.email}</span>
+            <span className="text-sm text-gray-500">{userData.Phone}</span>
+          </CardContent>
+          <span className="text-xs text-center text-gray-500 ">
+            Latest Login: {new Date().toLocaleString()}
+          </span>
+        </Card>
 
-            <Card className={"rounded-sm col-span-2 row-span-2"}>
-                <CardHeader>
-                    <CardTitle className={"text-2xl"}>Quotation</CardTitle>
-                <hr />
-                </CardHeader>
-                <CardContent className={"grid gap-3"}>
-                    {loading
-                        ? Array.from({ length: 3 }).map((_, i) => (
-                            <Skeleton key={i} className="h-20 w-full rounded-lg" />
-                        ))
-                        : caseData.map((c) => (
-                            <Card
-                                key={c.CaseID}
-                                className="p-3 border-l-4 hover:scale-[0.99] rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400 bg-white cursor-pointer"
-                                onClick={() => navigate(`/app/case/${c.CaseID}`)}
-                            >
-                                <div className="flex flex-wrap items-center gap-2 ">
-                                <Badge
-                                    className={`px-2 py-1 rounded-md text-xs font-medium
-                                    ${c.caseinformation.CasePriority === "High"
+        <Card className={"rounded-sm col-span-2 row-span-2"}>
+          <CardHeader>
+            <CardTitle className={"text-2xl"}>Quotation</CardTitle>
+
+            <hr />
+          </CardHeader>
+          <CardContent className={"grid gap-3 overflow-y-auto"}>
+            {loading
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-20 w-full rounded-lg" />
+                ))
+              : caseData.map((c) => (
+                  <Card
+                    key={c.CaseID}
+                    className="p-3 border-l-4 hover:scale-[0.99] rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400 bg-white cursor-pointer"
+                    onClick={() => navigate(`/app/case/${c.CaseID}`)}
+                  >
+                    <div className="flex flex-wrap items-center gap-2 ">
+                      <Badge
+                        className={`px-2 py-1 rounded-md text-xs font-medium
+                                    ${
+                                      c.caseinformation.CasePriority === "High"
                                         ? "bg-orange-100 text-orange-700"
-                                        : c.caseinformation.CasePriority === "Critical"
+                                        : c.caseinformation.CasePriority ===
+                                          "Critical"
                                         ? "bg-red-100 text-red-700"
                                         : "bg-gray-200 text-gray-700"
                                     }`}
@@ -345,7 +349,7 @@ export default function CashManagement() {
                                     {c?.caseinformation.CasePriority || "Low"}
                                 </Badge>
                                 <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
-                                    {c.CaseStatus}
+                                    {STATUS_ENUM_TO_LABEL[c.CaseStatus]}
                                 </Badge>
                                 <p className='ml-auto text-xs text-gray-500 '>{c.CreatedOn}</p>
                                 </div>
@@ -355,7 +359,7 @@ export default function CashManagement() {
                                 <p className='text-md  font-semibold'>{c.UpdateOn ? new Date(c.UpdateOn).toLocaleString("id-ID") : "No Update"}</p>
                                 </div>
                                 {/* TODO FOR SLAMET : ADD A MF COLOR IN DIS BUTON */}
-                                <Button
+                                {/* <Button
                                     size="sm"
                                     variant="outline"
                                     className="top-3 right-3 z-10"
@@ -366,21 +370,21 @@ export default function CashManagement() {
                                         setQuotationMaterialItems(extractMaterialOrderLineItems(c));
                                         setShowQuotationDialog(true);
                                     }}
-                                >Process Quotation</Button>
+                                >Process Quotation</Button> */}
                             </Card>
                         )
                     )}
                 </CardContent>
             </Card>
 
-            <Card className={"rounded-sm"}>
-                <CardHeader>
-                    <CardTitle>Notifications</CardTitle>
-                </CardHeader>
-                <CardContent className={"overflow-y-auto space-y-3"}>
-                    <NotificationCard />
-                </CardContent>
-            </Card> 
+        <Card className={"rounded-sm"}>
+          <CardHeader>
+            <CardTitle>Notifications</CardTitle>
+          </CardHeader>
+          <CardContent className={"overflow-y-auto space-y-3"}>
+            <NotificationCard />
+          </CardContent>
+        </Card>
 
             {selectedCase && (
                 <QuotationDialog

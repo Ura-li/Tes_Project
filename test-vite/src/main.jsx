@@ -13,7 +13,6 @@ import { AuthProvider } from "./context/auth-context";
 const Landing = lazy(() => import('./pages/landing'));
 const Lorem = lazy(() => import('./pages/Lorem'));
 const Search_case = lazy(() => import('./pages/Search_case'));
-const SearchCase_Dev = lazy(() => import('./pages/SearchCase_V2'));
 const SearchCaseProto2 = lazy(() => import('./pages/SearchCase_V3'));
 const Case = lazy(() => import('./pages/Case').then(m => ({ default: m.Case })));
 const Work = lazy(() => import('./pages/work').then(m => ({ default: m.Work })));
@@ -113,7 +112,6 @@ createRoot(document.getElementById("root")).render(
             <Route path="/app/frontdesk" element={<FrontDesk_Page />} />
             <Route path="/app/forbidden" element={<Forbidden />} />
             <Route path="/app/search_case" element={<Search_case />} />
-            <Route path="/app/search_case_dev" element={<SearchCase_Dev />} />
             <Route path="/app/searchcaseproto2" element={<SearchCaseProto2 />} />
             <Route path="/app/case/:caseId" element={<Case />} />
             <Route path="/app/work/:woid" element={<Work />} />

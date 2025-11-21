@@ -7,7 +7,7 @@ import { NotificationCard } from "@/components/NotificationCard";
 import { useNavigate } from "react-router";
 import { CaseField } from "@/pages/services/service-case";
 import { ExportExcelPart } from "@/components/Export-Excel";
-
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Logistik() {
     const { user } = useAuth();
@@ -21,9 +21,11 @@ export default function Logistik() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [filterStatus, setFilterStatus] = useState("All");
+  const [loading, setLoading] = useState(false);
   
 
     const fetchData = async () => {
+        setLoading(true);
         try {
             const fetchMo = await ApiCustomer.get('/api/mo-detaill');
             setMoData(fetchMo.data.data);      
@@ -50,6 +52,8 @@ export default function Logistik() {
          setMoData(valueFilterPartOrder)            
         } catch (err) {
             console.error(err);
+        }finally {
+            setLoading(false);
         }
     }
     useEffect(() =>{
@@ -142,63 +146,62 @@ export default function Logistik() {
                   </div>
                 </CardHeader>
                 <CardContent className={"grid gap-5 "}>
-                 {currentData.length > 0 ? (
-            currentData.map((m) => (
-              <div
-                key={m.MOID}
-                className="rounded-sm hover:bg-gray-50 cursor-pointer  ring-1  ring-gray-400 px-2 py-1"
-                onClick={() =>
-                  navigate(
-                    `/app/material-order/${m.MOID}`
-                  )
-                }
-              >
-                <CardHeader className="p-1 px-2">
-                  <div className="flex flex-row justify-between ">
-                  <CardTitle className={"flex flex-row gap-2 items-center"}>
-                    {m.MOID} 
-                    <Badge className={
-                      m.OrderStatus === 'New' ? "text-white bg-green-500" : 
-                      m.OrderStatus  === 'Shipped' ? "text-white bg-yellow-500" : 
-                      m.OrderStatus === 'Ordered' ? "text-white bg-blue-500" :
-                      m.OrderStatus === 'Closed' ? "text-white bg-gray-500" :
-                      m.OrderStatus === 'BackOrdered' ? "text-white bg-purple-500" :
-                      "text-white bg-red-500"} variant="invisible">
-                    {m.OrderStatus}
-                    </Badge>
-                  </CardTitle>
-                  <CardTitle className={"text-sm text-gray-500"}>
-                    {
-                      m.workorder?.caseinformation?.CaseID
+          {loading ? Array.from({ length:4 }).map((_,i) => (
+                  <Skeleton key={i} className="h-20 w-full rounded-md"/>
+                )) : currentData.map((m) => (
+                  <div
+                    key={m.MOID}
+                    className="rounded-sm hover:bg-gray-50 cursor-pointer  ring-1  ring-gray-400 px-2 py-1"
+                    onClick={() =>
+                      navigate(
+                        `/app/material-order/${m.MOID}`
+                      )
                     }
-                  </CardTitle>          
-                  </div>
-                   <hr className="border-1 border-gray-500 rounded-md"/>
-                </CardHeader>
-                <CardContent className="flex justify-between px-2">
-                  <div className="space-y-1">
-                  <CaseField className={"text-md"}>
-                   <span> Part Number - Part Description</span>
-                  </CaseField>
-                  <CaseField className={"text-md"}>
-                    {m.materialorderlineitems?.[0]?.PartNumber} / {m.materialorderlineitems?.[0]?.Description}
-                  </CaseField>
-                  </div>
+                  >
+                    <CardHeader className="p-1 px-2">
+                      <div className="flex flex-row justify-between ">
+                      <CardTitle className={"flex flex-row gap-2 items-center"}>
+                        {m.MOID} 
+                        <Badge className={
+                          m.OrderStatus === 'New' ? "text-white bg-green-500" : 
+                          m.OrderStatus  === 'Shipped' ? "text-white bg-yellow-500" : 
+                          m.OrderStatus === 'Ordered' ? "text-white bg-blue-500" :
+                          m.OrderStatus === 'Closed' ? "text-white bg-gray-500" :
+                          m.OrderStatus === 'BackOrdered' ? "text-white bg-purple-500" :
+                          "text-white bg-red-500"} variant="invisible">
+                        {m.OrderStatus}
+                        </Badge>
+                      </CardTitle>
+                      <CardTitle className={"text-sm text-gray-500"}>
+                        {
+                          m.workorder?.caseinformation?.CaseID
+                        }
+                      </CardTitle>          
+                      </div>
+                      <hr className="border-1 border-gray-500 rounded-md"/>
+                    </CardHeader>
+                    <CardContent className="flex justify-between px-2">
+                      <div className="space-y-1">
+                      <CaseField className={"text-md"}>
+                      <span> Part Number - Part Description</span>
+                      </CaseField>
+                      <CaseField className={"text-md"}>
+                        {m.materialorderlineitems?.[0]?.PartNumber} / {m.materialorderlineitems?.[0]?.Description}
+                      </CaseField>
+                      </div>
 
-                  <div className="flex flex-col items-end text-right gap-1">
-                  <CaseField className="flex gap-1 items-center">
-                    <span>SO Number - RMA Number</span>
-                  </CaseField>
-                  <CaseField className="flex gap-1 items-center">
-                    {m.SalesOrderNumber} / {m.RMANumber}
-                  </CaseField>
+                      <div className="flex flex-col items-end text-right gap-1">
+                      <CaseField className="flex gap-1 items-center">
+                        <span>SO Number - RMA Number</span>
+                      </CaseField>
+                      <CaseField className="flex gap-1 items-center">
+                        {m.SalesOrderNumber} / {m.RMANumber}
+                      </CaseField>
+                      </div>
+                    </CardContent>
                   </div>
-                </CardContent>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400">No Open Orders found</p>
-          )}
+                ))
+          }
         </CardContent>
 
         {/* Pagination Controls */}

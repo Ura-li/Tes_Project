@@ -59,6 +59,7 @@ import {
   CopyX,
   NotebookPen,
   MessageSquareText,
+  CoinsIcon,
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -98,6 +99,8 @@ import { cn, formatAccountingRupiah, formatDate } from "@/lib/utils";
 import { map, set } from "lodash";
 import QuotationDialog from "@/components/model/QuotationModal";
 import InvoiceDialog from "@/components/model/InvoiceModal"
+import { QuotationInvoice } from "@/components/QuatationInvoice";
+
 /**
  * TODO : 
  * ADDING THIS FUNCTION GLOBALLY OR MAKE THE CASE DETAIL INTO ONE
@@ -139,7 +142,7 @@ export const STATUS_ENUM_TO_LABEL = {
   NEW_AssignCE: "New Assign To CE",
   NEW_AssignLeader: "New Assign To Leader",
   NEW_AssignAPO: "New Assign To APO",
-  NEW_AssignPS: "New Assign To Product Store",
+  NEW_AssignPS: "New Assign To PS",
   NEW_POPDoc: "New Needed POP Document",
   NEW_Warranty: "New Warranty Approval",
   PartRequest: "Part Request",
@@ -792,19 +795,21 @@ const openPopup = () => {
     {
       icon: CircleChevronLeft,
       label: "",
-      onClick: () => navigate(`/app/viewcase`),
-      roles: ["admin", "fd","user", "apo", "ce","lg","celead","spv","ps","cm"]
+      onClick: () => navigate(`/app/`),
+      roles: ["admin", "fd","user", "apo", "ce","lg","celead","spv","ps","cm","apv"]
     },
     // { icon: SquareArrowOutUpRight, label: "",},
-    { icon: Save, label: "Save", 
-      onClick: () => handleSave(), 
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps","cm"],
+    {
+      icon: Save,
+      label: "Save",
+      onClick: () => handleSave(),
+      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"],
     },
     {
       icon: FileSymlink,
       label: "Save & Close",
       onClick: () => handleSave().then(() => navigate(`/app/`)),
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "ps","cm"],
+      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"],
     },
     {
       icon: CopyX,
@@ -818,56 +823,123 @@ const openPopup = () => {
       onClick: () => saveAndCloseCase(true),
       roles: ["admin", "fd"],
     },
-    { icon: RotateCw, label: "Refresh", 
+    {
+      icon: RotateCw,
+      label: "Refresh",
       onClick: () => window.location.reload(),
-      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps","cm"],
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps","cm","apv"],
     },
-    { icon: MessageSquareText, label: "Quotation",onClick: () => handleQuotationOpenChange(true),  roles: ["admin","cm"]},
-    { icon: StepBack, label: "SRF", 
+    {
+      icon: MessageSquareText,
+      label: "Quotation",
+      onClick: () => handleQuotationOpenChange(),
+      roles: ["admin", "cm"],
+    },
+    {
+      icon: StepBack,
+      label: "SRF",
       onClick: async () => {
         // return console.log(user);
-        await ApiCustomer.post('/api/case-information/case-notes',{
+        await ApiCustomer.post("/api/case-information/case-notes", {
           LogType: "System Info",
           ActionType: "Request SRF",
           Template: "SRF Requested",
           VisibleExternally: false,
           MinutesSpent: 0,
-          Note: `[PRINT] SRF requested by ${user?.role} - ${user?.name || "Unknown User"}`,
+          Note: `[PRINT] SRF requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
           CaseID: caseDetails?.CaseID,
           CreatedBy: user?.id,
-        })
-      const blob = await pdf(<ServiceRequestPDF caseDetails={caseDetails} customerSignature={signature} />).toBlob();
-      const url = URL.createObjectURL(blob);
-        window.open(url); 
-      // const link = document.createElement('a');
-      // link.href = url;
-      // link.download = 'Service_Request_Form.pdf';
-      // document.body.appendChild(link);
-      // link.click();
-      // document.body.removeChild(link);
-    }, 
-    roles: ["admin", "fd","user", "spv"]
-  },
-    { icon: StepBack, label: "ERF", 
-      onClick: async () => {
-        const blob = await pdf(<EquipmentReciptForm caseDetails={caseDetails} customerSignature={signature} />).toBlob();
+        });
+        const blob = await pdf(
+          <ServiceRequestPDF
+            caseDetails={caseDetails}
+            customerSignature={signature}
+          />
+        ).toBlob();
         const url = URL.createObjectURL(blob);
-        window.open(url); 
+        window.open(url);
+        // const link = document.createElement('a');
+        // link.href = url;
+        // link.download = 'Service_Request_Form.pdf';
+        // document.body.appendChild(link);
+        // link.click();
+        // document.body.removeChild(link);
       },
-    roles: ["admin", "fd","user", "spv"]
-  },
-  { icon: StepBack, label: "Service Order", onClick: () => openServiceCatalog("serviceorder"), 
-    roles: ["admin",   "ce", "celead", ],
-    hidden: caseDetails?.CaseStatus === "Close" ? true : false
-  },
+      roles: ["admin", "fd", "user", "spv"],
+    },
     {
-      icon: NotebookPen, label: "Signature Customer",
+      icon: StepBack,
+      label: "ERF",
+      onClick: async () => {
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          LogType: "System Info",
+          ActionType: "Request ERF",
+          Template: "ERF Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] ERF requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        });
+        const blob = await pdf(
+          <EquipmentReciptForm
+            caseDetails={caseDetails}
+            customerSignature={signature}
+          />
+        ).toBlob();
+        const url = URL.createObjectURL(blob);
+        window.open(url);
+      },
+      roles: ["admin", "fd", "user", "spv"],
+    },
+    {
+      icon: StepBack,
+      label: "Service Order",
+      onClick: () => openServiceCatalog("serviceorder"),
+      roles: ["admin", "ce", "celead"],
+      hidden: caseDetails?.CaseStatus === "Close" ? true : false,
+    },
+    {
+      icon: NotebookPen,
+      label: "Signature Customer",
       onClick: () => {
         handleOpenSignaturePad();
       },
-      roles: ["admin", "fd", "user", "spv"]
+      roles: ["admin", "fd", "user", "spv"],
     },
-    // { icon: StepBack, label: "CSR", onClick: () => openServiceCatalog("CSR"), hidden: true },
+    {
+      icon: CoinsIcon,
+      label: "Quotation Invoice",
+       onClick: async () => {
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          LogType: "System Info",
+          ActionType: "Request QUOTATION INVOICE",
+          Template: "QUOTATION INVOICE Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] QUOTATION INVOICE requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        });
+        const blob = await pdf(
+          <QuotationInvoice
+            caseDetails={caseDetails}
+            customerSignature={signature}
+            materialItems={fieldMO(caseDetails)}
+            initialData={quotationInitialData || {}}
+          />
+        ).toBlob();
+        const url = URL.createObjectURL(blob);
+        window.open(url); 
+      },
+      roles: ["admin", "fd", "user", "spv", "cm"],
+    },
     // { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder"), hidden:true },
     // { icon: StepBack, label: "Sales Offer", hidden:true},
     // { icon: StepBack, label: "Close Case", hidden:true },
@@ -1145,6 +1217,7 @@ const openPopup = () => {
 
 
 
+  console.log("CHECK DAtA initial quotation",quotationInitialData)
 
   const fieldMO = (caseDetails) => {
     const workorders = caseDetails?.workorder || [];
@@ -1254,7 +1327,7 @@ const openPopup = () => {
                 const endpoint = payload.quotationNo
                     ? `/api/quotation-information/${payload.quotationNo}`
                     : "/api/quotation-information";
-                const method = payload.quotationNo ? "patch" : "post";
+                const method = payload.quotationNo ? "patch" : "post";  
                 const requester =
                     method === "patch"
                         ? ApiCustomer.patch.bind(ApiCustomer)
@@ -1377,6 +1450,8 @@ const openPopup = () => {
           submitting={quotationSubmitting}
           onSubmit={handleQuotationSubmit}
           createdBy={user}
+          signature={signature}
+          caseDetails={caseDetails}
         />
       </div>
       <div>
@@ -1422,6 +1497,7 @@ const openPopup = () => {
             invoiceSummary={invoiceSummary}
             invoiceQuotation={invoiceQuotation}
             invoiceNotificationLabel={invoiceNotificationLabel}
+            handleInvoiceOpenChange={handleInvoiceOpenChange}
           />
       </div>
     </>
@@ -1459,6 +1535,7 @@ export const ServiceCase = ({
   invoiceSummary,
   invoiceQuotation,
   invoiceNotificationLabel,
+  handleInvoiceOpenChange
 }) => {
   const { open } = useSidebar();
 
@@ -1653,7 +1730,7 @@ export const ServiceCase = ({
     try{
       const res = await ApiCustomer.get('/api/otc-code')
       setOtcCode(res.data.data)
-    }catch(e){
+    }catch(err){
       console.error("Failed to fetch OTC Code:", err);
     }
   }
@@ -2205,7 +2282,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         
                         if(enumValue.startsWith("NEW_Assign")) {
                           const role = extractRoleFromStatus(enumValue);
-  // console.log("Extracted role:", role)
+                          
                           console.log("Mapped enum:", role);
                           
                           if(role) {
@@ -2392,9 +2469,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     value={
                       dataFetchCustomerData?.Type == "SiteAccount"
                         ? dataFetchCustomerData?.SiteAccount?.Company
-                        : dataFetchCustomerData?.MainAccount?.FirstName +
-                          " " +
-                          dataFetchCustomerData?.MainAccount?.LastName
+                        : dataFetchCustomerData?.MainAccount?.FirstName && dataFetchCustomerData?.MainAccount?.LastName ? dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName : "---"
                     }
                     readOnly
                   />
@@ -2402,7 +2477,12 @@ if (caseDetails.CaseStatus !== "Close") {
                 <CaseField label="Primary Contact" lock>
                   <Input
                     variant="invisible"
-                    value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
+                    value = {
+                      dataFetchCustomerData.MainAccount?.Salutation && dataFetchCustomerData.MainAccount?.FirstName && dataFetchCustomerData.MainAccount?.LastName ?
+                      `${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}` : 
+                      dataFetchCustomerData.MainAccount?.FirstName && dataFetchCustomerData.MainAccount?.LastName ?
+                      `${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}` : "---"
+                    }
                     readOnly
                   />
                 </CaseField>
@@ -2412,7 +2492,7 @@ if (caseDetails.CaseStatus !== "Close") {
                 <CaseField label=" Primary Email" lock>
                   <Input
                     variant="invisible"
-                    value={dataFetchCustomerData.MainAccount?.Email}
+                    value={dataFetchCustomerData.MainAccount?.Email ? dataFetchCustomerData.MainAccount?.Email : "---"}
                     placeholder="---"
                     readOnly
                   />
@@ -2423,7 +2503,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     value={
                       dataFetchCustomerData?.Type == "SiteAccount"
                         ? dataFetchCustomerData?.SiteAccount?.Country
-                        : dataFetchCustomerData?.MainAccount?.Country
+                        : dataFetchCustomerData?.MainAccount?.Country ? dataFetchCustomerData?.MainAccount?.Country : "---"
                     }
                     readOnly
                   />                  
@@ -2432,7 +2512,7 @@ if (caseDetails.CaseStatus !== "Close") {
                   <span className="pl-3">
                   {dataFetchCustomerData?.Type == "SiteAccount"
                     ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone
-                    : dataFetchCustomerData?.MainAccount?.Phone}
+                    : dataFetchCustomerData?.MainAccount?.Phone ? dataFetchCustomerData?.MainAccount?.Phone : "---"}
                   </span>
                 </CaseField>
                 <CaseField label="Region" lock>
@@ -2441,7 +2521,8 @@ if (caseDetails.CaseStatus !== "Close") {
                   placeholder="---"  
                   value={dataFetchCustomerData?.Type == "SiteAccount"
                     ? dataFetchCustomerData?.SiteAccount?.City + " - " + dataFetchCustomerData?.SiteAccount?.StateProvince
-                    : dataFetchCustomerData?.MainAccount?.City + " - " + dataFetchCustomerData?.MainAccount?.StateProvince}/>
+                    : dataFetchCustomerData?.MainAccount?.City && dataFetchCustomerData?.MainAccount?.StateProvince ? dataFetchCustomerData?.MainAccount?.City + " - " + dataFetchCustomerData?.MainAccount?.StateProvince : "---"
+                    }/>
                 </CaseField>
                 <CaseField label="Is Partner" lock>
                   <Input variant="invisible" placeholder="---" />
@@ -3181,7 +3262,7 @@ if (caseDetails.CaseStatus !== "Close") {
                             <TableCell></TableCell>
                             <TableCell>{work.owner?.Name}</TableCell>
                             <TableCell>{work.owner?.Name}</TableCell>
-                            <TableCell>{work.CreatedOn}</TableCell>
+                            <TableCell>{formatDate(work.CreatedOn)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -3214,18 +3295,25 @@ if (caseDetails.CaseStatus !== "Close") {
                           <TableRow 
                           key={material.MOID}
                           onClick = {() => navigate(`/app/material-order/${material.MOID}`)}
-                          className="cursor-pointer hover:bg-gray-300"
+                           className={
+                            material.OrderStatus === "New" ? "cursor-pointer bg-green-100" :
+                            material.OrderStatus === "Shipped" ? "cursor-pointer bg-yellow-100" :
+                            material.OrderStatus === "Ordered" ? "cursor-pointer bg-blue-100" :
+                            material.OrderStatus === "Closed" ? "cursor-pointer bg-gray-100" :
+                            material.OrderStatus === "BackOrdered" ? "cursor-pointer bg-purple-100" 
+                            : "cursor-pointer bg-red-100"
+                          }
                           >
                             <TableCell className="font-medium">
                                 {material.MOID} on {material.WOID}
                             </TableCell>
                             <TableCell>{material.workorder?.CaseID}</TableCell>
-                            <TableCell>{material.CreatedOn}</TableCell>
+                            <TableCell>{formatDate(material.CreatedOn)}</TableCell>
                             <TableCell>{material.OrderStatus}</TableCell>
                             <TableCell>{material.OrderType}</TableCell>
                             <TableCell>{material.owner?.Name}</TableCell>
                             <TableCell>{material.WOID}</TableCell>
-                            <TableCell>{material.ReadyForClosureDate}</TableCell>
+                            <TableCell>{formatDate(material.ReadyForClosureDate)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
