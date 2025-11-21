@@ -1487,7 +1487,7 @@ export default function NewCaseForm() {
       <div className="lg:columns-2 space-y-2 md:columns-1 ">
 
         {/* 1) Case Section */}
-        <Card className="rounded-2xl p-[20px]  shadow-2xl   break-inside-avoid" id='case'>
+        <Card className="rounded-2xl p-[20px]  shadow-2xl   break-inside-avoid dark:bg-slate-200" id='case'>
           <CardHeader>
             <CardTitle>1) Case</CardTitle>
             <CardDescription>Diisi setelah pilih serial/customer.</CardDescription>

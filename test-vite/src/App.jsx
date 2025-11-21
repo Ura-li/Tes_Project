@@ -34,6 +34,8 @@ import { SheetProvider } from './context/sheet-context'
 import { Toaster } from 'sonner'
 import { GlobalLogListener } from './components/GlobalLogListener'
 import { SocketInitializer } from './components/SocketInitializer'
+import { ThemeProvider } from './context/theme-context'
+import { ThemeToggle } from './components/ThemeToggle'
 
 export function Breadcrumbs() {
   const location = useLocation();
@@ -41,7 +43,7 @@ export function Breadcrumbs() {
 
   return (
     <nav className="text-[10px] w-full sm:text-sm overflow-hidden whitespace-nowrap text-ellipsis">
-      <Link to="/" className="text-gray-700 font-medium">Home</Link>
+      <Link to="/" className="text-gray-700 font-medium dark:text-gray-300">Home</Link>
       {pathnames.map((segment, index) => {
         const to = '/' + pathnames.slice(0, index + 1).join('/');
         return (
@@ -112,15 +114,12 @@ export function GlobalSearchBar() {
           placeholder="Search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="border bg-white/50"
-          onFocus={() => {
-            if (results) setShowResults(true);
-          }}
+          className="border bg-white/50 dark:bg-slate-700/40 dark:text-slate-100 dark:border-slate-500 dark:placeholder:text-slate-300 pr-8"
         />
         {loading ? <Loader2 className=' animate-spin'></Loader2> : ""}
       </span>
       {showResults && results && (
-        <div className="absolute bg-white shadow rounded p-2 z-50 w-full overflow-scroll max-h-96">
+        <div className="absolute bg-white shadow rounded p-2 z-50 w-full overflow-scroll max-h-96 text-sm dark:bg-slate-800 dark:text-slate-100 dark:border dark:border-slate-600">
           <div>
             <strong>Cases</strong>
             {results.cases.map(c => (
@@ -152,37 +151,45 @@ export function GlobalSearchBar() {
 }
 
 const App = () => {
-  
   return (
-    <div>
-      <SheetProvider >
-      <SidebarProvider style={{
-    "--sidebar-width": "11rem",
-    "--sidebar-width-mobile": "20rem",
-  }}>
-      <AppSidebar  />
-      <SidebarInset className={'w-full'}>
-        <header className="flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300 w-(screen-64) h-16 border-b border-b-slate-200">
-          <div className="flex items-center gap-4  p-4">
-            <SidebarTrigger className="-ml-1" />
-            <Breadcrumbs/>
-          </div>
-            <div className="flex  p-2 items-center gap-2 self-center">
-              <Search></Search>
-              <GlobalSearchBar />
-            </div>
-            <SheetBar  ></SheetBar>
-        </header>
+    <ThemeProvider defaultTheme="light" storageKey="my-app-theme">
+      <div>
+        <SheetProvider>
+          <SidebarProvider
+            style={{
+              "--sidebar-width": "11rem",
+              "--sidebar-width-mobile": "20rem",
+            }}
+          >
+            <AppSidebar />
+            <SidebarInset className={"w-full"}>
+              <header className="  flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64) h-16 border-b border-b-slate-200 dark:border-b-slate-600">
+                <div className="flex items-center gap-4 p-4">
+                  <SidebarTrigger className="-ml-1" />
+                  <Breadcrumbs />
+                </div>
+                <div className="flex p-2 items-center gap-2 self-center">
+                  <Search />
+                  <GlobalSearchBar />
+                </div>
+                <div className="flex items-center gap-2 pr-4">
+                  {/* tombol light/dark */}
+                  <ThemeToggle />
+                  <SheetBar />
+                </div>
+              </header>
 
-        <Outlet />
-      </SidebarInset>
-    </SidebarProvider> 
-    </SheetProvider> 
-    <GlobalLogListener />
-    <SocketInitializer/>
-    <Toaster/>
-    </div>
-  )
-}
+              <Outlet />
+            </SidebarInset>
+          </SidebarProvider>
+        </SheetProvider>
+        <GlobalLogListener />
+        <SocketInitializer />
+        <Toaster />
+      </div>
+    </ThemeProvider>
+  );
+};
+
 
 export default App
