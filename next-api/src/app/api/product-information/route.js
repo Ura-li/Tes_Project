@@ -46,8 +46,13 @@ export async function GET(request) {
                 product_type: {
                   OR: [
                     { ProductType: { contains: search } },
-                    { ProductGroup: { contains: search } },
-                    { ProductTower: { contains: search } },
+                    /**
+                     * TODO FOR FERDI
+                     * BIKIN ALTERNATIF DARI INI TANPA MENGGUNAKAN  MODE INSENSITIVE
+                     * KARENA TIDAK SUPPORT DI MYSQL
+                     */
+                    // { ProductGroup: { contains: search } },
+                    // { ProductTower: { contains: search } },
                   ],
                 },
               },
