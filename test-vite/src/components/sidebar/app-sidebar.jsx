@@ -170,6 +170,11 @@ export function AppSidebar({
             url: "/app/master/ServiceCatalog",
             icon: Stamp
           },
+                    {
+            title: "Service Type",
+            url: "/app/master/ServiceType",
+            icon: Stamp
+          },
           {
             title: "OTC Code",
             url: "/app/master/OTC_Code",

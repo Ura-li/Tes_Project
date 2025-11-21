@@ -41,6 +41,7 @@ const masterTables = {
   Resource_table: lazy(() => import('./pages/master_table').then(m => ({ default: m.Resource_table }))),
   RepairClassCodeTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.RepairClassCodeTable }))),
   ServiceCatalogTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.ServiceCatalogTable }))),
+  ServiceTypeTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.ServiceTypeTable }))),
   OTCCodeTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.OTCCodeTable }))),
   CrsTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.CrsTable }))),
   FailureTable: lazy(() => import('./pages/master_table').then(m => ({ default: m.FailureTable }))),
@@ -69,6 +70,7 @@ const {
   Resource_table,
   RepairClassCodeTable,
   ServiceCatalogTable,
+  ServiceTypeTable,
   OTCCodeTable,
   CrsTable,
   NmuTable,
@@ -77,6 +79,7 @@ const {
   BookingStatusTable,
 } = masterTables;
 import { getUserFromToken } from "./lib/utils/auth";
+
 
 
 
@@ -284,6 +287,14 @@ createRoot(document.getElementById("root")).render(
               element={
                 <MasterGateKeeping allow={["admin"]}>
                   <ServiceCatalogTable />
+                </MasterGateKeeping>
+              }
+            />
+            <Route
+              path="/app/master/ServiceType"
+              element={
+                <MasterGateKeeping allow={["admin"]}>
+                  <ServiceTypeTable />
                 </MasterGateKeeping>
               }
             />

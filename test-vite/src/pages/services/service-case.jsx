@@ -1004,7 +1004,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, materialOrderI
       onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", },
-    { icon: Save, label: "Save", onClick: () => saveMaterialOrder() },
+    { icon: Save, label: "Save", onClick: () => saveMaterialOrder().then(() => {`/app/material-order/${materialOrders.MOID}`}) },
     { icon: FileSymlink, label: "Save & Close", onClick: () => saveMaterialOrder().then(() => navigate(`/app/work/${materialOrders.WOID}`))},
     {
       icon: CopyXIcon,
@@ -1091,9 +1091,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, materialOrderI
           text: res.data.message,
           timer: 2000,
           showConfirmButton: false,
-        }).then(() => {
-          navigate(`/app/material-order/${materialOrders.MOID}`);
-        });
+        })
       } else {
         Swal.fire({
           icon: "error",
