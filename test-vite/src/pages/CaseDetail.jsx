@@ -2307,7 +2307,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     <SearchCommandBlock
                       value={caseForm?.Owner}
                       onChange={(selectedID) => {
-                            if (selectedID === null) {
+                            if (!selectedID) {
                           onChangeCase("Owner")(null); // Clear the value!
                           return;
                         }
