@@ -4160,7 +4160,7 @@ return (
 );
 };
 
-export function PartAdd (onReload = false) {
+export function PartAdd ({ onReload = true, onSuccess }) {
   const [formData, setFormData] = useState({
     PartNumber: '',
     Keyword: '',
@@ -4223,14 +4223,23 @@ export function PartAdd (onReload = false) {
 
     try {
       const res = await ApiCustomer.post(`/api/service-log/parts-catalog`, payload);
+      const createdPart = res.data?.data || res.data;
+
       Swal.fire({
         title: "Success!",
         text: "Part successfully added.",
         icon: "success",
         timer: 1200,
         showConfirmButton: false,
-      }).then(() => {
-        if(onReload) window.location.reload()
+      }).then(async () => {
+        if (onReload) {
+          window.location.reload();
+        } else {
+          // new behavior: just tell parent “I’m done, refresh your list”
+          if (typeof onSuccess === "function") {
+            await onSuccess(createdPart);
+          }
+        }
       });
     } catch (err) {
       Swal.fire({
@@ -4988,6 +4997,33 @@ export function BtnModalsServiceCatalog({
       console.error("Err :",e)
     }
   }
+
+  const handlePartAdded = async (createdPart) => {
+    // 1) refresh catalog from backend (optional but recommended)
+    await fetchDataPartCatalog();
+
+    // 2) auto-select the newly created part in selectedPartCatalog
+    if (createdPart?.PartNumber) {
+      setSelectedPartCatalog((prev) => {
+        const alreadyExists = prev.some(
+          (p) => p.PartNumber === createdPart.PartNumber
+        );
+        if (alreadyExists) return prev;
+
+        const price = parseFloat(createdPart.Price) || 0;
+
+        return [
+          ...prev,
+          {
+            ...createdPart,
+            qty: 1,
+            Total: price.toFixed ? price.toFixed(2) : price,
+          },
+        ];
+      });
+    }
+  };
+
 
   //search part handler
   const [partNumberSearch, setPartNumberSearch] = useState("");
@@ -5820,7 +5856,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
               <SearchCommandBlock 
                 value={assignApo}
                 onChange={(selectedID) =>{
-                  if(selectedID === null) {
+                  if(!selectedID) {
                     setAssignApo(null);
                     return;
                   }
@@ -5860,6 +5896,9 @@ console.log("Asset Info OTC : ",isOutWarranty)
       partCatalog={partCatalog}
       selectedPartCatalog={selectedPartCatalog}
       setSelectedPartCatalog={setSelectedPartCatalog}
+
+      onPartAdded={handlePartAdded}
+      
     />
     </Dialog>
   </>
@@ -6144,7 +6183,8 @@ export function BtnModalsPartAdd({
   setOpen2,
   partCatalog,
   selectedPartCatalog,
-  setSelectedPartCatalog
+  setSelectedPartCatalog,
+  onPartAdded,
 }){
   const [tempSelectedParts, setTempSelectedParts] = useState([]);
   const handlerPartCatalog = (part, checked) => {
@@ -6168,8 +6208,23 @@ export function BtnModalsPartAdd({
       part.PartNumber?.toLowerCase().includes(partNumberSearch.toLowerCase())
     );
   });
-
+    const MAX_PAGES_SHOWN = 3;
+ const getPaginationPages = () => {
+    if (totalPages <= MAX_PAGES_SHOWN) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 2) {
+      return [1, 2, 3];
+    }
+    if (currentPage >= totalPages - 1) {
+      return [totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [currentPage - 1, currentPage, currentPage + 1];
+  };
   const totalPages = Math.ceil(filteredPartCatalog.length / PAGE_SIZE);
+  const paginationPages = getPaginationPages();
+  
+  
   const currentPageData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return filteredPartCatalog.slice(start, start + PAGE_SIZE);
@@ -6184,7 +6239,7 @@ export function BtnModalsPartAdd({
   return(
     <>
     <Dialog open={open2} onOpenChange={setOpen2}>
-      <DialogContent className={' sm:min-w-[58vw] sm:min-h-[fit-content] flex flex-col justify-center'}>
+      <DialogContent className={' sm:min-w-[58vw] sm:min-h-[fit-content] flex flex-col justify-center overflow-y-auto'}>
         <DialogHeader className={''}>
           <DialogTitle className={'text-blue-600 text-2xl '}>Add Part</DialogTitle>
         </DialogHeader>
@@ -6200,18 +6255,25 @@ export function BtnModalsPartAdd({
                 variant={'search'}
                 onClick={(e) => setPartNumberSearch(partNumberInput)}
               >Search</Button>
-              <PartAdd/>
+              <PartAdd
+                onReload={false}
+                onSuccess={async(createdPart) =>{
+                  if(typeof onPartAdded === "function"){
+                    await onPartAdded();
+                  }
+                }}
+              />
             </span>
             <div className="bg-gray-300 flex gap-x-10 p-2 flex-1 max-w-[10em]">
                 <p>Currency</p><p className="whitespace-nowrap">: </p>
             </div>
           </div>
-          <div className="max-w-full overflow-x-auto">
+          <div className="overflow-y-auto">
             <Table className={''}>
               <TableHeader>
                 <TableRow>
-                  <TableHead className={'text-black font-bold'}>Select</TableHead>
-                  <TableHead className={'text-black font-bold'}>Part #</TableHead>
+                  <TableHead className={'p-2 text-black font-bold'}>Select</TableHead>
+                  <TableHead className={'text-black font-bold p-2'}>Part #</TableHead>
                   <TableHead className={'text-black font-bold'}>Keyword</TableHead>
                   <TableHead className={'text-black font-bold'}>Part Description</TableHead>
                   <TableHead className={'font-black text-black'}>Orderability</TableHead>
@@ -6236,8 +6298,12 @@ export function BtnModalsPartAdd({
               .filter(part => !selectedPartCatalog.some(selected => selected.PartNumber === part.PartNumber))
               .map((part, index) => {
                   const isChecked = tempSelectedParts.some((item) => item.PartNumber === part.PartNumber)
+
+                  const toggleRow = () => {
+                    handlerPartCatalog(part, !isChecked);
+                  };
                   return (
-                    <TableRow key={index}>
+                    <TableRow key={index} onClick={toggleRow} className={`cursor-pointer ${isChecked ? "bg-blue-100" : ""}`}>
                       <TableCell className="flex">
                         <Checkbox 
                           checked={isChecked}
@@ -6278,17 +6344,17 @@ export function BtnModalsPartAdd({
                           />
                         </PaginationItem>
 
-                        {Array.from({ length: totalPages }, (_, i) => (
+                        {paginationPages.map((i) => (
                           <PaginationItem key={i}>
                             <PaginationLink
                               href="#"
-                              isActive={currentPage === i + 1}
+                              isActive={currentPage === i }
                               onClick={(e) => {
                                 e.preventDefault();
-                                handlePageChange(i + 1);
+                                handlePageChange(i);
                               }}
                             >
-                              {i + 1}
+                              {i}
                             </PaginationLink>
                           </PaginationItem>
                         ))}

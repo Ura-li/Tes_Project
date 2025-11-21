@@ -39,6 +39,7 @@ export async function PATCH(request) {
       SalesOrderNumber,
       RMANumber,
     } = await request.json();
+    
 
     if (!MOID || !WOID) {
       return NextResponse.json(
@@ -50,6 +51,7 @@ export async function PATCH(request) {
       );
     }
 
+    moUpdates.OrderNumber = moUpdates.orderNumber
     const result = await prisma.$transaction(async (tx) => {
       const [materialOrder, workOrder] = await Promise.all([
         tx.materialorder.findUnique({ where: { MOID } }),
@@ -69,10 +71,11 @@ export async function PATCH(request) {
 
       const originalOrderStatus = materialOrder.OrderStatus;
       const originalSalesOrder = materialOrder.SalesOrderNumber ?? null;
-      const originalRmaNumber = materialOrder.RMANumber ?? null;
+      const originalRmaNumber = materialOrder.RMANumber ?? null;  
       const originalDeliveryRequestedDate = materialOrder.DeliveryRequestedDate ?? null;
 
       const updateEntries = Object.entries(updates ?? {});
+      console.log("Update Entries",updateEntries);
       if (updateEntries.length > 0) {
         for (const [lineItemID, status] of updateEntries) {
           await tx.materialorderlineitems.update({
@@ -85,6 +88,28 @@ export async function PATCH(request) {
       const lineItems = await tx.materialorderlineitems.findMany({ where: { MOID } });
       const allMatch = (status) =>
         lineItems.length > 0 && lineItems.every((item) => item.Status === status);
+
+      const mergeAllowedMoUpdates = (source, target, current) => {
+        const allowedFields = [
+          'DeliveryRequestedDate',
+          'CollectionRequestedDate',
+          'ReadyForClosureDate',
+          'AWB_InCode',
+          'AWB_OutCode',
+          'RMAStatus',
+          //AND ETCETERA ON FIELD REQUIRED
+        ];
+
+        for (const field of allowedFields) {
+          if (field in source) {
+            const newVal = source[field] ?? null;
+            const oldVal = current[field] ?? null;
+            if (newVal !== oldVal) {
+              target[field] = newVal;
+            }
+          }
+        }
+      };
 
       const materialOrderUpdate = {};
 
@@ -124,14 +149,18 @@ export async function PATCH(request) {
       ) {
         materialOrderUpdate.DeliveryRequestedDate = moUpdates.deliveryRequestedDate || null;
       }
+      mergeAllowedMoUpdates(moUpdates, materialOrderUpdate, materialOrder);
 
       let updatedOrder = materialOrder;
       if (Object.keys(materialOrderUpdate).length > 0) {
+        // console.log("Material Ordeer Update", materialOrderUpdate);
         updatedOrder = await tx.materialorder.update({
           where: { MOID },
           data: materialOrderUpdate,
         });
+        // console.log("Material Ordeer Update", updatedCaseInfo);
       }
+      // return console.log("Material Ordeer Update", updatedOrder);
 
       const derivedOrderStatus = updatedOrder.OrderStatus;
       const caseId = workOrder.caseinformation?.CaseID ?? null;
