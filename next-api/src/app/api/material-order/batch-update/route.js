@@ -97,7 +97,7 @@ export async function PATCH(request) {
           'AWB_InCode',
           'AWB_OutCode',
           'RMAStatus',
-          //AND ETCETERA ON FIELD REQUIRED
+          //AND ETCETERA ONFIELD REQUIRED
         ];
 
         for (const field of allowedFields) {

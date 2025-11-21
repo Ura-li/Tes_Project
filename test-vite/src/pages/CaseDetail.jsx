@@ -1061,6 +1061,7 @@ const openPopup = () => {
       /**
        * TODO FOR SLAMET : 
        * MAKE TIS CONFIRMATION INTO SOMETHING ELSE
+       * TULUNG ININYA DI ITUIN BIAR GA APA KALI
        */
       await Swal.fire({
         icon: "warning",
