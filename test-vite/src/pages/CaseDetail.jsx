@@ -3640,6 +3640,7 @@ if (caseDetails.CaseStatus !== "Close") {
                   <div className="flex items-center justify-between">
                     <CardTitle className={"text-lg"}>Invoice Information</CardTitle>
                     <Button
+                    className={'bg-gray-300'}
                       size="sm"
                       variant="outline"
                       onClick={() => handleInvoiceOpenChange(true)}
@@ -3720,15 +3721,7 @@ if (caseDetails.CaseStatus !== "Close") {
                   ) : (
                     <div className="flex flex-col gap-2 text-sm text-muted-foreground">
                       <p>Belum ada invoice untuk case ini.</p>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="w-fit"
-                        onClick={() => handleInvoiceOpenChange(true)}
-                        disabled={caseDetails?.CaseStatus === "Close"}
-                      >
-                        Buat Invoice
-                      </Button>
+                     
                     </div>
                   )}
                 </CardContent>

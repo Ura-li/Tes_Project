@@ -10,12 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import CaseField from "../CaseField";
 import { Textarea } from "../ui/textarea";
 import { SearchCommandBlock } from "../sc-select";
@@ -130,10 +125,7 @@ const InvoiceDialog = ({
       nextErrors.quotationNo = "Quotation belum tersedia.";
     }
 
-    if (
-      form.amountReceive === "" ||
-      Number.isNaN(Number(form.amountReceive))
-    ) {
+    if (form.amountReceive === "" || Number.isNaN(Number(form.amountReceive))) {
       nextErrors.amountReceive = "Amount receive wajib diisi dengan angka.";
     }
 
@@ -183,17 +175,20 @@ const InvoiceDialog = ({
   const renderEmptyQuotation = () => (
     <div className="flex min-h-[200px] flex-col items-center justify-center text-center text-sm text-muted-foreground">
       <p>Belum ada quotation untuk case ini.</p>
-      <p className="text-xs">Buat quotation terlebih dahulu sebelum membuat invoice.</p>
+      <p className="text-xs">
+        Buat quotation terlebih dahulu sebelum membuat invoice.
+      </p>
     </div>
   );
 
   const renderForm = () => (
-    <div className="space-y-6">
-      <Card>
+    <div className="grid gap-6 md:grid-cols-2 items-start">
+      {/* Left: Quotation summary */}
+      <Card className="h-full">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Ringkasan Quotation</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2">
+        <CardContent className="grid grid-cols-2 gap-4">
           <CaseField label="Quotation No" lock>
             <Input value={quotation?.quotationNo || "-"} readOnly />
           </CaseField>
@@ -218,12 +213,13 @@ const InvoiceDialog = ({
         </CardContent>
       </Card>
 
-      <Card>
+      {/* Right: Invoice detail */}
+      <Card className="h-full">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Detail Invoice</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2">
-          <CaseField label="Amount Receive *" lock={false}>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <CaseField label="Amount Receive *">
             <div className="space-y-1">
               <Input
                 type="number"
@@ -250,15 +246,14 @@ const InvoiceDialog = ({
             <Input
               type="date"
               value={form.amountReceiveDate}
-              onChange={(e) => handleChange("amountReceiveDate", e.target.value)}
+              onChange={(e) =>
+                handleChange("amountReceiveDate", e.target.value)
+              }
             />
           </CaseField>
 
           <CaseField label="Amount Difference" lock>
-            <Input
-              value={formatAccountingRupiah(form.amountDiff)}
-              readOnly
-            />
+            <Input value={formatAccountingRupiah(form.amountDiff)} readOnly />
           </CaseField>
 
           {Number(form.amountDiff) !== 0 && (
@@ -296,6 +291,7 @@ const InvoiceDialog = ({
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium">
               <Checkbox
+                className={'ring-1 '}
                 checked={form.sendInvoice}
                 onCheckedChange={(checked) =>
                   handleChange("sendInvoice", Boolean(checked))
@@ -305,6 +301,7 @@ const InvoiceDialog = ({
             </label>
             <label className="flex items-center gap-2 text-sm font-medium">
               <Checkbox
+                className={'ring-1 '}
                 checked={form.sendWa}
                 onCheckedChange={(checked) =>
                   handleChange("sendWa", Boolean(checked))
@@ -314,6 +311,7 @@ const InvoiceDialog = ({
             </label>
             <label className="flex items-center gap-2 text-sm font-medium">
               <Checkbox
+                className={'ring-1 '}
                 checked={form.sendEmail}
                 onCheckedChange={(checked) =>
                   handleChange("sendEmail", Boolean(checked))
@@ -323,6 +321,7 @@ const InvoiceDialog = ({
             </label>
             <label className="flex items-center gap-2 text-sm font-medium">
               <Checkbox
+                className={'ring-1 '}
                 checked={form.sendErf}
                 onCheckedChange={(checked) =>
                   handleChange("sendErf", Boolean(checked))
@@ -390,21 +389,25 @@ const InvoiceDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="w-full sm:max-w-[960px] max-h-[90vh]  p-6 flex flex-col transition-all">
         <DialogHeader>
-          <DialogTitle>{form.invoiceNo ? "Perbarui Invoice" : "Buat Invoice"}</DialogTitle>
+          <DialogTitle>
+            {form.invoiceNo ? "Perbarui Invoice" : "Buat Invoice"}
+          </DialogTitle>
           <DialogDescription>
             Isi informasi invoice sebelum case ditutup.
           </DialogDescription>
         </DialogHeader>
 
-        {loading
-          ? renderLoading()
-          : !quotation
+        <div className="overflow-y-auto ">
+          {loading
+            ? renderLoading()
+            : !quotation
             ? renderEmptyQuotation()
             : step === "form"
-              ? renderForm()
-              : renderConfirmation()}
+            ? renderForm()
+            : renderConfirmation()}
+        </div>
 
         {!loading && quotation && (
           <DialogFooter className="mt-6">

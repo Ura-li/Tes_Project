@@ -140,9 +140,6 @@ table: {
   partsColSpan5: { flex: 8 },  // No + Vendor + HP + Part Name + QTY
   partsColSpan6: { flex: 9.3 },  // above + Unit Price
 
-  alignRight: {
-    textAlign: 'right',
-  },
   alignCenter: {
     textAlign: 'center',
   },
