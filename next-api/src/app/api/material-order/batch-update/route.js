@@ -39,6 +39,8 @@ export async function PATCH(request) {
       SalesOrderNumber,
       RMANumber,
     } = await request.json();
+
+    // return console.log(moUpdates, updates)
     
 
     if (!MOID || !WOID) {
@@ -92,8 +94,11 @@ export async function PATCH(request) {
       const mergeAllowedMoUpdates = (source, target, current) => {
         const allowedFields = [
           'DeliveryRequestedDate',
+          'deliveryRequestedDate',
           'CollectionRequestedDate',
+          'collectionRequestedDate',
           'ReadyForClosureDate',
+          'readyForClosureDate',
           'AWB_InCode',
           'AWB_OutCode',
           'RMAStatus',
@@ -150,6 +155,8 @@ export async function PATCH(request) {
         materialOrderUpdate.DeliveryRequestedDate = moUpdates.deliveryRequestedDate || null;
       }
       mergeAllowedMoUpdates(moUpdates, materialOrderUpdate, materialOrder);
+
+      // return console.log(materialOrderUpdate);
 
       let updatedOrder = materialOrder;
       if (Object.keys(materialOrderUpdate).length > 0) {

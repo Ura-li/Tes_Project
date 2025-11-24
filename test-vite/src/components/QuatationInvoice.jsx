@@ -9,6 +9,7 @@ import {
   Link,
 } from "@react-pdf/renderer";
 import React from "react";
+import { formatAccountingRupiah } from "../lib/utils";
 
 Font.register({
   family: "Helvetice",
@@ -87,6 +88,12 @@ const styles = StyleSheet.create({
   value: {
     width: '68%',
     fontSize: 9,
+  },
+  value1: {
+    width: '68%',
+    fontSize: 9,
+    textAlign: 'justify',
+    textIndent: -5,
   },
   colon: {
     width: '2%',
@@ -178,6 +185,16 @@ const Section = ({ title, children }) => (
   </View>
 );
 
+const List = ({ items }) => (
+  <View>
+    {items.map((item, index) => (
+      <Text key={index} style={styles.value1}>
+        • {item}
+      </Text>
+    ))}
+  </View>
+)
+
 export const QuotationInvoice = ({
   caseDetails,
   customerSignature,
@@ -222,7 +239,8 @@ export const QuotationInvoice = ({
               :
             </Text>
             <Text style={[styles.value, { fontWeight: "bold", fontSize: 10 }]}>
-              {initialData?.quotationNo ?? null}
+              {/* {initialData?.quotationNo ?? null}\ */}
+              {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.QuotationNo ?? "N/A"}
             </Text>
 
             <Text style={styles.label}>Case Type</Text>
@@ -240,16 +258,19 @@ export const QuotationInvoice = ({
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
               {caseDetails?.CreatedOn
-                ? new Date(caseDetails.CreatedOn).toLocaleDateString()
+                ? new Date(caseDetails.CreatedOn).toLocaleString()
                 : "N/A"}
             </Text>
 
             <Text style={styles.label}>Quotation Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
-              {initialData?.quotationDate
+              {/* {initialData?.quotationDate
                 ? new Date(initialData.quotationDate).toLocaleDateString()
-                : "N/A"}
+                : "N/A"} */}
+              {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate ? 
+              new Date (caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate).toLocaleString() : "N/A" 
+              }
             </Text>
 
             <Text style={styles.label}>Problem Desc</Text>
@@ -461,49 +482,41 @@ export const QuotationInvoice = ({
 
         {/* Body */}
         {caseDetails?.workorder?.length > 0 ? (
-          caseDetails.workorder.map((item, index) => {
-            const line =
-              item.materialorder?.[0]?.materialorderlineitems?.[0] || {};
-            return (
-              <View style={styles.tableRow} key={index}>
-                <Text
-                  style={[
-                    styles.tableCell,
-                    styles.partsColNo,
-                    styles.alignCenter,
-                  ]}
-                >
-                  {index + 1}
-                </Text>
+          caseDetails.workorder.flatMap((wo) =>
+            wo.materialorder.flatMap((mo) =>
+              mo.materialorderlineitems.map((line, index) => (
+                <View style={styles.tableRow} key={line.LineItemID}>
+                  <Text style={[styles.tableCell, styles.partsColNo, styles.alignCenter]}>
+                    {index + 1}
+                  </Text>
 
-                <Text style={[styles.tableCell, styles.partsColVendor]}>
-                  {/* Vendor part no here if available */}
-                </Text>
+                  <Text style={[styles.tableCell, styles.partsColVendor]}>
+                    {line.servicecatalog_parts?.VendorPartNumber ?? "N/A"}
+                  </Text>
 
-                <Text style={[styles.tableCell, styles.partsColHp]}>
-                  {line.PartNumber ?? "N/A"}
-                </Text>
+                  <Text style={[styles.tableCell, styles.partsColHp]}>
+                    {line.PartNumber ?? "N/A"}
+                  </Text>
 
-                <Text style={[styles.tableCell, styles.partsColPartName]}>
-                  {line.Description ?? "N/A"}
-                </Text>
+                  <Text style={[styles.tableCell, styles.partsColPartName]}>
+                    {line.Description ?? "N/A"}
+                  </Text>
 
-                <Text style={[styles.tableCell, styles.partsColQty]}>
-                  {line.Quantity ?? "N/A"}
-                </Text>
+                  <Text style={[styles.tableCell, styles.partsColQty]}>
+                    {line.Quantity ?? "N/A"}
+                  </Text>
 
-                <Text style={[styles.tableCell, styles.partsColUnitPrice]}>
-                  {/* line.UnitPrice ?? '.00' */}
-                  .00
-                </Text>
+                  <Text style={[styles.tableCell, styles.partsColUnitPrice]}>
+                    {formatAccountingRupiah(line.Price) ?? "0"}
+                  </Text>
 
-                <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-                  {/* line.TotalPrice ?? '.00' */}
-                  .00
-                </Text>
-              </View>
-            );
-          })
+                  <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+                    {formatAccountingRupiah(Number(line.Price) * Number(line.Quantity)) || 0}
+                  </Text>
+                </View>
+              ))
+            )
+          )
         ) : (
           <View style={styles.tableRow}>
             <Text style={[styles.tableCell, styles.partsColNo]} />
@@ -516,6 +529,7 @@ export const QuotationInvoice = ({
           </View>
         )}
 
+
         {/* Footer rows – perfectly aligned with header columns */}
 
         {/* Labor Fee: colspan=5 */}
@@ -523,10 +537,14 @@ export const QuotationInvoice = ({
           <Text
             style={[styles.tableCell, styles.partsColSpan5, styles.alignRight]}
           >
-            Labor Fee :
+            Labor Fee : 
           </Text>
-          <Text style={[styles.tableCell, styles.partsColUnitPrice]} />
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
+          <Text style={[styles.tableCell, styles.partsColUnitPrice]} >
+            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
+          </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
+          </Text>
         </View>
 
         {/* Sub Total: colspan=6 */}
@@ -536,7 +554,9 @@ export const QuotationInvoice = ({
           >
             Sub Total :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal)}
+          </Text>
         </View>
 
         {/* Total: colspan=6 */}
@@ -546,7 +566,9 @@ export const QuotationInvoice = ({
           >
             Total :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal)}
+          </Text>
         </View>
       </View>
 
@@ -557,10 +579,7 @@ export const QuotationInvoice = ({
           </Text>
           <Text style={styles.colon}>:</Text>
           <Text style={[styles.value]}>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo
-            ipsam necessitatibus dolor labore beatae earum nam neque praesentium
-            sunt suscipit, quis perspiciatis. Obcaecati iure excepturi mollitia
-            similique in accusantium exercitationem.
+           
           </Text>
         </View>
       </View>
@@ -570,33 +589,35 @@ export const QuotationInvoice = ({
               <Text style={styles.label}>Validity</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                N / A
+                7 (seven) calender days
               </Text>
               <Text style={styles.label}>Delivery Time</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                N / A
+                2 (two) weeks from date of PO confirmation & subject to spare part availibility
               </Text>
               <Text style={styles.label}>Payment</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                N / A
+                Cash or transfer
               </Text>
               <Text style={styles.label}>Warranty</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                N / A
+                1 (one) month for the same part
               </Text>
               <Text style={styles.label}>Cancellation Fee</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                N / A
+                Rp. 121.000,
               </Text>
               <Text style={styles.label}>Others</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={[styles.value]}>
-                N / A
-              </Text>
+              <List items={[
+                "Defective part(s) should be returned to HP",
+                "No cancellation accepted after PO confirmation (full quotation charge will apply after PO confirmation)",
+                "Any damaged part(s) that has been replaced shall be the property of HP Indonesia (Suku cadang yang rusak pada barang yang diperbaiki akan menjadi milik HP Indonesia)",
+              ]}/>
             </View>
           </View>
         </Section>
@@ -608,7 +629,7 @@ export const QuotationInvoice = ({
         >
           <View style={{ flexDirection: "column", alignItems: "center" }} >
             <Text style={[styles.textSmall, { marginBottom: 10 }]}>
-              Received By
+              Sincerely yours
             </Text>
             <Image src={caseDetails?.createdByUser?.Signature} style={{ width: 120, height: 60 }} />
             <Text style={styles.textSmall}>
@@ -620,7 +641,7 @@ export const QuotationInvoice = ({
           </View>
           <View style={{ flexDirection: "column", alignItems: "center" }} >
             <Text style={[styles.textSmall, { marginBottom: 10 }]}>
-              Received By
+              Accepted by
             </Text>
             <Image src={customerSignature} style={{ width: 120, height: 60 }} />
             <Text style={styles.textSmall}>
@@ -635,8 +656,10 @@ export const QuotationInvoice = ({
                 : "N/A"}
             </Text>
           </View>
-       
       </View>
+          <Text style={styles.textSmall}>
+            * This PDF Quotation auto generated by system.
+          </Text>
     </Page>
   </Document>
 );

@@ -307,15 +307,15 @@ model materialorder {
   AWB_InCode  String? @db.VarChar(100)
   AWB_OutCode String? @db.VarChar(100)
 
-  ReadyForClosureDate        DateTime?         @db.DateTime(0)
+  ReadyForClosureDate        DateTime?         @db.DateTime(0) //Part OUT CE Ready For Closure Date
   ShippingPriority           ShippingPriority? @default(MEDIUM)
   CustomerInducedDamage      Boolean?          @default(false)
   AccidentalDamageProtection Boolean?          @default(false)
   DefectiveMediaRetention    Boolean?          @default(false)
 
-  DeliveryRequestedDate   DateTime?       @db.DateTime(0)
-  CollectionRequestedDate DateTime?       @db.DateTime(0)
-  PromoCode               String?         @db.VarChar(50)
+  DeliveryRequestedDate   DateTime?       @db.DateTime(0) //ETA Delivery Required Date (Customer Time)
+  CollectionRequestedDate DateTime?       @db.DateTime(0) //Part on Hand CE Date
+  PromoCode               String?         @db.VarChar(50) 
   NotificationNumber      String?         @db.VarChar(100)
   ParentMOID              String?         @db.VarChar(13)
   IsBCPOrder              Boolean?        @default(false)

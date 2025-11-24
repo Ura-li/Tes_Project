@@ -47,7 +47,11 @@ const formatDateForInput = (value) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
 const normaliseLineItems = (items = [], prevItems = []) => {
@@ -474,7 +478,7 @@ const QuotationDialog = ({
                 {isPendingQuote && (
                   <CaseField label="Quote Approve Date" star className="gap-1">
                     <Input
-                      type="date"
+                      type="datetime-local"
                       disabled={formDisabled}
                       value={form.quoteApproveDate}
                       onChange={(e) =>
@@ -514,7 +518,7 @@ const QuotationDialog = ({
 
                 <CaseField label="Quotation Date" star className="gap-1">
                   <Input
-                    type="date"
+                    type="datetime-local"
                     disabled={formDisabled}
                     value={form.quotationDate}
                     onChange={(e) =>
@@ -598,7 +602,7 @@ const QuotationDialog = ({
                     <SearchCommandBlock
                       value={form.userAssign}
                       onChange={(selectedID) => {
-                        if (selectedID === null) {
+                        if (!selectedID) {
                           handleFieldChange("userAssign", "");
                           return;
                         }
