@@ -598,7 +598,7 @@ const QuotationDialog = ({
                     <SearchCommandBlock
                       value={form.userAssign}
                       onChange={(selectedID) => {
-                        if (selectedID === null) {
+                        if (!selectedID) {
                           handleFieldChange("userAssign", "");
                           return;
                         }

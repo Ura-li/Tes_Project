@@ -2258,6 +2258,12 @@ if (caseDetails.CaseStatus !== "Close") {
                       <Input variant="invisible" placeholder="---" value={caseDetails.workorder[0].owner.Name} readOnly/>                    
                   </CaseField>
                 )}
+                
+                {caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.User?.IDUser && (
+                  <CaseField label="CM name" className={"mt-2"} childClass={'col-span-2'} span={2} lock >  
+                      <Input variant="invisible" placeholder="---" value={caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.User?.Name} readOnly/>                    
+                  </CaseField>
+                )}
                 {caseDetails?.workorder[0]?.materialorder[0]?.owner?.IDUser && (
                   <CaseField label="APO name" className={"mt-2"} childClass={'col-span-2'} span={2} lock >  
                       <Input variant="invisible" placeholder="---" value={caseDetails.workorder[0].materialorder[0].owner.Name} readOnly/>                    

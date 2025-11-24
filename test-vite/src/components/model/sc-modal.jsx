@@ -5203,13 +5203,12 @@ console.log("Asset Info OTC : ",isOutWarranty)
           ? await (async () => {
               const createdMOIDs = [];
               for (const part of selectedPartCatalog) {
-                const note = `[NOTICE] Order Part\nOrder Part : ${part.PartNumber} - ${part.PartDescription}\n${part.Price ? `Harga : Rp. ${part.Price}\n` : ''}${part.RemovedPartNumber ? `Return CT Key : ${part.RemovedPartNumber}\n` : ''}Requested to APO : ${assignApo}`;
+                // const note = `[NOTICE] Order Part\nOrder Part : ${part.PartNumber} - ${part.PartDescription}\n${part.Price ? `Harga : Rp. ${part.Price}\n` : ''}${part.RemovedPartNumber ? `Return CT Key : ${part.RemovedPartNumber}\n` : ''}Requested to APO : ${assignApo}`;
                 const r = await ApiCustomer.post("/api/material-order", {
                   WOID: WOID,
                   selectedPartCatalog: [{ ...part, qty: part.qty || 1 }],
                   OwnerID: data.user.id,
                   assignApo: assignApo,
-                  notesLog: note,
                 });
                 if (r?.data?.MOID) createdMOIDs.push(r.data.MOID);
               }

@@ -63,7 +63,11 @@ export async function GET(request, { params }) {
                                     servicecatalog_parts: true,
                                     quotation_lineitem: {
                                         include:{
-                                            quotation: true
+                                            quotation: {
+                                                include: {
+                                                    User: true
+                                                }
+                                            }
                                         }
                                     }
 

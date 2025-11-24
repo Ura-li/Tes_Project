@@ -218,8 +218,16 @@ export const FlowCaseData = (user) => {
   const emptyData = { within4: [], within8: [], within15: [], over15: [] };
 
   const dataTime = [
-    { status: "FinishRepair", data: { ...emptyData } },
-    { status: "NEW_POPDoc", data: { ...emptyData } },
+    { status: "FinishRepair", data: { ...emptyData }, hide: user.user.role === "fd" || user.user.role === "admin" ? false : true },
+    { status: "NEW_POPDoc", data: { ...emptyData }, hide: user.user.role === "ps" || user.user.role === "fd" || user.user.role === "admin" ? false : true },
+    { status: "NEW_AssignPS", data: { ...emptyData }, hide: user.user.role === "ps" || user.user.role === "admin" ? false : true },
+    { status: "NEW_AssignCE", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "admin" ? false : true},
+    { status: "NEW_AssignLeader", data: { ...emptyData }, hide: user.user.role === "celead" || user.user.role === "admin" ? false : true},
+    { status: "Quote_Approved", data: { ...emptyData }, hide: user.user.role === "cm" || user.user.role === "admin" ? false : true},
+    { status: "Quote_Rejected", data: { ...emptyData }, hide: user.user.role === "cm" || user.user.role === "admin" ? false : true},
+    { status: "Escalated", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
+    { status: "PartRequest", data: { ...emptyData }, hide: user.user.role === "apo"  || user.user.role === "admin" ? false : true},
+    { status: "PartRequestLog", data: { ...emptyData }, hide: user.user.role === "lg" ||  user.user.role === "admin" ? false : true},
     { status: "Close", data: { ...emptyData }, hide: filterClose }
   ];
 

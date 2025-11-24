@@ -151,6 +151,7 @@ export const TabsService = ({
     caseReadyForClosure: "",
     readyForCloseDays: "",
     readyForClosureDate: "",
+    ReadyForClosureDate: "",
     pendingCustomerAction: "",
     customerRequestedCloseDate: "",
   });
@@ -1056,9 +1057,9 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, materialOrderI
       const formatMaterialOrderInformationForBackend = () => {
         return {
           ...materialOrderInformation,
-          deliveryRequestedDate: DateHelper.toDB(materialOrderInformation.deliveryRequestedDate),
-          collectionRequestedDate: DateHelper.toDB(materialOrderInformation.collectionRequestedDate),
-          readyForClosureDate: DateHelper.toDB(materialOrderInformation.readyForClosureDate),
+          DeliveryRequestedDate: DateHelper.toDB(materialOrderInformation.DeliveryRequestedDate),
+          CollectionRequestedDate: DateHelper.toDB(materialOrderInformation.CollectionRequestedDate),
+          ReadyForClosureDate: DateHelper.toDB(materialOrderInformation.ReadyForClosureDate),
         };
       };
 
