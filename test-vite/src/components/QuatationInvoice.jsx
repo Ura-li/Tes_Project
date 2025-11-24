@@ -9,6 +9,7 @@ import {
   Link,
 } from "@react-pdf/renderer";
 import React from "react";
+import { formatAccountingRupiah } from "../lib/utils";
 
 Font.register({
   family: "Helvetice",
@@ -461,49 +462,41 @@ export const QuotationInvoice = ({
 
         {/* Body */}
         {caseDetails?.workorder?.length > 0 ? (
-          caseDetails.workorder.map((item, index) => {
-            const line =
-              item.materialorder?.[0]?.materialorderlineitems?.[0] || {};
-            return (
-              <View style={styles.tableRow} key={index}>
-                <Text
-                  style={[
-                    styles.tableCell,
-                    styles.partsColNo,
-                    styles.alignCenter,
-                  ]}
-                >
-                  {index + 1}
-                </Text>
+          caseDetails.workorder.flatMap((wo) =>
+            wo.materialorder.flatMap((mo) =>
+              mo.materialorderlineitems.map((line, index) => (
+                <View style={styles.tableRow} key={line.LineItemID}>
+                  <Text style={[styles.tableCell, styles.partsColNo, styles.alignCenter]}>
+                    {index + 1}
+                  </Text>
 
-                <Text style={[styles.tableCell, styles.partsColVendor]}>
-                  {/* Vendor part no here if available */}
-                </Text>
+                  <Text style={[styles.tableCell, styles.partsColVendor]}>
+                    {line.servicecatalog_parts?.VendorPartNumber ?? "N/A"}
+                  </Text>
 
-                <Text style={[styles.tableCell, styles.partsColHp]}>
-                  {line.PartNumber ?? "N/A"}
-                </Text>
+                  <Text style={[styles.tableCell, styles.partsColHp]}>
+                    {line.PartNumber ?? "N/A"}
+                  </Text>
 
-                <Text style={[styles.tableCell, styles.partsColPartName]}>
-                  {line.Description ?? "N/A"}
-                </Text>
+                  <Text style={[styles.tableCell, styles.partsColPartName]}>
+                    {line.Description ?? "N/A"}
+                  </Text>
 
-                <Text style={[styles.tableCell, styles.partsColQty]}>
-                  {line.Quantity ?? "N/A"}
-                </Text>
+                  <Text style={[styles.tableCell, styles.partsColQty]}>
+                    {line.Quantity ?? "N/A"}
+                  </Text>
 
-                <Text style={[styles.tableCell, styles.partsColUnitPrice]}>
-                  {/* line.UnitPrice ?? '.00' */}
-                  .00
-                </Text>
+                  <Text style={[styles.tableCell, styles.partsColUnitPrice]}>
+                    {formatAccountingRupiah(line.Price) ?? "0"}
+                  </Text>
 
-                <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-                  {/* line.TotalPrice ?? '.00' */}
-                  .00
-                </Text>
-              </View>
-            );
-          })
+                  <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+                    {formatAccountingRupiah(Number(line.Price) * Number(line.Quantity)) || 0}
+                  </Text>
+                </View>
+              ))
+            )
+          )
         ) : (
           <View style={styles.tableRow}>
             <Text style={[styles.tableCell, styles.partsColNo]} />
@@ -516,6 +509,7 @@ export const QuotationInvoice = ({
           </View>
         )}
 
+
         {/* Footer rows – perfectly aligned with header columns */}
 
         {/* Labor Fee: colspan=5 */}
@@ -523,10 +517,14 @@ export const QuotationInvoice = ({
           <Text
             style={[styles.tableCell, styles.partsColSpan5, styles.alignRight]}
           >
-            Labor Fee :
+            Labor Fee : 
           </Text>
-          <Text style={[styles.tableCell, styles.partsColUnitPrice]} />
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
+          <Text style={[styles.tableCell, styles.partsColUnitPrice]} >
+            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
+          </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
+          </Text>
         </View>
 
         {/* Sub Total: colspan=6 */}
@@ -536,7 +534,9 @@ export const QuotationInvoice = ({
           >
             Sub Total :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal)}
+          </Text>
         </View>
 
         {/* Total: colspan=6 */}
@@ -546,7 +546,9 @@ export const QuotationInvoice = ({
           >
             Total :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]} />
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal)}
+          </Text>
         </View>
       </View>
 
@@ -557,6 +559,7 @@ export const QuotationInvoice = ({
           </Text>
           <Text style={styles.colon}>:</Text>
           <Text style={[styles.value]}>
+            {/* IDK WHERE IS THIS OUTPUT */}
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo
             ipsam necessitatibus dolor labore beatae earum nam neque praesentium
             sunt suscipit, quis perspiciatis. Obcaecati iure excepturi mollitia
