@@ -27,6 +27,7 @@ import { BookingDetailsAdd, BookingDetailsEdit, BookingDetailsDelete } from "@/c
 import { BookingStatusAdd, BookingStatusEdit, BookingStatusDelete} from "@/components/model/sc-modal";
 import { RepairClassCodeAdd, RepairClassCodeEdit, RepairClassCodeDelete } from "@/components/model/sc-modal";
 import { ServiceCatalogAdd, ServiceCatalogEdit, ServiceCatalogDelete } from "@/components/model/sc-modal";
+import { ServiceTypeAdd, ServiceTypeEdit, ServiceTypeDelete } from "@/components/model/sc-modal";
 import { OTCAdd, OTCEdit, OTCDelete} from "@/components/model/sc-modal";
 import { CrsAdd, CrsEdit, CrsDelete } from "@/components/model/sc-modal";
 import { NmuAdd, NmuEdit, NmuDelete} from "@/components/model/sc-modal";
@@ -45,6 +46,14 @@ import { ExportExcel } from "@/components/Export-Excel";
 
 import { Select, SelectItem, SelectTrigger, SelectContent, SelectGroup, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/context/auth-context";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 // import PDFButton from "./components/PDFButton";
 // import ServiceRequestPDF from "./components/service-request-form";
 export const Contact_table = () => {
@@ -251,7 +260,7 @@ export const Contact_table = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full">
+    <div className="grid p-6 grid-cols-1 w-full h-full rounded-2xl">
       <h2 className="mb-4 text-xl sm:text-2xl font-bold">📊 Contact Management</h2>
 
       {/* Search + Filters */}
@@ -298,124 +307,124 @@ export const Contact_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[70vh] w-full">
-        <table className="w-full border-collapse min-w-[1200px]">
-          <thead className="sticky z-10 top-0 bg-gray-100 text-xs sm:text-sm">
-            <tr>
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ContactID")}>
+      <div className="rounded-2xl shadow overflow-scroll max-h-[70vh] w-full">
+        <Table className="w-full border-collapse min-w-[1200px]">
+          <TableHeader className="sticky z-10 top-0 text-xs sm:text-sm">
+            <TableRow>
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ContactID")}>
                 Contact ID {getSortIcon("ContactID")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Company")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Company")}>
                 Company {getSortIcon("Company")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Salutation")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Salutation")}>
                 Salutation {getSortIcon("Salutation")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("FirstName")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("FirstName")}>
                 First Name {getSortIcon("FirstName")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("LastName")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("LastName")}>
                 Last Name {getSortIcon("LastName")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Email")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Email")}>
                 Email {getSortIcon("Email")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PreferredLanguage")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PreferredLanguage")}>
                 Preferred Language {getSortIcon("PreferredLanguage")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Phone")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Phone")}>
                 Phone {getSortIcon("Phone")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Mobile")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Mobile")}>
                 Mobile {getSortIcon("Mobile")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("WorkPhone")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("WorkPhone")}>
                 Work Phone {getSortIcon("WorkPhone")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("WorkExtension")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("WorkExtension")}>
                 Work Extension {getSortIcon("WorkExtension")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("OtherPhone")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("OtherPhone")}>
                 Other Phone {getSortIcon("OtherPhone")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("OtherExtension")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("OtherExtension")}>
                 Other Extension {getSortIcon("OtherExtension")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Fax")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Fax")}>
                 Fax {getSortIcon("Fax")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("AddressLine1")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("AddressLine1")}>
                 Address Line 1 {getSortIcon("AddressLine1")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("AddressLine2")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("AddressLine2")}>
                 Address Line 2 {getSortIcon("AddressLine2")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("City")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("City")}>
                 City {getSortIcon("City")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("StateProvince")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("StateProvince")}>
                 State/Province {getSortIcon("StateProvince")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Country")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Country")}>
                 Country {getSortIcon("Country")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ZipPostalCode")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ZipPostalCode")}>
                 Zip/Postal Code {getSortIcon("ZipPostalCode")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Name")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Name")}>
                 PIC Name {getSortIcon("PIC_Name")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Email")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Email")}>
                 PIC Email {getSortIcon("PIC_Email")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Phone")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Phone")}>
                 PIC Phone {getSortIcon("PIC_Phone")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-xs sm:text-sm">
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="text-xs sm:text-sm">
             {currentData.length > 0 ? (
               currentData.map((contact, index) => (
-                <tr key={contact.ContactID} className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                  <td className="p-3 border">{contact.ContactID}</td>
-                  <td className="p-3 border">{contact.Company}</td>
-                  <td className="p-3 border">{contact.Salutation}</td>
-                  <td className="p-3 border">{contact.FirstName}</td>
-                  <td className="p-3 border">{contact.LastName}</td>
-                  <td className="p-3 border">{contact.Email}</td>
-                  <td className="p-3 border">{contact.PreferredLanguage}</td>
-                  <td className="p-3 border">{contact.Phone}</td>
-                  <td className="p-3 border">{contact.Mobile}</td>
-                  <td className="p-3 border">{contact.WorkPhone}</td>
-                  <td className="p-3 border">{contact.WorkExtension}</td>
-                  <td className="p-3 border">{contact.OtherPhone}</td>
-                  <td className="p-3 border">{contact.OtherExtension}</td>
-                  <td className="p-3 border">{contact.Fax}</td>
-                  <td className="p-3 border">{contact.AddressLine1}</td>
-                  <td className="p-3 border">{contact.AddressLine2}</td>
-                  <td className="p-3 border">{contact.City}</td>
-                  <td className="p-3 border">{contact.StateProvince}</td>
-                  <td className="p-3 border">{contact.Country}</td>
-                  <td className="p-3 border">{contact.ZipPostalCode}</td>
-                  <td className="p-3 border">{contact.PIC_Name}</td>
-                  <td className="p-3 border">{contact.PIC_Email}</td>
-                  <td className="p-3 border">{contact.PIC_Phone}</td>
-                  <td className="flex items-center justify-center gap-2 p-3 border">
+                <TableRow key={contact.ContactID} className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
+                  <TableCell className="p-3 border">{contact.ContactID}</TableCell>
+                  <TableCell className="p-3 border">{contact.Company}</TableCell>
+                  <TableCell className="p-3 border">{contact.Salutation}</TableCell>
+                  <TableCell className="p-3 border">{contact.FirstName}</TableCell>
+                  <TableCell className="p-3 border">{contact.LastName}</TableCell>
+                  <TableCell className="p-3 border">{contact.Email}</TableCell>
+                  <TableCell className="p-3 border">{contact.PreferredLanguage}</TableCell>
+                  <TableCell className="p-3 border">{contact.Phone}</TableCell>
+                  <TableCell className="p-3 border">{contact.Mobile}</TableCell>
+                  <TableCell className="p-3 border">{contact.WorkPhone}</TableCell>
+                  <TableCell className="p-3 border">{contact.WorkExtension}</TableCell>
+                  <TableCell className="p-3 border">{contact.OtherPhone}</TableCell>
+                  <TableCell className="p-3 border">{contact.OtherExtension}</TableCell>
+                  <TableCell className="p-3 border">{contact.Fax}</TableCell>
+                  <TableCell className="p-3 border">{contact.AddressLine1}</TableCell>
+                  <TableCell className="p-3 border">{contact.AddressLine2}</TableCell>
+                  <TableCell className="p-3 border">{contact.City}</TableCell>
+                  <TableCell className="p-3 border">{contact.StateProvince}</TableCell>
+                  <TableCell className="p-3 border">{contact.Country}</TableCell>
+                  <TableCell className="p-3 border">{contact.ZipPostalCode}</TableCell>
+                  <TableCell className="p-3 border">{contact.PIC_Name}</TableCell>
+                  <TableCell className="p-3 border">{contact.PIC_Email}</TableCell>
+                  <TableCell className="p-3 border">{contact.PIC_Phone}</TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-3 border">
                     <ContactEdit contactID={contact.ContactID} onUpdate={fetchContacts} />
                     <ContactDelete contactID={contact.ContactID} />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="22" className="p-6 text-center text-gray-500">No data found 🚫</td>
-              </tr>
+              <TableRow>
+                <TableCell colSpan="22" className="p-6 text-center text-gray-500">No data found 🚫</TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Bottom controls */}
@@ -641,9 +650,9 @@ export const Company_table = () => {
     if (sortConfig.key !== key)
       return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
     return sortConfig.direction === "asc" ? (
-      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600 dark:text-sky-300" />
     ) : (
-      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600 dark:text-sky-300 " />
     );
   };
 
@@ -665,7 +674,7 @@ export const Company_table = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 grid grid-flow-row gap-4 text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900/60 rounded-2xl">
       <h2 className="mb-6 text-2xl font-bold">📊 Company Management</h2>
 
       {/* Kontainer Flexbox untuk pencarian dan tombol reset */}
@@ -674,7 +683,10 @@ export const Company_table = () => {
         <input
           type="text"
           placeholder="🔍 Search companies..."
-          className="w-full p-2 border rounded-lg shadow-sm sm:w-1/3 focus:ring-2 focus:ring-blue-400"
+          className="w-full p-2 text-sm border rounded-lg shadow-sm sm:w-1/3
+                     bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
+                     focus:outline-none focus:ring-2 focus:ring-sky-400
+                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500"
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
@@ -686,7 +698,10 @@ export const Company_table = () => {
       {/* Filters */}
       <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          className="p-2 text-sm border rounded-lg shadow-sm
+                     bg-white border-slate-300 text-slate-800
+                     focus:outline-none focus:ring-2 focus:ring-sky-400
+                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
           value={selectedCountry}
           onChange={(e) => {
             setSelectedCountry(e.target.value);
@@ -704,7 +719,11 @@ export const Company_table = () => {
           ))}
         </select>
         <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          className="p-2 text-sm border rounded-lg shadow-sm
+                     bg-white border-slate-300 text-slate-800
+                     focus:outline-none focus:ring-2 focus:ring-sky-400
+                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500
+                     disabled:opacity-60"
           value={selectedState}
           onChange={(e) => {
             setSelectedState(e.target.value);
@@ -722,7 +741,11 @@ export const Company_table = () => {
           ))}
         </select>
         <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          className="p-2 text-sm border rounded-lg shadow-sm
+                     bg-white border-slate-300 text-slate-800
+                     focus:outline-none focus:ring-2 focus:ring-sky-400
+                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500
+                     disabled:opacity-60"
           value={selectedCity}
           onChange={(e) => {
             setSelectedCity(e.target.value);
@@ -739,7 +762,11 @@ export const Company_table = () => {
           ))}
         </select>
         <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          className="p-2 text-sm border rounded-lg shadow-sm
+                     bg-white border-slate-300 text-slate-800
+                     focus:outline-none focus:ring-2 focus:ring-sky-400
+                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500
+                     disabled:opacity-60"
           value={selectedZipCode}
           onChange={(e) => {
             setSelectedZipCode(e.target.value);
@@ -758,7 +785,10 @@ export const Company_table = () => {
         <div className="flex items-center">
         <button
           onClick={handleResetFilters}
-          className="px-4 py-2 text-sm font-semibold text-white bg-gray-500 rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+          className="px-4 py-2 text-sm font-semibold text-white rounded-lg shadow-md
+                       bg-slate-500 hover:bg-slate-600
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-600 dark:hover:bg-slate-500 dark:focus:ring-sky-500"
         >
           Reset Filters
         </button>
@@ -768,97 +798,102 @@ export const Company_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className=" bg-white rounded-2xl shadow overflow-scroll max-h-150">
-        <table className="w-full relative border-collapse">
-          <thead className="sticky z-10 top-0 bg-gray-100">
-            <tr>
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+      <div className="relative w-full overflow-x-auto overflow-y-auto max-h-[75vh]
+                      bg-white/95 dark:bg-slate-900/90
+                      rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
+        <Table className="min-w-full border-collapse text-xs sm:text-sm">
+          <TableHeader className="sticky z-10 top-0 bg-gray-100/95 dark:bg-slate-800/95">
+            <TableRow className="text-slate-800 dark:text-slate-100">
+              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap">No</TableHead>
+              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Company")}>
-                Company {getSortIcon("Company")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+                Company  {getSortIcon("Company")}
+              </TableHead>
+              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Email")}>
                 Email {getSortIcon("Email")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("PrimaryPhone")}>
                 Primary Phone {getSortIcon("PrimaryPhone")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("WhatsappNo")}>
                 Whatsapp {getSortIcon("WhatsappNo")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("AddressLine1")}>
                 Address Line 1 {getSortIcon("AddressLine1")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("AddressLine2")}>
                 Address Line 2 {getSortIcon("AddressLine2")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("Country")}>
                 Country {getSortIcon("Country")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("StateProvince")}>
                 State/Province {getSortIcon("StateProvince")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("City")}>
                 City {getSortIcon("City")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
                   onClick={() => handleSort("ZipPostalCode")}>
                 Zip/Postal Code {getSortIcon("ZipPostalCode")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="">
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border border-slate-200 dark:border-slate-700 whitespace-nowrap">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="">
             {currentData.length > 0 ? (
               currentData.map((c, i) => (
-                <tr key={c.SiteAccountID}
-                    className={`hover:bg-blue-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <td className="p-3 text-center border">
+                <TableRow key={c.SiteAccountID}
+                    className={`hover:bg-blue-50/70 dark:hover:bg-slate-700 ${i % 2 === 0 ? "bg-white dark:bg-slate-900" : "bg-gray-50 dark:bg-slate-800/80"}`}>
+                  <TableCell className="p-3 text-center border border-slate-200 dark:border-slate-800">
                     {(currentPage - 1) * itemsPerPage + i + 1}
-                  </td>
-                  <td className="p-3 border">{c.Company}</td>
-                  <td className="p-3 border">{c.Email}</td>
-                  <td className="p-3 border">{c.PrimaryPhone}</td>
-                  <td className="p-3 border">{c.WhatsappNo}</td>
-                  <td className="p-3 border">{c.AddressLine1}</td>
-                  <td className="p-3 border">{c.AddressLine2}</td>
-                  <td className="p-3 border">{c.Country}</td>
-                  <td className="p-3 border">{c.StateProvince}</td>
-                  <td className="p-3 border">{c.City}</td>
-                  <td className="p-3 border">{c.ZipPostalCode}</td>
-                  <td className="flex items-center justify-center gap-2 p-3 border">
+                  </TableCell>
+                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Company}</TableCell>
+                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Email}</TableCell>
+                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.PrimaryPhone}</TableCell>
+                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.WhatsappNo}</TableCell>
+                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.AddressLine1}</TableCell>
+                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.AddressLine2}</TableCell>
+                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Country}</TableCell>
+                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.StateProvince}</TableCell>
+                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.City}</TableCell>
+                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.ZipPostalCode}</TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-3 border border-slate-200 dark:border-slate-800">
                     <CompanyEdit siteAccountId={c.SiteAccountID} onUpdate={fetchCompanies}/>
                     <CompanyDelete siteAccountId={c.SiteAccountID}
                                    isModalOpen={isModalOpen}
                                    setIsModalOpen={setIsModalOpen}
                                    onUpdate={fetchCompanies}/>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="12" className="p-6 text-center text-gray-500">No data found 🚫</td>
-              </tr>
+              <TableRow>
+                <TableCell colSpan="12" className="p-6 text-center text-sm text-gray-500 dark:text-slate-300">No data found 🚫</TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Bottom controls */}
-      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col w-full gap-4 mt-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Rows per page */}
         <div className="flex items-center gap-2">
           <span className="text-sm">Rows per page:</span>
           <select
-            className="p-1 text-sm border rounded-lg"
+            className="p-1 text-sm border rounded-lg
+                       bg-white border-slate-300 text-slate-800
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
             value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
             onChange={(e) => {
               const value = e.target.value;
@@ -880,7 +915,7 @@ export const Company_table = () => {
         </div>
 
         {/* Info total data */}
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-700 dark:text-slate-300">
           Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
           <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
           <b>{sortedData.length}</b> companies
@@ -890,7 +925,9 @@ export const Company_table = () => {
         {totalPages > 1 && (
           <div className="flex items-center gap-3">
             <button
-              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300
+                         disabled:opacity-50
+                         dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-100"
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
             >
@@ -902,7 +939,9 @@ export const Company_table = () => {
             </span>
 
             <button
-              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300
+                         disabled:opacity-50
+                         dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-100"
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
             >
@@ -915,13 +954,19 @@ export const Company_table = () => {
                 min="1"
                 max={totalPages}
                 placeholder="Go to"
-                className="w-16 p-1 text-sm text-center border rounded-lg"
+                className="w-16 p-1 text-sm text-center border rounded-lg
+                           bg-white border-slate-300 text-slate-800
+                           focus:outline-none focus:ring-2 focus:ring-sky-400
+                           dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
                 value={goToPageInput}
                 onChange={(e) => setGoToPageInput(e.target.value)}
               />
               <button
                 type="submit"
-                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                className="px-2 py-1 text-sm text-white rounded-lg
+                           bg-blue-500 hover:bg-blue-600
+                           focus:outline-none focus:ring-2 focus:ring-sky-400
+                           dark:bg-sky-600 dark:hover:bg-sky-500 dark:focus:ring-sky-500"
               >
                 Go
               </button>
@@ -1049,43 +1094,65 @@ export const Case_table = () => {
     return new Date(year, month - 1, day, hours, minutes, seconds);
   };
 
-  // 🔹 Sorting
-  const sortedData = useMemo(() => {
-    const sorted = [...filteredData];
-    if (sortConfig.key) {
-      sorted.sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
+const sortedData = useMemo(() => {
+  const sorted = [...filteredData];
+  if (sortConfig.key) {
+    sorted.sort((a, b) => {
+      let aVal, bVal;
 
-        if (aVal === null || aVal === undefined) aVal = "";
-        if (bVal === null || bVal === undefined) bVal = "";
+      // 🔹 Deteksi nested path manual
+      switch (sortConfig.key) {
+        case "CaseID_Manual":
+          aVal = a.caseinformation?.CaseID_Manual;
+          bVal = b.caseinformation?.CaseID_Manual;
+          break;
+        case "CaseID_Manual_Date":
+          aVal = a.caseinformation?.CaseID_Manual_Date;
+          bVal = b.caseinformation?.CaseID_Manual_Date;
+          break;
+        case "WarrantyType":
+          aVal = a.caseinformation?.otcCodeTable?.WarrantyCondition;
+          bVal = b.caseinformation?.otcCodeTable?.WarrantyCondition;
+          break;
+        case "WarrantyStatus":
+          aVal = a.caseinformation?.otcCodeTable?.Description;
+          bVal = b.caseinformation?.otcCodeTable?.Description;
+          break;
+        default:
+          aVal = a[sortConfig.key];
+          bVal = b[sortConfig.key];
+      }
 
-        // ✅ Khusus CreatedOn: parse manual
-        if (sortConfig.key === "CreatedOn") {
-          const dateA = parseCustomDate(aVal);
-          const dateB = parseCustomDate(bVal);
-          if (dateA && dateB) {
-            return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
-          }
+      if (aVal === null || aVal === undefined) aVal = "";
+      if (bVal === null || bVal === undefined) bVal = "";
+
+      // 🔹 Parse tanggal khusus
+      if (sortConfig.key === "CreatedOn") {
+        const dateA = parseCustomDate(aVal);
+        const dateB = parseCustomDate(bVal);
+        if (dateA && dateB) {
+          return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
         }
-        // coba numeric dulu
-        const numA = parseFloat(aVal);
-        const numB = parseFloat(bVal);
-        if (!isNaN(numA) && !isNaN(numB)) {
-          return sortConfig.direction === "asc" ? numA - numB : numB - numA;
-        }
+      }
 
-        // fallback string
-        if (typeof aVal === "string") aVal = aVal.toLowerCase();
-        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+      // 🔹 Coba numeric sort
+      const numA = parseFloat(aVal);
+      const numB = parseFloat(bVal);
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return sortConfig.direction === "asc" ? numA - numB : numB - numA;
+      }
 
-        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-      });
-    }
-    return sorted;
-  }, [filteredData, sortConfig]);
+      // 🔹 String fallback
+      if (typeof aVal === "string") aVal = aVal.toLowerCase();
+      if (typeof bVal === "string") bVal = bVal.toLowerCase();
+
+      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
+  return sorted;
+}, [filteredData, sortConfig]);
 
   // 🔹 Pagination
   const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
@@ -1121,9 +1188,9 @@ export const Case_table = () => {
   const getSortSymbol = (key) => {
     if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
     return sortConfig.direction === "asc" ? (
-      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600 dark:text-sky-300" />
     ) : (
-      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600 dark:text-sky-300" />
     );
   };
 
@@ -1169,8 +1236,9 @@ const EnumToLabel = {
 }
 
   return (
-    <div className="grid p-6 grid-cols-1 w-full h-full bg-gray-200 rounded-2xl">
-     
+    <div className="grid p-6 grid-cols-1 w-full rounded-2xl
+                    bg-slate-50 text-slate-800
+                    dark:bg-slate-900/60 dark:text-slate-100">  
       {/* <h2 className="mb-4 text-xl font-bold">ID Daily Aging Cases Javag FY</h2> */}
       <h2 className="mb-4 text-2xl font-semibold">View All The Case</h2>
 
@@ -1178,20 +1246,26 @@ const EnumToLabel = {
       <input
         type="text"
         placeholder="Search..."
-        className="w-1/3 p-2 mb-4 border rounded"
+        className="w-full sm:w-1/3 p-2 mb-4 text-sm border rounded-lg
+                   bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
+                   focus:outline-none focus:ring-2 focus:ring-sky-400
+                   dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-6 mb-4">
+      <div className="flex flex-wrap gap-6 mb-4 items-end">
         {/* HW */}
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Filter by HW</label>
           <select
             value={selectedHW}
             onChange={(e) => setSelectedHW(e.target.value)}
-            className="p-2 border rounded"
+            className="p-2 text-sm border rounded-lg
+                       bg-white border-slate-300 text-slate-800
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
           >
             {uniqueHW.map((hw) => (
               <option key={hw} value={hw}>
@@ -1206,7 +1280,10 @@ const EnumToLabel = {
           <select
             value={selectedProduct}
             onChange={(e) => setSelectedProduct(e.target.value)}
-            className="p-2 border rounded w-full"
+            className="p-2 text-sm border rounded-lg
+                       bg-white border-slate-300 text-slate-800
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
           >
             {uniqueProduct.map((prod) => (
               <option key={prod} value={prod}>
@@ -1221,7 +1298,10 @@ const EnumToLabel = {
           <select
             value={selectedCreatedName}
             onChange={(e) => setSelectedCreatedName(e.target.value)}
-            className="p-2 border rounded"
+            className="p-2 text-sm border rounded-lg
+                       bg-white border-slate-300 text-slate-800
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
           >
             {uniqueCreatedName.map((name) => (
               <option key={name} value={name}>
@@ -1236,7 +1316,10 @@ const EnumToLabel = {
           <select
             value={selectedOwner}
             onChange={(e) => setSelectedOwner(e.target.value)}
-            className="p-2 border rounded"
+            className="p-2 text-sm border rounded-lg
+                       bg-white border-slate-300 text-slate-800
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
           >
             {uniqueOwner.map((owner) => (
               <option key={owner} value={owner}>
@@ -1251,7 +1334,10 @@ const EnumToLabel = {
           <select
             value={selectedWorkGroup}
             onChange={(e) => setSelectedWorkGroup(e.target.value)}
-            className="p-2 border rounded"
+            className="p-2 text-sm border rounded-lg
+                       bg-white border-slate-300 text-slate-800
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
           >
             {uniqueWorkGroup.map((wg) => (
               <option key={wg} value={wg}>
@@ -1264,10 +1350,13 @@ const EnumToLabel = {
       <div className="flex flex-col">
         <label htmlFor="status" className="mb-2 text-sm font-medium">Toggle Status Of Case :</label>
         <Select defaultValue="All" value={openClose} onValueChange={setOpenClose}>
-          <SelectTrigger id="status">
+          <SelectTrigger id="status" className="w-48 p-2 text-sm border rounded-lg
+                         bg-white border-slate-300 text-slate-800
+                         focus:outline-none focus:ring-2 focus:ring-sky-400
+                         dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500">
             <SelectValue>{openClose}</SelectValue>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white dark:bg-slate-800 dark:text-slate-100">
             <SelectGroup>
               <SelectItem value="Open">Open Case Status</SelectItem>
               <SelectItem value="Close">Close Case Status</SelectItem>
@@ -1281,7 +1370,7 @@ const EnumToLabel = {
         <div className="flex  gap-2">
           <Button
             onClick={resetFilters}
-            className={"bg-blue-400 text-white hover:bg-blue-300 cursor-pointer"}
+            className={"bg-blue-500 text-white hover:bg-blue-400 dark:bg-sky-600 dark:hover:bg-sky-400"}
           >
             Reset Filters
           </Button>
@@ -1292,114 +1381,127 @@ const EnumToLabel = {
       </div>
 
       {/* Loading & Error */}
-      {loading && <p>Loading cases...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {loading && <p className="mb-2 text-sm text-gray-700 dark:text-slate-300">Loading cases...</p>}
+      {error && <p className="mb-2 text-sm text-red-500 dark:text-red-400">{error}</p>}
 
       {/* Table */}
-      <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-        <table className="min-w-full border border-gray-300 shadow-lg">
-          <thead className="sticky top-0 bg-gray-200 ">
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseID")}>
+      <div className="overflow-x-auto max-h-[500px] overflow-y-auto
+                      rounded-2xl border border-slate-200 shadow-md
+                      bg-white/95 dark:bg-slate-900/90 dark:border-slate-700">
+        <Table className="min-w-full border-collapse text-xs sm:text-sm">
+          <TableHeader className="sticky top-0 bg-gray-200/95 dark:bg-slate-800/95">
+            <TableRow className="text-sm text-gray-700 uppercase bg-gray-200 dark:bg-slate-800 dark:text-slate-100">
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseID")}>
                 Case ID {getSortSymbol("CaseID")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseID_Manual")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseID_Manual")}>
                 Case ID MANUAL {getSortSymbol("CaseID_Manual")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseSubject")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseSubject")}>
                 Case Subject {getSortSymbol("CaseSubject")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CustomerAccount")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CustomerAccount")}>
                 Customer Company {getSortSymbol("CustomerAccount")}
-              </th>
-               <th className="p-2 border cursor-pointer" onClick={() => handleSort("SerialNumber")}>
+              </TableHead>
+               <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("SerialNumber")}>
                 Serial No {getSortSymbol("SerialNumber")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductNumber")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("ProductNumber")}>
                 Product No {getSortSymbol("ProductNumber")}
-              </th>
-                <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductName")}>
+              </TableHead>
+                <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("ProductName")}>
                 Product Name {getSortSymbol("ProductName")}
-              </th>
-                <th className="p-2 border cursor-pointer" onClick={() => handleSort("WarrantyType")}>
+              </TableHead>
+                <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("WarrantyType")}>
                 Warranty Type {getSortSymbol("WarrantyType")}
-              </th>
-                <th className="p-2 border cursor-pointer" onClick={() => handleSort("WarrantyStatus")}>
+              </TableHead>
+                <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("WarrantyStatus")}>
                 Warranty Status {getSortSymbol("WarrantyStatus")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseType")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseType")}>
                 Case Type {getSortSymbol("CaseType")}
-              </th>
-                <th className="p-2 border cursor-pointer" onClick={() => handleSort("CreatedOn")}>
+              </TableHead>
+                <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CreatedOn")}>
                 Created On {getSortSymbol("CreatedOn")}
-              </th>
-                <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseID_Manual_Date")}>
+              </TableHead>
+                <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseID_Manual_Date")}>
                 Case ID Manual Date {getSortSymbol("CaseID_Manual_Date")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Primary")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("Primary")}>
                 Customer Name {getSortSymbol("Primary")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CreatedName")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CreatedName")}>
                 Created Name {getSortSymbol("CreatedName")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Owner")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("Owner")}>
                 Owner {getSortSymbol("Owner")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("CaseStatus")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer" onClick={() => handleSort("CaseStatus")}>
                 Case Status {getSortSymbol("CaseStatus")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.map((caseItem, index) => (
-              <tr key={caseItem.CaseID} className="text-center hover:bg-gray-100">
-                <td
-                  className="p-2 text-blue-500 border cursor-pointer hover:underline"
+              <TableRow key={caseItem.CaseID} className={cn(
+                  "text-center hover:bg-blue-50/70 dark:hover:bg-slate-700",
+                  index % 2 === 0
+                    ? "bg-white dark:bg-slate-900"
+                    : "bg-gray-50 dark:bg-slate-800/80"
+                 )}
+              >
+                <TableCell
+                  className="p-2 border border-slate-200 dark:border-slate-800 text-blue-600 dark:text-sky-300 cursor-pointer hover:underline"
                   onClick={() => navigate(`/app/case/${caseItem.CaseID}`)}
                 >
                   {caseItem.CaseID}
-                </td>
-                <td className="p-2 border">{caseItem.caseinformation?.CaseID_Manual}</td>
-                <td className="p-2 border">{caseItem.CaseSubject}</td>
-                <td className="p-2 border">{caseItem.CustomerAccount}</td>
-                <td className="p-2 border">{caseItem.SerialNumber}</td>
-                <td className="p-2 border">{caseItem.ProductNumber}</td>
-                <td className="p-2 border">{caseItem.ProductName}</td>
-                <td className="p-2 border">{caseItem.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition}</td>
-                <td className="p-2 border">{caseItem.caseinformation?.asset_information?.WarrantyOTCCode?.Description}</td>
-                <td className="p-2 border">{caseItem.caseinformation?.CaseType}</td>
-                <td className="p-2 border">{caseItem.CreatedOn}</td>
-                <td className="p-2 border">{caseItem.caseinformation?.CaseID_Manual_Date ? new Date(caseItem.caseinformation?.CaseID_Manual_Date).toLocaleString() : "N/A"}</td>
-                <td className="p-2 border">{caseItem.Primary}</td>
-                <td className="p-2 border">{caseItem.CreatedName}</td>
-                <td className="p-2 border">{caseItem.Owner}</td>
-                <td
+                </TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.CaseID_Manual}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CaseSubject}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CustomerAccount}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.SerialNumber}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.ProductNumber}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.ProductName}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.asset_information?.WarrantyOTCCode?.Description}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.CaseType}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CreatedOn}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.caseinformation?.CaseID_Manual_Date ? new Date(caseItem.caseinformation?.CaseID_Manual_Date).toLocaleString() : "N/A"}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.Primary}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.CreatedName}</TableCell>
+                <TableCell className="p-2 border border-slate-200 dark:border-slate-800">{caseItem.Owner}</TableCell>
+                <TableCell
                   className={cn(
-                    "bg-emerald-300",
-                    caseItem.CaseStatus === "Close"
-                      ? "bg-red-300"
-                      : caseItem.CaseStatus === "InActive"
-                        ? "bg-sky-300"
-                        : ""
+                    "p-2 border border-slate-200 dark:border-slate-800",
+                    "text-xs font-semibold text-slate-800 dark:text-slate-900",
+                    "rounded-full text-center",
+                    "bg-emerald-300/80 border-emerald-400",
+                    caseItem.CaseStatus === "Close" &&
+                      "bg-red-300/80 border-red-400",
+                    caseItem.CaseStatus === "InActive" &&
+                      "bg-sky-300/80 border-sky-400"
                   )}
                 >
                  {EnumToLabel[caseItem.CaseStatus]}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
         {sortedData.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">No cases found.</p>
+          <p className="mt-4 text-center text-gray-500 dark:text-slate-300">No cases found.</p>
         )}
       </div>
       {/* Bottom controls */}
       <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
         {/* Rows per page */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-sm">
           <span className="text-sm">Rows per page:</span>
           <select
-            className="p-1 text-sm border rounded-lg"
+            className="p-1 text-sm border rounded-lg
+                       bg-white border-slate-300 text-slate-800
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
             value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
             onChange={(e) => {
               const value = e.target.value;
@@ -1421,7 +1523,7 @@ const EnumToLabel = {
         </div>
 
         {/* Info total data */}
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-700 dark:text-slate-300">
           Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
           <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
           <b>{sortedData.length}</b> cases
@@ -1431,7 +1533,9 @@ const EnumToLabel = {
         {totalPages > 1 && (
           <div className="flex items-center gap-3">
             <button
-              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300
+                         disabled:opacity-50
+                         dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-100"
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
             >
@@ -1443,7 +1547,9 @@ const EnumToLabel = {
             </span>
 
             <button
-              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300
+                         disabled:opacity-50
+                         dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-100"
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
             >
@@ -1456,13 +1562,19 @@ const EnumToLabel = {
                 min="1"
                 max={totalPages}
                 placeholder="Go to"
-                className="w-16 p-1 text-sm text-center border rounded-lg"
+                className="w-16 p-1 text-sm text-center border rounded-lg
+                           bg-white border-slate-300 text-slate-800
+                           focus:outline-none focus:ring-2 focus:ring-sky-400
+                           dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
                 value={goToPageInput}
                 onChange={(e) => setGoToPageInput(e.target.value)}
               />
               <button
                 type="submit"
-                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                className="px-2 py-1 text-sm text-white rounded-lg
+                           bg-blue-500 hover:bg-blue-600
+                           focus:outline-none focus:ring-2 focus:ring-sky-400
+                           dark:bg-sky-600 dark:hover:bg-sky-500 dark:focus:ring-sky-500"
               >
                 Go
               </button>
@@ -1486,9 +1598,8 @@ export const Assets_table = () => {
   const [goToPageInput, setGoToPageInput] = useState("");
 
   // dropdown filters
-  const [selectedProductName, setSelectedProductName] = useState("");
-  const [selectedProductNumber, setSelectedProductNumber] = useState("");
   const [selectedProductLine, setSelectedProductLine] = useState("");
+  const [selectedWarrantyStatus, setSelectedWarrantyStatus] = useState("");
 
   // sorting
   const [sortConfig, setSortConfig] = useState({ key: "AssetID", direction: "asc" });
@@ -1547,44 +1658,53 @@ export const Assets_table = () => {
   }, []);
 
   // unique filters
-  const uniqueProductNames = useMemo(
-    () => ["", ...new Set(assets.map(a => a?.product_information?.ProductName).filter(Boolean).sort())],
-    [assets]
-  );
-  const uniqueProductNumbers = useMemo(
-    () => ["", ...new Set(assets.map(a => a?.ProductNumber).filter(Boolean).sort())],
-    [assets]
-  );
   const uniqueProductLines = useMemo(
     () => ["", ...new Set(assets.map(a => a?.product_information?.ProductLine).filter(Boolean).sort())],
     [assets]
   );
+  const uniqueWarrantyStatus = useMemo(
+    () => ["", ...new Set(assets.map(a => a?.Warranty_Status).filter(Boolean).sort())],
+    [assets]
+  );
 
-  // filtering (search + dropdowns)
+
   useEffect(() => {
-    const q = debouncedSearchTerm.trim().toLowerCase();
-    const next = assets.filter(a => {
-      const pn = a?.product_information?.ProductName ?? "";
-      const pl = a?.product_information?.ProductLine ?? "";
-      const num = a?.ProductNumber ?? "";
+  const q = debouncedSearchTerm.trim().toLowerCase();
 
-      const fName   = !selectedProductName  || pn === selectedProductName;
-      const fNumber = !selectedProductNumber|| num === selectedProductNumber;
-      const fLine   = !selectedProductLine  || pl === selectedProductLine;
-      if (!(fName && fNumber && fLine)) return false;
+  const next = assets.filter(a => {
+    const productLine = a?.product_information?.ProductLine ?? "";
+    const warranty = a?.Warranty_Status ?? "";
 
-      if (!q) return true;
-      const haystack = [a?.AssetID, a?.SerialNumber, a?.SiteAccountID, a?.ContactID,       a?.product_information?.ProductName,
-      a?.product_information?.ProductLine,
+    // FILTER: Product Line
+    const fLine = !selectedProductLine || productLine === selectedProductLine;
+
+    // FILTER: Warranty
+    const fWarranty = !selectedWarrantyStatus || warranty === selectedWarrantyStatus;
+
+    if (!(fLine && fWarranty)) return false;
+
+    // SEARCH
+    if (!q) return true;
+
+    const haystack = [
+      a?.AssetID,
+      a?.SerialNumber,
       a?.ProductNumber,
-      a?.site_account?.Company, `${a?.contact_information?.FirstName ?? ""} ${a?.contact_information?.LastName ?? ""}` ,pn, pl, num, a?.Warranty_Status, a?.EOW_Date ? new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(a.EOW_Date))
-        : ""]
-        .map(v => (v ?? "").toString().toLowerCase()).join(" ");
-      return haystack.includes(q);
-    });
+      productLine,
+      warranty,
+      a?.site_account?.Company,
+      `${a?.contact_information?.FirstName ?? ""} ${a?.contact_information?.LastName ?? ""}`,
+    ]
+      .map(v => (v ?? "").toString().toLowerCase())
+      .join(" ");
+
+    return haystack.includes(q);
+  });
+
     setFilteredAssets(next);
     setCurrentPage(1);
-  }, [debouncedSearchTerm, assets, selectedProductName, selectedProductNumber, selectedProductLine]);
+  }, [debouncedSearchTerm, assets, selectedProductLine, selectedWarrantyStatus]);
+
 
   // sorting function
   const sortedAssets = useMemo(() => {
@@ -1649,8 +1769,8 @@ export const Assets_table = () => {
 
   const renderSortIcon = (key) => {
     if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
-    if (sortConfig.direction === "asc") return <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />;
-    return <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />;
+    if (sortConfig.direction === "asc") return <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600 dark:text-sky-300" />;
+    return <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600 dark:text-sky-300" />;
   };
 
   const handleGoToPage = (e) => {
@@ -1661,119 +1781,147 @@ export const Assets_table = () => {
   };
 
   const resetFilters = () => {
-    setSelectedProductName("");
-    setSelectedProductNumber("");
     setSelectedProductLine("");
+    setSelectedWarrantyStatus("");
     setSearchTerm("");
     setCurrentPage(1);
     setSortConfig({ key: "AssetID", direction: "asc" });
   };
 
   return (
-    <div className="p-6">
-      <h2 className="mb-6 text-2xl font-bold">📦 Asset Information</h2>
+    <div className="grid p-6 grid-flow-row gap-4 text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900/60 rounded-2xl">
+      <h2 className="mb-2 text-2xl font-bold">📦 Asset Information</h2>
 
       {/* Search + Reset */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
+      <div className="flex flex-wrap items-center gap-2 mb-2">
         <input
           type="text"
           placeholder="🔍 Search asset..."
-          className="p-2 border border-gray-300 rounded min-w-[300px]"
+          className="p-2 text-sm border rounded min-w-[280px]
+                     bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
+                     focus:outline-none focus:ring-2 focus:ring-sky-400
+                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        <select className="p-2 border rounded" value={selectedProductName} onChange={(e) => setSelectedProductName(e.target.value)}>
-          <option value="">Filter by Product Name</option>
-          {uniqueProductNames.map(v => <option key={v} value={v}>{v || "—"}</option>)}
-        </select>
-        <select className="p-2 border rounded" value={selectedProductNumber} onChange={(e) => setSelectedProductNumber(e.target.value)}>
-          <option value="">Filter by Product Number</option>
-          {uniqueProductNumbers.map(v => <option key={v} value={v}>{v || "—"}</option>)}
-        </select>
-        <select className="p-2 border rounded" value={selectedProductLine} onChange={(e) => setSelectedProductLine(e.target.value)}>
+      <div className="flex flex-wrap gap-2 mb-4">
+        
+        {/* Product Line */}
+        <select 
+          className="p-2 text-sm border rounded min-w-[280px]
+                     bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
+                     focus:outline-none focus:ring-2 focus:ring-sky-400
+                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500" 
+          value={selectedProductLine} 
+          onChange={(e) => setSelectedProductLine(e.target.value)}
+        >
           <option value="">Filter by Product Line</option>
-          {uniqueProductLines.map(v => <option key={v} value={v}>{v || "—"}</option>)}
+          {uniqueProductLines.map(v => (
+            <option key={v} value={v}>{v || "—"}</option>
+          ))}
         </select>
-          <button
+
+        {/* Warranty Status */}
+        <select 
+          className="p-2 text-sm border rounded min-w-[280px]
+                     bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
+                     focus:outline-none focus:ring-2 focus:ring-sky-400
+                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500" 
+          value={selectedWarrantyStatus} 
+          onChange={(e) => setSelectedWarrantyStatus(e.target.value)}
+        >
+          <option value="">Filter by Warranty Status</option>
+          {uniqueWarrantyStatus.map(v => (
+            <option key={v} value={v}>{v || "—"}</option>
+          ))}
+        </select>
+
+        <button
           onClick={resetFilters}
-          className="px-3 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
-        >Reset Filter</button>
+          className="px-3 py-2 text-sm font-semibold text-white rounded shadow-md
+                     bg-slate-500 hover:bg-slate-600
+                     focus:outline-none focus:ring-2 focus:ring-sky-400
+                     dark:bg-slate-600 dark:hover:bg-slate-500 dark:focus:ring-sky-500"
+        >
+          Reset Filter
+        </button>
       </div>
 
-      {error && <p className="mb-2 text-red-500">{error}</p>}
+      {error && <p className="mb-2 text-red-500 dark:text-red-400">{error}</p>}
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-150">
-        <table className="w-full relative border-collapse">
-          <thead className="sticky top-0 z-10 bg-gray-100">
-            <tr>
-              <th className="p-2 border">No</th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("AssetID")}>
+      <div className="relative w-full overflow-x-auto overflow-y-auto max-h-[75vh]
+                      bg-white/95 dark:bg-slate-900/90
+                      rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
+        <Table className="w-full border-collapse text-xs sm:text-sm">
+          <TableHeader className="sticky top-0 z-10 bg-gray-100/95 dark:bg-slate-800/95">
+            <TableRow className="text-slate-800 dark:text-slate-100">
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 text-center">No</TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("AssetID")}>
                 Asset ID {renderSortIcon("AssetID")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("SerialNumber")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("SerialNumber")}>
                 Serial Number {renderSortIcon("SerialNumber")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductName")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("ProductName")}>
                 Product Name {renderSortIcon("ProductName")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductNumber")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("ProductNumber")}>
                 Product Number {renderSortIcon("ProductNumber")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ProductLine")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("ProductLine")}>
                 Product Line {renderSortIcon("ProductLine")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("SiteAccountID")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("SiteAccountID")}>
                 Site Account ID {renderSortIcon("SiteAccountID")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("ContactID")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("ContactID")}>
                 Contact ID {renderSortIcon("ContactID")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("Warranty_Status")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("Warranty_Status")}>
                 Warranty Status {renderSortIcon("Warranty_Status")}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("EOW_Date")}>
+              </TableHead>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("EOW_Date")}>
                 EOW Date {renderSortIcon("EOW_Date")}
-              </th>
-              <th className="p-2 border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-2 border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {loading ? (
-              <tr><td colSpan="9" className="p-4 text-center">Loading...</td></tr>
+              <TableRow><TableCell colSpan="9" className="p-4 text-sm text-center text-gray-600 dark:text-slate-300">Loading...</TableCell></TableRow>
             ) : currentData.length > 0 ? (
               currentData.map((a, idx) => (
-                <tr key={a.AssetID} className="hover:bg-gray-50">
-                  <td className="p-2 text-center border">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                  <td className="p-2 border">{a.AssetID}</td>
-                  <td className="p-2 border">{a.SerialNumber}</td>
-                  <td className="p-2 border">{a?.product_information?.ProductName}</td>
-                  <td className="p-2 border">{a?.ProductNumber}</td>
-                  <td className="p-2 border">{a?.product_information?.ProductLine}</td>
-                  <td className="p-2 border">{a?.site_account?.Company}</td>
-                  <td className="p-2 border">{a?.contact_information?.FirstName} {a?.contact_information?.LastName}</td>
-                  <td className="p-2 border">{a?.Warranty_Status}</td>
-                  <td className="p-2 border">
+                <TableRow key={a.AssetID} className={`hover:bg-blue-50 ${idx % 2 === 0 ? "bg-white dark:bg-slate-900" : "bg-gray-50 dark:bg-slate-800/80"}`}>
+                  <TableCell className="p-2 text-center border">{(currentPage - 1) * itemsPerPage + idx + 1}</TableCell>
+                  <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{a.AssetID}</TableCell>
+                  <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{a.SerialNumber}</TableCell>
+                  <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{a?.product_information?.ProductName}</TableCell>
+                  <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{a?.ProductNumber}</TableCell>
+                  <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{a?.product_information?.ProductLine}</TableCell>
+                  <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{a?.site_account?.Company}</TableCell>
+                  <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{a?.contact_information?.FirstName} {a?.contact_information?.LastName}</TableCell>
+                  <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{a?.Warranty_Status}</TableCell>
+                  <TableCell className="p-2 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">
                     {a?.EOW_Date
                       ? new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(a.EOW_Date))
                       : "—"}
-                  </td>
-                  <td className="flex p-2 gap-2 border">
+                  </TableCell>
+                  <TableCell className="flex p-2 gap-2 border border-slate-200 dark:border-slate-800 justify-center">
                     <AssetEdit assetId={a.AssetID} onUpdate={fetchAllAssets} />
                     <AssetDelete assetId={a.AssetID} />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr><td colSpan="9" className="p-4 text-center text-gray-500">No data found 🚫</td></tr>
+              <TableRow><TableCell colSpan="9" className="p-4 text-center text-gray-500 dark:text-slate-300">No data found 🚫</TableCell></TableRow>
             )}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </div> 
 
       {/* Bottom controls */}
       <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
@@ -1781,7 +1929,10 @@ export const Assets_table = () => {
         <div className="flex items-center gap-2">
           <span className="text-sm">Rows per page:</span>
           <select
-            className="p-1 text-sm border rounded-lg"
+            className="p-1 text-sm border rounded-lg
+                       bg-white border-slate-300 text-slate-800
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
             value={itemsPerPage === sortedAssets.length ? "all" : itemsPerPage}
             onChange={(e) => {
               const value = e.target.value;
@@ -1803,7 +1954,7 @@ export const Assets_table = () => {
         </div>
 
         {/* Info */}
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-700 dark:text-slate-300">
           Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> – {" "}
           <b>{Math.min(currentPage * itemsPerPage, sortedAssets.length)}</b> of {" "}
           <b>{sortedAssets.length}</b> assets
@@ -1813,15 +1964,19 @@ export const Assets_table = () => {
         {totalPages > 1 && (
           <div className="flex items-center gap-3">
             <button
-              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300
+                         disabled:opacity-50
+                         dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-100"
               onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
             >⬅ Prev</button>
 
-            <span className="px-3 py-1 text-sm">Page <b>{currentPage}</b> of {totalPages}</span>
+            <span className="px-3 py-1">Page <b>{currentPage}</b> of {totalPages}</span>
 
             <button
-              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300
+                         disabled:opacity-50
+                         dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-100"
               onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
             >Next ➡</button>
@@ -1832,13 +1987,19 @@ export const Assets_table = () => {
                 min="1"
                 max={totalPages}
                 placeholder="Go to"
-                className="w-16 p-1 text-sm text-center border rounded-lg"
+                className="w-16 p-1 text-sm text-center border rounded-lg
+                           bg-white border-slate-300 text-slate-800
+                           focus:outline-none focus:ring-2 focus:ring-sky-400
+                           dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
                 value={goToPageInput}
                 onChange={(e) => setGoToPageInput(e.target.value)}
               />
               <button
                 type="submit"
-                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                className="px-2 py-1 text-sm text-white rounded-lg
+                           bg-blue-500 hover:bg-blue-600
+                           focus:outline-none focus:ring-2 focus:ring-sky-400
+                           dark:bg-sky-600 dark:hover:bg-sky-500 dark:focus:ring-sky-500"
               >Go</button>
             </form>
           </div>
@@ -1849,355 +2010,501 @@ export const Assets_table = () => {
 };
 
 export const Product_table = () => {
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [filterSource, setFilterSource] = useState([]); // sumber unik filter
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // search + pagination
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [goToPageInput, setGoToPageInput] = useState("");
+  // search + pagination
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [goToPageInput, setGoToPageInput] = useState("");
 
-  // filters
-  const [selectedLine, setSelectedLine] = useState("");
-  const [selectedType, setSelectedType] = useState("");
-  const [selectedGroup, setSelectedGroup] = useState("");
-  const [selectedTower, setSelectedTower] = useState("");
+  // filters
+  const [selectedLine, setSelectedLine] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+  const [selectedGroup, setSelectedGroup] = useState("");
+  const [selectedTower, setSelectedTower] = useState("");
 
-  // modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // sorting → default ProductNumber ASC
-  const [sortConfig, setSortConfig] = useState({ key: "ProductNumber", direction: "asc" });
+  // sorting → default ProductNumber ASC
+  const [sortConfig, setSortConfig] = useState({
+    key: "ProductNumber",
+    direction: "asc",
+  });
 
-  const handleSort = (key) => {
-    setSortConfig((prev) => {
-      if (prev.key === key) {
-        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
-      }
-      return { key, direction: "asc" };
-    });
-  };
+  // total info dari server
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
-  const getSortIcon = (key) => {
-    if (sortConfig.key !== key) return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
-    return sortConfig.direction === "asc"
-      ? <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
-      : <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />;
-  };
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+  };
 
-  // debounce search
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1);
-    }, 500);
-    return () => clearTimeout(t);
-  }, [searchTerm]);
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) {
+      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+    }
 
-  // fetch ALL products once
-  const fetchAllProducts = async () => {
-    Swal.fire({
-      title: "Memuat Data Produk...",
-      text: "Mohon tunggu sebentar",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => Swal.showLoading(),
-    });
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+    );
+  };
 
-    setLoading(true);
-    setError(null);
+  // debounce search
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
 
-    try {
-      const LIMIT = 1000;
-      const first = await ApiCustomer.get(`/api/product-information?page=1&limit=${LIMIT}`);
-      const firstData = first?.data?.data ?? [];
-      const totalPagesFromApi = first?.data?.totalPages ?? 1;
+    return () => clearTimeout(t);
+  }, [searchTerm]);
 
-      let all = [...firstData];
-      for (let p = 2; p <= totalPagesFromApi; p++) {
-        const res = await ApiCustomer.get(`/api/product-information?page=${p}&limit=${LIMIT}`);
-        all = all.concat(res?.data?.data ?? []);
-      }
+  // Fetch data utama (per page) dari server
+  const fetchProducts = async (pageToLoad = 1) => {
+    setLoading(true);
+    setError(null);
 
-      if (totalPagesFromApi === 1 && Array.isArray(first?.data) && !first?.data?.data) {
-        all = first.data;
-      }
+    try {
+      const res = await ApiCustomer.get("/api/product-information", {
+        params: {
+          page: pageToLoad,
+          limit: itemsPerPage,
+          search: debouncedSearchTerm,
+          line: selectedLine,
+          type: selectedType,
+          group: selectedGroup,
+          tower: selectedTower,
+        },
+      });
 
-      setProducts(all);
-      setFilteredProducts(all);
-    } catch (err) {
-      console.error("Error fetching product data:", err);
-      setError("Failed to fetch data");
-    } finally {
-      setLoading(false);
-      Swal.close();
-    }
-  };
+      const data = res?.data?.data ?? [];
+      const totalPagesFromApi = res?.data?.totalPages ?? 1;
+      const totalCountFromApi = res?.data?.totalCount ?? data.length;
 
-  useEffect(() => {
-    fetchAllProducts();
-  }, []);
+      setProducts(data);
+      setTotalPages(totalPagesFromApi);
+      setTotalCount(totalCountFromApi);
+      setCurrentPage(pageToLoad);
+    } catch (err) {
+      console.error("Error fetching product data:", err);
+      setError("Failed to fetch data");
+      setProducts([]);
+      setTotalPages(1);
+      setTotalCount(0);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // unique filters
-  const uniqueLines = useMemo(() => ["", ...new Set(products.map(p => p?.ProductLine).filter(Boolean)).values()].sort(), [products]);
-  const uniqueTypes = useMemo(() => ["", ...new Set(products.map(p => p?.product_type?.ProductType).filter(Boolean)).values()].sort(), [products]);
-  const uniqueGroups = useMemo(() => ["", ...new Set(products.map(p => p?.product_type?.ProductGroup).filter(Boolean)).values()].sort(), [products]);
-  const uniqueTowers = useMemo(() => ["", ...new Set(products.map(p => p?.product_type?.ProductTower).filter(Boolean)).values()].sort(), [products]);
+  // Fetch sumber filter (sekali saja, limit besar tapi 1x request)
+  const fetchFilterSource = async () => {
+    try {
+      const res = await ApiCustomer.get("/api/product-information", {
+        params: {
+          page: 1,
+          limit: 1000, // ambil max 1000 pertama sebagai sumber filter
+        },
+      });
 
-  // apply filters + search
-  useEffect(() => {
-    const q = debouncedSearchTerm.trim().toLowerCase();
+      const data = res?.data?.data ?? [];
+      setFilterSource(data);
+    } catch (err) {
+      console.error("Error fetching filter source:", err);
+      // kalau gagal, fallback: pakai products sebagai source filter
+      setFilterSource([]);
+    }
+  };
 
-    const next = products.filter(p => {
-      const line = p?.ProductLine ?? "";
-      const name = p?.ProductName ?? "";
-      const number = p?.ProductNumber ?? "";
-      const type = p?.product_type?.ProductType ?? "";
-      const group = p?.product_type?.ProductGroup ?? "";
-      const tower = p?.product_type?.ProductTower ?? "";
+  // Initial load
+  useEffect(() => {
+    fetchProducts(1);
+    fetchFilterSource();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      const fLine  = !selectedLine  || line === selectedLine;
-      const fType  = !selectedType  || type === selectedType;
-      const fGroup = !selectedGroup || group === selectedGroup;
-      const fTower = !selectedTower || tower === selectedTower;
-      if (!(fLine && fType && fGroup && fTower)) return false;
+  // Reload kalau search / filter / itemsPerPage berubah
+  useEffect(() => {
+    // Reset ke page 1 setiap ada perubahan filter / search / limit
+    fetchProducts(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchTerm, selectedLine, selectedType, selectedGroup, selectedTower, itemsPerPage]);
 
-      if (!q) return true;
-      const haystack = [number, name, line, type, group, tower].join(" ").toLowerCase();
-      return haystack.includes(q);
-    });
+  // Sumber untuk unique values filter (kalau kosong, pakai products page sekarang)
+  const filterBase = filterSource.length > 0 ? filterSource : products;
 
-    setFilteredProducts(next);
-    setCurrentPage(1);
-  }, [products, debouncedSearchTerm, selectedLine, selectedType, selectedGroup, selectedTower]);
+  // unique filters
+  const uniqueLines = useMemo(() => {
+    const set = new Set(
+      filterBase
+        .map((p) => p?.ProductLine)
+        .filter((v) => v !== null && v !== undefined && v !== "")
+    );
+    return ["", ...Array.from(set)].sort();
+  }, [filterBase]);
 
-  // sorting applied here
-  const sortedProducts = useMemo(() => {
-    let sortable = [...filteredProducts];
-    if (sortConfig.key) {
-      sortable.sort((a, b) => {
-        const aVal = a?.[sortConfig.key] ?? a?.product_type?.[sortConfig.key] ?? "";
-        const bVal = b?.[sortConfig.key] ?? b?.product_type?.[sortConfig.key] ?? "";
+  const uniqueTypes = useMemo(() => {
+    const set = new Set(
+      filterBase
+        .map((p) => p?.product_type?.ProductType)
+        .filter((v) => v !== null && v !== undefined && v !== "")
+    );
+    return ["", ...Array.from(set)].sort();
+  }, [filterBase]);
 
-        if (!isNaN(aVal) && !isNaN(bVal)) {
-          return sortConfig.direction === "asc" ? aVal - bVal : bVal - aVal;
-        }
-        return sortConfig.direction === "asc"
-          ? String(aVal).localeCompare(String(bVal))
-          : String(bVal).localeCompare(String(aVal));
-      });
-    }
-    return sortable;
-  }, [filteredProducts, sortConfig]);
+  const uniqueGroups = useMemo(() => {
+    const set = new Set(
+      filterBase
+        .map((p) => p?.product_type?.ProductGroup)
+        .filter((v) => v !== null && v !== undefined && v !== "")
+    );
+    return ["", ...Array.from(set)].sort();
+  }, [filterBase]);
 
-  // pagination
-  const totalPagesLocal = Math.max(1, Math.ceil(sortedProducts.length / itemsPerPage));
-  const currentData = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return sortedProducts.slice(start, start + itemsPerPage);
-  }, [sortedProducts, currentPage, itemsPerPage]);
+  const uniqueTowers = useMemo(() => {
+    const set = new Set(
+      filterBase
+        .map((p) => p?.product_type?.ProductTower)
+        .filter((v) => v !== null && v !== undefined && v !== "")
+    );
+    return ["", ...Array.from(set)].sort();
+  }, [filterBase]);
 
-  const resetFilters = () => {
-    setSelectedLine("");
-    setSelectedType("");
-    setSelectedGroup("");
-    setSelectedTower("");
-    setSearchTerm("");
-    setCurrentPage(1);
-    setItemsPerPage(10);
-  };
+  // Sorting hanya untuk data 1 page (di client)
+  const sortedProducts = useMemo(() => {
+    const sortable = [...products];
 
-  const handleGoToPage = (e) => {
-    e.preventDefault();
-    const page = Number(goToPageInput);
-    if (page >= 1 && page <= totalPagesLocal) setCurrentPage(page);
-    setGoToPageInput("");
-  };
+    if (sortConfig.key) {
+      sortable.sort((a, b) => {
+        const aVal =
+          (a && a[sortConfig.key]) ||
+          (a && a.product_type && a.product_type[sortConfig.key]) ||
+          "";
+        const bVal =
+          (b && b[sortConfig.key]) ||
+          (b && b.product_type && b.product_type[sortConfig.key]) ||
+          "";
 
-  return (
-    <div className="p-6">
-      <h2 className="mb-6 text-2xl font-bold">📊 Product Management</h2>
+        const aNum = Number(aVal);
+        const bNum = Number(bVal);
 
-      {/*search + reset */}
+        if (!Number.isNaN(aNum) && !Number.isNaN(bNum)) {
+          return sortConfig.direction === "asc" ? aNum - bNum : bNum - aNum;
+        }
+
+        return sortConfig.direction === "asc"
+          ? String(aVal).localeCompare(String(bVal))
+          : String(bVal).localeCompare(String(aVal));
+      });
+    }
+
+    return sortable;
+  }, [products, sortConfig]);
+
+  const hasData = sortedProducts.length > 0;
+
+  const resetFilters = () => {
+    setSelectedLine("");
+    setSelectedType("");
+    setSelectedGroup("");
+    setSelectedTower("");
+    setSearchTerm("");
+    setCurrentPage(1);
+    // itemsPerPage biarkan, user mungkin sudah pilih
+  };
+
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) {
+      fetchProducts(page);
+    }
+    setGoToPageInput("");
+  };
+
+  const startIndex = totalCount > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
+  const endIndex = totalCount > 0 ? Math.min(currentPage * itemsPerPage, totalCount) : 0;
+
+  return (
+    <div className="p-6 grid grid-flow-row">
+      <h2 className="mb-6 text-2xl font-bold">📊 Product Management</h2>
+
+      {/* search + add */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
-          <input
-          type="text"
-          placeholder="🔍 Search products..."
-          className=" p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <ProductAdd onAdded={fetchAllProducts} />
+        <input
+          type="text"
+          placeholder="🔍 Search products..."
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <ProductAdd onAdded={() => fetchProducts(currentPage)} />
       </div>
-      {/* Filters */}
-      <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-       <select className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400" value={selectedLine} onChange={(e) => {setSelectedLine(e.target.value); setCurrentPage(1)}}>
-          <option value="">All Product Line</option>
-          {uniqueLines.map(v => <option key={v} value={v}>{v || "—"}</option>)}
-        </select>
-        <select className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400" value={selectedType} onChange={(e) => {setSelectedType(e.target.value); setCurrentPage(1)}}>
-          <option value="">All Product Type</option>
-          {uniqueTypes.map(v => <option key={v} value={v}>{v || "—"}</option>)}
-        </select>
-        <select className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400" value={selectedGroup} onChange={(e) => {setSelectedGroup(e.target.value); setCurrentPage(1)}}>
-          <option value="">All Product Group</option>
-          {uniqueGroups.map(v => <option key={v} value={v}>{v || "—"}</option>)}
-        </select>
-        <select className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400" value={selectedTower} onChange={(e) => {setSelectedTower(e.target.value); setCurrentPage(1)}}>
-          <option value="">All Product Tower</option>
-          {uniqueTowers.map(v => <option key={v} value={v}>{v || "—"}</option>)}
-        </select>
-        <button onClick={resetFilters} className="px-3 py-2 bg-gray-400 text-white rounded-lg shadow hover:bg-gray-500">Reset Filter</button>
-      </div>
 
-      {error && <p className="mb-4 text-red-500">{error}</p>}
-      
+      {/* Filters */}
+      <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <select
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={selectedLine}
+          onChange={(e) => {
+            setSelectedLine(e.target.value);
+          }}
+        >
+          <option value="">All Product Line</option>
+          {uniqueLines.map((v, idx) => (
+            <option key={`line-${idx}-${v || "empty"}`} value={v}>
+              {v || "—"}
+            </option>
+          ))}
+        </select>
 
-      {/* Table */}
-      <div className=" bg-white rounded-2xl shadow overflow-scroll max-h-150 mt-4">
-        <table className="w-full relative border-collapse">
-          <thead className="sticky z-10 top-0 bg-gray-100">
-            <tr>
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductNumber")}>
-                Product Number {getSortIcon("ProductNumber")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductLine")}>
-                Product Line {getSortIcon("ProductLine")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductName")}>
-                Product Name {getSortIcon("ProductName")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductType")}>
-                Product Type {getSortIcon("ProductType")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductGroup")}>
-                Product Group {getSortIcon("ProductGroup")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ProductTower")}>
-                Product Tower {getSortIcon("ProductTower")}
-              </th>
-              <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+        <select
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={selectedType}
+          onChange={(e) => {
+            setSelectedType(e.target.value);
+          }}
+        >
+          <option value="">All Product Type</option>
+          {uniqueTypes.map((v, idx) => (
+            <option key={`type-${idx}-${v || "empty"}`} value={v}>
+              {v || "—"}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={selectedGroup}
+          onChange={(e) => {
+            setSelectedGroup(e.target.value);
+          }}
+        >
+          <option value="">All Product Group</option>
+          {uniqueGroups.map((v, idx) => (
+            <option key={`group-${idx}-${v || "empty"}`} value={v}>
+              {v || "—"}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={selectedTower}
+          onChange={(e) => {
+            setSelectedTower(e.target.value);
+          }}
+        >
+          <option value="">All Product Tower</option>
+          {uniqueTowers.map((v, idx) => (
+            <option key={`tower-${idx}-${v || "empty"}`} value={v}>
+              {v || "—"}
+            </option>
+          ))}
+        </select>
+
+        <button
+          onClick={resetFilters}
+          className="px-3 py-2 bg-gray-400 text-white rounded-lg shadow hover:bg-gray-500"
+        >
+          Reset Filter
+        </button>
+      </div>
+
+      {error && <p className="mb-4 text-red-500">{error}</p>}
+
+      {/* Table */}
+      <div className="relative w-full overflow-x-auto overflow-y-auto max-h-[75vh] bg-white rounded-2xl shadow-md border">
+        <Table className="min-w-full border-collapse">
+          <TableHeader className="sticky z-10 top-0 bg-gray-100">
+            <TableRow>
+              <TableHead className="p-3 text-sm font-semibold text-center border">No</TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
+                onClick={() => handleSort("ProductNumber")}
+              >
+                Product Number {getSortIcon("ProductNumber")}
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
+                onClick={() => handleSort("ProductLine")}
+              >
+                Product Line {getSortIcon("ProductLine")}
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
+                onClick={() => handleSort("ProductName")}
+              >
+                Product Name {getSortIcon("ProductName")}
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
+                onClick={() => handleSort("ProductType")}
+              >
+                Product Type {getSortIcon("ProductType")}
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
+                onClick={() => handleSort("ProductGroup")}
+              >
+                Product Group {getSortIcon("ProductGroup")}
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
+                onClick={() => handleSort("ProductTower")}
+              >
+                Product Tower {getSortIcon("ProductTower")}
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("HWPC")}
               >
                 HWPC {getSortIcon("HWPC")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border">Vendor</th>
-              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan="9" className="p-4 text-center text-gray-500">Loading...</td></tr>
-            ) : currentData.length > 0 ? (
-              currentData.map((p, idx) => (
-                <tr key={p.ProductNumber} className={`hover:bg-blue-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                  <td className="p-3 border">{p.ProductNumber}</td>
-                  <td className="p-3 border">{p.ProductLine}</td>
-                  <td className="p-3 border">{p.ProductName}</td>
-                  <td className="p-3 border">{p.product_type?.ProductType}</td>
-                  <td className="p-3 border">{p.product_type?.ProductGroup}</td>
-                  <td className="p-3 border">{p.product_type?.ProductTower}</td>
-                  <td className="p-3 border">{p.HWPC}</td>
-                  <td className="p-3 border">-</td>
-                  <td className="flex items-center justify-center gap-2 p-3 border">
-                    <ProductEdit ProductNumber={p.ProductNumber} onUpdate={fetchAllProducts} />
-                    <ProductDelete ProductNumber={p.ProductNumber} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onUpdate={fetchAllProducts}/>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr><td colSpan="9" className="p-6 text-center text-gray-500">No data found 🚫</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={9} className="p-4 text-center text-gray-500">
+                  Loading...
+                </TableCell>
+              </TableRow>
+            ) : !hasData ? (
+              <TableRow>
+                <TableCell colSpan={9} className="p-6 text-center text-gray-500">
+                  No data found 🚫
+                </TableCell>
+              </TableRow>
+            ) : (
+              sortedProducts.map((p, idx) => (
+                <TableRow
+                  key={p.ProductNumber}
+                  className={`hover:bg-blue-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+                >
+                  <TableCell className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + idx + 1}
+                  </TableCell>
+                  <TableCell className="p-3 border">{p.ProductNumber}</TableCell>
+                  <TableCell className="p-3 border">{p.ProductLine}</TableCell>
+                  <TableCell className="p-3 border">{p.ProductName}</TableCell>
+                  <TableCell className="p-3 border">{p.product_type?.ProductType}</TableCell>
+                  <TableCell className="p-3 border">{p.product_type?.ProductGroup}</TableCell>
+                  <TableCell className="p-3 border">{p.product_type?.ProductTower}</TableCell>
+                  <TableCell className="p-3 border">{p.HWPC}</TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-3 border">
+                    <ProductEdit ProductNumber={p.ProductNumber} onUpdate={() => fetchProducts(currentPage)} />
+                    <ProductDelete
+                      ProductNumber={p.ProductNumber}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={() => fetchProducts(currentPage)}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-      {/* Bottom controls */}
-      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
-        {/* Rows per page */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm">Rows per page:</span>
-          <select
-            className="p-1 text-sm border rounded-lg"
-            value={itemsPerPage === sortedProducts.length ? "all" : itemsPerPage}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === "all") {
-                setItemsPerPage(sortedProducts.length);
-                setCurrentPage(1);
-              } else {
-                setItemsPerPage(Number(value));
-                setCurrentPage(1);
-              }
-            }}
-          >
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-            <option value="all">All</option>
-          </select>
-        </div>
+      {/* Bottom controls */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              setItemsPerPage(value || 10);
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
 
-        {/* Info total data */}
-        <div className="text-sm text-gray-600">
-          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
-          <b>{Math.min(currentPage * itemsPerPage, sortedProducts.length)}</b> of{" "}
-          <b>{sortedProducts.length}</b> products
-        </div>
+        {/* Info total data */}
+        <div className="text-sm text-gray-600">
+          {totalCount > 0 ? (
+            <>
+              Showing <b>{startIndex}</b> – <b>{endIndex}</b> of <b>{totalCount}</b> products
+            </>
+          ) : (
+            <>Showing 0 – 0 of 0 products</>
+          )}
+        </div>
 
-        {/* Pagination + Go to page */}
-        {totalPagesLocal > 1 && (
-          <div className="flex items-center gap-3">
-            <button
-              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              ⬅ Prev
-            </button>
+        {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => {
+                if (currentPage > 1) {
+                  fetchProducts(currentPage - 1);
+                }
+              }}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
 
-            <span className="px-3 py-1 text-sm">
-              Page <b>{currentPage}</b> of {totalPagesLocal}
-            </span>
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
 
-            <button
-              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPagesLocal))}
-              disabled={currentPage === totalPagesLocal}
-            >
-              Next ➡
-            </button>
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => {
+                if (currentPage < totalPages) {
+                  fetchProducts(currentPage + 1);
+                }
+              }}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
 
-            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
-              <input
-                type="number"
-                min="1"
-                max={totalPagesLocal}
-                placeholder="Go to"
-                className="w-16 p-1 text-sm text-center border rounded-lg"
-                value={goToPageInput}
-                onChange={(e) => setGoToPageInput(e.target.value)}
-              />
-              <button
-                type="submit"
-                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-              >
-                Go
-              </button>
-            </form>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min={1}
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export const ProductType_table = () => {
@@ -2310,7 +2617,7 @@ export const ProductType_table = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-6grid grid-flow-row">
       <h2 className="mb-4 text-xl font-bold">Product Type Table</h2>
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <input
@@ -2330,58 +2637,58 @@ export const ProductType_table = () => {
 
       {/* ✅ MODIFIED: Table wrapper for scrolling */}
       <div className="bg-white rounded-lg shadow overflow-scroll max-h-[60vh]">
-        <table className="w-full border-collapse">
+        <Table className="w-full border-collapse">
           {/* ✅ MODIFIED: Sticky header */}
-          <thead className="sticky top-0 z-10">
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-3 font-semibold text-center border">No</th> {/* ✅ ADDED: Kolom Nomor */}
-              <th
-                className="p-3 font-semibold text-left border cursor-pointer"
+          <TableHeader className="sticky top-0 z-10">
+            <TableRow className="text-sm text-gray-700 uppercase bg-gray-200">
+              <TableHead className="p-3 font-semibold text-center border">No</TableHead> {/* ✅ ADDED: Kolom Nomor */}
+              <TableHead
+                className="p-3 font-semibold text-center border cursor-pointer"
                 onClick={() => requestSort("ProductTypeID")}
               >
                 ProductType ID {renderSortArrow("ProductTypeID")}
-              </th>
-              <th
-                className="p-3 font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead
+                className="p-3 font-semibold text-center border cursor-pointer"
                 onClick={() => requestSort("ProductTower")}
               >
                 Product Tower {renderSortArrow("ProductTower")}
-              </th>
-              <th
-                className="p-3 font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead
+                className="p-3 font-semibold text-center border cursor-pointer"
                 onClick={() => requestSort("ProductGroup")}
               >
                 Product Group {renderSortArrow("ProductGroup")}
-              </th>
-              <th
-                className="p-3 font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead
+                className="p-3 font-semibold text-center border cursor-pointer"
                 onClick={() => requestSort("ProductType")}
               >
                 Product Type {renderSortArrow("ProductType")}
-              </th>
-              <th className="p-3 font-semibold text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 font-semibold text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, index) => (
-                <tr
+                <TableRow
                   key={item.ProductTypeID}
                   className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  <td className="p-3 text-center border">
+                  <TableCell className="p-3 text-center border">
                     {(currentPage - 1) * itemsPerPage + index + 1}
-                  </td>
-                  <td
+                  </TableCell>
+                  <TableCell
                     className="p-3 text-blue-500 border cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/case/${item.ProductTypeID}`)}
                   >
                     {item.ProductTypeID}
-                  </td>
-                  <td className="p-3 border">{item.ProductTower}</td>
-                  <td className="p-3 border">{item.ProductGroup}</td>
-                  <td className="p-3 border">{item.ProductType}</td>
-                  <td className="flex items-center justify-center gap-2 p-3 border">
+                  </TableCell>
+                  <TableCell className="p-3 border">{item.ProductTower}</TableCell>
+                  <TableCell className="p-3 border">{item.ProductGroup}</TableCell>
+                  <TableCell className="p-3 border">{item.ProductType}</TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-3 border">
                     <ProductTypeEdit
                       ProductTypeID={item.ProductTypeID}
                       onUpdate={fetchProductTypeDataTable}
@@ -2392,18 +2699,18 @@ export const ProductType_table = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchProductTypeDataTable}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="6" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="6" className="p-6 text-center text-gray-500">
                   No data found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* ✅ MODIFIED: Pagination controls yang lebih lengkap */}
@@ -2625,99 +2932,99 @@ export const WarrantyService_table = () => {
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
       <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[600px]">
-        <table className="w-full relative border-collapse">
-          <thead className="sticky z-10 top-0 bg-gray-100">
-            <tr>
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+        <Table className="w-full relative border-collapse">
+          <TableHeader className="sticky z-10 top-0 bg-gray-100">
+            <TableRow>
+              <TableHead className="p-3 text-sm font-semibold text-center border">No</TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Service_offerID")}
               >
                 Service offerID {renderSortIcon("Service_offerID")}
-              </th>
-              <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Service_description")}
               >
                 Service description {renderSortIcon("Service_description")}
-              </th>
-              <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("CTat_RTime")}
               >
                 Customer Tat {renderSortIcon("CTat_RTime")}
-              </th>
-              <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Price")}
               >
                 Price {renderSortIcon("Price")}
-              </th>
-              <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Shipping_Fee")}
               >
                 Shipping Fee {renderSortIcon("Shipping_Fee")}
-              </th>
-              <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("qty_ws")}
               >
                 Quantity {renderSortIcon("qty_ws")}
-              </th>
-              <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Tax")}
               >
                 Tax {renderSortIcon("Tax")}
-              </th>
-              <th
-                className="p-3 text-sm font-semibold text-left border cursor-pointer"
+              </TableHead>
+              <TableHead
+                className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Total")}
               >
                 Total {renderSortIcon("Total")}
-              </th>
-              <th onClick={() => handleSort("WarrantyCondition")} className="p-3 text-sm font-semibold text-left border cursor-pointer">
+              </TableHead>
+              <TableHead onClick={() => handleSort("WarrantyCondition")} className="p-3 text-sm font-semibold text-center border cursor-pointer">
                 Warranty Condition {renderSortIcon("WarrantyCondition")}
-              </th>
-              <th onClick={() => handleSort("CaseTypeServices")} className="p-3 text-sm font-semibold text-left border cursor-pointer">
+              </TableHead>
+              <TableHead onClick={() => handleSort("CaseTypeServices")} className="p-3 text-sm font-semibold text-center border cursor-pointer">
                 Case Type {renderSortIcon("CaseTypeServices")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-center border">
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border">
                 Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((WarrantyServiceItem, i) => (
-                <tr
+                <TableRow
                   key={WarrantyServiceItem.Service_offerID}
                   className={`hover:bg-blue-50 ${
                     i % 2 === 0 ? "bg-white" : "bg-gray-50"
                   }`}
                 >
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell
                     className="p-3 border text-blue-500 cursor-pointer hover:underline"
                     onClick={() =>
                       navigate(`/app/case/${WarrantyServiceItem.Service_offerID}`)
                     }
                   >
                     {WarrantyServiceItem.Service_offerID}
-                  </td>
-                  <td className="p-3 border">
+                  </TableCell>
+                  <TableCell className="p-3 border">
                     {WarrantyServiceItem.Service_description}
-                  </td>
-                  <td className="p-3 border">{WarrantyServiceItem.CTat_RTime}</td>
-                  <td className="p-3 border">{WarrantyServiceItem.Price}</td>
-                  <td className="p-3 border">{WarrantyServiceItem.Shipping_Fee}</td>
-                  <td className="p-3 border">{WarrantyServiceItem.qty_ws}</td>
-                  <td className="p-3 border">{WarrantyServiceItem.Tax}</td>
-                  <td className="p-3 border">{WarrantyServiceItem.Total}</td>
-                  <td className="p-3 border">{WarrantyServiceItem.WarrantyCondition}</td>
-                  <td className="p-3 border">{WarrantyServiceItem.CaseTypeServices}</td>
-                  <td className="flex p-3 space-x-2 border justify-center">
+                  </TableCell>
+                  <TableCell className="p-3 border">{WarrantyServiceItem.CTat_RTime}</TableCell>
+                  <TableCell className="p-3 border">{WarrantyServiceItem.Price}</TableCell>
+                  <TableCell className="p-3 border">{WarrantyServiceItem.Shipping_Fee}</TableCell>
+                  <TableCell className="p-3 border">{WarrantyServiceItem.qty_ws}</TableCell>
+                  <TableCell className="p-3 border">{WarrantyServiceItem.Tax}</TableCell>
+                  <TableCell className="p-3 border">{WarrantyServiceItem.Total}</TableCell>
+                  <TableCell className="p-3 border">{WarrantyServiceItem.WarrantyCondition}</TableCell>
+                  <TableCell className="p-3 border">{WarrantyServiceItem.CaseTypeServices}</TableCell>
+                  <TableCell className="flex p-3 space-x-2 border justify-center">
                     <WarrantyServiceEdit
                       Service_offerID={WarrantyServiceItem.Service_offerID}
                       onUpdate={fetchWarrantyServiceDataTable}
@@ -2728,18 +3035,18 @@ export const WarrantyService_table = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchWarrantyServiceDataTable}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="9" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="9" className="p-6 text-center text-gray-500">
                   No data found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Bottom controls */}
@@ -2833,7 +3140,7 @@ export const Mo_table = () => {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [goToPageInput, setGoToPageInput] = useState("");
 
   // Sorting
@@ -2968,7 +3275,19 @@ export const Mo_table = () => {
 
   // === Render Section ===
   const navigate = useNavigate();
+  const formatDate = (dateString) => {
+    if (!dateString) return "-"; // jika null atau undefined
+    const date = new Date(dateString);
+    if (isNaN(date)) return dateString; // fallback jika bukan format valid
 
+    return date.toLocaleString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
   return (
     <div className="p-6">
       <h2 className="mb-6 text-2xl font-bold">📊 Material Order Table</h2>
@@ -3023,133 +3342,131 @@ export const Mo_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table with Sticky Header and Scroll */}
-      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[400px]">
-        <table className="w-full relative border-collapse">
-          <thead className="sticky z-10 top-0 bg-gray-100">
-            <tr>
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th
+      <div className="bg-white rounded-2xl shadow overflow-scroll max-h-[800px]">
+        <Table className="w-full relative border-collapse">
+          <TableHeader className="sticky z-10 top-0 bg-gray-100">
+            <TableRow>
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("MOID")}
               >
                 <div className="flex items-center justify-center space-x-1">
                   <span>MO ID</span> {renderSortIcon("MOID")}
                 </div>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("WOID")}
               >
                 <div className="flex items-center justify-center space-x-1">
                   <span>WO ID</span> {renderSortIcon("WOID")}
                 </div>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("OrderNumber")}
               >
                 <div className="flex items-center justify-center space-x-1">
                   <span>Order Number</span> {renderSortIcon("OrderNumber")}
                 </div>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("OrderStatus")}
               >
                 <div className="flex items-center justify-center space-x-1">
                   <span>Order Status</span> {renderSortIcon("OrderStatus")}
                 </div>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("OrderType")}
               >
                 <div className="flex items-center justify-center space-x-1">
                   <span>Order Type</span> {renderSortIcon("OrderType")}
                 </div>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("CreatedOn")}
               >
                 <div className="flex items-center justify-center space-x-1">
                   <span>Created On</span> {renderSortIcon("CreatedOn")}
                 </div>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("SalesOrderNumber")}
               >
                 <div className="flex items-center justify-center space-x-1">
                   <span>Sales Order Number</span> {renderSortIcon("SalesOrderNumber")}
                 </div>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("RMANumber")}
               >
                 <div className="flex items-center justify-center space-x-1">
                   <span>RMA Number</span> {renderSortIcon("RMANumber")}
                 </div>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("ReadyForClosureDate")}
               >
                 <div className="flex items-center justify-center space-x-1">
                   <span>Ready For Closure Date</span> {renderSortIcon("ReadyForClosureDate")}
                 </div>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Owner")}
               >
                 <div className="flex items-center justify-center space-x-1">
                   <span>Owner</span> {renderSortIcon("Owner")}
                 </div>
-              </th>
-              <th className="p-3 text-sm font-semibold text-center border">
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border">
                 Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((MaterialOrderItem, i) => (
-                <tr
+                <TableRow
                   key={MaterialOrderItem.MOID}
                   className={`text-center hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell
                     className="p-3 text-blue-500 border cursor-pointer hover:underline"
                     onClick={() =>
                       navigate(`/app/material-order/${MaterialOrderItem.MOID}`)
                     }
                   >
                     {MaterialOrderItem.MOID}
-                  </td>
-                  <td
+                  </TableCell>
+                  <TableCell
                     className="p-3 text-blue-500 border cursor-pointer hover:underline"
                     onClick={() =>
                       navigate(`/app/work/${MaterialOrderItem.WOID}`)
                     }
                   >
                     {MaterialOrderItem.WOID}
-                  </td>
-                  <td className="p-3 border">{MaterialOrderItem.OrderNumber}</td>
-                  <td className="p-3 border">{MaterialOrderItem.OrderStatus}</td>
-                  <td className="p-3 border">{MaterialOrderItem.OrderType}</td>
-                  <td className="p-3 border">{MaterialOrderItem.CreatedOn}</td>
-                  <td className="p-3 border">
+                  </TableCell>
+                  <TableCell className="p-3 border">{MaterialOrderItem.OrderNumber}</TableCell>
+                  <TableCell className="p-3 border">{MaterialOrderItem.OrderStatus}</TableCell>
+                  <TableCell className="p-3 border">{MaterialOrderItem.OrderType}</TableCell>
+                  <TableCell className="p-3 border">{formatDate(MaterialOrderItem.CreatedOn)}</TableCell>
+                  <TableCell className="p-3 border">
                     {MaterialOrderItem.SalesOrderNumber}
-                  </td>
-                  <td className="p-3 border">{MaterialOrderItem.RMANumber}</td>
-                  <td className="p-3 border">
-                    {MaterialOrderItem.ReadyForClosureDate}
-                  </td>
-                  <td className="p-3 border">{MaterialOrderItem.Owner}</td>
-                  <td className="flex items-center justify-center p-3 space-x-2 border">
+                  </TableCell>
+                  <TableCell className="p-3 border">{MaterialOrderItem.RMANumber}</TableCell>
+                  <TableCell className="p-3 border">{formatDate(MaterialOrderItem.ReadyForClosureDate)}</TableCell>
+                  <TableCell className="p-3 border">{MaterialOrderItem.Owner}</TableCell>
+                  <TableCell className="flex items-center justify-center p-3 space-x-2 border">
                     <MaterialOrderEdit
                       MOID={MaterialOrderItem.MOID}
                       onUpdate={fetchMaterialOrderDataTable}
@@ -3160,18 +3477,18 @@ export const Mo_table = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchMaterialOrderDataTable}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="11" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="11" className="p-6 text-center text-gray-500">
                   No data found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Bottom controls */}
@@ -3193,7 +3510,6 @@ export const Mo_table = () => {
               }
             }}
           >
-            <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={25}>25</option>
             <option value={50}>50</option>
@@ -3277,6 +3593,24 @@ export const Wo_table = () => {
     direction: "asc",
   });
 
+  const formatDate = (value) => {
+    if (!value) return "-";
+
+
+    const date = new Date(value);
+
+    // Cek apakah valid date
+    if (isNaN(date.getTime())) return value;
+
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date);
+  };
+
   const navigate = useNavigate();
 
   // Ambil unique values untuk dropdown filter, menggunakan useMemo untuk performa
@@ -3311,7 +3645,7 @@ export const Wo_table = () => {
   const uniqueOwner = useMemo(
     () => [
       "",
-      ...new Set(WorkOrderData.map((d) => d.Owner).filter(Boolean)),
+      ...new Set(WorkOrderData.map((d) => d.owner?.Name).filter(Boolean)),
     ],
     [WorkOrderData]
   );
@@ -3384,7 +3718,7 @@ export const Wo_table = () => {
       const matchSystemStatus = filterSystemStatus ? item.SystemStatus === filterSystemStatus : true;
       const matchShipmentCountry = filterShipmentCountry ? item.ShipmentCountry === filterShipmentCountry : true;
       const matchShipmentState = filterShipmentState ? item.ShipmentState === filterShipmentState : true;
-      const matchOwner = filterOwner ? item.Owner === filterOwner : true;
+      const matchOwner = filterOwner ? item.owner?.Name === filterOwner : true;
 
       return (
         matchSearch &&
@@ -3412,7 +3746,11 @@ export const Wo_table = () => {
       sorted.sort((a, b) => {
         const aVal = a[sortConfig.key];
         const bVal = b[sortConfig.key];
-
+      if (sortConfig.key === "ownerName") {
+        return sortConfig.direction === "asc"
+          ? a.owner?.Name?.localeCompare(b.owner?.Name)
+          : b.owner?.Name?.localeCompare(a.owner?.Name);
+      }
         if (typeof aVal === 'number' && typeof bVal === 'number') {
             return sortConfig.direction === "asc" ? aVal - bVal : bVal - aVal;
         }
@@ -3557,249 +3895,249 @@ export const Wo_table = () => {
 
       {/* 🔹 Table with fixed header and scrollable body */}
       <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
-        <table className="min-w-full relative border-collapse">
-          <thead className="sticky top-0 z-10 bg-gray-200">
-            <tr className="text-sm text-gray-700 uppercase">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th
+        <Table className="min-w-full relative border-collapse">
+          <TableHeader className="sticky top-0 z-10 bg-gray-200">
+            <TableRow className="text-sm text-gray-700 uppercase">
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("WOID")}
               >
                 WOID {getSortIcon("WOID")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("CaseID")}
               >
                 Case ID {getSortIcon("CaseID")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("WorkOrderType")}
               >
                 Work Order Type {getSortIcon("WorkOrderType")}
-              </th>
-              <th
+              </TableHead>
+              {/* <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Priority")}
               >
                 Priority {getSortIcon("Priority")}
-              </th>
-              <th
+              </TableHead> */}
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SystemStatus")}
               >
                 System Status {getSortIcon("SystemStatus")}
-              </th>
-              <th
+              </TableHead>
+              {/* <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SubStatus")}
               >
                 Sub Status {getSortIcon("SubStatus")}
-              </th>
-              <th
+              </TableHead> */}
+              {/* <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("PreferredDay")}
               >
                 Preferred Day {getSortIcon("PreferredDay")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("PreferredTime")}
               >
                 Preferred Time {getSortIcon("PreferredTime")}
-              </th>
-              <th
+              </TableHead> */}
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("ShipmentCountry")}
               >
                 Shipment Country {getSortIcon("ShipmentCountry")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("ShipmentState")}
               >
                 Shipment State {getSortIcon("ShipmentState")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("CreatedOn")}
               >
                 Created On {getSortIcon("CreatedOn")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
-                onClick={() => handleSort("Owner")}
+                onClick={() => handleSort("ownerName")}
               >
-                Owner {getSortIcon("Owner")}
-              </th>
-              <th
+                Owner {getSortIcon("ownerName")}
+              </TableHead>
+              {/* <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SLAJeopardy")}
               >
                 SLAJeopardy {getSortIcon("SLAJeopardy")}
-              </th>
-              <th
+              </TableHead> */}
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("DueDateCustomer")}
               >
                 DueDate Customer {getSortIcon("DueDateCustomer")}
-              </th>
-              <th
+              </TableHead>
+              {/* <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("CoverageWindow")}
               >
                 Coverage Window {getSortIcon("CoverageWindow")}
-              </th>
-              <th
+              </TableHead> */}
+              {/* <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Response")}
               >
                 Response {getSortIcon("Response")}
-              </th>
-              <th
+              </TableHead> */}
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("OTCCode")}
               >
                 OTCCode {getSortIcon("OTCCode")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("RequestedDateTimeCustomer")}
               >
                 Requested DateTime Customer {getSortIcon("RequestedDateTimeCustomer")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("GuaranteedFixTimeCustomer")}
               >
                 Guaranteed FixTime Customer {getSortIcon("GuaranteedFixTimeCustomer")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("EarlyStartDateTimeCustomer")}
               >
                 Early Start DateTime Customer {getSortIcon("EarlyStartDateTimeCustomer")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("LatestStartDateTimeCustomer")}
               >
                 Latest Start DateTime Customer {getSortIcon("LatestStartDateTimeCustomer")}
-              </th>
-              <th
+              </TableHead>
+              {/* <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SLAReschedule")}
               >
                 SLAReschedule {getSortIcon("SLAReschedule")}
-              </th>
-              <th
+              </TableHead> */}
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("ActiveScheduleDate")}
               >
                 Active Schedule Date {getSortIcon("ActiveScheduleDate")}
-              </th>
-              <th
+              </TableHead>
+              {/* <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SLAErrorDescription")}
               >
                 SLA Error Description {getSortIcon("SLAErrorDescription")}
-              </th>
-              <th
+              </TableHead> */}
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("CasePriorityIndex")}
               >
                 Case Priority Index {getSortIcon("CasePriorityIndex")}
-              </th>
-              <th
+              </TableHead>
+              {/* <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("PartnerStatus")}
               >
                 Partner Status {getSortIcon("PartnerStatus")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("WorkOrderDescription")}
               >
                 WorkOrder Description {getSortIcon("WorkOrderDescription")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("PartnerNotes")}
               >
                 PartnerNotes {getSortIcon("PartnerNotes")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("IncomingChannel")}
               >
                 Incoming Channel {getSortIcon("IncomingChannel")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("MaterialOrder")}
               >
                 Material Order {getSortIcon("MaterialOrder")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("CaseInformation")}
               >
                 Case Information {getSortIcon("CaseInformation")}
-              </th>
-              <th className="p-3 text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead> */}
+              <TableHead className="p-3 text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((WorkOrderItem, i) => (
-                <tr
+                <TableRow
                   key={WorkOrderItem.WOID}
                   className={`text-center hover:bg-gray-100 text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell
                     className="p-2 text-blue-500 border cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/work/${WorkOrderItem.WOID}`)}
                   >
                     {WorkOrderItem.WOID}
-                  </td>
-                  <td
+                  </TableCell>
+                  <TableCell
                     className="p-2 text-blue-500 border cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/case/${WorkOrderItem.CaseID}`)}
                   >
                     {WorkOrderItem.CaseID}
-                  </td>
-                  <td className="p-2 border">{WorkOrderItem.WorkOrderType}</td>
-                  <td className="p-2 border">{WorkOrderItem.Priority}</td>
-                  <td className="p-2 border">{WorkOrderItem.SystemStatus}</td>
-                  <td className="p-2 border">{WorkOrderItem.SubStatus}</td>
-                  <td className="p-2 border">{WorkOrderItem.PreferredDay}</td>
-                  <td className="p-2 border">{WorkOrderItem.PreferredTime}</td>
-                  <td className="p-2 border">{WorkOrderItem.ShipmentCountry}</td>
-                  <td className="p-2 border">{WorkOrderItem.ShipmentState}</td>
-                  <td className="p-2 border">{WorkOrderItem.CreatedOn}</td>
-                  <td className="p-2 border">{WorkOrderItem.Owner}</td>
-                  <td className="p-2 border">{WorkOrderItem.SLAJeopardy}</td>
-                  <td className="p-2 border">{WorkOrderItem.DueDateCustomer}</td>
-                  <td className="p-2 border">{WorkOrderItem.CoverageWindow}</td>
-                  <td className="p-2 border">{WorkOrderItem.Response}</td>
-                  <td className="p-2 border">{WorkOrderItem.OTCCode}</td>
-                  <td className="p-2 border">{WorkOrderItem.RequestedDateTimeCustomer}</td>
-                  <td className="p-2 border">{WorkOrderItem.GuaranteedFixTimeCustomer}</td>
-                  <td className="p-2 border">{WorkOrderItem.EarlyStartDateTimeCustomer}</td>
-                  <td className="p-2 border">{WorkOrderItem.LatestStartDateTimeCustomer}</td>
-                  <td className="p-2 border">{WorkOrderItem.SLAReschedule}</td>
-                  <td className="p-2 border">{WorkOrderItem.ActiveScheduleDate}</td>
-                  <td className="p-2 border">{WorkOrderItem.SLAErrorDescription}</td>
-                  <td className="p-2 border">{WorkOrderItem.CasePriorityIndex}</td>
-                  <td className="p-2 border">{WorkOrderItem.PartnerStatus}</td>
-                  <td className="p-2 border">{WorkOrderItem.WorkOrderDescription}</td>
-                  <td className="p-2 border">{WorkOrderItem.PartnerNotes}</td>
-                  <td className="p-2 border">{WorkOrderItem.IncomingChannel}</td>
-                  <td className="p-2 border">{WorkOrderItem.MaterialOrder}</td>
-                  <td className="p-2 border">{WorkOrderItem.CaseInformation}</td>
-                  <td className="flex items-center justify-center gap-2 p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">{WorkOrderItem.WorkOrderType}</TableCell>
+                  {/* <TableCell className="p-2 border">{WorkOrderItem.Priority}</TableCell> */}
+                  <TableCell className="p-2 border">{WorkOrderItem.SystemStatus}</TableCell>
+                  {/* <TableCell className="p-2 border">{WorkOrderItem.SubStatus}</TableCell>
+                  <TableCell className="p-2 border">{WorkOrderItem.PreferredDay}</TableCell>
+                  <TableCell className="p-2 border">{WorkOrderItem.PreferredTime}</TableCell> */}
+                  <TableCell className="p-2 border">{WorkOrderItem.ShipmentCountry}</TableCell>
+                  <TableCell className="p-2 border">{WorkOrderItem.ShipmentState}</TableCell>
+                  <TableCell className="p-2 border">{formatDate(WorkOrderItem.CreatedOn)}</TableCell>
+                  <TableCell className="p-2 border">{WorkOrderItem.owner?.Name}</TableCell>
+                  {/* <TableCell className="p-2 border">{WorkOrderItem.SLAJeopardy}</TableCell> */}
+                  <TableCell className="p-2 border">{formatDate(WorkOrderItem.DueDateCustomer)}</TableCell>
+                  {/* <TableCell className="p-2 border">{WorkOrderItem.CoverageWindow}</TableCell>
+                  <TableCell className="p-2 border">{WorkOrderItem.Response}</TableCell> */}
+                  <TableCell className="p-2 border">{WorkOrderItem.OTCCode}</TableCell>
+                  <TableCell className="p-2 border">{formatDate(WorkOrderItem.RequestedDateTimeCustomer)}</TableCell>
+                  <TableCell className="p-2 border">{formatDate(WorkOrderItem.GuaranteedFixTimeCustomer)}</TableCell>
+                  <TableCell className="p-2 border">{formatDate(WorkOrderItem.EarlyStartDateTimeCustomer)}</TableCell>
+                  <TableCell className="p-2 border">{formatDate(WorkOrderItem.LatestStartDateTimeCustomer)}</TableCell>
+                  {/* <TableCell className="p-2 border">{WorkOrderItem.SLAReschedule}</TableCell> */}
+                  <TableCell className="p-2 border">{formatDate(WorkOrderItem.ActiveScheduleDate)}</TableCell>
+                  {/* <TableCell className="p-2 border">{WorkOrderItem.SLAErrorDescription}</TableCell> */}
+                  <TableCell className="p-2 border">{WorkOrderItem.CasePriorityIndex}</TableCell>
+                  {/* <TableCell className="p-2 border">{WorkOrderItem.PartnerStatus}</TableCell>
+                  <TableCell className="p-2 border">{WorkOrderItem.WorkOrderDescription}</TableCell>
+                  <TableCell className="p-2 border">{WorkOrderItem.PartnerNotes}</TableCell>
+                  <TableCell className="p-2 border">{WorkOrderItem.IncomingChannel}</TableCell>
+                  <TableCell className="p-2 border">{WorkOrderItem.MaterialOrder}</TableCell>
+                  <TableCell className="p-2 border">{WorkOrderItem.CaseInformation}</TableCell> */}
+                  <TableCell className="flex items-center justify-center gap-2 p-2 border">
                     <WorkOrderEdit WOID={WorkOrderItem.WOID} onUpdate={fetchWorkOrderDataTable} />
                     <WorkOrderDelete
                       MOID={WorkOrderItem.MOID}
@@ -3807,18 +4145,18 @@ export const Wo_table = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchWorkOrderDataTable}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="32" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="32" className="p-6 text-center text-gray-500">
                   No data found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* 🔹 Bottom controls (Pagination) */}
@@ -3913,6 +4251,13 @@ export const User_table = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [goToPageInput, setGoToPageInput] = useState("");
 
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [selectedSignature, setSelectedSignature] = useState(null);
+
+  const handleViewSignature = (signature) => {
+    setSelectedSignature(signature);
+    setShowSignatureModal(true);
+  };
 
   // 🔹 sort state
   const [sortConfig, setSortConfig] = useState({
@@ -4004,7 +4349,6 @@ const sortedData = useMemo(() => {
         aVal = a[sortConfig.key];
         bVal = b[sortConfig.key];
       }
-
       // Handle null/undefined
       if (aVal === null || aVal === undefined) aVal = "";
       if (bVal === null || bVal === undefined) bVal = "";
@@ -4080,112 +4424,112 @@ const sortedData = useMemo(() => {
 
       {/* Table with fixed header and scrollable body */}
       <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
-        <table className="min-w-full relative border-collapse">
-          <thead className="sticky top-0 z-10 bg-gray-200">
-            <tr className="text-sm text-gray-700 uppercase">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th
+        <Table className="min-w-full relative border-collapse">
+          <TableHeader className="sticky top-0 z-10 bg-gray-200">
+            <TableRow className="text-sm text-gray-700 uppercase">
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("IDUser")}
               >
                 ID User {getSortIcon("IDUser")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Email")}
               >
                 Email {getSortIcon("Email")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Username")}
               >
                 Username {getSortIcon("Username")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Name")}
               >
                 Name {getSortIcon("Name")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Role")}
               >
                 Role {getSortIcon("Role")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Resources")}
               >
                 Resources {getSortIcon("Resources")}
-              </th>
+              </TableHead>
               {/* Tambahkan kolom Phone di sini */}
-              <th
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Phone")}
               >
                 Phone {getSortIcon("Phone")}
-              </th>
+              </TableHead>
               {/* Tambahkan kolom Signature di sini */}
-              <th
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Signature")}
               >
                 Signature {getSortIcon("Signature")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("ProfilePhoto")}
               >
                 Profil Photo {getSortIcon("ProfilePhoto")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("CreatedAt")}
               >
                 CreatedAt {getSortIcon("CreatedAt")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("UpdatedAt")}
               >
                 UpdatedAt {getSortIcon("UpdatedAt")}
-              </th>
-              <th className="p-3 text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((UserItem, i) => (
-                <tr
+                <TableRow
                   key={UserItem.IDUser}
                   className={`text-center text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell className="p-2 text-blue-500 border cursor-pointer hover:underline">
                     {UserItem.IDUser}
-                  </td>
-                  <td className="p-2 border">{UserItem.Email}</td>
-                  <td className="p-2 border">{UserItem.Username}</td>
-                  <td className="p-2 border">{UserItem.Name}</td>
-                  <td className="p-2 border">{UserItem.Role}</td>
-                  <td className="p-2 border">{UserItem.resource?.Name}</td>
+                  </TableCell>
+                  <TableCell className="p-2 border">{UserItem.Email}</TableCell>
+                  <TableCell className="p-2 border">{UserItem.Username}</TableCell>
+                  <TableCell className="p-2 border">{UserItem.Name}</TableCell>
+                  <TableCell className="p-2 border">{UserItem.Role}</TableCell>
+                  <TableCell className="p-2 border">{UserItem.resource?.Name}</TableCell>
                   {/* Tampilkan data Phone di sini */}
-                  <td className="p-2 border">{UserItem.Phone}</td>
+                  <TableCell className="p-2 border">{UserItem.Phone}</TableCell>
                   {/* Tampilkan data Signature di sini */}
-                  <td className="p-2 border"><img src={UserItem.Signature} /></td>
-                  <td className="p-2 border">
+                  <TableCell className="p-2 border"><img src={UserItem.Signature} /></TableCell>
+                  <TableCell className="p-2 border">
                     {/* {console.log(preview?.ProfilePhoto)} */}
                     {UserItem?.ProfilePhoto ? (
                       <img src={`${import.meta.env.VITE_API_BASE_URL}${UserItem.ProfilePhoto}`} alt="Profile" className="w-10 h-10 object-cover rounded-full mx-auto" />
                     ) : (
                       "No Photo"
                     )}
-                  </td>
-                  <td className="p-2 border">{UserItem.CreatedAt}</td>
-                  <td className="p-2 border">{UserItem.UpdatedAt}</td>
-                  <td className="flex items-center justify-center gap-2 p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">{UserItem.CreatedAt}</TableCell>
+                  <TableCell className="p-2 border">{UserItem.UpdatedAt}</TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-2 border">
                     <UserEdit
                       IDUser={UserItem.IDUser}
                       onUpdate={fetchUserDataTable}
@@ -4196,19 +4540,38 @@ const sortedData = useMemo(() => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchUserDataTable}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="11" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="11" className="p-6 text-center text-gray-500">
                   No data found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
+      
+      {showSignatureModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="w-[90%] max-w-md bg-white rounded-2xl shadow-lg p-6">
+              <h3 className="mb-4 text-lg font-semibold text-center">🖋 Signature</h3>
+              <div className="p-3 mb-4 text-sm text-gray-700 bg-gray-100 rounded-md max-h-[300px] overflow-y-auto">
+                {selectedSignature}
+              </div>
+              <div className="flex justify-center">
+                <button
+                  onClick={() => setShowSignatureModal(false)}
+                  className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       {/* 🔹 Bottom controls (Pagination) */}
       <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
@@ -4456,129 +4819,129 @@ export const Part_table = () => {
 
       {/* 🔹 Table with fixed header and scrollable body */}
       <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
-        <table className="min-w-full relative border-collapse">
-          <thead className="sticky top-0 z-10 bg-gray-200">
-            <tr className="text-sm text-gray-700 uppercase">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("PartNumber")}>
+        <Table className="min-w-full relative border-collapse">
+          <TableHeader className="sticky top-0 z-10 bg-gray-200">
+            <TableRow className="text-sm text-gray-700 uppercase">
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("PartNumber")}>
                 Part Number {getSortIcon("PartNumber")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Keyword")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Keyword")}>
                 Keyword {getSortIcon("Keyword")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("PartDescription")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("PartDescription")}>
                 Part Description {getSortIcon("PartDescription")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Orderability")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Orderability")}>
                 Orderability {getSortIcon("Orderability")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("RestrictionReason")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("RestrictionReason")}>
                 Restriction Reason {getSortIcon("RestrictionReason")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("CSR_Flag")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("CSR_Flag")}>
                 CSR Flag {getSortIcon("CSR_Flag")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ROHS_Flag")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ROHS_Flag")}>
                 ROHS Flag {getSortIcon("ROHS_Flag")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Returnable_Flag")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Returnable_Flag")}>
                 Returnable Flag {getSortIcon("Returnable_Flag")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("HardRoll_Flag")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("HardRoll_Flag")}>
                 HardRoll Flag {getSortIcon("HardRoll_Flag")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("DangerousGoods_Flag")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("DangerousGoods_Flag")}>
                 DangerousGoods Flag {getSortIcon("DangerousGoods_Flag")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("LithiumBattery_Flag")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("LithiumBattery_Flag")}>
                 LithiumBattery Flag {getSortIcon("LithiumBattery_Flag")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Oversize_Flag")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Oversize_Flag")}>
                 Oversize Flag {getSortIcon("Oversize_Flag")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Heavy_Flag")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Heavy_Flag")}>
                 Heavy Flag {getSortIcon("Heavy_Flag")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Price")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Price")}>
                 Price {getSortIcon("Price")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("FreightPrice")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("FreightPrice")}>
                 Freight Price {getSortIcon("FreightPrice")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Tax")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Tax")}>
                 Tax {getSortIcon("Tax")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Total")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Total")}>
                 Total {getSortIcon("Total")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Shipping_Fee")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Shipping_Fee")}>
                 Shipping Fee {getSortIcon("Shipping_Fee")}
-              </th>
-              <th className="p-3 text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((PartItem, i) => (
-                <tr key={PartItem.PartNumber} className={`text-center text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
+                <TableRow key={PartItem.PartNumber} className={`text-center text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell className="p-2 text-blue-500 border cursor-pointer hover:underline">
                     {PartItem.PartNumber}
-                  </td>
-                  <td className="p-2 border">{PartItem.Keyword}</td>
-                  <td className="p-2 border">{PartItem.PartDescription}</td>
-                  <td className="p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">{PartItem.Keyword}</TableCell>
+                  <TableCell className="p-2 border">{PartItem.PartDescription}</TableCell>
+                  <TableCell className="p-2 border">
                     <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Orderability ? "bg-green-500" : "bg-red-500"}`}>
                       {PartItem.Orderability ? "Yes" : "No"}
                     </span>
-                  </td>
-                  <td className="p-2 border">{PartItem.RestrictionReason}</td>
-                  <td className="p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">{PartItem.RestrictionReason}</TableCell>
+                  <TableCell className="p-2 border">
                     <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.CSR_Flag ? "bg-green-500" : "bg-red-500"}`}>
                       {PartItem.CSR_Flag ? "Yes" : "No"}
                     </span>
-                  </td>
-                  <td className="p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">
                     <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.ROHS_Flag ? "bg-green-500" : "bg-red-500"}`}>
                       {PartItem.ROHS_Flag ? "Yes" : "No"}
                     </span>
-                  </td>
-                  <td className="p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">
                     <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Returnable_Flag ? "bg-green-500" : "bg-red-500"}`}>
                       {PartItem.Returnable_Flag ? "Yes" : "No"}
                     </span>
-                  </td>
-                  <td className="p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">
                     <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.HardRoll_Flag ? "bg-green-500" : "bg-red-500"}`}>
                       {PartItem.HardRoll_Flag ? "Yes" : "No"}
                     </span>
-                  </td>
-                  <td className="p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">
                     <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.DangerousGoods_Flag ? "bg-green-500" : "bg-red-500"}`}>
                       {PartItem.DangerousGoods_Flag ? "Yes" : "No"}
                     </span>
-                  </td>
-                  <td className="p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">
                     <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.LithiumBattery_Flag ? "bg-green-500" : "bg-red-500"}`}>
                       {PartItem.LithiumBattery_Flag ? "Yes" : "No"}
                     </span>
-                  </td>
-                  <td className="p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">
                     <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Oversize_Flag ? "bg-green-500" : "bg-red-500"}`}>
                       {PartItem.Oversize_Flag ? "Yes" : "No"}
                     </span>
-                  </td>
-                  <td className="p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">
                     <span className={`px-2 py-1 rounded-full text-white text-sm ${PartItem.Heavy_Flag ? "bg-green-500" : "bg-red-500"}`}>
                       {PartItem.Heavy_Flag ? "Yes" : "No"}
                     </span>
-                  </td>
-                  <td className="p-2 border">{PartItem.Price}</td>
-                  <td className="p-2 border">{PartItem.FreightPrice}</td>
-                  <td className="p-2 border">{PartItem.Tax}</td>
-                  <td className="p-2 border">{PartItem.Total}</td>
-                  <td className="p-2 border">{PartItem.Shipping_Fee}</td>
-                  <td className="flex items-center justify-center gap-2 p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">{PartItem.Price}</TableCell>
+                  <TableCell className="p-2 border">{PartItem.FreightPrice}</TableCell>
+                  <TableCell className="p-2 border">{PartItem.Tax}</TableCell>
+                  <TableCell className="p-2 border">{PartItem.Total}</TableCell>
+                  <TableCell className="p-2 border">{PartItem.Shipping_Fee}</TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-2 border">
                     <PartEdit PartNumber={PartItem.PartNumber} onUpdate={fetchPartDataTable} />
                     <PartDelete
                       PartNumber={PartItem.PartNumber}
@@ -4586,18 +4949,18 @@ export const Part_table = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchPartDataTable}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="19" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="19" className="p-6 text-center text-gray-500">
                   No data found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* 🔹 Bottom controls (Pagination) */}
@@ -4851,38 +5214,38 @@ export const Resource_table = () => {
 
       {/* Table with fixed header and scrollable body */}
       <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
-        <table className="min-w-full relative border-collapse">
-          <thead className="sticky top-0 z-10 bg-gray-200">
-            <tr className="text-sm text-gray-700 uppercase">
-              <th className="p-3 text-sm font-semibold text-center border">No</th>
-              <th
+        <Table className="min-w-full relative border-collapse">
+          <TableHeader className="sticky top-0 z-10 bg-gray-200">
+            <TableRow className="text-sm text-gray-700 uppercase">
+              <TableHead className="p-3 text-sm font-semibold text-center border">No</TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("ResourceId")}
               >
                 Resource ID {getSortIcon("ResourceId")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("Name")}
               >
                 Name {getSortIcon("Name")}
-              </th>
-              <th className="p-3 text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((ResourceItem, i) => (
-                <tr
+                <TableRow
                   key={ResourceItem.ResourceId}
                   className={`text-center hover:bg-gray-100 text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td className="p-2 text-blue-500 border cursor-pointer hover:underline">
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell className="p-2 text-blue-500 border cursor-pointer hover:underline">
                     {ResourceItem.ResourceId}
-                  </td>
-                  <td className="p-2 border">{ResourceItem.Name}</td>
-                  <td className="flex items-center justify-center gap-2 p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.Name}</TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-2 border">
                     <ResourceEdit
                       ResourceId={ResourceItem.ResourceId}
                       onUpdate={fetchResourceDataTable}
@@ -4893,18 +5256,18 @@ export const Resource_table = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchResourceDataTable}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="3" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="3" className="p-6 text-center text-gray-500">
                   No data found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* 🔹 Bottom controls (Pagination) */}
@@ -5184,41 +5547,41 @@ export const ResourceAccountTable = () => {
 
       {/* Table with fixed header and scrollable body */}
       <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
-        <table className="min-w-full relative border-collapse">
-          <thead className="sticky top-0 z-10 bg-gray-200">
-            <tr className="text-sm text-gray-700 uppercase">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-3 text-center border cursor-pointer max-w-20" onClick={() => handleSort("ResourceAccountId")}>
+        <Table className="min-w-full relative border-collapse">
+          <TableHeader className="sticky top-0 z-10 bg-gray-200">
+            <TableRow className="text-sm text-gray-700 uppercase">
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer max-w-20" onClick={() => handleSort("ResourceAccountId")}>
                 Resource Account ID {getSortIcon("ResourceAccountId")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Name")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Name")}>
                 Name {getSortIcon("Name")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ResourceId")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ResourceId")}>
                 Resource ID {getSortIcon("ResourceId")}
-              </th>
-              <th className="p-3 text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((account, i) => (
-                <tr
+                <TableRow
                   key={account.ResourceAccountId}
                   className={`text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell
                     className="p-3 text-center text-blue-500 border cursor-pointer hover:underline"
                     onClick={() =>
                       navigate(`/app/resource-account/${account.ResourceAccountId}`)
                     }
                   >
                     {account.ResourceAccountId}
-                  </td>
-                  <td className="p-3 border text-center">{account.Name}</td>
-                  <td className="p-3 border text-center">{account.ResourceId || "-"}</td>
-                  <td className="flex items-center justify-center gap-2 p-3 border">
+                  </TableCell>
+                  <TableCell className="p-3 border text-center">{account.Name}</TableCell>
+                  <TableCell className="p-3 border text-center">{account.ResourceId || "-"}</TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-3 border">
                     <ResourceAccountEdit
                       ResourceAccountId={account.ResourceAccountId}
                       resources={resources}
@@ -5230,18 +5593,18 @@ export const ResourceAccountTable = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchResourceAccounts}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="4" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="4" className="p-6 text-center text-gray-500">
                   No accounts found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Bottom controls (Pagination) */}
@@ -5526,41 +5889,41 @@ export const SubkTechnician_table = () => {
 
       {/* Table with fixed header and scrollable body */}
       <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
-        <table className="min-w-full relative border-collapse">
-          <thead className="sticky top-0 z-10 bg-gray-200">
-            <tr className="text-sm text-gray-700 uppercase">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("SubkTechnicianId")}>
+        <Table className="min-w-full relative border-collapse">
+          <TableHeader className="sticky top-0 z-10 bg-gray-200">
+            <TableRow className="text-sm text-gray-700 uppercase">
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("SubkTechnicianId")}>
                 Subk Technician ID {getSortIcon("SubkTechnicianId")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Name")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Name")}>
                 Name {getSortIcon("Name")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ResourceAccount")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ResourceAccount")}>
                 Resource Account {getSortIcon("ResourceAccount")}
-              </th>
-              <th className="p-3 text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, i) => (
-                <tr
+                <TableRow
                   key={item.SubkTechnicianId}
                   className={`text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell
                     className="p-3 text-center text-blue-500 border cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/subk-technician/${item.SubkTechnicianId}`)}
                   >
                     {item.SubkTechnicianId}
-                  </td>
-                  <td className="p-3 border text-center">{item.Name}</td>
-                  <td className="p-3 border text-center">
+                  </TableCell>
+                  <TableCell className="p-3 border text-center">{item.Name}</TableCell>
+                  <TableCell className="p-3 border text-center">
                     {item.resourceAccount?.Name || "N/A"}
-                  </td>
-                  <td className="flex items-center justify-center gap-2 p-3 border">
+                  </TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-3 border">
                     <SubkTechnicianEdit
                       SubkTechnicianId={item.SubkTechnicianId}
                       onUpdate={fetchSubkTechnicianData}
@@ -5571,18 +5934,18 @@ export const SubkTechnician_table = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchSubkTechnicianData}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="4" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="4" className="p-6 text-center text-gray-500">
                   No entries found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Bottom controls (Pagination) */}
@@ -5814,72 +6177,72 @@ export const SymptomCodeTable = () => {
 
       {/* Table with fixed header and scrollable body */}
       <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
-        <table className="min-w-full relative border-collapse">
-          <thead className="sticky top-0 z-10 bg-gray-200">
-            <tr className="text-sm text-gray-700 uppercase">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th
+        <Table className="min-w-full relative border-collapse">
+          <TableHeader className="sticky top-0 z-10 bg-gray-200">
+            <TableRow className="text-sm text-gray-700 uppercase">
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SymptomCodeID")}
               >
                 Symptom Code ID {getSortIcon("SymptomCodeID")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SymptomCode")}
               >
                 Symptom Code {getSortIcon("SymptomCode")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("TopCategory")}
               >
                 Top Category {getSortIcon("TopCategory")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("SubCategory")}
               >
                 Sub Category {getSortIcon("SubCategory")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("QualityCodes")}
               >
                 Quality Codes {getSortIcon("QualityCodes")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("CreatedOn")}
               >
                 Created On {getSortIcon("CreatedOn")}
-              </th>
-              <th className="p-3 text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, i) => (
-                <tr key={item.SymptomCodeID} className={`text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td
+                <TableRow key={item.SymptomCodeID} className={`text-sm hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell
                     className="p-3 text-center text-blue-500 border cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/symptom-code/${item.SymptomCodeID}`)}
                   >
                     {item.SymptomCodeID}
-                  </td>
-                  <td className="p-3 border text-center">{item.SymptomCode}</td>
-                  <td className="p-3 border text-center">{item.TopCategory}</td>
-                  <td className="p-3 border text-center">{item.SubCategory}</td>
-                  <td className="p-3 border text-center">{item.QualityCodes || "N/A"}</td>
-                  <td className="p-3 border text-center">
+                  </TableCell>
+                  <TableCell className="p-3 border text-center">{item.SymptomCode}</TableCell>
+                  <TableCell className="p-3 border text-center">{item.TopCategory}</TableCell>
+                  <TableCell className="p-3 border text-center">{item.SubCategory}</TableCell>
+                  <TableCell className="p-3 border text-center">{item.QualityCodes || "N/A"}</TableCell>
+                  <TableCell className="p-3 border text-center">
                     {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
-                  </td>
-                  <td className="flex items-center justify-center gap-2 p-3 border">
+                  </TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-3 border">
                     <SymptomCodeEdit
                       SymptomCodeID={item.SymptomCodeID}
                       onUpdate={fetchSymptomCodeData}
@@ -5890,18 +6253,18 @@ export const SymptomCodeTable = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchSymptomCodeData}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="7" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="7" className="p-6 text-center text-gray-500">
                   No entries found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Bottom controls (Pagination) */}
@@ -6235,76 +6598,76 @@ export const BookingsTable = () => {
 
       {/* Table with fixed header and scrollable body */}
       <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
-        <table className="min-w-full relative border-collapse">
-          <thead className="sticky top-0 z-10 bg-gray-200">
-            <tr className="text-sm text-gray-700 uppercase">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("BookingId")}>
+        <Table className="min-w-full relative border-collapse">
+          <TableHeader className="sticky top-0 z-10 bg-gray-200">
+            <TableRow className="text-sm text-gray-700 uppercase">
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("BookingId")}>
                 Booking ID {getSortIcon("BookingId")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("WOID")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("WOID")}>
                 WOID {getSortIcon("WOID")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("BookingStatus")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("BookingStatus")}>
                 Status {getSortIcon("BookingStatus")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ScheduleJeopardy")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ScheduleJeopardy")}>
                 Schedule Jeopardy {getSortIcon("ScheduleJeopardy")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ScheduleJeopardyTime")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("ScheduleJeopardyTime")}>
                 Jeopardy Time {getSortIcon("ScheduleJeopardyTime")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("DoNotDisturb")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("DoNotDisturb")}>
                 Do Not Disturb {getSortIcon("DoNotDisturb")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("CeScheduleChange")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("CeScheduleChange")}>
                 CE Schedule Change {getSortIcon("CeScheduleChange")}
-              </th>
-              <th className="p-3 text-center border">Durations (min)</th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Username")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border">Durations (min)</TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("Username")}>
                 Created By {getSortIcon("Username")}
-              </th>
-              <th className="p-3 text-center border cursor-pointer" onClick={() => handleSort("CreatedAt")}>
+              </TableHead>
+              <TableHead className="p-3 text-center border cursor-pointer" onClick={() => handleSort("CreatedAt")}>
                 Created At {getSortIcon("CreatedAt")}
-              </th>
-              <th className="p-3 text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, i) => (
-                <tr key={item.BookingId} className={`text-center hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td
+                <TableRow key={item.BookingId} className={`text-center hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell
                     className="p-3 text-blue-500 border cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/bookings/${item.BookingId}`)}
                   >
                     {item.BookingId}
-                  </td>
-                  <td className="p-3 border text-center" onClick={() => navigate(`/app/work/${item.WOID}`)}>{item.WOID}</td>
-                  <td className="p-3 border text-center">{item.BookingStatus?.Description}</td>
-                  <td className="p-3 border text-center">{item.ScheduleJeopardy ? "Yes" : "No"}</td>
-                  <td className="p-3 border text-center">
+                  </TableCell>
+                  <TableCell className="p-3 border text-center" onClick={() => navigate(`/app/work/${item.WOID}`)}>{item.WOID}</TableCell>
+                  <TableCell className="p-3 border text-center">{item.BookingStatus?.Description}</TableCell>
+                  <TableCell className="p-3 border text-center">{item.ScheduleJeopardy ? "Yes" : "No"}</TableCell>
+                  <TableCell className="p-3 border text-center">
                     {item.ScheduleJeopardyTime
                       ? new Date(item.ScheduleJeopardyTime).toLocaleString("id-ID")
                       : "-"}
-                  </td>
-                  <td className="p-3 border text-center">{item.DoNotDisturb ? "Yes" : "No"}</td>
-                  <td className="p-3 border text-center">{item.CeScheduleChange ? "Yes" : "No"}</td>
-                  <td className="p-3 border text-center">
+                  </TableCell>
+                  <TableCell className="p-3 border text-center">{item.DoNotDisturb ? "Yes" : "No"}</TableCell>
+                  <TableCell className="p-3 border text-center">{item.CeScheduleChange ? "Yes" : "No"}</TableCell>
+                  <TableCell className="p-3 border text-center">
                     Total Billable: {item.TotalBillableDurationInMinutes || 0} <br />
                     Total In Progress: {item.TotalInProgressDurationInMinutes || 0} <br />
                     Total Break: {item.TotalBreakDurationInMinutes || 0}
-                  </td>
-                  <td className="p-3 border text-center">{item.createdByUser?.Username || "-"}</td>
-                  <td className="p-3 border text-center">
+                  </TableCell>
+                  <TableCell className="p-3 border text-center">{item.createdByUser?.Username || "-"}</TableCell>
+                  <TableCell className="p-3 border text-center">
                     {new Date(item.CreatedAt).toLocaleDateString("id-ID", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
-                  </td>
-                  <td className="flex justify-center p-3 space-x-2 border">
+                  </TableCell>
+                  <TableCell className="flex justify-center p-3 space-x-2 border">
                     <BookingsEdit BookingId={item.BookingId} onUpdate={fetchBookingData} />
                     <BookingsDelete
                       BookingId={item.BookingId}
@@ -6312,18 +6675,18 @@ export const BookingsTable = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchBookingData}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="11" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="11" className="p-6 text-center text-gray-500">
                   No entries found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Bottom controls */}
@@ -6465,7 +6828,8 @@ export const BookingDetailsTable = () => {
       Swal.close();
     }
   };
-
+  
+  const [users, setUsers] = useState([]);
   // fetching user data for createdBy filter
   const fetchUsers = async () => {
     try {
@@ -6486,9 +6850,6 @@ export const BookingDetailsTable = () => {
     fetchBookingDetails();
     fetchUsers();
   }, []);
-
-  const [users, setUsers] = useState([]);
-  console.log("Users:", users);
 
   // derive unique options
   // const uniqueStatus = useMemo(() => {
@@ -6665,56 +7026,56 @@ export const BookingDetailsTable = () => {
 
       {/* Table Container */}
       <div className="bg-white rounded-2xl shadow overflow-auto max-h-[600px] relative">
-        <table className="w-full relative border-collapse">
-          <thead className="sticky top-0 bg-gray-100 z-10">
-            <tr className="text-gray-700 uppercase text-sm text-center">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("BookingDetailId")}>
+        <Table className="w-full relative border-collapse">
+          <TableHeader className="sticky top-0 bg-gray-100 z-10">
+            <TableRow className="text-gray-700 uppercase text-sm text-center">
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead className="border p-3 cursor-pointer" onClick={() => handleSort("BookingDetailId")}>
                 Booking Detail ID {getSortSymbol("BookingDetailId")}
-              </th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("BookingId")}>
+              </TableHead>
+              <TableHead className="border p-3 cursor-pointer" onClick={() => handleSort("BookingId")}>
                 Booking ID {getSortSymbol("BookingId")}
-              </th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("ResourceId")}>
+              </TableHead>
+              <TableHead className="border p-3 cursor-pointer" onClick={() => handleSort("ResourceId")}>
                 Resource ID {getSortSymbol("ResourceId")}
-              </th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("ResourceAccountId")}>
+              </TableHead>
+              <TableHead className="border p-3 cursor-pointer" onClick={() => handleSort("ResourceAccountId")}>
                 Resource Account ID {getSortSymbol("ResourceAccountId")}
-              </th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("EngineerId")}>
+              </TableHead>
+              <TableHead className="border p-3 cursor-pointer" onClick={() => handleSort("EngineerId")}>
                 Engineer ID {getSortSymbol("EngineerId")}
-              </th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("Status")}>
+              </TableHead>
+              <TableHead className="border p-3 cursor-pointer" onClick={() => handleSort("Status")}>
                 Status {getSortSymbol("Status")}
-              </th>
-              <th className="border p-3">Customer Time</th>
-              <th className="border p-3">User Time</th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("ChangedBy")}>
+              </TableHead>
+              <TableHead className="border p-3">Customer Time</TableHead>
+              <TableHead className="border p-3">User Time</TableHead>
+              <TableHead className="border p-3 cursor-pointer" onClick={() => handleSort("ChangedBy")}>
                 Changed By {getSortSymbol("ChangedBy")}
-              </th>
-              <th className="border p-3 cursor-pointer" onClick={() => handleSort("ChangedAt")}>
+              </TableHead>
+              <TableHead className="border p-3 cursor-pointer" onClick={() => handleSort("ChangedAt")}>
                 Changed At {getSortSymbol("ChangedAt")}
-              </th>
-              <th className="border p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="border p-3">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, i) => (
-                <tr key={item.BookingDetailId} className={`hover:bg-gray-100 text-center text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td
+                <TableRow key={item.BookingDetailId} className={`hover:bg-gray-100 text-center text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell
                     className="border p-2 text-blue-500 cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/bookings/${item.BookingDetailId}`)}
                   >
                     {item.BookingDetailId}
-                  </td>
-                  <td className="border p-2">{item.BookingId}</td>
-                  <td className="border p-2">{item.ResourceId}</td>
-                  <td className="border p-2">{item.ResourceAccountId}</td>
-                  <td className="border p-2">{item.engineer ? item.engineer.Name : "-"}</td>
-                  <td className="border p-2">{item.Status?.Description || "-"}</td>
-                  <td className="p-2 text-left border">
+                  </TableCell>
+                  <TableCell className="border p-2">{item.BookingId}</TableCell>
+                  <TableCell className="border p-2">{item.ResourceId}</TableCell>
+                  <TableCell className="border p-2">{item.ResourceAccountId}</TableCell>
+                  <TableCell className="border p-2">{item.engineer ? item.engineer.Name : "-"}</TableCell>
+                  <TableCell className="border p-2">{item.Status?.Description || "-"}</TableCell>
+                  <TableCell className="p-2 text-left border">
                     <div>
                       Start:{" "}
                       {item.StartTimeCustomerTime
@@ -6739,8 +7100,8 @@ export const BookingDetailsTable = () => {
                         ? new Date(item.ActualArrivalTimeCustomerTime).toLocaleString()
                         : "-"}
                     </div>
-                  </td>
-                  <td className="p-2 text-left border">
+                  </TableCell>
+                  <TableCell className="p-2 text-left border">
                     <div>
                       Start:{" "}
                       {item.StartTimeUserTime
@@ -6766,18 +7127,20 @@ export const BookingDetailsTable = () => {
                         ? new Date(item.ActualArrivalTimeUserTime).toLocaleString()
                         : "-"}
                     </div>
-                  </td>
-                  <td className="p-2 border">{
+                  </TableCell>
+                  <TableCell className="p-2 border">
+                    {/* {console.log("users :", users)} */}
+                    {
                     users.find((u) => u.IDUser === item.ChangedBy)?.Username || "-"
-                    }</td>
-                  <td className="p-2 border">
+                    }</TableCell>
+                  <TableCell className="p-2 border">
                     {new Date(item.ChangedAt).toLocaleDateString("id-ID", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
-                  </td>
-                  <td className="flex justify-center gap-2 p-2 border">
+                  </TableCell>
+                  <TableCell className="flex justify-center gap-2 p-2 border">
                     <BookingDetailsEdit
                       BookingDetailId={item.BookingDetailId}
                       onUpdate={fetchBookingDetails}
@@ -6788,18 +7151,18 @@ export const BookingDetailsTable = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchBookingDetails}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="12" className="p-4 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="12" className="p-4 text-center text-gray-500">
                   No entries found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Bottom controls */}
@@ -7016,61 +7379,61 @@ export const BookingStatusTable = () => {
 
       {/* 📑 Table */}
       <div className="bg-white rounded-2xl shadow overflow-auto max-h-[600px] relative">
-        <table className="w-full border-collapse">
-          <thead className="sticky top-0 bg-gray-100 z-10">
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-3 text-sm font-semibold text-center border">No</th>
-              <th
+        <Table className="w-full border-collapse">
+          <TableHeader className="sticky top-0 bg-gray-100 z-10">
+            <TableRow className="text-sm text-gray-700 uppercase bg-gray-200">
+              <TableHead className="p-3 text-sm font-semibold text-center border">No</TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-left border cursor-pointer"
                 onClick={() => handleSort("BookingStatusId")}
               >
                 <div className="flex items-center justify-center gap-1">
                   Booking StatusID {getSortIcon("BookingStatusId")}
                 </div>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-left border cursor-pointer"
                 onClick={() => handleSort("Description")}
               >
                 <div className="flex items-center justify-center gap-1">
                   Description {getSortIcon("Description")}
                 </div>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-left border cursor-pointer"
                 onClick={() => handleSort("CreatedOn")}
               >
                 <div className="flex items-center justify-center gap-1">
                   Created At {getSortIcon("CreatedOn")}
                 </div>
-              </th>
-              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, i) => (
-                <tr
+                <TableRow
                   key={item.BookingStatusId}
                   className={`hover:bg-gray-100 text-center text-sm ${
                     i % 2 === 0 ? "bg-white" : "bg-gray-50"
                   }`}
                 >
-                  <td className="p-3 text-center border">
+                  <TableCell className="p-3 text-center border">
                     {(currentPage - 1) * itemsPerPage + i + 1}
-                  </td>
-                  <td className="p-3 border">
+                  </TableCell>
+                  <TableCell className="p-3 border">
                     {item.BookingStatusId}
-                  </td>
-                  <td className="p-3 border">{item.Description}</td>
-                  <td className="p-3 border">
+                  </TableCell>
+                  <TableCell className="p-3 border">{item.Description}</TableCell>
+                  <TableCell className="p-3 border">
                     {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
-                  </td>
-                  <td className="border p-2 flex space-x-2 justify-center">
+                  </TableCell>
+                  <TableCell className="border p-2 flex space-x-2 justify-center">
                     <BookingStatusEdit
                       BookingStatusId={item.BookingStatusId}
                       onUpdate={fetchBookingStatus}
@@ -7081,18 +7444,18 @@ export const BookingStatusTable = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchBookingStatus}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="5" className="p-4 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="5" className="p-4 text-center text-gray-500">
                   No entries found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* 🔻 Bottom controls */}
@@ -7325,61 +7688,61 @@ export const RepairClassCodeTable = () => {
 
       {/* Kontainer tabel dengan gulir dan header tetap */}
       <div className="bg-white rounded-2xl shadow overflow-auto max-h-[600px] relative">
-        <table className="w-full relative border-collapse">
+        <Table className="w-full relative border-collapse">
           {/* Header tabel dengan sticky class */}
-          <thead className="sticky top-0 bg-gray-100 z-10">
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
-              <th className="p-3 text-sm font-semibold text-center border">No</th>
-              <th
+          <TableHeader className="sticky top-0 bg-gray-100 z-10">
+            <TableRow className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
+              <TableHead className="p-3 text-sm font-semibold text-center border">No</TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Code")}
               >
                 Code {getSortIcon("Code")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Description")}
               >
                 Description {getSortIcon("Description")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Definition")}
               >
                 Definition {getSortIcon("Definition")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("PaymentEligibility")}
               >
                 Payment Eligibility {getSortIcon("PaymentEligibility")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("CreatedOn")}
               >
                 Created On {getSortIcon("CreatedOn")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, i) => (
-                <tr key={item.Code} className={`hover:bg-gray-100 text-center text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <td className="p-3 text-center border">
+                <TableRow key={item.Code} className={`hover:bg-gray-100 text-center text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <TableCell className="p-3 text-center border">
                     {(currentPage - 1) * itemsPerPage + i + 1}
-                  </td>
-                  <td
+                  </TableCell>
+                  <TableCell
                     className="border p-2 text-blue-500 cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/repair-class-code/${item.Code}`)}
                   >
                     {item.Code}
-                  </td>
-                  <td className="border p-2">{item.Description}</td>
-                  <td className="border p-2">{item.Definition}</td>
-                  <td className="border p-2">{item.PaymentEligibility}</td>
-                  <td className="border p-2">
+                  </TableCell>
+                  <TableCell className="border p-2">{item.Description}</TableCell>
+                  <TableCell className="border p-2">{item.Definition}</TableCell>
+                  <TableCell className="border p-2">{item.PaymentEligibility}</TableCell>
+                  <TableCell className="border p-2">
                     {item.CreatedOn
                       ? new Date(item.CreatedOn).toLocaleDateString("id-ID", {
                           year: "numeric",
@@ -7387,8 +7750,8 @@ export const RepairClassCodeTable = () => {
                           day: "numeric",
                         })
                       : "-"}
-                  </td>
-                  <td className="border p-2 flex justify-center gap-2">
+                  </TableCell>
+                  <TableCell className="border p-2 flex justify-center gap-2">
                     <RepairClassCodeEdit Code={item.Code} onUpdate={fetchData} />
                     <RepairClassCodeDelete
                       Code={item.Code}
@@ -7396,18 +7759,18 @@ export const RepairClassCodeTable = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchData}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="7" className="p-4 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="7" className="p-4 text-center text-gray-500">
                   No entries found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Bottom controls */}
@@ -7634,69 +7997,69 @@ export const ServiceCatalogTable = () => {
 
       {/* Kontainer tabel dengan gulir dan header tetap */}
       <div className="bg-white rounded-2xl shadow overflow-auto max-h-[600px] relative">
-        <table className="w-full relative border-collapse">
+        <Table className="w-full relative border-collapse">
           {/* Header tabel dengan sticky class */}
-          <thead className="sticky top-0 bg-gray-100 z-10">
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("ServiceCatalogID")}>
+          <TableHeader className="sticky top-0 bg-gray-100 z-10">
+            <TableRow className="bg-gray-200 text-gray-700 uppercase text-sm text-center">
+              <TableHead className="p-3 text-sm font-semibold text-center border">No</TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("ServiceCatalogID")}>
                 Service Catalog ID {renderSortIcon("ServiceCatalogID")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("AssetID")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("AssetID")}>
                 Asset ID {renderSortIcon("AssetID")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Service_offerID")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("Service_offerID")}>
                 Service Offer ID {renderSortIcon("Service_offerID")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("PartNumber")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("PartNumber")}>
                 Part Number {renderSortIcon("PartNumber")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("WarrantyStatus")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("WarrantyStatus")}>
                 Warranty Status {renderSortIcon("WarrantyStatus")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Currency")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("Currency")}>
                 Currency {renderSortIcon("Currency")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Price")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("Price")}>
                 Price {renderSortIcon("Price")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Tax")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("Tax")}>
                 Tax {renderSortIcon("Tax")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => requestSort("Total")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => requestSort("Total")}>
                 Total {renderSortIcon("Total")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, i) => (
-                <tr key={item.ServiceCatalogID} className={`hover:bg-gray-100 text-center text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <td className="p-3 text-center border">
+                <TableRow key={item.ServiceCatalogID} className={`hover:bg-gray-100 text-center text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <TableCell className="p-3 text-center border">
                     {(currentPage - 1) * itemsPerPage + i + 1}
-                  </td>
-                  <td
+                  </TableCell>
+                  <TableCell
                     className="border p-2 text-blue-500 cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/service-log/${item.ServiceCatalogID}`)}
                   >
                     {item.ServiceCatalogID}
-                  </td>
-                  <td className="border p-2">{item.AssetID}</td>
-                  <td className="border p-2">{item.Service_offerID}</td>
-                  <td className="border p-2">{item.PartNumber || "-"}</td>
-                  <td className="border p-2">{item.WarrantyStatus || "-"}</td>
-                  <td className="border p-2">{item.Currency || "-"}</td>
-                  <td className="border p-2">
+                  </TableCell>
+                  <TableCell className="border p-2">{item.AssetID}</TableCell>
+                  <TableCell className="border p-2">{item.Service_offerID}</TableCell>
+                  <TableCell className="border p-2">{item.PartNumber || "-"}</TableCell>
+                  <TableCell className="border p-2">{item.WarrantyStatus || "-"}</TableCell>
+                  <TableCell className="border p-2">{item.Currency || "-"}</TableCell>
+                  <TableCell className="border p-2">
                     {item.Price ? parseFloat(item.Price).toFixed(2) : "-"}
-                  </td>
-                  <td className="border p-2">
+                  </TableCell>
+                  <TableCell className="border p-2">
                     {item.Tax ? parseFloat(item.Tax).toFixed(2) : "-"}
-                  </td>
-                  <td className="border p-2">
+                  </TableCell>
+                  <TableCell className="border p-2">
                     {item.Total ? parseFloat(item.Total).toFixed(2) : "-"}
-                  </td>
-                  <td className="border p-2 flex justify-center gap-2">
+                  </TableCell>
+                  <TableCell className="border p-2 flex justify-center gap-2">
                     <ServiceCatalogEdit
                       ServiceCatalogID={item.ServiceCatalogID}
                       onUpdate={fetchServiceCatalog}
@@ -7707,18 +8070,18 @@ export const ServiceCatalogTable = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchServiceCatalog}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="11" className="p-4 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="11" className="p-4 text-center text-gray-500">
                   No entries found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Bottom controls */}
@@ -7756,6 +8119,317 @@ export const ServiceCatalogTable = () => {
         </div>
 
         {/* Pagination + Go to page */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              ⬅ Prev
+            </button>
+
+            <span className="px-3 py-1 text-sm">
+              Page <b>{currentPage}</b> of {totalPages}
+            </span>
+
+            <button
+              className="px-3 py-1 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next ➡
+            </button>
+
+            <form onSubmit={handleGoToPage} className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder="Go to"
+                className="w-16 p-1 text-sm text-center border rounded-lg"
+                value={goToPageInput}
+                onChange={(e) => setGoToPageInput(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+              >
+                Go
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const ServiceTypeTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [serviceTypeData, setServiceTypeData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [goToPageInput, setGoToPageInput] = useState("");
+
+  // debounce search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // sorting
+  const [sortConfig, setSortConfig] = useState({
+    key: "ServiceTypeId",
+    direction: "asc",
+  });
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+    setCurrentPage(1);
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key)
+      return <ArrowUpDown size={14} className="inline ml-1 opacity-50" />;
+    return sortConfig.direction === "asc" ? (
+      <ArrowUp size={14} className="inline ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown size={14} className="inline ml-1 text-blue-600" />
+    );
+  };
+
+  // Fetch Data
+  const fetchServiceTypeData = async () => {
+    Swal.fire({
+      title: "Memuat Data Service Type...",
+      text: "Mohon tunggu sebentar...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await ApiCustomer.get("/api/service-type");
+      if (response.data.success) {
+        setServiceTypeData(response.data.data);
+      } else {
+        setError("Gagal memuat data Service Type");
+      }
+    } catch (err) {
+      console.error("Error fetching ServiceType data:", err);
+      setError("Terjadi kesalahan saat mengambil data");
+    } finally {
+      setLoading(false);
+      Swal.close();
+    }
+  };
+
+  useEffect(() => {
+    fetchServiceTypeData();
+  }, []);
+
+  // Filtering
+  const filteredData = useMemo(() => {
+    return serviceTypeData.filter((item) =>
+      Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    );
+  }, [serviceTypeData, debouncedSearchTerm]);
+
+  // Sorting
+  const sortedData = useMemo(() => {
+    const sortable = [...filteredData];
+    if (sortConfig.key) {
+      sortable.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+
+        if (typeof aValue === "string" || typeof bValue === "string") {
+          return sortConfig.direction === "asc"
+            ? String(aValue).localeCompare(String(bValue))
+            : String(bValue).localeCompare(String(aValue));
+        }
+
+        return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
+      });
+    }
+    return sortable;
+  }, [filteredData, sortConfig]);
+
+  // Pagination
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
+  const currentData = sortedData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  
+
+  const navigate = useNavigate();
+
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = Number(goToPageInput);
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    setGoToPageInput("");
+  };
+
+  return (
+    <div className="p-6">
+      <h2 className="mb-6 text-xl font-bold">Service Type Table</h2>
+
+      {/* Search + Add Button */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <input
+          type="text"
+          placeholder="🔍 Search Service Type..."
+          className="w-1/3 p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <ServiceTypeAdd onUpdate={fetchServiceTypeData} />
+      </div>
+
+      {loading && <p>Loading data...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Table */}
+      <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
+        <Table className="min-w-full relative border-collapse">
+          <TableHeader className="sticky top-0 z-10 bg-gray-200">
+            <TableRow className="text-sm text-gray-700 uppercase">
+              <TableHead className="p-3 text-center border">No</TableHead>
+              <TableHead
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ServiceTypeId")}
+              >
+                ID {getSortIcon("ServiceTypeId")}
+              </TableHead>
+              <TableHead
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ServiceTypeName")}
+              >
+                Service Type Name {getSortIcon("ServiceTypeName")}
+              </TableHead>
+              <TableHead
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ProblemCategory")}
+              >
+                Problem Category {getSortIcon("ProblemCategory")}
+              </TableHead>
+              <TableHead
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("createdAt")}
+              >
+                Created At {getSortIcon("createdAt")}
+              </TableHead>
+              <TableHead className="p-3 text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {currentData.length > 0 ? (
+              currentData.map((item, i) => (
+                <TableRow
+                  key={item.ServiceTypeId}
+                  className={`text-sm hover:bg-gray-100 ${
+                    i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  }`}
+                >
+                  <TableCell className="p-3 text-center border">
+                    {(currentPage - 1) * itemsPerPage + i + 1}
+                  </TableCell>
+                  <TableCell className="p-3 text-center border text-blue-500 cursor-pointer hover:underline">
+                    {item.ServiceTypeId}
+                  </TableCell>
+                  <TableCell className="p-3 text-center border">
+                    {item.ServiceTypeName || "-"}
+                  </TableCell>
+                  <TableCell className="p-3 text-center border">
+                    {item.ProblemCategory || "-"}
+                  </TableCell>
+                  <TableCell className="p-3 text-center border">
+                    {new Date(item.createdAt).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-3 border">
+                    <ServiceTypeEdit
+                      ServiceTypeId={item.ServiceTypeId}
+                      onUpdate={fetchServiceTypeData}
+                    />
+                    <ServiceTypeDelete
+                      ServiceTypeId={item.ServiceTypeId}
+                      isModalOpen={isModalOpen}
+                      setIsModalOpen={setIsModalOpen}
+                      onUpdate={fetchServiceTypeData}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan="6" className="p-6 text-center text-gray-500">
+                  No entries found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex flex-col w-full gap-4 mt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Rows per page:</span>
+          <select
+            className="p-1 text-sm border rounded-lg"
+            value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                setItemsPerPage(sortedData.length);
+                setCurrentPage(1);
+              } else {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        <div className="text-sm text-gray-600">
+          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
+          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
+          <b>{sortedData.length}</b> Service Type entries
+        </div>
+
         {totalPages > 1 && (
           <div className="flex items-center gap-3">
             <button
@@ -7964,59 +8638,59 @@ export const OTCCodeTable = () => {
 
       {/* Kontainer tabel dengan gulir dan header tetap */}
       <div className="bg-white rounded-2xl shadow overflow-auto max-h-[600px] relative">
-        <table className="w-full relative border-collapse">
+        <Table className="w-full relative border-collapse">
           {/* Header tabel dengan sticky class */}
-          <thead className="sticky top-0 bg-gray-100 z-10">
-            <tr className="text-sm text-gray-700 uppercase bg-gray-200">
-              <th className="p-3 text-sm font-semibold text-center border">No</th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("OTCCode")}>
+          <TableHeader className="sticky top-0 bg-gray-100 z-10">
+            <TableRow className="text-sm text-gray-700 uppercase bg-gray-200">
+              <TableHead className="p-3 text-sm font-semibold text-center border">No</TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("OTCCode")}>
                 <div className="flex items-center justify-center gap-1">
                   OTC Code {getSortIcon("OTCCode")}
                 </div>
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Description")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Description")}>
                 <div className="flex items-center justify-center gap-1">
                   Description {getSortIcon("Description")}
                 </div>
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-left border cursor-pointer"
                 onClick={() => handleSort("WarrantyCondition")}
               >
                 <div className="flex items-center justify-center gap-1">
                   Warranty Condition {getSortIcon("WarrantyCondition")}
                 </div>
-              </th>
-              <th className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("CreatedOn")}>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("CreatedOn")}>
                 <div className="flex items-center justify-center gap-1">
                   Created At {getSortIcon("CreatedOn")}
                 </div>
-              </th>
-              <th className="p-3 text-sm font-semibold text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, i) => (
-                <tr key={item.OTCCode} className={`hover:bg-gray-100 text-center text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <td className="p-3 text-center border">
+                <TableRow key={item.OTCCode} className={`hover:bg-gray-100 text-center text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <TableCell className="p-3 text-center border">
                     {(currentPage - 1) * itemsPerPage + i + 1}
-                  </td>
-                  <td className="p-3 text-blue-500 border cursor-pointer hover:underline">
+                  </TableCell>
+                  <TableCell className="p-3 text-blue-500 border cursor-pointer hover:underline">
                     {item.OTCCode}
-                  </td>
-                  <td className="p-3 border">{item.Description}</td>
-                  <td className="p-3 border">
+                  </TableCell>
+                  <TableCell className="p-3 border">{item.Description}</TableCell>
+                  <TableCell className="p-3 border">
                     {item.WarrantyCondition ? item.WarrantyCondition : "—"}
-                  </td>
-                  <td className="p-3 border">
+                  </TableCell>
+                  <TableCell className="p-3 border">
                     {new Date(item.CreatedOn).toLocaleDateString("id-ID", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
-                  </td>
-                  <td className="border p-2 flex space-x-2 justify-center">
+                  </TableCell>
+                  <TableCell className="border p-2 flex space-x-2 justify-center">
                     <OTCEdit OTCCode={item.OTCCode} onUpdate={fetchOTCCode} />
                     <OTCDelete
                       OTCCode={item.OTCCode}
@@ -8024,18 +8698,18 @@ export const OTCCodeTable = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchOTCCode}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="5" className="p-4 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="5" className="p-4 text-center text-gray-500">
                   No entries found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Bottom controls */}
@@ -8268,78 +8942,78 @@ export const CrsTable = () => {
 
       {/* Kontainer untuk tabel yang bisa digulir */}
       <div className="bg-white rounded-2xl shadow overflow-scroll max-h-300">
-        <table className="min-w-full border border-gray-300 border-collapse">
-          <thead className="sticky z-10 top-0 bg-gray-200">
-            <tr className="text-sm text-gray-700 uppercase">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("id_csr")}>
+        <Table className="min-w-full border border-gray-300 border-collapse">
+          <TableHeader className="sticky z-10 top-0 bg-gray-200">
+            <TableRow className="text-sm text-gray-700 uppercase">
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead className="p-2 border cursor-pointer" onClick={() => handleSort("id_csr")}>
                 <div className="flex items-center justify-center gap-1">
                   ID Csr {renderSortIcon("id_csr")}
                 </div>
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("caseResolutionCode")}>
+              </TableHead>
+              <TableHead className="p-2 border cursor-pointer" onClick={() => handleSort("caseResolutionCode")}>
                 <div className="flex items-center justify-center gap-1">
                   Case Resolution Code {renderSortIcon("caseResolutionCode")}
                 </div>
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("autoClose")}>
+              </TableHead>
+              <TableHead className="p-2 border cursor-pointer" onClick={() => handleSort("autoClose")}>
                 <div className="flex items-center justify-center gap-1">
                   Auto Close {renderSortIcon("autoClose")}
                 </div>
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("caseReadyForClosure")}>
+              </TableHead>
+              <TableHead className="p-2 border cursor-pointer" onClick={() => handleSort("caseReadyForClosure")}>
                 <div className="flex items-center justify-center gap-1">
                   Case Ready For Closure {renderSortIcon("caseReadyForClosure")}
                 </div>
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("readyForCloseDays")}>
+              </TableHead>
+              <TableHead className="p-2 border cursor-pointer" onClick={() => handleSort("readyForCloseDays")}>
                 <div className="flex items-center justify-center gap-1">
                   Ready For Close Days {renderSortIcon("readyForCloseDays")}
                 </div>
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("readyForClosureDate")}>
+              </TableHead>
+              <TableHead className="p-2 border cursor-pointer" onClick={() => handleSort("readyForClosureDate")}>
                 <div className="flex items-center justify-center gap-1">
                   Ready For Closure Date {renderSortIcon("readyForClosureDate")}
                 </div>
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("pendingCustomerAction")}>
+              </TableHead>
+              <TableHead className="p-2 border cursor-pointer" onClick={() => handleSort("pendingCustomerAction")}>
                 <div className="flex items-center justify-center gap-1">
                   Pending Customer Action {renderSortIcon("pendingCustomerAction")}
                 </div>
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort("customerRequestedCloseDate")}>
+              </TableHead>
+              <TableHead className="p-2 border cursor-pointer" onClick={() => handleSort("customerRequestedCloseDate")}>
                 <div className="flex items-center justify-center gap-1">
                   Customer Requested CloseDate {renderSortIcon("customerRequestedCloseDate")}
                 </div>
-              </th>
-              <th className="p-2 border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-2 border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, i) => (
-                <tr key={item.id_csr} className={`text-center hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td
+                <TableRow key={item.id_csr} className={`text-center hover:bg-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell
                     className="p-2 text-blue-500 border cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/case-resolution/${item.id_csr}`)}
                   >
                     {item.id_csr}
-                  </td>
-                  <td className="p-2 text-blue-500 border">{item.caseResolutionCode}</td>
-                  <td className="p-2 border">{item.autoClose}</td>
-                  <td className="p-2 border">{item.caseReadyForClosure}</td>
-                  <td className="p-2 border">{item.readyForCloseDays}</td>
-                  <td className="p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 text-blue-500 border">{item.caseResolutionCode}</TableCell>
+                  <TableCell className="p-2 border">{item.autoClose}</TableCell>
+                  <TableCell className="p-2 border">{item.caseReadyForClosure}</TableCell>
+                  <TableCell className="p-2 border">{item.readyForCloseDays}</TableCell>
+                  <TableCell className="p-2 border">
                     {item.readyForClosureDate ? new Date(item.readyForClosureDate).toLocaleDateString("id-ID") : "-"}
-                  </td>
-                  <td className="p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">
                     {item.pendingCustomerAction ? new Date(item.pendingCustomerAction).toLocaleDateString("id-ID") : "-"}
-                  </td>
-                  <td className="p-2 border">
+                  </TableCell>
+                  <TableCell className="p-2 border">
                     {item.customerRequestedCloseDate ? new Date(item.customerRequestedCloseDate).toLocaleDateString("id-ID") : "-"}
-                  </td>
-                  <td className="border p-2 flex space-x-2 justify-center">
+                  </TableCell>
+                  <TableCell className="border p-2 flex space-x-2 justify-center">
                     <CrsEdit id_csr={item.id_csr} onUpdate={fetchCrs} />
                     <CrsDelete
                       id_csr={item.id_csr}
@@ -8347,18 +9021,18 @@ export const CrsTable = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchCrs}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="9" className="p-4 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="9" className="p-4 text-center text-gray-500">
                   No entries found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Pagination dan Rows per page */}
@@ -8582,76 +9256,76 @@ export const NmuTable = () => {
 
       {/* Table */}
       <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
-        <table className="min-w-full relative border-collapse">
-          <thead className="sticky top-0 z-10 bg-gray-200">
-            <tr className="text-sm text-gray-700 uppercase">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th
+        <Table className="min-w-full relative border-collapse">
+          <TableHeader className="sticky top-0 z-10 bg-gray-200">
+            <TableRow className="text-sm text-gray-700 uppercase">
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("NMUId")}
               >
                 NMU ID {getSortIcon("NMUId")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("NMUDesc")}
               >
                 Description {getSortIcon("NMUDesc")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("ItemNeeded")}
               >
                 Item Needed {getSortIcon("ItemNeeded")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("VersionNeeded")}
               >
                 Version Needed {getSortIcon("VersionNeeded")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("createdAt")}
               >
                 Created At {getSortIcon("createdAt")}
-              </th>
-              <th className="p-3 text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, i) => (
-                <tr
+                <TableRow
                   key={item.NMUId}
                   className={`text-sm hover:bg-gray-100 ${
                     i % 2 === 0 ? "bg-white" : "bg-gray-50"
                   }`}
                 >
-                  <td className="p-3 text-center border">
+                  <TableCell className="p-3 text-center border">
                     {(currentPage - 1) * itemsPerPage + i + 1}
-                  </td>
-                  <td
+                  </TableCell>
+                  <TableCell
                     className="p-3 text-center text-blue-500 border cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/nmu/${item.NMUId}`)}
                   >
                     {item.NMUId}
-                  </td>
-                  <td className="p-3 border text-center">{item.NMUDesc || "-"}</td>
-                  <td className="p-3 border text-center">
+                  </TableCell>
+                  <TableCell className="p-3 border text-center">{item.NMUDesc || "-"}</TableCell>
+                  <TableCell className="p-3 border text-center">
                     {item.ItemNeeded ? "Yes" : "No"}
-                  </td>
-                  <td className="p-3 border text-center">
+                  </TableCell>
+                  <TableCell className="p-3 border text-center">
                     {item.VersionNeeded ? "Yes" : "No"}
-                  </td>
-                  <td className="p-3 border text-center">
+                  </TableCell>
+                  <TableCell className="p-3 border text-center">
                     {new Date(item.createdAt).toLocaleDateString("id-ID", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
-                  </td>
-                  <td className="flex items-center justify-center gap-2 p-3 border">
+                  </TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-3 border">
                     <NmuEdit NMUId={item.NMUId} onUpdate={fetchNmuData} />
                     <NmuDelete
                       NMUId={item.NMUId}
@@ -8659,18 +9333,18 @@ export const NmuTable = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchNmuData}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="7" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="7" className="p-6 text-center text-gray-500">
                   No entries found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Pagination */}
@@ -8843,10 +9517,13 @@ export const NmuItemTable = () => {
   // Sorting logic
   const sortedData = useMemo(() => {
     const sortable = [...filteredData];
+    const getNestedValue = (obj, key) => {
+      return key.split(".").reduce((acc, part) => acc && acc[part], obj);
+    };
     if (sortConfig.key) {
       sortable.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
+        const aValue = getNestedValue(a, sortConfig.key);
+        const bValue = getNestedValue(b, sortConfig.key);
 
         if (aValue === null || aValue === undefined) return 1;
         if (bValue === null || bValue === undefined) return -1;
@@ -8900,78 +9577,83 @@ export const NmuItemTable = () => {
 
       {/* Table */}
       <div className="bg-white rounded-2xl shadow-md overflow-x-auto max-h-[70vh]">
-        <table className="min-w-full relative border-collapse">
-          <thead className="sticky top-0 z-10 bg-gray-200">
-            <tr className="text-sm text-gray-700 uppercase">
-              <th className="p-3 text-sm font-semibold text-left border">No</th>
-              <th
+        <Table className="min-w-full relative border-collapse">
+          <TableHeader className="sticky top-0 z-10 bg-gray-200">
+            <TableRow className="text-sm text-gray-700 uppercase">
+              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("id")}
               >
                 Item ID {getSortIcon("id")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("itemName")}
               >
                 Item Name {getSortIcon("itemName")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("nmuId")}
               >
                 NMU ID {getSortIcon("nmuId")}
-              </th>
-              <th className="p-3 text-center border">NMU Desc</th>
-              <th
+              </TableHead>
+              <TableHead
+                className="p-3 border cursor-pointer text-center"
+                onClick={() => handleSort("nmu.NMUDesc")}
+              >
+                NMU Desc {getSortIcon("nmu.NMUDesc")}
+              </TableHead>
+              <TableHead
                 className="p-3 text-center border cursor-pointer"
                 onClick={() => handleSort("createdAt")}
               >
                 Created At {getSortIcon("createdAt")}
-              </th>
-              <th className="p-3 text-center border">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead className="p-3 text-center border">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, i) => (
-                <tr
+                <TableRow
                   key={item.id}
                   className={`text-sm hover:bg-gray-100 ${
                     i % 2 === 0 ? "bg-white" : "bg-gray-50"
                   }`}
                 >
-                  <td className="p-3 text-center border">
+                  <TableCell className="p-3 text-center border">
                     {(currentPage - 1) * itemsPerPage + i + 1}
-                  </td>
-                  <td className="p-3 text-center border">{item.id}</td>
-                  <td className="p-3 text-center border">{item.itemName}</td>
-                  <td className="p-3 text-center border">{item.nmuId}</td>
-                  <td className="p-3 text-center border">
+                  </TableCell>
+                  <TableCell className="p-3 text-center border">{item.id}</TableCell>
+                  <TableCell className="p-3 text-center border">{item.itemName}</TableCell>
+                  <TableCell className="p-3 text-center border">{item.nmuId}</TableCell>
+                  <TableCell className="p-3 text-center border">
                     {item.nmu?.NMUDesc || "-"}
-                  </td>
-                  <td className="p-3 border text-center">
+                  </TableCell>
+                  <TableCell className="p-3 border text-center">
                     {new Date(item.createdAt).toLocaleDateString("id-ID", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
-                  </td>
-                  <td className="flex items-center justify-center gap-2 p-3 border">
+                  </TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 p-3 border">
                     <NmuItemEdit id={item.id} onUpdate={fetchNmuItemData} />
-                    <NmuItemDelete id={item.id} onUpdate={fetchNmuItemData} />
-                  </td>
-                </tr>
+                    <NmuItemDelete id={item.id} itemName={item.itemName} onUpdate={fetchNmuItemData} />
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="7" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="7" className="p-6 text-center text-gray-500">
                   No entries found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Pagination */}
@@ -9185,50 +9867,50 @@ export const FailureTable = () => {
 
       {/* Kontainer untuk tabel yang bisa digulir */}
       <div className="bg-white rounded-2xl shadow overflow-scroll max-h-300">
-        <table className="w-full relative border-collapse">
-          <thead className="sticky z-10 top-0 bg-gray-100">
-            <tr>
-              <th className="p-3 text-sm font-semibold text-center border">No</th>
-              <th
+        <Table className="w-full relative border-collapse">
+          <TableHeader className="sticky z-10 top-0 bg-gray-100">
+            <TableRow>
+              <TableHead className="p-3 text-sm font-semibold text-center border">No</TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("FailureId")}
               >
                 Failure ID {renderSortIcon("FailureId")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Name")}
               >
                 Name {renderSortIcon("Name")}
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 className="p-3 text-sm font-semibold text-center border cursor-pointer"
                 onClick={() => handleSort("Description")}
               >
                 Description {renderSortIcon("Description")}
-              </th>
-              <th className="p-3 text-sm font-semibold text-center border">
+              </TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border">
                 Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentData.length > 0 ? (
               currentData.map((FailureItem, i) => (
-                <tr
+                <TableRow
                   key={FailureItem.FailureId}
                   className={`hover:bg-blue-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                 >
-                  <td className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</td>
-                  <td
+                  <TableCell className="p-3 text-center border">{(currentPage - 1) * itemsPerPage + i + 1}</TableCell>
+                  <TableCell
                     className="p-3 text-blue-500 text-center border cursor-pointer hover:underline"
                     onClick={() => navigate(`/app/failure/${FailureItem.FailureId}`)}
                   >
                     {FailureItem.FailureId}
-                  </td>
-                  <td className="p-3 border">{FailureItem.Name}</td>
-                  <td className="p-3 border">{FailureItem.Description}</td>
-                  <td className="flex p-3 space-x-2 justify-center border">
+                  </TableCell>
+                  <TableCell className="p-3 border">{FailureItem.Name}</TableCell>
+                  <TableCell className="p-3 border">{FailureItem.Description}</TableCell>
+                  <TableCell className="flex p-3 space-x-2 justify-center border">
                     <FailureEdit
                       FailureId={FailureItem.FailureId}
                       onUpdate={fetchFailureDataTable}
@@ -9239,18 +9921,18 @@ export const FailureTable = () => {
                       setIsModalOpen={setIsModalOpen}
                       onUpdate={fetchFailureDataTable}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan="4" className="p-6 text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan="4" className="p-6 text-center text-gray-500">
                   No data found 🚫
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Kontrol di bagian bawah tabel */}

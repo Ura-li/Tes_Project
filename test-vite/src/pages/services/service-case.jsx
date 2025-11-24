@@ -721,7 +721,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
     },
     {
       icon: CopyX,
-      label: "Cancel WOKONTOL",
+      label: "Cancel WO",
       onClick:async () => {
         const isValid = await validate();
         if (isValid !== false) {
@@ -1005,13 +1005,13 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, materialOrderI
       onClick: () => navigate(`/app/work/${materialOrders.WOID}`),
     },
     { icon: SquareArrowOutUpRight, label: "", },
-    { icon: Save, label: "Save", onClick: () => saveMaterialOrder() },
+    { icon: Save, label: "Save", onClick: () => saveMaterialOrder().then(() => {`/app/material-order/${materialOrders.MOID}`}) },
     { icon: FileSymlink, label: "Save & Close", onClick: () => saveMaterialOrder().then(() => navigate(`/app/work/${materialOrders.WOID}`))},
     {
       icon: CopyXIcon,
       label: "Close MO",
       onClick: () => saveAndCloseMaterialOrder(),
-      hidden: currentRole !== 'ce' && currentRole !== 'celead',
+      hidden: currentRole !== 'ce' && currentRole !== 'celead' && currentRole !== 'admin',
     },
     { icon: RotateCw, label: "Refresh", onClick: () => window.location.reload() },
     { icon: StepBack, label: "Cancel Order", hidden: true},
@@ -1092,9 +1092,7 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, materialOrderI
           text: res.data.message,
           timer: 2000,
           showConfirmButton: false,
-        }).then(() => {
-          navigate(`/app/material-order/${materialOrders.MOID}`);
-        });
+        })
       } else {
         Swal.fire({
           icon: "error",

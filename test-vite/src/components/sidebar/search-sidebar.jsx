@@ -27,7 +27,7 @@ import { Home, Inbox, Calendar, Search, Settings, User2, ChevronRight } from "lu
 import { cn } from "@/lib/utils"
 import { Label } from "../ui/label"
 import { Input } from "../ui/input"
-import { STATUS_LABELS } from "@/pages/CaseDetail"
+import { STATUS_ENUM_TO_LABEL, STATUS_LABELS } from "@/pages/CaseDetail"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
 import DatePicker from "../date-picker"
@@ -214,7 +214,7 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                                         <TableHeader>
                                             <TableRow className={'col-span-5'}>
                                                 <TableHead className={'text-center font-semibold text-black text-[15px] ring-4 ring-teal-500'} colSpan={5}>
-                                                    {e.status}
+                                                    {STATUS_ENUM_TO_LABEL[e.status]}
                                                 </TableHead>
                                             </TableRow>
                                         </TableHeader>

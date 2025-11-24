@@ -131,7 +131,7 @@ export const ExportExcel = ({ caseData }) => {
     <div>
       <Button
         onClick={exportToExcel}
-        className={"bg-blue-400 text-white hover:bg-blue-300 cursor-pointer"} 
+        className={"bg-blue-500 text-white hover:bg-blue-400 dark:bg-sky-600 dark:hover:bg-sky-300"} 
       >
         Export to Excel
       </Button>

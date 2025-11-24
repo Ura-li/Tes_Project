@@ -50,8 +50,9 @@ import {
    SelectTrigger,
    SelectValue,
   } from '@/components/ui/select'
-
   
+  import CaseField from "../CaseField";
+
  import { SnInput } from "../sn-input";
 import { Textarea } from "../ui/textarea";
 import { Pencil, Trash } from "lucide-react";
@@ -1116,7 +1117,7 @@ export function AssetEdit({ assetId, onUpdate }) {
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Serial Number*</label>
+            <Label className="text-sm font-medium text-gray-700">Serial Number<Label className="text-red-600">*</Label></Label>
             <Input
               value={formData.SerialNumber}
               onChange={(e) => handleChange("SerialNumber", e.target.value)}
@@ -1404,15 +1405,15 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         {/* Form Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
           <div>
-            <Label htmlFor="Company">Company Name *</Label>
+            <Label htmlFor="Company">Company Name <Label className="text-red-600">*</Label></Label>
             <Input id="Company" autoComplete="organization" value={formData.Company} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="Email">Email *</Label>
+            <Label htmlFor="Email">Email <Label className="text-red-600">*</Label></Label>
             <Input id="Email" type="email" autoComplete="email" value={formData.Email} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="PrimaryPhone">Primary Phone *</Label>
+            <Label htmlFor="PrimaryPhone">Primary Phone <Label className="text-red-600">*</Label></Label>
             <Input id="PrimaryPhone" type="tel" autoComplete="tel" value={formData.PrimaryPhone} onChange={handleChange} />
           </div>
           <div>
@@ -1420,7 +1421,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
             <Input id="WhatsappNo" type="tel" value={formData.WhatsappNo} onChange={handleChange} />
           </div>
           <div className="sm:col-span-2">
-            <Label htmlFor="AddressLine1">Address Line 1 *</Label>
+            <Label htmlFor="AddressLine1">Address Line 1 <Label className="text-red-600">*</Label></Label>
             <Input id="AddressLine1" value={formData.AddressLine1} onChange={handleChange} />
           </div>
           <div className="sm:col-span-2">
@@ -1428,19 +1429,19 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
             <Input id="AddressLine2" value={formData.AddressLine2} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="City">City *</Label>
+            <Label htmlFor="City">City <Label className="text-red-600">*</Label></Label>
             <Input id="City" value={formData.City} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="StateProvince">State/Province</Label>
+            <Label htmlFor="StateProvince">State/Province <Label className="text-red-600">*</Label></Label>
             <Input id="StateProvince" value={formData.StateProvince} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="Country">Country *</Label>
+            <Label htmlFor="Country">Country <Label className="text-red-600">*</Label></Label>
             <Input id="Country" value={formData.Country} onChange={handleChange} />
           </div>
           <div>
-            <Label htmlFor="ZipPostalCode">Zip/Postal Code *</Label>
+            <Label htmlFor="ZipPostalCode">Zip/Postal Code <Label className="text-red-600">*</Label></Label>
             <Input id="ZipPostalCode" value={formData.ZipPostalCode} onChange={handleChange} />
           </div>
         </div>
@@ -1678,63 +1679,63 @@ export function ContactEdit({ contactID, onUpdate }) {
         <div className="max-h-[70vh] overflow-y-auto p-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium">Salutation</label>
+              <Label className="text-sm font-medium">Salutation</Label>
               <Input value={salutation} onChange={(e) => setSalutation(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">First Name *</label>
+              <Label className="text-sm font-medium">First Name <Label className="text-red-600">*</Label></Label>
               <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Last Name *</label>
+              <Label className="text-sm font-medium">Last Name <Label className="text-red-600">*</Label></Label>
               <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Email *</label>
+              <Label className="text-sm font-medium">Email <Label className="text-red-600">*</Label></Label>
               <Input value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Preferred Language</label>
+              <Label className="text-sm font-medium">Preferred Language</Label>
               <Input value={preferredLanguage} onChange={(e) => setPreferredLanguage(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Phone *</label>
+              <Label className="text-sm font-medium">Phone <Label className="text-red-600">*</Label></Label>
               <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Mobile</label>
+              <Label className="text-sm font-medium">Mobile</Label>
               <Input value={mobile} onChange={(e) => setMobile(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Work Phone</label>
+              <Label className="text-sm font-medium">Work Phone</Label>
               <Input value={workPhone} onChange={(e) => setWorkPhone(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Work Extension</label>
+              <Label className="text-sm font-medium">Work Extension</Label>
               <Input value={workExtension} onChange={(e) => setWorkExtension(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Address Line 1</label>
+              <Label className="text-sm font-medium">Address Line 1</Label>
               <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Address Line 2</label>
+              <Label className="text-sm font-medium">Address Line 2</Label>
               <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">City *</label>
+              <Label className="text-sm font-medium">City <Label className="text-red-600">*</Label></Label>
               <Input value={city} onChange={(e) => setCity(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">State / Province</label>
+              <Label className="text-sm font-medium">State / Province <Label className="text-red-600">*</Label></Label>
               <Input value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Country *</label>
+              <Label className="text-sm font-medium">Country <Label className="text-red-600">*</Label></Label>
               <Input value={country} onChange={(e) => setCountry(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Zip / Postal Code *</label>
+              <Label className="text-sm font-medium">Zip / Postal Code <Label className="text-red-600">*</Label></Label>
               <Input value={zipPostalCode} onChange={(e) => setZipPostalCode(e.target.value)} />
             </div>
             <div>
@@ -2031,7 +2032,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Product Number *</Label>
+          <Label>Product Number <Label className="text-red-600">*</Label></Label>
           <Input
             type="text"
             id="ProductNumber"
@@ -2039,13 +2040,13 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
             onChange={handlerInputProduct}
           />
 
-          <Label>Product Line *</Label>
+          <Label>Product Line <Label className="text-red-600">*</Label></Label>
           <Input type="text" id="ProductLine" value={formDataProduct.ProductLine} onChange={handlerInputProduct} />
 
-          <Label>Product Name *</Label>
+          <Label>Product Name <Label className="text-red-600">*</Label></Label>
           <Input type="text" id="ProductName" value={formDataProduct.ProductName} onChange={handlerInputProduct} />
 
-          <Label>Product Type *</Label>
+          <Label>Product Type <Label className="text-red-600">*</Label></Label>
           <Select
             value={formDataProduct.ProductTypeID?.toString() || ""}
             onValueChange={(value) => setFormDataProduct((prev) => ({ ...prev, ProductTypeID: parseInt(value) }))}
@@ -2507,8 +2508,8 @@ export function WarrantyServiceAdd() {
     qty_ws: "",
     Tax: "",
     Total: "",
-    WarrantyCondition: "",   // ✅ Tambah
-    CaseTypeServices: "",    // ✅ Tambah
+    WarrantyCondition: "",   
+    CaseTypeServices: "",    
   });
 
   // Input handler
@@ -2607,7 +2608,7 @@ export function WarrantyServiceAdd() {
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Service Offer ID *</Label>
+          <Label>Service Offer ID <Label className="text-red-600">*</Label></Label>
           <Input
             type="text"
             id="Service_offerID"
@@ -2616,7 +2617,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label htmlFor="Service_description">Service Description *</Label>
+          <Label htmlFor="Service_description">Service Description <Label className="text-red-600">*</Label></Label>
           <Textarea
             id="Service_description"
             placeholder="Masukkan deskripsi servis"
@@ -2625,7 +2626,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label>Customer TAT / Response Time *</Label>
+          <Label>Customer TAT / Response Time <Label className="text-red-600">*</Label></Label>
           <Input
             type="text"
             id="CTat_RTime"
@@ -2634,7 +2635,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label>Price *</Label>
+          <Label>Price <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             id="Price"
@@ -2643,7 +2644,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label>Shipping Fee *</Label>
+          <Label>Shipping Fee <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             id="Shipping_Fee"
@@ -2652,7 +2653,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label>Quantity *</Label>
+          <Label>Quantity <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             id="qty_ws"
@@ -2661,7 +2662,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label>Tax *</Label>
+          <Label>Tax <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             id="Tax"
@@ -2670,7 +2671,7 @@ export function WarrantyServiceAdd() {
             onChange={handlerInputWarrantyService}
           />
 
-          <Label>Total *</Label>
+          <Label>Total <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             id="Total"
@@ -2680,7 +2681,7 @@ export function WarrantyServiceAdd() {
           />
 
           {/* ✅ Tambahan Field WarrantyCondition */}
-          <Label>Warranty Condition *</Label>
+          <Label>Warranty Condition <Label className="text-red-600">*</Label></Label>
           <select
             id="WarrantyCondition"
             className="w-full p-2 border rounded-lg"
@@ -2844,49 +2845,49 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Label htmlFor="Service_description">Service Description *</Label>
+          <Label htmlFor="Service_description">Service Description <Label className="text-red-600">*</Label></Label>
           <Textarea
             id="Service_description"
             value={Service_description}
             onChange={(e) => setService_description(e.target.value)}
           />
 
-          <Label>Customer TAT / Response Time *</Label>
+          <Label>Customer TAT / Response Time <Label className="text-red-600">*</Label></Label>
           <Input
             type="text"
             value={CTat_RTime}
             onChange={(e) => setCTat_RTime(e.target.value)}
           />
 
-          <Label>Price *</Label>
+          <Label>Price <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             value={Price}
             onChange={(e) => setPrice(e.target.value)}
           />
 
-          <Label>Shipping Fee *</Label>
+          <Label>Shipping Fee <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             value={Shipping_Fee}
             onChange={(e) => setShipping_Fee(e.target.value)}
           />
 
-          <Label>Quantity *</Label>
+          <Label>Quantity <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             value={qty_ws}
             onChange={(e) => setQty_ws(e.target.value)}
           />
 
-          <Label>Tax *</Label>
+          <Label>Tax <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             value={Tax}
             onChange={(e) => setTax(e.target.value)}
           />
 
-          <Label>Total *</Label>
+          <Label>Total <Label className="text-red-600">*</Label></Label>
           <Input
             type="number"
             value={Total}
@@ -3686,7 +3687,7 @@ export function UserAdd({ onAdd }) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="ml-2 rounded-sm h-11">
-          Tambah User
+          Add User
         </Button>
       </DialogTrigger>
 
@@ -3700,7 +3701,7 @@ export function UserAdd({ onAdd }) {
 
         <div className="space-y-3">
           <div>
-            <Label>Email*</Label>
+            <Label>Email<Label className="text-red-600">*</Label></Label>
             <Input
               type="email"
               value={formData.Email}
@@ -3708,7 +3709,7 @@ export function UserAdd({ onAdd }) {
             />
           </div>
           <div>
-            <Label>Username*</Label>
+            <Label>Username<Label className="text-red-600">*</Label></Label>
             <Input
               type="text"
               value={formData.Username}
@@ -3716,7 +3717,7 @@ export function UserAdd({ onAdd }) {
             />
           </div>
           <div>
-            <Label>Password*</Label>
+            <Label>Password<Label className="text-red-600">*</Label></Label>
             <Input
               type="password"
               value={formData.Password}
@@ -3724,7 +3725,7 @@ export function UserAdd({ onAdd }) {
             />
           </div>
           <div>
-            <Label>Nama*</Label>
+            <Label>Nama <Label className="text-red-600">*</Label></Label>
             <Input
               type="text"
               value={formData.Name}
@@ -3991,7 +3992,7 @@ export function UserEdit({ IDUser, onUpdate }) {
 
         <div className="space-y-3">
           <div>
-            <Label>Email*</Label>
+            <Label>Email<Label className="text-red-600">*</Label></Label>
             <Input
               type="email"
               value={formData.Email}
@@ -3999,7 +4000,7 @@ export function UserEdit({ IDUser, onUpdate }) {
             />
           </div>
           <div>
-            <Label>Username*</Label>
+            <Label>Username<Label className="text-red-600">*</Label></Label>
             <Input
               type="text"
               value={formData.Username}
@@ -4016,7 +4017,7 @@ export function UserEdit({ IDUser, onUpdate }) {
             />
           </div>
           <div>
-            <Label>Name*</Label>
+            <Label>Name<Label className="text-red-600">*</Label></Label>
             <Input
               type="text"
               value={formData.Name}
@@ -4162,10 +4163,10 @@ return (
 
 export function PartAdd ({ onReload = true, onSuccess }) {
   const [formData, setFormData] = useState({
-    PartNumber: '',
-    Keyword: '',
-    PartDescription: '',
-    RestrictionReason: '',
+    PartNumber: "",
+    Keyword: "",
+    PartDescription: "",
+    RestrictionReason: "",
     Orderability: false,
     CSR_Flag: false,
     ROHS_Flag: false,
@@ -4202,7 +4203,6 @@ export function PartAdd ({ onReload = true, onSuccess }) {
       return;
     }
 
-    // Convert types before sending
     const payload = {
       ...formData,
       Orderability: Boolean(formData.Orderability),
@@ -4255,63 +4255,92 @@ export function PartAdd ({ onReload = true, onSuccess }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="ml-2 rounded-sm h-11">Part Add</Button>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">Add Part</Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
+
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Add New Part</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Add New Part</DialogTitle>
           <DialogDescription>Fill in all part details below:</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2">
-          <Label>Part Number *</Label>
-          <Input type="text" id="PartNumber" value={formData.PartNumber} onChange={handleChange} />
+        {/* Grid layout untuk input */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <div>
+            <Label>Part Number <Label className="text-red-600">*</Label></Label>
+            <Input type="text" id="PartNumber" value={formData.PartNumber} onChange={handleChange} />
+          </div>
 
-          <Label>Keyword *</Label>
-          <Input type="text" id="Keyword" value={formData.Keyword} onChange={handleChange} />
+          <div>
+            <Label>Keyword <Label className="text-red-600">*</Label></Label>
+            <Input type="text" id="Keyword" value={formData.Keyword} onChange={handleChange} />
+          </div>
 
-          <Label>Part Description *</Label>
-          <Input type="text" id="PartDescription" value={formData.PartDescription} onChange={handleChange} />
+          <div className="sm:col-span-2">
+            <Label>Part Description <Label className="text-red-600">*</Label></Label>
+            <Input type="text" id="PartDescription" value={formData.PartDescription} onChange={handleChange} />
+          </div>
 
-          <Label>Restriction Reason</Label>
-          <Input type="text" id="RestrictionReason" value={formData.RestrictionReason} onChange={handleChange} />
+          <div className="sm:col-span-2">
+            <Label>Restriction Reason</Label>
+            <Input type="text" id="RestrictionReason" value={formData.RestrictionReason} onChange={handleChange} />
+          </div>
 
-          <Label>Price</Label>
-          <Input type="number" id="Price" value={formData.Price} onChange={handleChange} />
+          <div>
+            <Label>Price</Label>
+            <Input type="number" id="Price" value={formData.Price} onChange={handleChange} />
+          </div>
 
-          <Label>Freight Price</Label>
-          <Input type="number" id="FreightPrice" value={formData.FreightPrice} onChange={handleChange} />
+          <div>
+            <Label>Freight Price</Label>
+            <Input type="number" id="FreightPrice" value={formData.FreightPrice} onChange={handleChange} />
+          </div>
 
-          <Label>Shipping Fee</Label>
-          <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} />
+          <div>
+            <Label>Shipping Fee</Label>
+            <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} />
+          </div>
 
-          <Label>Tax</Label>
-          <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} />
+          <div>
+            <Label>Tax</Label>
+            <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} />
+          </div>
 
-          <Label>Total</Label>
-          <Input type="number" id="Total" value={formData.Total} onChange={handleChange} />
-
-          {/* Checkbox flags */}
-          {[
-            "Orderability", "CSR_Flag", "ROHS_Flag", "Returnable_Flag", "HardRoll_Flag",
-            "DangerousGoods_Flag", "LithiumBattery_Flag", "Oversize_Flag", "Heavy_Flag"
-          ].map((flag) => (
-            <div key={flag}>
-              <label className="flex items-center space-x-2">
-                <input type="checkbox" id={flag} checked={formData[flag]} onChange={handleChange} />
-                <span>{flag.replace(/_/g, " ")}</span>
-              </label>
-            </div>
-          ))}
+          <div className="sm:col-span-2">
+            <Label>Total</Label>
+            <Input type="number" id="Total" value={formData.Total} onChange={handleChange} />
+          </div>
         </div>
 
-        <DialogFooter>
-          <Button onClick={handleSubmit}>Submit</Button>
+        {/* Checkbox flags grid */}
+        <div className="mt-6">
+          <h3 className="font-medium mb-2">Flags</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {[
+              "Orderability", "CSR_Flag", "ROHS_Flag", "Returnable_Flag", "HardRoll_Flag",
+              "DangerousGoods_Flag", "LithiumBattery_Flag", "Oversize_Flag", "Heavy_Flag"
+            ].map((flag) => (
+              <label key={flag} className="flex items-center space-x-2 text-sm">
+                <input
+                  type="checkbox"
+                  id={flag}
+                  checked={formData[flag]}
+                  onChange={handleChange}
+                  className="w-4 h-4 accent-blue-600"
+                />
+                <span>{flag.replace(/_/g, " ")}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <DialogFooter className="mt-6">
+          <Button onClick={handleSubmit} className="w-full sm:w-auto">Submit</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export function PartEdit({ PartNumber, onUpdate }) {
   const [formData, setFormData] = useState({});
@@ -4321,8 +4350,8 @@ export function PartEdit({ PartNumber, onUpdate }) {
     PartNumber: "",
     Keyword: "",
     PartDescription: "",
-    Orderability: false,
     RestrictionReason: "",
+    Orderability: false,
     CSR_Flag: false,
     ROHS_Flag: false,
     Returnable_Flag: false,
@@ -4331,13 +4360,14 @@ export function PartEdit({ PartNumber, onUpdate }) {
     LithiumBattery_Flag: false,
     Oversize_Flag: false,
     Heavy_Flag: false,
-    Price: "",
-    FreightPrice: "",
-    Tax: "",
-    Total: "",
-    Shipping_Fee: "",
+    Price: 0,
+    FreightPrice: 0,
+    Shipping_Fee: 0,
+    Tax: 0,
+    Total: 0,
   };
 
+  // 🔹 Fetch data part berdasarkan PartNumber
   const fetchPart = async () => {
     try {
       const res = await ApiCustomer.get(`/api/service-log/parts-catalog/${PartNumber}`);
@@ -4347,87 +4377,78 @@ export function PartEdit({ PartNumber, onUpdate }) {
     }
   };
 
-  const handleChange = (field) => (e) => {
-    const val = e.target.type === "checkbox" ? e.target.checked : e.target.value;
-    setFormData((prev) => ({ ...prev, [field]: val }));
+  const handleChange = (e) => {
+    const { id, type, value, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
+    setFormData((prev) => ({ ...prev, [id]: newValue }));
   };
 
   const handleUpdate = async () => {
-    const {
-      PartNumber, Keyword, PartDescription,
-      Price, FreightPrice, Tax, Shipping_Fee,
-      ...restFlags
-    } = formData;
-  
+    const { PartNumber, Keyword, PartDescription } = formData;
     if (!PartNumber || !Keyword || !PartDescription) {
-      return Swal.fire({
+      Swal.fire({
         icon: "warning",
         title: "Incomplete Data",
-        text: "Lengkapi semua field wajib.",
+        text: "PartNumber, Keyword, dan PartDescription wajib diisi.",
         timer: 1200,
-        timerProgressBar: true,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
+      return;
     }
-  
+
     const updatedData = {
-      PartNumber,
-      Keyword,
-      PartDescription,
-      Price: parseFloat(Price) || 0,
-      FreightPrice: parseFloat(FreightPrice) || 0,
-      Tax: parseFloat(Tax) || 0,
-      Shipping_Fee: parseFloat(Shipping_Fee) || 0,
-      Total:
-        (parseFloat(Price) || 0) +
-        (parseFloat(FreightPrice) || 0) +
-        (parseFloat(Tax) || 0),
-      ...restFlags,
+      ...formData,
+      Orderability: Boolean(formData.Orderability),
+      CSR_Flag: Boolean(formData.CSR_Flag),
+      ROHS_Flag: Boolean(formData.ROHS_Flag),
+      Returnable_Flag: Boolean(formData.Returnable_Flag),
+      HardRoll_Flag: Boolean(formData.HardRoll_Flag),
+      DangerousGoods_Flag: Boolean(formData.DangerousGoods_Flag),
+      LithiumBattery_Flag: Boolean(formData.LithiumBattery_Flag),
+      Oversize_Flag: Boolean(formData.Oversize_Flag),
+      Heavy_Flag: Boolean(formData.Heavy_Flag),
+      Price: Number(formData.Price),
+      FreightPrice: Number(formData.FreightPrice),
+      Shipping_Fee: Number(formData.Shipping_Fee),
+      Tax: Number(formData.Tax),
+      Total: Number(formData.Total),
     };
-  
+
     try {
       Swal.fire({
-        title: "Menyimpan data...",
+        title: "Updating...",
         allowOutsideClick: false,
         allowEscapeKey: false,
-        didOpen: () => Swal.showLoading()
+        didOpen: () => Swal.showLoading(),
       });
-  
+
       await ApiCustomer.patch(`/api/service-log/parts-catalog/${PartNumber}`, updatedData);
-  
-      Swal.close(); 
-  
+      Swal.close();
+
       Swal.fire({
         icon: "success",
-        title: "Berhasil!",
-        text: "Data berhasil diperbarui.",
+        title: "Success!",
+        text: "Part updated successfully.",
         timer: 1500,
-        timerProgressBar: true,
         showConfirmButton: false,
-        allowEscapeKey: false
       }).then(() => {
         onUpdate();
         setIsOpen(false);
       });
-  
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
       Swal.close();
       Swal.fire({
         icon: "error",
-        title: "Gagal!",
-        text: "Perbaruan data gagal!",
+        title: "Update Failed",
+        text: err.response?.data?.message || "Failed to update part.",
         timer: 1500,
-        timerProgressBar: true,
         showConfirmButton: false,
-        allowEscapeKey: false
       });
     }
   };
-  
 
   useEffect(() => {
-    if (PartNumber && isOpen) fetchPart();
+    if (isOpen && PartNumber) fetchPart();
     else if (!isOpen) setFormData(defaultFormData);
   }, [isOpen]);
 
@@ -4438,57 +4459,90 @@ export function PartEdit({ PartNumber, onUpdate }) {
           <Pencil />
         </Button>
       </DialogTrigger>
-      <DialogContent className="h-[500px] overflow-y-auto">
+
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Edit Part</DialogTitle>
-          <DialogDescription>Update data part. (*) wajib diisi.</DialogDescription>
+          <DialogTitle className="text-xl font-semibold">Edit Part</DialogTitle>
+          <DialogDescription>Update detail part di bawah ini:</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3">
-          {[
-            { id: "PartNumber", label: "Part Number", type: "text", readonly: true },
-            { id: "Keyword", label: "Keyword", type: "text", required: true },
-            { id: "PartDescription", label: "Description", type: "textarea", required: true },
-            { id: "RestrictionReason", label: "Restriction Reason", type: "textarea" },
-            { id: "Orderability", label: "Orderable", type: "checkbox" },
-            { id: "CSR_Flag", label: "CSR", type: "checkbox" },
-            { id: "ROHS_Flag", label: "ROHS", type: "checkbox" },
-            { id: "Returnable_Flag", label: "Returnable", type: "checkbox" },
-            { id: "HardRoll_Flag", label: "Hard Roll", type: "checkbox" },
-            { id: "DangerousGoods_Flag", label: "Dangerous Goods", type: "checkbox" },
-            { id: "LithiumBattery_Flag", label: "Lithium Battery", type: "checkbox" },
-            { id: "Oversize_Flag", label: "Oversize", type: "checkbox" },
-            { id: "Heavy_Flag", label: "Heavy", type: "checkbox" },
-            { id: "Price", label: "Price", type: "number" },
-            { id: "FreightPrice", label: "Freight Price", type: "number" },
-            { id: "Tax", label: "Tax", type: "number" },
-            { id: "Shipping_Fee", label: "Shipping Fee", type: "number" },
-          ].map(({ id, label, type, required, readonly }) => (
-            <div key={id}>
-              <Label htmlFor={id}>
-                {label} {required && <span className="text-red-500">*</span>}
-              </Label>
-              {type === "textarea" ? (
-                <Textarea id={id} value={formData[id] || ""} onChange={handleChange(id)} />
-              ) : type === "checkbox" ? (
-                <div className="flex items-center space-x-2">
-                  <input type="checkbox" id={id} checked={!!formData[id]} onChange={handleChange(id)} />
-                  <label htmlFor={id}>{label}</label>
-                </div>
-              ) : (
-                <Input type={type} id={id} value={formData[id] || ""} onChange={handleChange(id)} readOnly={readonly} />
-              )}
-            </div>
-          ))}
+        {/* Grid layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <div>
+            <Label>Part Number <Label className="text-red-600">*</Label></Label>
+            <Input type="text" id="PartNumber" value={formData.PartNumber || ""} readOnly />
+          </div>
+
+          <div>
+            <Label>Keyword <Label className="text-red-600">*</Label></Label>
+            <Input type="text" id="Keyword" value={formData.Keyword || ""} onChange={handleChange} />
+          </div>
+
+          <div className="sm:col-span-2">
+            <Label>Part Description <Label className="text-red-600">*</Label></Label>
+            <Input type="text" id="PartDescription" value={formData.PartDescription || ""} onChange={handleChange} />
+          </div>
+
+          <div className="sm:col-span-2">
+            <Label>Restriction Reason</Label>
+            <Input type="text" id="RestrictionReason" value={formData.RestrictionReason || ""} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label>Price</Label>
+            <Input type="number" id="Price" value={formData.Price || 0} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label>Freight Price</Label>
+            <Input type="number" id="FreightPrice" value={formData.FreightPrice || 0} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label>Shipping Fee</Label>
+            <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee || 0} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label>Tax</Label>
+            <Input type="number" id="Tax" value={formData.Tax || 0} onChange={handleChange} />
+          </div>
+
+          <div className="sm:col-span-2">
+            <Label>Total</Label>
+            <Input type="number" id="Total" value={formData.Total || 0} onChange={handleChange} />
+          </div>
         </div>
 
-        <DialogFooter>
-          <Button onClick={handleUpdate}>Simpan</Button>
+        {/* Flags grid */}
+        <div className="mt-6">
+          <h3 className="font-medium mb-2">Flags</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {[
+              "Orderability", "CSR_Flag", "ROHS_Flag", "Returnable_Flag", "HardRoll_Flag",
+              "DangerousGoods_Flag", "LithiumBattery_Flag", "Oversize_Flag", "Heavy_Flag"
+            ].map((flag) => (
+              <label key={flag} className="flex items-center space-x-2 text-sm">
+                <input
+                  type="checkbox"
+                  id={flag}
+                  checked={!!formData[flag]}
+                  onChange={handleChange}
+                  className="w-4 h-4 accent-blue-600"
+                />
+                <span>{flag.replace(/_/g, " ")}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <DialogFooter className="mt-6">
+          <Button onClick={handleUpdate} className="w-full sm:w-auto">Update</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export function PartDelete ({ PartNumber, isModalOpen, setIsModalOpen, onUpdate }) {
   const handleDelete = async () => {
@@ -4642,10 +4696,10 @@ export function ResourceAdd () {
        </DialogHeader>
        <div className="space-y-2">
 
-       <Label>Resource ID</Label>
+       <Label>Resource ID<Label className="text-red-600">*</Label></Label>
        <Input type="text" id="ResourceId" className="p-2" value={formDataResource.ResourceId} onChange={handlerInputResource} />
 
-       <Label>Name</Label>
+       <Label>Name<Label className="text-red-600">*</Label></Label>
        <Input type="text" id="Name" className="p-2" value={formDataResource.Name} onChange={handlerInputResource} />
        </div>
        <DialogFooter>
@@ -5972,22 +6026,22 @@ export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
-          <Label>Part Number*</Label>
+          <Label>Part Number<Label className="text-red-600">*</Label></Label>
           <Input id="PartNumber" value={formData.PartNumber} onChange={handleChange} />
 
-          <Label>Keyword*</Label>
+          <Label>Keyword<Label className="text-red-600">*</Label></Label>
           <Input id="Keyword" value={formData.Keyword} onChange={handleChange} />
 
-          <Label>Part Description*</Label>
+          <Label>Part Description<Label className="text-red-600">*</Label></Label>
           <Input id="PartDescription" value={formData.PartDescription} onChange={handleChange} />
 
-          <Label>Orderability*</Label>
+          <Label>Orderability<Label className="text-red-600">*</Label></Label>
           <Input id="Orderability" value={formData.Orderability} onChange={handleChange} />
 
           <Label>Restriction Reason</Label>
           <Input id="RestrictionReason" value={formData.RestrictionReason} onChange={handleChange} />
 
-          <Label>Price*</Label>
+          <Label>Price<Label className="text-red-600">*</Label></Label>
           <Input type="number" id="Price" value={formData.Price} onChange={handleChange} />
 
           <Label>Freight Price</Label>
@@ -5996,10 +6050,10 @@ export function ServiceCatalogPartAdd({ onAddSuccess, onClose, isOpen, setIsOpen
           <Label>Shipping Fee</Label>
           <Input type="number" id="Shipping_Fee" value={formData.Shipping_Fee} onChange={handleChange} />
 
-          <Label>Tax*</Label>
+          <Label>Tax<Label className="text-red-600">*</Label></Label>
           <Input type="number" id="Tax" value={formData.Tax} onChange={handleChange} />
 
-          <Label>Total*</Label>
+          <Label>Total<Label className="text-red-600">*</Label></Label>
           <Input type="number" id="Total" value={formData.Total} onChange={handleChange} />
 
           <div className="grid grid-cols-2 mt-4 gap-x-4 gap-y-2">
@@ -6651,10 +6705,10 @@ export function ResourceAccountAdd() {
           <DialogDescription>Fields marked with * are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Label>ResourceAccountId *</Label>
+          <Label>ResourceAccountId <Label className="text-red-600">*</Label></Label>
           <Input id="ResourceAccountId" value={formData.ResourceAccountId} onChange={handleInputChange} />
 
-          <Label>Name *</Label>
+          <Label>Name <Label className="text-red-600">*</Label></Label>
           <Input id="Name" value={formData.Name} onChange={handleInputChange} />
 
           <Label>Resource (optional)</Label>
@@ -6771,11 +6825,13 @@ export function ResourceAccountEdit({ ResourceAccountId, onUpdate, resources }) 
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
+          <Label>Name <Label className="text-red-600">*</Label></Label>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Name*"
           />
+          <Label>Resource <Label className="text-red-600">*</Label></Label>
           <select
             value={resourceId || ""}
             onChange={(e) => setResourceId(e.target.value)}
@@ -6945,7 +7001,7 @@ export function SubkTechnicianAdd() {
           <DialogDescription>Fields marked with * are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Label>SubkTechnicianId *</Label>
+          <Label>SubkTechnicianId</Label>
           <Input id="SubkTechnicianId" value={formData.SubkTechnicianId} onChange={handleInputChange} />
 
           <Label>Name *</Label>
@@ -7250,16 +7306,16 @@ export function SymptomCodeAdd({ onUpdate }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Symptom Code</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Label>SymptomCode *</Label>
+          <Label>SymptomCode <span className="text-red-500">*</span></Label>
           <Input id="SymptomCode" value={formData.SymptomCode} onChange={handleInputChange} />
 
-          <Label>TopCategory *</Label>
+          <Label>TopCategory <span className="text-red-500">*</span></Label>
           <Input id="TopCategory" value={formData.TopCategory} onChange={handleInputChange} />
 
-          <Label>SubCategory *</Label>
+          <Label>SubCategory <span className="text-red-500">*</span></Label>
           <Input id="SubCategory" value={formData.SubCategory} onChange={handleInputChange} />
 
           <Label>QualityCodes</Label>
@@ -7359,12 +7415,16 @@ export function SymptomCodeEdit({ SymptomCodeID, onUpdate }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Symptom Code</DialogTitle>
-          <DialogDescription>Update the details of the symptom code. Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Update the details of the symptom code. Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
+          <Label>Symptom Code <span className="text-red-500">*</span></Label>
           <Input id="SymptomCode" value={symptomData.SymptomCode} onChange={handleChange} placeholder="SymptomCode *" />
+          <Label>Top Category <span className="text-red-500">*</span></Label>
           <Input id="TopCategory" value={symptomData.TopCategory} onChange={handleChange} placeholder="TopCategory *" />
+          <Label>Sub Category <span className="text-red-500">*</span></Label>
           <Input id="SubCategory" value={symptomData.SubCategory} onChange={handleChange} placeholder="SubCategory *" />
+          <Label>Quality Codes</Label>
           <Input id="QualityCodes" value={symptomData.QualityCodes} onChange={handleChange} placeholder="QualityCodes" />
         </div>
         <DialogFooter>
@@ -7549,7 +7609,7 @@ export function BookingsAdd({ onUpdate }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Booking</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
@@ -7562,7 +7622,7 @@ export function BookingsAdd({ onUpdate }) {
               labelKey="WOID"
               valueKey="WOID"
               placeholder="Search WOID..."
-              label="WOID *"
+              label={<><span>WOID</span> <span className="text-red-500">*</span></>}
               className="z-50"
             />
           </div>
@@ -7606,7 +7666,7 @@ export function BookingsAdd({ onUpdate }) {
           <Input id="TotalBreakDurationInMinutes" type="number" value={formData.TotalBreakDurationInMinutes} onChange={handleInputChange} />
 
           {/* ✅ Created By (read-only, tampil nama user) */}
-          <Label>Created By *</Label>
+          <Label>Created By <span className="text-red-500">*</span></Label>
           <Input
             id="CreatedBy"
             type="text"
@@ -7776,7 +7836,7 @@ export function BookingsEdit({ BookingId, onUpdate }) {
             labelKey="WOID"
             valueKey="WOID"
             placeholder="Search WOID..."
-            label="WOID *"
+            label={<><span>WOID</span> <span className="text-red-500">*</span></>}
           />
 
           <GenericSelector
@@ -7860,7 +7920,7 @@ export function BookingsEdit({ BookingId, onUpdate }) {
           />
 
           {/* Created By */}
-          <Label>Created By *</Label>
+          <Label>Created By <span className="text-red-500">*</span></Label>
           <Input
             id="CreatedBy"
             type="text"
@@ -8068,7 +8128,7 @@ export function BookingDetailsAdd({ onUpdate }) {
           {/* Booking Info */}
                    <div>
             <GenericSelector
-              label="Booking *"
+              label={<><span>Booking</span> <span className="text-red-500">*</span></>}
               placeholder="Search Booking..."
               endpoint="/api/booking"
               value={bookings.find((b) => b.BookingId === formData.BookingId)}
@@ -8080,7 +8140,7 @@ export function BookingDetailsAdd({ onUpdate }) {
 
           <div>
             <GenericSelector
-              label="Resource"
+              label={<><span>Resource</span> <span className="text-red-500">*</span></>}
               placeholder="Search Resource..."
               endpoint="/api/resources"
               value={resources.find((r) => r.ResourceId === formData.ResourceId)}
@@ -8092,7 +8152,7 @@ export function BookingDetailsAdd({ onUpdate }) {
 
           <div>
             <GenericSelector
-              label="Resource Account"
+              label={<><span>Resource Account</span> <span className="text-red-500">*</span></>}
               placeholder="Search Account..."
               endpoint="/api/resource-account"
               value={accounts.find((a) => a.ResourceAccountId === formData.ResourceAccountId)}
@@ -8104,7 +8164,7 @@ export function BookingDetailsAdd({ onUpdate }) {
 
           <div>
             <GenericSelector
-              label="Engineer"
+              label={<><span>Engineer</span> <span className="text-red-500">*</span></>}
               placeholder="Search Engineer..."
               endpoint="/api/user?role=ce"
               value={engineers.find((e) => e.IDUser === formData.EngineerId)}
@@ -8116,7 +8176,7 @@ export function BookingDetailsAdd({ onUpdate }) {
 
           <div>
             <GenericSelector
-              label="Status"
+              label={<><span>Status</span> <span className="text-red-500">*</span></>}
               placeholder="Search Status..."
               endpoint="/api/booking-status"
               value={statuses.find((s) => s.BookingStatusId === formData.BookingStatusId)}
@@ -8319,7 +8379,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           {/* Booking */}
           <div>
             <GenericSelector
-              label="Booking *"
+              label={<><span>Booking</span> <span className="text-red-500">*</span></>}
               placeholder="Search Booking..."
               endpoint="/api/booking"
               value={bookings.find((b) => b.BookingId === formData.BookingId)}
@@ -8332,7 +8392,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           {/* Resource */}
           <div>
             <GenericSelector
-              label="Resource"
+              label={<><span>Resource</span> <span className="text-red-500">*</span></>}
               placeholder="Search Resource..."
               endpoint="/api/resources"
               value={resources.find((r) => r.ResourceId === formData.ResourceId)}
@@ -8345,7 +8405,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           {/* Resource Account */}
           <div>
             <GenericSelector
-              label="Resource Account"
+              label={<><span>Resource Account</span> <span className="text-red-500">*</span></>}
               placeholder="Search Account..."
               endpoint="/api/resource-account"
               value={accounts.find((a) => a.ResourceAccountId === formData.ResourceAccountId)}
@@ -8358,7 +8418,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           {/* Engineer */}
           <div>
             <GenericSelector
-              label="Engineer"
+              label={<><span>Engineer</span> <span className="text-red-500">*</span></>}
               placeholder="Search Engineer..."
               endpoint="/api/users?role=ce"
               value={engineers.find((e) => e.IDUser === formData.EngineerId)}
@@ -8371,7 +8431,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           {/* Status */}
           <div>
             <GenericSelector
-              label="Status"
+              label={<><span>Status</span> <span className="text-red-500">*</span></>}
               placeholder="Search Status..."
               endpoint="/api/booking-status"
               value={statuses.find((s) => s.BookingStatusId === formData.BookingStatusId)}
@@ -8551,12 +8611,12 @@ export function BookingStatusAdd({ onUpdate }) {
         <DialogHeader>
           <DialogTitle>Add Booking Status</DialogTitle>
           <DialogDescription>
-            Fields marked with * are required.
+            Fields marked with <span className="text-red-500">*</span> are required.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Description *</Label>
+          <Label>Description <span className="text-red-500">*</span></Label>
           <Input
             type="text"
             id="Description"
@@ -8652,7 +8712,7 @@ export function BookingStatusEdit({ BookingStatusId, onUpdate }) {
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Description *</Label>
+          <Label>Description <span className="text-red-500">*</span></Label>
           <Input
             type="text"
             id="Description"
@@ -8800,20 +8860,20 @@ export function RepairClassCodeAdd() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Repair Class Code</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Code *</Label>
+          <Label>Code <span className="text-red-500">*</span></Label>
           <Input id="Code" value={formData.Code} onChange={handleInputChange} maxLength={3} />
 
-          <Label>Description *</Label>
+          <Label>Description <span className="text-red-500">*</span></Label>
           <Input id="Description" value={formData.Description} onChange={handleInputChange} maxLength={100} />
 
           <Label>Definition</Label>
           <Input id="Definition" value={formData.Definition} onChange={handleInputChange} maxLength={255} />
 
-          <Label>Payment Eligibility *</Label>
+          <Label>Payment Eligibility <span className="text-red-500">*</span></Label>
           <select
             id="PaymentEligibility"
             value={formData.PaymentEligibility}
@@ -8917,16 +8977,19 @@ export function RepairClassCodeEdit({ Code }) {
         </DialogHeader>
 
         <div className="space-y-3">
+          <Label>Description <span className="text-red-500">*</span></Label>
           <Input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Description"
           />
+          <Label>Definition <span className="text-red-500">*</span></Label>
           <Input
             value={definition}
             onChange={(e) => setDefinition(e.target.value)}
             placeholder="Definition"
           />
+          <Label>Payment Eligibility <span className="text-red-500">*</span></Label>
           <select
             value={paymentEligibility}
             onChange={(e) => setPaymentEligibility(e.target.value)}
@@ -9116,10 +9179,10 @@ export function ServiceCatalogAdd() {
       <DialogContent className="max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Service Catalog</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          <Label>Asset *</Label>
+          <Label>Asset <span className="text-red-500">*</span></Label>
           <Select onValueChange={handleSelectChange("AssetID")}>
             <SelectTrigger>
               <SelectValue placeholder="Select Asset ID" />
@@ -9133,7 +9196,7 @@ export function ServiceCatalogAdd() {
             </SelectContent>
           </Select>
 
-          <Label>Service Offer *</Label>
+          <Label>Service Offer <span className="text-red-500">*</span></Label>
           <Select onValueChange={handleSelectChange("Service_offerID")}>
             <SelectTrigger>
               <SelectValue placeholder="Select Service Offer ID" />
@@ -9293,7 +9356,7 @@ export function ServiceCatalogEdit({ ServiceCatalogID, onUpdate }) {
         </DialogHeader>
 
         <div className="space-y-2">
-          <Label>Asset *</Label>
+          <Label>Asset <span className="text-red-500">*</span></Label>
           <Select value={formData.AssetID} onValueChange={handleSelectChange("AssetID")}>
             <SelectTrigger>
               <SelectValue placeholder="Select Asset ID" />
@@ -9307,7 +9370,7 @@ export function ServiceCatalogEdit({ ServiceCatalogID, onUpdate }) {
             </SelectContent>
           </Select>
 
-          <Label>Service Offer *</Label>
+          <Label>Service Offer <span className="text-red-500">*</span></Label>
           <Select value={formData.Service_offerID} onValueChange={handleSelectChange("Service_offerID")}>
             <SelectTrigger>
               <SelectValue placeholder="Select Service Offer ID" />
@@ -9437,6 +9500,300 @@ export function ServiceCatalogDelete({ ServiceCatalogID, onUpdate }) {
   );
 }
 
+export function ServiceTypeAdd() {
+  const [formData, setFormData] = useState({
+    ServiceTypeName: "",
+    ProblemCategory: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.ServiceTypeName || !formData.ProblemCategory) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "Both Service Type Name and Problem Category are required.",
+        icon: "warning",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      const response = await ApiCustomer.post("/api/service-type", formData);
+      console.log("✅ Success:", response.data);
+
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Service Type has been successfully added.",
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("❌ Error saving ServiceType:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to save Service Type. Please try again.",
+        icon: "error",
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="ml-2 rounded-sm h-11">
+          Add Service Type
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Service Type</DialogTitle>
+          <DialogDescription>
+            Fields marked with <span className="text-red-500">*</span> are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {/* ServiceTypeName */}
+          <Label>
+            Service Type Name <span className="text-red-600">*</span>
+          </Label>
+          <Input
+            id="ServiceTypeName"
+            value={formData.ServiceTypeName}
+            onChange={handleInputChange}
+          />
+
+          {/* ProblemCategory */}
+          <Label>
+            Problem Category <span className="text-red-600">*</span>
+          </Label>
+          <select
+            id="ProblemCategory"
+            value={formData.ProblemCategory || ""}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border rounded"
+          >
+            <option value="">-- Select Problem Category --</option>
+            <option value="Hardware">Hardware</option>
+            <option value="Software">Software</option>
+          </select>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Add</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ServiceTypeEdit({ ServiceTypeId, onUpdate }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    ServiceTypeName: "",
+    ProblemCategory: "",
+  });
+  const [serviceType, setServiceType] = useState(null);
+
+  // 🔹 Ambil data ServiceType by ID
+  const fetchServiceType = async () => {
+    if (!ServiceTypeId) return;
+    try {
+      const res = await ApiCustomer.get(`/api/service-type/${ServiceTypeId}`);
+      const data = res.data.data;
+      setServiceType(data);
+      setFormData({
+        ServiceTypeName: data?.ServiceTypeName || "",
+        ProblemCategory: data?.ProblemCategory || "",
+      });
+    } catch (error) {
+      console.error("Error fetching ServiceType:", error);
+    }
+  };
+
+  // 🔹 Jalankan fetch saat modal dibuka
+  useEffect(() => {
+    if (ServiceTypeId && isOpen) {
+      fetchServiceType();
+    }
+  }, [ServiceTypeId, isOpen]);
+
+  // 🔹 Reset field saat modal ditutup
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({ ServiceTypeName: "", ProblemCategory: "" });
+    }
+  }, [isOpen]);
+
+  // 🔹 Handler untuk update ServiceType
+  const handleUpdate = async () => {
+    if (!formData.ServiceTypeName) {
+      Swal.fire({
+        title: "Incomplete Data",
+        text: "ServiceType Name is required.",
+        icon: "warning",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      await ApiCustomer.patch(`/api/service-type/${ServiceTypeId}`, {
+        ServiceTypeName: formData.ServiceTypeName,
+        ProblemCategory: formData.ProblemCategory || null,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "ServiceType updated successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(() => {
+        onUpdate?.();
+        setIsOpen(false);
+      });
+    } catch (error) {
+      console.error("Error updating ServiceType:", error);
+      Swal.fire({
+        title: "Update Failed",
+        text: "Could not update ServiceType. Please try again.",
+        icon: "error",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => { setIsOpen(true); fetchServiceType(); }}>
+          <Pencil />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit ServiceType</DialogTitle>
+          <DialogDescription>
+            Update ServiceType details below. Fields marked with <span className="text-red-500">*</span> are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <Label>Service Type Name <span className="text-red-500">*</span></Label>
+          <Input
+            value={formData.ServiceTypeName}
+            onChange={(e) =>
+              setFormData({ ...formData, ServiceTypeName: e.target.value })
+            }
+            placeholder="Service Type Name*"
+          />
+          <Label>Problem Category <span className="text-red-500">*</span></Label>
+          <select
+            value={formData.ProblemCategory || ""}
+            onChange={(e) =>
+              setFormData({ ...formData, ProblemCategory: e.target.value })
+            }
+            className="w-full px-3 py-2 border rounded"
+          >
+            <option value="">-- Select Problem Category --</option>
+            <option value="Hardware">Hardware</option>
+            <option value="Software">Software</option>
+          </select>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ServiceTypeDelete({ ServiceTypeId, onUpdate }) {
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: "ServiceType ini akan dihapus dan perubahan tidak bisa dibatalkan.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const response = await ApiCustomer.delete(`/api/service-type/${ServiceTypeId}`);
+
+      if (response.status === 409 || response.data.success === false) {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal menghapus!",
+          text: response.data.message || "ServiceType tidak bisa dihapus karena ada relasi.",
+        });
+        return;
+      }
+
+      await Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "ServiceType berhasil dihapus.",
+        timer: 1100,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+
+      if (onUpdate) onUpdate(); 
+    } catch (error) {
+      if (error.response?.status === 409) {
+        Swal.fire({
+          icon: "error",
+          title: "Tidak bisa menghapus!",
+          text: "ServiceType ini memiliki relasi aktif di tabel lain. Harap hapus data terkait terlebih dahulu.",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text:
+            error.response?.data?.message ||
+            "Terjadi kesalahan saat menghapus ServiceType. Silakan coba lagi.",
+        });
+      }
+    }
+  };
+
+  return (
+    <Button
+      variant="outline"
+      className="text-red-500 hover:text-red-700"
+      onClick={handleDelete}
+    >
+      <Trash className="w-4 h-4" />
+    </Button>
+  );
+}
 
 export function OTCAdd({ onUpdate }) {
   const [formData, setFormData] = useState({
@@ -9500,16 +9857,16 @@ export function OTCAdd({ onUpdate }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add OTC Code</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Label>OTC Code</Label>
+          <Label>OTC Code <span className="text-red-500">*</span></Label>
           <Input id="OTCCode" value={formData.OTCCode} onChange={handleInputChange} />
 
-          <Label>Description</Label>
+          <Label>Description <span className="text-red-500">*</span></Label>
           <Input id="Description" value={formData.Description} onChange={handleInputChange} />
 
-          <Label>Warranty Condition *</Label>
+          <Label>Warranty Condition <span className="text-red-500">*</span></Label>
           <select
             id="WarrantyCondition"
             value={formData.WarrantyCondition}
@@ -9619,13 +9976,13 @@ export function OTCEdit({ OTCCode, onUpdate }) {
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>OTC Code</Label>
+          <Label>OTC Code <span className="text-red-500">*</span></Label>
           <Input id="OTCCode" value={formData.OTCCode} disabled />
 
-          <Label>Description</Label>
+          <Label>Description <span className="text-red-500">*</span></Label>
           <Input id="Description" value={formData.Description} onChange={handleInputChange} />
 
-          <Label>Warranty Condition</Label>
+          <Label>Warranty Condition <span className="text-red-500">*</span></Label>
           <select
             id="WarrantyCondition"
             value={formData.WarrantyCondition}
@@ -9787,7 +10144,7 @@ export function CrsAdd() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Case Resolution</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <Label>Case Resolution Code</Label>
@@ -10096,11 +10453,11 @@ export function NmuAdd() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add NMU</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>NMU Description *</Label>
+          <Label>NMU Description <span className="text-red-500">*</span></Label>
           <Input
             id="NMUDesc"
             value={formData.NMUDesc}
@@ -10223,6 +10580,7 @@ export function NmuEdit({ NMUId, onUpdate }) {
         </DialogHeader>
 
         <div className="space-y-3">
+          <Label>NMU Description <span className="text-red-500">*</span></Label>
           <Input
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
@@ -10415,11 +10773,11 @@ export function NmuItemAdd() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add NMU Item</DialogTitle>
-          <DialogDescription>Fields marked with * are required.</DialogDescription>
+          <DialogDescription>Fields marked with <span className="text-red-500">*</span> are required.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Item Name *</Label>
+          <Label>Item Name <span className="text-red-500">*</span></Label>
           <Input
             id="itemName"
             value={formData.itemName}
@@ -10427,7 +10785,7 @@ export function NmuItemAdd() {
             maxLength={255}
           />
 
-          <Label>Pilih NMU *</Label>
+          <Label>Pilih NMU <span className="text-red-500">*</span></Label>
           <select
             id="nmuId"
             value={formData.nmuId}
@@ -10451,38 +10809,33 @@ export function NmuItemAdd() {
   );
 }
 
-export function NmuItemEdit({ id }) {
+export function NmuItemEdit({ id, onUpdate }) {
   const [formData, setFormData] = useState({
     itemName: "",
     nmuId: "",
   });
-  console.log("THE vALUE",id)
 
   const [nmuList, setNmuList] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Fetch list NMU untuk dropdown
-  useEffect(() => {
-    const fetchNMU = async () => {
-      try {
-        const res = await ApiCustomer.get("/api/nmu", {
-          params: { limit: 100 },
-        });
-        if (res.data.success) {
-          setNmuList(res.data.data);
-        }
-      } catch (error) {
-        console.error("Gagal ambil data NMU:", error);
+  // Ambil list NMU untuk dropdown
+  const fetchNMU = async () => {
+    try {
+      const res = await ApiCustomer.get("/api/nmu", {
+        params: { limit: 100 },
+      });
+      if (res.data.success) {
+        setNmuList(res.data.data);
       }
-    };
+    } catch (error) {
+      console.error("Gagal ambil data NMU:", error);
+    }
+  };
 
-    fetchNMU();
-  }, []);
-
-  // Fetch data NMUItem untuk edit
+  // Ambil data NMUItem untuk edit
   const fetchNMUItem = async () => {
     try {
       const res = await ApiCustomer.get(`/api/nmu/nmuitem/${id}`);
-      console.log("TES VALUE OF THE NMU ITEM",res)
       if (res.data.success) {
         setFormData({
           itemName: res.data.data.itemName,
@@ -10493,12 +10846,14 @@ export function NmuItemEdit({ id }) {
       console.error("Gagal ambil data NMU Item:", error);
     }
   };
-  useEffect(() => {
 
-    if (id) {
-      fetchNMUItem();
+  // Load data ketika modal dibuka
+  useEffect(() => {
+    if (isOpen) {
+      fetchNMU();
+      if (id) fetchNMUItem();
     }
-  }, [id]);
+  }, [isOpen]);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -10524,19 +10879,20 @@ export function NmuItemEdit({ id }) {
       await ApiCustomer.patch(`/api/nmu/nmuitem/${id}`, formData);
       Swal.fire({
         icon: "success",
-        title: "Success",
-        text: "NMU Item berhasil diperbarui",
+        title: "Updated!",
+        text: "NMU Item berhasil diperbarui.",
         timer: 1200,
         showConfirmButton: false,
       }).then(() => {
-        window.location.reload();
+        setIsOpen(false);
+        if (onUpdate) onUpdate();
       });
     } catch (error) {
       console.error("Gagal update NMU Item:", error);
       Swal.fire({
         icon: "error",
         title: "Failed",
-        text: "Gagal mengupdate data",
+        text: "Gagal mengupdate data.",
         timer: 1500,
         showConfirmButton: false,
       });
@@ -10544,10 +10900,13 @@ export function NmuItemEdit({ id }) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-sm">Edit</Button>
+        <Button variant="outline" onClick={() => setIsOpen(true)}>
+          <Pencil size={16} />
+        </Button>
       </DialogTrigger>
+
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit NMU Item</DialogTitle>
@@ -10555,7 +10914,7 @@ export function NmuItemEdit({ id }) {
         </DialogHeader>
 
         <div className="space-y-3">
-          <Label>Item Name *</Label>
+          <Label>Item Name <span className="text-red-500">*</span></Label>
           <Input
             id="itemName"
             value={formData.itemName}
@@ -10563,7 +10922,7 @@ export function NmuItemEdit({ id }) {
             maxLength={255}
           />
 
-          <Label>Pilih NMU *</Label>
+          <Label>Pilih NMU <span className="text-red-500">*</span></Label>
           <select
             id="nmuId"
             value={formData.nmuId}
@@ -10587,64 +10946,89 @@ export function NmuItemEdit({ id }) {
   );
 }
 
-export function NmuItemDelete({ id, itemName }) {
-  const [loading, setLoading] = useState(false);
-
+export function NmuItemDelete({ id, itemName, onUpdate }) {
   const handleDelete = async () => {
-    setLoading(true);
-    try {
-      await ApiCustomer.delete(`/api/nmu/nmuitem/${id}`);
-      Swal.fire({
-        icon: "success",
-        title: "Deleted",
-        text: "NMU Item berhasil dihapus",
-        timer: 1200,
-        showConfirmButton: false,
-      }).then(() => {
-        window.location.reload();
-      });
-    } catch (error) {
-      console.error("Gagal hapus NMU Item:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Failed",
-        text: "Gagal menghapus data",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-    } finally {
-      setLoading(false);
+    const result = await Swal.fire({
+      title: "Apakah Anda yakin?",
+      text: `Item "${itemName}" akan dihapus secara permanen dan tidak bisa dibatalkan.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await ApiCustomer.delete(`/api/nmu/nmuitem/${id}`);
+
+        // Jika backend mengirim status gagal atau 409 (foreign key constraint)
+        if (response.status === 409 || response.data.success === false) {
+          return Swal.fire({
+            icon: "warning",
+            title: "Tidak Bisa Dihapus!",
+            text:
+              response.data.message ||
+              "Data ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        }
+
+        // ✅ Jika sukses hapus
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "NMU Item berhasil dihapus.",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+        }).then(() => {
+          if (onUpdate) {
+            onUpdate(); // refresh tabel parent tanpa reload halaman
+          } else {
+            window.location.reload();
+          }
+        });
+      } catch (error) {
+        const message = error?.response?.data?.message;
+        if (error?.response?.status === 409) {
+          Swal.fire({
+            icon: "warning",
+            title: "Tidak Bisa Dihapus!",
+            text:
+              message ||
+              "Data ini memiliki keterkaitan dan tidak dapat dihapus.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Gagal Menghapus!",
+            text: "Terjadi kesalahan saat menghapus data. Silakan coba lagi.",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowEscapeKey: false,
+          });
+        }
+      }
     }
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="destructive" className="h-11 rounded-sm">
-          Delete
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Hapus NMU Item</DialogTitle>
-          <DialogDescription>
-            Apakah kamu yakin ingin menghapus item <b>{itemName}</b>?  
-            Data yang sudah dihapus tidak bisa dikembalikan.
-          </DialogDescription>
-        </DialogHeader>
-
-        <DialogFooter className="mt-4">
-          <Button variant="outline">Batal</Button>
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={loading}
-          >
-            {loading ? "Menghapus..." : "Ya, Hapus"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <Button
+      variant="outline"
+      className="text-red-500 hover:text-red-700"
+      onClick={handleDelete}
+    >
+      <Trash size={16} />
+    </Button>
   );
 }
 
@@ -10721,11 +11105,11 @@ export function FailureAdd () {
        <DialogHeader>
          <DialogTitle>Add Failure Information</DialogTitle>
          <DialogDescription>
-           Add the Failure Fields marked with * are required.
+           Add the Failure Fields marked with <span className="text-red-500">*</span> are required.
          </DialogDescription>
        </DialogHeader>
        <div className="space-y-2">
-       <Label>Name</Label>
+       <Label>Name <span className="text-red-500">*</span></Label>
        <Input type="text" id="Name" className="p-2" value={formDataFailure.Name} onChange={handlerInputFailure} />
 
        <Label>Description</Label>
@@ -10819,7 +11203,7 @@ export function FailureEdit({ FailureId, onUpdate }) {
       <DialogContent className="h-[300px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Failure</DialogTitle>
-          <DialogDescription>Update data Failure. (*) wajib diisi.</DialogDescription>
+          <DialogDescription>Update data Failure. (<span className="text-red-500">*</span>) wajib diisi.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">

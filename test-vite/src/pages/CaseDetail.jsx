@@ -142,7 +142,7 @@ export const STATUS_ENUM_TO_LABEL = {
   NEW_AssignCE: "New Assign To CE",
   NEW_AssignLeader: "New Assign To Leader",
   NEW_AssignAPO: "New Assign To APO",
-  NEW_AssignPS: "New Assign To Product Store",
+  NEW_AssignPS: "New Assign To PS",
   NEW_POPDoc: "New Needed POP Document",
   NEW_Warranty: "New Warranty Approval",
   PartRequest: "Part Request",
@@ -795,19 +795,8 @@ const openPopup = () => {
     {
       icon: CircleChevronLeft,
       label: "",
-      onClick: () => navigate(`/app/viewcase`),
-      roles: [
-        "admin",
-        "fd",
-        "user",
-        "apo",
-        "ce",
-        "lg",
-        "celead",
-        "spv",
-        "ps",
-        "cm",
-      ],
+      onClick: () => navigate(`/app/`),
+      roles: ["admin", "fd","user", "apo", "ce","lg","celead","spv","ps","cm","apv"]
     },
     // { icon: SquareArrowOutUpRight, label: "",},
     {
@@ -838,18 +827,7 @@ const openPopup = () => {
       icon: RotateCw,
       label: "Refresh",
       onClick: () => window.location.reload(),
-      roles: [
-        "admin",
-        "fd",
-        "user",
-        "apo",
-        "ce",
-        "lg",
-        "celead",
-        "spv",
-        "ps",
-        "cm",
-      ],
+      roles: ["admin", "fd","user", "apo", "ce", "lg", "celead", "spv", "ps","cm","apv"],
     },
     {
       icon: MessageSquareText,
@@ -895,6 +873,18 @@ const openPopup = () => {
       icon: StepBack,
       label: "ERF",
       onClick: async () => {
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          LogType: "System Info",
+          ActionType: "Request ERF",
+          Template: "ERF Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] ERF requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        });
         const blob = await pdf(
           <EquipmentReciptForm
             caseDetails={caseDetails}
@@ -925,6 +915,18 @@ const openPopup = () => {
       icon: CoinsIcon,
       label: "Quotation Invoice",
        onClick: async () => {
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          LogType: "System Info",
+          ActionType: "Request QUOTATION INVOICE",
+          Template: "QUOTATION INVOICE Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] QUOTATION INVOICE requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        });
         const blob = await pdf(
           <QuotationInvoice
             caseDetails={caseDetails}
@@ -933,8 +935,31 @@ const openPopup = () => {
             initialData={quotationInitialData || {}}
           />
         ).toBlob();
-        const url = URL.createObjectURL(blob);
-        window.open(url); 
+         const fileName = `Quotation-${
+           quotationInitialData?.quotationNo ||
+           caseDetails?.CaseID ||
+           "document"
+         }.pdf`;
+
+         const url = URL.createObjectURL(blob);
+
+         // Open a new tab/window
+         const newWindow = window.open("", "_blank");
+
+         if (!newWindow) return;
+
+         // Set the tab title
+         newWindow.document.title = fileName;
+
+         // Fill with a minimal HTML shell and embed the PDF
+         newWindow.document.body.style.margin = "0";
+         const iframe = newWindow.document.createElement("iframe");
+         iframe.src = url;
+         iframe.style.border = "none";
+         iframe.style.width = "100%";
+         iframe.style.height = "100vh";
+
+         newWindow.document.body.appendChild(iframe);
       },
       roles: ["admin", "fd", "user", "spv", "cm"],
     },
@@ -1496,6 +1521,7 @@ const openPopup = () => {
             invoiceSummary={invoiceSummary}
             invoiceQuotation={invoiceQuotation}
             invoiceNotificationLabel={invoiceNotificationLabel}
+            handleInvoiceOpenChange={handleInvoiceOpenChange}
           />
       </div>
     </>
@@ -1533,6 +1559,7 @@ export const ServiceCase = ({
   invoiceSummary,
   invoiceQuotation,
   invoiceNotificationLabel,
+  handleInvoiceOpenChange
 }) => {
   const { open } = useSidebar();
 
@@ -2028,6 +2055,7 @@ let canEdit;
 let canEditFd;
 let canEditApo;
 let canEditCe;
+let canEditWarranty;
 
 const [hideAsignTo, setHideAsignTo] = useState(null)
 if (caseDetails.CaseStatus !== "Close") {
@@ -2035,11 +2063,13 @@ if (caseDetails.CaseStatus !== "Close") {
    canEditFd = user?.role === "fd" || user?.role === 'admin';
    canEditApo = user?.role === "apo" || user?.role === 'admin';
    canEditCe = user?.role === "ce" || user?.role === "celead" || user?.role === 'admin';
+   canEditWarranty = user?.role === "fd" || user?.role === 'admin' || user?.role === 'apv';
 } else {
    canEdit = false;
    canEditFd = false;
    canEditApo = false;
    canEditCe = false;
+   canEditWarranty = false;
 }
 
 
@@ -2285,7 +2315,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         
                         if(enumValue.startsWith("NEW_Assign")) {
                           const role = extractRoleFromStatus(enumValue);
-  // console.log("Extracted role:", role)
+                          
                           console.log("Mapped enum:", role);
                           
                           if(role) {
@@ -2310,7 +2340,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     <SearchCommandBlock
                       value={caseForm?.Owner}
                       onChange={(selectedID) => {
-                            if (selectedID === null) {
+                            if (!selectedID) {
                           onChangeCase("Owner")(null); // Clear the value!
                           return;
                         }
@@ -2472,9 +2502,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     value={
                       dataFetchCustomerData?.Type == "SiteAccount"
                         ? dataFetchCustomerData?.SiteAccount?.Company
-                        : dataFetchCustomerData?.MainAccount?.FirstName +
-                          " " +
-                          dataFetchCustomerData?.MainAccount?.LastName
+                        : dataFetchCustomerData?.MainAccount?.FirstName && dataFetchCustomerData?.MainAccount?.LastName ? dataFetchCustomerData?.MainAccount?.FirstName + " " + dataFetchCustomerData?.MainAccount?.LastName : "---"
                     }
                     readOnly
                   />
@@ -2482,7 +2510,12 @@ if (caseDetails.CaseStatus !== "Close") {
                 <CaseField label="Primary Contact" lock>
                   <Input
                     variant="invisible"
-                    value={`${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}`}
+                    value = {
+                      dataFetchCustomerData.MainAccount?.Salutation && dataFetchCustomerData.MainAccount?.FirstName && dataFetchCustomerData.MainAccount?.LastName ?
+                      `${dataFetchCustomerData.MainAccount?.Salutation} ${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}` : 
+                      dataFetchCustomerData.MainAccount?.FirstName && dataFetchCustomerData.MainAccount?.LastName ?
+                      `${dataFetchCustomerData.MainAccount?.FirstName} ${dataFetchCustomerData.MainAccount?.LastName}` : "---"
+                    }
                     readOnly
                   />
                 </CaseField>
@@ -2492,7 +2525,7 @@ if (caseDetails.CaseStatus !== "Close") {
                 <CaseField label=" Primary Email" lock>
                   <Input
                     variant="invisible"
-                    value={dataFetchCustomerData.MainAccount?.Email}
+                    value={dataFetchCustomerData.MainAccount?.Email ? dataFetchCustomerData.MainAccount?.Email : "---"}
                     placeholder="---"
                     readOnly
                   />
@@ -2503,7 +2536,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     value={
                       dataFetchCustomerData?.Type == "SiteAccount"
                         ? dataFetchCustomerData?.SiteAccount?.Country
-                        : dataFetchCustomerData?.MainAccount?.Country
+                        : dataFetchCustomerData?.MainAccount?.Country ? dataFetchCustomerData?.MainAccount?.Country : "---"
                     }
                     readOnly
                   />                  
@@ -2512,7 +2545,7 @@ if (caseDetails.CaseStatus !== "Close") {
                   <span className="pl-3">
                   {dataFetchCustomerData?.Type == "SiteAccount"
                     ? dataFetchCustomerData?.SiteAccount?.PrimaryPhone
-                    : dataFetchCustomerData?.MainAccount?.Phone}
+                    : dataFetchCustomerData?.MainAccount?.Phone ? dataFetchCustomerData?.MainAccount?.Phone : "---"}
                   </span>
                 </CaseField>
                 <CaseField label="Region" lock>
@@ -2521,7 +2554,8 @@ if (caseDetails.CaseStatus !== "Close") {
                   placeholder="---"  
                   value={dataFetchCustomerData?.Type == "SiteAccount"
                     ? dataFetchCustomerData?.SiteAccount?.City + " - " + dataFetchCustomerData?.SiteAccount?.StateProvince
-                    : dataFetchCustomerData?.MainAccount?.City + " - " + dataFetchCustomerData?.MainAccount?.StateProvince}/>
+                    : dataFetchCustomerData?.MainAccount?.City && dataFetchCustomerData?.MainAccount?.StateProvince ? dataFetchCustomerData?.MainAccount?.City + " - " + dataFetchCustomerData?.MainAccount?.StateProvince : "---"
+                    }/>
                 </CaseField>
                 <CaseField label="Is Partner" lock>
                   <Input variant="invisible" placeholder="---" />
@@ -2895,7 +2929,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         <Input variant="invisible" placeholder="---" />
                       </CaseField>
                     </div>
-                    <CaseField label="Warranty Status"  span={3} star className={"whitespace-break-spaces col-span-1 sm:col-span-2 md:col-span-1"} lock={!canEditFd}>
+                    <CaseField label="Warranty Status"  span={3} star className={"whitespace-break-spaces col-span-1 sm:col-span-2 md:col-span-1"} lock={!canEditWarranty}>
                       <SearchCommandBlock
                         options={otcCode}
                         value={entitlementStatus.OTCCode || "--select--"}
@@ -2910,7 +2944,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         getValue={(opt) => opt.OTCCode}
                       />
                     </CaseField>
-                  <CaseField lock={entitlementStatus?.needWarrantyApproval || !canEditFd} label="Need warranty approval?"  className={'col-span-1 '} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2}>
+                  <CaseField lock={entitlementStatus?.needWarrantyApproval || !canEditWarranty} label="Need warranty approval?"  className={'col-span-1 '} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2}>
                     <SelectYN
                       // value={caseDetails.CaseStatus === "NEW_POPDoc" ? (WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition] === 'Out of Warranty' ? "Yes" : WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition] === 'InWarranty' ? "No" : "") : (caseDetails?.IsHWUnderWarranty ? "Yes" : "No")}
                       value={entitlementStatus?.needWarrantyApproval === undefined || entitlementStatus?.needWarrantyApproval === null ? "No" : entitlementStatus?.needWarrantyApproval ? "Yes" : "No"}
@@ -2928,7 +2962,7 @@ if (caseDetails.CaseStatus !== "Close") {
                       }
                     />
                   </CaseField>
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Approval Status"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditFd}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Approval Status"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditWarranty}>
                     <SelectBar
                       options={
                         [
@@ -2941,12 +2975,12 @@ if (caseDetails.CaseStatus !== "Close") {
                       onChange={handleEntitlementStatus('WarrantyApprovalStatus')}
                     />
                   </CaseField>
-                    <CaseField  label="Warranty Expiration Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditFd}>
+                    <CaseField  label="Warranty Expiration Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditWarranty}>
                       <DatePicker
                         variant="icon"
                       value={entitlementStatus?.EOW_Date}
                         onChange={handleEntitlementStatus('EOW_Date')}
-                        readOnly={!canEditFd}
+                        readOnly={!canEditWarranty}
                       ></DatePicker>
                     </CaseField>
                   {/* <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Upload Pop Document" className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
@@ -2958,7 +2992,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     className="col-span-1"
                     childClass="col-span-1 sm:col-span-2 md:col-span-1"
                     span={2}
-                    lock={!canEditFd}
+                    lock={!canEditWarranty}
                   >
                     {entitlementStatus?.POPDocument ? (
                       
@@ -2989,7 +3023,7 @@ if (caseDetails.CaseStatus !== "Close") {
                           onChange={(e) =>
                             handleEntitlementStatus("POPDocument")(e.target.files?.[0] || "")
                           }
-                          readOnly={!canEditFd}
+                          readOnly={!canEditWarranty}
                         />
                         
                       </div>
@@ -2999,7 +3033,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         onChange={(e) =>
                           handleEntitlementStatus("POPDocument")(e.target.files?.[0] || "")
                         }
-                        readOnly={!canEditFd}
+                        readOnly={!canEditWarranty}
                       />
                     )}
                   </CaseField>
@@ -3007,12 +3041,12 @@ if (caseDetails.CaseStatus !== "Close") {
 
 
                   
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Purchase date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditFd}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Purchase date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditWarranty}>
                     <DatePicker
                       variant="icon"
                       value={entitlementStatus?.PurchaseDate}
                       onChange={handleEntitlementStatus('PurchaseDate')}
-                      readOnly={!canEditFd}
+                      readOnly={!canEditWarranty}
                     ></DatePicker>
                   </CaseField>
                   <CaseField
@@ -3021,7 +3055,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     className="col-span-1"
                     childClass="col-span-1 sm:col-span-2 md:col-span-1"
                     span={2}
-                    lock={!canEditFd}
+                    lock={!canEditWarranty}
                   >
                     {entitlementStatus.WarrantyCard ? (
 
@@ -3050,7 +3084,7 @@ if (caseDetails.CaseStatus !== "Close") {
                           onChange={(e) =>
                             handleEntitlementStatus("WarrantyCard")(e.target.files?.[0] || "")
                           }
-                          readOnly={!canEditFd}
+                          readOnly={!canEditWarranty}
                         />
 
                       </div>
@@ -3060,7 +3094,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         onChange={(e) =>
                           handleEntitlementStatus("WarrantyCard")(e.target.files?.[0] || "")
                         }
-                        readOnly={!canEditFd}
+                        readOnly={!canEditWarranty}
                       />
                     )}
                   </CaseField>
@@ -3068,12 +3102,12 @@ if (caseDetails.CaseStatus !== "Close") {
                     <Input type="file"  onChange={(e) => onPickWarrantyCards(e.target.files)} />
                   </CaseField> */}
                  
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Card Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditFd}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="Warranty Card Date"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditWarranty}>
                     <DatePicker
                       variant="icon"
                       value={entitlementStatus?.WarrantyCardDate}
                       onChange={handleEntitlementStatus('WarrantyCardDate')}
-                      readOnly={!canEditFd}
+                      readOnly={!canEditWarranty}
                     ></DatePicker>
                   </CaseField>
                   {/* <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Upload Photo Unit" className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2}>
@@ -3085,7 +3119,7 @@ if (caseDetails.CaseStatus !== "Close") {
                     className="col-span-1"
                     childClass="col-span-1 sm:col-span-2 md:col-span-1"
                     span={2}
-                    lock={!canEditFd}
+                    lock={!canEditWarranty}
                   >
                     {entitlementStatus?.PhotoUnit ? (
 
@@ -3116,7 +3150,7 @@ if (caseDetails.CaseStatus !== "Close") {
                           onChange={(e) =>
                             handleEntitlementStatus("PhotoUnit")(e.target.files?.[0] || "")
                           }
-                          readOnly={!canEditFd}
+                          readOnly={!canEditWarranty}
                         />
 
                       </div>
@@ -3126,18 +3160,18 @@ if (caseDetails.CaseStatus !== "Close") {
                         onChange={(e) =>
                           handleEntitlementStatus("PhotoUnit")(e.target.files?.[0] || "")
                         }
-                        readOnly={!canEditFd}
+                        readOnly={!canEditWarranty}
                       />
                     )}
                   </CaseField>
                   
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Name"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditFd}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Name"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditWarranty}>
                     <Input value={entitlementStatus.EndUserName} onChange={(e) => handleEntitlementStatus('EndUserName')(e.target.value)} variant="invisible" placeholder="---" />
                   </CaseField>
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Phone"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditFd}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Phone"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditWarranty}>
                     <Input value={entitlementStatus.EndUserPhone} onChange={(e) => handleEntitlementStatus('EndUserPhone')(e.target.value)} variant="invisible" placeholder="---" />
                   </CaseField>
-                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Address"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditFd}>
+                  <CaseField hide={!entitlementStatus.needWarrantyApproval} label="End User Address"  className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2} lock={!canEditWarranty}>
                     <Textarea value={entitlementStatus.EndUserAddress} onChange={(e) => handleEntitlementStatus('EndUserAddress')(e.target.value)} variant="invisible" placeholder="---" />
                   </CaseField>
                   </CardContent>
@@ -3261,7 +3295,7 @@ if (caseDetails.CaseStatus !== "Close") {
                             <TableCell></TableCell>
                             <TableCell>{work.owner?.Name}</TableCell>
                             <TableCell>{work.owner?.Name}</TableCell>
-                            <TableCell>{work.CreatedOn}</TableCell>
+                            <TableCell>{formatDate(work.CreatedOn)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -3294,18 +3328,25 @@ if (caseDetails.CaseStatus !== "Close") {
                           <TableRow 
                           key={material.MOID}
                           onClick = {() => navigate(`/app/material-order/${material.MOID}`)}
-                          className="cursor-pointer hover:bg-gray-300"
+                           className={
+                            material.OrderStatus === "New" ? "cursor-pointer bg-green-100" :
+                            material.OrderStatus === "Shipped" ? "cursor-pointer bg-yellow-100" :
+                            material.OrderStatus === "Ordered" ? "cursor-pointer bg-blue-100" :
+                            material.OrderStatus === "Closed" ? "cursor-pointer bg-gray-100" :
+                            material.OrderStatus === "BackOrdered" ? "cursor-pointer bg-purple-100" 
+                            : "cursor-pointer bg-red-100"
+                          }
                           >
                             <TableCell className="font-medium">
                                 {material.MOID} on {material.WOID}
                             </TableCell>
                             <TableCell>{material.workorder?.CaseID}</TableCell>
-                            <TableCell>{material.CreatedOn}</TableCell>
+                            <TableCell>{formatDate(material.CreatedOn)}</TableCell>
                             <TableCell>{material.OrderStatus}</TableCell>
                             <TableCell>{material.OrderType}</TableCell>
                             <TableCell>{material.owner?.Name}</TableCell>
                             <TableCell>{material.WOID}</TableCell>
-                            <TableCell>{material.ReadyForClosureDate}</TableCell>
+                            <TableCell>{formatDate(material.ReadyForClosureDate)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -3605,6 +3646,7 @@ if (caseDetails.CaseStatus !== "Close") {
                   <div className="flex items-center justify-between">
                     <CardTitle className={"text-lg"}>Invoice Information</CardTitle>
                     <Button
+                    className={'bg-gray-300'}
                       size="sm"
                       variant="outline"
                       onClick={() => handleInvoiceOpenChange(true)}
@@ -3685,15 +3727,7 @@ if (caseDetails.CaseStatus !== "Close") {
                   ) : (
                     <div className="flex flex-col gap-2 text-sm text-muted-foreground">
                       <p>Belum ada invoice untuk case ini.</p>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="w-fit"
-                        onClick={() => handleInvoiceOpenChange(true)}
-                        disabled={caseDetails?.CaseStatus === "Close"}
-                      >
-                        Buat Invoice
-                      </Button>
+                     
                     </div>
                   )}
                 </CardContent>

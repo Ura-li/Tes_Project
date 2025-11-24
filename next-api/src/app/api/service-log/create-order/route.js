@@ -276,7 +276,7 @@ export async function POST(request) {
             console.log("IS OUT WARRANRY ", caseUpdateData)
             if (assignApoId !== null) {
                 caseUpdateData.Owner = assignApoId;
-            }
+            }   
 
             await tx.caseinformation.update({
                 where: { CaseID },

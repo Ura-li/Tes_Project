@@ -63,6 +63,7 @@ export async function GET(request) {
                     }
                 },
                 materialorderlineitems: true,
+                owner: true,
             }
         });
 
@@ -71,6 +72,7 @@ export async function GET(request) {
             message: "List Data Material Order Information",
             data: materialorder.map(m => ({
                     ...m,
+                    Owner: m.owner ? m.owner.Name : "-",
                     workorder: {
                         ...m.workorder,
                         caseinformation: {

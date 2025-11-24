@@ -14,7 +14,7 @@ import { se } from 'date-fns/locale'
 import { filter, set } from 'lodash'
 import { PanelRight } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { data, useNavigate } from 'react-router'
 import Swal from 'sweetalert2'
 import { STATUS_ENUM_TO_LABEL } from './CaseDetail'
 import { Label } from '@/components/ui/label'
@@ -212,10 +212,10 @@ export const FlowCaseData = (user) => {
         FormattedCreatedOn: createdDate ? createdDate.toLocaleString("id-ID") : null,
         EstimedTimeFromUpdate: estimatedTime || "No Update",
       };
-    })
-    ;
+    });
 
-  const emptyData = { within4: [], within8: [], within15: [], over15: [] };
+  const emptyData = { within4: [], within8: [], within15: [], over15: [] };  
+  
 
   const dataTime = [
     { status: "FinishRepair", data: { ...emptyData }, hide: user.user.role === "fd" || user.user.role === "admin" ? false : true },
@@ -243,11 +243,12 @@ export const FlowCaseData = (user) => {
     groupedDataTime = dataTime.map((t) => {
       const filt = caseData.filter((data) => {
         const dataStatus = data.UpdatedActionLogs[0]?.dataNew;
-        console.log("FeRdy GIMAnG",dataStatus)
 
         return (
           dataStatus?.replace("Finish Repair","").toLowerCase() ===
-          t.status?.replace("FinishRepair","").toLowerCase()
+          t.status?.replace("FinishRepair","").toLowerCase() || 
+          dataStatus?.replace("Part Request","").toLowerCase() ===
+          t.status?.replace("PartRequest","").toLowerCase()
         )
       }
       );
