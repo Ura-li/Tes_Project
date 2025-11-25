@@ -350,23 +350,47 @@ const QuotationDialog = ({
     const newLineErrors = {};
 
     if (!form.laborFee) {
-      newFieldErrors.laborFee = "Labor fee wajib diisi.";
+      toast.warning("Labor fee wajib diisi.", {
+        position: 'top-center'
+      })
+      return
     }
 
     if (!form.quotationDate) {
-      newFieldErrors.quotationDate = "Quotation date wajib diisi.";
+      toast.warning("Quotation date wajib diisi.",{
+        position: "top-center"
+      })
+      return
     }
 
     if (form.quotationType === "Standard" && !form.vatValue) {
-      newFieldErrors.vatValue = "VAT value wajib diisi untuk tipe Standard.";
+      toast.warning("VAT value wajib diisi untuk tipe Standard.", {
+        position: 'top-center'
+      })
+      return
     }
 
     if (isPendingQuote && !form.quoteApproveDate) {
-      newFieldErrors.quoteApproveDate = "Quote approve date wajib diisi.";
+      toast.warning("Quoate approve date wajib diisi", {
+        position: 'top-center'
+      })
+      return
     }
 
     if (isPendingQuote && !form.quoteDecision) {
-      newFieldErrors.quoteDecision = "Pilih apakah quotation disetujui atau ditolak.";
+      toast.warning("Quotation decision wajid di isi", {
+        description: "Pilihlah apakah quotation disetujui atau ditolak",
+        position: "top-center"
+      })
+      return
+    }
+
+    if (!form.userAssign) {
+      toast.warning("Apo IS Not Assign Yet", {
+        description: "Please Choose The Apo Partner Before Save Quoation",
+        position: 'top-center'
+      })
+      return
     }
 
     form.lineItems.forEach((item) => {
