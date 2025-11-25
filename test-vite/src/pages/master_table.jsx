@@ -996,6 +996,9 @@ export const Case_table = () => {
   const [selectedCreatedName, setSelectedCreatedName] = useState("All");
   const [selectedOwner, setSelectedOwner] = useState("All");
   const [selectedWorkGroup, setSelectedWorkGroup] = useState("All");
+  const [selectedCaseType, setSelectedCaseType] = useState("All");
+  const [selectedWarrantyType, setSelectedWarrantyType] = useState("All");
+  const [selectedWarrantyStatus, setSelectedWarrantyStatus] = useState("All");
 
   // 🔹 Sort state
   const [sortConfig, setSortConfig] = useState({
@@ -1063,6 +1066,38 @@ export const Case_table = () => {
   const uniqueCreatedName = ["All", ...new Set(caseData.map((c) => c.CreatedName))];
   const uniqueOwner = ["All", ...new Set(caseData.map((c) => c.Owner))];
   const uniqueWorkGroup = ["All", ...new Set(caseData.map((c) => c.WorkGroup))];
+  const uniqueCaseType = [
+  "All",
+  ...new Set(
+    caseData
+        .map((c) => c.caseinformation?.CaseType)
+        .filter(Boolean)
+    ),
+  ];
+  const uniqueWarrantyType = [
+  "All",
+  ...new Set(
+    caseData
+      .map(
+        (c) =>
+          c.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition
+      )
+      .filter(Boolean)
+    ),
+  ];
+
+  const uniqueWarrantyStatus = [
+    "All",
+    ...new Set(
+      caseData
+        .map(
+          (c) =>
+            c.caseinformation?.asset_information?.WarrantyOTCCode?.Description
+        )
+        .filter(Boolean)
+    ),
+  ];
+
 
   // 🔹 Filtering
   const filteredData = caseData
@@ -1081,7 +1116,25 @@ export const Case_table = () => {
     .filter((item) => (selectedOwner === "All" ? true : item.Owner === selectedOwner))
     .filter((item) =>
       selectedWorkGroup === "All" ? true : item.WorkGroup === selectedWorkGroup
-    );
+    )
+    .filter((item) => {
+    if (selectedWarrantyType === "All") return true;
+    const wType =
+      item.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition;
+    return wType === selectedWarrantyType;
+    })
+    .filter((item) => {
+    if (selectedCaseType === "All") return true;
+      const cType = item.caseinformation?.CaseType;
+      return cType === selectedCaseType;
+    })
+    // ➕ Filter Warranty Status
+    .filter((item) => {
+      if (selectedWarrantyStatus === "All") return true;
+      const wStatus =
+        item.caseinformation?.asset_information?.WarrantyOTCCode?.Description;
+      return wStatus === selectedWarrantyStatus;
+    });
   
     // 🔹 Parser khusus tanggal format "dd/MM/yyyy, HH.mm.ss"
   const parseCustomDate = (dateStr) => {
@@ -1112,12 +1165,16 @@ const sortedData = useMemo(() => {
           bVal = b.caseinformation?.CaseID_Manual_Date;
           break;
         case "WarrantyType":
-          aVal = a.caseinformation?.otcCodeTable?.WarrantyCondition;
-          bVal = b.caseinformation?.otcCodeTable?.WarrantyCondition;
+          aVal = a.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition;
+          bVal = b.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition;
+          break;
+        case "CaseType":
+          aVal = a.caseinformation?.CaseType;
+          bVal = b.caseinformation?.CaseType;
           break;
         case "WarrantyStatus":
-          aVal = a.caseinformation?.otcCodeTable?.Description;
-          bVal = b.caseinformation?.otcCodeTable?.Description;
+          aVal = a.caseinformation?.asset_information?.WarrantyOTCCode?.Description;
+          bVal = b.caseinformation?.asset_information?.WarrantyOTCCode?.Description;
           break;
         default:
           aVal = a[sortConfig.key];
@@ -1126,11 +1183,21 @@ const sortedData = useMemo(() => {
 
       if (aVal === null || aVal === undefined) aVal = "";
       if (bVal === null || bVal === undefined) bVal = "";
-
       // 🔹 Parse tanggal khusus
       if (sortConfig.key === "CreatedOn") {
-        const dateA = parseCustomDate(aVal);
-        const dateB = parseCustomDate(bVal);
+        const dateA =
+          aVal instanceof Date
+            ? aVal
+            : typeof aVal === "string"
+            ? parseCustomDate(aVal)
+            : null;
+        const dateB =
+          bVal instanceof Date
+            ? bVal
+            : typeof bVal === "string"
+            ? parseCustomDate(bVal)
+            : null;
+
         if (dateA && dateB) {
           return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
         }
@@ -1171,6 +1238,9 @@ const sortedData = useMemo(() => {
     setSelectedCreatedName("All");
     setSelectedOwner("All");
     setSelectedWorkGroup("All");
+    setSelectedCaseType("All");
+    setSelectedWarrantyType("All");     
+    setSelectedWarrantyStatus("All");
   };
 
   // 🔹 Handle sort
@@ -1348,6 +1418,61 @@ const EnumToLabel = {
             ))}
           </select>
         </div>
+        <div className="flex flex-col">
+          <label className="text-sm font-medium mb-1">Filter by Case Type</label>
+          <select
+            value={selectedCaseType}
+            onChange={(e) => setSelectedCaseType(e.target.value)}
+            className="p-2 text-sm border rounded-lg
+                      bg-white border-slate-300 text-slate-800
+                      focus:outline-none focus:ring-2 focus:ring-sky-400
+                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+          >
+            {uniqueCaseType.map((ct) => (
+              <option key={ct} value={ct}>
+                {ct}
+              </option>
+            ))}
+          </select>
+        </div>
+        {/* Warranty Type */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium mb-1">Filter by Warranty Type</label>
+          <select
+            value={selectedWarrantyType}
+            onChange={(e) => setSelectedWarrantyType(e.target.value)}
+            className="p-2 text-sm border rounded-lg
+                      bg-white border-slate-300 text-slate-800
+                      focus:outline-none focus:ring-2 focus:ring-sky-400
+                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+          >
+            {uniqueWarrantyType.map((wt) => (
+              <option key={wt} value={wt}>
+                {wt}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Warranty Status */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium mb-1">Filter by Warranty Status</label>
+          <select
+            value={selectedWarrantyStatus}
+            onChange={(e) => setSelectedWarrantyStatus(e.target.value)}
+            className="p-2 text-sm border rounded-lg
+                      bg-white border-slate-300 text-slate-800
+                      focus:outline-none focus:ring-2 focus:ring-sky-400
+                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+          >
+            {uniqueWarrantyStatus.map((ws) => (
+              <option key={ws} value={ws}>
+                {ws}
+              </option>
+            ))}
+          </select>
+        </div>
+
          {/* Toggle status */}
       <div className="flex flex-col">
         <label htmlFor="status" className="mb-2 text-sm font-medium">Toggle Status Of Case :</label>
