@@ -225,6 +225,7 @@ export const FlowCaseData = (user) => {
     { status: "NEW_AssignLeader", data: { ...emptyData }, hide: user.user.role === "celead" || user.user.role === "admin" ? false : true},
     { status: "Quote_Approved", data: { ...emptyData }, hide: user.user.role === "cm" || user.user.role === "admin" ? false : true},
     { status: "Quote_Rejected", data: { ...emptyData }, hide: user.user.role === "cm" || user.user.role === "admin" ? false : true},
+    { status: "Quote_Requested", data: { ...emptyData }, hide: user.user.role === "cm" || user.user.role === "admin" ? false : true},
     { status: "Escalated", data: { ...emptyData }, hide: user.user.role === "ce" || user.user.role === "celead" || user.user.role === "admin" ? false : true},
     { status: "PartRequest", data: { ...emptyData }, hide: user.user.role === "apo"  || user.user.role === "admin" ? false : true},
     { status: "PartRequestLog", data: { ...emptyData }, hide: user.user.role === "lg" ||  user.user.role === "admin" ? false : true},
