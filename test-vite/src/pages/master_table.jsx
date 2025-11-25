@@ -54,6 +54,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
+import { Cancel } from "@radix-ui/react-alert-dialog";
 // import PDFButton from "./components/PDFButton";
 // import ServiceRequestPDF from "./components/service-request-form";
 export const Contact_table = () => {
@@ -1232,7 +1233,8 @@ const EnumToLabel = {
   PartRequestLog: "Part Request Log",
   PartAvailable: "Part Available",
   RepairProgress: "Repair Progress",
-  FinishRepair: "Finish Repair"
+  FinishRepair: "Finish Repair",
+  Cancel: "Cancel"
 }
 
   return (
@@ -1361,6 +1363,7 @@ const EnumToLabel = {
               <SelectItem value="Open">Open Case Status</SelectItem>
               <SelectItem value="Close">Close Case Status</SelectItem>
               <SelectItem value="InActive">InActive Case Status</SelectItem>
+              <SelectItem value="Cancel">Cancel Case Status</SelectItem>
               <SelectItem value="All">ALL Case Status</SelectItem>
             </SelectGroup>
           </SelectContent>
@@ -1479,7 +1482,9 @@ const EnumToLabel = {
                     caseItem.CaseStatus === "Close" &&
                       "bg-red-300/80 border-red-400",
                     caseItem.CaseStatus === "InActive" &&
-                      "bg-sky-300/80 border-sky-400"
+                      "bg-sky-300/80 border-sky-400",
+                    caseItem.CaseStatus === "Cancel" &&
+                      "bg-amber-300/80 border-amber-400 text-amber-900 font-extrabold shadow-sm dark:bg-amber-600/80 dark:border-amber-500 dark:text-amber-100"
                   )}
                 >
                  {EnumToLabel[caseItem.CaseStatus]}
