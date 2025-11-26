@@ -385,7 +385,7 @@ const QuotationDialog = ({
       return
     }
 
-    if (!form.userAssign) {
+    if (isPendingQuote && !form.userAssign) {
       toast.warning("Apo IS Not Assign Yet", {
         description: "Please Choose The Apo Partner Before Save Quoation",
         position: 'top-center'
