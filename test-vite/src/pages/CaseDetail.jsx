@@ -1592,7 +1592,7 @@ export const ServiceCase = ({
   // const allRoleTabs = ["admin","fd", "apo","ce","lg","celead","ps"];
   
   let hiddenTab;
-  if (caseDetails.asset_information?.WarrantyOTCCode.Description !== "Trade (OOW)") {
+  if (caseDetails.asset_information?.WarrantyOTCCode.OTCCode !== "01T") {
     hiddenTab = true
   }else {
     hiddenTab = false
