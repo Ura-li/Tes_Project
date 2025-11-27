@@ -268,6 +268,8 @@ export const TabsServiceCaseDetails = ({
     ProductTypeID: caseDetails.asset_information?.product_information?.ProductTypeID,
   })
 
+  
+
   const [caseForm, setCaseForm] = useState({
     CaseType: "",
     CaseStatus: "",
@@ -1615,6 +1617,8 @@ export const ServiceCase = ({
   ];
 
   const { user } = useAuth();
+
+  let totalquoLineItemPrice = 0;
 
   // const visibleTabs = useMemo(
   //   () => tabs.filter(tab => tab.roles.includes(user.role)),
@@ -3559,6 +3563,11 @@ if (caseDetails.CaseStatus !== "Close") {
                     value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationType || "---"}
                   />
                  </CaseField>
+                  <CaseField label={"Labor Fee"} lock> 
+                    <Input 
+                      value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
+                    />
+                 </CaseField>
                   <CaseField label={"Quotation amount"} lock> 
                   <Input 
                     value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal)}
@@ -3619,6 +3628,11 @@ if (caseDetails.CaseStatus !== "Close") {
                         value={quo.materialorderlineitems[0]?.Quantity}
                       />
                     </CaseField>
+                    <CaseField label={"Price"} lock>
+                      <Input
+                        value={formatAccountingRupiah(quo.materialorderlineitems[0]?.Price)}
+                      />
+                    </CaseField>
                     <CaseField label={"Part category"} lock>
                       <Input
                         value={quo.materialorderlineitems[0]?.servicecatalog_parts?.Keyword}
@@ -3670,9 +3684,40 @@ if (caseDetails.CaseStatus !== "Close") {
                       <CaseField label={"Invoice No"} lock>
                         <Input value={invoiceSummary.invoiceNo} readOnly />
                       </CaseField>
+                      <CaseField label={"Total Harga Sparepart"} lock>
+                        {
+                        caseDetails.workorder[0]?.materialorder.map((mo) =>{
+                          const quoLineItemPrice = mo.materialorderlineitems[0]?.quotation_lineitem[0]?.Price;
+                          totalquoLineItemPrice += Number(quoLineItemPrice);
+
+                        })}
+                        <Input
+                          value={formatAccountingRupiah(totalquoLineItemPrice)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Labor Fee"} lock>
+                        <Input
+                          value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
+                          readOnly
+                        />
+                      </CaseField>
                       <CaseField label={"Subtotal"} lock>
                         <Input
                           value={formatAccountingRupiah(invoiceQuotation?.subtotal)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"VAT value (%)"} lock> 
+                        <Input 
+                          value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue 
+                            ? caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue + "%" 
+                            : "---"}
+                        />
+                      </CaseField>
+                      <CaseField label={"DP"} lock>
+                        <Input
+                          value={formatAccountingRupiah("0")}
                           readOnly
                         />
                       </CaseField>
@@ -3695,7 +3740,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         />
                       </CaseField>
                       <CaseField
-                        label={"Alasan Selisih"}
+                        label={"Ammount Difference Reason"}
                         lock
                         hide={!invoiceSummary.amountDiffReason}
                       >
