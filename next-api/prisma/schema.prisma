@@ -557,6 +557,7 @@ model symptom_codes {
 model test_table_without_migration {
   id   Int    @id @default(autoincrement())
   name String @db.VarChar(12)
+  testI12november2025 String? @db.VarChar(12)
 
   @@map("test-table-without-migration")
 }
