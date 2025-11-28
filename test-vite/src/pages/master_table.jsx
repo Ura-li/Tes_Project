@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useMemo} from "react";
+import React, { useState, useEffect , useMemo, use} from "react";
 import ApiCustomer from "@/api";
 import { ContactEdit, ContactDelete } from "@/components/model/sc-modal";
 import { CompanyEdit, CompanyDelete } from "@/components/model/sc-modal";
@@ -54,6 +54,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
+import { ComboboxDemo } from "@/components/sc-select";
 import { Cancel } from "@radix-ui/react-alert-dialog";
 // import PDFButton from "./components/PDFButton";
 // import ServiceRequestPDF from "./components/service-request-form";
@@ -75,16 +76,16 @@ export const Contact_table = () => {
   });
 
   // Filters
-  const [selectedCompany, setSelectedCompany] = useState("");
-  const [selectedSalutation, setSelectedSalutation] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-  const [selectedZipCode, setSelectedZipCode] = useState("");
-  const [picNameSearch, setPicNameSearch] = useState("");
-  const [picEmailSearch, setPicEmailSearch] = useState("");
-  const [picPhoneSearch, setPicPhoneSearch] = useState("");
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [selectedSalutation, setSelectedSalutation] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedState, setSelectedState] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedZipCode, setSelectedZipCode] = useState(null);
+  const [picNameSearch, setPicNameSearch] = useState(null);
+  const [picEmailSearch, setPicEmailSearch] = useState(null);
+  const [picPhoneSearch, setPicPhoneSearch] = useState(null);
   // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -124,34 +125,103 @@ export const Contact_table = () => {
   }, []);
 
   // Dropdown options
-  const uniqueCompanies = useMemo(() => ["", ...new Set(contacts.map(c => c.Company).filter(Boolean).sort())], [contacts]);
-  const uniqueSalutations = useMemo(() => ["", ...new Set(contacts.map(c => c.Salutation).filter(Boolean).sort())], [contacts]);
-  const uniqueLanguages = useMemo(() => ["", ...new Set(contacts.map(c => c.PreferredLanguage).filter(Boolean).sort())], [contacts]);
-  const uniqueCountries = useMemo(() => ["", ...new Set(contacts.map(c => c.Country).filter(Boolean).sort())], [contacts]);
+  const companyOptions = useMemo(() => {
+    const companies = contacts
+      .map((c) => c.Company)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(companies)]
+    return unique.map((name, index) => ({
+      id: `company-${index}`,
+      name,
+    }))
+  }, [contacts])
 
-  const uniqueStates = useMemo(() => {
-    const states = contacts.filter(c =>
-      !selectedCountry || c.Country === selectedCountry
-    ).map(c => c.StateProvince).filter(Boolean);
-    return ["", ...new Set(states.sort())];
-  }, [contacts, selectedCountry]);
+  const salutationOptions = useMemo(() => {
+    const salutations = contacts
+      .map((c) => c.Salutation)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(salutations)]
+    return unique.map((name, index) => ({
+      id: `salutation-${index}`,
+      name,
+    }))
+  }, [contacts])
 
-  const uniqueCities = useMemo(() => {
-    const cities = contacts.filter(c =>
-      (!selectedCountry || c.Country === selectedCountry) &&
-      (!selectedState || c.StateProvince === selectedState)
-    ).map(c => c.City).filter(Boolean);
-    return ["", ...new Set(cities.sort())];
-  }, [contacts, selectedCountry, selectedState]);
+  const languageOptions = useMemo(() => {
+    const langs = contacts
+      .map((c) => c.PreferredLanguage)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(langs)]
+    return unique.map((name, index) => ({
+      id: `lang-${index}`,
+      name,
+    }))
+  }, [contacts])
 
-  const uniqueZipCodes = useMemo(() => {
-    const zips = contacts.filter(c =>
-      (!selectedCountry || c.Country === selectedCountry) &&
-      (!selectedState || c.StateProvince === selectedState) &&
-      (!selectedCity || c.City === selectedCity)
-    ).map(c => c.ZipPostalCode).filter(Boolean);
-    return ["", ...new Set(zips.sort())];
-  }, [contacts, selectedCountry, selectedState, selectedCity]);
+  const countryOptions = useMemo(() => {
+    const countries = contacts
+      .map((c) => c.Country)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(countries)]
+    return unique.map((name, index) => ({
+      id: `country-${index}`,
+      name,
+    }))
+  }, [contacts])
+
+  const stateOptions = useMemo(() => {
+    const states = contacts
+      .filter(
+        (c) => !selectedCountry?.name || c.Country === selectedCountry.name
+      )
+      .map((c) => c.StateProvince)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(states)]
+    return unique.map((name, index) => ({
+      id: `state-${index}`,
+      name,
+    }))
+  }, [contacts, selectedCountry])
+
+  const cityOptions = useMemo(() => {
+    const cities = contacts
+      .filter(
+        (c) =>
+          (!selectedCountry?.name || c.Country === selectedCountry.name) &&
+          (!selectedState?.name || c.StateProvince === selectedState.name)
+      )
+      .map((c) => c.City)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(cities)]
+    return unique.map((name, index) => ({
+      id: `city-${index}`,
+      name,
+    }))
+  }, [contacts, selectedCountry, selectedState])
+
+  const zipCodeOptions = useMemo(() => {
+    const zips = contacts
+      .filter(
+        (c) =>
+          (!selectedCountry?.name || c.Country === selectedCountry.name) &&
+          (!selectedState?.name || c.StateProvince === selectedState.name) &&
+          (!selectedCity?.name || c.City === selectedCity.name)
+      )
+      .map((c) => c.ZipPostalCode)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(zips)]
+    return unique.map((name, index) => ({
+      id: `zip-${index}`,
+      name,
+    }))
+  }, [contacts, selectedCountry, selectedState, selectedCity])
 
   // Filtering (search + dropdown)
   const filteredData = useMemo(() => {
@@ -162,13 +232,13 @@ export const Contact_table = () => {
 
       return (
         matchesSearch &&
-        (!selectedCompany || contact.Company === selectedCompany) &&
-        (!selectedSalutation || contact.Salutation === selectedSalutation) &&
-        (!selectedLanguage || contact.PreferredLanguage === selectedLanguage) &&
-        (!selectedCountry || contact.Country === selectedCountry) &&
-        (!selectedState || contact.StateProvince === selectedState) &&
-        (!selectedCity || contact.City === selectedCity) &&
-        (!selectedZipCode || contact.ZipPostalCode === selectedZipCode) &&
+        (!selectedCompany?.name || contact.Company === selectedCompany.name) &&
+        (!selectedSalutation?.name || contact.Salutation === selectedSalutation.name) &&
+        (!selectedLanguage?.name || contact.PreferredLanguage === selectedLanguage.name) &&
+        (!selectedCountry?.name || contact.Country === selectedCountry.name) &&
+        (!selectedState?.name || contact.StateProvince === selectedState.name) &&
+        (!selectedCity?.name || contact.City === selectedCity.name) &&
+        (!selectedZipCode?.name || contact.ZipPostalCode === selectedZipCode.name) &&
         (!picNameSearch || (contact.PIC_Name && contact.PIC_Name.toLowerCase().includes(picNameSearch.toLowerCase()))) &&
         (!picEmailSearch || (contact.PIC_Email && contact.PIC_Email.toLowerCase().includes(picEmailSearch.toLowerCase()))) &&
         (!picPhoneSearch || (contact.PIC_Phone && contact.PIC_Phone.toLowerCase().includes(picPhoneSearch.toLowerCase())))
@@ -260,8 +330,21 @@ export const Contact_table = () => {
     setGoToPageInput("");
   };
 
+    const handleResetFilters = () => {
+    setSearchTerm("");
+    setSelectedCompany("null");
+    setSelectedSalutation("null");
+    setSelectedLanguage("null");
+    setSelectedCountry("null");
+    setSelectedState("null");
+    setSelectedCity("null");
+    setSelectedZipCode("null");
+    setSortConfig({ key: "Company", direction: "asc" });
+    setCurrentPage(1);
+  };
+
   return (
-    <div className="grid p-6 grid-cols-1 w-full h-full rounded-2xl">
+    <div className="grid p-6 grid-cols-1 w-full  rounded-2xl">
       <h2 className="mb-4 text-xl sm:text-2xl font-bold">📊 Contact Management</h2>
 
       {/* Search + Filters */}
@@ -275,40 +358,125 @@ export const Contact_table = () => {
         />
       </div>
         {/* Dropdown filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-6 w-full">
-        <select value={selectedCompany} onChange={(e) => setSelectedCompany(e.target.value)} className="p-2 border rounded-lg shadow-sm">
-          <option value="">All Companies</option>
-          {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select value={selectedSalutation} onChange={(e) => setSelectedSalutation(e.target.value)} className="p-2 border rounded-lg shadow-sm">
-          <option value="">All Salutations</option>
-          {uniqueSalutations.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className="p-2 border rounded-lg shadow-sm">
-          <option value="">All Languages</option>
-          {uniqueLanguages.map(l => <option key={l} value={l}>{l}</option>)}
-        </select>
-        <select value={selectedCountry} onChange={(e) => { setSelectedCountry(e.target.value); setSelectedState(""); setSelectedCity(""); setSelectedZipCode(""); }} className="p-2 border rounded-lg shadow-sm">
-          <option value="">All Countries</option>
-          {uniqueCountries.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select value={selectedState} onChange={(e) => { setSelectedState(e.target.value); setSelectedCity(""); setSelectedZipCode(""); }} className="p-2 border rounded-lg shadow-sm" disabled={!selectedCountry}>
-          <option value="">All States</option>
-          {uniqueStates.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <select value={selectedCity} onChange={(e) => { setSelectedCity(e.target.value); setSelectedZipCode(""); }} className="p-2 border rounded-lg shadow-sm" disabled={!selectedState}>
-          <option value="">All Cities</option>
-          {uniqueCities.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select value={selectedZipCode} onChange={(e) => setSelectedZipCode(e.target.value)} className="p-2 border rounded-lg shadow-sm" disabled={!selectedCity}>
-          <option value="">All Zip Codes</option>
-          {uniqueZipCodes.map(z => <option key={z} value={z}>{z}</option>)}
-        </select>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-6 w-full">
+       <ComboboxDemo
+          id="company"
+          value={selectedCompany}
+          setValue={(val) => {
+            setSelectedCompany(val?.name ? val : null)
+            setCurrentPage(1)
+          }}
+          options={companyOptions}
+          placeholder="🏢 All Companies"
+          disabled={false}
+        />
+
+        {/* Salutation */}
+        <ComboboxDemo
+          id="salutation"
+          value={selectedSalutation}
+          setValue={(val) => {
+            setSelectedSalutation(val?.name ? val : null)
+            setCurrentPage(1)
+          }}
+          options={salutationOptions}
+          placeholder="🙋 All Salutations"
+          disabled={false}
+        />
+
+        {/* Language */}
+        <ComboboxDemo
+          id="language"
+          value={selectedLanguage}
+          setValue={(val) => {
+            setSelectedLanguage(val?.name ? val : null)
+            setCurrentPage(1)
+          }}
+          options={languageOptions}
+          placeholder="🌐 All Languages"
+          disabled={false}
+        />
+
+        {/* Country */}
+        <ComboboxDemo
+          id="country"
+          value={selectedCountry}
+          setValue={(val) => {
+            setSelectedCountry(val?.name ? val : null)
+            setSelectedState(null)
+            setSelectedCity(null)
+            setSelectedZipCode(null)
+            setCurrentPage(1)
+          }}
+          options={countryOptions}
+          placeholder="🌍 All Countries"
+          disabled={false}
+        />
+
+        {/* State */}
+        <ComboboxDemo
+          id="state"
+          value={selectedState}
+          setValue={(val) => {
+            setSelectedState(val?.name ? val : null)
+            setSelectedCity(null)
+            setSelectedZipCode(null)
+            setCurrentPage(1)
+          }}
+          options={stateOptions}
+          placeholder="🗺 All States"
+          disabled={!selectedCountry?.name && contacts.length > 0}
+        />
+
+        {/* City */}
+        <ComboboxDemo
+          id="city"
+          value={selectedCity}
+          setValue={(val) => {
+            setSelectedCity(val?.name ? val : null)
+            setSelectedZipCode(null)
+            setCurrentPage(1)
+          }}
+          options={cityOptions}
+          placeholder="🏙 All Cities"
+          disabled={
+            ((!selectedCountry?.name && contacts.length > 0) ||
+              (!selectedState?.name && contacts.length > 0))
+          }
+        />
+
+        {/* Zip */}
+        <ComboboxDemo
+          id="zip"
+          value={selectedZipCode}
+          setValue={(val) => {
+            setSelectedZipCode(val?.name ? val : null)
+            setCurrentPage(1)
+          }}
+          options={zipCodeOptions}
+          placeholder="📮 All Zip Codes"
+          disabled={
+            ((!selectedCountry?.name && contacts.length > 0) ||
+              (!selectedState?.name && contacts.length > 0) ||
+              (!selectedCity?.name && contacts.length > 0))
+          }
+        />
+        <div className="flex item-center gap-1">
+        <button
+          onClick={handleResetFilters}
+          className="px-4 py-2 text-sm font-semibold text-white rounded-lg shadow-md
+                       bg-slate-500 hover:bg-slate-600
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-600 dark:hover:bg-slate-500 dark:focus:ring-sky-500"
+        >
+          Reset Filters
+        </button>
+      </div>
       </div>
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="rounded-2xl shadow overflow-scroll max-h-[70vh] w-full">
+      <div className="rounded-2xl shadow  max-h-[70vh] w-full h-fit">
         <Table className="w-full border-collapse min-w-[1200px]">
           <TableHeader className="sticky z-10 top-0 text-xs sm:text-sm">
             <TableRow>
@@ -524,39 +692,59 @@ export const Company_table = () => {
   const [sortConfig, setSortConfig] = useState({ key: "Company", direction: "asc" });
 
   // filter
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-  const [selectedZipCode, setSelectedZipCode] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedState, setSelectedState] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedZipCode, setSelectedZipCode] = useState(null);
 
-  const uniqueCountries = useMemo(() => {
-    const countries = companies.map((c) => c.Country).filter(Boolean);
-    return ["", ...new Set(countries.sort())];
-  }, [companies]);
+  const countryOptions = useMemo(() => {
+    const countries = companies.map((c) => c.Country).filter(Boolean).sort()
+      const unique = [...new Set(countries)]
+        return unique.map((name, index) => ({
+          id: `country-${index}`,
+          name,
+        }))
+      }, [companies])
 
-  const uniqueStates = useMemo(() => {
+  const statesOptions = useMemo(() => {
     const states = companies
-      .filter((c) => !selectedCountry || c.Country === selectedCountry)
+      .filter((c) => !selectedCountry?.name || c.Country === selectedCountry.name)
       .map((c) => c.StateProvince)
-      .filter(Boolean);
-    return ["", ...new Set(states.sort())];
-  }, [companies, selectedCountry]);
+      .filter(Boolean)
+      .sort()
+        const unique = [...new Set(states)]
+        return unique.map((name, index) => ({
+          id: `state-${index}`,
+          name,
+        }))
+      }, [companies, selectedCountry])
 
-  const uniqueCities = useMemo(() => {
-    const cities = companies
-      .filter((c) => (!selectedCountry || c.Country === selectedCountry) && (!selectedState || c.StateProvince === selectedState))
-      .map((c) => c.City)
-      .filter(Boolean);
-    return ["", ...new Set(cities.sort())];
-  }, [companies, selectedCountry, selectedState]);
+  const cityOptions = useMemo(() => {
+    const cities = companies
+      .filter((c) => (!selectedCountry?.name || c.Country === selectedCountry.name) &&
+                     (!selectedState?.name || c.StateProvince === selectedState.name))
+      .map((c) => c.City)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(cities)]
+    return unique.map((name, index) => ({
+      id: `city-${index}`,
+      name,
+    }))
+  }, [companies, selectedCountry, selectedState])
 
-  const uniqueZipCodes = useMemo(() => {
-    const zipCodes = companies
-      .filter((c) => (!selectedCountry || c.Country === selectedCountry) && (!selectedState || c.StateProvince === selectedState) && (!selectedCity || c.City === selectedCity))
+  const zipCodeOptions = useMemo(() => {
+    const zips = companies
+      .filter((c) => (!selectedCountry?.name || c.Country === selectedCountry.name) && (!selectedState?.name || c.StateProvince === selectedState.name) && (!selectedCity?.name || c.City === selectedCity.name))
       .map((c) => c.ZipPostalCode)
-      .filter(Boolean);
-    return ["", ...new Set(zipCodes.sort())];
-  }, [companies, selectedCountry, selectedState, selectedCity]);
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(zips)]
+    return unique.map((name, index) => ({
+      id: `zip-${index}`,
+      name,
+    }))
+  }, [companies, selectedCountry, selectedState, selectedCity])
 
   // debounce search
   useEffect(() => {
@@ -606,10 +794,10 @@ export const Company_table = () => {
     const matchesSearch = Object.values(c).some((val) =>
       val?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     );
-    const matchesCountry = !selectedCountry || c.Country === selectedCountry;
-    const matchesState = !selectedState || c.StateProvince === selectedState;
-    const matchesCity = !selectedCity || c.City === selectedCity;
-    const matchesZipCode = !selectedZipCode || c.ZipPostalCode === selectedZipCode;
+    const matchesCountry = !selectedCountry?.name || c.Country === selectedCountry.name;
+    const matchesState = !selectedState?.name || c.StateProvince === selectedState.name;
+    const matchesCity = !selectedCity?.name || c.City === selectedCity.name;
+    const matchesZipCode = !selectedZipCode?.name || c.ZipPostalCode === selectedZipCode.name;
     return matchesSearch && matchesCountry && matchesState && matchesCity && matchesZipCode;
   });
 
@@ -666,10 +854,10 @@ export const Company_table = () => {
 
   const handleResetFilters = () => {
     setSearchTerm("");
-    setSelectedCountry("");
-    setSelectedState("");
-    setSelectedCity("");
-    setSelectedZipCode("");
+    setSelectedCountry("null");
+    setSelectedState("null");
+    setSelectedCity("null");
+    setSelectedZipCode("null");
     setSortConfig({ key: "Company", direction: "asc" });
     setCurrentPage(1);
   };
@@ -698,90 +886,56 @@ export const Company_table = () => {
       
       {/* Filters */}
       <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <select
-          className="p-2 text-sm border rounded-lg shadow-sm
-                     bg-white border-slate-300 text-slate-800
-                     focus:outline-none focus:ring-2 focus:ring-sky-400
-                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+        <ComboboxDemo
+          id="country"
           value={selectedCountry}
-          onChange={(e) => {
-            setSelectedCountry(e.target.value);
-            setSelectedState("");
-            setSelectedCity("");
-            setSelectedZipCode("");
+          setValue={(val) => {
+            setSelectedCountry(val?.name ?val : null)
+            setSelectedState("null");
+            setSelectedCity("null");
+            setSelectedZipCode("null");
             setCurrentPage(1);
           }}
-        >
-          <option value="">🌍 All Countries</option>
-          {uniqueCountries.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-        <select
-          className="p-2 text-sm border rounded-lg shadow-sm
-                     bg-white border-slate-300 text-slate-800
-                     focus:outline-none focus:ring-2 focus:ring-sky-400
-                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500
-                     disabled:opacity-60"
+          options={countryOptions}
+          placeholder="🌍 All Countries"
+          disabled={false}
+        />
+        <ComboboxDemo
+          id="state"
           value={selectedState}
-          onChange={(e) => {
-            setSelectedState(e.target.value);
-            setSelectedCity("");
-            setSelectedZipCode("");
+          setValue={(val) => {
+            setSelectedState(val?.name ?val : null)
+            setSelectedCity("null");
+            setSelectedZipCode("null");
             setCurrentPage(1);
           }}
-          disabled={!selectedCountry && companies.length > 0}
-        >
-          <option value="">🗺 All States</option>
-          {uniqueStates.map((state) => (
-            <option key={state} value={state}>
-              {state}
-            </option>
-          ))}
-        </select>
-        <select
-          className="p-2 text-sm border rounded-lg shadow-sm
-                     bg-white border-slate-300 text-slate-800
-                     focus:outline-none focus:ring-2 focus:ring-sky-400
-                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500
-                     disabled:opacity-60"
+          options={statesOptions}
+          placeholder="🏞 All States "
+          disabled={!selectedCountry?.name && companies.length > 0}
+        />
+        <ComboboxDemo
+          id="city"
           value={selectedCity}
-          onChange={(e) => {
-            setSelectedCity(e.target.value);
-            setSelectedZipCode("");
+          setValue={(val) => {
+            setSelectedCity(val?.name ?val : null)
+            setSelectedZipCode("null");
             setCurrentPage(1);
           }}
-          disabled={(!selectedCountry && companies.length > 0) || (!selectedState && companies.length > 0)}
-        >
-          <option value="">🏙 All Cities</option>
-          {uniqueCities.map((city) => (
-            <option key={city} value={city}>
-              {city}
-            </option>
-          ))}
-        </select>
-        <select
-          className="p-2 text-sm border rounded-lg shadow-sm
-                     bg-white border-slate-300 text-slate-800
-                     focus:outline-none focus:ring-2 focus:ring-sky-400
-                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500
-                     disabled:opacity-60"
+          options={cityOptions}
+          placeholder="🏙 All Cities"
+          disabled={(!selectedCountry?.name && companies.length > 0) || (!selectedState?.name && companies.length > 0)}
+        />
+        <ComboboxDemo
+          id="zip"
           value={selectedZipCode}
-          onChange={(e) => {
-            setSelectedZipCode(e.target.value);
+          setValue={(val) => {
+            setSelectedZipCode(val?.name ?val : null)
             setCurrentPage(1);
           }}
-          disabled={(!selectedCountry && companies.length > 0) || (!selectedState && companies.length > 0) || (!selectedCity && companies.length > 0)}
-        >
-          <option value="">📪 All Zip Codes</option>
-          {uniqueZipCodes.map((zip) => (
-            <option key={zip} value={zip}>
-              {zip}
-            </option>
-          ))}
-        </select>
+          options={zipCodeOptions}
+          placeholder="📮 All Zip Codes"
+          disabled={(!selectedCountry?.name && companies.length > 0) || (!selectedState?.name && companies.length > 0) || (!selectedCity?.name && companies.length > 0)}
+        />
         {/* Reset Filter Button */}
         <div className="flex items-center">
         <button
@@ -1723,9 +1877,11 @@ export const Assets_table = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [goToPageInput, setGoToPageInput] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // dropdown filters
   const [selectedProductLine, setSelectedProductLine] = useState("");
@@ -1753,10 +1909,10 @@ export const Assets_table = () => {
       didOpen: () => Swal.showLoading(),
     });
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
+      try {
       const LIMIT = 1000;
       const first = await ApiCustomer.get(`/api/asset-information?page=1&limit=${LIMIT}`);
       const firstData = first?.data?.data || [];
@@ -1774,14 +1930,14 @@ export const Assets_table = () => {
       console.log("All assets fetched:", all);
       setAssets(all);
       setFilteredAssets(all);
-    } catch (err) {
-      console.error("Error fetching asset data:", err);
-      setError("Failed to fetch data");
-    } finally {
-      setLoading(false);
-      Swal.close();
-    }
-  };
+        } catch (err) {
+          console.error("Error fetching asset data:", err);
+          setError("Failed to fetch data");
+        } finally {
+          setLoading(false);
+          Swal.close();
+        }
+      };
 
   useEffect(() => {
     fetchAllAssets();
@@ -1804,6 +1960,9 @@ export const Assets_table = () => {
   const next = assets.filter(a => {
     const productLine = a?.product_information?.ProductLine ?? "";
     const warranty = a?.Warranty_Status ?? "";
+    const serial = a?.SerialNumber ?? "";
+    const productName = a?.product_information?.ProductName ?? "";
+    const productNumber = a?.ProductNumber ?? "";
 
     // FILTER: Product Line
     const fLine = !selectedProductLine || productLine === selectedProductLine;
@@ -1822,6 +1981,8 @@ export const Assets_table = () => {
       a?.ProductNumber,
       productLine,
       warranty,
+      productName,
+      productNumber,
       a?.site_account?.Company,
       `${a?.contact_information?.FirstName ?? ""} ${a?.contact_information?.LastName ?? ""}`,
     ]
@@ -1945,7 +2106,7 @@ export const Assets_table = () => {
                      bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
                      focus:outline-none focus:ring-2 focus:ring-sky-400
                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500" 
-          value={selectedProductLine} 
+          value={selectedProductLine}
           onChange={(e) => setSelectedProductLine(e.target.value)}
         >
           <option value="">Filter by Product Line</option>
@@ -1960,7 +2121,7 @@ export const Assets_table = () => {
                      bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
                      focus:outline-none focus:ring-2 focus:ring-sky-400
                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500" 
-          value={selectedWarrantyStatus} 
+          value={selectedWarrantyStatus}
           onChange={(e) => setSelectedWarrantyStatus(e.target.value)}
         >
           <option value="">Filter by Warranty Status</option>

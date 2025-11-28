@@ -202,6 +202,7 @@ export function ComboboxDemo({
   disabled
 }) {
   const [open, setOpen] = useState(false)
+  const selectedName = value?.name || ""
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -212,8 +213,8 @@ export function ComboboxDemo({
           className="w-full justify-between overflow-hidden"
           disabled={disabled}
         >
-          {value
-            ? options.find((data) => data.name === value.name)?.name
+          {selectedName
+            ? options.find((data) => data.name === selectedName)?.name
             : placeholder}
           <CircleChevronDown className="opacity-50" />
         </Button>
@@ -230,7 +231,7 @@ export function ComboboxDemo({
                   value={data.name}
                   onSelect={(currentValue) => {
                     const obj = options.find((o) => o.name === currentValue);
-                    setValue(obj || { id: "", name: ""})
+                    setValue(obj || null)
                     setOpen(false)
                   }}
                 >
@@ -238,7 +239,7 @@ export function ComboboxDemo({
                   <Check
                     className={cn(
                       "ml-auto",
-                      value === data.name ? "opacity-100" : "opacity-0"
+                      value?.name === data.name ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

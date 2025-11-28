@@ -48,7 +48,7 @@ export async function GET(request) {
 
         // Hitung jumlah data total
         const totalCount = await prisma.asset_information.count({
-            where: whereCondition
+            where: whereCondition,
         });
 
         console.log("Total Data:", totalCount);
