@@ -1,29 +1,27 @@
-import * as React from "react"
-
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 import { cva } from "class-variance-authority";
 
 const inputVariants = cva(
-  "border-input file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed",
+  "border-transparent placeholder:text-neutral-400 selection:bg-blue-500 selection:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex h-9 w-full min-w-0 rounded-lg px-4 py-2 text-base bg-transparent transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:shadow-lg outline-none disabled:pointer-events-none disabled:cursor-not-allowed",
   {
     variants: {
       variant: {
         default:
-          "border-0 border-input border-b-2 file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground flex h-9 w-full min-w-0 bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed",
+          "border border-transparent bg-transparent text-neutral-800 placeholder:text-neutral-400 hover:border-neutral-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
         destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
+          "bg-red-500 text-white placeholder:text-red-300 hover:bg-red-400 focus:ring-red-500 focus:border-red-500",
         outline:
-          "border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
+          "border border-neutral-300 bg-transparent text-neutral-800 hover:border-neutral-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
         invisible:
-          "border-0 bg-transparent shadow-none hover:bg-accent hover:text-accent-foreground focus:ring-1",
-          // border-b-0 shadow-none ring-0 focus:ring-1
+          "border-0 bg-transparent text-neutral-800 focus:ring-2 focus:ring-blue-500",
       },
     },
     defaultVariants: {
       variant: "default",
     },
   }
-)
+);
 
 function Input({
   className,
@@ -43,4 +41,4 @@ function Input({
   );
 }
 
-export { Input }
+export { Input };
