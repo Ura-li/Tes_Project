@@ -26,7 +26,7 @@ export const FlowCase = () => {
   const { user, loading } = useAuth();
 
   if (loading || !user) {
-    return null; // don’t render listener until auth is ready
+    return null; // dont render listener until auth is ready
   }
   return <FlowCaseData user={user}/>
 
@@ -34,7 +34,6 @@ export const FlowCase = () => {
 
 export const FlowCaseData = (user) => {
   const [caseData, setCaseData] = useState([]);
-  console.log("what HPPAen IN hERE",caseData)
   const [renderer, setRenderer] = useState(false)
   const [error, setError] = useState(false)
   const [filters, setFilters] = useState({
@@ -52,13 +51,30 @@ export const FlowCaseData = (user) => {
     },
     TimeLength: "",
   });
+  const isToggleUser = user.user?.role === "admin" || user.user?.role === "fd";
   const [filterClose, setFilterClose] = useState(true)
+  const [filterFinish, setFilterFinish] = useState(true)
+
+  
+
+  const [adminViewDoneOnly, setAdminViewDoneOnly] = useState(false);
 
   const fetchData = async () => {
     setRenderer(true);
     try {
       const response = await ApiCustomer.get('/api/case-information');
-      const filtercases = response.data.data.filter(c => (c?.caseinformation?.Owner === user.user?.id || c?.caseinformation?.CreatedBy === user.user?.id) && (filterClose ? c.CaseStatus !== 'Close' : c.CaseStatus !== '' ) );
+      const filtercases = response.data.data.filter(c => {
+      const mainfilter = (c?.caseinformation?.Owner === user.user?.id || c?.caseinformation?.CreatedBy === user.user?.id) && c?.CaseStatus !== 'Close' && c?.CaseStatus !== 'FinishRepair';
+        
+      if (isToggleUser && !filterClose) {
+        return c?.CaseStatus === "Close"
+      }
+      if (isToggleUser && !filterFinish) {
+        return c?.CaseStatus === "FinishRepair"
+      }
+
+        return mainfilter;
+        });
       
       // const sortedCases = filtercases.sort((a, b) => {
       //   const dateAraw = a.caseinformation.ActionLog[0]?.ChangeAt;
@@ -99,7 +115,7 @@ export const FlowCaseData = (user) => {
 
   useEffect(() => {
     fetchData();
-  }, [user.user, filterClose]);
+  }, [user.user, filterClose, filterFinish]);
 
   function parseCreatedOn(dateStr) {
     const [datePart, timePart] = dateStr.split(', ');
@@ -274,7 +290,6 @@ export const FlowCaseData = (user) => {
     });
   }
 
-console.log("CHECK FULLY DATA",filteredCases)
   const finishedCases = caseData.filter(c => c.CaseStatus === "FinishRepair");
   // console.log(caseData)
   const [currentPage, setCurrentPage] = useState(1);
@@ -311,81 +326,119 @@ console.log("CHECK FULLY DATA",filteredCases)
   const navigate = useNavigate();
   return (
     <>
-      <SidebarProvider defaultOpen className={'min-h-0'}>
-
+      <SidebarProvider defaultOpen className={"min-h-0"}>
         <SidebarInset>
           <div className="max-h-screen flex flex-col w-full">
             <div className="sticky top-13  bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
               <div className=" flex h-14 w-full items-center gap-3 px-4  place-content-between">
-                <div className='flex gap-3 items-center'>
-                  <Switch checked={filters.Status === "FinishRepair"}
+                {isToggleUser &&
+                <div className="flex gap-3 items-center">
+                  <Switch
+                    checked={filterFinish === false}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFilterClose(true); // Turn off filterFinish if filterClose is unchecked
+                      }
+                      setFilterFinish(checked ? false : true);
+                    }}
+                    className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500"
+                    id="Finish"
+                  />
+                  {/* <Switch checked={filters.Status === "FinishRepair"}
                     onCheckedChange={(checked) => setFilters({
                       ...filters,
                       Status: checked ? "FinishRepair" : "",
-                    })} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500" id="Finish" />
-                  <Label htmlFor="Finish" className={'font-[700]'}>Show Only Finished Case</Label>
-                  <Switch checked={filterClose === false}
-                    onCheckedChange={(checked) => setFilterClose(
-                      
-                      checked ? false : true,
-                    )} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500" id="Close" />
-                  <Label htmlFor="Close" className={'font-[700]'}>Enabled Closed Case</Label>
+                    })} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500" id="Finish" /> */}
+                  <Label htmlFor="Finish" className={"font-[700]"}>
+                    Show Finished Case
+                  </Label>
+                  <Switch
+                    checked={filterClose === false}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFilterFinish(true); // Turn off filterFinish if filterClose is unchecked
+                      }
+                      setFilterClose(checked ? false : true);
+                    }}
+                    className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500"
+                    id="Close"
+                  />
+                  <Label htmlFor="Close" className={"font-[700]"}>
+                    Show Closed Case
+                  </Label>
                 </div>
-                <h1 className="lg:text-xl md:text-md font-semibold tracking-tight text-sm">Case For You</h1>
+                }
+                <h1 className="lg:text-xl md:text-md font-semibold tracking-tight text-sm">
+                  Case For You
+                </h1>
                 <SidebarTrigger icon={PanelRight} />
               </div>
             </div>
 
             <div className="space-y-3 p-5">
-              {renderer ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="p-4 shadow-sm">
-                    <Skeleton className="h-6 w-32" />
-                  </Card>
-                ))
-              ) : (
-                currentPageData.map((c) => (
-                  <Card
-                    key={c.CaseID}
-                    className={cn("flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4",
-                      c.CaseStatus === "FinishRepair" ? "border-green-300" :
-                      c.CaseStatus === "Close" ? "border-red-300 bg-fuchsia-100" :
-                        c?.caseinformation.Owner !== user.user.id ? "border-blue-300" : ''
-                    )}
-                    onClick={() => navigate(`/app/case/${c.CaseID}`)}
-                  >
-                    <div>
-                      <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
-                      <p className="text-sm text-gray-500">{c.SerialNumber} | {c.Primary} | {c.CustomerAccount || "No Company"} | {c.CreatedOn}</p>
-                    </div>
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="space-x-2">
-                        {c?.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition === "InWarranty" ? (
-                          <Badge className="bg-green-500">IW</Badge>
-                        ) : c?.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? (
-                          <Badge className="bg-red-500">OOW</Badge>
-                        ) : (
-                          <Badge className="bg-gray-500">?</Badge>
-                        )}
-
-                        <Badge className="bg-cyan-600">{STATUS_ENUM_TO_LABEL[c.CaseStatus]}</Badge>
-                        <Badge>{c.caseinformation.CaseType}</Badge>
-                        {c?.caseinformation.Owner === user.user.id ? (
-                          <Badge className="bg-purple-500">Owner</Badge>
-                        ) : (
-                          <Badge className="bg-sky-500">CreatedBy</Badge>
-                        )}
+              {renderer
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <Card key={i} className="p-4 shadow-sm">
+                      <Skeleton className="h-6 w-32" />
+                    </Card>
+                  ))
+                : currentPageData.map((c) => (
+                    <Card
+                      key={c.CaseID}
+                      className={cn(
+                        "flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4",
+                        c.CaseStatus === "FinishRepair"
+                          ? "border-green-300 bg-lime-200"
+                          : c.CaseStatus === "Close"
+                          ? "border-red-300 bg-fuchsia-100"
+                          : c?.caseinformation.Owner !== user.user.id
+                          ? "border-blue-300"
+                          : ""
+                      )}
+                      onClick={() => navigate(`/app/case/${c.CaseID}`)}
+                    >
+                      <div>
+                        <p className="font-semibold">
+                          #{c.CaseID} - {c.ProductName}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {c.SerialNumber} | {c.Primary} |{" "}
+                          {c.CustomerAccount || "No Company"} | {c.CreatedOn}
+                        </p>
                       </div>
-                      {c.EstimedTimeFromUpdate}
-                    </div>
-                  </Card>
-                ))
-              )}
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="space-x-2">
+                          {c?.caseinformation?.asset_information
+                            ?.WarrantyOTCCode?.WarrantyCondition ===
+                          "InWarranty" ? (
+                            <Badge className="bg-green-500">IW</Badge>
+                          ) : c?.caseinformation?.asset_information
+                              ?.WarrantyOTCCode?.WarrantyCondition ===
+                            "OutWarranty" ? (
+                            <Badge className="bg-red-500">OOW</Badge>
+                          ) : (
+                            <Badge className="bg-gray-500">?</Badge>
+                          )}
+
+                          <Badge className="bg-cyan-600">
+                            {STATUS_ENUM_TO_LABEL[c.CaseStatus]}
+                          </Badge>
+                          <Badge>{c.caseinformation.CaseType}</Badge>
+                          {c?.caseinformation.Owner === user.user.id ? (
+                            <Badge className="bg-purple-500">Owner</Badge>
+                          ) : (
+                            <Badge className="bg-sky-500">CreatedBy</Badge>
+                          )}
+                        </div>
+                        {c.EstimedTimeFromUpdate}
+                      </div>
+                    </Card>
+                  ))}
               <Pagination className="flex justify-start">
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
-                      placeholder='First'
+                      placeholder="First"
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
@@ -429,7 +482,7 @@ console.log("CHECK FULLY DATA",filteredCases)
                   </PaginationItem>
                   <PaginationItem>
                     <PaginationNext
-                      placeholder='Last'
+                      placeholder="Last"
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
@@ -439,21 +492,32 @@ console.log("CHECK FULLY DATA",filteredCases)
                   </PaginationItem>
                   <div className="flex gap-3 p-1 items-center">
                     Total Page
-                    <span className='border-2 p-1 rounded-md shadow-2xl'>
+                    <span className="border-2 p-1 rounded-md shadow-2xl">
                       {totalPages}
                     </span>
                   </div>
                 </PaginationContent>
               </Pagination>
-              {error ? <h1 className="text-center text-destructive">Something went wrong</h1> : ""}
+              {error ? (
+                <h1 className="text-center text-destructive">
+                  Something went wrong
+                </h1>
+              ) : (
+                ""
+              )}
             </div>
           </div>
-
         </SidebarInset>
-        <SearchBar filters={filters} setFilters={setFilters} caseData={caseData} filterClose={filterClose} dataTime={dataTime}/>
+        <SearchBar
+          filters={filters}
+          setFilters={setFilters}
+          caseData={caseData}
+          filterClose={filterClose}
+          dataTime={dataTime}
+        />
       </SidebarProvider>
     </>
-  )
+  );
   
 }
 
