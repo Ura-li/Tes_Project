@@ -788,6 +788,73 @@ const openPopup = () => {
     });
   };
   
+  //QR CODE
+  const [qrCodeImg,setQrCodeImg]= useState("");
+  const[qrData,setQrData]=useState(caseDetails.CaseID);
+  //define this manually
+  /**TODO FOR SLAMET */
+  const[qrSize,setQrSize]=useState(150);
+
+  async function generateQR(){
+      
+      try{
+      const url =`https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(qrData)}`;
+
+      const base64 = await fetch(url)
+      .then(response => response.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        console.log("QR",reader)
+        return new Promise((res) => {
+          reader.onloadend = () => {
+          res(reader.result);
+        }})
+      })
+
+
+      setQrCodeImg(base64);
+
+      }catch(error){
+      console.error("Error generating QR code",error);
+
+      }
+  }
+  
+  console.log("QRCODEIMAGE",qrCodeImg);
+  function downloadQr(){
+      try{
+          fetch(qrCodeimg).then((response)=>response.blob()).then((blob)=>{
+              const link=document.createElement("a");
+              link.href=URL.createObjectURL(blob);
+              link.download="qrcode.png";
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+          });
+        }
+      catch{(error) => {
+        console.error("Error in Downloading QRcode",error);
+      }};
+    }
+  useEffect(()=>{
+    generateQR()
+  },[caseDetails.CaseID])
+
+  // Source - https://stackoverflow.com/a
+// Posted by Jukka Koivu
+// Retrieved 2025-11-29, License - CC BY-SA 4.0
+
+
+  const convertToBase64 = async (url) => {
+    // Source - https://stackoverflow.com/a
+    // Posted by Robert
+    // Retrieved 2025-11-29, License - CC BY-SA 4.0
+
+    
+    return base64
+  }
+
 
   // Deprecated: previously used for single textarea notes display
   // Replaced by notesList table
@@ -858,6 +925,7 @@ const openPopup = () => {
           <ServiceRequestPDF
             caseDetails={caseDetails}
             customerSignature={signature}
+            qrcode={qrCodeImg}
           />
         ).toBlob();
         const url = URL.createObjectURL(blob);
@@ -1414,6 +1482,8 @@ const openPopup = () => {
     ]
       .filter(Boolean)
       .join(", ") || "-";
+
+  
 
   return (
     <>
@@ -2149,6 +2219,11 @@ if (caseDetails.CaseStatus !== "Close") {
     handleEntitlementStatus('PhotoUnit')(validFiles);
   }
 
+  
+
+  
+
+  
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (
@@ -2167,6 +2242,10 @@ if (caseDetails.CaseStatus !== "Close") {
               <h1 className="text-2xl font-semibold">{caseDetails.CaseID}</h1>
               <p className="text-lg text-muted-foreground">{caseDetails.CaseSubject}</p>
             </div>
+            <div className="app-container">
+              {/* { img && <img src={img} className="qr-code-image" />} */}
+            </div>
+
 
             {/* RIGHT SIDE - Quick Info */}
             <div className="flex flex-wrap items-center gap-4 text-sm">
