@@ -326,29 +326,17 @@ export const FlowCaseData = (user) => {
   const navigate = useNavigate();
   return (
     <>
-      <SidebarProvider defaultOpen className={"min-h-0"}>
-        <SidebarInset>
-          <div className="max-h-screen flex flex-col w-full">
-            <div className="sticky top-13  bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
-              <div className=" flex h-14 w-full items-center gap-3 px-4  place-content-between">
-                {isToggleUser &&
-                <div className="flex gap-3 items-center">
-                  <Switch
-                    checked={filterFinish === false}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setFilterClose(true); // Turn off filterFinish if filterClose is unchecked
-                      }
-                      setFilterFinish(checked ? false : true);
-                    }}
-                    className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500"
-                    id="Finish"
-                  />
-                  {/* <Switch checked={filters.Status === "FinishRepair"}
+      <SidebarProvider defaultOpen className={"dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"}>
+        <SidebarInset className={"dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"}>
+          <div className="flex flex-col w-full ">
+            <div className="sticky top-13 dark:bg-transparent bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+              <div className=" flex h-14 w-full items-center gap-3 px-4  place-content-between ">
+                <div className='flex gap-3 items-center'>
+                  <Switch checked={filters.Status === "FinishRepair"}
                     onCheckedChange={(checked) => setFilters({
                       ...filters,
                       Status: checked ? "FinishRepair" : "",
-                    })} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500" id="Finish" /> */}
+                    })} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500" id="Finish" /> 
                   <Label htmlFor="Finish" className={"font-[700]"}>
                     Show Finished Case
                   </Label>
@@ -367,7 +355,6 @@ export const FlowCaseData = (user) => {
                     Show Closed Case
                   </Label>
                 </div>
-                }
                 <h1 className="lg:text-xl md:text-md font-semibold tracking-tight text-sm">
                   Case For You
                 </h1>
@@ -376,36 +363,28 @@ export const FlowCaseData = (user) => {
             </div>
 
             <div className="space-y-3 p-5">
-              {renderer
-                ? Array.from({ length: 6 }).map((_, i) => (
-                    <Card key={i} className="p-4 shadow-sm">
-                      <Skeleton className="h-6 w-32" />
-                    </Card>
-                  ))
-                : currentPageData.map((c) => (
-                    <Card
-                      key={c.CaseID}
-                      className={cn(
-                        "flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4",
-                        c.CaseStatus === "FinishRepair"
-                          ? "border-green-300 bg-lime-200"
-                          : c.CaseStatus === "Close"
-                          ? "border-red-300 bg-fuchsia-100"
-                          : c?.caseinformation.Owner !== user.user.id
-                          ? "border-blue-300"
-                          : ""
-                      )}
-                      onClick={() => navigate(`/app/case/${c.CaseID}`)}
-                    >
-                      <div>
-                        <p className="font-semibold">
-                          #{c.CaseID} - {c.ProductName}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {c.SerialNumber} | {c.Primary} |{" "}
-                          {c.CustomerAccount || "No Company"} | {c.CreatedOn}
-                        </p>
-                      </div>
+              {renderer ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="p-4 shadow-sm dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600">
+                    <Skeleton className="h-6 w-32" />
+                  </Card>
+                ))
+              ) : (
+                currentPageData.map((c) => (
+                  <Card
+                    key={c.CaseID}
+                    className={cn("flex-row justify-between items-center p-4 shadow-md hover:shadow-md hover:border-amber-200 transition cursor-pointer border-l-4 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600 dark:hover:border-purple-700",
+                      c.CaseStatus === "FinishRepair" ? "border-green-300 dark:border-green-600" :
+                      c.CaseStatus === "Close" ? "border-red-300 bg-fuchsia-100 dark:border-red-600" :
+                        c?.caseinformation.Owner !== user.user.id ? "border-blue-300 dark:border-blue-600" : 'dark:border-slate-600'
+                    )}
+                    onClick={() => navigate(`/app/case/${c.CaseID}`)}
+                  >
+                    <div>
+                      <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
+                      <p className="text-sm text-gray-500">{c.SerialNumber} | {c.Primary} | {c.CustomerAccount || "No Company"} | {c.CreatedOn}</p>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">  
                       <div className="flex flex-col items-center gap-2">
                         <div className="space-x-2">
                           {c?.caseinformation?.asset_information
@@ -432,14 +411,18 @@ export const FlowCaseData = (user) => {
                         </div>
                         {c.EstimedTimeFromUpdate}
                       </div>
-                    </Card>
-                  ))}
+                    </div>
+                  </Card>
+                ))
+              )
+            }
               <Pagination className="flex justify-start">
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
                       placeholder="First"
                       href="#"
+                      className={"dark:hover:bg-slate-800"}
                       onClick={(e) => {
                         e.preventDefault();
                         handlePageChange(1);
@@ -449,6 +432,7 @@ export const FlowCaseData = (user) => {
                   <PaginationItem>
                     <PaginationPrevious
                       href="#"
+                      className={"dark:hover:bg-slate-800"}
                       onClick={(e) => {
                         e.preventDefault();
                         handlePageChange(currentPage - 1);
@@ -460,6 +444,7 @@ export const FlowCaseData = (user) => {
                     <PaginationItem key={page}>
                       <PaginationLink
                         href="#"
+                        className={"dark:hover:bg-slate-800"}
                         isActive={currentPage === page}
                         onClick={(e) => {
                           e.preventDefault();
@@ -473,6 +458,7 @@ export const FlowCaseData = (user) => {
 
                   <PaginationItem>
                     <PaginationNext
+                      className={"dark:hover:bg-slate-800"}
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
@@ -482,7 +468,8 @@ export const FlowCaseData = (user) => {
                   </PaginationItem>
                   <PaginationItem>
                     <PaginationNext
-                      placeholder="Last"
+                      placeholder='Last'
+                      className={"dark:hover:bg-slate-800"}
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
@@ -492,19 +479,13 @@ export const FlowCaseData = (user) => {
                   </PaginationItem>
                   <div className="flex gap-3 p-1 items-center">
                     Total Page
-                    <span className="border-2 p-1 rounded-md shadow-2xl">
+                    <span className='border-2 p-1 rounded-md shadow-2xl dark:border-slate-500 '>
                       {totalPages}
                     </span>
                   </div>
                 </PaginationContent>
               </Pagination>
-              {error ? (
-                <h1 className="text-center text-destructive">
-                  Something went wrong
-                </h1>
-              ) : (
-                ""
-              )}
+              {error ? <h1 className="text-center text-destructive dark:text-red-500">Something went wrong</h1> : ""}
             </div>
           </div>
         </SidebarInset>

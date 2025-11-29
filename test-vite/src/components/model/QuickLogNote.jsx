@@ -1,10 +1,29 @@
 import React from 'react'
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '../ui/dialog'
+import CaseField from '../CaseField'
+import { SearchCommandBlock, SelectYN } from '../sc-select'
+import { Input } from '../ui/input'
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+ } from '../ui/table'
+ import { format } from 'date-fns'
+ import { parseNoteText } from "@/lib/utils.jsx";
 
-export const QuickLogNote = () => {
+
+export const QuickLogNote = ({
+  formData,
+  notesList,
+  onChange,
+  open
+}) => {
   return (
     <>
-    <Dialog>
+    <Dialog open={open}>
         <DialogHeader>
 
         </DialogHeader>

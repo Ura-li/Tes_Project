@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   textSmall: {
-    fontSize: 9,
+    fontSize: 8,
   },
   textCenter: {
     textAlign: 'center',
@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   qrCode: {
-    width: 45,
-    height: 45,
+    width: 50,
+    height: 50,
   },
   logo: {
     width: 60,
@@ -183,7 +183,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
 (
   <Document>
     <Page size="A4" style={styles.container}>
-      <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', marginBottom: 4, padding: 3  }}>
+      <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', marginBottom: 4, padding: 3, borderBottom: 1,  }}>
         <Image src="/hp.png" style={[styles.logo,{padding: 2  }]} />
         <View>
           <Text style={styles.sectionHeader}>PT.JAVA ABADI GEMILANG</Text>

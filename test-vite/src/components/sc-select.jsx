@@ -21,6 +21,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { twMerge } from "tailwind-merge";
 
 export const SearchCommandBlock = ({
   options = [],
@@ -112,7 +113,7 @@ const handleClear = () => {
           {allowClear && !readOnly && (
             <button
               type="button"
-              className="ml-auto inline-flex items-center justify-center rounded-full p-1 hover:bg-gray-100"
+              className="ml-auto inline-flex items-center justify-center rounded-full p-1 hover:bg-gray-100 dark:hover:bg-black"
               aria-label="Clear selection"
               onClick={(e) => {
                 e.stopPropagation(); // don't trigger startSearchMode
@@ -140,7 +141,7 @@ const handleClear = () => {
           {open && !readOnly && (
             <CommandList
               ref={dropdownRef}
-              className={`absolute z-50 w-full border rounded-md bg-white shadow-lg max-h-60 overflow-y-auto ${
+              className={`absolute z-50 w-full border rounded-md bg-white dark:bg-black shadow-lg max-h-60 overflow-y-auto ${
                 positionAbove ? "bottom-full mb-2" : "top-full mt-2"
               }`}
             >
@@ -238,7 +239,8 @@ export function ComboboxDemo({
   setValue,
   options,
   placeholder,
-  disabled
+  disabled,
+  className
 }) {
   const [open, setOpen] = useState(false)
   return (
@@ -248,7 +250,7 @@ export function ComboboxDemo({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between overflow-hidden"
+          className={twMerge(`w-full justify-between overflow-hidden ${className}`)}
           disabled={disabled}
         >
           {value

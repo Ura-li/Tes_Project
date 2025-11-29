@@ -301,7 +301,6 @@ export default function CashManagement() {
             <div className="flex justify-end">
               <Badge
                 variant={"outline"}
-                className={user.role === "lg" ? "bg-amber-200" : "bg-gray-200"}
               >
                 {user.role}
               </Badge>

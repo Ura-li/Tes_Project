@@ -417,17 +417,17 @@ export function AppSidebar({
   }
 
   return (  
-    <Sidebar collapsible="icon" {...props} className="border-0 bg-none z-40 h-auto ">
-      <SidebarHeader className={'bg-gradient-to-l from-hp-50 via-hp-200 to-hp-300'}>
-        <TeamSwitcher teams={data.teams} />
+    <Sidebar  collapsible="icon" {...props} className="border-0 bg-none z-40 ">
+      <SidebarHeader className={'bg-gradient-to-bl from-hp-50 via-hp-100 to-hp-300 dark:bg-gradient-to-br dark:from-slate-600 dark:via-slate-800 dark:to-slate-800 '}>
+        <TeamSwitcher  teams={data.teams} />
       </SidebarHeader>
-      <SidebarContent className={'bg-gradient-to-b from-hp-300 via-hp-400 to-hp-500 text-white'}>
+      <SidebarContent className={'bg-gradient-to-b from-hp-300 via-hp-400 to-hp-500 text-white dark:from-slate-800 dark:via-slate-700 dark:to-slate-600'}>
         <NavProjects projects={navrole} user={data.user} />
         
         {/* <Separator className={'border-2'}></Separator> */}
         {DropNav}
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className={"bg-gradient-to-t from-hp-50 via-hp-200 to-hp-500 dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-700 dark:to-slate-600"}>
         <NavUser user={data.user} />
       </SidebarFooter>
       <SidebarRail />

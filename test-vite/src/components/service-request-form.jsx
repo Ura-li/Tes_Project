@@ -208,6 +208,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
           alignItems: "center",
           marginBottom: 4,
           padding: 3,
+          borderBottom: 1,
         }}
       >
         <Image src="/hp.png" style={[styles.logo, { padding: 2 }]} />

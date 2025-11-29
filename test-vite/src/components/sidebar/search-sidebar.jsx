@@ -120,23 +120,21 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
 
     return (
         <Sidebar side="right" variant="sidebar" className={cn("z-10 top-16 h-full", className)}>
-            <Tabs defaultValue="search" className="w-full">
-
-                <SidebarHeader className="bg-cyan-700 h-14" >
-                    <TabsList className={'w-full'}>
-                        <TabsTrigger value="search" className="w-full justify-center">Search </TabsTrigger>
-                        <TabsTrigger value="Time" className="w-full justify-center">Time </TabsTrigger>
+            <Tabs defaultValue="search" className="w-full h-full dark:bg-gradient-to-t   dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-13% dark:from-4%">
+                <SidebarHeader className="bg-cyan-700 h-14 dark:bg-slate-800">
+                    <TabsList className={'w-full dark:bg-slate-600 dark:text-gray-200'}>
+                        <TabsTrigger value="search" className="w-full justify-center dark:data-[state=active]:bg-gray-500">Search </TabsTrigger>
+                        <TabsTrigger value="Time" className="w-full justify-center dark:data-[state=active]:bg-gray-500">Time </TabsTrigger>
                     </TabsList>
                 </SidebarHeader>
                 <TabsContent value="search" className={'max-h-[calc(100vh-8rem)] overflow-y-auto'}>
-
-                    <SidebarContent className=" ">
+                    <SidebarContent >
                         <SidebarGroup>
                             <SidebarGroupContent>
                                 <SidebarMenu className="flex flex-col gap-3 p-3">
                                     {items.map((item) => (
                                         <SidebarMenuItem key={item.title} className="flex flex-col gap-3">
-                                            <Label className="font-semibold flex items-center gap-2 text-gray-500 text-md" htmlFor={item.title}>
+                                            <Label className="dark:text-gray-300 font-semibold flex items-center gap-2 text-gray-500 text-md" htmlFor={item.title}>
                                                 {item.label}
                                             </Label>
                                             <Input
@@ -144,34 +142,34 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                                                 value={filters[item.title] || ""}
                                                 onChange={(e) => handleChange(item.title, e.target.value)}
                                                 placeholder={`Search ${item.label}`}
-                                                className="ml-2"
+                                                className="dark:text-white dark:border-gray-400  "
                                             />
                                         </SidebarMenuItem>
                                     ))}
 
                                     {/* Dropdown filters */}
                                     <SidebarMenuItem className="flex flex-col gap-3">
-                                        <Label className="text-gray-500">Case Status</Label>
+                                        <Label className="text-gray-500 dark:text-gray-300">Case Status</Label>
                                         <select
                                             value={filters.Status}
                                             onChange={(e) => handleChange("Status", e.target.value)}
-                                            className="p-2 rounded-md"
+                                            className="p-2 rounded-md dark:border-gray-400 dark:border-b-2 dark:rounded-none  dark:text-gray-400"
                                         >
                                             <option value="">All</option>
                                             {STATUS_LABELS.map((status) => (
                                                 <option key={status} value={status}>
-                                                    {status}
+                                                    {STATUS_ENUM_TO_LABEL[status]}
                                                 </option>
                                             ))}
                                         </select>
                                     </SidebarMenuItem>
 
                                     <SidebarMenuItem className="flex flex-col gap-3">
-                                        <Label className="text-gray-500">Case Type</Label>
+                                        <Label className="text-gray-500 dark:text-gray-300">Case Type</Label>
                                         <select
                                             value={filters.Type}
                                             onChange={(e) => handleChange("Type", e.target.value)}
-                                            className="p-2 rounded-md"
+                                            className="p-2 rounded-md dark:border-gray-400 dark:border-b-2 dark:rounded-none dark:text-gray-400"
                                         >
                                             <option value="">All</option>
                                             <option value="Bench">Bench</option>
@@ -179,11 +177,11 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                                         </select>
                                     </SidebarMenuItem>
                                     <SidebarMenuItem className="flex flex-col gap-3">
-                                        <Label className="text-gray-500">Case Holder</Label>
+                                        <Label className="text-gray-500 dark:text-gray-300">Case Holder</Label>
                                         <select
                                             value={filters.Role}
                                             onChange={(e) => handleChange("Role", e.target.value)}
-                                            className="p-2 rounded-md"
+                                            className="p-2 rounded-md dark:border-gray-400 dark:border-b-2 dark:rounded-none dark:text-gray-400"
                                         >
                                             <option value="">All</option>
                                             <option value="Owner">Case Owner</option>
@@ -191,7 +189,7 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                                         </select>
                                     </SidebarMenuItem>
                                     <SidebarMenuItem className="flex flex-col gap-3">
-                                        <Label className="text-gray-500">Range Time</Label>
+                                        <Label className="text-gray-500 dark:text-gray-300">Range Time</Label>
                                         <DatePicker 
                                             value={filters.RangeTime}
                                             onChange={(val) => handleChange("RangeTime",val)}
@@ -206,14 +204,14 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                 </TabsContent>
 
                 <TabsContent value="Time">
-                    <SidebarContent className=" p-2">
+                    <SidebarContent className="p-2">
                         {dataTime?.map((e, idx) => ( 
                             <SidebarGroup key={e.status} hidden={e.hide}>
-                                <SidebarGroupContent className={''}>
-                                    <Table className={''}>
+                                <SidebarGroupContent>
+                                    <Table>
                                         <TableHeader>
                                             <TableRow className={'col-span-5'}>
-                                                <TableHead className={'text-center font-semibold text-black text-[15px] ring-4 ring-teal-500'} colSpan={5}>
+                                                <TableHead className={'text-center font-semibold text-black dark:text-gray-300 text-[15px] ring-4 ring-teal-500 dark:ring-gray-400 dark:bg-slate-800'} colSpan={5}>
                                                     {STATUS_ENUM_TO_LABEL[e.status]}
                                                 </TableHead>
                                             </TableRow>
@@ -234,8 +232,8 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                                                     <TableCell
                                                         key={key}
                                                         className={cn(
-                                                             "p-2 text-center cursor-pointer hover:bg-teal-100",
-                                                             filters.Status === e.status && filters.TimeLength === key && "bg-teal-300"
+                                                             "text-center cursor-pointer hover:bg-teal-100 dark:hover:bg-gray-700 ",
+                                                             filters.Status === e.status && filters.TimeLength === key && "dark:bg-gray-600 bg-teal-300"
                                                         )}
                                                         onClick={() => {
                                                             const sameClick = filters.Status === e.status && filters.TimeLength === key;
@@ -301,7 +299,7 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                         ))} */}
 
                         <SidebarGroup hidden={!filterClose}>
-                            <SidebarGroupContent className={'italic text-center text-gray-500'}>
+                            <SidebarGroupContent className={'italic text-center text-gray-500 dark:text-gray-400'}>
                                 == Closed Case Data Hidden ==
                             </SidebarGroupContent>
                         </SidebarGroup>

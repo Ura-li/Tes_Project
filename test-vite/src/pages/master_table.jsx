@@ -1321,7 +1321,7 @@ const EnumToLabel = {
         className="w-full sm:w-1/3 p-2 mb-4 text-sm border rounded-lg
                    bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
                    focus:outline-none focus:ring-2 focus:ring-sky-400
-                   dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500"
+                   dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-gray-500"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -1337,7 +1337,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueHW.map((hw) => (
               <option key={hw} value={hw}>
@@ -1355,7 +1355,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueProduct.map((prod) => (
               <option key={prod} value={prod}>
@@ -1373,7 +1373,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueCreatedName.map((name) => (
               <option key={name} value={name}>
@@ -1391,7 +1391,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueOwner.map((owner) => (
               <option key={owner} value={owner}>
@@ -1409,7 +1409,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueWorkGroup.map((wg) => (
               <option key={wg} value={wg}>
@@ -1426,7 +1426,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                       bg-white border-slate-300 text-slate-800
                       focus:outline-none focus:ring-2 focus:ring-sky-400
-                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueCaseType.map((ct) => (
               <option key={ct} value={ct}>
@@ -1444,7 +1444,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                       bg-white border-slate-300 text-slate-800
                       focus:outline-none focus:ring-2 focus:ring-sky-400
-                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueWarrantyType.map((wt) => (
               <option key={wt} value={wt}>
@@ -1463,7 +1463,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                       bg-white border-slate-300 text-slate-800
                       focus:outline-none focus:ring-2 focus:ring-sky-400
-                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueWarrantyStatus.map((ws) => (
               <option key={ws} value={ws}>
@@ -1480,7 +1480,7 @@ const EnumToLabel = {
           <SelectTrigger id="status" className="w-48 p-2 text-sm border rounded-lg
                          bg-white border-slate-300 text-slate-800
                          focus:outline-none focus:ring-2 focus:ring-sky-400
-                         dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500">
+                         dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500">
             <SelectValue>{openClose}</SelectValue>
           </SelectTrigger>
           <SelectContent className="bg-white dark:bg-slate-800 dark:text-slate-100">
@@ -1631,7 +1631,7 @@ const EnumToLabel = {
             className="p-1 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
             value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
             onChange={(e) => {
               const value = e.target.value;
@@ -1695,7 +1695,7 @@ const EnumToLabel = {
                 className="w-16 p-1 text-sm text-center border rounded-lg
                            bg-white border-slate-300 text-slate-800
                            focus:outline-none focus:ring-2 focus:ring-sky-400
-                           dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                           dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
                 value={goToPageInput}
                 onChange={(e) => setGoToPageInput(e.target.value)}
               />
