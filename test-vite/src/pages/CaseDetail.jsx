@@ -233,7 +233,7 @@ const DEFAULT_EXTRA_STATUS_KEYS = ALL_STATUS_KEYS.filter((key) => !BASE_STATUS_K
 export const TabsServiceCaseDetails = ({ 
   caseDetails,
   setCaseDetails, 
-  caseNote,
+  // caseNote,
   caseNoteFormData,
   setCaseNoteFormData
 }) => {
@@ -1355,121 +1355,123 @@ const openPopup = () => {
   }
 
   useEffect(() => {
-    if (!openDialogQuotation || !caseDetails)  return;
+    if (!openDialogQuotation || !caseDetails) return;
 
     let cancelled = false;
 
     setQuotationInitialData(null);
-    setQuotationLoading(true)
+    setQuotationLoading(true);
 
     const loadQuotation = async () => {
-            try {
-                const response = await ApiCustomer.get(`/api/quotation-information?caseId=${caseDetails.CaseID}`);
-                if (cancelled) return;
-                const quotationPayload = response.data.data;
-                if (quotationPayload) {
-                    setQuotationInitialData(mapQuotationInitialData(quotationPayload));
-                }
-            } catch (error) {
-                if (!cancelled) {
-                    console.error("Failed to fetch quotation:", error);
-                    toast.error(
-                        error.response?.data?.message ?? "Gagal mengambil data quotation.",
-                    );
-                }
-            } finally {
-                if (!cancelled) {
-                    setQuotationLoading(false);
-                }
-            }
+      try {
+        const response = await ApiCustomer.get(
+          `/api/quotation-information?caseId=${caseDetails.CaseID}`
+        );
+        if (cancelled) return;
+        const quotationPayload = response.data.data;
+        if (quotationPayload) {
+          setQuotationInitialData(mapQuotationInitialData(quotationPayload));
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to fetch quotation:", error);
+          toast.error(
+            error.response?.data?.message ?? "Gagal mengambil data quotation."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setQuotationLoading(false);
+        }
+      }
     };
 
     loadQuotation();
 
     return () => {
-        cancelled = true;
+      cancelled = true;
     };
-    },[openDialogQuotation, caseDetails]);
+  }, [openDialogQuotation, caseDetails]);
 
-    const handleQuotationOpenChange = (nextOpen = true) => {
-        setOpenDialogQuotation(nextOpen);
-        if (!nextOpen) {
-          setQuotationInitialData(null);
-          setQuotationLoading(false);
-          setQuotationSubmitting(false);          
-        }
-    };
+  const handleQuotationOpenChange = (nextOpen = true) => {
+    setOpenDialogQuotation(nextOpen);
+    if (!nextOpen) {
+      setQuotationInitialData(null);
+      setQuotationLoading(false);
+      setQuotationSubmitting(false);
+    }
+  };
 
-      const handleQuotationSubmit = async (payload) => {
-            if (!caseDetails) return;
-            if (!user?.id) {
-                toast.error("User tidak valid. Silakan login kembali.");
-                return;
-            }
-            try {
-                setQuotationSubmitting(true);
-                // return console.log("Submit : ",payload)
-                const apiPayload = {
-                    ...payload,
-                    userAssign: user.id !== payload?.userAssign ? payload.userAssign : user.id,
-                };
-                if(apiPayload.quoteDecision === "Rejected"){
-                  apiPayload.userAssign = caseDetails.workorder[0]?.OwnerID;
-                }
-                
-                console.log("Sending payload:", apiPayload);
-                const endpoint = payload.quotationNo
-                    ? `/api/quotation-information/${payload.quotationNo}`
-                    : "/api/quotation-information";
-                const method = payload.quotationNo ? "patch" : "post";  
-                const requester =
-                    method === "patch"
-                        ? ApiCustomer.patch.bind(ApiCustomer)
-                        : ApiCustomer.post.bind(ApiCustomer);
-    
-                await requester(endpoint, apiPayload);
-    
-                toast.success(
-                    payload.quotationNo
-                        ? "Quotation berhasil diperbarui."
-                        : "Quotation berhasil dibuat.",
-                );
-    
-                handleQuotationOpenChange(false);
-            } catch (error) {
-                console.error("Failed to save quotation:", error);
-                const message =
-                    error.response?.data?.message ?? "Gagal menyimpan quotation.";
-                toast.error(message);
-            } finally {
-                setQuotationSubmitting(false);
-            }
-        };
-    
-    
-        const mapQuotationInitialData = (quotationPayload) => {
-            if (!quotationPayload?.quotation) return null;
-            const q = quotationPayload.quotation;
-    
-        return {
-            quotationNo: q.quotationNo,
-            quotationType: q.quotationType ?? "Simple",
-            vatValue:
-                q.vatValue === null || q.vatValue === undefined
-                        ? ""
-                        : String(q.vatValue),
-                quotationNote: q.quotationNote ?? "",
-                laborFee:
-                    q.laborFee === null || q.laborFee === undefined
-                        ? ""
-                    : String(q.laborFee),
-                quotationDate: q.quotationDate ?? "",
-                quoteApproveDate: q.quoteApproveDate ?? "",
-                sendWa: Boolean(q.sendWa),
-                sendEmail: Boolean(q.sendEmail),
-                quoteDecision: q.quoteDecision ?? "",
-        };
+  const handleQuotationSubmit = async (payload) => {
+    if (!caseDetails) return;
+    if (!user?.id) {
+      toast.error("User tidak valid. Silakan login kembali.");
+      return;
+    }
+    try {
+      setQuotationSubmitting(true);
+      // return console.log("Submit : ",payload)
+      const apiPayload = {
+        ...payload,
+        userAssign:
+          user.id !== payload?.userAssign ? payload.userAssign : user.id,
+      };
+      if (apiPayload.quoteDecision === "Rejected") {
+        apiPayload.userAssign = caseDetails.workorder[0]?.OwnerID;
+      }
+
+      console.log("Sending payload:", apiPayload);
+      const endpoint = payload.quotationNo
+        ? `/api/quotation-information/${payload.quotationNo}`
+        : "/api/quotation-information";
+      const method = payload.quotationNo ? "patch" : "post";
+      const requester =
+        method === "patch"
+          ? ApiCustomer.patch.bind(ApiCustomer)
+          : ApiCustomer.post.bind(ApiCustomer);
+
+      await requester(endpoint, apiPayload);
+
+      toast.success(
+        payload.quotationNo
+          ? "Quotation berhasil diperbarui."
+          : "Quotation berhasil dibuat."
+      );
+
+      handleQuotationOpenChange(false);
+    } catch (error) {
+      console.error("Failed to save quotation:", error);
+      const message =
+        error.response?.data?.message ?? "Gagal menyimpan quotation.";
+      toast.error(message);
+    } finally {
+      setQuotationSubmitting(false);
+    }
+  };
+
+  const mapQuotationInitialData = (quotationPayload) => {
+    if (!quotationPayload?.quotation) return null;
+    const q = quotationPayload.quotation;
+
+    return {
+      quotationNo: q.quotationNo,
+      quotationType: q.quotationType ?? "Simple",
+      vatValue:
+        q.vatValue === null || q.vatValue === undefined
+          ? ""
+          : String(q.vatValue),
+      quotationNote: q.quotationNote ?? "",
+      laborFee:
+        q.laborFee === null || q.laborFee === undefined
+          ? ""
+          : String(q.laborFee),
+      quotationDate: q.quotationDate ?? "",
+      quoteApproveDate: q.quoteApproveDate ?? "",
+      sendWa: Boolean(q.sendWa),
+      sendEmail: Boolean(q.sendEmail),
+      quoteDecision: q.quoteDecision ?? "",
     };
+  };
 
   const invoiceSummary = invoiceData?.invoice;
   const invoiceQuotation = invoiceData?.quotation;
@@ -1604,7 +1606,7 @@ export const ServiceCase = ({
   caseDetails,
   formData,
   setCaseNoteFormData,
-  onChange,
+  onChange,  //!
   notesList,
   setNotesList,
   handleCaseDetails,
@@ -1614,19 +1616,19 @@ export const ServiceCase = ({
   setFormGtc,
   onChangeGtc,
   entitlementStatus,
-  handleEntitlementStatus,
+  handleEntitlementStatus, //!
   csrForm,
   setCsrForm,
   onChangeCsr,
   caseForm,
-  onChangeCase,
+  onChangeCase,  //!
   setCaseForm,
   signature,
   setSignature,
   refreshFetchPage,
   productForm,
   setProductForm,
-  handleProductChange,
+  handleProductChange, //! 
   invoiceLoading,
   invoiceSummary,
   invoiceQuotation,

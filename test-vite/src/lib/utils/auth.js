@@ -22,11 +22,26 @@ export function isTokenExpired(decodedToken) {
   return decodedToken.exp * 1000 <= Date.now();
 }
 
+/**
+ * @typedef {Object} MyJwtPayload
+ * @property {number} id
+ * @property {string} email
+ * @property {string} role
+ * @property {string} name
+ * @property {string} avatar
+ * @property {number} iat
+ * @property {number} exp
+ */
+
+/**
+ * @returns {MyJwtPayload | null}
+ */
 export function getUserFromToken(tokenOverride) {
   const token = tokenOverride ?? getToken();
   if (!token) return null;
 
   try {
+    /** @type {MyJwtPayload} */
     const decoded = jwtDecode(token);
 
     if (isTokenExpired(decoded)) {
@@ -34,10 +49,11 @@ export function getUserFromToken(tokenOverride) {
       return null;
     }
 
-    return decoded; // berisi: { id, email, role, iat, exp }
+    return decoded;
   } catch (error) {
     console.error("Failed to decode token:", error);
     clearToken();
     return null;
   }
 }
+
