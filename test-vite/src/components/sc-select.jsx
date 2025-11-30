@@ -265,7 +265,7 @@ export function ComboboxDemo({
           <CommandList>
             <CommandEmpty>No state found.</CommandEmpty>
             <CommandGroup>
-              {options.map((data) => (
+              {options?.map((data) => (
                 <CommandItem
                   key={data.id}
                   value={data.name}

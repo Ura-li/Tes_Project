@@ -6,128 +6,249 @@ import { Skeleton } from '../components/ui/skeleton'
 import { TabsService } from '../pages/services/service-case'
 import { useDraft } from '../components/DraftContext';
 import { useAuth } from '@/context/auth-context';
-import { TabsServiceCaseDetails } from './CaseDetail';
+import { create } from 'zustand';
+import { useServiceCaseStore } from '@/hooks/useServiceCaseStore';
+
+//? This is the old case detail import just uncomment it if need to use it back
+// import { TabsServiceCaseDetails } from './CaseDetail';
+
+// export const Case = () => {
+//   const { user } = useAuth();
+//   const { caseId } = useParams(); // Get caseId from URL params
+//   const { updateDraft } = useDraft(); // Access updateDraft from context
+//   const [caseDetails, setCaseDetails] = useState(null);
+//   const [caseNote, setCaseNote] = useState(null);
+//   const [caseNoteFormData, setCaseNoteFormData] = useState({
+//     LogType: "Notes Log",
+//     ActionType: "Inbound Customer call",
+//     Template: '',
+//     VisibleExternally: null,
+//     MinutesSpent: 0,
+//     Note: ''
+//   });
+
+// useEffect(() => {
+//   // Update draft when the user visits the case page
+//   updateDraft('caseId', caseId); // Save the visited caseId to drafts
+
+//   const loadCaseData = async () => {
+//     try {
+//       const response = await ApiCustomer.get(`/api/case-information/${caseId}`);
+//       setCaseDetails(response.data.data);
+//       // console.log("Case Details:", response.data.data);
+
+//       // const res = await ApiCustomer.get(`/api/case-information/case-notes`);
+//       // const notes = res.data.data;
+//       // const existingNote = notes.find(note => note.CaseID === caseId);
+
+//       // let noteID;
+//       // if (existingNote) {
+//       //   noteID = existingNote.NoteID;
+//       // } else {
+//       //   const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`, {
+//       //     LogType: "",
+//       //     ActionType: "",
+//       //     Template: "",
+//       //     VisibleExternally: false,
+//       //     MinutesSpent: 0,
+//       //     Note: "",
+//       //     CaseID: caseId
+//       //   });
+//       //   noteID = createResponse.data.data.NoteID;
+//       // }
+
+//       // const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`);
+//       // setCaseNote(detailRes.data.data);
+
+//       // Delay sedikit agar UI sempat render dulu
+//       await new Promise(resolve => setTimeout(resolve, 500));
+
+//     } catch (error) {
+//       console.error("Gagal memuat data:", error);
+//       Swal.fire({
+//         icon: 'error',
+//         title: 'Gagal memuat data',
+//         text: 'Terjadi kesalahan saat mengambil data kasus atau catatan.',
+//         timer: 2000,
+//         timerProgressBar: true,
+//         showConfirmButton: false
+//       });
+//     } finally {
+//       Swal.close();
+//     }
+//   };
+
+//   loadCaseData();
+// }, [caseId]); // Only include caseId here, no need for updateDraft
+
+//   if (!caseDetails) {
+//     return (
+//       <div className="p-2 space-y-6">
+//         <Skeleton className="h-6 w-1/4"  />
+//         <Skeleton className="w-1/1 h-30" />
+//         <div className="grid grid-cols-2 gap-4">
+//         <Skeleton className="h-116 w-full rounded-lg" />
+//         <Skeleton className="h-116 w-full rounded-lg" />
+//         </div>
+//         <div className="space-y-2" hidden>
+//           <Skeleton className="h-4 w-3/4" />
+//           <Skeleton className="h-4 w-2/4" />
+//           <Skeleton className="h-4 w-full" />
+//         </div>
+        
+//       </div>
+//     );
+//   }
+//   return (
+//     <>
+//     {/* {user.role === 'admin' ? (
+//       <TabsService
+//         caseDetails={caseDetails}
+//         setCaseDetails={setCaseDetails}
+//         caseNote={caseNote}
+//         caseNoteFormData={caseNoteFormData}
+//         setCaseNoteFormData={setCaseNoteFormData}
+//       /> 
+//     )  : ( */}
+//       <TabsServiceCaseDetails
+//           caseDetails={caseDetails}
+//           setCaseDetails={setCaseDetails}
+//           // caseNote={caseNote}
+//           caseNoteFormData={caseNoteFormData}
+//           setCaseNoteFormData={setCaseNoteFormData}
+//       /> 
+//     {/* )
+//     } */}
+//     </>
+//   );
+// };
 
 
+//? This is the new one comment this when the old one is in use
+import { TabsServiceCaseDetails } from './CaseDetailReimagined';
 
 export const Case = () => {
   const { user } = useAuth();
-  const { caseId } = useParams(); // Get caseId from URL params
-  const { updateDraft } = useDraft(); // Access updateDraft from context
-  const [caseDetails, setCaseDetails] = useState(null);
-  const [caseNote, setCaseNote] = useState(null);
-  const [caseNoteFormData, setCaseNoteFormData] = useState({
-    LogType: "Notes Log",
-    ActionType: "Inbound Customer call",
-    Template: '',
-    VisibleExternally: null,
-    MinutesSpent: 0,
-    Note: ''
-  });
+  const { caseId } = useParams();
+  const { updateDraft } = useDraft();
+  const [loading, setLoading] = useState(false)
+  const refreshFetchPage = useServiceCaseStore((s) => s.refreshFetchPage);
+  const caseDetails = useServiceCaseStore((s) => s.caseDetails);
+  const initFromCaseDetails = useServiceCaseStore(
+    (s) => s.initFromCaseDetails
+  );
 
-useEffect(() => {
-  // Update draft when the user visits the case page
-  updateDraft('caseId', caseId); // Save the visited caseId to drafts
+  // optional: prefetch functions
+  const fetchCustomerData = useServiceCaseStore((s) => s.fetchCustomerData);
+  const fetchAssetInformation = useServiceCaseStore(
+    (s) => s.fetchAssetInformation
+  );
+  const fetchCaseNotes = useServiceCaseStore((s) => s.fetchCaseNotes);
+  const fetchOwnerUserData = useServiceCaseStore(
+    (s) => s.fetchOwnerUserData
+  );
+  const fetchWorkOrders = useServiceCaseStore((s) => s.fetchWorkOrders);
+  const fetchMaterialOrders = useServiceCaseStore(
+    (s) => s.fetchMaterialOrders
+  );
+  const fetchGtc = useServiceCaseStore((s) => s.fetchGtc);
+  const fetchCsr = useServiceCaseStore((s) => s.fetchCsr);
+  const fetchActionLog = useServiceCaseStore((s) => s.fetchActionLog);
+  const fetchOtcCode = useServiceCaseStore((s) => s.fetchOtcCode);
+
+ useEffect(() => {
+  if (!caseId) return;
+
+  // still okay to call this here
+  updateDraft("caseId", caseId);
 
   const loadCaseData = async () => {
-    // Swal.fire({
-    //   title: 'Memuat Case Detail...',
-    //   text: 'Mohon tunggu sebentar',
-    //   allowOutsideClick: false,
-    //   allowEscapeKey: false,
-    //   didOpen: () => Swal.showLoading(),
-    //   customClass: {
-    //     popup: 'z-[9999]',
-    //   }
-    // });
-
     try {
-      const response = await ApiCustomer.get(`/api/case-information/${caseId}`);
-      setCaseDetails(response.data.data);
-      console.log("Case Details:", response.data.data);
+      setLoading(false)
+      Swal.fire({
+        title: "Loading...",
+        text: "Mohon tunggu sebentar",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
 
-      const res = await ApiCustomer.get(`/api/case-information/case-notes`);
-      const notes = res.data.data;
-      const existingNote = notes.find(note => note.CaseID === caseId);
+      const response = await ApiCustomer.get(
+        `/api/case-information/${caseId}`
+      );
+      const details = response.data.data;
 
-      let noteID;
-      if (existingNote) {
-        noteID = existingNote.NoteID;
-      } else {
-        const createResponse = await ApiCustomer.post(`/api/case-information/case-notes`, {
-          LogType: "",
-          ActionType: "",
-          Template: "",
-          VisibleExternally: false,
-          MinutesSpent: 0,
-          Note: "",
-          CaseID: caseId
-        });
-        noteID = createResponse.data.data.NoteID;
-      }
+      // put into zustand
+      initFromCaseDetails(details);
 
-      const detailRes = await ApiCustomer.get(`/api/case-information/case-notes/${noteID}`);
-      setCaseNote(detailRes.data.data);
+      await Promise.allSettled([
+        fetchCustomerData(),
+        fetchAssetInformation(),
+        fetchCaseNotes(),
+        fetchOwnerUserData(),
+        fetchWorkOrders(),
+        // fetchMaterialOrders(),
+        fetchGtc(),
+        fetchCsr(),
+        fetchActionLog(),
+        fetchOtcCode(),
+      ]);
 
-      // Delay sedikit agar UI sempat render dulu
-      await new Promise(resolve => setTimeout(resolve, 500));
-
+      await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error) {
       console.error("Gagal memuat data:", error);
       Swal.fire({
-        icon: 'error',
-        title: 'Gagal memuat data',
-        text: 'Terjadi kesalahan saat mengambil data kasus atau catatan.',
+        icon: "error",
+        title: "Gagal memuat data",
+        text: "Terjadi kesalahan saat mengambil data kasus.",
         timer: 2000,
         timerProgressBar: true,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
     } finally {
       Swal.close();
+      setLoading(true)
     }
   };
 
   loadCaseData();
-}, [caseId]); // Only include caseId here, no need for updateDraft
 
-  if (!caseDetails) {
+// 👇 only depend on caseId
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [caseId, refreshFetchPage]);
+
+
+  if (!loading) {
     return (
       <div className="p-2 space-y-6">
-        <Skeleton className="h-6 w-1/4"  />
-        <Skeleton className="w-1/1 h-30" />
+        <Skeleton className="h-6 w-1/4" />
+        <Skeleton className="w-full h-30" />
         <div className="grid grid-cols-2 gap-4">
-        <Skeleton className="h-116 w-full rounded-lg" />
-        <Skeleton className="h-116 w-full rounded-lg" />
+          <Skeleton className="h-116 w-full rounded-lg" />
+          <Skeleton className="h-116 w-full rounded-lg" />
         </div>
-        <div className="space-y-2" hidden>
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-2/4" />
-          <Skeleton className="h-4 w-full" />
-        </div>
-        
       </div>
     );
   }
+
   return (
-    <>
-    {/* {user.role === 'admin' ? (
-      <TabsService
-        caseDetails={caseDetails}
-        setCaseDetails={setCaseDetails}
-        caseNote={caseNote}
-        caseNoteFormData={caseNoteFormData}
-        setCaseNoteFormData={setCaseNoteFormData}
-      /> 
-    )  : ( */}
-      <TabsServiceCaseDetails
-          caseDetails={caseDetails}
-          setCaseDetails={setCaseDetails}
-          caseNote={caseNote}
-          caseNoteFormData={caseNoteFormData}
-          setCaseNoteFormData={setCaseNoteFormData}
-      /> 
-    {/* )
-    } */}
-    </>
+    <TabsServiceCaseDetails />
   );
 };
+
+// export const useCaseStore = create((set) => ({
+//   caseDetails: null,
+//   setCaseDetails: (data) => set({ caseDetails: data }),
+  
+//   caseNote: null,
+//   setCaseNote: (data) => set({ caseNote: data }),
+  
+//   caseNoteFormData: {
+//     LogType: "Notes Log",
+//     ActionType: "Inbound Customer call",
+//     Template: '',
+//     VisibleExternally: null,
+//     MinutesSpent: 0,
+//     Note: ''
+//   },
+//   setCaseNoteFormData: (data) => set({ caseNoteFormData: data }),
+// }));

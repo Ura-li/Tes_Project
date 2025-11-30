@@ -2,6 +2,7 @@ import React from "react";
 import { Lock } from "lucide-react";
 import { CardTitle } from "./ui/card";
 import { twMerge } from "tailwind-merge";
+import { Label } from "./ui/label";
 
 const spanMap = {
     1: "lg:col-span-1",
@@ -25,7 +26,7 @@ const CaseField = ({ label, children, lock = false, span = 1, className, childCl
     });
     return (
         <>
-            <CardTitle className={twMerge(
+            <Label className={twMerge(
                 `font-normal flex  items-center gap-4 text-md ${className}`
             )}>
                 {IconComponent ? (
@@ -35,7 +36,7 @@ const CaseField = ({ label, children, lock = false, span = 1, className, childCl
                 )}
                 {label}
                 {star ? <span className="text-red-400">*</span> : ""}
-            </CardTitle>
+            </Label>
             <CardTitle className={twMerge(spanMap[span], childClass, "font-semibold items-center flex ")}>
                 {modifiedChildren}
             </CardTitle>

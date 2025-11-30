@@ -1,3 +1,5 @@
+// InvoiceDialog.jsx
+
 import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
@@ -17,6 +19,9 @@ import { SearchCommandBlock } from "../sc-select";
 import { Checkbox } from "../ui/checkbox";
 import { formatAccountingRupiah, formatDateForInput } from "@/lib/utils";
 import { toast } from "sonner";
+import ApiCustomer from "@/api";
+import { useServiceCaseStore } from "../../hooks/useServiceCaseStore";
+import { useAuth } from "../../context/auth-context";
 
 const AMOUNT_DIFF_REASON_OPTIONS = [
   "Cancellation Fee (part mahal)",
@@ -65,24 +70,38 @@ const buildInitialForm = (invoice, quotation) => {
   };
 };
 
-const InvoiceDialog = ({
-  open,
-  onOpenChange,
-  quotation,
-  invoice,
-  loading,
-  submitting,
-  onSubmit,
-}) => {
+const InvoiceDialog = () => {
+  const { user } = useAuth();
+  const open = useServiceCaseStore((s) => s.invoiceDialogOpen);
+  const setInvoiceDialogOpen = useServiceCaseStore(
+    (s) => s.setInvoiceDialogOpen
+  );
+  const invoiceData = useServiceCaseStore((s) => s.invoiceData);
+  const invoiceLoading = useServiceCaseStore((s) => s.invoiceLoading);
+  const fetchInvoiceData = useServiceCaseStore((s) => s.fetchInvoiceData);
+  const caseDetails = useServiceCaseStore((s) => s.caseDetails);
+
+  const quotation = invoiceData?.quotation;
+  const invoice = invoiceData?.invoice;
+
   const [step, setStep] = useState("form");
-  const [form, setForm] = useState(() => buildInitialForm(invoice, quotation));
+  const [form, setForm] = useState(() =>
+    buildInitialForm(invoice, quotation)
+  );
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
 
   const grandTotalNumber = useMemo(() => {
     if (!quotation?.grandTotal) return 0;
     const parsed = Number(quotation.grandTotal);
     return Number.isNaN(parsed) ? 0 : parsed;
   }, [quotation]);
+
+  // fetch invoice data whenever dialog is opened
+  useEffect(() => {
+    if (!open || !caseDetails?.CaseID) return;
+    fetchInvoiceData();
+  }, [open, caseDetails?.CaseID, fetchInvoiceData]);
 
   useEffect(() => {
     if (!open) {
@@ -134,10 +153,6 @@ const InvoiceDialog = ({
       Number(form.amountDiff || 0) !== 0 &&
       (!form.amountDiffReason || form.amountDiffReason.trim() === "")
     ) {
-      /**
-       * TODO FOR SLAMET :
-       * GANTI BIAR GA APA KALI
-       */
       nextErrors.amountDiffReason =
         "Pilih alasan ketika terdapat selisih nominal.";
     }
@@ -152,8 +167,11 @@ const InvoiceDialog = ({
     }
   };
 
-  const handleConfirm = () => {
-    if (!onSubmit) return;
+  const handleConfirm = async () => {
+    if (!caseDetails?.CaseID || !user?.id) return;
+    if (!quotation?.quotationNo) return;
+    if (submitting) return;
+
     const payload = {
       invoiceNo: form.invoiceNo || undefined,
       quotationNo: form.quotationNo,
@@ -168,7 +186,44 @@ const InvoiceDialog = ({
       sendInvoice: form.sendInvoice,
       sendErf: form.sendErf,
     };
-    onSubmit(payload);
+
+    const hasInvoice = Boolean(payload.invoiceNo);
+    const endpoint = hasInvoice
+      ? `/api/invoice-information/${payload.invoiceNo}`
+      : "/api/invoice-information";
+    const method = hasInvoice ? "patch" : "post";
+    const requester =
+      method === "patch"
+        ? ApiCustomer.patch.bind(ApiCustomer)
+        : ApiCustomer.post.bind(ApiCustomer);
+
+    const requestBody = {
+      ...payload,
+      caseId: caseDetails.CaseID,
+    };
+
+    if (!hasInvoice) {
+      requestBody.createdBy = user.id;
+    }
+
+    try {
+      setSubmitting(true);
+      const response = await requester(endpoint, requestBody);
+      toast.success(
+        hasInvoice
+          ? "Invoice berhasil diperbarui."
+          : "Invoice berhasil dibuat."
+      );
+      await fetchInvoiceData();
+      setInvoiceDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to save invoice:", error);
+      const message =
+        error?.response?.data?.message ?? "Gagal menyimpan invoice.";
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const renderLoading = () => (
@@ -230,17 +285,14 @@ const InvoiceDialog = ({
           <CardTitle className="text-base">Detail Invoice</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
-          <CaseField label="Amount Receive" star>
+          <CaseField label="Amount Receive " star>
             <div className="space-y-1">
               <Input
                 type="number"
                 min="0"
                 step="0.01"
                 value={form.amountReceive}
-                onChange={(e) => {
-                  // const v = e.target.value.replace(/[^0-9.-]/g, '')
-                  // if (v === "") return handleAmountReceiveChange(form.amountReceive)
-                  handleAmountReceiveChange(e.target.value)}}
+                onChange={(e) => handleAmountReceiveChange(e.target.value)}
               />
               {errors.amountReceive && (
                 <p className="text-xs text-red-500">{errors.amountReceive}</p>
@@ -249,12 +301,7 @@ const InvoiceDialog = ({
           </CaseField>
 
           <CaseField label="Payment Type">
-            {/* <Input
-              value={form.paymentType}
-              onChange={(e) => handleChange("paymentType", e.target.value)}
-              placeholder="Transfer / Cash / VA"
-            /> */}
-            <SearchCommandBlock
+             <SearchCommandBlock
               value={form.paymentType}
               onChange={(value) => handleChange("paymentType", value)}
               options={[
@@ -282,7 +329,7 @@ const InvoiceDialog = ({
           </CaseField>
 
           {Number(form.amountDiff) !== 0 && (
-            <CaseField label="Alasan Amount Difference" star={Number(form.amountDiff) !== 0}>
+            <CaseField label="Alasan Amount Difference">
               <div className="space-y-1">
                 <SearchCommandBlock
                   value={form.amountDiffReason}
@@ -316,7 +363,7 @@ const InvoiceDialog = ({
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium">
               <Checkbox
-                className={'ring-1 '}
+                className={"ring-1 "}
                 checked={form.sendInvoice}
                 onCheckedChange={(checked) =>
                   handleChange("sendInvoice", Boolean(checked))
@@ -326,7 +373,7 @@ const InvoiceDialog = ({
             </label>
             <label className="flex items-center gap-2 text-sm font-medium">
               <Checkbox
-                className={'ring-1 '}
+                className={"ring-1 "}
                 checked={form.sendWa}
                 onCheckedChange={(checked) =>
                   handleChange("sendWa", Boolean(checked))
@@ -336,7 +383,7 @@ const InvoiceDialog = ({
             </label>
             <label className="flex items-center gap-2 text-sm font-medium">
               <Checkbox
-                className={'ring-1 '}
+                className={"ring-1 "}
                 checked={form.sendEmail}
                 onCheckedChange={(checked) =>
                   handleChange("sendEmail", Boolean(checked))
@@ -346,7 +393,7 @@ const InvoiceDialog = ({
             </label>
             <label className="flex items-center gap-2 text-sm font-medium">
               <Checkbox
-                className={'ring-1 '}
+                className={"ring-1 "}
                 checked={form.sendErf}
                 onCheckedChange={(checked) =>
                   handleChange("sendErf", Boolean(checked))
@@ -412,9 +459,17 @@ const InvoiceDialog = ({
     </div>
   );
 
+  const handleOpenChange = (nextOpen) => {
+    setInvoiceDialogOpen(nextOpen);
+    if (!nextOpen) {
+      setStep("form");
+      setErrors({});
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full sm:max-w-[960px] max-h-[90vh]  p-6 flex flex-col transition-all">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="w-full sm:max-w-[960px] max-h-[90vh] p-6 flex flex-col transition-all">
         <DialogHeader>
           <DialogTitle>
             {form.invoiceNo ? "Perbarui Invoice" : "Buat Invoice"}
@@ -425,7 +480,7 @@ const InvoiceDialog = ({
         </DialogHeader>
 
         <div className="overflow-y-auto ">
-          {loading
+          {invoiceLoading
             ? renderLoading()
             : !quotation
             ? renderEmptyQuotation()
@@ -434,7 +489,7 @@ const InvoiceDialog = ({
             : renderConfirmation()}
         </div>
 
-        {!loading && quotation && (
+        {!invoiceLoading && quotation && (
           <DialogFooter className="mt-6">
             {step === "form" ? (
               <>
