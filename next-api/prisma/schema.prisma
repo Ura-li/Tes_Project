@@ -240,7 +240,9 @@ model global_trade_check {
 }
 
 model down_payment_table {
-  ID_DP_table Int @id @default(autoincrement())
+  ID_DP_table Int    @id @default(autoincrement())
+  //CUSTOM KEY
+  DPInvoiceNo String @unique
 
   //FK Key
   CaseID          String?
@@ -555,8 +557,8 @@ model symptom_codes {
 }
 
 model test_table_without_migration {
-  id   Int    @id @default(autoincrement())
-  name String @db.VarChar(12)
+  id                  Int     @id @default(autoincrement())
+  name                String  @db.VarChar(12)
   testI12november2025 String? @db.VarChar(12)
 
   @@map("test-table-without-migration")
@@ -604,20 +606,20 @@ model User {
   // Case notes created by this user
   caseNotes_created casenotes[] @relation("UserCreatedCaseNotes")
 
-  quotationtable quotationtable[] @relation("UserQuotationAdmin")
-  invoicetable   invoicetable[]   @relation("UserInvoiceAdmin")
-  refreshTokens  RefreshToken[]
+  quotationtable     quotationtable[]     @relation("UserQuotationAdmin")
+  invoicetable       invoicetable[]       @relation("UserInvoiceAdmin")
+  refreshTokens      RefreshToken[]
   down_payment_table down_payment_table[] @relation("UserDPAdmin")
 }
 
 model RefreshToken {
-  id          Int      @id @default(autoincrement())
-  hashedToken String   @unique @db.Char(64)
+  id          Int       @id @default(autoincrement())
+  hashedToken String    @unique @db.Char(64)
   userId      Int
-  user        User     @relation(fields: [userId], references: [IDUser], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [IDUser], onDelete: Cascade)
   expiresAt   DateTime
   revokedAt   DateTime?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   @@index([userId])
 }
@@ -790,6 +792,20 @@ model workorder {
 model Resource {
   ResourceId String @id @db.VarChar(255)
   Name       String @db.VarChar(255)
+
+  //Resource Related Question
+  ServiceCenterName String? @db.VarChar(255)
+  ResourceCode      Int?
+  ResourceLogo      String? @db.LongText
+  Phone             String? @db.VarChar(20)
+  Mobile            String? @db.VarChar(20)
+  Fax               String? @db.VarChar(20)
+  Email             String? @db.VarChar(255)
+  City              String? @db.VarChar(100)
+  StateProvince     String? @db.VarChar(100)
+  Country           String? @db.VarChar(100)
+  ZipPostalCode     String? @db.VarChar(20)
+  AddressLine       String? @db.VarChar(255)
 
   // Relations
   resourceAccounts ResourceAccount[] // <-- 1 Resource has many ResourceAccounts
