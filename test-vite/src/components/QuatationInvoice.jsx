@@ -599,7 +599,10 @@ export const QuotationInvoice = ({
               <Text style={styles.label}>Payment</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={[styles.value]}>
-                Cash or transfer
+              {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.invoicetable[0]?.PaymentType ? 
+                caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.invoicetable[0]?.PaymentType : 
+                "Cash / Debit / Qris / Credit Card / Transfer"  
+              }
               </Text>
               <Text style={styles.label}>Warranty</Text>
               <Text style={styles.colon}>:</Text>

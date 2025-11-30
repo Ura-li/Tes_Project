@@ -712,6 +712,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
       icon: CopyX,
       label: "Close WO",
       onClick:async () => {
+        // const isValid = true;
         const isValid = await validate();
         if (isValid !== false) {
           setOnCancelWo(false);
@@ -723,6 +724,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
       icon: CopyX,
       label: "Cancel WO",
       onClick:async () => {
+        // const isValid = true;
         const isValid = await validate();
         if (isValid !== false) {
           setOnCancelWo(true);

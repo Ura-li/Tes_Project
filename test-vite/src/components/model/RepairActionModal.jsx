@@ -41,6 +41,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
     delayCode : null,
     cancelReason: "",
   });
+  const isOutWarranty = workOrders?.serviceCatalog?.asset_information?.Warranty_Status === "01T"
 
   const fetchServiceType = async (problemCategory) => {
     try {
@@ -79,11 +80,25 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
     }
   }
   useEffect(()=>{
+    isOutWarranty ? setProblemCategory('Hardware') : '';
     fetchNMU();
   },[])
   useEffect(()=>{
-    fetchServiceType(problemCategory)
+    fetchServiceType(problemCategory)    
   },[problemCategory])
+  
+  useEffect(()=>{
+    if(isOutWarranty){
+      const targetServiceType = onCancelWo ? "Cancel Repair" : "Standard Replacement / Failure (Part Used)"
+      console.log(targetServiceType);
+      const target = serviceTypeList.find(
+        item => item.ServiceTypeName === targetServiceType
+      );
+      if (target) {
+        handleChange("serviceType", target.ServiceTypeId);  
+      }
+    }
+  },[serviceTypeList, onCancelWo])
   useEffect(() => {
     setFormData(prev => ({ ...prev, nmuItem: null, Version: "" }));
 
@@ -257,7 +272,7 @@ console.log(formData);
                   onChange={(e) => handleChange("serviceType", e.target.value)}
                 /> */}
               </CaseField>
-              <CaseField label="Defec desc" star={canEdit} lock={!canEdit}>
+              <CaseField label="Defect desc" star={canEdit} lock={!canEdit}>
                 <Textarea
                   onChange={(e) => handleChange("defectDesc", e.target.value)}
                 />

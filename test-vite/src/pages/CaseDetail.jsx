@@ -268,6 +268,8 @@ export const TabsServiceCaseDetails = ({
     ProductTypeID: caseDetails.asset_information?.product_information?.ProductTypeID,
   })
 
+  
+
   const [caseForm, setCaseForm] = useState({
     CaseType: "",
     CaseStatus: "",
@@ -786,6 +788,73 @@ const openPopup = () => {
     });
   };
   
+  //QR CODE
+  const [qrCodeImg,setQrCodeImg]= useState("");
+  const[qrData,setQrData]=useState(caseDetails.CaseID);
+  //define this manually
+  /**TODO FOR SLAMET */
+  const[qrSize,setQrSize]=useState(150);
+
+  async function generateQR(){
+      
+      try{
+      const url =`https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(qrData)}`;
+
+      const base64 = await fetch(url)
+      .then(response => response.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        console.log("QR",reader)
+        return new Promise((res) => {
+          reader.onloadend = () => {
+          res(reader.result);
+        }})
+      })
+
+
+      setQrCodeImg(base64);
+
+      }catch(error){
+      console.error("Error generating QR code",error);
+
+      }
+  }
+  
+  console.log("QRCODEIMAGE",qrCodeImg);
+  function downloadQr(){
+      try{
+          fetch(qrCodeimg).then((response)=>response.blob()).then((blob)=>{
+              const link=document.createElement("a");
+              link.href=URL.createObjectURL(blob);
+              link.download="qrcode.png";
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+          });
+        }
+      catch{(error) => {
+        console.error("Error in Downloading QRcode",error);
+      }};
+    }
+  useEffect(()=>{
+    generateQR()
+  },[caseDetails.CaseID])
+
+  // Source - https://stackoverflow.com/a
+// Posted by Jukka Koivu
+// Retrieved 2025-11-29, License - CC BY-SA 4.0
+
+
+  const convertToBase64 = async (url) => {
+    // Source - https://stackoverflow.com/a
+    // Posted by Robert
+    // Retrieved 2025-11-29, License - CC BY-SA 4.0
+
+    
+    return base64
+  }
+
 
   // Deprecated: previously used for single textarea notes display
   // Replaced by notesList table
@@ -856,6 +925,7 @@ const openPopup = () => {
           <ServiceRequestPDF
             caseDetails={caseDetails}
             customerSignature={signature}
+            qrcode={qrCodeImg}
           />
         ).toBlob();
         const url = URL.createObjectURL(blob);
@@ -1413,6 +1483,8 @@ const openPopup = () => {
       .filter(Boolean)
       .join(", ") || "-";
 
+  
+
   return (
     <>
       <div className="flex items-center border-1 sticky top-15 z-5 bg-gray-50 overflow-auto">
@@ -1615,6 +1687,8 @@ export const ServiceCase = ({
   ];
 
   const { user } = useAuth();
+
+  let totalquoLineItemPrice = 0;
 
   // const visibleTabs = useMemo(
   //   () => tabs.filter(tab => tab.roles.includes(user.role)),
@@ -2145,6 +2219,11 @@ if (caseDetails.CaseStatus !== "Close") {
     handleEntitlementStatus('PhotoUnit')(validFiles);
   }
 
+  
+
+  
+
+  
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (
@@ -2163,6 +2242,10 @@ if (caseDetails.CaseStatus !== "Close") {
               <h1 className="text-2xl font-semibold">{caseDetails.CaseID}</h1>
               <p className="text-lg text-muted-foreground">{caseDetails.CaseSubject}</p>
             </div>
+            <div className="app-container">
+              {/* { img && <img src={img} className="qr-code-image" />} */}
+            </div>
+
 
             {/* RIGHT SIDE - Quick Info */}
             <div className="flex flex-wrap items-center gap-4 text-sm">
@@ -3559,6 +3642,11 @@ if (caseDetails.CaseStatus !== "Close") {
                     value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationType || "---"}
                   />
                  </CaseField>
+                  <CaseField label={"Labor Fee"} lock> 
+                    <Input 
+                      value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
+                    />
+                 </CaseField>
                   <CaseField label={"Quotation amount"} lock> 
                   <Input 
                     value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal)}
@@ -3619,6 +3707,11 @@ if (caseDetails.CaseStatus !== "Close") {
                         value={quo.materialorderlineitems[0]?.Quantity}
                       />
                     </CaseField>
+                    <CaseField label={"Price"} lock>
+                      <Input
+                        value={formatAccountingRupiah(quo.materialorderlineitems[0]?.Price)}
+                      />
+                    </CaseField>
                     <CaseField label={"Part category"} lock>
                       <Input
                         value={quo.materialorderlineitems[0]?.servicecatalog_parts?.Keyword}
@@ -3670,9 +3763,40 @@ if (caseDetails.CaseStatus !== "Close") {
                       <CaseField label={"Invoice No"} lock>
                         <Input value={invoiceSummary.invoiceNo} readOnly />
                       </CaseField>
+                      <CaseField label={"Total Harga Sparepart"} lock>
+                        {
+                        caseDetails.workorder[0]?.materialorder.map((mo) =>{
+                          const quoLineItemPrice = mo.materialorderlineitems[0]?.quotation_lineitem[0]?.Price;
+                          totalquoLineItemPrice += Number(quoLineItemPrice);
+
+                        })}
+                        <Input
+                          value={formatAccountingRupiah(totalquoLineItemPrice)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Labor Fee"} lock>
+                        <Input
+                          value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
+                          readOnly
+                        />
+                      </CaseField>
                       <CaseField label={"Subtotal"} lock>
                         <Input
                           value={formatAccountingRupiah(invoiceQuotation?.subtotal)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"VAT value (%)"} lock> 
+                        <Input 
+                          value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue 
+                            ? caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue + "%" 
+                            : "---"}
+                        />
+                      </CaseField>
+                      <CaseField label={"DP"} lock>
+                        <Input
+                          value={formatAccountingRupiah("0")}
                           readOnly
                         />
                       </CaseField>
@@ -3695,7 +3819,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         />
                       </CaseField>
                       <CaseField
-                        label={"Alasan Selisih"}
+                        label={"Ammount Difference Reason"}
                         lock
                         hide={!invoiceSummary.amountDiffReason}
                       >

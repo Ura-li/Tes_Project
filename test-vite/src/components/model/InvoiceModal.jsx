@@ -16,6 +16,7 @@ import { Textarea } from "../ui/textarea";
 import { SearchCommandBlock } from "../sc-select";
 import { Checkbox } from "../ui/checkbox";
 import { formatAccountingRupiah, formatDateForInput } from "@/lib/utils";
+import { toast } from "sonner";
 
 const AMOUNT_DIFF_REASON_OPTIONS = [
   "Cancellation Fee (part mahal)",
@@ -133,6 +134,10 @@ const InvoiceDialog = ({
       Number(form.amountDiff || 0) !== 0 &&
       (!form.amountDiffReason || form.amountDiffReason.trim() === "")
     ) {
+      /**
+       * TODO FOR SLAMET :
+       * GANTI BIAR GA APA KALI
+       */
       nextErrors.amountDiffReason =
         "Pilih alasan ketika terdapat selisih nominal.";
     }
@@ -198,15 +203,21 @@ const InvoiceDialog = ({
               readOnly
             />
           </CaseField>
-          <CaseField label="Grand Total (After VAT)" lock>
+          <CaseField label="DP" lock>
             <Input
-              value={formatAccountingRupiah(quotation?.grandTotal)}
+              value={formatAccountingRupiah(0)}
               readOnly
             />
           </CaseField>
           <CaseField label="VAT Amount" lock>
             <Input
               value={formatAccountingRupiah(quotation?.vatAmount)}
+              readOnly
+            />
+          </CaseField>
+          <CaseField label="Grand Total (After VAT)" lock>
+            <Input
+              value={formatAccountingRupiah(quotation?.grandTotal)}
               readOnly
             />
           </CaseField>
@@ -219,14 +230,17 @@ const InvoiceDialog = ({
           <CardTitle className="text-base">Detail Invoice</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
-          <CaseField label="Amount Receive *">
+          <CaseField label="Amount Receive" star>
             <div className="space-y-1">
               <Input
                 type="number"
                 min="0"
                 step="0.01"
                 value={form.amountReceive}
-                onChange={(e) => handleAmountReceiveChange(e.target.value)}
+                onChange={(e) => {
+                  // const v = e.target.value.replace(/[^0-9.-]/g, '')
+                  // if (v === "") return handleAmountReceiveChange(form.amountReceive)
+                  handleAmountReceiveChange(e.target.value)}}
               />
               {errors.amountReceive && (
                 <p className="text-xs text-red-500">{errors.amountReceive}</p>
@@ -235,10 +249,21 @@ const InvoiceDialog = ({
           </CaseField>
 
           <CaseField label="Payment Type">
-            <Input
+            {/* <Input
               value={form.paymentType}
               onChange={(e) => handleChange("paymentType", e.target.value)}
               placeholder="Transfer / Cash / VA"
+            /> */}
+            <SearchCommandBlock
+              value={form.paymentType}
+              onChange={(value) => handleChange("paymentType", value)}
+              options={[
+                "Cash",
+                "Debit",
+                "Qris",
+                "Credit Card",
+                "Transfer",
+              ]}
             />
           </CaseField>
 
@@ -257,7 +282,7 @@ const InvoiceDialog = ({
           </CaseField>
 
           {Number(form.amountDiff) !== 0 && (
-            <CaseField label="Alasan Amount Difference">
+            <CaseField label="Alasan Amount Difference" star={Number(form.amountDiff) !== 0}>
               <div className="space-y-1">
                 <SearchCommandBlock
                   value={form.amountDiffReason}
