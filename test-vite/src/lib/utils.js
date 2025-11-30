@@ -35,3 +35,4 @@ export function unformatRupiah(str) {
   if (!str) return "";
   return Number(str.replace(/[^0-9]/g, ""));
 }
+

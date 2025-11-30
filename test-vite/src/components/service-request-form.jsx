@@ -198,7 +198,7 @@ const Table = ({ data }) => (
 );
 
 
-const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
+const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => (
   <Document>
     <Page size="A4" style={styles.container}>
       <View
@@ -211,6 +211,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
         }}
       >
         <Image src="/hp.png" style={[styles.logo, { padding: 2 }]} />
+        {console.log("QR PDF : ", qrcode)}
         <View>
           <Text style={styles.sectionHeader}>PT.JAVA ABADI GEMILANG</Text>
           <Text style={styles.textSmall}>
@@ -266,7 +267,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
             <Text style={[styles.textSmall, styles.bold]}>
               {caseDetails?.CaseID ?? "N/A"}
             </Text>
-            <Image src="/random_qr.png" style={styles.qrCode} />
+            <Image src={qrcode} style={styles.qrCode} />
           </View>
         </View>
       </Section>
