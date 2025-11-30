@@ -89,20 +89,20 @@ const styles = StyleSheet.create({
   },
   label: {
     width: "30%",
-    fontSize: 9,
+    fontSize: 8,
   },
   label2: {
     width: "20%",
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 'bold',
   },
   value: {
     width: "68%",
-    fontSize: 9,
+    fontSize: 8,
   },
   colon: {
     width: "2%",
-    fontSize: 9,
+    fontSize: 8,
   },
   value2: {
     width: '80%',
@@ -229,7 +229,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
       </View>
 
       <Section title="Case Info">
-        <View style={{ display: "flex", flexDirection: "row" }}>
+        <View style={{ display: "flex", flexDirection: "row"}}>
           <View style={styles.leftSection}>
             <Text style={styles.label}>Case Type</Text>
             <Text style={styles.colon}>:</Text>
@@ -255,19 +255,22 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature }) => (
             <Text style={[styles.value]}>
               {caseDetails?.ProblemDescription ?? "N/A"}
             </Text>
-
-            <Text style={styles.label}>Note</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.CaseProductNote ?? "N/A"}
-            </Text>
           </View>
 
           <View style={styles.rightSection}>
-            <Text style={[styles.textSmall, styles.bold]}>
-              {caseDetails?.CaseID ?? "N/A"}
-            </Text>
+              <Text style={[styles.textSmall, styles.bold]}>
+                {caseDetails?.CaseID ?? "N/A"}
+              </Text>
             <Image src="/random_qr.png" style={styles.qrCode} />
+          </View>
+        </View>
+        <View style={{display: 'flex', flexDirection: "row",}}>
+          <View style={styles.leftSection}>
+            <Text style={{width: '15%', fontSize: 8}}>Note</Text>
+            <Text style={{width: '1%', fontSize: 8}}>:</Text>
+            <Text style={{width: '84%', fontSize: 8, textAlign: 'justify'}}>
+              {caseDetails?.CaseProductNote ?? "N/A"}
+            </Text>
           </View>
         </View>
       </Section>

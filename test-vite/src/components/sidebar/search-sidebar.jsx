@@ -142,7 +142,7 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                                                 value={filters[item.title] || ""}
                                                 onChange={(e) => handleChange(item.title, e.target.value)}
                                                 placeholder={`Search ${item.label}`}
-                                                className="dark:text-white dark:border-gray-400  "
+                                                className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                                             />
                                         </SidebarMenuItem>
                                     ))}

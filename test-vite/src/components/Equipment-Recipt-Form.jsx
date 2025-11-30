@@ -89,23 +89,23 @@ const styles = StyleSheet.create({
   },
   label: {
     width: '30%', 
-    fontSize: 9,
+    fontSize: 8,
   },
   label2: {
     width: '20%', 
-    fontSize: 9,
+    fontSize: 8,
   },
   value: {
     width: '68%',
-    fontSize: 9,
+    fontSize: 8,
   },
   colon: {
     width: '2%',
-    fontSize: 9,
+    fontSize: 8,
   },
   value2: {
     width: '80%',
-    fontSize: 9,
+    fontSize: 8,
   },
    table: {
     width: "100%",
@@ -194,6 +194,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
         </View>
         <Text style={[styles.sectionHeader]}>EQUIPMENT RECIPT FORM</Text>
       </View>
+
       <Section title="Case Info">
       <View style={{ display: 'flex', flexDirection: 'row' }}>
         <View style={styles.leftSection}>
@@ -220,19 +221,24 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
           <Text style={[styles.value]}>
             {caseDetails?.ProblemDescription ?? 'N/A'}
           </Text>
+         </View>
 
-          <Text style={styles.label}>Note</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.CaseProductNote ?? 'N/A'}
-          </Text>
+          <View style={styles.rightSection}>
+            <Text style={[styles.textSmall, styles.bold]}>{caseDetails?.CaseID ?? 'N/A'}</Text>
+            <Image src="/random_qr.png" style={styles.qrCode} />
+          </View>
         </View>
 
-        <View style={styles.rightSection}>
-          <Text style={[styles.textSmall, styles.bold]}>{caseDetails?.CaseID ?? 'N/A'}</Text>
-          <Image src="/random_qr.png" style={styles.qrCode} />
-        </View>
-      </View>
+          <View style={{display: 'flex', flexDirection: "row",}}>
+                   <View style={styles.leftSection}>
+                     <Text style={{width: '15%', fontSize: 8}}>Note</Text>
+                     <Text style={{width: '1%', fontSize: 8}}>:</Text>
+                     <Text style={{width: '84%', fontSize: 8, textAlign: 'justify'}}>
+                       {caseDetails?.CaseProductNote ?? "N/A"}
+                     </Text>
+                   </View>
+                 </View>
+
       </Section>
 
       {/* Customer Section */}

@@ -11,7 +11,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input } from "../components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -1572,7 +1572,7 @@ export default function NewCaseForm() {
                 id="incCompany"
                 checked={showCompanySection}
                 onCheckedChange={(v) => setShowCompanySection(Boolean(v))}
-                className={"ring-2 bg-gray-100"}
+                className={"ring-2 bg-gray-100 dark:bg-transparent dark:data-[state=checked]:bg-white"}
               />
               <Label htmlFor="incCompany" className={'font-[700]'}>Termasuk dalam company</Label>
             </div>
@@ -1580,7 +1580,7 @@ export default function NewCaseForm() {
           <CardContent className="space-y-6">
             <div className="grid grid-flow-row  gap-4 ">
               {/* Customer */}
-              <div className="space-y-2 border-2 p-2 ">
+              <div className="space-y-2 border-2 p-2 dark:border-gray-400 dark:rounded-sm">
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Salutation<Label className="text-red-600 dark:text-red-600">*</Label></Label>
                   <div className="col-span-2">
@@ -1598,29 +1598,29 @@ export default function NewCaseForm() {
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Nama Customer<Label className="text-red-600 dark:text-red-600">*</Label></Label>
                   <div className="col-span-2 grid grid-cols-2 gap-2">
-                    <Input placeholder="First Name" value={contactFirstName} onChange={(e) => setContactFirstName(e.target.value)} className={"dark:text-white dark:border-gray-400"}/>
-                    <Input placeholder="Last Name" value={contactLastName} onChange={(e) => setContactLastName(e.target.value)} className={"dark:text-white dark:border-gray-400"}/>
+                    <Input placeholder="First Name" value={contactFirstName} onChange={(e) => setContactFirstName(e.target.value)} className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
+                    <Input placeholder="Last Name" value={contactLastName} onChange={(e) => setContactLastName(e.target.value)} className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">No. Telepon<Label className="text-red-600 dark:text-red-600">*</Label></Label>
-                  <Input className="col-span-2 dark:text-white dark:border-gray-400 " value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
+                  <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">No. Whatsapp</Label>
-                  <Input className="col-span-2 dark:text-white dark:border-gray-400 " value={contactMobile} onChange={(e) => setContactMobile(e.target.value)} />
+                  <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactMobile} onChange={(e) => setContactMobile(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Email<Label className="text-red-600 dark:text-red-600">*</Label></Label>
-                  <Input className="col-span-2 dark:text-white dark:border-gray-400 " type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+                  <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Alamat<Label className="text-red-600 dark:text-red-600">*</Label></Label>
-                  <Input className="col-span-2 dark:text-white dark:border-gray-400 " value={contactAddressLine1} onChange={(e) => setContactAddressLine1(e.target.value)} />
+                  <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactAddressLine1} onChange={(e) => setContactAddressLine1(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Country<Label className="text-red-600 dark:text-red-600">*</Label></Label>
-                  <Input className="col-span-2 dark:text-white dark:border-gray-400 " placeholder="Indonesia / other" value={contactCountry} onChange={(e) => setContactCountry(e.target.value)} />
+                  <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="Indonesia / other" value={contactCountry} onChange={(e) => setContactCountry(e.target.value)} />
                 </div>
                 {/* Province/City (Indonesia via EMSIFA) */}
                 {contactCountry.toLowerCase() === 'indonesia' ? (
@@ -1650,7 +1650,7 @@ export default function NewCaseForm() {
                       State / Region<Label className="text-red-600">*</Label>
                     </Label>
                     <Input
-                      className="col-span-2"
+                      className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       value={contactStateProvince}
                       onChange={(e) => setContactStateProvince(e.target.value)}
                       placeholder="e.g. Tokyo, California, etc."
@@ -1687,7 +1687,7 @@ export default function NewCaseForm() {
                       City / Area<Label className="text-red-600">*</Label>
                     </Label>
                     <Input
-                      className="col-span-2"
+                      className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       value={contactCity}
                       onChange={(e) => setContactCity(e.target.value)}
                       placeholder="e.g. Jakarta, Berlin, New York..."
@@ -1696,23 +1696,23 @@ export default function NewCaseForm() {
                 )}
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
-                  <Input className="col-span-2" value={contactZipPostalCode} onChange={(e) => setContactZipPostalCode(e.target.value)} />
+                  <Input className={"col-span-2 dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactZipPostalCode} onChange={(e) => setContactZipPostalCode(e.target.value)} />
                 </div>
 
                 {/* PIC Information */}
                 
-                <div className="space-y-2 border-2 p-2 rounded">
+                <div className="space-y-2 border-2 p-2 rounded dark:border-gray-400 dark:rounded-sm">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <Checkbox
                         id="usePIC"
                         checked={usePIC}
                         onCheckedChange={(v) => setUsePIC(Boolean(v))}
-                        className={"ring-2 bg-gray-100"}  
+                        className={"ring-2 bg-gray-100 dark:bg-transparent dark:data-[state=checked]:bg-white"}  
                       />
                       <Label htmlFor="usePIC">Tambahkan PIC</Label>
                     </div>
-                    <Button type="button" variant="outline" size="sm" onClick={copyPICFromContact} disabled={!usePIC}>
+                    <Button type="button" variant="outline" size="sm" onClick={copyPICFromContact} disabled={!usePIC} className={'cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}>
                       Same as Contact Information
                     </Button>
                   </div>
@@ -1723,7 +1723,7 @@ export default function NewCaseForm() {
                     <div className="grid grid-cols-3 gap-2 items-center pt-4 border-t">
                       <Label className="col-span-1">Nama PIC<Label className="text-red-600">*</Label></Label>
                       <Input
-                        className="col-span-2"
+                        className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         placeholder="Nama PIC"
                         value={contactPICName}
                         onChange={(e) => setContactPICName(e.target.value)}
@@ -1732,7 +1732,7 @@ export default function NewCaseForm() {
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Email PIC<Label className="text-red-600">*</Label></Label>
                       <Input
-                        className="col-span-2"
+                        className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         placeholder="Email PIC"
                         type="email"
                         value={contactPICEmail}
@@ -1741,17 +1741,18 @@ export default function NewCaseForm() {
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">No. Telepon PIC<Label className="text-red-600">*</Label></Label>
-                      <Input className="col-span-2" value={contactPICPhone} onChange={(e) => setContactPICPhone(e.target.value)} />
+                      <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactPICPhone} onChange={(e) => setContactPICPhone(e.target.value)} />
                     </div>
                   </>
                 )}
 
               </div>
+
               {/* Company (optional) */}
                 {showCompanySection && (
-                <div className="space-y-2 border-2 p-2">
+                <div className="space-y-2 border-2 p-2 dark:border-gray-400 dark:rounded-sm">
                   <div className="flex justify-end">
-                    <Button type="button" variant="outline" size="sm" onClick={copyCompanyFromContact}>
+                    <Button type="button" variant="outline" size="sm" onClick={copyCompanyFromContact} className={'cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}>
                       Same as contact information
                     </Button>
                   </div>
@@ -1759,27 +1760,27 @@ export default function NewCaseForm() {
                   <div className="space-y-2 w-full">
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Nama Company<Label className="text-red-600">*</Label></Label>
-                      <Input className="col-span-2" placeholder="Cari / isi nama company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                      <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="Cari / isi nama company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Email Company<Label className="text-red-600">*</Label></Label>
-                      <Input className="col-span-2" type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)} />
+                      <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Nomor Telepon<Label className="text-red-600">*</Label></Label>
-                      <Input className="col-span-2" value={companyPhone} onChange={(e) => setCompanyPhone(e.target.value)} />
+                      <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyPhone} onChange={(e) => setCompanyPhone(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Nomor WA</Label>
-                      <Input className="col-span-2" value={companyWhatsapp} onChange={(e) => setCompanyWhatsapp(e.target.value)} />
+                      <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyWhatsapp} onChange={(e) => setCompanyWhatsapp(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Alamat<Label className="text-red-600">*</Label></Label>
-                      <Input className="col-span-2" value={companyAddressLine1} onChange={(e) => setCompanyAddressLine1(e.target.value)} />
+                      <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyAddressLine1} onChange={(e) => setCompanyAddressLine1(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Country<Label className="text-red-600">*</Label></Label>
-                      <Input className="col-span-2" value={companyCountry} onChange={(e) => setCompanyCountry(e.target.value)} />
+                      <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyCountry} onChange={(e) => setCompanyCountry(e.target.value)} />
                     </div>
                     {companyCountry.toLowerCase() === 'indonesia' ? (
                     <div className="grid grid-cols-3 gap-2 items-center">
@@ -1798,6 +1799,7 @@ export default function NewCaseForm() {
                           setValue={setCompanyStateProvince}
                           options={provCompany}
                           placeholder="Select a Province"
+                          className={"dark:border-gray-400 dark:bg-transparent"}
                         />
                       </div>
                     </div>
@@ -1807,7 +1809,7 @@ export default function NewCaseForm() {
                           State / Region<Label className="text-red-600">*</Label>
                         </Label>
                         <Input
-                          className="col-span-2"
+                          className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={companyStateProvince}
                           onChange={(e) => setCompanyStateProvince(e.target.value)}
                           placeholder="e.g. Tokyo, California, etc."
@@ -1832,6 +1834,7 @@ export default function NewCaseForm() {
                             setValue={setCompanyCity}
                             options={cityCompany}
                             placeholder="Select a City"
+                            className={"dark:border-gray-400 dark:bg-transparent"}
                           />
                         </div>
                       </div>
@@ -1841,7 +1844,7 @@ export default function NewCaseForm() {
                           City / Area<Label className="text-red-600">*</Label>
                         </Label>
                         <Input
-                          className="col-span-2"
+                          className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={companyCity}
                           onChange={(e) => setCompanyCity(e.target.value)}
                           placeholder="e.g. Jakarta, Berlin, New York..."
@@ -1850,11 +1853,11 @@ export default function NewCaseForm() {
                     )}
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
-                      <Input className="col-span-2" value={companyZipPostalCode} onChange={(e) => setCompanyZipPostalCode(e.target.value)} />
+                      <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyZipPostalCode} onChange={(e) => setCompanyZipPostalCode(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">NPWP<Label className="text-red-600">*</Label></Label>
-                      <Input className="col-span-2" value={companyNPWP} onChange={(e) => setCompanyNPWP(e.target.value)} />
+                      <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyNPWP} onChange={(e) => setCompanyNPWP(e.target.value)} />
                     </div>
 
                   </div>
@@ -2090,20 +2093,20 @@ export default function NewCaseForm() {
                         "Stylus Pen",
                         "Toner Catridge"
                       ]}
-                      className={"dark:bg-transparent dark:ring-1 dark:mt-2"}
-                    >
-                    </SearchCommandBlock>
+                      className={"dark:bg-transparent dark:ring-gray-400 dark:ring-1 mt-2"}
+                    />
                   </div>
                   <div className="col-span-12 md:col-span-6">
                     <Label className="text-xs">Note</Label>
                     <Input
+                      className={"dark:ring-gray-400 dark:ring-1 mt-2 dark:text-white dark:p-2"}
                       value={row.note}
                       onChange={(e) => updateAccessory(row.id, "note", e.target.value)}
                     />
                   </div>
                   <div className="col-span-10 md:col-span-10">
                     <Label className="text-xs">CT/SN</Label>
-                    <Input value={row.code} onChange={(e) => updateAccessory(row.id, "code", e.target.value)} />
+                    <Input value={row.code} onChange={(e) => updateAccessory(row.id, "code", e.target.value)} className={"dark:ring-gray-400 dark:ring-1 mt-2 dark:text-white dark:p-2"}/>
                   </div>
                   <div className="col-span-2 flex justify-end pt-5">
                     <Button type="button" variant="ghost" size="icon" onClick={() => removeAccessory(row.id)} disabled={accessories.length === 1}>
@@ -2115,7 +2118,7 @@ export default function NewCaseForm() {
                 </React.Fragment>
                 
               ))}
-              <Button type="button" variant="secondary" onClick={addAccessory}>
+              <Button type="button" variant="outline" className={'cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'} onClick={addAccessory}>
                 <Plus className="w-4 h-4 mr-2" /> Add Row
               </Button>
             </CardContent>
@@ -2128,7 +2131,7 @@ export default function NewCaseForm() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-3">
-                <Input type="file" multiple accept="image/*" onChange={(e) => onPickPhotos(e.target.files)} />
+                <Input type="file" multiple accept="image/*" onChange={(e) => onPickPhotos(e.target.files)} className={"dark:border-b-slate-400 dark:rounded-none dark:text-gray-400"}/>
                 <Badge variant="outline" className="flex items-center gap-1">
                   <ImageIcon className="w-3 h-3" /> {photos.length} selected
                 </Badge>
@@ -2156,8 +2159,8 @@ export default function NewCaseForm() {
 
 
       {/* Footer */}
-      <div className="sticky bottom-0 bg-background/90 backdrop-blur border-t py-3 dark:bg-slate-700 dark:border-2 dark:border-[#3B38A0]">
-        <div className="max-w-7xl mx-auto flex justify-end gap-3 px-4">
+      <div className="sticky bottom-0 bg-background/90 py-3 dark:bg-slate-700  dark:backdrop-blur dark:supports-[backdrop-filter]:bg-background/20">
+        <div className="max-w-7xl mx-auto flex justify-end gap-3 px-4 dark:text-white">
           <Button variant="outline" onClick={() => navigate(-1)}>Cancel</Button>
           <Button onClick={onCreateCase} disabled={loading || (!selectedAsset && !isNewAsset) || (!selectedContact && !isNewContact)}>
             {loading ? (

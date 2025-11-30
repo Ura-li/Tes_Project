@@ -100,7 +100,7 @@ export const ErfCase = () => {
               <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">
                 You can upload multiple ERF files. Maximum file size per file: 10MB.
               </p>
-              <Input type="file" className={"dark:border-b-slate-400 dark:rounded-none"} multiple onChange={(e) => setSelectedFiles(e.target.files)} />
+              <Input type="file" className={"dark:border-b-slate-400 dark:rounded-none dark:text-gray-400"} multiple onChange={(e) => setSelectedFiles(e.target.files)} />
               <button
                 onClick={() => uploadFiles(selectedFiles)}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-2"
