@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useMemo, use} from "react";
+import React, { useState, useEffect , useMemo, use, useCallback} from "react";
 import ApiCustomer from "@/api";
 import { ContactEdit, ContactDelete } from "@/components/model/sc-modal";
 import { CompanyEdit, CompanyDelete } from "@/components/model/sc-modal";
@@ -5341,6 +5341,8 @@ export const Resource_table = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -5363,12 +5365,12 @@ export const Resource_table = () => {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  const fetchResourceDataTable = async () => {
+  const fetchResourceDataTable = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     Swal.fire({
-      title: "Memuat Data Resource...",
+      title: "Memuat Data Resources...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
       allowEscapeKey: false,
@@ -5378,110 +5380,109 @@ export const Resource_table = () => {
     });
 
     try {
-      const response = await ApiCustomer.get("/api/resources");
+      const response = await ApiCustomer.get("/api/resources", {
+        params: {
+          keyword: debouncedSearchTerm,
+          page: currentPage,
+          limit: itemsPerPage,
+        },
+      });
+
       if (response.data.success) {
-        setResourceData(response.data.data);
+        const { resources, totalCount, totalPages } = response.data.data;
+
+        setResourceData(resources || []);
+        setTotalCount(totalCount || 0);
+        setTotalPages(totalPages || 1);
+
         Swal.close();
       } else {
         setError("Failed to fetch Resource data");
         Swal.close();
         Swal.fire({
           title: "Error!",
-          text: "Gagal mengambil data Resource.",
+          text: "Gagal mengambil data Resources.",
           icon: "error",
           confirmButtonText: "OK",
         });
       }
-    } catch (err) {
-      console.error("Error fetching Resource data:", err);
-      setError("Error fetching data");
+    } catch (error) {
+      console.error("Error fetching resources:", error);
+      setError("An error occurred while fetching Resource data");
       Swal.close();
       Swal.fire({
         title: "Error!",
-        text: "Gagal mengambil data Resource.",
+        text: "Terjadi kesalahan saat mengambil data Resources.",
         icon: "error",
         confirmButtonText: "OK",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [debouncedSearchTerm, currentPage, itemsPerPage]);
 
+  // Panggil fetch saat dependency berubah
   useEffect(() => {
     fetchResourceDataTable();
-  }, []);
+  }, [fetchResourceDataTable]);
 
-  // 🔹 Filter data based on debounced search
-  const filteredResourceTable = useMemo(() => {
-    return ResourceData.filter((item) =>
-      Object.values(item).some((value) =>
-        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      )
-    );
-  }, [ResourceData, debouncedSearchTerm]);
+    const sortedData = useMemo(() => {
+      const sorted = [...ResourceData];
+      if (sortConfig.key) {
+        sorted.sort((a, b) => {
+          let aVal = a[sortConfig.key];
+          let bVal = b[sortConfig.key];
 
-  // 🔹 Sorting
-  const sortedData = useMemo(() => {
-    const sorted = [...filteredResourceTable];
-    if (sortConfig.key) {
-      sorted.sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
+          if (aVal === null || aVal === undefined) aVal = "";
+          if (bVal === null || bVal === undefined) bVal = "";
 
-        if (aVal === null || aVal === undefined) aVal = "";
-        if (bVal === null || bVal === undefined) bVal = "";
+          if (typeof aVal === "string") aVal = aVal.toLowerCase();
+          if (typeof bVal === "string") bVal = bVal.toLowerCase();
 
-        if (typeof aVal === "string") aVal = aVal.toLowerCase();
-        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+          if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+          if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+          return 0;
+        });
+      }
+      return sorted;
+    }, [ResourceData, sortConfig]);
 
-        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-      });
-    }
-    return sorted;
-  }, [filteredResourceTable, sortConfig]);
-
-  // 🔹 Calculate total pages
-  const totalPages = Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
-
-  // 🔹 Get current page data
-  const currentData = sortedData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // 🔹 Sorting handler
-  const handleSort = (key) => {
-    setSortConfig((prev) => {
-      if (prev.key === key) {
+    const handleSort = (key) => {
+      setSortConfig((prev) => {
+        if (prev.key === key) {
+          return {
+            key,
+            direction: prev.direction === "asc" ? "desc" : "asc",
+          };
+        }
         return {
           key,
-          direction: prev.direction === "asc" ? "desc" : "asc",
+          direction: "asc",
         };
-      }
-      return { key, direction: "asc" };
-    });
-  };
+      });
+    };
 
-  // 🔹 Sort icon
-  const getSortIcon = (key) => {
-    if (sortConfig.key !== key)
-      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
-    return sortConfig.direction === "asc" ? (
-      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
-    ) : (
-      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
-    );
-  };
-  
-  // 🔹 Go to page handler
-  const handleGoToPage = (e) => {
-    e.preventDefault();
-    const page = Number(goToPageInput);
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
-    setGoToPageInput("");
-  };
+    const getSortIcon = (key) => {  
+      if (sortConfig.key !== key)
+        return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+
+      return sortConfig.direction === "asc" ? (
+        <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+      ) : (
+        <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+      );
+    };
+
+    const handleGoToPage = (e) => {
+      e.preventDefault();
+      const page = Number(goToPageInput);
+      if (page >= 1 && page <= totalPages) setCurrentPage(page);
+      setGoToPageInput("");
+    };
+    const currentData = sortedData;
+
+    const startIndex = totalCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+    const endIndex = Math.min(currentPage * itemsPerPage, totalCount);
 
   return (
     <div className="p-6">
@@ -5521,6 +5522,76 @@ export const Resource_table = () => {
               >
                 Name {getSortIcon("Name")}
               </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ServiceCenterName")}
+              >
+                Service Center Name {getSortIcon("ServiceCenterName")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ResourceCode")}
+              >
+                ResourceCode {getSortIcon("ResourceCode")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer">
+                Logo
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Phone")}
+              >
+                Phone {getSortIcon("Phone")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Mobile")}
+              >
+                Mobile {getSortIcon("Mobile")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Fax")}
+              >
+                Fax {getSortIcon("Fax")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Email")}
+              >
+                Email {getSortIcon("Email")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Country")}
+              >
+                Country {getSortIcon("Country")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("StateProvince")}
+              >
+                State/Province {getSortIcon("StateProvince")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("City")}
+              >
+                City {getSortIcon("City")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ZipPostalCode")}
+              >
+                Zip/Postal Code {getSortIcon("ZipPostalCode")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("AddressLine")}
+              >
+                Address Line {getSortIcon("AddressLine")}
+              </TableHead>
               <TableHead className="p-3 text-center border">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -5536,6 +5607,18 @@ export const Resource_table = () => {
                     {ResourceItem.ResourceId}
                   </TableCell>
                   <TableCell className="p-2 border">{ResourceItem.Name}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.ServiceCenterName}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.ResourceCode}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.ResourceLogo ? (<img src={ResourceItem.ResourceLogo} alt="Resource Logo" className="h-8 mx-auto object-contain" />) : ("-")}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.Phone}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.Mobile}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.Fax}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.Email}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.Country}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.StateProvince}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.City}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.ZipPostalCode}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.AddressLine}</TableCell>
                   <TableCell className="flex items-center justify-center gap-2 p-2 border">
                     <ResourceEdit
                       ResourceId={ResourceItem.ResourceId}
@@ -5590,9 +5673,8 @@ export const Resource_table = () => {
 
         {/* Info total data */}
         <div className="text-sm text-gray-600">
-          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
-          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
-          <b>{sortedData.length}</b> resources
+          Showing <b>{startIndex}</b> – <b>{endIndex}</b> of{" "}
+          <b>{totalCount}</b> resources
         </div>
 
         {/* Pagination + Go to page */}
