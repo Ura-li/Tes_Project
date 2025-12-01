@@ -8,6 +8,7 @@ import { useNavigate } from "react-router";
 import { CaseField } from "@/pages/services/service-case";
 import { ExportExcelPart } from "@/components/Export-Excel";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SOImport, SOTemplateButton } from "../components/importFileComponent/SOUpdate";
 
 export default function Logistik() {
     const { user } = useAuth();
@@ -78,6 +79,7 @@ export default function Logistik() {
   const currentData = sortedData.slice(startIndex, startIndex + itemsPerPage);
 
 
+
     return (
         <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3">
             <Card className={"rounded-sm"}>
@@ -129,6 +131,7 @@ export default function Logistik() {
                     <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
                     <div className="flex gap-2">
                     <ExportExcelPart/>
+                    <SOTemplateButton />
                     <select
                       value={filterStatus}
                       onChange={(e) => {
