@@ -70,11 +70,11 @@ export const ServiceMaterialApo = () => {
     serviceDescription: "",
     orderType: "",
     shippingPriority: "",
-    readyForClosureDate: "",
+    ReadyForClosureDate: "",
     caseID: "",
     contact: null,
-    deliveryRequestedDate: null,
-    collectionRequestedDate: null,
+    DeliveryRequestedDate: null,
+    CollectionRequestedDate: null,
     promoCode: "",
     customerInducedDamage: false,
     accidentalDamageProtection: false,
@@ -182,15 +182,15 @@ export const ServiceMaterialApo = () => {
         serviceDescription: data.ServiceDescription || "",
         orderType: data.OrderType || "",
         shippingPriority: data.ShippingPriority || "",
-        readyForClosureDate: DateHelper.fromDB(data.ReadyForClosureDate || ""),
+        ReadyForClosureDate: DateHelper.fromDB(data.ReadyForClosureDate || ""),
         caseID: data.workorder?.CaseID || "",
         contact: data.workorder?.caseinformation?.contact_information
           ? `${data.workorder.caseinformation.contact_information.FirstName} ${data.workorder.caseinformation.contact_information.LastName}`
           : null,
-        deliveryRequestedDate: DateHelper.fromDB(
+        DeliveryRequestedDate: DateHelper.fromDB(
           data.DeliveryRequestedDate || ""
         ),
-        collectionRequestedDate: DateHelper.fromDB(
+        CollectionRequestedDate: DateHelper.fromDB(
           data.CollectionRequestedDate || ""
         ),
         promoCode: data.PromoCode || "",
@@ -468,22 +468,22 @@ export const ServiceMaterialApo = () => {
                   >
                     {console.log("MATERIAL ORDER INFO ", materialOrderInformation)}
                     <DatePicker
-                      value={materialOrderInformation?.deliveryRequestedDate ? new Date(materialOrderInformation?.deliveryRequestedDate) : null}
-                      onChange={handleMaterialOrderChange("deliveryRequestedDate")}
+                      value={materialOrderInformation?.DeliveryRequestedDate ? new Date(materialOrderInformation?.DeliveryRequestedDate) : null}
+                      onChange={handleMaterialOrderChange("DeliveryRequestedDate")}
                     />
                   </CaseField>
 
                   <CaseField label={"Part on Hand CE Date"}  star={user?.role === 'lg'} lock={!canEditapo}>
                     <DatePicker
-                      value={materialOrderInformation?.collectionRequestedDate ? new Date(materialOrderInformation?.collectionRequestedDate) : null}
-                      onChange={handleMaterialOrderChange("collectionRequestedDate")}
+                      value={materialOrderInformation?.CollectionRequestedDate ? new Date(materialOrderInformation?.CollectionRequestedDate) : null}
+                      onChange={handleMaterialOrderChange("CollectionRequestedDate")}
                     />
                   </CaseField>
 
                   <CaseField label={"Part OUT CE Ready For Closure Date"} star={user?.role === 'lg'} lock={!canEditapo}>
                     <DatePicker
-                      value={materialOrderInformation?.readyForClosureDate ? new Date(materialOrderInformation?.readyForClosureDate) : null}
-                      onChange={handleMaterialOrderChange("readyForClosureDate")}
+                      value={materialOrderInformation?.ReadyForClosureDate ? new Date(materialOrderInformation?.ReadyForClosureDate) : null}
+                      onChange={handleMaterialOrderChange("ReadyForClosureDate")}
                     />
                   </CaseField>
 

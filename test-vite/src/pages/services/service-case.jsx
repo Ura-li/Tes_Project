@@ -151,6 +151,7 @@ export const TabsService = ({
     caseReadyForClosure: "",
     readyForCloseDays: "",
     readyForClosureDate: "",
+    ReadyForClosureDate: "",
     pendingCustomerAction: "",
     customerRequestedCloseDate: "",
   });
@@ -711,6 +712,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
       icon: CopyX,
       label: "Close WO",
       onClick:async () => {
+        // const isValid = true;
         const isValid = await validate();
         if (isValid !== false) {
           setOnCancelWo(false);
@@ -722,6 +724,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
       icon: CopyX,
       label: "Cancel WO",
       onClick:async () => {
+        // const isValid = true;
         const isValid = await validate();
         if (isValid !== false) {
           setOnCancelWo(true);
@@ -1056,9 +1059,9 @@ export const TabsServiceMO = ({ materialOrders, updatedLineItems, materialOrderI
       const formatMaterialOrderInformationForBackend = () => {
         return {
           ...materialOrderInformation,
-          deliveryRequestedDate: DateHelper.toDB(materialOrderInformation.deliveryRequestedDate),
-          collectionRequestedDate: DateHelper.toDB(materialOrderInformation.collectionRequestedDate),
-          readyForClosureDate: DateHelper.toDB(materialOrderInformation.readyForClosureDate),
+          DeliveryRequestedDate: DateHelper.toDB(materialOrderInformation.DeliveryRequestedDate),
+          CollectionRequestedDate: DateHelper.toDB(materialOrderInformation.CollectionRequestedDate),
+          ReadyForClosureDate: DateHelper.toDB(materialOrderInformation.ReadyForClosureDate),
         };
       };
 

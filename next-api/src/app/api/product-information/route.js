@@ -38,16 +38,21 @@ export async function GET(request) {
       search !== ""
         ? {
             OR: [
-              { ProductNumber: { contains: search, mode: "insensitive" } },
-              { ProductName: { contains: search, mode: "insensitive" } },
-              { ProductLine: { contains: search, mode: "insensitive" } },
-              { HWPC: { contains: search, mode: "insensitive" } },
+              { ProductNumber: { contains: search } },
+              { ProductName: { contains: search } },
+              { ProductLine: { contains: search } },
+              { HWPC: { contains: search } },
               {
                 product_type: {
                   OR: [
-                    { ProductType: { contains: search, mode: "insensitive" } },
-                    { ProductGroup: { contains: search, mode: "insensitive" } },
-                    { ProductTower: { contains: search, mode: "insensitive" } },
+                    { ProductType: { contains: search } },
+                    /**
+                     * TODO FOR FERDI
+                     * BIKIN ALTERNATIF DARI INI TANPA MENGGUNAKAN  MODE INSENSITIVE
+                     * KARENA TIDAK SUPPORT DI MYSQL
+                     */
+                    // { ProductGroup: { contains: search } },
+                    // { ProductTower: { contains: search } },
                   ],
                 },
               },

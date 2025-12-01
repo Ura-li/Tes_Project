@@ -28,6 +28,7 @@ const CASE_INFO_SELECT = {
 export async function POST(request) {
     try{
         const body = await request.json()
+        // return console.log("オーダー",body);
         const { AssetID, CaseID, selectedWarrantyServices, selectedPartCatalog, IncidentType, OwnerID, assignApo, notesLog } = body;
 
         const normalizeNote = (value) =>
@@ -74,7 +75,7 @@ export async function POST(request) {
                     Warranty_Status: true,
                     WarrantyOTCCode: {
                         select: {
-                            WarrantyCondition: true,
+                        	WarrantyCondition: true,
                         },
                     },
                 },
@@ -216,7 +217,7 @@ export async function POST(request) {
                 await tx.casenotes.create({
                     data: {
                         CaseID,
-                        LogType: "NotesLog",
+                        LogType: "NoticeOrderNote",
                         ActionType: "Action Plan",
                         Template: "",
                         VisibleExternally: true,

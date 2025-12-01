@@ -376,13 +376,31 @@ export async function PATCH(request, { params }) {
        * THE PRICE WAS NOT UPDATED
        */
       await Promise.all(
-        normalizedLineItems.map((item) =>
-          tx.materialorderlineitems.update({
+        normalizedLineItems.map(async (item) => {
+          const existing = await tx.materialorderlineitems.findUnique({
             where: { LineItemID: item.lineItemId },
-            data: { Price: item.price },
-          }),
-        ),
+          });
+
+          if (!existing || !existing.MOID) {
+            throw new Error(`MOID not found for LineItemID ${item.lineItemId}`);
+          }
+
+          await tx.materialorderlineitems.update({
+            where: { LineItemID: item.lineItemId },
+            data: { 
+              Price: item.price,
+            },
+          })
+
+          const moid = await tx.materialorder.update({
+            where: {MOID: existing.MOID },
+            data:{OwnerID: userAssign}
+          })
+          
+          // return console.log(moid);
+        }),
       );
+      // return console.log("A");
 
       const caseUpdateData = { CaseStatus: targetStatusCase };
       if(targetStatusCase !== "Pending_Quote"){

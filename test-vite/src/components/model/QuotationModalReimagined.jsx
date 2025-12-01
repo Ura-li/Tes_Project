@@ -1,3 +1,5 @@
+// QuotationDialog.jsx
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Dialog,
@@ -20,12 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {
   Table,
   TableBody,
@@ -37,23 +34,25 @@ import {
 import { SearchCommandBlock } from "../sc-select";
 import ApiCustomer from "@/api";
 import { toast } from "sonner";
-import { Separator } from "../ui/separator";
 import { pdf } from "@react-pdf/renderer";
 import { QuotationInvoice } from "../QuatationInvoice";
+import { useServiceCaseStore } from "../../hooks/useServiceCaseStore";
+import { useAuth } from "../../context/auth-context";
+import { mapMaterialOrdersToQuotationItems } from "../../lib/mappers/fieldMO";
 
+// ---- helper: date to datetime-local string ----
 const formatDateForInput = (value) => {
   const date = value ? new Date(value) : new Date();
   if (Number.isNaN(date.getTime())) return "";
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
-
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
-
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
+// ---- helper: normalize line items (same as before) ----
 const normaliseLineItems = (items = [], prevItems = []) => {
   return items.map((item, index) => {
     const internalId =
@@ -64,7 +63,8 @@ const normaliseLineItems = (items = [], prevItems = []) => {
       item?.lineId ??
       index;
 
-    const previous = prevItems.find((line) => line.internalId === internalId) || {};
+    const previous =
+      prevItems.find((line) => line.internalId === internalId) || {};
 
     const partNumber =
       item?.PartNumber ??
@@ -85,25 +85,19 @@ const normaliseLineItems = (items = [], prevItems = []) => {
       "";
 
     const quantity =
-      item?.Quantity ??
       item?.quantity ??
-      item?.Qty ??
+      item?.Quantity ??
       item?.qty ??
+      item?.Qty ??
       item?.RequestQty ??
       item?.requestQty ??
+      previous.quantity ??
       "";
 
-    const priceValue =
-      item?.price ??
-      item?.Price ??
-      previous.price ??
-      "";
+    const priceValue = item?.price ?? item?.Price ?? previous.price ?? "";
 
     let partApprovedValue =
-      item?.partApproved ??
-      item?.Approved ??
-      previous.partApproved ??
-      "yes";
+      item?.partApproved ?? item?.Approved ?? previous.partApproved ?? "yes";
 
     if (partApprovedValue === null || partApprovedValue === undefined) {
       partApprovedValue = "";
@@ -111,27 +105,16 @@ const normaliseLineItems = (items = [], prevItems = []) => {
       partApprovedValue = partApprovedValue ? "yes" : "no";
     } else if (typeof partApprovedValue === "string") {
       const lowered = partApprovedValue.toLowerCase();
-      if (lowered === "true") {
-        partApprovedValue = "yes";
-      } else if (lowered === "false") {
-        partApprovedValue = "no";
-      } else {
-        partApprovedValue = lowered;
-      }
+      if (lowered === "true") partApprovedValue = "yes";
+      else if (lowered === "false") partApprovedValue = "no";
+      else partApprovedValue = lowered;
     }
-
-    const quantityValue =
-      item?.quantity ??
-      item?.Quantity ??
-      item?.qty ??
-      previous.quantity ??
-      "";
 
     return {
       internalId,
       partNumber,
       description,
-      quantity: quantityValue,
+      quantity,
       price:
         priceValue === null || priceValue === undefined
           ? ""
@@ -147,52 +130,124 @@ const normaliseLineItems = (items = [], prevItems = []) => {
 const copyToClipboard = (value) => {
   if (!value) return;
   navigator.clipboard.writeText(value);
-  toast.success(`Copied: ${value}`); // kalau kamu pakai react-hot-toast
+  toast.success(`Copied: ${value}`);
 };
 
-const QuotationDialog = ({
-  open,
-  onOpenChange,
-  caseId,
-  status,
-  materialItems = [],
-  onSubmit,
-  initialData = {},
-  loading = false,
-  submitting = false,
-  createdBy,
-  signature,
-  caseDetails
-}) => {
-  
-  const isQuoteRequested = status === "Quote_Requested";
-  const isPendingQuote = status === "Pending_Quote";
-  const existingQuotationNo = initialData?.quotationNo ?? null;
-  const formDisabled = loading || submitting;
+
+
+const QuotationDialog = () => {
+  const { user } = useAuth();
+  const open = useServiceCaseStore((s) => s.openDialogQuotation);
+  const setOpenDialogQuotation = useServiceCaseStore(
+    (s) => s.setOpenDialogQuotation
+  );
+  const caseDetails = useServiceCaseStore((s) => s.caseDetails);
+  const signature = useServiceCaseStore((s) => s.signature);
+
+    const [initialData, setInitialData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState({});
   const [lineErrors, setLineErrors] = useState({});
-
   const [roleAssign, setRoleAssign] = useState([]);
   const [isDirty, setIsDirty] = useState(false);
 
+  const status = caseDetails?.CaseStatus;
+  const isQuoteRequested = status === "Quote_Requested";
+  const isPendingQuote = status === "Pending_Quote";
+
+  const materialItems = useMemo(
+    () => (caseDetails ? mapMaterialOrdersToQuotationItems(caseDetails) : []),
+    [caseDetails]
+  );
+
+  const existingQuotationNo = initialData?.quotationNo ?? null;
+  const formDisabled = loading || submitting;
+
+  // --- fetch APO users once ---
   const fetchUserAssign = useCallback(async (role) => {
     try {
       const res = await ApiCustomer.get(`/api/user?role=${role}`);
-      setRoleAssign(res.data.data);
+      setRoleAssign(res.data.data || []);
     } catch (err) {
       console.error("Error fetching role: ", err);
     }
   }, []);
 
+  useEffect(() => {
+    fetchUserAssign("apo");
+  }, [fetchUserAssign]);
+
+  const filteredUserAssign = useMemo(
+    () => roleAssign.filter((u) => u.Role === "apo"),
+    [roleAssign]
+  );
+
+  // --- fetch quotation when dialog opens ---
+  useEffect(() => {
+    if (!open || !caseDetails?.CaseID) return;
+
+    let cancelled = false;
+    setInitialData(null);
+    setLoading(true);
+
+    (async () => {
+      try {
+        const response = await ApiCustomer.get(
+          `/api/quotation-information?caseId=${caseDetails.CaseID}`
+        );
+        if (cancelled) return;
+        const quotationPayload = response.data.data;
+        if (quotationPayload?.quotation) {
+          const q = quotationPayload.quotation;
+          setInitialData({
+            quotationNo: q.quotationNo,
+            quotationType: q.quotationType ?? "Simple",
+            vatValue:
+              q.vatValue === null || q.vatValue === undefined
+                ? ""
+                : String(q.vatValue),
+            quotationNote: q.quotationNote ?? "",
+            laborFee:
+              q.laborFee === null || q.laborFee === undefined
+                ? ""
+                : String(q.laborFee),
+            quotationDate: q.quotationDate ?? "",
+            quoteApproveDate: q.quoteApproveDate ?? "",
+            sendWa: Boolean(q.sendWa),
+            sendEmail: Boolean(q.sendEmail),
+            quoteDecision: q.quoteDecision ?? "",
+            userAssign: q.userAssign ?? undefined,
+          });
+        } else {
+          setInitialData({});
+        }
+      } catch (error) {
+        console.error("Failed to fetch quotation:", error);
+        toast.error(
+          error?.response?.data?.message ?? "Gagal mengambil data quotation."
+        );
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, caseDetails?.CaseID]);
+
+  // --- default form state based on initialData + materialItems ---
   const defaultFormState = useMemo(() => {
+    const data = initialData || {};
     const quotationDate =
-      formatDateForInput(initialData.quotationDate) || formatDateForInput();
+      formatDateForInput(data.quotationDate) || formatDateForInput();
     const quoteApproveDate = isPendingQuote
-      ? formatDateForInput(initialData.quoteApproveDate) || formatDateForInput()
+      ? formatDateForInput(data.quoteApproveDate) || formatDateForInput()
       : "";
 
-    const decision = initialData.quoteDecision;
+    const decision = data.quoteDecision;
     let mappedDecision = "";
     if (decision) {
       const lowered = String(decision).toLowerCase();
@@ -202,27 +257,21 @@ const QuotationDialog = ({
     }
 
     return {
-      quotationType: initialData.quotationType ?? "Simple",
-      vatValue: initialData.vatValue ?? "",
-      quotationNote: null,
-      laborFee: initialData.laborFee ?? "",
+      quotationType: data.quotationType ?? "Simple",
+      vatValue: data.vatValue ?? "",
+      quotationNote: data.quotationNote ?? "",
+      laborFee: data.laborFee ?? "",
       quotationDate,
       useNewQuotationNo:
-        initialData.useNewQuotationNo ??
-        (isQuoteRequested ? true : false),
-      sendWa: initialData.sendWa ?? false,
-      sendEmail: initialData.sendEmail ?? false,
+        data.useNewQuotationNo ?? (isQuoteRequested ? true : false),
+      sendWa: data.sendWa ?? false,
+      sendEmail: data.sendEmail ?? false,
       quoteApproveDate,
       quoteDecision: mappedDecision,
       lineItems: normaliseLineItems(materialItems),
-      userAssign: initialData.userAssign ?? undefined
+      userAssign: data.userAssign ?? undefined,
     };
-  }, [
-    initialData,
-    isPendingQuote,
-    isQuoteRequested,
-    materialItems,
-  ]);
+  }, [initialData, isPendingQuote, isQuoteRequested, materialItems]);
 
   const [form, setForm] = useState(defaultFormState);
 
@@ -234,22 +283,19 @@ const QuotationDialog = ({
   }, [defaultFormState]);
 
   useEffect(() => {
-    fetchUserAssign("apo");
-  }, [fetchUserAssign]);
+    if (!open) {
+      // when dialog closed, reset "dirty" flag
+      setIsDirty(false);
+    }
+  }, [open]);
 
+  // sync form when initialData/materialItems change, but only if not dirty
   useEffect(() => {
     if (isDirty) return;
     resetForm();
   }, [defaultFormState, isDirty, resetForm]);
 
-  useEffect(() => {
-    setIsDirty(false);
-  }, [caseId, status]);
-
-  const filteredUserAssign = roleAssign.filter(
-    (user) => user.Role === "apo"
-  )
-
+  // keep line items in sync with materialItems
   const syncLineItems = useCallback(
     (items) => {
       setForm((prev) => ({
@@ -262,10 +308,9 @@ const QuotationDialog = ({
 
   useEffect(() => {
     syncLineItems(materialItems);
-  }, [syncLineItems]);
+  }, [materialItems, syncLineItems]);
 
-
-
+  // auto adjust decision-dependent fields
   useEffect(() => {
     setForm((prev) => ({
       ...prev,
@@ -277,25 +322,16 @@ const QuotationDialog = ({
     }));
   }, [isPendingQuote, isQuoteRequested]);
 
-  useEffect(() =>{
-    if(form.quoteDecision === "reject") {
-      setForm((prevForm) => ({
-        ...prevForm,
-        lineItems: prevForm.lineItems.map((item) => ({
-          ...item,
-          partApproved: "no",
-        })),
-      }));
-    }else{
-      setForm((prevForm) => ({
-        ...prevForm,
-        lineItems: prevForm.lineItems.map((item) => ({
-          ...item,
-          partApproved: "yes",
-        })),
-      }));
-    }
-  }, [form.quoteDecision])
+  // auto set partApproved yes/no depending on quoteDecision
+  useEffect(() => {
+    setForm((prevForm) => ({
+      ...prevForm,
+      lineItems: prevForm.lineItems.map((item) => ({
+        ...item,
+        partApproved: prevForm.quoteDecision === "reject" ? "no" : "yes",
+      })),
+    }));
+  }, [form.quoteDecision]);
 
   const handleFieldChange = (field, value) => {
     setForm((prev) => {
@@ -315,7 +351,11 @@ const QuotationDialog = ({
     handleFieldChange(field, Boolean(value));
   };
 
-  const handleLineItemChange = (internalId, field, value) => {
+  const handleLineItemChange = (
+    internalId,
+    field,
+    value
+  ) => {
     setForm((prev) => {
       let hasChanged = false;
       const nextLineItems = prev.lineItems.map((item) => {
@@ -334,12 +374,12 @@ const QuotationDialog = ({
       const existing = prev[internalId];
       if (!existing?.[field]) return prev;
       const next = { ...prev };
-      const fieldErrors = { ...existing };
-      delete fieldErrors[field];
-      if (Object.keys(fieldErrors).length === 0) {
+      const fieldErrs = { ...existing };
+      delete fieldErrs[field];
+      if (Object.keys(fieldErrs).length === 0) {
         delete next[internalId];
       } else {
-        next[internalId] = fieldErrors;
+        next[internalId] = fieldErrs;
       }
       return next;
     });
@@ -350,47 +390,45 @@ const QuotationDialog = ({
     const newLineErrors = {};
 
     if (!form.laborFee) {
-      toast.warning("Labor fee wajib diisi.", {
-        position: 'top-center'
-      })
-      return
+      toast.warning("Labor fee wajib diisi.", { position: "top-center" });
+      return false;
     }
 
     if (!form.quotationDate) {
-      toast.warning("Quotation date wajib diisi.",{
-        position: "top-center"
-      })
-      return
+      toast.warning("Quotation date wajib diisi.", {
+        position: "top-center",
+      });
+      return false;
     }
 
     if (form.quotationType === "Standard" && !form.vatValue) {
       toast.warning("VAT value wajib diisi untuk tipe Standard.", {
-        position: 'top-center'
-      })
-      return
+        position: "top-center",
+      });
+      return false;
     }
 
     if (isPendingQuote && !form.quoteApproveDate) {
-      toast.warning("Quoate approve date wajib diisi", {
-        position: 'top-center'
-      })
-      return
+      toast.warning("Quote approve date wajib diisi", {
+        position: "top-center",
+      });
+      return false;
     }
 
     if (isPendingQuote && !form.quoteDecision) {
-      toast.warning("Quotation decision wajid di isi", {
-        description: "Pilihlah apakah quotation disetujui atau ditolak",
-        position: "top-center"
-      })
-      return
+      toast.warning("Quotation decision wajib diisi", {
+        description: "Pilih apakah quotation disetujui atau ditolak",
+        position: "top-center",
+      });
+      return false;
     }
 
     if (isPendingQuote && !form.userAssign) {
-      toast.warning("Apo IS Not Assign Yet", {
-        description: "Please Choose The Apo Partner Before Save Quoation",
-        position: 'top-center'
-      })
-      return
+      toast.warning("APO belum di-assign", {
+        description: "Pilih partner APO sebelum menyimpan quotation",
+        position: "top-center",
+      });
+      return false;
     }
 
     form.lineItems.forEach((item) => {
@@ -419,27 +457,27 @@ const QuotationDialog = ({
   const handleSubmit = async () => {
     if (formDisabled) return;
     if (!validateForm()) return;
+    if (!caseDetails?.CaseID || !user?.id) return;
 
     const quoteDecisionValue = form.quoteDecision
       ? form.quoteDecision === "approve"
         ? "Approved"
         : "Rejected"
       : null;
-    
-      
-      const payload = {
-        quotationNo: existingQuotationNo,
-        quotationType: form.quotationType,
-        vatValue: form.vatValue,
-        quotationNote: form.quotationNote,
-        laborFee: form.laborFee,
-        quotationDate: form.quotationDate,
-        quoteApproveDate: isPendingQuote ? form.quoteApproveDate : null,
-        useNewQuotationNo: form.useNewQuotationNo,
-        sendWa: form.sendWa,
-        sendEmail: form.sendEmail,
-        quoteDecision: quoteDecisionValue,
-        userAssign: form.userAssign ?? createdBy.id,
+
+    const basePayload = {
+      quotationNo: existingQuotationNo,
+      quotationType: form.quotationType,
+      vatValue: form.vatValue,
+      quotationNote: form.quotationNote,
+      laborFee: form.laborFee,
+      quotationDate: form.quotationDate,
+      quoteApproveDate: isPendingQuote ? form.quoteApproveDate : null,
+      useNewQuotationNo: form.useNewQuotationNo,
+      sendWa: form.sendWa,
+      sendEmail: form.sendEmail,
+      quoteDecision: quoteDecisionValue,
+      userAssign: form.userAssign ?? user.id,
       lineItems: form.lineItems.map((item) => ({
         lineItemId: item.internalId,
         price: item.price,
@@ -447,28 +485,61 @@ const QuotationDialog = ({
         partApproved: isPendingQuote ? item.partApproved : undefined,
       })),
       status,
-      caseId,
-      createdBy: createdBy.id
+      caseId: caseDetails.CaseID,
+      createdBy: user.id,
     };
-    
-    // console.log("ON PAYLOAD KONT", form)
-    // return console.log("ON PAYLOAD KONT", payload)
-    
-    // if(quoteDecisionValue === 'Rejected') pa
+
+    const apiPayload = { ...basePayload };
+
+    if (apiPayload.quoteDecision === "Rejected") {
+      // assign back to WO owner if rejected
+      apiPayload.userAssign = caseDetails.workorder?.[0]?.OwnerID;
+    }
+
     try {
-      await Promise.resolve(onSubmit?.(payload));
+      setSubmitting(true);
+
+      const endpoint = existingQuotationNo
+        ? `/api/quotation-information/${existingQuotationNo}`
+        : "/api/quotation-information";
+      const method = existingQuotationNo ? "patch" : "post";
+      const requester =
+        method === "patch"
+          ? ApiCustomer.patch.bind(ApiCustomer)
+          : ApiCustomer.post.bind(ApiCustomer);
+
+      await requester(endpoint, apiPayload);
+
+      toast.success(
+        existingQuotationNo
+          ? "Quotation berhasil diperbarui."
+          : "Quotation berhasil dibuat."
+      );
+
+      setOpenDialogQuotation(false);
       resetForm();
     } catch (error) {
-      console.error("Failed to submit quotation:", error);
+      console.error("Failed to save quotation:", error);
+      const message =
+        error?.response?.data?.message ?? "Gagal menyimpan quotation.";
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // --- close handler for Dialog ---
+  const handleOpenChange = (nextOpen) => {
+    setOpenDialogQuotation(nextOpen);
+    if (!nextOpen) {
+      resetForm();
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-6xl bg-white flex flex-col h-150 gap-1 ">
-        <DialogHeader
-          className={"flex flex-row justify-between gap-4 px-10 py-4  border-b"}
-        >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="min-w-6xl bg-white flex flex-col h-150 gap-1">
+        <DialogHeader className="flex flex-row justify-between gap-4 px-10 py-4 border-b">
           <div>
             <DialogTitle>Quotation Detail</DialogTitle>
             <DialogDescription>
@@ -599,22 +670,25 @@ const QuotationDialog = ({
                   )}
                 </CaseField>
 
-                 {form.quotationType === "Standard" && (
-            <CaseField label="VAT Value (%)" star>
-              <Input
-                disabled={formDisabled}
-                value={form.vatValue}
-                onChange={(e) => handleFieldChange("vatValue", e.target.value)}
-                placeholder="Contoh: 10"
-                type="number"
-                min="0"
-              />
-              {fieldErrors.vatValue && (
-                <p className="text-xs text-red-500">{fieldErrors.vatValue}</p>
-              )}
-            </CaseField>
-          )}
-
+                {form.quotationType === "Standard" && (
+                  <CaseField label="VAT Value (%)" star>
+                    <Input
+                      disabled={formDisabled}
+                      value={form.vatValue}
+                      onChange={(e) =>
+                        handleFieldChange("vatValue", e.target.value)
+                      }
+                      placeholder="Contoh: 10"
+                      type="number"
+                      min="0"
+                    />
+                    {fieldErrors.vatValue && (
+                      <p className="text-xs text-red-500">
+                        {fieldErrors.vatValue}
+                      </p>
+                    )}
+                  </CaseField>
+                )}
 
                 {form.quoteDecision === "approve" && (
                   <CaseField
@@ -830,7 +904,6 @@ const QuotationDialog = ({
             </CardContent>
           </Card>
         </div>
-
         <DialogFooter className="border-t px-2 py-2 m-0">
           <DialogClose asChild>
             <Button variant="secondary" disabled={submitting}>
@@ -842,6 +915,7 @@ const QuotationDialog = ({
           </Button>
           <Button
             onClick={async () => {
+              if (!caseDetails) return;
               const blob = await pdf(
                 <QuotationInvoice
                   caseDetails={caseDetails}
@@ -855,7 +929,7 @@ const QuotationDialog = ({
             }}
             disabled={formDisabled}
           >
-          Print Quotation Invoice
+            Print Quotation Invoice
           </Button>
         </DialogFooter>
       </DialogContent>

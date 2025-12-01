@@ -233,7 +233,7 @@ const DEFAULT_EXTRA_STATUS_KEYS = ALL_STATUS_KEYS.filter((key) => !BASE_STATUS_K
 export const TabsServiceCaseDetails = ({ 
   caseDetails,
   setCaseDetails, 
-  caseNote,
+  // caseNote,
   caseNoteFormData,
   setCaseNoteFormData
 }) => {
@@ -267,6 +267,8 @@ export const TabsServiceCaseDetails = ({
     HWPC: "",
     ProductTypeID: caseDetails.asset_information?.product_information?.ProductTypeID,
   })
+
+  
 
   const [caseForm, setCaseForm] = useState({
     CaseType: "",
@@ -786,6 +788,73 @@ const openPopup = () => {
     });
   };
   
+  //QR CODE
+  const [qrCodeImg,setQrCodeImg]= useState("");
+  const[qrData,setQrData]=useState(caseDetails.CaseID);
+  //define this manually
+  /**TODO FOR SLAMET */
+  const[qrSize,setQrSize]=useState(150);
+
+  async function generateQR(){
+      
+      try{
+      const url =`https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(qrData)}`;
+
+      const base64 = await fetch(url)
+      .then(response => response.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        console.log("QR",reader)
+        return new Promise((res) => {
+          reader.onloadend = () => {
+          res(reader.result);
+        }})
+      })
+
+
+      setQrCodeImg(base64);
+
+      }catch(error){
+      console.error("Error generating QR code",error);
+
+      }
+  }
+  
+  console.log("QRCODEIMAGE",qrCodeImg);
+  function downloadQr(){
+      try{
+          fetch(qrCodeimg).then((response)=>response.blob()).then((blob)=>{
+              const link=document.createElement("a");
+              link.href=URL.createObjectURL(blob);
+              link.download="qrcode.png";
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+          });
+        }
+      catch{(error) => {
+        console.error("Error in Downloading QRcode",error);
+      }};
+    }
+  useEffect(()=>{
+    generateQR()
+  },[caseDetails.CaseID])
+
+  // Source - https://stackoverflow.com/a
+// Posted by Jukka Koivu
+// Retrieved 2025-11-29, License - CC BY-SA 4.0
+
+
+  const convertToBase64 = async (url) => {
+    // Source - https://stackoverflow.com/a
+    // Posted by Robert
+    // Retrieved 2025-11-29, License - CC BY-SA 4.0
+
+    
+    return base64
+  }
+
 
   // Deprecated: previously used for single textarea notes display
   // Replaced by notesList table
@@ -856,6 +925,7 @@ const openPopup = () => {
           <ServiceRequestPDF
             caseDetails={caseDetails}
             customerSignature={signature}
+            qrcode={qrCodeImg}
           />
         ).toBlob();
         const url = URL.createObjectURL(blob);
@@ -935,8 +1005,31 @@ const openPopup = () => {
             initialData={quotationInitialData || {}}
           />
         ).toBlob();
-        const url = URL.createObjectURL(blob);
-        window.open(url); 
+         const fileName = `Quotation-${
+           quotationInitialData?.quotationNo ||
+           caseDetails?.CaseID ||
+           "document"
+         }.pdf`;
+
+         const url = URL.createObjectURL(blob);
+
+         // Open a new tab/window
+         const newWindow = window.open("", "_blank");
+
+         if (!newWindow) return;
+
+         // Set the tab title
+         newWindow.document.title = fileName;
+
+         // Fill with a minimal HTML shell and embed the PDF
+         newWindow.document.body.style.margin = "0";
+         const iframe = newWindow.document.createElement("iframe");
+         iframe.src = url;
+         iframe.style.border = "none";
+         iframe.style.width = "100%";
+         iframe.style.height = "100vh";
+
+         newWindow.document.body.appendChild(iframe);
       },
       roles: ["admin", "fd", "user", "spv", "cm"],
     },
@@ -1061,6 +1154,7 @@ const openPopup = () => {
       /**
        * TODO FOR SLAMET : 
        * MAKE TIS CONFIRMATION INTO SOMETHING ELSE
+       * TULUNG ININYA DI ITUIN BIAR GA APA KALI
        */
       await Swal.fire({
         icon: "warning",
@@ -1261,121 +1355,123 @@ const openPopup = () => {
   }
 
   useEffect(() => {
-    if (!openDialogQuotation || !caseDetails)  return;
+    if (!openDialogQuotation || !caseDetails) return;
 
     let cancelled = false;
 
     setQuotationInitialData(null);
-    setQuotationLoading(true)
+    setQuotationLoading(true);
 
     const loadQuotation = async () => {
-            try {
-                const response = await ApiCustomer.get(`/api/quotation-information?caseId=${caseDetails.CaseID}`);
-                if (cancelled) return;
-                const quotationPayload = response.data.data;
-                if (quotationPayload) {
-                    setQuotationInitialData(mapQuotationInitialData(quotationPayload));
-                }
-            } catch (error) {
-                if (!cancelled) {
-                    console.error("Failed to fetch quotation:", error);
-                    toast.error(
-                        error.response?.data?.message ?? "Gagal mengambil data quotation.",
-                    );
-                }
-            } finally {
-                if (!cancelled) {
-                    setQuotationLoading(false);
-                }
-            }
+      try {
+        const response = await ApiCustomer.get(
+          `/api/quotation-information?caseId=${caseDetails.CaseID}`
+        );
+        if (cancelled) return;
+        const quotationPayload = response.data.data;
+        if (quotationPayload) {
+          setQuotationInitialData(mapQuotationInitialData(quotationPayload));
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to fetch quotation:", error);
+          toast.error(
+            error.response?.data?.message ?? "Gagal mengambil data quotation."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setQuotationLoading(false);
+        }
+      }
     };
 
     loadQuotation();
 
     return () => {
-        cancelled = true;
+      cancelled = true;
     };
-    },[openDialogQuotation, caseDetails]);
+  }, [openDialogQuotation, caseDetails]);
 
-    const handleQuotationOpenChange = (nextOpen = true) => {
-        setOpenDialogQuotation(nextOpen);
-        if (!nextOpen) {
-          setQuotationInitialData(null);
-          setQuotationLoading(false);
-          setQuotationSubmitting(false);          
-        }
-    };
+  const handleQuotationOpenChange = (nextOpen = true) => {
+    setOpenDialogQuotation(nextOpen);
+    if (!nextOpen) {
+      setQuotationInitialData(null);
+      setQuotationLoading(false);
+      setQuotationSubmitting(false);
+    }
+  };
 
-      const handleQuotationSubmit = async (payload) => {
-            if (!caseDetails) return;
-            if (!user?.id) {
-                toast.error("User tidak valid. Silakan login kembali.");
-                return;
-            }
-            try {
-                setQuotationSubmitting(true);
-                // return console.log("Submit : ",payload)
-                const apiPayload = {
-                    ...payload,
-                    userAssign: user.id !== payload?.userAssign ? payload.userAssign : user.id,
-                };
-                if(apiPayload.quoteDecision === "Rejected"){
-                  apiPayload.userAssign = caseDetails.workorder[0]?.OwnerID;
-                }
-                
-                console.log("Sending payload:", apiPayload);
-                const endpoint = payload.quotationNo
-                    ? `/api/quotation-information/${payload.quotationNo}`
-                    : "/api/quotation-information";
-                const method = payload.quotationNo ? "patch" : "post";  
-                const requester =
-                    method === "patch"
-                        ? ApiCustomer.patch.bind(ApiCustomer)
-                        : ApiCustomer.post.bind(ApiCustomer);
-    
-                await requester(endpoint, apiPayload);
-    
-                toast.success(
-                    payload.quotationNo
-                        ? "Quotation berhasil diperbarui."
-                        : "Quotation berhasil dibuat.",
-                );
-    
-                handleQuotationOpenChange(false);
-            } catch (error) {
-                console.error("Failed to save quotation:", error);
-                const message =
-                    error.response?.data?.message ?? "Gagal menyimpan quotation.";
-                toast.error(message);
-            } finally {
-                setQuotationSubmitting(false);
-            }
-        };
-    
-    
-        const mapQuotationInitialData = (quotationPayload) => {
-            if (!quotationPayload?.quotation) return null;
-            const q = quotationPayload.quotation;
-    
-        return {
-            quotationNo: q.quotationNo,
-            quotationType: q.quotationType ?? "Simple",
-            vatValue:
-                q.vatValue === null || q.vatValue === undefined
-                        ? ""
-                        : String(q.vatValue),
-                quotationNote: q.quotationNote ?? "",
-                laborFee:
-                    q.laborFee === null || q.laborFee === undefined
-                        ? ""
-                    : String(q.laborFee),
-                quotationDate: q.quotationDate ?? "",
-                quoteApproveDate: q.quoteApproveDate ?? "",
-                sendWa: Boolean(q.sendWa),
-                sendEmail: Boolean(q.sendEmail),
-                quoteDecision: q.quoteDecision ?? "",
-        };
+  const handleQuotationSubmit = async (payload) => {
+    if (!caseDetails) return;
+    if (!user?.id) {
+      toast.error("User tidak valid. Silakan login kembali.");
+      return;
+    }
+    try {
+      setQuotationSubmitting(true);
+      // return console.log("Submit : ",payload)
+      const apiPayload = {
+        ...payload,
+        userAssign:
+          user.id !== payload?.userAssign ? payload.userAssign : user.id,
+      };
+      if (apiPayload.quoteDecision === "Rejected") {
+        apiPayload.userAssign = caseDetails.workorder[0]?.OwnerID;
+      }
+
+      console.log("Sending payload:", apiPayload);
+      const endpoint = payload.quotationNo
+        ? `/api/quotation-information/${payload.quotationNo}`
+        : "/api/quotation-information";
+      const method = payload.quotationNo ? "patch" : "post";
+      const requester =
+        method === "patch"
+          ? ApiCustomer.patch.bind(ApiCustomer)
+          : ApiCustomer.post.bind(ApiCustomer);
+
+      await requester(endpoint, apiPayload);
+
+      toast.success(
+        payload.quotationNo
+          ? "Quotation berhasil diperbarui."
+          : "Quotation berhasil dibuat."
+      );
+
+      handleQuotationOpenChange(false);
+    } catch (error) {
+      console.error("Failed to save quotation:", error);
+      const message =
+        error.response?.data?.message ?? "Gagal menyimpan quotation.";
+      toast.error(message);
+    } finally {
+      setQuotationSubmitting(false);
+    }
+  };
+
+  const mapQuotationInitialData = (quotationPayload) => {
+    if (!quotationPayload?.quotation) return null;
+    const q = quotationPayload.quotation;
+
+    return {
+      quotationNo: q.quotationNo,
+      quotationType: q.quotationType ?? "Simple",
+      vatValue:
+        q.vatValue === null || q.vatValue === undefined
+          ? ""
+          : String(q.vatValue),
+      quotationNote: q.quotationNote ?? "",
+      laborFee:
+        q.laborFee === null || q.laborFee === undefined
+          ? ""
+          : String(q.laborFee),
+      quotationDate: q.quotationDate ?? "",
+      quoteApproveDate: q.quoteApproveDate ?? "",
+      sendWa: Boolean(q.sendWa),
+      sendEmail: Boolean(q.sendEmail),
+      quoteDecision: q.quoteDecision ?? "",
     };
+  };
 
   const invoiceSummary = invoiceData?.invoice;
   const invoiceQuotation = invoiceData?.quotation;
@@ -1388,6 +1484,8 @@ const openPopup = () => {
     ]
       .filter(Boolean)
       .join(", ") || "-";
+
+  
 
   return (
     <>
@@ -1508,7 +1606,7 @@ export const ServiceCase = ({
   caseDetails,
   formData,
   setCaseNoteFormData,
-  onChange,
+  onChange,  //!
   notesList,
   setNotesList,
   handleCaseDetails,
@@ -1518,19 +1616,19 @@ export const ServiceCase = ({
   setFormGtc,
   onChangeGtc,
   entitlementStatus,
-  handleEntitlementStatus,
+  handleEntitlementStatus, //!
   csrForm,
   setCsrForm,
   onChangeCsr,
   caseForm,
-  onChangeCase,
+  onChangeCase,  //!
   setCaseForm,
   signature,
   setSignature,
   refreshFetchPage,
   productForm,
   setProductForm,
-  handleProductChange,
+  handleProductChange, //! 
   invoiceLoading,
   invoiceSummary,
   invoiceQuotation,
@@ -1568,7 +1666,7 @@ export const ServiceCase = ({
   // const allRoleTabs = ["admin","fd", "apo","ce","lg","celead","ps"];
   
   let hiddenTab;
-  if (caseDetails.asset_information?.WarrantyOTCCode.Description !== "Trade (OOW)") {
+  if (caseDetails.asset_information?.WarrantyOTCCode.OTCCode !== "01T") {
     hiddenTab = true
   }else {
     hiddenTab = false
@@ -1591,6 +1689,8 @@ export const ServiceCase = ({
   ];
 
   const { user } = useAuth();
+
+  let totalquoLineItemPrice = 0;
 
   // const visibleTabs = useMemo(
   //   () => tabs.filter(tab => tab.roles.includes(user.role)),
@@ -2121,6 +2221,11 @@ if (caseDetails.CaseStatus !== "Close") {
     handleEntitlementStatus('PhotoUnit')(validFiles);
   }
 
+  
+
+  
+
+  
   return (
     <>
       {caseDetails.CaseStatus === "Close" && (
@@ -2139,6 +2244,10 @@ if (caseDetails.CaseStatus !== "Close") {
               <h1 className="text-2xl font-semibold">{caseDetails.CaseID}</h1>
               <p className="text-lg text-muted-foreground">{caseDetails.CaseSubject}</p>
             </div>
+            <div className="app-container">
+              {/* { img && <img src={img} className="qr-code-image" />} */}
+            </div>
+
 
             {/* RIGHT SIDE - Quick Info */}
             <div className="flex flex-wrap items-center gap-4 text-sm">
@@ -2262,6 +2371,12 @@ if (caseDetails.CaseStatus !== "Close") {
                 {caseDetails?.workorder[0]?.owner?.IDUser && (
                   <CaseField label="Engineer name" className={"mt-2"} childClass={'col-span-2'} span={2} lock >  
                       <Input variant="invisible" placeholder="---" value={caseDetails.workorder[0].owner.Name} readOnly/>                    
+                  </CaseField>
+                )}
+                
+                {caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.User?.IDUser && (
+                  <CaseField label="CM name" className={"mt-2"} childClass={'col-span-2'} span={2} lock >  
+                      <Input variant="invisible" placeholder="---" value={caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.User?.Name} readOnly/>                    
                   </CaseField>
                 )}
                 {caseDetails?.workorder[0]?.materialorder[0]?.owner?.IDUser && (
@@ -3529,6 +3644,11 @@ if (caseDetails.CaseStatus !== "Close") {
                     value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationType || "---"}
                   />
                  </CaseField>
+                  <CaseField label={"Labor Fee"} lock> 
+                    <Input 
+                      value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
+                    />
+                 </CaseField>
                   <CaseField label={"Quotation amount"} lock> 
                   <Input 
                     value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal)}
@@ -3589,6 +3709,11 @@ if (caseDetails.CaseStatus !== "Close") {
                         value={quo.materialorderlineitems[0]?.Quantity}
                       />
                     </CaseField>
+                    <CaseField label={"Price"} lock>
+                      <Input
+                        value={formatAccountingRupiah(quo.materialorderlineitems[0]?.Price)}
+                      />
+                    </CaseField>
                     <CaseField label={"Part category"} lock>
                       <Input
                         value={quo.materialorderlineitems[0]?.servicecatalog_parts?.Keyword}
@@ -3616,6 +3741,7 @@ if (caseDetails.CaseStatus !== "Close") {
                   <div className="flex items-center justify-between">
                     <CardTitle className={"text-lg"}>Invoice Information</CardTitle>
                     <Button
+                    className={'bg-gray-300'}
                       size="sm"
                       variant="outline"
                       onClick={() => handleInvoiceOpenChange(true)}
@@ -3639,9 +3765,40 @@ if (caseDetails.CaseStatus !== "Close") {
                       <CaseField label={"Invoice No"} lock>
                         <Input value={invoiceSummary.invoiceNo} readOnly />
                       </CaseField>
+                      <CaseField label={"Total Harga Sparepart"} lock>
+                        {
+                        caseDetails.workorder[0]?.materialorder.map((mo) =>{
+                          const quoLineItemPrice = mo.materialorderlineitems[0]?.quotation_lineitem[0]?.Price;
+                          totalquoLineItemPrice += Number(quoLineItemPrice);
+
+                        })}
+                        <Input
+                          value={formatAccountingRupiah(totalquoLineItemPrice)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Labor Fee"} lock>
+                        <Input
+                          value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
+                          readOnly
+                        />
+                      </CaseField>
                       <CaseField label={"Subtotal"} lock>
                         <Input
                           value={formatAccountingRupiah(invoiceQuotation?.subtotal)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"VAT value (%)"} lock> 
+                        <Input 
+                          value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue 
+                            ? caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue + "%" 
+                            : "---"}
+                        />
+                      </CaseField>
+                      <CaseField label={"DP"} lock>
+                        <Input
+                          value={formatAccountingRupiah("0")}
                           readOnly
                         />
                       </CaseField>
@@ -3664,7 +3821,7 @@ if (caseDetails.CaseStatus !== "Close") {
                         />
                       </CaseField>
                       <CaseField
-                        label={"Alasan Selisih"}
+                        label={"Ammount Difference Reason"}
                         lock
                         hide={!invoiceSummary.amountDiffReason}
                       >
@@ -3696,15 +3853,7 @@ if (caseDetails.CaseStatus !== "Close") {
                   ) : (
                     <div className="flex flex-col gap-2 text-sm text-muted-foreground">
                       <p>Belum ada invoice untuk case ini.</p>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="w-fit"
-                        onClick={() => handleInvoiceOpenChange(true)}
-                        disabled={caseDetails?.CaseStatus === "Close"}
-                      >
-                        Buat Invoice
-                      </Button>
+                     
                     </div>
                   )}
                 </CardContent>

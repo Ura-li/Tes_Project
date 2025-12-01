@@ -29,7 +29,8 @@ export async function GET(request, { params }) {
                             product_type: true
                         }
                     },
-                    WarrantyOTCCode: true
+                    WarrantyOTCCode: true,
+                    asset_warranty: true
                 }
             } ,
             contact_information: true, 
@@ -63,7 +64,12 @@ export async function GET(request, { params }) {
                                     servicecatalog_parts: true,
                                     quotation_lineitem: {
                                         include:{
-                                            quotation: true
+                                            quotation: {
+                                                include: {
+                                                    User: true,
+                                                    invoicetable: true
+                                                }
+                                            }
                                         }
                                     }
 

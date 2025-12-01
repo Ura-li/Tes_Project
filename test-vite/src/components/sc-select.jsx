@@ -8,7 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
   } from "@/components/ui/select"
-import { Archive, Check, CircleChevronDown, X } from "lucide-react";
+import { Archive, Check, CircleChevronDown, Trash, X } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -31,13 +31,19 @@ export const SearchCommandBlock = ({
   renderLabel = (opt) => opt.label || opt,
   getValue = (opt) => opt.value || opt,
   readOnly,
-  className
+  className,
+  allowClear = true,
+  clearValue = "",
 }) => {
   const [open, setOpen] = useState(false);
   const [positionAbove, setPositionAbove] = useState(false);
+  const [isSearching, setIsSearching] = useState(false); // 👈 UI-only search mode
+
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
+
   const selectedOption = options.find((opt) => getValue(opt) === value);
+  const showSelectedPill = selectedOption && !isSearching;
 
   useEffect(() => {
     if (!open || !inputRef.current) return;
@@ -54,40 +60,71 @@ export const SearchCommandBlock = ({
     }
   }, [open]);
 
-  const handleBlur = (e) => {
+  const startSearchMode = () => {
+    if (readOnly) return;
+
+    setIsSearching(true);
+    setOpen(true);
+
+    // Optional: clear search text if you want
+    if (onSearchInputChange) onSearchInputChange("");
+
     setTimeout(() => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(document.activeElement)
-      ) {
+      inputRef.current?.focus();
+    }, 0);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => {
+      const active = document.activeElement;
+      const insideDropdown =
+        dropdownRef.current && dropdownRef.current.contains(active);
+      const onInput = inputRef.current === active;
+
+      // If focus is completely outside input + dropdown, close and exit search mode
+      if (!insideDropdown && !onInput) {
         setOpen(false);
+        setIsSearching(false); 
       }
     }, 150);
   };
 
+const handleClear = () => {
+  if (readOnly) return;
+
+  onChange(clearValue); 
+  setOpen(false); 
+  setIsSearching(false); 
+
+  if (onSearchInputChange) {
+    onSearchInputChange(""); 
+  }
+};
   return (
     <div className="relative w-full">
-      {selectedOption ? (
-        <div className="flex items-center justify-start px-2 py-2 border rounded-md gap-2 ring-1"
-          onClick={() => {
-            if (!readOnly) {
-              onChange("")
-              setOpen
-
-              setTimeout(() => {
-                inputRef.current?.focus(); // focus input
-              }, 0);
-            }
-          }
-          }
-
-
-        >
-          <Archive color="blue" className="size-4 shrink-0" />
-          <span className="pl-1">{renderLabel(selectedOption)}</span>
-        </div>
+      {showSelectedPill ? (
+          <div
+            className="flex border rounded-md  ring-1 px-2 py-2  gap-2 items-center justify-start   cursor-pointer"
+            onClick={startSearchMode}
+          >
+            <Archive color="blue" className="size-4 shrink-0" />
+            <span className="pl-1">{renderLabel(selectedOption)}</span>
+          {allowClear && !readOnly && (
+            <button
+              type="button"
+              className="ml-auto inline-flex items-center justify-center rounded-full p-1 hover:bg-gray-100"
+              aria-label="Clear selection"
+              onClick={(e) => {
+                e.stopPropagation(); // don't trigger startSearchMode
+                handleClear();
+              }}
+            >
+              <X className="size-3" />
+            </button>
+          )}
+          </div>
       ) : (
-        <Command className={cn(className,"w-full")}>
+        <Command className={cn(className, "w-full")}>
           <CommandInput
             ref={inputRef}
             placeholder={placeholder}
@@ -95,16 +132,17 @@ export const SearchCommandBlock = ({
             onBlur={handleBlur}
             onValueChange={(val) => {
               if (onSearchInputChange) {
-                onSearchInputChange(val); // 👈 call if exist
+                onSearchInputChange(val);
               }
             }}
-            disabled={readOnly} // 👈 prevent typing if readOnly
+            disabled={readOnly}
           />
-          {open && !readOnly && ( // 👈 don’t open dropdown if readOnly
+          {open && !readOnly && (
             <CommandList
               ref={dropdownRef}
-              className={`absolute z-50 w-full border rounded-md bg-white shadow-lg max-h-60 overflow-y-auto ${positionAbove ? "bottom-full mb-2" : "top-full mt-2"
-                }`}
+              className={`absolute z-50 w-full border rounded-md bg-white shadow-lg max-h-60 overflow-y-auto ${
+                positionAbove ? "bottom-full mb-2" : "top-full mt-2"
+              }`}
             >
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
@@ -113,12 +151,13 @@ export const SearchCommandBlock = ({
                     key={getValue(opt)}
                     onSelect={() => {
                       if (!readOnly) {
-                        onChange(getValue(opt));
+                        onChange(getValue(opt)); // 👈 only change real value on selection
                         setOpen(false);
+                        setIsSearching(false); // back to pill mode
                       }
                     }}
                   >
-                    <Archive />
+                    <Archive className="mr-2" />
                     {renderLabel(opt)}
                   </CommandItem>
                 ))}
@@ -225,7 +264,7 @@ export function ComboboxDemo({
           <CommandList>
             <CommandEmpty>No state found.</CommandEmpty>
             <CommandGroup>
-              {options.map((data) => (
+              {options?.map((data) => (
                 <CommandItem
                   key={data.id}
                   value={data.name}

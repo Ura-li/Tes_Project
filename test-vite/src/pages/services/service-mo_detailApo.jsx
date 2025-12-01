@@ -154,6 +154,7 @@ export const ServiceMoDetailApo = () => {
         `/api/material-order/material-order-line-items/${lineItemID}`
       );
       const data = res.data.data;
+      console.log("MOLI ITEM", data);
 
       setMoLineItems(data);
       setMODetailInput({
@@ -454,6 +455,7 @@ export const ServiceMoDetailApo = () => {
     return option?.data?.DOA ? `${label} (DOA)` : label;
   };
 
+
   const handleUpdate = async () => {
     try {
       await ApiCustomer.patch(
@@ -480,6 +482,7 @@ export const ServiceMoDetailApo = () => {
 
 useEffect(() => {
   ApiCustomer.get("/api/failure/options").then((res) => {
+    console.log("RES",res);
     const defaultOptions = res.data.map((f, index) => ({
       value: f.FailureId.toString(), 
       label: (
