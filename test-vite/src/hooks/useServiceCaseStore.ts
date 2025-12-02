@@ -56,6 +56,8 @@ interface ServiceCaseState {
   invoiceLoading: boolean;
   quotationInitialData: any | null;
 
+  dpLoading: boolean;
+
   // UI flags
   refreshFetchPage: boolean;
   openWorkOrder: boolean;
@@ -102,6 +104,7 @@ interface ServiceCaseState {
   fetchActionLog: () => Promise<void>;
   fetchOtcCode: () => Promise<void>;
   fetchInvoiceData: () => Promise<void>;
+  fetchDPData: () => Promise<void>;
 
   // save
   saveAll: (opts?: { redirect?: boolean }) => Promise<boolean>;
@@ -197,24 +200,28 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   invoiceDialogOpen: false,
   signature: null,
 
+  dpLoading: false,
+
   dpDataForm: {
     InvoiceNo: "",
     DpAmount: "",
-    DpDate: "",
+    DpDate: null,
     PaymentType: "",
     DpNote: "",
   },
 
   dpList: [
-    {
-      tempId: `${Date.now()}-${Math.random()}`,
-      InvoiceNo: null,
-      DpAmount: "",
-      DpDate: "",
-      PaymentType: "",
-      DpNote: "",
-      isPersisted: false,
-    },
+    // SET TO NULL FIRST 
+
+    // {
+    //   tempId: `${Date.now()}-${Math.random()}`,
+    //   InvoiceNo: null,
+    //   DpAmount: "",
+    //   DpDate: "",
+    //   PaymentType: "",
+    //   DpNote: "",
+    //   isPersisted: false,
+    // },
   ],
   // ------------ simple setters -------------
   initFromCaseDetails: (caseDetails) =>
@@ -278,11 +285,21 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   removeDpRow: (tempId) =>
     set((state) => {
       // keep at least 1 row
-      if (state.dpList.length === 1) return state;
+      // if (state.dpList.length === 1) return state;
       return {
         dpList: state.dpList.filter((row) => row.tempId !== tempId),
       };
     }),
+
+  totalDpAmount: () => {
+    const { dpList } = get();
+    return dpList.reduce((sum, row) => {
+      const amt = parseFloat(row.DpAmount) || 0;
+      console.log("TOTAL DP AMMOUNT ",sum, amt)
+      return sum + amt;
+    }, 0);
+  },
+
 
   setDpField: (tempId, field, value) =>
     set((state) => ({
@@ -302,6 +319,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   setOpenDialogQuotation: (open) => set({ openDialogQuotation: open }),
   setInvoiceDialogOpen: (open) => set({ invoiceDialogOpen: open }),
   setOwnerUserData: (data) => set({ ownerUserData: data }),
+
+  
 
   // ------------- fetchers -----------------
   fetchCustomerData: async () => {
@@ -514,6 +533,41 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     }
   },
 
+    fetchDPData: async () =>{
+      const { caseDetails } = get();
+      if(!caseDetails?.CaseID) return
+      set({dpLoading: true})
+      try {
+        const response = await ApiCustomer.get(
+          `/api/dp-information?caseId=${caseDetails.CaseID}`
+        )
+        const data = response.data?.data;
+
+        const arrayData = Array.isArray(data)
+          ? data
+          : data
+          ? [data]
+          : [];
+        const mapped = arrayData.map((dp: any) => ({
+          tempId: dp.dpInvoiceNo,           // stable key
+          InvoiceNo: dp.dpInvoiceNo,
+          DpAmount: dp.dpAmount ?? "",
+          DpDate: dp.dpDate ?? null,        // string is fine, your DatePicker helper converts it
+          PaymentType: dp.paymentType ?? "",
+          DpNote: dp.dpNote ?? "",
+          isPersisted: true,
+        }));
+
+        set({ dpList : mapped ?? null })
+        return data;
+      } catch (error: any) {
+        console.error("Failed Fetch DP", error);
+        toast.error(error?.response?.data?.message ?? "Gagal mengambil Data DP")
+      } finally {
+        set({dpLoading: false})
+      }
+    },
+
   // --------------- saveAll (replacement for handleSave) --------------
   saveAll: async ({ redirect = true } = {}) => {
     const {
@@ -528,8 +582,12 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       ownerUserData,
       setOwnerUserData,
       toggleRefresh,
+      dpList,
+      dpDataForm
     } = get();
-
+    // console.log(dpList, dpDataForm);
+    // return false
+    
     if (!caseDetails) return false;
 
     try {
@@ -557,6 +615,16 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       const gtcEdited = hasAnyNonEmptyValue(gtcForm);
       const csrEdited = hasAnyNonEmptyValue(csrForm);
       const productEdited = hasAnyNonEmptyValue(productForm);
+      const dpEdited = dpList.some(
+        (row) =>
+          !row.isPersisted &&
+          (
+            row.DpAmount.trim() !== "" ||
+            row.DpDate !== null ||
+            row.PaymentType.trim() !== "" ||
+            row.DpNote.trim() !== ""
+          )
+      );
 
       const hasIntentToSave =
         noteFilled ||
@@ -564,7 +632,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         entitlementEdited ||
         csrEdited ||
         caseEdited ||
-        productEdited;
+        productEdited ||
+        dpEdited;
 
         //fungsi not working
       if (!hasIntentToSave) {
@@ -590,6 +659,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         "CSR",
         "CASE",
         "PRODUCT",
+        "PAYMENT"
       ] as const) {
         switch (target) {
           case "NOTE": {
@@ -929,6 +999,37 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
                 });
               }
             }
+            break;
+          }
+
+          case "PAYMENT":{
+            const newRows = dpList.filter((row) => {
+              const hasAnyField =
+                (row.DpAmount && row.DpAmount.toString().trim() !== "") ||
+                row.DpDate ||
+                (row.PaymentType && row.PaymentType.toString().trim() !== "") ||
+                (row.DpNote && row.DpNote.toString().trim() !== "");
+
+              return !row.isPersisted && hasAnyField
+            })
+
+            if(newRows.length === 0) break;
+            const user = getUserFromToken();
+
+            const payload = {
+              caseId: caseDetails.CaseID,
+              createdBy: user?.id,
+              dps: newRows.map((row) => ({
+                dpAmount: row.DpAmount,
+                dpDate: row.DpDate,       // make sure this is string / ISO or whatever parseDate expects
+                paymentType: row.PaymentType,
+                dpNote: row.DpNote,
+              })),
+            }
+            const response = await ApiCustomer.post(`/api/dp-information`, payload);
+
+            dataToUpdate.dp = response.data.data;
+            savedModules.push("DP");
             break;
           }
         }

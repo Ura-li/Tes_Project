@@ -10,6 +10,14 @@ export function formatDateForInput(dateString) {
   return offsetDate.toISOString().split('T')[0]; // ambil 'YYYY-MM-DD'
 };
 
+export function DatePickertoDateOrNull(dateString) {
+  if (!dateString) return null;
+
+  const date = new Date(dateString);
+  return isNaN(date) ? null : date;
+}
+
+
 export function formatDate(dateString) {
   if (!dateString) return "-";
   const date = new Date(dateString);

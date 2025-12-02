@@ -90,6 +90,7 @@ export const TabsServiceCaseDetails = () => {
   );
 
   const fetchInvoiceData = useServiceCaseStore((s) => s.fetchInvoiceData);
+  const fetchDPData = useServiceCaseStore((s) => s.fetchDPData)
   const saveAll = useServiceCaseStore((s) => s.saveAll);
 
   // ---- local only (still fine to keep) ----
@@ -986,6 +987,8 @@ function fieldMO(caseDetails) {
       .filter(Boolean)
       .join(", ") || "-";
 console.log("CHeCK CASe daTA",caseDetails)
+
+  
   return (
     <>
       <div className="flex items-center border-1 sticky top-15 z-5 bg-gray-50 dark:dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 overflow-auto">
@@ -1125,6 +1128,7 @@ import QuotationDialog from "../components/model/QuotationModalReimagined";
 import { mapMaterialOrdersToQuotationItems } from "../lib/mappers/fieldMO";
 import { QuickLogNote } from "../components/model/QuickLogNote";
 import Approvel from "../layout/Apv_page";
+import { DatePickertoDateOrNull, formatDateForInput } from "../lib/utils";
 
 const suffixToRoleMap = {
   CE: "ce",
@@ -1318,6 +1322,7 @@ export const ServiceCase = () => {
 
   const invoiceData = useServiceCaseStore((s) => s.invoiceData);
   const invoiceLoading = useServiceCaseStore((s) => s.invoiceLoading);
+  const totalDpAmount = useServiceCaseStore((s) => s.totalDpAmount());
   const setInvoiceDialogOpen = useServiceCaseStore(
     (s) => s.setInvoiceDialogOpen
   );
@@ -1352,6 +1357,14 @@ export const ServiceCase = () => {
       .filter(Boolean)
       .join(", ") || "-";
 
+  const grandTotalNumber = useMemo(() => {
+    if (!invoiceQuotation?.grandTotal) return 0;
+    let parsed = Number(invoiceQuotation.grandTotal);
+    if(totalDpAmount !== 0) parsed = parsed - Number(totalDpAmount)
+      console.log("Berkurang ", parsed, totalDpAmount)
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }, [invoiceQuotation, totalDpAmount]);
+
   // UI-only state
   const [selectedSite, setSelectedSite] = useState("--Selected--");
   const [roleAssign, setRoleAssign] = useState([]);
@@ -1381,6 +1394,9 @@ const dpList = useServiceCaseStore((s) => s.dpList);
 const addDpRow = useServiceCaseStore((s) => s.addDpRow);
 const removeDpRow = useServiceCaseStore((s) => s.removeDpRow);
 const setDpField = useServiceCaseStore((s) => s.setDpField);
+
+
+
   useEffect(() => {
     if (!assetInformation) return;
 
@@ -1421,6 +1437,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
   //     ),
   //   []
   // );
+
 
 
   const labelToStatusEnum = Object.entries(STATUS_ENUM_TO_LABEL).reduce((acc, [key, val]) => {
@@ -2234,7 +2251,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
-                </CardContent>
+                </CardContent>  
               </Card>
             </div>
             {/* --- Card 1: Customer Issue & System Info --- */}
@@ -3538,6 +3555,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent>
+                  {console.log("WOI INVOICCENYA GA NOGNOL",invoiceSummary, invoiceData)}
                   {invoiceLoading ? (
                     <p className="text-sm text-muted-foreground">
                       Memuat data invoice...
@@ -3586,16 +3604,25 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             : "---"}
                         />
                       </CaseField>
-                      <CaseField label={"DP"} lock>
+                        
+                      <CaseField label={"Total + VAT"} lock>
                         <Input
-                          value={formatAccountingRupiah("0")}
+                          value={formatAccountingRupiah(
+                            invoiceQuotation.grandTotal
+                          )}
                           readOnly
                         />
                       </CaseField>
-                      <CaseField label={"Grand Total"} lock>
+                      <CaseField label={"DP"} lock>
+                        <Input
+                          value={formatAccountingRupiah(totalDpAmount)}
+                          readOnly
+                        />
+                      </CaseField>
+                      <CaseField label={"Balance Due"} lock>
                         <Input
                           value={formatAccountingRupiah(
-                            invoiceQuotation?.grandTotal
+                            grandTotalNumber
                           )}
                           readOnly
                         />
@@ -3675,11 +3702,12 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                 </CardHeader>
 
                 <CardContent className="space-y-3 ">
-                  {dpList.map((row) => (
+                  {dpList.length > 0 ? dpList.map((row) => (
                     <Card key={row.tempId} className="border shadow-sm dark:bg-radial-[at_70%_20%] dark:from-slate-600 dark:via-slate-800 dark:to-slate-700 dark:border-gray-700 dark:border-4">
                       <CardHeader className="flex flex-row items-center justify-between py-2 px-4">
                         <CardTitle className="text-sm font-semibold">
                           Invoice No: {row.InvoiceNo || "-"}
+                          {/* {console.log("DP",row)} */}
                         </CardTitle>
                         {!row.isPersisted && (
                           <Button
@@ -3703,10 +3731,11 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         </CaseField>
 
                         <CaseField label="DP Date">
+                          {console.log(row)}
                           <DatePicker
-                            value={row.DpDate || ""}
+                            value={DatePickertoDateOrNull(row.DpDate)}
                             onChange={(e) =>
-                              setDpField(row.tempId, "DpDate", e.target.value)
+                              setDpField(row.tempId, "DpDate", e)
                             }
                           />
                         </CaseField>
@@ -3738,7 +3767,11 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         </CaseField>
                       </CardContent>
                     </Card>
-                  ))}
+                  )) : (
+                    <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                      <p>Belum ada DP untuk case ini.</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
