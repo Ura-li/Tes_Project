@@ -1026,9 +1026,7 @@ export default function NewCaseForm() {
       if (warrantySearchValue !== "01T" && needWarrantyApproval) {
     setNeedWarrantyApproval(false);
   }
-    needWarrantyApproval ? setCaseStatus("NEW_POPDoc")
-      : setCaseStatus("Open")
-      ;
+    needWarrantyApproval ? setCaseStatus("NEW_POPDoc") : setCaseStatus("Open");
   }, [warrantySearchValue, needWarrantyApproval])
 
   const onCreateCase = async () => {
@@ -1494,7 +1492,7 @@ export default function NewCaseForm() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label>Received Date <Label className="text-red-600 dark:text-red-600">*</Label></Label>
+              <Label>Received Date <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
               <Input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
             </div>
             <div className="hidden">
@@ -1510,7 +1508,7 @@ export default function NewCaseForm() {
               <Input value={referenceCase} onChange={(e) => setReferenceCase(e.target.value)} className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
             </div>
             <div className="flex flex-col gap-2">
-              <Label>Case Status <Label className="text-red-600 dark:text-red-600">*</Label></Label>
+              <Label>Case Status <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
               <Select value={caseStatus} onValueChange={setCaseStatus}>
                 <SelectTrigger className={"ring-1 rounded-sm w-full dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
                   <SelectValue placeholder="Select Case Status" />
@@ -1523,7 +1521,7 @@ export default function NewCaseForm() {
               </Select>
             </div>
             <div className="flex flex-col gap-2">
-              <Label>Case Type <Label className="text-red-600 dark:text-red-600">*</Label></Label>
+              <Label>Case Type <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
               <Select value={caseType} onValueChange={setCaseType}>
                 <SelectTrigger className={"ring-1 rounded-sm w-full  dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
                   <SelectValue placeholder="Select Case Type" />
@@ -1549,15 +1547,15 @@ export default function NewCaseForm() {
               </div>
             </div>
             <div className="md:col-span-3 space-y-2">
-              <Label>Case Subject <Label className="text-red-600 dark:text-red-600">*</Label></Label>
+              <Label>Case Subject <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
               <Textarea type="text" value={caseSubject} onChange={(e) => setCaseSubject(e.target.value)} className={" dark:bg-gray-500/10 dark:border-gray-400"}/>
             </div>
             <div className="md:col-span-3 space-y-2">
-              <Label>Problem Description <Label className="text-red-600 dark:text-red-600">*</Label></Label>
+              <Label>Problem Description <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
               <Textarea rows={3} value={problemDesc} onChange={(e) => setProblemDesc(e.target.value)} className={"dark:bg-gray-500/10 dark:border-gray-400"}/>
             </div>
             <div className="md:col-span-3 space-y-2">
-              <Label>Case Note <Label className="text-red-600 dark:text-red-600">*</Label></Label>
+              <Label>Case Note <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
               <Textarea rows={3} value={caseNote} onChange={(e) => setCaseNote(e.target.value)} className={"dark:bg-gray-500/10 dark:border-gray-400"}/>
             </div>
           </CardContent>
@@ -1582,7 +1580,7 @@ export default function NewCaseForm() {
               {/* Customer */}
               <div className="space-y-2 border-2 p-2 dark:border-gray-400 dark:rounded-sm">
                 <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Salutation<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                  <Label className="col-span-1">Salutation<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <div className="col-span-2">
                     <Select value={contactSalutation} onValueChange={setContactSalutation}>
                       <SelectTrigger>
@@ -1596,14 +1594,14 @@ export default function NewCaseForm() {
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Nama Customer<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                  <Label className="col-span-1">Nama Customer<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <div className="col-span-2 grid grid-cols-2 gap-2">
                     <Input placeholder="First Name" value={contactFirstName} onChange={(e) => setContactFirstName(e.target.value)} className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                     <Input placeholder="Last Name" value={contactLastName} onChange={(e) => setContactLastName(e.target.value)} className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">No. Telepon<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                  <Label className="col-span-1">No. Telepon<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
@@ -1611,21 +1609,21 @@ export default function NewCaseForm() {
                   <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactMobile} onChange={(e) => setContactMobile(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Email<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                  <Label className="col-span-1">Email<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Alamat<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                  <Label className="col-span-1">Alamat<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactAddressLine1} onChange={(e) => setContactAddressLine1(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Country<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                  <Label className="col-span-1">Country<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="Indonesia / other" value={contactCountry} onChange={(e) => setContactCountry(e.target.value)} />
                 </div>
                 {/* Province/City (Indonesia via EMSIFA) */}
                 {contactCountry.toLowerCase() === 'indonesia' ? (
                   <div className="grid grid-cols-3 gap-2 items-center">
-                    <Label className="col-span-1">Province<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                    <Label className="col-span-1">Province<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                     <div className="col-span-2">
                       {/* <SelectBarState
                         id="contactStateProvince"
@@ -1647,7 +1645,7 @@ export default function NewCaseForm() {
                 ) : (
                   <div className="grid grid-cols-3 gap-2 items-center">
                     <Label className="col-span-1">
-                      State / Region<Label className="text-red-600">*</Label>
+                      State / Region<Label className="text-red-600 dark:text-[#FF8A80]">*</Label>
                     </Label>
                     <Input
                       className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
@@ -1660,7 +1658,7 @@ export default function NewCaseForm() {
 
                 {contactCountry.toLowerCase() === "indonesia" ? (
                   <div className="grid grid-cols-3 gap-2 items-center">
-                    <Label className="col-span-1">City<Label className="text-red-600">*</Label></Label>
+                    <Label className="col-span-1">City<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                     <div className="col-span-2 overflow-hidden">
                       <ComboboxDemo
                         id="contactCity"
@@ -1684,7 +1682,7 @@ export default function NewCaseForm() {
                 ): (
                   <div className="grid grid-cols-3 gap-2 items-center">
                     <Label className="col-span-1">
-                      City / Area<Label className="text-red-600">*</Label>
+                      City / Area<Label className="text-red-600 dark:text-[#FF8A80]">*</Label>
                     </Label>
                     <Input
                       className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
@@ -1695,7 +1693,7 @@ export default function NewCaseForm() {
                   </div>
                 )}
                 <div className="grid grid-cols-3 gap-2 items-center">
-                  <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
+                  <Label className="col-span-1">Zip Code<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <Input className={"col-span-2 dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactZipPostalCode} onChange={(e) => setContactZipPostalCode(e.target.value)} />
                 </div>
 
@@ -1721,7 +1719,7 @@ export default function NewCaseForm() {
                 {usePIC && (
                   <>  
                     <div className="grid grid-cols-3 gap-2 items-center pt-4 border-t">
-                      <Label className="col-span-1">Nama PIC<Label className="text-red-600">*</Label></Label>
+                      <Label className="col-span-1">Nama PIC<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input
                         className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         placeholder="Nama PIC"
@@ -1730,7 +1728,7 @@ export default function NewCaseForm() {
                       />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Email PIC<Label className="text-red-600">*</Label></Label>
+                      <Label className="col-span-1">Email PIC<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input
                         className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         placeholder="Email PIC"
@@ -1740,7 +1738,7 @@ export default function NewCaseForm() {
                       />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">No. Telepon PIC<Label className="text-red-600">*</Label></Label>
+                      <Label className="col-span-1">No. Telepon PIC<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactPICPhone} onChange={(e) => setContactPICPhone(e.target.value)} />
                     </div>
                   </>
@@ -1759,15 +1757,15 @@ export default function NewCaseForm() {
 
                   <div className="space-y-2 w-full">
                     <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Nama Company<Label className="text-red-600">*</Label></Label>
+                      <Label className="col-span-1">Nama Company<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="Cari / isi nama company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Email Company<Label className="text-red-600">*</Label></Label>
+                      <Label className="col-span-1">Email Company<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Nomor Telepon<Label className="text-red-600">*</Label></Label>
+                      <Label className="col-span-1">Nomor Telepon<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyPhone} onChange={(e) => setCompanyPhone(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
@@ -1775,16 +1773,16 @@ export default function NewCaseForm() {
                       <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyWhatsapp} onChange={(e) => setCompanyWhatsapp(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Alamat<Label className="text-red-600">*</Label></Label>
+                      <Label className="col-span-1">Alamat<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyAddressLine1} onChange={(e) => setCompanyAddressLine1(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Country<Label className="text-red-600">*</Label></Label>
+                      <Label className="col-span-1">Country<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyCountry} onChange={(e) => setCompanyCountry(e.target.value)} />
                     </div>
                     {companyCountry.toLowerCase() === 'indonesia' ? (
                     <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Province (ID)<Label className="text-red-600">*</Label></Label>
+                      <Label className="col-span-1">Province (ID)<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <div className="col-span-2">
                         {/* <SelectBarState
                           id="CompanyStateProvince"
@@ -1806,7 +1804,7 @@ export default function NewCaseForm() {
                     ) : (
                       <div className="grid grid-cols-3 gap-2 items-center">
                         <Label className="col-span-1">
-                          State / Region<Label className="text-red-600">*</Label>
+                          State / Region<Label className="text-red-600 dark:text-[#FF8A80]">*</Label>
                         </Label>
                         <Input
                           className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
@@ -1819,7 +1817,7 @@ export default function NewCaseForm() {
 
                     {companyCountry.toLowerCase() === "indonesia" ? (
                       <div className="grid grid-cols-3 gap-2 items-center">
-                        <Label className="col-span-1">City (ID)<Label className="text-red-600">*</Label></Label>
+                        <Label className="col-span-1">City (ID)<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                         <div className="col-span-2">
                           {/* <SelectBarState
                             id="CompanyCity"
@@ -1841,7 +1839,7 @@ export default function NewCaseForm() {
                     ) : (
                       <div className="grid grid-cols-3 gap-2 items-center">
                         <Label className="col-span-1">
-                          City / Area<Label className="text-red-600">*</Label>
+                          City / Area<Label className="text-red-600 dark:text-[#FF8A80]">*</Label>
                         </Label>
                         <Input
                           className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
@@ -1852,14 +1850,13 @@ export default function NewCaseForm() {
                       </div>
                     )}
                     <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Zip Code<Label className="text-red-600">*</Label></Label>
+                      <Label className="col-span-1">Zip Code<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyZipPostalCode} onChange={(e) => setCompanyZipPostalCode(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">NPWP<Label className="text-red-600">*</Label></Label>
+                      <Label className="col-span-1">NPWP<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyNPWP} onChange={(e) => setCompanyNPWP(e.target.value)} />
                     </div>
-
                   </div>
                 </div>
                 )}
@@ -1879,7 +1876,7 @@ export default function NewCaseForm() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Serial No.<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                <Label>Serial No.<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                 <Input value={selectedAsset?.SerialNumber || serialQuery} readOnly={!!selectedAsset} onChange={(e) => setSerialQuery(e.target.value)} className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                 <Button variant="outline" asChild className={'w-full dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}>
                   <a
@@ -1944,7 +1941,7 @@ export default function NewCaseForm() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
-                  <Label>Product Tower<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                  <Label>Product Tower<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <Select value={productTower} onValueChange={setProductTower}>
                     <SelectTrigger className={"ring-1 rounded-sm w-full dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
                       <SelectValue placeholder="IPG / PSG" />
@@ -1956,7 +1953,7 @@ export default function NewCaseForm() {
                   </Select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label>Product Group<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                  <Label>Product Group<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <Select value={productGroup} onValueChange={setProductGroup}>
                     <SelectTrigger className={"ring-1 rounded-sm w-full dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
                       <SelectValue placeholder="Commercial / Consumer" />
@@ -1975,7 +1972,7 @@ export default function NewCaseForm() {
                 </div> */}
                 {productTower && productGroup && (
                   <div className="flex flex-col gap-2">
-                    <Label>Product Type <Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                    <Label>Product Type <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                     <Select
                       value={productTypeId || null}
                       onValueChange={setProductTypeId}
@@ -1996,15 +1993,15 @@ export default function NewCaseForm() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label>Product Line<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                  <Label>Product Line<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <Input value={productLine} onChange={(e) => setProductLine(e.target.value)} className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                 </div>
                 <div>
-                  <Label>Product No<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                  <Label>Product No<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <Input value={productNo} onChange={(e) => setProductNo(e.target.value)} className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                 </div>
                 <div>
-                  <Label>Product Name<Label className="text-red-600 dark:text-red-600">*</Label></Label>
+                  <Label>Product Name<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <Input value={productName} onChange={(e) => setProductName(e.target.value)} className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                 </div>
               </div>

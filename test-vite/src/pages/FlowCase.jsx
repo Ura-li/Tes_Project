@@ -330,12 +330,19 @@ export const FlowCaseData = (user) => {
           <div className="flex flex-col w-full ">
             <div className="sticky top-13 dark:bg-transparent bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <div className=" flex h-14 w-full items-center gap-3 px-4  place-content-between ">
+                {isToggleUser &&
                 <div className='flex gap-3 items-center'>
-                  <Switch checked={filters.Status === "FinishRepair"}
-                    onCheckedChange={(checked) => setFilters({
-                      ...filters,
-                      Status: checked ? "FinishRepair" : "",
-                    })} className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500" id="Finish" /> 
+                  <Switch
+                    checked={filterFinish === false}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFilterClose(true); // Turn off filterFinish if filterClose is unchecked
+                      }
+                      setFilterFinish(checked ? false : true);
+                    }}
+                    className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500"
+                    id="Finish"
+                  /> 
                   <Label htmlFor="Finish" className={"font-[700]"}>
                     Show Finished Case
                   </Label>
@@ -354,6 +361,7 @@ export const FlowCaseData = (user) => {
                     Show Closed Case
                   </Label>
                 </div>
+                }
                 <h1 className="lg:text-xl md:text-md font-semibold tracking-tight text-sm">
                   Case For You
                 </h1>

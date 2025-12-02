@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   qrCode: {
-    width: 50,
-    height: 50,
+    width: 45,
+    height: 45,
   },
   logo: {
     width: 60,
@@ -178,7 +178,7 @@ const Table = ({ data }) => (
   </View>
 );
 
-const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
+const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =>
 
 (
   <Document>
@@ -225,7 +225,9 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
 
           <View style={styles.rightSection}>
             <Text style={[styles.textSmall, styles.bold]}>{caseDetails?.CaseID ?? 'N/A'}</Text>
-            <Image src="/random_qr.png" style={styles.qrCode} />
+            <View style={{borderBottom : 1, borderTop: 1, padding: 2}}>
+                <Image src={qrcode} style={styles.qrCode} />
+            </View>
           </View>
         </View>
 
@@ -454,7 +456,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
 
       <Text style={styles.textSmall}>• Apabila pelayanan kami kurang memuaskan untuk case {caseDetails?.CaseID ?? 'N/A'}, silahkan sampaikan melalui email ke <Link style={styles.link} src="mailto:escalation.id@hp.com">escalation.id@hp.com</Link></Text>
 
-      <Text style={[styles.textSmall, { marginBottom: 20 }]}>• Apabila dikemudian hari membutuhkan bantuan teknis, silahkan klik{' '}
+      <Text style={[styles.textSmall, { marginBottom: 10 }]}>• Apabila dikemudian hari membutuhkan bantuan teknis, silahkan klik{' '}
         <Link style={styles.link} src="https://hp.care/digital-ID">https://hp.care/digital-ID</Link>
       </Text>
       <Text style={{ borderBottom: '1px solid #ccc' }}></Text>

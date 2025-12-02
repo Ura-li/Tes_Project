@@ -566,6 +566,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         caseEdited ||
         productEdited;
 
+        //fungsi not working
       if (!hasIntentToSave) {
         alert("Tidak ada data yang disimpan.");
         return false;
@@ -685,6 +686,34 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
                   headers: { "Content-Type": "multipart/form-data" },
                 }
               );
+
+              if (entitlementStatus.needWarrantyApproval === true) {
+                  const getAsset = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`);
+                  const fieldAsset = getAsset.data.data;
+                  const status = fieldAsset.asset_warranty[0]?.WarrantyApprovalStatus;
+
+                  let newOwner = null;
+
+                  switch (status) {
+                    case "Revision To WA":
+                      newOwner = caseDetails.CreatedBy;
+                      break;
+
+                    case "Add Info By WA":
+                    case "New":
+                    default:
+                      const userTarget = await ApiCustomer.get(`/api/user?role=apv`);
+                      const OwnerApv = userTarget.data.data[0];
+                      newOwner = OwnerApv?.IDUser;
+                      break;
+                  }
+
+                  if (newOwner) {
+                    await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, {
+                      Owner: newOwner
+                    });
+                  }
+                }
               Object.assign(dataToUpdate, entitlementStatus);
               savedModules.push("Entitlement");
             }

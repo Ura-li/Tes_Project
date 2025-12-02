@@ -465,7 +465,7 @@ const QuotationDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-6xl bg-white flex flex-col h-150 gap-1 ">
+      <DialogContent className="min-w-6xl bg-white flex flex-col h-150 gap-1">
         <DialogHeader
           className={"flex flex-row justify-between gap-4 px-10 py-4  border-b"}
         >

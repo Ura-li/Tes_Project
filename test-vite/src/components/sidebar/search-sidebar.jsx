@@ -203,7 +203,7 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                     </SidebarContent>
                 </TabsContent>
 
-                <TabsContent value="Time">
+                <TabsContent value="Time" className={"max-h-[calc(100vh-8rem)] overflow-y-auto"}>
                     <SidebarContent className="p-2">
                         {dataTime?.map((e, idx) => ( 
                             <SidebarGroup key={e.status} hidden={e.hide}>
@@ -211,7 +211,7 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                                     <Table>
                                         <TableHeader>
                                             <TableRow className={'col-span-5'}>
-                                                <TableHead className={'text-center font-semibold text-black dark:text-gray-300 text-[15px] ring-4 ring-teal-500 dark:ring-gray-400 dark:bg-slate-800'} colSpan={5}>
+                                                <TableHead className={'text-center font-semibold text-black dark:text-gray-300 text-[15px] ring-4 ring-teal-500 dark:ring-gray-400'} colSpan={5}>
                                                     {STATUS_ENUM_TO_LABEL[e.status]}
                                                 </TableHead>
                                             </TableRow>

@@ -1,5 +1,5 @@
-import React from 'react'
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from '../ui/dialog'
+import React, { useState } from 'react'
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader } from '../ui/dialog'
 import CaseField from '../CaseField'
 import { SearchCommandBlock, SelectYN } from '../sc-select'
 import { Input } from '../ui/input'
@@ -13,47 +13,39 @@ import {
  } from '../ui/table'
  import { format } from 'date-fns'
  import { parseNoteText } from "@/lib/utils.jsx";
+ import { useServiceCaseStore } from '../../hooks/useServiceCaseStore'
+import { Button } from '../ui/button'
+import { DialogTitle } from '@radix-ui/react-dialog'
 
 
-export const QuickLogNote = ({
-  formData,
-  notesList,
-  onChange,
-  open
-}) => {
+export const QuickLogNote = ({ open, onOpenChange }) => {
+  const caseNoteFormData = useServiceCaseStore((s) => s.caseNoteFormData);
+  const setCaseNoteField = useServiceCaseStore((s) => s.setCaseNoteField); 
+  const saveAll = useServiceCaseStore((s) => s.saveAll);
+  const notesList = useServiceCaseStore((s) => s.notesList);
+  const onChangeCaseNote = (field, value)  => setCaseNoteField(field, value);
+  const handleSave = (redirect = true) => saveAll({ redirect })
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentData = notesList.slice(startIndex, startIndex + itemsPerPage) 
+  const totalPage = Math.ceil(notesList.length / itemsPerPage)
   return (
     <>
-    <Dialog open={open}>
-        <DialogHeader>
-
-        </DialogHeader>
-        <DialogContent>
-          <div className="flex flex-col gap-2">
-                              
-          
+    <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className={"min-w-5xl"}>
+          <DialogHeader className={"px-2 border-b-2 font-bold italic"}>
+            <DialogTitle>Modal Quick Log Note</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 ">  
                           <div className="grid grid-cols-2 gap-4">
                             <CaseField
                               label="Log Type"
-          
                             >
-                              {/* <Select
-                                value={formData?.LogType}
-                                onValueChange={(val) => onChange("LogType", val)}
-                              >
-                                <SelectTrigger
-                                  className={"w-[100%] hover:shadow-lg border-b-0 p-3"}
-                                >
-                                  <SelectValue placeholder="Log Type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="NotesLog">Notes Log</SelectItem>
-                                  <SelectItem value="PhoneLog">Phone Log</SelectItem>
-                                </SelectContent>
-                              </Select> */}
-          
                               <SearchCommandBlock
-                               value={formData?.LogType}
-                               onChange={(val) => onChange("LogType", val)}
+                               value={caseNoteFormData?.LogType}
+                               onChange={(val) => onChangeCaseNote("LogType", val)}
                                options={[
                                 "Notes Log",
                                 "Phone Log"
@@ -64,11 +56,10 @@ export const QuickLogNote = ({
           
                             <CaseField
                               label="Action Type"
-          
                             >
                               <SearchCommandBlock
-                                value={formData?.ActionType}
-                                onChange={(val) => onChange("ActionType", val)}
+                                value={caseNoteFormData?.ActionType}
+                                onChange={(val) => onChangeCaseNote("ActionType", val)}
                                 placeholder="--Select--"
                                 options={[
                                   "Inbound Customer call",
@@ -80,55 +71,20 @@ export const QuickLogNote = ({
                                 
                               />
                             </CaseField>
-          
-                            <CaseField
-                              label="Template"
-                              lock
-                            >
-                              <Input variant="invisible" placeholder="---" />
-                            </CaseField>
-          
-                            <CaseField
-                              label="Visible Externally"
-          
-                            >
-                              <SelectYN
-                                value={
-                                  formData?.VisibleExternally === undefined ||
-                                    formData?.VisibleExternally === null
-                                    ? ""
-                                    : formData?.VisibleExternally
-                                      ? "Yes"
-                                      : "No"
-                                }
-                                onValueChange={(val) =>
-                                  onChange("VisibleExternally", val === "Yes")
-                                }
-                              ></SelectYN>
-                            </CaseField>
-          
-                            <CaseField
-                              label="Number of Minutes Spent"
-                                lock
-                            >
-                              <Input variant="invisible" placeholder="---" />
-                            </CaseField>
-          
+
                             <CaseField
                               label="Notes"
-          
-          
                               star
                             >
                               <textarea
                                 className="w-full h-full min-h-[100px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 shadow-sm"
-                                value={formData?.Note || ""}
-                                onChange={(e) => onChange("Note", e.target.value)}
+                                value={caseNoteFormData?.Note || ""}
+                                onChange={(e) => onChangeCaseNote("Note", e.target.value)}
                                 placeholder="Write your note"
                               />
                             </CaseField>
                           </div>
-                          <div className="w-full overflow-auto rounded-2xl shadow-xl">
+                          <div className=" rounded-2xl shadow-xl">
                             <Table >
                               <TableHeader className={'bg-slate-300 '}>
                                 <TableRow>
@@ -136,27 +92,19 @@ export const QuickLogNote = ({
                                   <TableHead>Created By</TableHead>
                                   <TableHead>Log Type</TableHead>
                                   <TableHead>Action Type</TableHead>
-                                  {/* <TableHead>Template</TableHead>
-                                  <TableHead>Visible Externally</TableHead>
-                                  <TableHead>Number of Minutes Spent</TableHead> */}
                                   <TableHead>Role</TableHead>
                                   <TableHead>Note</TableHead>
-                                  <TableHead></TableHead>
-                                  <TableHead></TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
-                                {Array.isArray(notesList) && notesList.length > 0 ? (
-                                  notesList.map((n,i) => (
+                                {Array.isArray(currentData) && currentData.length > 0 ? (
+                                  currentData.map((n,i) => (
                                     
                                     <TableRow key={n.NoteID} className={``}>
                                       <TableCell>{n.CreatedOn ? format(new Date(n.CreatedOn), 'yyyy-MM-dd HH:mm') : '-'}</TableCell>
                                       <TableCell>{n.createdByUser?.Name || n.CreatedBy || '-'}</TableCell>
                                       <TableCell>{n.LogType || '-'}</TableCell>
                                       <TableCell>{n.ActionType || '-'}</TableCell>
-                                      {/* <TableCell>{n.Template || '-'}</TableCell>
-                                      <TableCell>{n.VisibleExternally || '-'}</TableCell>
-                                      <TableCell>{n.MinutesSpent || '-'}</TableCell> */}
                                       <TableCell>{n.createdByUser?.Role || '-'}</TableCell>
                                       <TableCell  colSpan="3" className="whitespace-pre-wrap max-w-xl">{parseNoteText(n.Note)}</TableCell>
                                     </TableRow>
@@ -169,11 +117,23 @@ export const QuickLogNote = ({
                               </TableBody>
                             </Table>
                           </div>
-                            </div>
+          </div>  
+        
+        <div className='flex justify-between'>
+        <div className='flex gap-2 items-center'>
+          <Button variant={"outline"} className={"cursor-pointer"} onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}>
+            Previous
+          </Button>
+
+          <span>Page {currentPage} of {totalPage}</span>
+
+          <Button  variant={"outline"} className={"cursor-pointer"} onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPage))} disabled={currentPage === totalPage}>Next</Button>
+        </div>
+        <div>
+          <Button variant={"outline"} onClick={() => handleSave()}>Save</Button>
+        </div>
+        </div>
         </DialogContent>
-        <DialogFooter>
-            
-        </DialogFooter>
     </Dialog>
     </>
   )

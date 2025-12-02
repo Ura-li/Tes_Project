@@ -172,7 +172,7 @@ const handleClear = () => {
 };
 
    
-export function SelectBar({ id, onChange, value, options, placeholder,readOnly }) {
+export function SelectBar({ id, onChange, value, options, placeholder,readOnly, className }) {
   return (
     <Select
       value={value}
@@ -188,7 +188,7 @@ export function SelectBar({ id, onChange, value, options, placeholder,readOnly }
       }}
       disabled={readOnly}
     >
-      <SelectTrigger className="w-full border-black p-3 text-md">
+      <SelectTrigger className={twMerge(`w-full border-black p-3 text-md, ${className}`)}>
         <SelectValue placeholder={placeholder || "Select an option"} />
       </SelectTrigger>
       <SelectContent>
@@ -429,7 +429,7 @@ export function ComboboxDemo({
     )
   }
 
-export function SelectYN({ value, onValueChange, readOnly }) {
+export function SelectYN({ value, onValueChange, readOnly, className }) {
   return (
     <Select
       value={value }
@@ -437,7 +437,7 @@ export function SelectYN({ value, onValueChange, readOnly }) {
       disabled={readOnly}   // 👈 disable dropdown if readOnly
     >
       <SelectTrigger
-        className="w-full hover:shadow-lg border-b-0 p-3"
+        className={twMerge(`w-full hover:shadow-lg border-b-0 p-3, ${className}`)}
         disabled={readOnly} // 👈 also disable trigger button
       >
         <span>{value }</span>

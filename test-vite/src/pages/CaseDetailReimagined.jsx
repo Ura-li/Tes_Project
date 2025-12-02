@@ -15,6 +15,7 @@ import { BtnModalsServiceCatalog } from "@/components/model/sc-modal";
 import ServiceRequestPDF from "@/components/service-request-form";
 import EquipmentReciptForm from "@/components/Equipment-Recipt-Form";
 import { QuotationInvoice } from "@/components/QuatationInvoice";
+import { Invoice } from "../components/Invoice";
 import {
   CircleChevronLeft,
   Save,
@@ -26,7 +27,16 @@ import {
   NotebookPen,
   CoinsIcon,
   Trash2,
+  ClipboardPenLine,
+  BadgeCheck
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useMediaQuery } from 'react-responsive'
 
 // ... STATUS ENUMS etc (same as before)
 
@@ -34,6 +44,7 @@ export const TabsServiceCaseDetails = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { open } = useSidebar();
+  const  isResponsive  = useMediaQuery({query: '(min-width: 1824px)'})
 
   // ---- pull state from zustand ----
   const caseDetails = useServiceCaseStore((s) => s.caseDetails);
@@ -88,6 +99,7 @@ export const TabsServiceCaseDetails = () => {
   const [quotationSubmitting, setQuotationSubmitting] = useState(false);
   const [invoiceSubmitting, setInvoiceSubmitting] = useState(false);
   const [cancelState, setCancelState] = useState(false);
+  const [logNoteOpen, setLogNoteOpen] = useState(false)
 
 //QR CODE
   const [qrCodeImg,setQrCodeImg]= useState("");
@@ -142,7 +154,6 @@ export const TabsServiceCaseDetails = () => {
   },[caseDetails.CaseID])
 
 
-
   const convertToBase64 = async (url) => {
     return base64
   }
@@ -190,7 +201,7 @@ export const TabsServiceCaseDetails = () => {
     {
       icon: CircleChevronLeft,
       label: "",
-      onClick: () => navigate(`/app/viewcase`),
+      onClick: () => navigate(`/app/`),
       roles: [
         "admin",
         "fd",
@@ -202,13 +213,14 @@ export const TabsServiceCaseDetails = () => {
         "spv",
         "ps",
         "cm",
+        "apv",
       ],
     },
     {
       icon: Save,
       label: "Save",
       onClick: () => handleSave(),
-      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"],
+      roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm","apv"],
     },
     {
       icon: FileSymlink,
@@ -246,7 +258,14 @@ export const TabsServiceCaseDetails = () => {
         "spv",
         "ps",
         "cm",
+        "apv",
       ],
+    },
+    {
+      icon: BadgeCheck,
+      label: "Approve",
+      onClick: () => Approve(),
+      roles: ["admin", "apv"],
     },
     {
       icon: MessageSquareText,
@@ -277,8 +296,31 @@ export const TabsServiceCaseDetails = () => {
             qrcode={qrCodeImg}
           />
         ).toBlob();
-        const url = URL.createObjectURL(blob);
-        window.open(url);
+       const fileName = `SRF-${
+           quotationInitialData?.quotationNo ||
+           caseDetails?.CaseID ||
+           "document"
+         }.pdf`;
+
+         const url = URL.createObjectURL(blob);
+
+         // Open a new tab/window
+         const newWindow = window.open("", "_blank");
+
+         if (!newWindow) return;
+
+         // Set the tab title
+         newWindow.document.title = fileName;
+
+         // Fill with a minimal HTML shell and embed the PDF
+         newWindow.document.body.style.margin = "0";
+         const iframe = newWindow.document.createElement("iframe");
+         iframe.src = url;
+         iframe.style.border = "none";
+         iframe.style.width = "100%";
+         iframe.style.height = "100vh";
+
+         newWindow.document.body.appendChild(iframe);
       },
       roles: ["admin", "fd", "user", "spv"],
     },
@@ -302,10 +344,34 @@ export const TabsServiceCaseDetails = () => {
           <EquipmentReciptForm
             caseDetails={caseDetails}
             customerSignature={signature}
+            qrcode={qrCodeImg}
           />
         ).toBlob();
-        const url = URL.createObjectURL(blob);
-        window.open(url);
+       const fileName = `ERF-${
+           quotationInitialData?.quotationNo ||
+           caseDetails?.CaseID ||
+           "document"
+         }.pdf`;
+
+         const url = URL.createObjectURL(blob);
+
+         // Open a new tab/window
+         const newWindow = window.open("", "_blank");
+
+         if (!newWindow) return;
+
+         // Set the tab title
+         newWindow.document.title = fileName;
+
+         // Fill with a minimal HTML shell and embed the PDF
+         newWindow.document.body.style.margin = "0";
+         const iframe = newWindow.document.createElement("iframe");
+         iframe.src = url;
+         iframe.style.border = "none";
+         iframe.style.width = "100%";
+         iframe.style.height = "100vh";
+
+         newWindow.document.body.appendChild(iframe);
       },
       roles: ["admin", "fd", "user", "spv"],
     },
@@ -325,73 +391,182 @@ export const TabsServiceCaseDetails = () => {
       roles: ["admin", "fd", "user", "spv"],
     },
     {
-      icon: CoinsIcon,
-      label: "Invoice DP",
-      onClick: async () => {
-        const blob = await pdf(
-          <InvoiceDp
-            caseDetails={caseDetails}
-            customerSignature={signature}
-            materialItems={fieldMO(caseDetails)}
-            initialData={quotationInitialData || {}}
-          />
-        ).toBlob();
-
-        const fileName = `Invoice-${
-          quotationInitialData?.quotationNo || caseDetails?.CaseID || "document"
-        }.pdf`;
-
-        const url = URL.createObjectURL(blob);
-        const newWindow = window.open("", "_blank");
-        if (!newWindow) return;
-
-        newWindow.document.title = fileName;
-        newWindow.document.body.style.margin = "0";
-        const iframe = newWindow.document.createElement("iframe");
-        iframe.src = url;
-        iframe.style.border = "none";
-        iframe.style.width = "100%";
-        iframe.style.height = "100vh";
-        newWindow.document.body.appendChild(iframe);
-      },
-      roles: ["admin", "fd", "user", "spv", "cm"],
-    },
-    {
-      icon: CoinsIcon,
-      label: "Quotation Invoice",
-      onClick: async () => {
-        const blob = await pdf(
-          <QuotationInvoice
-            caseDetails={caseDetails}
-            customerSignature={signature}
-            materialItems={fieldMO(caseDetails)}
-            initialData={quotationInitialData || {}}
-          />
-        ).toBlob();
-
-        const fileName = `Quotation-${
-          quotationInitialData?.quotationNo || caseDetails?.CaseID || "document"
-        }.pdf`;
-
-        const url = URL.createObjectURL(blob);
-        const newWindow = window.open("", "_blank");
-        if (!newWindow) return;
-
-        newWindow.document.title = fileName;
-        newWindow.document.body.style.margin = "0";
-        const iframe = newWindow.document.createElement("iframe");
-        iframe.src = url;
-        iframe.style.border = "none";
-        iframe.style.width = "100%";
-        iframe.style.height = "100vh";
-        newWindow.document.body.appendChild(iframe);
-      },
-      roles: ["admin", "fd", "user", "spv", "cm"],
-    },
+          icon: CoinsIcon,
+          label: "Quotation Invoice",
+           onClick: async () => {
+            await ApiCustomer.post("/api/case-information/case-notes", {
+              LogType: "System Info",
+              ActionType: "Request QUOTATION INVOICE",
+              Template: "QUOTATION INVOICE Requested",
+              VisibleExternally: false,
+              MinutesSpent: 0,
+              Note: `[PRINT] QUOTATION INVOICE requested by ${user?.role} - ${
+                user?.name || "Unknown User"
+              }`,
+              CaseID: caseDetails?.CaseID,
+              CreatedBy: user?.id,
+            });
+            const blob = await pdf(
+              <QuotationInvoice
+                caseDetails={caseDetails}
+                customerSignature={signature}
+                materialItems={fieldMO(caseDetails)}
+                initialData={quotationInitialData || {}}
+                qrcode={qrCodeImg}
+              />
+            ).toBlob();
+             const fileName = `Quotation-${
+               quotationInitialData?.quotationNo ||
+               caseDetails?.CaseID ||
+               "document"
+             }.pdf`;
+    
+             const url = URL.createObjectURL(blob);
+    
+             // Open a new tab/window
+             const newWindow = window.open("", "_blank");
+    
+             if (!newWindow) return;
+    
+             // Set the tab title
+             newWindow.document.title = fileName;
+    
+             // Fill with a minimal HTML shell and embed the PDF
+             newWindow.document.body.style.margin = "0";
+             const iframe = newWindow.document.createElement("iframe");
+             iframe.src = url;
+             iframe.style.border = "none";
+             iframe.style.width = "100%";
+             iframe.style.height = "100vh";
+    
+             newWindow.document.body.appendChild(iframe);
+          },
+          roles: ["admin", "fd", "user", "spv", "cm"],
+          hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
+        },
+         {
+          icon: CoinsIcon,
+          label: "DP",
+           onClick: async () => {
+            await ApiCustomer.post("/api/case-information/case-notes", {
+              LogType: "System Info",
+              ActionType: "Request DP",
+              Template: "INVOICE DP Requested",
+              VisibleExternally: false,
+              MinutesSpent: 0,
+              Note: `[PRINT] DP requested by ${user?.role} - ${
+                user?.name || "Unknown User"
+              }`,
+              CaseID: caseDetails?.CaseID,
+              CreatedBy: user?.id,
+            });
+            const blob = await pdf(
+              <InvoiceDp
+                caseDetails={caseDetails}
+                customerSignature={signature}
+                materialItems={fieldMO(caseDetails)}
+                initialData={quotationInitialData || {}}
+              />
+            ).toBlob();
+             const fileName = `DP-${
+               quotationInitialData?.quotationNo ||
+               caseDetails?.CaseID ||
+               "document"
+             }.pdf`;
+    
+             const url = URL.createObjectURL(blob);
+    
+             // Open a new tab/window
+             const newWindow = window.open("", "_blank");
+    
+             if (!newWindow) return;
+    
+             // Set the tab title
+             newWindow.document.title = fileName;
+    
+             // Fill with a minimal HTML shell and embed the PDF
+             newWindow.document.body.style.margin = "0";
+             const iframe = newWindow.document.createElement("iframe");
+             iframe.src = url;
+             iframe.style.border = "none";
+             iframe.style.width = "100%";
+             iframe.style.height = "100vh";
+    
+             newWindow.document.body.appendChild(iframe);
+          },
+          roles: ["admin", "fd", "user", "spv", "cm"],
+          hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
+        },
+         {
+          icon: CoinsIcon,
+          label: "Invoice",
+           onClick: async () => {
+            await ApiCustomer.post("/api/case-information/case-notes", {
+              LogType: "System Info",
+              ActionType: "Request INVOICE",
+              Template: "INVOICE Requested",
+              VisibleExternally: false,
+              MinutesSpent: 0,
+              Note: `[PRINT] INVOICE requested by ${user?.role} - ${
+                user?.name || "Unknown User"
+              }`,
+              CaseID: caseDetails?.CaseID,
+              CreatedBy: user?.id,
+            });
+            const blob = await pdf(
+              <Invoice
+                caseDetails={caseDetails}
+                customerSignature={signature}
+                materialItems={fieldMO(caseDetails)}
+                initialData={quotationInitialData || {}}
+              />
+            ).toBlob();
+             const fileName = `Invoice-${
+               quotationInitialData?.quotationNo ||
+               caseDetails?.CaseID ||
+               "document"
+             }.pdf`;
+    
+             const url = URL.createObjectURL(blob);
+    
+             // Open a new tab/window
+             const newWindow = window.open("", "_blank");
+    
+             if (!newWindow) return;
+    
+             // Set the tab title
+             newWindow.document.title = fileName;
+    
+             // Fill with a minimal HTML shell and embed the PDF
+             newWindow.document.body.style.margin = "0";
+             const iframe = newWindow.document.createElement("iframe");
+             iframe.src = url;
+             iframe.style.border = "none";
+             iframe.style.width = "100%";
+             iframe.style.height = "100vh";
+    
+             newWindow.document.body.appendChild(iframe);
+          },
+          roles: ["admin", "fd", "user", "spv", "cm"],
+          hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
+        },
+        { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {setLogNoteOpen(true)}, roles: ["admin", "fd", "user", "apo", "ce", "lg", "celead", "ps", "cm"]},
   ];
 
-  const visibleButtons = buttons.filter((btn) => btn.roles.includes(user.role));
 
+  const allowedButtons = buttons.filter((btn) =>
+  btn.roles.includes(user.role)
+);
+
+const visibleButtons = isResponsive
+  ? allowedButtons.slice(0, -4)   
+  : allowedButtons;              
+
+const hiddenButtons = isResponsive
+  ? allowedButtons.slice(-4)      
+  : [];
+
+  
   const handleInvoiceOpenChange = (nextOpen = true) => {
     setInvoiceDialogOpen(nextOpen);
     if (nextOpen) {
@@ -614,12 +789,67 @@ export const TabsServiceCaseDetails = () => {
     }
   };
 
+     const Approve = async () => {
+      try {
+        Swal.fire({
+          title: "Saving...",
+          text: "Please wait while we update",
+          allowEscapeKey: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        const caseUpdate = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`,{
+          CaseStatus: "New",
+          Owner: caseDetails.CreatedBy,
+        })
+        
+        const assetUpdate = await ApiCustomer.patch(`/api/asset-information/${caseDetails.AssetID}`,{
+          Warranty_Status: caseDetails.asset_information?.Warranty_Status,
+          needWarrantyApproval: true,
+          WarrantyApprovalStatus: "Add Info By WA",
+          WarrantyCardDate: caseDetails.asset_information?.asset_warranty[0]?.WarrantyCardDate,
+          PurchaseDate: caseDetails.asset_information?.asset_warranty[0]?.PurchaseDate,
+          POPDocument: caseDetails.asset_information?.asset_warranty[0]?.POPDocument,
+          WarrantyCard: caseDetails.asset_information?.asset_warranty[0]?.WarrantyCard,
+          PhotoUnit: caseDetails.asset_information?.asset_warranty[0]?.PhotoUnit,
+          EndUserName: caseDetails.asset_information?.asset_warranty[0]?.EndUserName,
+          EndUserPhone: caseDetails.asset_information?.asset_warranty[0]?.EndUserPhone,
+          EndUserAddress: caseDetails.asset_information?.asset_warranty[0]?.EndUserAddress,
+        })
+
+        const LogNote = await ApiCustomer.post("/api/case-information/case-notes", {
+          LogType: "System Approved",
+          ActionType: "Approved",
+          Template: "Approve Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note : `Approved by ${user?.role} - ${user?.name || "Uknown User"}`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        })
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: "Updated Succes",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          window.location.reload()
+        })
+      } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Updated Failed",
+        });
+      }
+    }
 
 function fieldMO(caseDetails) {
   return mapMaterialOrdersToQuotationItems(caseDetails);
-}
-
-  
+}  
       useEffect(() => {
         if (!openDialogQuotation || !caseDetails) return;
 
@@ -758,19 +988,34 @@ function fieldMO(caseDetails) {
 console.log("CHeCK CASe daTA",caseDetails)
   return (
     <>
-      <div className="flex items-center border-1 sticky top-15 z-5 bg-gray-50 overflow-auto">
-        {visibleButtons.map((btn, index) => (
+      <div className="flex items-center border-1 sticky top-15 z-5 bg-gray-50 dark:dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 overflow-auto">
+         {visibleButtons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
-            hidden={btn.hidden}
             variant="link"
-            className="rounded-none px-0 py-0 flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5"
+            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
-            <btn.icon />
-            {btn.label && <span className="text-md">{btn.label}</span>}
+            <btn.icon className="w-4 h-4 dark:text-gray-400" />
+            {btn.label && <span className="text-md dark:text-gray-300">{btn.label}</span>}
           </Button>
         ))}
+
+        {hiddenButtons.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md dark:bg-transparent dark:text-gray-400">
+              ...
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {hiddenButtons.map((btn, index) => (
+                <DropdownMenuItem key={index} onClick={btn.onClick}>
+                  <btn.icon className="inline-block w-4 h-4 mr-2" />
+                  {btn.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
         <BtnModalsServiceCatalog
           open={openWorkOrder}
           setOpen={(open) => setOpenWorkOrder(open)}
@@ -809,6 +1054,12 @@ console.log("CHeCK CASe daTA",caseDetails)
       </div>
       <div>
         <ServiceCase />
+      </div>
+      <div>
+        <QuickLogNote 
+          open={logNoteOpen}
+          onOpenChange={setLogNoteOpen}
+        />
       </div>
 
       {/* Quotation dialog, Invoice dialog, ServiceCase component, etc
@@ -872,6 +1123,8 @@ import { ComboboxDemo } from "../components/sc-select";
 import InvoiceDialog from "../components/model/InvoiceModalReimagined";
 import QuotationDialog from "../components/model/QuotationModalReimagined";
 import { mapMaterialOrdersToQuotationItems } from "../lib/mappers/fieldMO";
+import { QuickLogNote } from "../components/model/QuickLogNote";
+import Approvel from "../layout/Apv_page";
 
 const suffixToRoleMap = {
   CE: "ce",
@@ -1310,9 +1563,9 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
         </div>
       )}
 
-      <Card className="border-0 w-full">
+      <Card className="border-0 dark:rounded-none bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% ">
         <Tabs defaultValue="case_info">
-          <CardHeader className="sticky top-24 z-5 w-full border-b bg-white shadow-sm flex flex-col">
+          <CardHeader className="sticky top-24 z-5 w-full border-b bg-white shadow-sm flex flex-col dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
               {/* LEFT SIDE - Case Info */}
               <div>
@@ -1326,7 +1579,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
               <div className="flex flex-wrap items-center gap-4 text-sm">
                 {/* Owner */}
                 <div className="flex flex-col">
-                  <span className="text-blue-600 font-medium">
+                  <span className="text-blue-600 font-medium dark:text-white">
                     {ownerUserData?.Name || "."}
                   </span>
                   <span className="text-muted-foreground">
@@ -1356,13 +1609,13 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
                 {/* Queue */}
                 <div className="flex flex-col">
-                  <span className="text-blue-600 font-medium">---</span>
+                  <span className="text-blue-600 font-medium dark:text-white">---</span>
                   <span className="text-muted-foreground">Queue</span>
                 </div>
 
                 {/* Contact */}
                 <div className="flex flex-col">
-                  <span className="text-blue-600 font-medium">
+                  <span className="text-blue-600 font-medium dark:text-white">
                     {customerData.MainAccount?.Salutation}
                     {customerData.MainAccount?.FirstName}{" "}
                     {customerData.MainAccount?.LastName}
@@ -1373,7 +1626,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                 {/* Site Account */}
                 <div className="flex flex-col">
                   <Select defaultValue="first">
-                    <SelectTrigger className="h-auto p-0 text-blue-600 font-medium border-none shadow-none focus:ring-0">
+                    <SelectTrigger className="h-auto p-0 text-blue-600 font-medium border-none shadow-none focus:ring-0 dark:text-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1390,8 +1643,8 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
             </div>
 
             {/* TABS */}
-            <div className=" border-t bg-gray-50 w-full overflow-x-auto">
-              <TabsList className="sm:w-full w-fit flex gap-4 h-fit p-0 ">
+            <div className=" border-t bg-gray-50 w-full overflow-x-auto ">
+              <TabsList className="sm:w-full w-fit flex gap-4 h-fit p-0  dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 dark:rounded-none">
                 {tabs.map((tab, index) =>
                   tab.component ? (
                     <div key={index}>{tab.component}</div>
@@ -1402,7 +1655,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       value={tab.value}
                       disabled={tab.disable}
                       hidden={tab.hidden}
-                      className="text-sm font-medium"
+                      className="text-sm font-medium dark:border-b-slate-500 dark:text-gray-300"
                     >
                       {tab.label}
                     </TabsTrigger>
@@ -1419,14 +1672,14 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                 - customer fields from customerData instead of dataFetchCustomerData
                 - etc.
             */}
-            <div className={" grid lg:grid-cols-2 md:grid-cols-1 gap-4 "}>
-              <Card className="flex-col">
+            <div className={" grid lg:grid-cols-2 md:grid-cols-1 gap-4"}>
+              <Card className="flex-col dark:bg-gradient-to-tl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
                 <CardHeader>
                   <CardTitle className={"text-lg  flex gap-3"}>
                     <Briefcase />
                     Case Information
                   </CardTitle>
-                  <hr />
+                  <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent className="grid grid-cols-3 gap-3 ">
                   <CaseField
@@ -1441,7 +1694,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         onChange={(e) =>
                           onChangeCase("CaseSubject")(e.target.value)
                         }
-                        className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base"
+                        className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base dark:bg-gray-500/10 dark:border-gray-400"
                         readOnly={!canEditFd}
                       />
                     </div>
@@ -1455,12 +1708,12 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     lock={!canEditApo}
                   >
                     <Input
-                      variant="invisible"
                       placeholder="---"
                       value={caseForm?.CaseID_Manual}
                       onChange={(e) =>
                         onChangeCase("CaseID_Manual")(e.target.value)
                       }
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
 
@@ -1491,10 +1744,10 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   >
                     {/* {console.log("Bool to check wo owner aaliabe : ", caseDetails?.workorder[0]?.owner?.IDUser)} */}
                     <Input
-                      variant="invisible"
                       placeholder="---"
                       value={caseDetails.createdByUser?.Name}
                       readOnly
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
                   {caseDetails?.workorder[0]?.owner?.IDUser && (
@@ -1506,10 +1759,10 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       lock
                     >
                       <Input
-                        variant="invisible"
                         placeholder="---"
                         value={caseDetails.workorder[0].owner.Name}
                         readOnly
+                        className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                     </CaseField>
                   )}
@@ -1524,13 +1777,13 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       lock
                     >
                       <Input
-                        variant="invisible"
                         placeholder="---"
                         value={
                           caseDetails?.workorder[0]?.materialorder[0]
                             ?.materialorderlineitems[0]?.quotation_lineitem[0]
                             ?.quotation?.User?.Name
                         }
+                        className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         readOnly
                       />
                     </CaseField>
@@ -1545,11 +1798,11 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       lock
                     >
                       <Input
-                        variant="invisible"
                         placeholder="---"
                         value={
                           caseDetails.workorder[0].materialorder[0].owner.Name
                         }
+                        className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         readOnly
                       />
                     </CaseField>
@@ -1591,6 +1844,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       }}
                       placeholder="--Select--"
                       options={statusOptions}
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
                     />
                   </CaseField>
                   <CaseField
@@ -1621,6 +1875,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       }))}
                       renderLabel={(opt) => opt.label}
                       getValue={(opt) => opt.value}
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
                     />
                   </CaseField>
                   {/* {assignToForm == true ?? (
@@ -1638,6 +1893,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       onChange={onChangeCase("CaseType")}
                       placeholder="--Select--"
                       options={["Depot Repair", "Onsite", "Bench", "DOA"]}
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
                     />
                   </CaseField>
 
@@ -1653,7 +1909,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         onChange={(e) =>
                           onChangeCase("ProblemDescription")(e.target.value)
                         }
-                        className=" ring-1 ring-gray-300 bg-gray-50 italic"
+                        className=" ring-1 ring-gray-300 bg-gray-50 italic dark:bg-gray-500/10 dark:border-gray-400"
                         readOnly={!canEditFd}
                       />
                     </div>
@@ -1666,7 +1922,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     span={2}
                     lock={!canEditFd}
                   >
-                    {/* <Input variant="invisible" value={caseDetails.CasePriority}/> */}
+                    {/* <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={caseDetails.CasePriority}/> */}
                     <SearchCommandBlock
                       value={caseForm?.CasePriority}
                       onChange={onChangeCase("CasePriority")}
@@ -1675,6 +1931,8 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         "Next Businnes Days (NBD)",
                         "3 Businnes Days (3BD)",
                       ]}
+
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
                     />
                   </CaseField>
 
@@ -1685,8 +1943,8 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     lock
                   >
                     <Input
-                      variant="invisible"
                       value={caseDetails.KCI_Flag ? "Yes" : "No"}
+                      className={"dark:text-white dark:border-gray-400  dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
                   <CaseField
@@ -1733,7 +1991,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             className={"mt-2"}
                           >
                             <Input
-                              variant="invisible"
+                              className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={caseDetails.IncomingChannel}
                             />
                           </CaseField>
@@ -1748,46 +2006,46 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           </CaseField>
                           <CaseField lock label="Customer Severity">
                             <Input
-                              variant="invisible"
+                              className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={caseDetails.CustomerSeverity}
                             />
                           </CaseField>
                           <CaseField lock label="Business Segment">
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
 
                           <CaseField lock label="HPI Segment">
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
 
                           <CaseField lock label="Customer Tracking Number">
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
 
                           <CaseField
                             lock
                             label="Update Customer Tracking Number"
                           >
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField
                             lock
                             label="Alternate Customer Tracking Number"
                           >
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
 
                           <CaseField lock label="Irrelevant">
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
 
                           <CaseField lock label="Email Status">
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
 
                           <CaseField label="Case ID" lock className={"hidden"}>
                             <Input
-                              variant="invisible"
+                              className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={caseDetails.CaseID}
                               hidden
                             />
@@ -1799,18 +2057,17 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                 </CardContent>
               </Card>
 
-              <Card className="flex-col">
+              <Card className="flex-col dark:bg-gradient-to-tr dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
                 <CardHeader>
                   <CardTitle className="text-lg flex gap-3">
                     <Contact />
                     Customer Information
                   </CardTitle>
-                  <hr />
+                  <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent className="grid items-center grid-cols-2 gap-3">
                   <CaseField label="Customer Account" lock>
                     <Input
-                      variant="invisible"
                       value={
                         customerData?.Type == "SiteAccount"
                           ? customerData?.SiteAccount?.Company
@@ -1822,11 +2079,11 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           : "---"
                       }
                       readOnly
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
                   <CaseField label="Primary Contact" lock>
                     <Input
-                      variant="invisible"
                       value={
                         customerData.MainAccount?.Salutation &&
                         customerData.MainAccount?.FirstName &&
@@ -1838,14 +2095,14 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           : "---"
                       }
                       readOnly
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
                   <CaseField label="Secondary Contact" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input  placeholder="---" className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                   </CaseField>
                   <CaseField label=" Primary Email" lock>
                     <Input
-                      variant="invisible"
                       value={
                         customerData.MainAccount?.Email
                           ? customerData.MainAccount?.Email
@@ -1853,11 +2110,11 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       }
                       placeholder="---"
                       readOnly
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
                   <CaseField label="Country" lock>
                     <Input
-                      variant="invisible"
                       value={
                         customerData?.Type == "SiteAccount"
                           ? customerData?.SiteAccount?.Country
@@ -1866,20 +2123,22 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           : "---"
                       }
                       readOnly
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
                   <CaseField label="Phone" lock>
-                    <span className="pl-3">
-                      {customerData?.Type == "SiteAccount"
+                    <Input
+                      value={customerData?.Type == "SiteAccount"
                         ? customerData?.SiteAccount?.PrimaryPhone
                         : customerData?.MainAccount?.Phone
                         ? customerData?.MainAccount?.Phone
                         : "---"}
-                    </span>
+                        readOnly
+                        className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                    />
                   </CaseField>
                   <CaseField label="Region" lock>
                     <Input
-                      variant="invisible"
                       placeholder="---"
                       value={
                         customerData?.Type == "SiteAccount"
@@ -1893,38 +2152,39 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             customerData?.MainAccount?.StateProvince
                           : "---"
                       }
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
                   <CaseField label="Is Partner" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
                   <CaseField label="Partner & Customer" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
                   <CaseField label="PIC Name" lock>
                     <Input
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder="---"
                       value={customerData.MainAccount?.PIC_Name}
                     />
                   </CaseField>
                   <CaseField label="PIC Email" lock>
                     <Input
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder="---"
                       value={customerData.MainAccount?.PIC_Email}
                     />
                   </CaseField>
                   <CaseField label="PIC Phone no." lock>
                     <Input
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder="---"
                       value={customerData.MainAccount?.PIC_Phone}
                     />
                   </CaseField>
                   <CaseField label="NPWP" lock>
                     <Input
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder="---"
                       value={customerData.SiteAccount?.NPWP}
                     />
@@ -1942,33 +2202,33 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       <AccordionContent className="m-1">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
                           <CaseField lock label="Submitted By">
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField lock label="HIPAA">
                             <Input
-                              variant="invisible"
+                              className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               placeholder="---"
                               readOnly
                             />
                           </CaseField>
                           <CaseField lock label="PIN">
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField lock label="Parent Company">
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField lock label="Parent Company Non-Latin">
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField lock label="Customer Time Zone">
                             <Input
-                              variant="invisible"
+                              className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               placeholder="---"
                               readOnly
                             />
                           </CaseField>
                           <CaseField lock label="Account Tier">
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                         </div>
                       </AccordionContent>
@@ -1979,13 +2239,13 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
             </div>
             {/* --- Card 1: Customer Issue & System Info --- */}
 
-            <Card className="flex-col">
+            <Card className="flex-col dark:bg-gradient-to-l dark:from-slate-800 dark:via-slate-600 dark:to-slate-800  dark:border-slate-700 dark:border-4">
               <CardHeader>
                 <CardTitle className="text-lg  flex gap-3">
                   <FileSliders />
                   Customer Issue Description & System Information
                 </CardTitle>
-                <Separator />
+                <hr className="dark:border-gray-500"/>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
@@ -1993,7 +2253,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   <div className="space-y-6">
                     <textarea
                       className={cn(
-                        "w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50 ",
+                        "w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50 dark:bg-gray-500/10 dark:border-gray-400",
                         !canEditFd && "cursor-not-allowed"
                       )}
                       value={caseForm?.CaseProductNote}
@@ -2016,34 +2276,34 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       <AccordionContent className="m-1">
                         <div className="grid grid-cols-4 gap-6">
                           <CaseField label="Related Device" lock>
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField label="Device Manufacturer" lock>
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField label="Device Model" lock>
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField label="Program / Category" lock>
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField label="Operating System" lock>
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField label="Version" lock>
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField label="Remote Diag Code" lock>
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField label="Application Information" lock>
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField label="Provider / Platform" lock>
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                           <CaseField label="Software Version" lock>
-                            <Input variant="invisible" placeholder="---" />
+                            <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                           </CaseField>
                         </div>
                       </AccordionContent>
@@ -2053,13 +2313,13 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
               </CardContent>
             </Card>
             {/* --- Card 2: Case Notes --- */}
-            <Card className=" hover:shadow-gray-400">
+            <Card className="dark:bg-radial-[at_50%_20%] dark:from-slate-600 dark:via-slate-800 dark:to-slate-700  dark:border-slate-700 dark:border-4">
               <CardHeader>
                 <CardTitle className="text-xl flex gap-2 ">
                   <NotepadText />
                   Log Notes
                 </CardTitle>
-                <hr />
+                <hr className="dark:border-gray-500"/>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-2">
@@ -2085,6 +2345,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         onChange={(val) => onChangeCaseNote("LogType", val)}
                         options={["Notes Log", "Phone Log"]}
                         placeholder="--Select--"
+                        className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
                       />
                     </CaseField>
 
@@ -2100,14 +2361,15 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           "CE/Partner Assist",
                           "Customer Email",
                         ]}
+                        className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
                       />
                     </CaseField>
 
-                    <CaseField label="Template" lock>
-                      <Input variant="invisible" placeholder="---" />
-                    </CaseField>
+                    {/* <CaseField label="Template" lock>
+                      <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
+                    </CaseField> */}
 
-                    <CaseField label="Visible Externally">
+                    {/* <CaseField label="Visible Externally">
                       <SelectYN
                         value={
                           caseNoteFormData?.VisibleExternally === undefined ||
@@ -2121,15 +2383,15 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           onChangeCaseNote("VisibleExternally", val === "Yes")
                         }
                       ></SelectYN>
-                    </CaseField>
+                    </CaseField> */}
 
-                    <CaseField label="Number of Minutes Spent" lock>
-                      <Input variant="invisible" placeholder="---" />
-                    </CaseField>
+                    {/* <CaseField label="Number of Minutes Spent" lock>
+                      <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
+                    </CaseField> */}
 
                     <CaseField label="Notes" star>
                       <textarea
-                        className="w-full h-full min-h-[100px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 shadow-sm"
+                        className="w-full h-full min-h-[100px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 shadow-sm dark:bg-gray-500/10 dark:border-gray-400"
                         value={caseNoteFormData?.Note || ""}
                         onChange={(e) =>
                           onChangeCaseNote("Note", e.target.value)
@@ -2138,9 +2400,9 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       />
                     </CaseField>
                   </div>
-                  <div className="w-full overflow-auto rounded-2xl shadow-xl">
+                  <div className="w-full overflow-auto rounded-2xl shadow-xl dark:bg-slate-900/90 dark:border-slate-700">
                     <Table>
-                      <TableHeader className={"bg-slate-300 "}>
+                      <TableHeader className={"bg-slate-300 dark:bg-slate-700/90"}>
                         <TableRow>
                           <TableHead>Created On</TableHead>
                           <TableHead>Created By</TableHead>
@@ -2151,14 +2413,17 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                                     <TableHead>Number of Minutes Spent</TableHead> */}
                           <TableHead>Role</TableHead>
                           <TableHead>Note</TableHead>
-                          <TableHead></TableHead>
-                          <TableHead></TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {Array.isArray(notesList) && notesList.length > 0 ? (
                           notesList.map((n, i) => (
-                            <TableRow key={n.NoteID} className={``}>
+                            <TableRow key={n.NoteID} className={cn(
+                                              "hover:bg-blue-50/70 dark:hover:bg-slate-700",
+                                              i % 2 === 0
+                                                ? "bg-white dark:bg-slate-900"
+                                                : "bg-gray-50 dark:bg-slate-800/80"
+                                             )}>
                               <TableCell>
                                 {n.CreatedOn
                                   ? format(
@@ -2203,12 +2468,13 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
               </CardContent>
             </Card>
           </TabsContent>
+          
           <TabsContent value="ci_asset">
             <div className="grid grid-cols-1 p-3 gap-3">
-              <Card className="flex-col">
+              <Card className="flex-col dark:bg-radial-[at_30%_80%] dark:from-slate-500 dark:via-slate-800 dark:to-slate-700 dark:border-gray-700 dark:border-4">
                 <CardHeader>
                   <CardTitle className="text-lg ">Asset Information</CardTitle>
-                  <hr />
+                  <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
                   <CaseField
@@ -2222,7 +2488,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           assetInformation?.WarrantyOTCCode?.WarrantyCondition
                         ]
                       }
-                      variant={"invisible"}
+                      className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder={"---"}
                     />
                   </CaseField>
@@ -2231,33 +2497,25 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       value={
                         assetInformation?.product_information?.ProductNumber
                       }
-                      variant={"invisible"}
+                      className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder={"---"}
                     />
                   </CaseField>
                   <CaseField label="Asset Location" lock={user?.role !== "ps"}>
-                    <Input
-                      variant="invisible"
-                      placeholder="---"
-                      value={caseForm?.StorageLocationStore}
-                      onChange={(e) =>
-                        onChangeCase("StorageLocationStore")(e.target.value)
-                      }
-                      hidden
-                    />
                     <SearchCommandBlock
                       value={caseForm?.StorageLocationStore}
                       onChange={onChangeCase("StorageLocationStore")}
                       options={OptionStorage}
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
                     />
                   </CaseField>
 
                   <CaseField label="Serial Number" lock>
                     <Input
                       value={assetInformation?.SerialNumber}
-                      variant={"invisible"}
+                      className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder={"---"}
-                      className={"hover:text-blue-600 hover:cursor-pointer"}
+                      className={"hover:text-blue-600 dark:hover:text-blue-600 dark:hover:cursor-pointer hover:cursor-pointer dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       onClick={() => {
                         const sn = assetInformation?.SerialNumber;
                         if (sn) {
@@ -2276,18 +2534,18 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         assetInformation?.product_information?.product_type
                           ?.ProductGroup
                       }
-                      variant={"invisible"}
+                      className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder={"---"}
                     />
                   </CaseField>
 
                   <CaseField label="SNIC - Count" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
                   <CaseField label="Product Name" lock>
                     <Input
                       value={assetInformation?.product_information?.ProductName}
-                      variant={"invisible"}
+                      className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder={"---"}
                     />
                   </CaseField>
@@ -2295,7 +2553,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   <CaseField label="HWPC Code" lock={!canEditCe}>
                     <Input
                       value={productForm?.HWPC}
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder="---"
                       onChange={(e) =>
                         handleProductChange("HWPC")(e.target.value)
@@ -2304,11 +2562,11 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   </CaseField>
 
                   <CaseField label="HW Profit Center" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
                   <div className="grid items-center grid-cols-2 col-span-2 gap-2 p-5 ring-1">
                     <CaseField label="Device Properties" lock>
-                      <Input variant="invisible" placeholder="---" />
+                      <Input className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                     </CaseField>
                   </div>
                   <CaseField
@@ -2348,14 +2606,16 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       // value={caseDetails.CaseStatus === "NEW_POPDoc" ? (WarrantyConditionEnumToLabel[assetInformation?.WarrantyOTCCode?.WarrantyCondition] === 'Out of Warranty' ? "Yes" : WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition] === 'InWarranty' ? "No" : "") : (caseDetails?.IsHWUnderWarranty ? "Yes" : "No")}
                       value={
                         entitlementStatus?.needWarrantyApproval === undefined ||
-                        entitlementStatus?.needWarrantyApproval === null
+                        entitlementStatus?.needWarrantyApproval == null 
                           ? "No"
                           : entitlementStatus?.needWarrantyApproval
                           ? "Yes"
                           : "No"
                       }
-                      onValueChange={(val) => {
+                      onValueChange={async (val) => {
                         const isNeed = val === "Yes";
+                        const userTarget = await ApiCustomer.get(`/api/user?role=apv`)
+                        const OwnerApv = userTarget.data.data[0];
                         handleEntitlementStatus("needWarrantyApproval")(isNeed);
                         if (isNeed) {
                           const CmbineOTC = otcCode.find(
@@ -2363,14 +2623,16 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                               otc.OTCCode === "01T" &&
                               otc.Description === "Trade (OOW)"
                           );
-                          console.log("CmbineOTC:", CmbineOTC);
                           if (CmbineOTC) {
                             handleEntitlementStatus("OTCCode")(
                               CmbineOTC.OTCCode
                             );
                           }
+                          onChangeCase("CaseStatus")("NEW_POPDoc");
+                          onChangeCase("Owner")(OwnerApv.IDUser);
                         }
                       }}
+                      className={"cursor-pointer dark:bg-transparent dark:ring-2 dark:ring-gray-400 dark:rounded-md dark:text-white"}
                     />
                   </CaseField>
                   <CaseField
@@ -2391,6 +2653,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       onChange={handleEntitlementStatus(
                         "WarrantyApprovalStatus"
                       )}
+                      className={"dark:bg-transparent dark:ring-2 dark:ring-gray-400 dark:rounded-md dark:text-white"}
                     />
                   </CaseField>
                   <CaseField
@@ -2451,6 +2714,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             )
                           }
                           readOnly={!canEditWarranty}
+                          className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         />
                       </div>
                     ) : (
@@ -2462,6 +2726,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           )
                         }
                         readOnly={!canEditWarranty}
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                     )}
                   </CaseField>
@@ -2522,6 +2787,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             )
                           }
                           readOnly={!canEditWarranty}
+                          className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         />
                       </div>
                     ) : (
@@ -2533,6 +2799,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           )
                         }
                         readOnly={!canEditWarranty}
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                     )}
                   </CaseField>
@@ -2599,6 +2866,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             )
                           }
                           readOnly={!canEditWarranty}
+                          className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         />
                       </div>
                     ) : (
@@ -2610,6 +2878,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           )
                         }
                         readOnly={!canEditWarranty}
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                     )}
                   </CaseField>
@@ -2627,7 +2896,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       onChange={(e) =>
                         handleEntitlementStatus("EndUserName")(e.target.value)
                       }
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder="---"
                     />
                   </CaseField>
@@ -2644,7 +2913,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       onChange={(e) =>
                         handleEntitlementStatus("EndUserPhone")(e.target.value)
                       }
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder="---"
                     />
                   </CaseField>
@@ -2663,7 +2932,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           e.target.value
                         )
                       }
-                      variant="invisible"
+                      className={" dark:bg-gray-500/10 dark:border-gray-400"}
                       placeholder="---"
                     />
                   </CaseField>
@@ -2672,98 +2941,103 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                 <div className="px-6 pb-6">
                   <h3 className="text-md font-semibold mb-2">Accessory</h3>
                   <div className="overflow-x-auto">
-                    <table className="min-w-full border text-sm text-left">
-                      <thead className="bg-gray-100 text-gray-700">
-                        <tr>
-                          <th className="border px-4 py-2" hidden>
+                    <Table className="min-w-full text-sm ">
+                      <TableHeader className="bg-gray-100 text-gray-700 dark:bg-gray-700 ">
+                        <TableRow>
+                          <TableHead className="px-4 py-2" hidden>
                             No Accesories
-                          </th>
-                          <th className="border px-4 py-2" hidden>
+                          </TableHead>
+                          <TableHead className=" px-4 py-2" hidden>
                             Case ID
-                          </th>
-                          <th className="border px-4 py-2">Accessories</th>
-                          <th className="border px-4 py-2">Note</th>
-                          <th className="border px-4 py-2">CT / SN code</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                          </TableHead>
+                          <TableHead className=" dark:text-white px-4 py-2">Accessories</TableHead>
+                          <TableHead className=" dark:text-white px-4 py-2">Note</TableHead>
+                          <TableHead className=" dark:text-white px-4 py-2">CT / SN code</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {caseDetails.accessory?.map((item, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="border px-4 py-2" hidden>
+                          <TableRow key={index} className={cn(
+                                            "hover:bg-blue-50/70 dark:hover:bg-slate-700 dark:text-gray-300",
+                                            index % 2 === 0
+                                              ? "bg-white dark:bg-slate-800"
+                                              : "bg-gray-50 dark:bg-slate-700/80"
+                                           )}>
+                            <TableCell className=" px-4 py-2" hidden>
                               {item.id}
-                            </td>
-                            <td className="border px-4 py-2" hidden>
+                            </TableCell>
+                            <TableCell className=" px-4 py-2" hidden>
                               {item.CaseID}
-                            </td>
-                            <td className="border px-4 py-2">
+                            </TableCell>
+                            <TableCell className=" px-4 py-2">
                               {item.Accessories}
-                            </td>
-                            <td className="border px-4 py-2">
+                            </TableCell>
+                            <TableCell className=" px-4 py-2">
                               {item.Note || "---"}
-                            </td>
-                            <td className="border px-4 py-2">
+                            </TableCell>
+                            <TableCell className=" px-4 py-2">
                               {item.CT_SNCode || "---"}
-                            </td>
-                          </tr>
+                            </TableCell>
+                          </TableRow>
                         ))}
                         {(!caseDetails?.accessory ||
                           caseDetails.accessory.length === 0) && (
-                          <tr>
-                            <td
-                              className="border px-4 py-2 text-center"
+                          <TableRow>
+                            <TableCell
+                              className=" px-4 py-2 text-center"
                               colSpan={5}
                             >
                               No accessories found.
-                            </td>
-                          </tr>
+                            </TableCell>
+                          </TableRow>
                         )}
-                      </tbody>
-                    </table>
-                    <div className="mt-2 text-md text-gray-600">
+                      </TableBody>
+                    </Table>
+                    <div className="mt-2 text-md text-gray-600 dark:text-white">
                       Total Accesories: {caseDetails.accessory?.length || 0}
                     </div>
                   </div>
                 </div>
               </Card>
 
-              <Card className="flex-col  ">
+              <Card className="flex-col dark:bg-radial-[at_90%_30%] dark:from-slate-500 dark:via-slate-800 dark:to-slate-700 dark:border-gray-700 dark:border-4">
                 <CardHeader>
                   <CardTitle className="text-lg ">Work Order</CardTitle>
-                  <hr />
+                  <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-5 p-3 ">
                   <div className="grid grid-cols-4 gap-5" hidden>
                     <CaseField label="Incident Type" span={3}>
-                      <Input variant="invisible" placeholder="---" />
+                      <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                     </CaseField>
                     <CaseField label="Work Order Description" span={3}>
-                      <Input variant="invisible" placeholder="---" />
+                      <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                     </CaseField>
                   </div>
 
-                  <Table className={"max-w-100"}>
-                    <TableHeader>
+                  <Table className={"max-w-100 "}>
+                    <TableHeader >
                       <TableRow>
-                        <TableHead className="">Work Order Number</TableHead>
-                        <TableHead>Case ID</TableHead>
-                        <TableHead>Service Account</TableHead>
-                        <TableHead>Sub-Status</TableHead>
-                        <TableHead>System Status</TableHead>
-                        <TableHead>Priority</TableHead>
-                        <TableHead>Work Order</TableHead>
-                        <TableHead>Primary Incident</TableHead>
-                        <TableHead>Due Date</TableHead>
-                        <TableHead>Orion</TableHead>
-                        <TableHead>Owner</TableHead>
-                        <TableHead>Created By</TableHead>
-                        <TableHead>Created At</TableHead>
+                        <TableHead className={"dark:text-white"}>Work Order Number</TableHead>
+                        <TableHead className={"dark:text-white"}>Case ID</TableHead>
+                        <TableHead className={"dark:text-white"}>Service Account</TableHead>
+                        <TableHead className={"dark:text-white"}>Sub-Status</TableHead>
+                        <TableHead className={"dark:text-white"}>System Status</TableHead>
+                        <TableHead className={"dark:text-white"}>Priority</TableHead>
+                        <TableHead className={"dark:text-white"}>Work Order</TableHead>
+                        <TableHead className={"dark:text-white"}>Primary Incident</TableHead>
+                        <TableHead className={"dark:text-white"}>Due Date</TableHead>
+                        <TableHead className={"dark:text-white"}>Orion</TableHead>
+                        <TableHead className={"dark:text-white"}>Owner</TableHead>
+                        <TableHead className={"dark:text-white"}>Created By</TableHead>
+                        <TableHead className={"dark:text-white"}>Created At</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody className={"max-w-100"}>
                       {workOrders.map((work) => (
                         <TableRow
                           key={work.WOID}
-                          className="cursor-pointer hover:bg-gray-300"
+                          className="cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 dark:text-gray-300"
                           onClick={() => handleClick(work)}
                         >
                           <TableCell className="font-medium ">
@@ -2799,23 +3073,23 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                 </CardContent>
               </Card>
 
-              <Card className="flex-col ">
+              <Card className="flex-col dark:bg-radial-[at_40%_10%] dark:from-slate-500 dark:via-slate-800 dark:to-slate-700 dark:border-gray-700 dark:border-4">
                 <CardHeader>
-                  <CardTitle className="text-lg ">Material Order</CardTitle>
-                  <hr />
+                  <CardTitle className="text-lg">Material Order</CardTitle>
+                  <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent className="grid gap-5">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[100px]">Name</TableHead>
-                        <TableHead>Case ID</TableHead>
-                        <TableHead>Created On</TableHead>
-                        <TableHead>Order Status</TableHead>
-                        <TableHead>Order Type</TableHead>
-                        <TableHead>Owner</TableHead>
-                        <TableHead>Work Order</TableHead>
-                        <TableHead>Ready For Closure Date</TableHead>
+                        <TableHead className="w-[100px] dark:text-white">Name</TableHead>
+                        <TableHead className={"dark:text-white"}>Case ID</TableHead>
+                        <TableHead className={"dark:text-white"}>Created On</TableHead>
+                        <TableHead className={"dark:text-white"}>Order Status</TableHead>
+                        <TableHead className={"dark:text-white"}>Order Type</TableHead>
+                        <TableHead className={"dark:text-white"}>Owner</TableHead>
+                        <TableHead className={"dark:text-white"}>Work Order</TableHead>
+                        <TableHead className={"dark:text-white"}>Ready For Closure Date</TableHead>
                       </TableRow>
                     </TableHeader>
 
@@ -2828,16 +3102,16 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           }
                           className={
                             material.OrderStatus === "New"
-                              ? "cursor-pointer bg-green-100"
+                              ? "cursor-pointer bg-green-100 dark:bg-green-600 dark:hover:bg-gray-500 dark:text-gray-300"
                               : material.OrderStatus === "Shipped"
-                              ? "cursor-pointer bg-yellow-100"
+                              ? "cursor-pointer bg-yellow-100 dark:bg-yellow-600 dark:hover:bg-gray-500 dark:text-gray-300"
                               : material.OrderStatus === "Ordered"
-                              ? "cursor-pointer bg-blue-100"
+                              ? "cursor-pointer bg-blue-100 dark:bg-blue-600 dark:hover:bg-gray-500 dark:text-gray-300"
                               : material.OrderStatus === "Closed"
-                              ? "cursor-pointer bg-gray-100"
+                              ? "cursor-pointer bg-gray-100 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-300"
                               : material.OrderStatus === "BackOrdered"
-                              ? "cursor-pointer bg-purple-100"
-                              : "cursor-pointer bg-red-100"
+                              ? "cursor-pointer bg-purple-100 dark:bg-purple-600 dark:hover:bg-gray-500 dark:text-gray-300"
+                              : "cursor-pointer bg-red-100 dark:bg-red-600 dark:hover:bg-gray-500 dark:text-gray-300"
                           }
                         >
                           <TableCell className="font-medium">
@@ -2865,14 +3139,14 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
           <TabsContent value="action_log">
             <div className="mt-2 p-1 grid grid-cols-2">
-              <Card className="flex-col col-span-2">
+              <Card className="flex-col col-span-2 dark:bg-slate-900/90 dark:border-slate-700">
                 <CardHeader>
                   <CardTitle className="text-lg">Action Log</CardTitle>
-                  <hr />
+                  <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent className="overflow-x-auto">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="dark:bg-slate-800/95">
                       <TableRow>
                         <TableHead className="w-[60px]">No</TableHead>
                         <TableHead>ReferenceId</TableHead>
@@ -2888,7 +3162,12 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     <TableBody>
                       {actionLogs?.length > 0 ? (
                         actionLogs.map((log, index) => (
-                          <TableRow key={log.id || index} className={"text-xs"}>
+                          <TableRow key={log.id || index} className={cn(
+                                            "hover:bg-blue-50/70 dark:hover:bg-slate-700",
+                                            index % 2 === 0
+                                              ? "bg-white dark:bg-slate-900"
+                                              : "bg-gray-50 dark:bg-slate-800/80"
+                                           )}>
                             <TableCell>{index + 1}</TableCell>
                             <TableCell>{log.ReferenceId}</TableCell>
                             <TableCell>{log.model}</TableCell>
@@ -2922,10 +3201,9 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
           <TabsContent value="doc_photo">
             <div className="p-3 space-y-5">
-              <Card>
+              <Card className="dark:bg-gradient-to-l dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:border-gray-700 dark:border-4">
                 <CardHeader className="flex flex-row justify-between">
                   <CardTitle className="text-lg">Photo Unit</CardTitle>
-
                   <div className="flex items-center gap-2">
                     {/* Hidden file input */}
                     <Input
@@ -2943,7 +3221,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         asChild
                         size="sm"
                         variant="outline"
-                        className={"cursor-pointer"}
+                         className={'cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}
                       >
                         <span>+ Add Photo</span>
                       </Button>
@@ -2983,7 +3261,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     )}
                   </div>
                 </CardHeader>
-
                 <CardContent>
                   {/*  Preview foto baru yang baru dipilih */}
                   {photos.length > 0 && (
@@ -3076,15 +3353,15 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
           <TabsContent value="quotation">
             <div className="grid grid-cols-1 p-3 gap-3">
-              <Card className={"flex-col col-span-2"}>
+              <Card className={"flex-col col-span-2 dark:bg-radial-[at_30%_80%] dark:from-slate-600 dark:via-slate-800 dark:to-slate-700 dark:border-gray-700 dark:border-4"}>
                 <CardHeader>
                   <CardTitle className={"text-lg"}>
                     Quotation Information
                   </CardTitle>
-                  <hr />
+                  <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent className={"flex flex-col gap-4"}>
-                  <div className="grid grid-cols-2 border-2 p-2 rounded-sm gap-2">
+                  <div className="grid grid-cols-2 border-2 p-2 rounded-sm gap-2 dark:border-gray-500 ">
                     <CaseField label={"Quotation no"} lock>
                       <Input
                         value={
@@ -3092,6 +3369,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             ?.materialorderlineitems[0]?.quotation_lineitem[0]
                             ?.QuotationNo || "---"
                         }
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                     </CaseField>
                     <CaseField label={"Quotation type"} lock>
@@ -3101,11 +3379,13 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             ?.materialorderlineitems[0]?.quotation_lineitem[0]
                             ?.quotation?.QuotationType || "---"
                         }
+                         className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                     </CaseField>
                     <CaseField label={"Labor Fee"} lock> 
                       <Input 
                         value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
+                         className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                     </CaseField>
                     <CaseField label={"Quotation amount"} lock>
@@ -3115,6 +3395,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             ?.materialorderlineitems[0]?.quotation_lineitem[0]
                             ?.quotation?.Subtotal
                         )}
+                         className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                     </CaseField>
                     <CaseField label={"VAT value (%)"} lock>
@@ -3129,6 +3410,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                               "%"
                             : "---"
                         }
+                         className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                     </CaseField>
                     <CaseField label={"Quotation amount + VAT"} lock>
@@ -3138,6 +3420,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             ?.materialorderlineitems[0]?.quotation_lineitem[0]
                             ?.quotation?.GrandTotal
                         )}
+                         className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                     </CaseField>
                     <CaseField label={"Quotation Request date"} lock>
@@ -3147,6 +3430,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate
                           )
                         }
+                        
                       />
                     </CaseField>
                     {caseDetails.workorder[0]?.materialorder[0]
@@ -3169,10 +3453,11 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             ?.materialorderlineitems[0]?.quotation_lineitem[0]
                             ?.quotation?.QuoteDecision || "---"
                         }
+                         className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                     </CaseField>
                   </div>
-                  <div className="grid grid-cols-2 border-2 p-2 rounded-sm gap-2">
+                  <div className="grid grid-cols-2 border-2 p-2 rounded-sm gap-2 dark:border-gray-500">
                     {caseDetails.workorder[0]?.materialorder.map((quo, i) => (
                       <div key={quo.MOID}>
                         <span className="font-bold">Sparepart {i + 1}</span>
@@ -3232,14 +3517,14 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                 </CardContent>
               </Card>
 
-              <Card className={"flex-col col-span-2"}>
+              <Card className={"flex-col col-span-2 dark:bg-radial-[at_70%_20%] dark:from-slate-600 dark:via-slate-800 dark:to-slate-700 dark:border-gray-700 dark:border-4"}>
                 <CardHeader className="space-y-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className={"text-lg"}>
                       Invoice Information
                     </CardTitle>
                     <Button
-                      className={"bg-gray-300"}
+                      className={'cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}
                       size="sm"
                       variant="outline"
                       onClick={() => handleInvoiceOpenChange(true)}
@@ -3250,7 +3535,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       {invoiceSummary ? "Edit Invoice" : "Buat Invoice"}
                     </Button>
                   </div>
-                  <hr />
+                  <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent>
                   {invoiceLoading ? (
@@ -3371,12 +3656,13 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   )}
                 </CardContent>
               </Card>
-              <Card className="flex-col col-span-2">
+
+              <Card className="flex-col col-span-2 dark:bg-radial-[at_70%_20%] dark:from-slate-600 dark:via-slate-800 dark:to-slate-700 dark:border-gray-700 dark:border-4">
                 <CardHeader className="space-y-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">DP Information</CardTitle>
                     <Button
-                      className="bg-gray-300"
+                      className={'cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}
                       size="sm"
                       variant="outline"
                       onClick={addDpRow} // ✅ only in handler
@@ -3385,12 +3671,12 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       Tambah DP
                     </Button>
                   </div>
-                  <hr />
+                  <hr className="dark:border-gray-500"/>
                 </CardHeader>
 
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 ">
                   {dpList.map((row) => (
-                    <Card key={row.tempId} className="border shadow-sm">
+                    <Card key={row.tempId} className="border shadow-sm dark:bg-radial-[at_70%_20%] dark:from-slate-600 dark:via-slate-800 dark:to-slate-700 dark:border-gray-700 dark:border-4">
                       <CardHeader className="flex flex-row items-center justify-between py-2 px-4">
                         <CardTitle className="text-sm font-semibold">
                           Invoice No: {row.InvoiceNo || "-"}
@@ -3405,13 +3691,14 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           </Button>
                         )}
                       </CardHeader>
-                      <CardContent className="grid grid-cols-2 gap-3 px-4 pb-4">
+                      <CardContent className="grid grid-cols-2 gap-3 px-4 pb-4 ">
                         <CaseField label="DP Amount">
                           <Input
                             value={row.DpAmount}
                             onChange={(e) =>
                               setDpField(row.tempId, "DpAmount", e.target.value)
                             }
+                            className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           />
                         </CaseField>
 
@@ -3446,6 +3733,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             onChange={(e) =>
                               setDpField(row.tempId, "DpNote", e.target.value)
                             }
+                            className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base dark:bg-gray-500/10 dark:border-gray-400"
                           />
                         </CaseField>
                       </CardContent>

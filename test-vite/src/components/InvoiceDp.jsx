@@ -52,8 +52,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   qrCode: {
-    width: 50,
-    height: 50,
+    width: 45,
+    height: 45,
   },
   logo: {
     width: 60,
@@ -79,29 +79,29 @@ const styles = StyleSheet.create({
   },
   label: {
     width: '30%', 
-    fontSize: 9,
+    fontSize: 8,
   },
   label2: {
     width: '20%', 
-    fontSize: 9,
+    fontSize: 8,
   },
   value: {
     width: '68%',
-    fontSize: 9,
+    fontSize: 8,
   },
   value1: {
     width: '68%',
-    fontSize: 9,
+    fontSize: 8,
     textAlign: 'justify',
     textIndent: -5,
   },
   colon: {
     width: '2%',
-    fontSize: 9,
+    fontSize: 8,
   },
   value2: {
     width: '80%',
-    fontSize: 9,
+    fontSize: 8,
   },
 table: {
     width: '100%',
@@ -257,7 +257,9 @@ export const InvoiceDp = ({
             ]}
           >
             <Text style={[styles.textSmall, styles.bold]}>INVOICE</Text>
-            <Image src="/random_qr.png" style={styles.qrCode} />
+             <View style={{borderWidth: 2, padding: 2}}>
+                <Image src="/random_qr.png" style={styles.qrCode} />
+             </View>
           </View>
           <View style={[styles.rightSection2, { alignItems: "center" }]}>
             <Text style={styles.label}>Case ID</Text>

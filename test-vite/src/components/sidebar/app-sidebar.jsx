@@ -12,6 +12,7 @@ import {
   Slice,
   Stamp,
   Table,
+  FolderInput
 } from "lucide-react"
 import { Building, Briefcase, Phone, Folder, Box, Tag, ShieldCheck, ShoppingCart, Wrench, User, HardHat, Heart, Calendar, ClipboardCheck, Hammer, Server, Barcode, CheckCircle } from 'lucide-react';
 import { NavMain } from "@/components/sidebar/nav-main"
@@ -369,6 +370,12 @@ export function AppSidebar({
         url: "/app/viewcase",
         icon: Pin
       },
+      {
+        name: "RMA",
+        title: "RMA",
+        url: "/app/uploadRMA",
+        icon: FolderInput
+      }
     ],
     default :[
        {
@@ -407,9 +414,9 @@ export function AppSidebar({
         activeClassName="bg-cyan-800 text-white"
       />
     );
-  } else if (data.user.role === 'apo' || data.user.role === 'ce'  ||  data.user.role === 'celead' || data.user?.role === 'cm' || data.user.role === 'ps' ){
+  } else if (data.user.role === 'apo' || data.user.role === 'ce'  ||  data.user.role === 'celead' || data.user?.role === 'cm' || data.user.role === 'ps' ||  data.user?.role === 'apv' ){
     navrole = data.apo;
-  } else if (data.user.role === 'lg' ||  data.user?.role === 'apv' ){
+  } else if (data.user.role === 'lg' ){
     navrole = data.lg;
     DropNav = '';
   } else {
