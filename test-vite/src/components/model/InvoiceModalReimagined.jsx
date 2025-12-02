@@ -96,7 +96,7 @@ const InvoiceDialog = () => {
     if (!quotation?.grandTotal) return 0;
     let parsed = Number(quotation.grandTotal);
     if(totalDpAmount !== 0) parsed = parsed - Number(totalDpAmount)
-      console.log("WOI MANA NGURANGNYA ANJENG ", parsed, totalDpAmount)
+      console.log("Berkurang", parsed, totalDpAmount)
     return Number.isNaN(parsed) ? 0 : parsed;
   }, [quotation, totalDpAmount]);
 
@@ -273,7 +273,7 @@ const InvoiceDialog = () => {
               readOnly
             />
           </CaseField>
-          <CaseField label="Grand Total (After VAT) KONTOL" lock>
+          <CaseField label="Grand Total (After VAT)" lock>
             <Input
               value={formatAccountingRupiah(grandTotalNumber)}
               readOnly

@@ -521,7 +521,6 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         `/api/invoice-information?caseId=${caseDetails.CaseID}`
       );
       const data = response.data?.data;
-      console.log("KOTNOL", data);
       set({ invoiceData: data ?? null });
       return data;
     } catch (error: any) {

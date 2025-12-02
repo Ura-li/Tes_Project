@@ -1108,7 +1108,7 @@ export const ServiceCase = () => {
     if (!invoiceQuotation?.grandTotal) return 0;
     let parsed = Number(invoiceQuotation.grandTotal);
     if(totalDpAmount !== 0) parsed = parsed - Number(totalDpAmount)
-      console.log("WOI MANA NGURANGNYA ANJENG ", parsed, totalDpAmount)
+      console.log("Berkurang ", parsed, totalDpAmount)
     return Number.isNaN(parsed) ? 0 : parsed;
   }, [invoiceQuotation, totalDpAmount]);
 
