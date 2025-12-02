@@ -32,6 +32,9 @@ import { OTCAdd, OTCEdit, OTCDelete} from "@/components/model/sc-modal";
 import { CrsAdd, CrsEdit, CrsDelete } from "@/components/model/sc-modal";
 import { NmuAdd, NmuEdit, NmuDelete} from "@/components/model/sc-modal";
 import { NmuItemAdd, NmuItemEdit, NmuItemDelete } from "@/components/model/sc-modal";
+import { AssetTemplateButton, AssetImport } from "@/components/importFileComponent/AssetImport"
+import { ProductTemplateButton, ProductImport } from "@/components/importFileComponent/ProductImport"
+import { PartTemplateButton, PartImport } from "@/components/importFileComponent/PartImport"
 import { FailureAdd, 
   FailureEdit, 
   FailureDelete } from "@/components/model/sc-modal";
@@ -1934,6 +1937,8 @@ export const Assets_table = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+        <AssetImport/>
+        <AssetTemplateButton/>
       </div>
 
       {/* Filters */}
@@ -2373,15 +2378,17 @@ export const Product_table = () => {
 
       {/* search + add */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="🔍 Search products..."
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <input
+          type="text"
+          placeholder="🔍 Search products..."
+          className=" p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         <ProductAdd onAdded={() => fetchProducts(currentPage)} />
-      </div>
+        <ProductImport/>
+        <ProductTemplateButton/>
+    </div>
 
       {/* Filters */}
       <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -4943,6 +4950,8 @@ export const Part_table = () => {
         />
         {/* Add Part Button */}
         <PartAdd />
+        <PartImport />
+        <PartTemplateButton />
       </div>
 
       {error && <p className="mb-4 text-red-500">{error}</p>}

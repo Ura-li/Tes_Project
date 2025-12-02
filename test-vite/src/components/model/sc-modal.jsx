@@ -5351,8 +5351,10 @@ console.log("Asset Info OTC : ",isOutWarranty)
         part.PartDescription?.toLowerCase().includes(descriptionSearch.toLowerCase())
       );
     });
+  const MAX_PAGES_SHOWN = 3;
+
     const totalPages = Math.ceil(filteredPartCatalog.length / PAGE_SIZE);
-    const MAX_PAGES_SHOWN = 3;
+    
   const getPaginationPages = () => {
     if (totalPages <= MAX_PAGES_SHOWN) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -5564,7 +5566,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
               > 
                 <Table>
                   <TableHeader>
-                    <TableRow className={'bg-gray-300'}>
+                    <TableRow className={'bg-gray-300 '}>
                       <TableHead className={'font-black text-black'}>Select</TableHead>
                       <TableHead className={'font-black text-black p-2'}>
                         Parts #
@@ -5577,42 +5579,42 @@ console.log("Asset Info OTC : ",isOutWarranty)
                           <XIcon className="cursor-pointer" onClick={() => setPartNumberSearch("")} />
                         </span>
                       </TableHead>
-                      <TableHead className={'font-black text-black'}>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>
                         Keyword
                         <span className="flex items-center">
                           <Input
-                            className={'bg-white font-medium'}
+                            className={'  whitespace-break-spaces bg-white font-medium'}
                             value={keywordSearch}
                             onChange={(e) => setKeywordSearch(e.target.value)}
                           />
                           <XIcon className="cursor-pointer" onClick={() => setKeywordSearch("")} />
                         </span>
                       </TableHead>
-                      <TableHead className={'font-black text-black'}>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>
                         Part Description
                         <span className="flex items-center">
                           <Input
-                            className={'bg-white font-medium'}
+                            className={'  whitespace-break-spaces bg-white font-medium'}
                             value={descriptionSearch}
                             onChange={(e) => setDescriptionSearch(e.target.value)}
                           />
                           <XIcon className="cursor-pointer" onClick={() => setDescriptionSearch("")} />
                         </span>
                       </TableHead>
-                      <TableHead className={'font-black text-black'}>Orderability</TableHead>
-                      <TableHead className={'font-black text-black whitespace-break-spaces'}>Restriction Reason</TableHead>
-                      <TableHead className={'font-black text-black'}>CRS</TableHead>
-                      <TableHead className={'font-black text-black'}>ROHS</TableHead>
-                      <TableHead className={'font-black text-black'}>Retrunable</TableHead>
-                      <TableHead className={'font-black text-black whitespace-break-spaces'}>Hard roll</TableHead>
-                      <TableHead className={'font-black text-black whitespace-break-spaces'}>Dangerous Goods</TableHead>
-                      <TableHead className={'font-black text-black whitespace-break-spaces'}>Lithium Battery</TableHead>
-                      <TableHead className={'font-black text-black'}>Oversize</TableHead>
-                      <TableHead className={'font-black text-black'}>Heavy</TableHead>
-                      <TableHead className={'font-black text-black'}>Price</TableHead>
-                      <TableHead className={'font-black text-black whitespace-break-spaces'}>Friegh Price</TableHead>
-                      <TableHead className={'font-black text-black'}>Tax</TableHead>
-                      <TableHead className={'font-black text-black'}>Total</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Orderability</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black '}>Restriction Reason</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>CRS</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>ROHS</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Retrunable</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black '}>Hard roll</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black '}>Dangerous Goods</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black '}>Lithium Battery</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Oversize</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Heavy</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Price</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black '}>Friegh Price</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Tax</TableHead>
+                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Total</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -5669,6 +5671,16 @@ console.log("Asset Info OTC : ",isOutWarranty)
                       <PaginationContent>
                             <PaginationItem>
                               <PaginationPrevious
+                                placeholder="First"
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handlePageChange(1);
+                                }}
+                              />
+                            </PaginationItem>
+                            <PaginationItem>
+                              <PaginationPrevious
                                 href="#"
                                 onClick={(e) => {
                                   e.preventDefault();
@@ -5701,6 +5713,22 @@ console.log("Asset Info OTC : ",isOutWarranty)
                                 }}
                               />
                             </PaginationItem>
+                            <PaginationItem>
+                              <PaginationNext
+                              placeholder="Last"
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handlePageChange(totalPages);
+                                }}
+                              />
+                            </PaginationItem>
+                             <div className="flex gap-3 p-1 items-center">
+                    Total Page
+                    <span className='border-2 p-1 rounded-md shadow-2xl'>
+                      {totalPages}
+                    </span>
+                  </div>
                           </PaginationContent>
                         </Pagination>
                       </TableCell>
