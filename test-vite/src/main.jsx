@@ -6,6 +6,7 @@ import { Buffer } from "buffer";
 import { DraftProvider } from "./components/DraftContext";
 import { Loader2 } from "lucide-react";
 import { ViewCase } from "./pages/ViewCase";
+import { UploadRma } from "./pages/uploadRMA";
 import { AuthProvider } from "./context/auth-context";
 
 
@@ -123,6 +124,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/app/flowcase" element={<FlowCase />} />
             <Route path="/app/ErfCase" element={<ErfCase />} />
             <Route path="/app/viewcase" element={<ViewCase />} />
+            <Route path="/app/uploadRMA" element={<UploadRma/>} />
 
 
             {/* <Route path='/app/master' element> */}

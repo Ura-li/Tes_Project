@@ -126,11 +126,11 @@ export default function FrontDesk_Page() {
 
 
   return (
-    <div className="min-h-[calc(100vh-64px)] w-full grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-[calc(100vh-64px)]  h-full w-full grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
       {/* Left Column - Profile */}
       <div className="col-span-1">
-        <Card className="rounded-xl shadow-lg h-full flex flex-col">
-          <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-400 text-white text-center relative">
+        <Card className="rounded-xl shadow-lg h-full flex flex-col dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700">
+          <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-400 text-white text-center relative dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-500 dark:to-slate-400 dark:to-130% via-70% from-2%">
             <div className="flex flex-col items-center">
               {preview.ProfilePhoto ? (
                 <img
@@ -148,21 +148,21 @@ export default function FrontDesk_Page() {
 
           <CardContent className="pt-12 text-center flex-1 space-y-2">
             <CardTitle className="text-lg">{user?.name || "User"}</CardTitle>
-            <p className="text-sm text-gray-500">{user?.email}</p>
-            <p className="text-sm text-gray-500">{userData.Phone}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{userData.Phone}</p>
           </CardContent>
 
           <CardFooter className="flex flex-col gap-2 items-center">
             <Badge
               variant="outline"
-              className={`capitalize ${user.role === "admin"
-                  ? "bg-amber-200 text-amber-800"
-                  : "bg-gray-200 text-gray-700"
-                }`}
+              // className={`capitalize ${user.role === "admin"
+              //     ? "bg-amber-200 text-amber-800"
+              //     : "bg-gray-200 text-gray-700"
+              //   }`}
             >
               {user.role}
             </Badge>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-300">
               Latest Login: {new Date().toLocaleString()}
             </p>
           </CardFooter>
@@ -171,7 +171,7 @@ export default function FrontDesk_Page() {
 
       {/* Center Column - Chart */}
       <div className="col-span-1 md:col-span-2">
-        <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col">
+        <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col dark:border-slate-600 dark:border-r-6  dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-10% via-80% from-20%">
           <CardHeader>
             <CardTitle>Cases Overview</CardTitle>
             <CardDescription>Today’s activity</CardDescription>
@@ -184,11 +184,11 @@ export default function FrontDesk_Page() {
 
       {/* Right Column - Notifications */}
       <div className="col-span-1">
-        <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col">
+        <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-10% via-90% from-30%">
           <CardHeader>
             <CardTitle>Notifications</CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 overflow-y-auto space-y-3 max-h-[50vh]">
+          <CardContent className="flex-1 overflow-y-auto space-y-3 max-h-[40vh]">
             <NotificationCard />
           </CardContent>
         </Card>
@@ -196,7 +196,7 @@ export default function FrontDesk_Page() {
 
       {/* Bottom Row - Recent Cases */}
       <div className="col-span-1 md:col-span-4">
-        <Card className="rounded-xl shadow-lg p-4 h-full">
+        <Card className="rounded-xl shadow-lg p-4 h-full dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-tr dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-20% via-80% from-30%">
           <CardHeader>
             <CardTitle>Recent Cases</CardTitle>
           </CardHeader>
@@ -208,7 +208,7 @@ export default function FrontDesk_Page() {
               : caseData.map((c) => (
                 <Card
                   key={c.CaseID}
-                  className="p-3 border-l-4 hover:scale-[0.99] rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400 bg-white cursor-pointer"
+                  className="p-3 border-l-4 hover:scale-[0.99] rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400  dark:border-l-4 dark:border-slate-600 cursor-pointer dark:bg-gradient-to-tr dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-20% via-80% from-50%"
                   onClick={() => navigate(`/app/case/${c.CaseID}`)}
                 >
                   <div className="flex flex-wrap items-center gap-2 ">
@@ -226,12 +226,12 @@ export default function FrontDesk_Page() {
                     <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
                       {STATUS_ENUM_TO_LABEL[c.CaseStatus]}
                     </Badge>
-                    <p className='ml-auto text-xs text-gray-500 '>{c.CreatedOn}</p>
+                    <p className='ml-auto text-xs text-gray-500 dark:text-slate-400'>{c.CreatedOn}</p>
                   </div>
                   <p className={cn("font-medium truncate mt-1", !c.CaseSubject && 'text-red-500')}>{c.CaseSubject || "No Subject"}</p>
                   <div className=" text-gray-500 mt-1 flex justify-between">
-                    <p className='text-md'>{c.CaseID}</p>
-                    <p className='text-md  font-semibold'>{c.UpdateOn ? new Date(c.UpdateOn).toLocaleString("id-ID") : "No Update"}</p>
+                    <p className='text-md dark:text-slate-400'>{c.CaseID}</p>
+                    <p className='text-md  font-semibold dark:text-slate-400'>{c.UpdateOn ? new Date(c.UpdateOn).toLocaleString("id-ID") : "No Update"}</p>
                   </div>
                 </Card>
               ))}

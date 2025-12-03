@@ -18,10 +18,10 @@ export function NotificationCard({ }) {
     return (
 
         notifications.map((i) => (
-            <Card className="shadow-md border rounded-xl hover:shadow-lg transition flex" key={i.token}>                
+            <Card className="shadow-md border rounded-xl hover:shadow-lg transition flex dark:border-slate-600 dark:bg-gradient-to-b dark:from-slate-800 dark:via-slate-700 dark:to-slate-800" key={i.token}>                
             
                 <CardHeader className="flex flex-col gap-1">
-                    <div className="flex justify-between items-center gap-2">
+                    <div className="flex justify-between items-center gap-10">
                         <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeColors[i.type] || "bg-gray-100 text-gray-700"}`}>
                             {i.type || "unknown"}
                         </span>
@@ -30,10 +30,10 @@ export function NotificationCard({ }) {
                     <CardTitle className="text-sm font-semibold">{i.title || `Case ${i.caseId}`}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <CardDescription>{i.description} by {i.user}</CardDescription>
+                    <CardDescription className={"dark:text-gray-400"}>{i.description} by {i.user}</CardDescription>
                 </CardContent>
                 <CardFooter>
-                    <Button onClick={() =>  deleteNotification(i.token)}>
+                    <Button variant={"outline"} className={"dark:border-b-slate-500 dark:bg-gradient-to-b dark:from-slate-600 dark:via-slate-800 dark:to-slate-700"} onClick={() =>  deleteNotification(i.token)}>
                     <Trash/>
                     </Button>
                 </CardFooter>
