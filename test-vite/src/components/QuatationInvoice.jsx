@@ -52,8 +52,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   qrCode: {
-    width: 50,
-    height: 50,
+    width: 45,
+    height: 45,
   },
   logo: {
     width: 60,
@@ -79,29 +79,29 @@ const styles = StyleSheet.create({
   },
   label: {
     width: '30%', 
-    fontSize: 9,
+    fontSize: 8,
   },
   label2: {
     width: '20%', 
-    fontSize: 9,
+    fontSize: 8,
   },
   value: {
     width: '68%',
-    fontSize: 9,
+    fontSize: 8,
   },
   value1: {
     width: '68%',
-    fontSize: 9,
+    fontSize: 8,
     textAlign: 'justify',
     textIndent: -5,
   },
   colon: {
     width: '2%',
-    fontSize: 9,
+    fontSize: 8,
   },
   value2: {
     width: '80%',
-    fontSize: 9,
+    fontSize: 8,
   },
 table: {
     width: '100%',
@@ -200,6 +200,7 @@ export const QuotationInvoice = ({
   customerSignature,
   materialItems = {},
   initialData = {},
+  qrcode
 }) => (
   <Document>
     <Page  size="A4" style={styles.container}>
@@ -210,6 +211,7 @@ export const QuotationInvoice = ({
           alignItems: "center",
           marginBottom: 4,
           padding: 3,
+          borderBottom: 1,
         }}
       >
         <Image src="/hp.png" style={[styles.logo, { padding: 2 }]} />
@@ -278,21 +280,26 @@ export const QuotationInvoice = ({
             <Text style={[styles.value]}>
               {caseDetails?.ProblemDescription ?? "N/A"}
             </Text>
-
-            <Text style={styles.label}>Note</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.CaseProductNote ?? "N/A"}
-            </Text>
           </View>
 
           <View style={styles.rightSection}>
             <Text style={[styles.textSmall, styles.bold]}>
               {caseDetails?.CaseID ?? "N/A"}
             </Text>
-            <Image src="/random_qr.png" style={styles.qrCode} />
+             <View style={{borderBottom : 1, borderTop: 1, padding: 2}}>
+                  <Image src={qrcode} style={styles.qrCode} />
+              </View>
           </View>
         </View>
+           <View style={{display: 'flex', flexDirection: "row",}}>
+                  <View style={styles.leftSection}>
+                    <Text style={{width: '15%', fontSize: 8}}>Note</Text>
+                    <Text style={{width: '1%', fontSize: 8}}>:</Text>
+                    <Text style={{width: '84%', fontSize: 8, textAlign: 'justify'}}>
+                      {caseDetails?.CaseProductNote ?? "N/A"}
+                    </Text>
+                  </View>
+                </View>
       </Section>
 
       <Section title="Customer">
@@ -547,6 +554,8 @@ export const QuotationInvoice = ({
           </Text>
         </View>
 
+       
+
         {/* Sub Total: colspan=6 */}
         <View style={styles.tableRow}>
           <Text
@@ -559,6 +568,21 @@ export const QuotationInvoice = ({
           </Text>
         </View>
 
+        {/* VAT: colspan=6 */}
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan6, styles.alignRight]}
+          >
+            VAT :
+          </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+          {caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue ? 
+            formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VATAmount)  : "0"
+          }
+          </Text>
+        </View>
+
+      
         {/* Total: colspan=6 */}
         <View style={styles.tableRow}>
           <Text
@@ -570,7 +594,32 @@ export const QuotationInvoice = ({
             {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal)}
           </Text>
         </View>
+
+       {/* DP: colspan=6 */}
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan6, styles.alignRight]}
+          >
+            DP :
+          </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+            {formatAccountingRupiah((caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) / 2)}
+          </Text>
+        </View>
+
+       {/* DP: colspan=6 */}
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan6, styles.alignRight]}
+          >
+            Balance Due :
+          </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+            {formatAccountingRupiah((caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) / 2)}
+          </Text>
+        </View>
       </View>
+
 
       <View style={{ display: "flex", flexDirection: "row", columnGap: 2 }} >
         <View style={styles.leftSection} >

@@ -12,6 +12,7 @@ import {
   Slice,
   Stamp,
   Table,
+  FolderInput
 } from "lucide-react"
 import { Building, Briefcase, Phone, Folder, Box, Tag, ShieldCheck, ShoppingCart, Wrench, User, HardHat, Heart, Calendar, ClipboardCheck, Hammer, Server, Barcode, CheckCircle } from 'lucide-react';
 import { NavMain } from "@/components/sidebar/nav-main"
@@ -369,6 +370,12 @@ export function AppSidebar({
         url: "/app/viewcase",
         icon: Pin
       },
+      {
+        name: "RMA",
+        title: "RMA",
+        url: "/app/uploadRMA",
+        icon: FolderInput
+      }
     ],
     default :[
        {
@@ -407,9 +414,9 @@ export function AppSidebar({
         activeClassName="bg-cyan-800 text-white"
       />
     );
-  } else if (data.user.role === 'apo' || data.user.role === 'ce'  ||  data.user.role === 'celead' || data.user?.role === 'cm' || data.user.role === 'ps' ){
+  } else if (data.user.role === 'apo' || data.user.role === 'ce'  ||  data.user.role === 'celead' || data.user?.role === 'cm' || data.user.role === 'ps' ||  data.user?.role === 'apv' ){
     navrole = data.apo;
-  } else if (data.user.role === 'lg' ||  data.user?.role === 'apv' ){
+  } else if (data.user.role === 'lg' ){
     navrole = data.lg;
     DropNav = '';
   } else {
@@ -417,17 +424,17 @@ export function AppSidebar({
   }
 
   return (  
-    <Sidebar collapsible="icon" {...props} className="border-0 bg-none z-40 h-auto ">
-      <SidebarHeader className={'bg-gradient-to-l from-hp-50 via-hp-200 to-hp-300'}>
-        <TeamSwitcher teams={data.teams} />
+    <Sidebar  collapsible="icon" {...props} className="border-0 bg-none z-40 ">
+      <SidebarHeader className={'bg-gradient-to-bl from-hp-50 via-hp-100 to-hp-300 dark:bg-gradient-to-br dark:from-slate-600 dark:via-slate-800 dark:to-slate-800 '}>
+        <TeamSwitcher  teams={data.teams} />
       </SidebarHeader>
-      <SidebarContent className={'bg-gradient-to-b from-hp-300 via-hp-400 to-hp-500 text-white'}>
+      <SidebarContent className={'bg-gradient-to-b from-hp-300 via-hp-400 to-hp-500 text-white dark:from-slate-800 dark:via-slate-700 dark:to-slate-600'}>
         <NavProjects projects={navrole} user={data.user} />
         
         {/* <Separator className={'border-2'}></Separator> */}
         {DropNav}
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className={"bg-gradient-to-t from-hp-50 via-hp-200 to-hp-500 dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-700 dark:to-slate-600"}>
         <NavUser user={data.user} />
       </SidebarFooter>
       <SidebarRail />

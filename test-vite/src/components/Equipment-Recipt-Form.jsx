@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   textSmall: {
-    fontSize: 9,
+    fontSize: 8,
   },
   textCenter: {
     textAlign: 'center',
@@ -89,23 +89,23 @@ const styles = StyleSheet.create({
   },
   label: {
     width: '30%', 
-    fontSize: 9,
+    fontSize: 8,
   },
   label2: {
     width: '20%', 
-    fontSize: 9,
+    fontSize: 8,
   },
   value: {
     width: '68%',
-    fontSize: 9,
+    fontSize: 8,
   },
   colon: {
     width: '2%',
-    fontSize: 9,
+    fontSize: 8,
   },
   value2: {
     width: '80%',
-    fontSize: 9,
+    fontSize: 8,
   },
    table: {
     width: "100%",
@@ -178,12 +178,12 @@ const Table = ({ data }) => (
   </View>
 );
 
-const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
+const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =>
 
 (
   <Document>
     <Page size="A4" style={styles.container}>
-      <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', marginBottom: 4, padding: 3  }}>
+      <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', marginBottom: 4, padding: 3, borderBottom: 1,  }}>
         <Image src="/hp.png" style={[styles.logo,{padding: 2  }]} />
         <View>
           <Text style={styles.sectionHeader}>PT.JAVA ABADI GEMILANG</Text>
@@ -194,6 +194,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
         </View>
         <Text style={[styles.sectionHeader]}>EQUIPMENT RECIPT FORM</Text>
       </View>
+
       <Section title="Case Info">
       <View style={{ display: 'flex', flexDirection: 'row' }}>
         <View style={styles.leftSection}>
@@ -220,19 +221,26 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
           <Text style={[styles.value]}>
             {caseDetails?.ProblemDescription ?? 'N/A'}
           </Text>
+         </View>
 
-          <Text style={styles.label}>Note</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={[styles.value]}>
-            {caseDetails?.CaseProductNote ?? 'N/A'}
-          </Text>
+          <View style={styles.rightSection}>
+            <Text style={[styles.textSmall, styles.bold]}>{caseDetails?.CaseID ?? 'N/A'}</Text>
+            <View style={{borderBottom : 1, borderTop: 1, padding: 2}}>
+                <Image src={qrcode} style={styles.qrCode} />
+            </View>
+          </View>
         </View>
 
-        <View style={styles.rightSection}>
-          <Text style={[styles.textSmall, styles.bold]}>{caseDetails?.CaseID ?? 'N/A'}</Text>
-          <Image src="/random_qr.png" style={styles.qrCode} />
-        </View>
-      </View>
+          <View style={{display: 'flex', flexDirection: "row",}}>
+                   <View style={styles.leftSection}>
+                     <Text style={{width: '15%', fontSize: 8}}>Note</Text>
+                     <Text style={{width: '1%', fontSize: 8}}>:</Text>
+                     <Text style={{width: '84%', fontSize: 8, textAlign: 'justify'}}>
+                       {caseDetails?.CaseProductNote ?? "N/A"}
+                     </Text>
+                   </View>
+                 </View>
+
       </Section>
 
       {/* Customer Section */}
@@ -448,7 +456,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature }) =>
 
       <Text style={styles.textSmall}>• Apabila pelayanan kami kurang memuaskan untuk case {caseDetails?.CaseID ?? 'N/A'}, silahkan sampaikan melalui email ke <Link style={styles.link} src="mailto:escalation.id@hp.com">escalation.id@hp.com</Link></Text>
 
-      <Text style={[styles.textSmall, { marginBottom: 20 }]}>• Apabila dikemudian hari membutuhkan bantuan teknis, silahkan klik{' '}
+      <Text style={[styles.textSmall, { marginBottom: 10 }]}>• Apabila dikemudian hari membutuhkan bantuan teknis, silahkan klik{' '}
         <Link style={styles.link} src="https://hp.care/digital-ID">https://hp.care/digital-ID</Link>
       </Text>
       <Text style={{ borderBottom: '1px solid #ccc' }}></Text>

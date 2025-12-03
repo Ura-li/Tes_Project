@@ -60,6 +60,7 @@ import {
   NotebookPen,
   MessageSquareText,
   CoinsIcon,
+  ClipboardPenLine,
 } from "lucide-react";
 import { CircleChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -100,6 +101,9 @@ import { map, set } from "lodash";
 import QuotationDialog from "@/components/model/QuotationModal";
 import InvoiceDialog from "@/components/model/InvoiceModal"
 import { QuotationInvoice } from "@/components/QuatationInvoice";
+import { QuickLogNote } from "@/components/model/QuickLogNote";
+import { InvoiceDp } from "@/components/InvoiceDp";
+import { Invoice } from "../components/Invoice";
 
 /**
  * TODO : 
@@ -143,7 +147,7 @@ export const STATUS_ENUM_TO_LABEL = {
   NEW_AssignLeader: "New Assign To Leader",
   NEW_AssignAPO: "New Assign To APO",
   NEW_AssignPS: "New Assign To PS",
-  NEW_POPDoc: "New Needed POP Document",
+  NEW_POPDoc: "New Needed POP Doc",
   NEW_Warranty: "New Warranty Approval",
   PartRequest: "Part Request",
   PartRequestLog: "Part Request Logistic",
@@ -316,6 +320,8 @@ export const TabsServiceCaseDetails = ({
   const [invoiceData, setInvoiceData] = useState(null);
   const [invoiceLoading, setInvoiceLoading] = useState(false);
   const [invoiceSubmitting, setInvoiceSubmitting] = useState(false);
+
+  const [logNoteOpen, setLogNoteOpen] = useState(false)
 
   const handleCaseDetails = (field) => (value) => {
     setCaseDetails((prev) => ({ ...prev, [field]: value }));
@@ -928,8 +934,31 @@ const openPopup = () => {
             qrcode={qrCodeImg}
           />
         ).toBlob();
-        const url = URL.createObjectURL(blob);
-        window.open(url);
+        const fileName = `SRF-${
+           quotationInitialData?.quotationNo ||
+           caseDetails?.CaseID ||
+           "document"
+         }.pdf`;
+
+         const url = URL.createObjectURL(blob);
+
+         // Open a new tab/window
+         const newWindow = window.open("", "_blank");
+
+         if (!newWindow) return;
+
+         // Set the tab title
+         newWindow.document.title = fileName;
+
+         // Fill with a minimal HTML shell and embed the PDF
+         newWindow.document.body.style.margin = "0";
+         const iframe = newWindow.document.createElement("iframe");
+         iframe.src = url;
+         iframe.style.border = "none";
+         iframe.style.width = "100%";
+         iframe.style.height = "100vh";
+
+         newWindow.document.body.appendChild(iframe);
         // const link = document.createElement('a');
         // link.href = url;
         // link.download = 'Service_Request_Form.pdf';
@@ -961,8 +990,31 @@ const openPopup = () => {
             customerSignature={signature}
           />
         ).toBlob();
-        const url = URL.createObjectURL(blob);
-        window.open(url);
+       const fileName = `ERF-${
+           quotationInitialData?.quotationNo ||
+           caseDetails?.CaseID ||
+           "document"
+         }.pdf`;
+
+         const url = URL.createObjectURL(blob);
+
+         // Open a new tab/window
+         const newWindow = window.open("", "_blank");
+
+         if (!newWindow) return;
+
+         // Set the tab title
+         newWindow.document.title = fileName;
+
+         // Fill with a minimal HTML shell and embed the PDF
+         newWindow.document.body.style.margin = "0";
+         const iframe = newWindow.document.createElement("iframe");
+         iframe.src = url;
+         iframe.style.border = "none";
+         iframe.style.width = "100%";
+         iframe.style.height = "100vh";
+
+         newWindow.document.body.appendChild(iframe);
       },
       roles: ["admin", "fd", "user", "spv"],
     },
@@ -1032,8 +1084,115 @@ const openPopup = () => {
          newWindow.document.body.appendChild(iframe);
       },
       roles: ["admin", "fd", "user", "spv", "cm"],
+      hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
     },
-    // { icon: StepBack, label: "Work Order", onClick: () => openServiceCatalog("workorder"), hidden:true },
+     {
+      icon: CoinsIcon,
+      label: "DP",
+       onClick: async () => {
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          LogType: "System Info",
+          ActionType: "Request DP",
+          Template: "INVOICE DP Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] DP requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        });
+        const blob = await pdf(
+          <InvoiceDp
+            caseDetails={caseDetails}
+            customerSignature={signature}
+            materialItems={fieldMO(caseDetails)}
+            initialData={quotationInitialData || {}}
+          />
+        ).toBlob();
+         const fileName = `DP-${
+           quotationInitialData?.quotationNo ||
+           caseDetails?.CaseID ||
+           "document"
+         }.pdf`;
+
+         const url = URL.createObjectURL(blob);
+
+         // Open a new tab/window
+         const newWindow = window.open("", "_blank");
+
+         if (!newWindow) return;
+
+         // Set the tab title
+         newWindow.document.title = fileName;
+
+         // Fill with a minimal HTML shell and embed the PDF
+         newWindow.document.body.style.margin = "0";
+         const iframe = newWindow.document.createElement("iframe");
+         iframe.src = url;
+         iframe.style.border = "none";
+         iframe.style.width = "100%";
+         iframe.style.height = "100vh";
+
+         newWindow.document.body.appendChild(iframe);
+      },
+      roles: ["admin", "fd", "user", "spv", "cm"],
+      hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
+    },
+     {
+      icon: CoinsIcon,
+      label: "Invoice",
+       onClick: async () => {
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          LogType: "System Info",
+          ActionType: "Request INVOICE",
+          Template: "INVOICE DP Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] INVOICE requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        });
+        const blob = await pdf(
+          <Invoice
+            caseDetails={caseDetails}
+            customerSignature={signature}
+            materialItems={fieldMO(caseDetails)}
+            initialData={quotationInitialData || {}}
+          />
+        ).toBlob();
+         const fileName = `Invoice-${
+           quotationInitialData?.quotationNo ||
+           caseDetails?.CaseID ||
+           "document"
+         }.pdf`;
+
+         const url = URL.createObjectURL(blob);
+
+         // Open a new tab/window
+         const newWindow = window.open("", "_blank");
+
+         if (!newWindow) return;
+
+         // Set the tab title
+         newWindow.document.title = fileName;
+
+         // Fill with a minimal HTML shell and embed the PDF
+         newWindow.document.body.style.margin = "0";
+         const iframe = newWindow.document.createElement("iframe");
+         iframe.src = url;
+         iframe.style.border = "none";
+         iframe.style.width = "100%";
+         iframe.style.height = "100vh";
+
+         newWindow.document.body.appendChild(iframe);
+      },
+      roles: ["admin", "fd", "user", "spv", "cm"],
+      hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
+    },
+     { icon: ClipboardPenLine, label: "Quick Log Note", onClick: () => {setLogNoteOpen(true)}, roles: ['admin','fd']},
     // { icon: StepBack, label: "Sales Offer", hidden:true},
     // { icon: StepBack, label: "Close Case", hidden:true },
     // { icon: StepBack, label: "Pick", hidden:true },
@@ -1561,6 +1720,14 @@ const openPopup = () => {
           loading={invoiceLoading}
           submitting={invoiceSubmitting}
           onSubmit={handleInvoiceSubmit}
+        />
+      </div>
+      <div>
+        <QuickLogNote
+          formData={FormData}
+          notesList={notesList}
+          open={logNoteOpen}
+          onChange={handleCaseNoteChange}
         />
       </div>
       <div>

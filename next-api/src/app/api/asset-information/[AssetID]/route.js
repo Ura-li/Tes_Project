@@ -184,7 +184,6 @@ export async function PATCH(request, { params }) {
                     EndUserPhone,
                     EndUserAddress,
                 };
-
                 if (existingWarranty) {
                     await tx.asset_warranty.update({
                         where: { WarrantyID: existingWarranty.WarrantyID },
@@ -202,7 +201,6 @@ export async function PATCH(request, { params }) {
 
             return updatedAsset;
         });
-
         return NextResponse.json(
             {
                 success: true,
