@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../prisma/client";
 import bcrypt from "bcrypt";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto"; 
 
 // 🔹 GET: ambil list user dengan filter search & role
 export async function GET(request) {
@@ -19,10 +22,10 @@ export async function GET(request) {
 
     if (search) {
       whereCondition.OR = [
-        { Email: { contains: search, mode: "insensitive" } },
-        { Username: { contains: search, mode: "insensitive" } },
-        { Name: { contains: search, mode: "insensitive" } },
-        { Phone: { contains: search, mode: "insensitive" } },
+        { Email: { contains: search } },
+        { Username: { contains: search } },
+        { Name: { contains: search } },
+        { Phone: { contains: search } },
       ];
     }
 
@@ -76,58 +79,72 @@ export async function GET(request) {
 
 // 🔹 POST: tambah user baru
 export async function POST(req) {
-  const {
-    Email,
-    Username,
-    Password,
-    Name,
-    Role,
-    ProfilePhoto,
-    Phone,
-    Signature,
-  } = await req.json();
-
   try {
+    let Email, Username, Password, Name, Role, ProfilePhoto, Phone, Signature, ResourceId;
 
-    //validasi 
+    // 🟢 Cek apakah request FormData (multipart/form-data)
+    if (req.headers.get("content-type")?.includes("multipart/form-data")) {
+      const formData = await req.formData();
+      Email = formData.get("Email");
+      Username = formData.get("Username");
+      Password = formData.get("Password");
+      Name = formData.get("Name");
+      Role = formData.get("Role");
+      Phone = formData.get("Phone");
+      Signature = formData.get("Signature");
+      ResourceId = formData.get("ResourceId");
+
+      // ProfilePhoto dari file
+      const ProfilePhotoFile = formData.get("ProfilePhoto");
+      if (ProfilePhotoFile && ProfilePhotoFile.size > 0) {
+        const buffer = Buffer.from(await ProfilePhotoFile.arrayBuffer());
+        const ext = path.extname(ProfilePhotoFile.name) || ".png";
+        const uniqueName = `${crypto.randomUUID()}${ext}`;
+        const uploadPath = path.join(process.cwd(), "public/uploads/profiles", uniqueName);
+        fs.writeFileSync(uploadPath, buffer);
+        ProfilePhoto = `/uploads/profiles/${uniqueName}`;
+      }
+    } else {
+      // fallback JSON seperti sebelumnya
+      const json = await req.json();
+      Email = json.Email;
+      Username = json.Username;
+      Password = json.Password;
+      Name = json.Name;
+      Role = json.Role;
+      ProfilePhoto = json.ProfilePhoto;
+      Phone = json.Phone;
+      Signature = json.Signature;
+      ResourceId = json.ResourceId;
+    }
+
+    // 🔹 Validasi required
     const requiredFields = { Email, Username, Password, Name };
     for (const [key, value] of Object.entries(requiredFields)) {
       if (!value || value.trim() === "") {
         return NextResponse.json(
-          {
-            success: false,
-            error: `${key} is required and cannot be empty`,
-          },
+          { success: false, error: `${key} is required and cannot be empty` },
           { status: 400 }
         );
       }
     }
 
-    const existingEmail = await prisma.user.findUnique({
-      where: { Email },
-    });
-    if (existingEmail) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Email is already registered",
-        },
-        { status: 409 } // Conflict
-      );
-    }
+    // 🔹 Cek duplicate Email & Username
+    const existingEmail = await prisma.user.findUnique({ where: { Email } });
+    if (existingEmail) return NextResponse.json({ success: false, error: "Email is already registered" }, { status: 409 });
 
-    // 3️⃣ Cek apakah Username sudah dipakai
-    const existingUsername = await prisma.user.findUnique({
-      where: { Username },
-    });
-    if (existingUsername) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Username is already taken",
-        },
-        { status: 409 } // Conflict
-      );
+    const existingUsername = await prisma.user.findUnique({ where: { Username } });
+    if (existingUsername) return NextResponse.json({ success: false, error: "Username is already taken" }, { status: 409 });
+
+    // 🔹 Proses base64 seperti sebelumnya jika masih base64
+    let finalPhoto = ProfilePhoto;
+    if (ProfilePhoto && typeof ProfilePhoto === "string" && ProfilePhoto.startsWith("data:image")) {
+      const base64Data = ProfilePhoto.split(";base64,").pop();
+      const extension = ProfilePhoto.substring("data:image/".length, ProfilePhoto.indexOf(";base64"));
+      const fileName = `${crypto.randomUUID()}.${extension}`;
+      const filePath = path.join(process.cwd(), "public/uploads/profiles", fileName);
+      fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
+      finalPhoto = `/uploads/profiles/${fileName}`;
     }
 
     const hashedPassword = await bcrypt.hash(Password, 10);
@@ -139,18 +156,16 @@ export async function POST(req) {
         Password: hashedPassword,
         Name,
         Role: Role || "user",
-        ProfilePhoto,
-        Phone,       // ✅ sekarang ikut disimpan
-        Signature,   // ✅ sekarang ikut disimpan
+        ProfilePhoto: finalPhoto,
+        Phone,
+        Signature,
+        ResourceId,
       },
     });
 
     return NextResponse.json({ success: true, data: newUser });
   } catch (error) {
     console.error("User creation error:", error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

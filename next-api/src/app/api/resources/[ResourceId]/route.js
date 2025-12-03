@@ -41,7 +41,23 @@ export async function GET(request, { params }) {
 // ========== PATCH: Edit resource ==========
 export async function PATCH(request, { params }) {
   const { ResourceId } = params;
-  const { Name } = await request.json();
+  const body = await request.json();
+
+  const {
+    Name,
+    ServiceCenterName,
+    ResourceCode,
+    ResourceLogo,
+    Phone,
+    Mobile,
+    Fax,
+    Email,
+    Country,
+    StateProvince,
+    City,
+    ZipPostalCode,
+    AddressLine,
+  } = body;
 
   if (!ResourceId || !Name) {
     return NextResponse.json({
@@ -50,10 +66,29 @@ export async function PATCH(request, { params }) {
     }, { status: 400 });
   }
 
+  const toNull = (v) =>
+    v === undefined || v === "" ? null : v;
+
   try {
     const updatedResource = await prisma.resource.update({
       where: { ResourceId },
-      data: { Name },
+      data: { Name,
+        ServiceCenterName: toNull(ServiceCenterName),
+        ResourceCode:
+         ResourceCode !== undefined && ResourceCode !== null && ResourceCode !==""
+          ? Number(ResourceCode)
+          : null,
+        ResourceLogo: toNull(ResourceLogo),
+        Phone: toNull(Phone),
+        Mobile: toNull(Mobile),
+        Fax: toNull(Fax),
+        Email: toNull(Email),
+        Country: toNull(Country),
+        StateProvince: toNull(StateProvince),
+        City: toNull(City),
+        ZipPostalCode: toNull(ZipPostalCode),
+        AddressLine: toNull(AddressLine),
+       },
     });
 
     return NextResponse.json({

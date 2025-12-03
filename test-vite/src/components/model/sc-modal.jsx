@@ -916,6 +916,8 @@ export function BtnModalAsset({
 //Peoduct Selection
 import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
 import { toast } from "sonner";
+import { data } from "react-router";
+import { id } from "date-fns/locale";
 
 
 function GenericSelector({ 
@@ -3569,11 +3571,30 @@ export function UserAdd({ onAdd }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewPhoto, setPreviewPhoto] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
-  
+  const [signatureImage, setSignatureImage] = useState("");
+  const [signature, setSignature] = useState("");
   useEffect(() => {
     fetchDataResource();
   }, []);
   
+  useEffect(() => {
+    const handleSignature = (event) => {
+      if (event.data.type === "signature") {
+        setSignatureImage(event.data.imageData);
+        setFormData((prev) => ({
+          ...prev,
+          Signature: event.data.imageData,
+        }));
+      }
+    };
+
+    window.addEventListener("message", handleSignature);
+
+    return () => {
+      window.removeEventListener("message", handleSignature);
+    };
+  }, []);
+
   const handleChange = (field) => (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -3594,7 +3615,7 @@ export function UserAdd({ onAdd }) {
       console.log(options)
       setResourceOptions(options);
     }catch(error){
-      console.error("Failed to fetch resources:", err);
+      console.error("Failed to fetch resources:", error);
     }
 
   } 
@@ -3608,11 +3629,12 @@ export function UserAdd({ onAdd }) {
     if (!selectedFile) return "";
     const formDataUpload = new FormData();
     formDataUpload.append("file", selectedFile);
-
+    console.log("Uploading file:", selectedFile);
     try {
       const res = await ApiCustomer.post("/api/upload", formDataUpload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      console.log("Upload response:", res.data);
       return res.data.url;
     } catch (error) {
       console.error("Upload failed:", error);
@@ -3621,7 +3643,8 @@ export function UserAdd({ onAdd }) {
   };
 
   const handleSubmit = async () => {
-    const { Email, Username, Password, Name } = formData;
+    // return console.log(formData);
+    const { Email, Username, Password, Name, Role, ResourceId, Phone, } = formData;
     if (!Email || !Username || !Password || !Name) {
       Swal.fire({
         title: "Data tidak lengkap",
@@ -3635,14 +3658,34 @@ export function UserAdd({ onAdd }) {
     }
 
     try {
-      const uploadedPhoto = await uploadImage();
+      const formDataToSend = new FormData();
+      formDataToSend.append("Email", Email);
+      formDataToSend.append("Username", Username);
+      formDataToSend.append("Password", Password);
+      formDataToSend.append("Name", Name);
+      formDataToSend.append("Role", Role);
+      formDataToSend.append("ResourceId", ResourceId);
+      formDataToSend.append("Phone", Phone);
+      formDataToSend.append("Signature", signature);
+
+      if (Password) formDataToSend.append("NewPassword", Password);
+
+      // File upload (baru)
+      if (selectedFile) {
+        formDataToSend.append("ProfilePhoto", selectedFile);
+      }
 
       const payload = {
-        ...formData,
-        ProfilePhoto: uploadedPhoto,
+        ...formDataToSend,
       };
 
-      await ApiCustomer.post("/api/user", payload);
+      // return console.log("Form Data to Send:", formDataToSend);
+
+      await ApiCustomer.post("/api/user", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       Swal.fire({
         icon: "success",
@@ -3682,6 +3725,22 @@ export function UserAdd({ onAdd }) {
       });
     }
   };
+
+  const handleOpenSignaturePad = () => {
+      const sigWindow = window.open("/signature-pad", "Signature Pad", "width=600,height=400");
+  
+      window.addEventListener("message", (event) => {
+        if (event.data.type === "signature") {
+          setSignature(event.data.signature); // save base64 signature
+          toast.success("Signature captured successfully!",
+            {
+              description: "Signature Caputred Successfully",
+              position:"top-center"
+            }
+          );
+        }
+      });
+    };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -3761,20 +3820,28 @@ export function UserAdd({ onAdd }) {
           <div>
             <Label>Phone</Label>
             <Input
-              type="tel"
+              type="text"
               value={formData.Phone}
               onChange={handleChange("Phone")}
-              placeholder="Contoh: 081234567890"
             />
           </div>
           <div>
             <Label>Signature</Label>
-            <Input
-              type="text"
-              value={formData.Signature}
-              onChange={handleChange("Signature")}
-              placeholder="Contoh: Tanda tangan digital"
-            />
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleOpenSignaturePad}
+            >
+              Tulis Tanda Tangan
+            </Button>
+
+            {signatureImage && (
+              <img
+                src={signatureImage}
+                alt="Signature Preview"
+                className="mt-2 w-24 h-24 rounded-md"
+              />
+            )}
           </div>
           <div>
             <Label>Foto Profil</Label>
@@ -3804,7 +3871,8 @@ export function UserEdit({ IDUser, onUpdate }) {
   const [isOpen, setIsOpen] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-
+  const [signatureImage, setSignatureImage] = useState("");
+  const [signature, setSignature] = useState("");
   const [resource, setResource] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
   const fetchDataResource = async() => {
@@ -3815,10 +3883,9 @@ export function UserEdit({ IDUser, onUpdate }) {
         value: res.ResourceId,
         accounts: res.resourceAccounts, // kamu bisa pakai ini nanti kalau mau tampilkan info akun juga
       }));
-      console.log(options)
       setResourceOptions(options);
     }catch(error){
-      console.error("Failed to fetch resources:", err);
+      console.error("Failed to fetch resources:", error );
     }
 
   } 
@@ -3853,7 +3920,9 @@ export function UserEdit({ IDUser, onUpdate }) {
         Signature: data.Signature || "",
       });
 
-      setPreviewPhoto(data.ProfilePhoto || null);
+      setPreviewPhoto(data.ProfilePhoto || "");
+      setSignatureImage(data.Signature || "");
+      setSignature(data.Signature || "");
     } catch (error) {
       console.error("Error fetching User information:", error);
     }
@@ -3863,6 +3932,8 @@ export function UserEdit({ IDUser, onUpdate }) {
     setFormData(defaultFormData);
     setPreviewPhoto(null);
     setSelectedFile(null);
+    setSignatureImage("");
+    setSignature("");
   };
 
   useEffect(() => {
@@ -3904,6 +3975,25 @@ export function UserEdit({ IDUser, onUpdate }) {
     }
   };
 
+  const handleOpenSignaturePad = () => {
+    const sigWindow = window.open("/signature-pad", "Signature Pad", "width=600,height=400");
+    window.addEventListener("message", (event) => {
+      if (event.data.type === "signature") {
+        setSignatureImage(event.data.signature);
+        setSignature(event.data.signature);
+        
+        setFormData((prev) => ({
+          ...prev,
+          Signature: event.data.signature,
+        }) );
+
+        toast.success("Signature captured successfully!", {
+          position: "top-center",
+        });
+      }
+    });
+  };
+
   const handleUpdate = async () => {
     const { Email, Username, Password, Name, Role, ResourceId, Phone, Signature } = formData;
 
@@ -3937,7 +4027,7 @@ export function UserEdit({ IDUser, onUpdate }) {
       if (selectedFile) {
         formDataToSend.append("ProfilePhoto", selectedFile);
       }
-
+      
       await ApiCustomer.patch(`/api/user/${IDUser}`, formDataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -4059,11 +4149,20 @@ export function UserEdit({ IDUser, onUpdate }) {
           </div>
           <div>
             <Label>Signature</Label>
-            <Input
-              type="text"
-              value={formData.Signature}
-              onChange={handleChange("Signature")}
-            />
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleOpenSignaturePad}
+            >
+              Open Signature Pad
+            </Button>
+            {signatureImage && (
+              <img
+                src={signatureImage}
+                alt="Signature Preview"
+                className="mt-2 w-24 h-24 rounded-md"
+              />
+            )}
           </div>
           <div>
             <Label>Profile Photo</Label>
@@ -4616,12 +4715,24 @@ export function PartDelete ({ PartNumber, isModalOpen, setIsModalOpen, onUpdate 
       <Trash />
     </Button>
   );
-};
+}
 
 export function ResourceAdd () {
   const [formDataResource, setFormDataResource] = useState({
    ResourceId: '',
-   Name: '',	
+   Name: '',
+   ServiceCenterName: '',
+   ResourceCode: '',
+   ResourceLogo: '',
+   Phone: '',
+   Mobile: '',
+   Fax: '',
+   Email: '',
+   Country: '',
+   StateProvince: '',
+   City: '',
+   ZipPostalCode: '',
+   AddressLine: '',	
    })
    
    // Make Handler ProductType
@@ -4631,6 +4742,51 @@ export function ResourceAdd () {
        ...prevState,
        [id]:value
      }));
+   };
+
+   const handleLogoChange = (e) => {
+     const file = e.target.files[0];
+     if (!file) return;
+
+     if (!file.type.startsWith("image/")) {
+       Swal.fire({
+          icon: "error",
+          title: "Invalid file type",
+          text: "Please select an image file.",
+          timer: 1500,
+          showConfirmButton: false,
+          allowEscapeKey: false,
+       });
+       return;
+     }
+   const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormDataResource((prev) => ({ ...prev, ResourceLogo: reader.result }));
+    };
+    reader.readAsDataURL(file);
+   };
+
+   const buildPayLoad = () => {
+      const toNull = (v) => (v === "" || v === undefined ? null : v);
+      return {
+        ResourceId: formDataResource.ResourceId,
+        Name: formDataResource.Name,
+        ServiceCenterName: toNull(formDataResource.ServiceCenterName),
+        ResourceCode:
+          formDataResource.ResourceCode !== "" && formDataResource.ResourceCode !== null && formDataResource.ResourceCode !== undefined
+            ? Number(formDataResource.ResourceCode)
+            : null,
+        ResourceLogo: toNull(formDataResource.ResourceLogo),
+        Phone: toNull(formDataResource.Phone),
+        Mobile: toNull(formDataResource.Mobile),
+        Fax: toNull(formDataResource.Fax),
+        Email: toNull(formDataResource.Email),
+        Country: toNull(formDataResource.Country),
+        StateProvince: toNull(formDataResource.StateProvince),
+        City: toNull(formDataResource.City),
+        ZipPostalCode: toNull(formDataResource.ZipPostalCode),
+        AddressLine: toNull(formDataResource.AddressLine),
+      };
    };
 
    // Handler Submit
@@ -4651,9 +4807,9 @@ export function ResourceAdd () {
        });
        return;
      }  
-   
+     const payload = buildPayLoad();
      try {
-       const response = await ApiCustomer.post("/api/resources", formDataResource);
+       const response = await ApiCustomer.post("/api/resources", payload);
        console.log("Success:", response.data);
    
        Swal.fire({
@@ -4682,33 +4838,148 @@ export function ResourceAdd () {
        });
      }
    };
+   const fields = [
+    {
+      id: 'ResourceId',
+      label: 'Resource ID',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'Name',
+      label: 'Name',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'ServiceCenterName',
+      label: 'Service Center Name',
+      type: 'text',
+    },
+    {
+      id: 'ResourceCode',
+      label: 'Resource Code',
+      type: 'number',
+    },
+    {
+      id: 'Phone',
+      label: 'Phone',
+      type: 'text',
+    },
+    {
+      id: 'Mobile',
+      label: 'Mobile',
+      type: 'text',
+    },
+    {
+      id: 'Fax',
+      label: 'Fax',
+      type: 'text',
+    },
+    {
+      id: 'Email',
+      label: 'Email',
+      type: 'email',
+    },
+    {
+      id: 'Country',
+      label: 'Country',
+      type: 'text',
+    },
+    {
+      id: 'StateProvince',
+      label: 'State/Province',
+      type: 'text',
+    },
+    {
+      id: 'City',
+      label: 'City',
+      type: 'text',
+    },
+    {
+      id: 'ZipPostalCode',
+      label: 'Zip/Postal Code',
+      type: 'text',
+    },
+    {
+      id: 'AddressLine',
+      label: 'Address Line',
+      type: 'text',
+    },
+   ];
  return (
    <Dialog>
      <DialogTrigger asChild>
        <Button variant="outline" className="ml-2 rounded-sm h-11"> Resource Add</Button>
      </DialogTrigger>
-     <DialogContent className="h-[300px] overflow-y-auto">
+     <DialogContent className="w-full max-w-2xl md:max-w-3xl max-h-[80vh] overflow-y-auto">
        <DialogHeader>
          <DialogTitle>Add Resource Information</DialogTitle>
          <DialogDescription>
            Add the Resource Fields marked with * are required.
          </DialogDescription>
        </DialogHeader>
-       <div className="space-y-2">
+        <div className="space-y-4">
+          {/* Grid dua kolom di layar besar */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {fields.map(({ id, label, type, required }) => (
+              <div key={id}>
+                <Label htmlFor={id}>
+                  {label}{" "}
+                  {required && <span className="text-red-600">*</span>}
+                </Label>
+                <Input
+                  type={type}
+                  id={id}
+                  className="p-2"
+                  value={formDataResource[id] ?? ""}
+                  onChange={handlerInputResource}
+                />
+              </div>
+            ))}
+          </div>
 
-       <Label>Resource ID<Label className="text-red-600">*</Label></Label>
-       <Input type="text" id="ResourceId" className="p-2" value={formDataResource.ResourceId} onChange={handlerInputResource} />
+          {/* Bagian logo: upload + preview */}
+          <div className="space-y-2">
+            <Label htmlFor="ResourceLogo">Resource Logo</Label>
+            <Input
+              id="ResourceLogo"
+              type="file"
+              accept="image/*"
+              onChange={handleLogoChange}
+            />
 
-       <Label>Name<Label className="text-red-600">*</Label></Label>
-       <Input type="text" id="Name" className="p-2" value={formDataResource.Name} onChange={handlerInputResource} />
-       </div>
+            {formDataResource.ResourceLogo && (
+              <div className="mt-2 flex items-center gap-4">
+                <img
+                  src={formDataResource.ResourceLogo}
+                  alt="Resource logo preview"
+                  className="h-16 md:h-20 object-contain border rounded-md p-1 bg-background"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setFormDataResource((prev) => ({
+                      ...prev,
+                      ResourceLogo: "",
+                    }))
+                  }
+                >
+                  Hapus logo
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
        <DialogFooter>
          <Button onClick={handlerResource}>Add</Button>
        </DialogFooter>
      </DialogContent>
    </Dialog>
- )
-};
+ );
+}
 
 export function ResourceEdit({ ResourceId, onUpdate }) {
   const [formData, setFormData] = useState({});
@@ -4716,21 +4987,91 @@ export function ResourceEdit({ ResourceId, onUpdate }) {
 
   const defaultFormData = {
     ResourceId: "",
-    Name: ""
+    Name: "",
+    ServiceCenterName: "",
+    ResourceCode: "",
+    ResourceLogo: "",
+    Phone: "",
+    Mobile: "",
+    Fax: "",
+    Email: "",
+    City: "",
+    StateProvince: "",
+    Country: "",
+    ZipPostalCode: "",
+    AddressLine: "",
   };
 
   const fetchResource = async () => {
     try {
       const res = await ApiCustomer.get(`/api/resources/${ResourceId}`);
-      setFormData(res.data.data || defaultFormData);
+      const data = res.data.data || {};
+
+      setFormData({
+        ...defaultFormData,
+        ...data,
+        ResourceCode: data.ResourceCode != null ? String(data.ResourceCode): "",
+      });
     } catch (e) {
       console.error("Fetch failed", e);
+      Swal.fire({
+        icon: "error",
+        title: "Fetch failed",
+        text: "Failed to fetch resource data.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     }
   };
 
   const handleChange = (field) => (e) => {
     const val = e.target.type === "checkbox" ? e.target.checked : e.target.value;
     setFormData((prev) => ({ ...prev, [field]: val }));
+  };
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid file type",
+        text: "Please select an image file.",
+        timer: 1500,
+        showConfirmButton: false,
+        allowEscapeKey: false,
+      });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData((prev) => ({ ...prev, ResourceLogo: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const buildPayload = () => {
+    const toNull = (v) => (v === "" || v === undefined ? null : v);
+
+    return {
+      Name: formData.Name,
+      ServiceCenterName: toNull(formData.ServiceCenterName),
+      ResourceCode:
+        formData.ResourceCode !== "" && formData.ResourceCode !== null
+          ? Number(formData.ResourceCode)
+          : null,
+      ResourceLogo: toNull(formData.ResourceLogo),
+      Phone: toNull(formData.Phone),
+      Mobile: toNull(formData.Mobile),
+      Fax: toNull(formData.Fax),
+      Email: toNull(formData.Email),
+      Country: toNull(formData.Country),
+      StateProvince: toNull(formData.StateProvince),
+      City: toNull(formData.City),
+      ZipPostalCode: toNull(formData.ZipPostalCode),
+      AddressLine: toNull(formData.AddressLine),
+    };
   };
 
   const handleUpdate = async () => {
@@ -4746,7 +5087,7 @@ export function ResourceEdit({ ResourceId, onUpdate }) {
       });
     }
 
-    const updatedData = { Name };
+    const updatedData = buildPayload();
 
     try {
       await ApiCustomer.patch(`/api/resources/${ResourceId}`, updatedData);
@@ -4777,7 +5118,23 @@ export function ResourceEdit({ ResourceId, onUpdate }) {
   useEffect(() => {
     if (ResourceId && isOpen) fetchResource();
     else if (!isOpen) setFormData(defaultFormData);
-  }, [isOpen]);
+  }, [isOpen, ResourceId]);
+
+  const fields = [
+    { id: "ResourceId", label: "Resource Id", type: "text", required: true, readonly: true },
+    { id: "Name", label: "Name", type: "text", required: true },
+    { id: "ServiceCenterName", label: "Service Center Name", type: "text" },
+    { id: "ResourceCode", label: "Resource Code", type: "number" },
+    { id: "Phone", label: "Phone", type: "text" },
+    { id: "Mobile", label: "Mobile", type: "text" },
+    { id: "Fax", label: "Fax", type: "text" },
+    { id: "Email", label: "Email", type: "text" },
+    { id: "Country", label: "Country", type: "text" },
+    { id: "StateProvince", label: "State/Province", type: "text" },
+    { id: "City", label: "City", type: "text" },
+    { id: "ZipPostalCode", label: "Zip/Postal Code", type: "text" },
+    { id: "AddressLine", label: "Address Line", type: "text" },
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -4786,29 +5143,67 @@ export function ResourceEdit({ ResourceId, onUpdate }) {
           <Pencil />
         </Button>
       </DialogTrigger>
-      <DialogContent className="h-[300px] overflow-y-auto">
+      <DialogContent className="w-full max-w-2xl md:max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Resource</DialogTitle>
           <DialogDescription>Update data Resource. (*) wajib diisi.</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3">
-          {[{ id: "ResourceId", label: "Resource Id", type: "text", required: true, readonly: true },
-            { id: "Name", label: "Name", type: "text", required: true }].map(({ id, label, type, required, readonly }) => (
-            <div key={id}>
-              <Label htmlFor={id}>
-                {label} {required && <span className="text-red-500">*</span>}
-              </Label>
-              <Input
-                type={type}
-                id={id}
-                value={formData[id] || ""}
-                onChange={handleChange(id)}
-                readOnly={readonly}
-              />
-            </div>
-          ))}
+        <div className="space-y-4">
+          {/* 🔹 Grid 2 kolom di layar besar */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {fields.map(({ id, label, type, required, readonly }) => (
+              <div key={id}>
+                <Label htmlFor={id}>
+                  {label}{" "}
+                  {required && <span className="text-red-500">*</span>}
+                </Label>
+                <Input
+                  type={type}
+                  id={id}
+                  value={formData[id] ?? ""}
+                  onChange={handleChange(id)}
+                  readOnly={readonly}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* 🔹 Khusus bagian Logo: upload + preview */}
+          <div className="space-y-2">
+            <Label htmlFor="ResourceLogo">Resource Logo</Label>
+            <Input
+              id="ResourceLogo"
+              type="file"
+              accept="image/*"
+              onChange={handleLogoChange}
+            />
+
+            {formData.ResourceLogo && (
+              <div className="mt-2 flex items-center gap-4">
+                <img
+                  src={formData.ResourceLogo}
+                  alt="Resource logo preview"
+                  className="h-16 md:h-20 object-contain border rounded-md p-1 bg-background"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      ResourceLogo: "",
+                    }))
+                  }
+                >
+                  Hapus logo
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
+
 
         <DialogFooter className="mt-4">
           <Button onClick={handleUpdate}>Simpan</Button>
@@ -6666,7 +7061,8 @@ export function ResourceAccountAdd() {
     const fetchResources = async () => {
       try {
         const response = await ApiCustomer.get("/api/resources"); 
-        setResources(response.data.data);
+        setResources(response.data.data || []);
+        console.log("Fetched resources:", response.data.data);
       } catch (error) {
         console.error("Error fetching resources:", error);
       }
@@ -6763,6 +7159,7 @@ export function ResourceAccountAdd() {
 }
 
 export function ResourceAccountEdit({ ResourceAccountId, onUpdate, resources }) {
+  console.log("ResourceAccountId di Edit:", resources);
   const [resourceAccount, setResourceAccount] = useState(null);
   const [name, setName] = useState("");
   const [resourceId, setResourceId] = useState("");
@@ -8283,7 +8680,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           ApiCustomer.get("/api/booking"),
           ApiCustomer.get("/api/resources"),
           ApiCustomer.get("/api/resource-account"),
-          ApiCustomer.get("/api/users?role=ce"),
+          ApiCustomer.get("/api/user?role=ce"),
           ApiCustomer.get("/api/booking-status"),
         ]);
 
