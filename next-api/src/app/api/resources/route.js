@@ -6,26 +6,26 @@ export async function GET(request) {
     // Ambil parameter pencarian & pagination dari URL
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("keyword") || "";  // Ambil kata kunci pencarian
-    const page = parseInt(searchParams.get("page") || "1", 10);  // Halaman saat ini
-    const limit = parseInt(searchParams.get("limit") || "10", 10);  // Batas data per halaman
+    const page = parseInt(searchParams.get("page")) || 1;  // Halaman saat ini
+    const limit = parseInt(searchParams.get("limit")) || 10;  // Batas data per halaman
 
     const skip = (page - 1) * limit;
 
     const where = search
       ? {
         OR: [
-          { ResourceId: { contains: search, mode: "insensitive" } },
-          { Name: { contains: search, mode: "insensitive" } },
-          { ServiceCenterName: { contains: search, mode: "insensitive" } },
-          { City: { contains: search, mode: "insensitive" } },
-          { StateProvince: { contains: search, mode: "insensitive" } },
-          { Country: { contains: search, mode: "insensitive" } },
-          { Phone: { contains: search, mode: "insensitive" } },
-          { Mobile: { contains: search, mode: "insensitive" } },
-          { Email: { contains: search, mode: "insensitive" } },
+          { ResourceId: { contains: search } },
+          { Name: { contains: search } },
+          { ServiceCenterName: { contains: search } },
+          { City: { contains: search } },
+          { StateProvince: { contains: search } },
+          { Country: { contains: search } },
+          { Phone: { contains: search } },
+          { Mobile: { contains: search } },
+          { Email: { contains: search } },
           ], 
         }
-      : {};
+      : undefined;
     // Hitung jumlah total data yang cocok dengan pencarian
     const totalCount = await prisma.resource.count({ where });
 
@@ -50,13 +50,14 @@ export async function GET(request) {
     return NextResponse.json({
       success: true,
       message: 'List Data Resources',
-      data: {
-      resources,
-      totalCount,
-      totalPages,
-      currentPage,
-      pageSize: limit,
-      }
+      data: resources,
+      meta: {
+        totalCount,
+        totalPages,
+        currentPage,
+        pageSize: limit,
+      },
+
     });
   } catch (error) {
     console.error('🔥 ERROR in GET API:', error);

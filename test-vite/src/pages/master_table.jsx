@@ -1884,8 +1884,9 @@ export const Assets_table = () => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   // dropdown filters
-  const [selectedProductLine, setSelectedProductLine] = useState("");
-  const [selectedWarrantyStatus, setSelectedWarrantyStatus] = useState("");
+  const [selectedProductLine, setSelectedProductLine] = useState(null);
+  const [selectedWarrantyStatus, setSelectedWarrantyStatus] = useState(null);
+  const [selectedProductNumber, setSelectedProductNumber] = useState(null);
 
   // sorting
   const [sortConfig, setSortConfig] = useState({ key: "AssetID", direction: "asc" });
@@ -1952,6 +1953,32 @@ export const Assets_table = () => {
     () => ["", ...new Set(assets.map(a => a?.Warranty_Status).filter(Boolean).sort())],
     [assets]
   );
+  const uniqueProductNumbers = useMemo(
+  () => [
+    ...new Set(
+      assets
+        ?.map(a => a?.ProductNumber)
+        .filter(Boolean)
+        .sort()
+    )
+  ].map((v, i) => ({ id: i, name: v })),
+  [assets]
+);
+
+  const productLineOptions = useMemo(() =>
+    uniqueProductLines
+      .filter(v => v !== "")
+      .map((v, index) => ({ id: index + 1, name: v })),
+    [uniqueProductLines]
+  );
+
+  const warrantyStatusOptions = useMemo(() =>
+    uniqueWarrantyStatus
+      .filter(v => v !== "")
+      .map((v, index) => ({ id: index + 1, name: v })),
+    [uniqueWarrantyStatus]
+  );
+
 
 
   useEffect(() => {
@@ -1965,12 +1992,13 @@ export const Assets_table = () => {
     const productNumber = a?.ProductNumber ?? "";
 
     // FILTER: Product Line
-    const fLine = !selectedProductLine || productLine === selectedProductLine;
+    const fLine = !selectedProductLine || productLine === selectedProductLine.name;
 
     // FILTER: Warranty
-    const fWarranty = !selectedWarrantyStatus || warranty === selectedWarrantyStatus;
+    const fWarranty = !selectedWarrantyStatus || warranty === selectedWarrantyStatus.name;
+    const fProductNumber = !selectedProductNumber || productNumber === selectedProductNumber.name;
 
-    if (!(fLine && fWarranty)) return false;
+    if (!(fLine && fWarranty && fProductNumber)) return false;
 
     // SEARCH
     if (!q) return true;
@@ -1994,7 +2022,7 @@ export const Assets_table = () => {
 
     setFilteredAssets(next);
     setCurrentPage(1);
-  }, [debouncedSearchTerm, assets, selectedProductLine, selectedWarrantyStatus]);
+  }, [debouncedSearchTerm, assets, selectedProductLine, selectedWarrantyStatus, selectedProductNumber]);
 
 
   // sorting function
@@ -2074,6 +2102,7 @@ export const Assets_table = () => {
   const resetFilters = () => {
     setSelectedProductLine("");
     setSelectedWarrantyStatus("");
+    setSelectedProductNumber(null);
     setSearchTerm("");
     setCurrentPage(1);
     setSortConfig({ key: "AssetID", direction: "asc" });
@@ -2099,37 +2128,36 @@ export const Assets_table = () => {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 mb-4">
-        
-        {/* Product Line */}
-        <select 
-          className="p-2 text-sm border rounded min-w-[280px]
-                     bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
-                     focus:outline-none focus:ring-2 focus:ring-sky-400
-                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500" 
+        <div className="w-[220px]">
+        <ComboboxDemo
+          id="productline"
           value={selectedProductLine}
-          onChange={(e) => setSelectedProductLine(e.target.value)}
-        >
-          <option value="">Filter by Product Line</option>
-          {uniqueProductLines.map(v => (
-            <option key={v} value={v}>{v || "—"}</option>
-          ))}
-        </select>
-
-        {/* Warranty Status */}
-        <select 
-          className="p-2 text-sm border rounded min-w-[280px]
-                     bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
-                     focus:outline-none focus:ring-2 focus:ring-sky-400
-                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500" 
+          setValue={setSelectedProductLine}
+          options={productLineOptions}
+          placeholder="Filter by Product Line"
+          disabled={false}
+        />
+        </div>
+        <div className="w-[220px]">
+        <ComboboxDemo
+          id="warrantystatus"
           value={selectedWarrantyStatus}
-          onChange={(e) => setSelectedWarrantyStatus(e.target.value)}
-        >
-          <option value="">Filter by Warranty Status</option>
-          {uniqueWarrantyStatus.map(v => (
-            <option key={v} value={v}>{v || "—"}</option>
-          ))}
-        </select>
-
+          setValue={setSelectedWarrantyStatus}
+          options={warrantyStatusOptions}
+          placeholder="Filter by Warranty Status"
+          disabled={false}
+        />
+        </div>
+        <div className="w-[220px]">
+        <ComboboxDemo
+          id="productnumber"
+          value={selectedProductNumber}
+          setValue={setSelectedProductNumber}
+          options={uniqueProductNumbers}
+          placeholder="Filter by Product Number"
+          disabled={false}
+        />
+        </div>
         <button
           onClick={resetFilters}
           className="px-3 py-2 text-sm font-semibold text-white rounded shadow-md
@@ -2314,10 +2342,10 @@ export const Product_table = () => {
   const [goToPageInput, setGoToPageInput] = useState("");
 
   // filters
-  const [selectedLine, setSelectedLine] = useState("");
-  const [selectedType, setSelectedType] = useState("");
-  const [selectedGroup, setSelectedGroup] = useState("");
-  const [selectedTower, setSelectedTower] = useState("");
+  const [selectedLine, setSelectedLine] = useState(null);
+  const [selectedType, setSelectedType] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [selectedTower, setSelectedTower] = useState(null);
 
   // modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -2331,7 +2359,7 @@ export const Product_table = () => {
   // total info dari server
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-
+  
   const handleSort = (key) => {
     setSortConfig((prev) => {
       if (prev.key === key) {
@@ -2374,10 +2402,10 @@ export const Product_table = () => {
           page: pageToLoad,
           limit: itemsPerPage,
           search: debouncedSearchTerm,
-          line: selectedLine,
-          type: selectedType,
-          group: selectedGroup,
-          tower: selectedTower,
+          line: selectedLine?.name || "",
+          type: selectedType?.name || "",
+          group: selectedGroup?.name || "",
+          tower: selectedTower?.name || "",
         },
       });
 
@@ -2436,42 +2464,42 @@ export const Product_table = () => {
   // Sumber untuk unique values filter (kalau kosong, pakai products page sekarang)
   const filterBase = filterSource.length > 0 ? filterSource : products;
 
+  const uniqueLines = useMemo(
+    () => [...new Set(filterBase.map((item) => item.ProductLine || ""))],
+    [filterBase]
+  );
+
+  const uniqueTypes = useMemo(
+    () => [...new Set(filterBase.map((item) => item.product_type?.ProductType || ""))],
+    [filterBase]
+  );
+
+  const uniqueGroups = useMemo(
+    () => [...new Set(filterBase.map((item) => item.product_type?.ProductGroup || ""))],
+    [filterBase]
+  );
+
+  const uniqueTowers = useMemo(
+    () => [...new Set(filterBase.map((item) => item.product_type?.ProductTower || ""))],
+    [filterBase]
+  );
   // unique filters
-  const uniqueLines = useMemo(() => {
-    const set = new Set(
-      filterBase
-        .map((p) => p?.ProductLine)
-        .filter((v) => v !== null && v !== undefined && v !== "")
-    );
-    return ["", ...Array.from(set)].sort();
-  }, [filterBase]);
-
-  const uniqueTypes = useMemo(() => {
-    const set = new Set(
-      filterBase
-        .map((p) => p?.product_type?.ProductType)
-        .filter((v) => v !== null && v !== undefined && v !== "")
-    );
-    return ["", ...Array.from(set)].sort();
-  }, [filterBase]);
-
-  const uniqueGroups = useMemo(() => {
-    const set = new Set(
-      filterBase
-        .map((p) => p?.product_type?.ProductGroup)
-        .filter((v) => v !== null && v !== undefined && v !== "")
-    );
-    return ["", ...Array.from(set)].sort();
-  }, [filterBase]);
-
-  const uniqueTowers = useMemo(() => {
-    const set = new Set(
-      filterBase
-        .map((p) => p?.product_type?.ProductTower)
-        .filter((v) => v !== null && v !== undefined && v !== "")
-    );
-    return ["", ...Array.from(set)].sort();
-  }, [filterBase]);
+  const lineOptions = useMemo(
+    () => uniqueLines.map((v, i) => ({ id: i, name: v || "-"})),
+    [uniqueLines]
+  );
+  const typeOptions = useMemo(
+    () => uniqueTypes.map((v, i) => ({ id: i, name: v || "-"})),
+    [uniqueTypes]
+  );
+  const groupOptions = useMemo(
+    () => uniqueGroups.map((v, i) => ({ id: i, name: v || "—" })),
+    [uniqueGroups]
+  );
+  const towerOptions = useMemo(
+    () => uniqueTowers.map((v, i) => ({ id: i, name: v || "—" })),
+    [uniqueTowers]
+  );
 
   // Sorting hanya untuk data 1 page (di client)
   const sortedProducts = useMemo(() => {
@@ -2507,10 +2535,10 @@ export const Product_table = () => {
   const hasData = sortedProducts.length > 0;
 
   const resetFilters = () => {
-    setSelectedLine("");
-    setSelectedType("");
-    setSelectedGroup("");
-    setSelectedTower("");
+    setSelectedLine(null);
+    setSelectedType(null);
+    setSelectedGroup(null);
+    setSelectedTower(null);
     setSearchTerm("");
     setCurrentPage(1);
     // itemsPerPage biarkan, user mungkin sudah pilih
@@ -2546,66 +2574,34 @@ export const Product_table = () => {
 
       {/* Filters */}
       <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+        <ComboboxDemo
+          id="line"
+          placeholder="All Product Line"
           value={selectedLine}
-          onChange={(e) => {
-            setSelectedLine(e.target.value);
-          }}
-        >
-          <option value="">All Product Line</option>
-          {uniqueLines.map((v, idx) => (
-            <option key={`line-${idx}-${v || "empty"}`} value={v}>
-              {v || "—"}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          setValue={(val) => setSelectedLine(val)}
+          options={lineOptions}
+        />
+        <ComboboxDemo
+          id="type"
+          placeholder="All Product Type"
           value={selectedType}
-          onChange={(e) => {
-            setSelectedType(e.target.value);
-          }}
-        >
-          <option value="">All Product Type</option>
-          {uniqueTypes.map((v, idx) => (
-            <option key={`type-${idx}-${v || "empty"}`} value={v}>
-              {v || "—"}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          setValue={(val) => setSelectedType(val)}
+          options={typeOptions}
+        />
+        <ComboboxDemo
+          id="group"
+          placeholder="All Product Group"
           value={selectedGroup}
-          onChange={(e) => {
-            setSelectedGroup(e.target.value);
-          }}
-        >
-          <option value="">All Product Group</option>
-          {uniqueGroups.map((v, idx) => (
-            <option key={`group-${idx}-${v || "empty"}`} value={v}>
-              {v || "—"}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          setValue={(val) => setSelectedGroup(val)}
+          options={groupOptions}
+        />
+        <ComboboxDemo
+          id="tower"
+          placeholder="All Product Tower"
           value={selectedTower}
-          onChange={(e) => {
-            setSelectedTower(e.target.value);
-          }}
-        >
-          <option value="">All Product Tower</option>
-          {uniqueTowers.map((v, idx) => (
-            <option key={`tower-${idx}-${v || "empty"}`} value={v}>
-              {v || "—"}
-            </option>
-          ))}
-        </select>
-
+          setValue={(val) => setSelectedTower(val)}
+          options={towerOptions}
+        />
         <button
           onClick={resetFilters}
           className="px-3 py-2 bg-gray-400 text-white rounded-lg shadow hover:bg-gray-500"
@@ -4693,6 +4689,16 @@ const sortedData = useMemo(() => {
     setGoToPageInput("");
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
+  };
+
   return (
     <div className="p-6">
       <h2 className="mb-6 text-2xl font-bold">📊 User Table</h2>
@@ -4809,7 +4815,16 @@ const sortedData = useMemo(() => {
                   {/* Tampilkan data Phone di sini */}
                   <TableCell className="p-2 border">{UserItem.Phone}</TableCell>
                   {/* Tampilkan data Signature di sini */}
-                  <TableCell className="p-2 border"><img src={UserItem.Signature} /></TableCell>
+                  <TableCell className="p-2 border">{UserItem.Signature ? (
+                    <button
+                      className="text-blue-600 underline text-xs"
+                      onClick={() => handleViewSignature(
+                        UserItem.Signature.startsWith("data:image")
+                          ? UserItem.Signature
+                        : `data:image/png;base64,${UserItem.Signature}`)} 
+                      >View Signature</button>
+                      ) :("-")}
+                      </TableCell>
                   <TableCell className="p-2 border">
                     {/* {console.log(preview?.ProfilePhoto)} */}
                     {UserItem?.ProfilePhoto ? (
@@ -4818,8 +4833,8 @@ const sortedData = useMemo(() => {
                       "No Photo"
                     )}
                   </TableCell>
-                  <TableCell className="p-2 border">{UserItem.CreatedAt}</TableCell>
-                  <TableCell className="p-2 border">{UserItem.UpdatedAt}</TableCell>
+                  <TableCell className="p-2 border">{formatDate(UserItem.CreatedAt)}</TableCell>
+                  <TableCell className="p-2 border">{formatDate(UserItem.UpdatedAt)}</TableCell>
                   <TableCell className="flex items-center justify-center gap-2 p-2 border">
                     <UserEdit
                       IDUser={UserItem.IDUser}
@@ -4849,8 +4864,12 @@ const sortedData = useMemo(() => {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="w-[90%] max-w-md bg-white rounded-2xl shadow-lg p-6">
               <h3 className="mb-4 text-lg font-semibold text-center">🖋 Signature</h3>
-              <div className="p-3 mb-4 text-sm text-gray-700 bg-gray-100 rounded-md max-h-[300px] overflow-y-auto">
-                {selectedSignature}
+              <div className="flex justify-center mb-4">
+                <img
+                  src={selectedSignature}
+                  alt="Signature"
+                  className="max-w-full max-h-[300px] object-contain border rounded-lg"
+                />
               </div>
               <div className="flex justify-center">
                 <button
@@ -5389,11 +5408,12 @@ export const Resource_table = () => {
       });
 
       if (response.data.success) {
-        const { resources, totalCount, totalPages } = response.data.data;
+        const resources = response.data.data;          // array
+        const meta = response.data.meta;               // pagination
 
         setResourceData(resources || []);
-        setTotalCount(totalCount || 0);
-        setTotalPages(totalPages || 1);
+        setTotalCount(meta?.totalCount || 0);
+        setTotalPages(meta?.totalPages || 1);
 
         Swal.close();
       } else {

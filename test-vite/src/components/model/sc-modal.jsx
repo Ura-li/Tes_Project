@@ -3571,11 +3571,30 @@ export function UserAdd({ onAdd }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewPhoto, setPreviewPhoto] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
-  
+  const [signatureImage, setSignatureImage] = useState("");
+  const [signature, setSignature] = useState("");
   useEffect(() => {
     fetchDataResource();
   }, []);
   
+  useEffect(() => {
+    const handleSignature = (event) => {
+      if (event.data.type === "signature") {
+        setSignatureImage(event.data.imageData);
+        setFormData((prev) => ({
+          ...prev,
+          Signature: event.data.imageData,
+        }));
+      }
+    };
+
+    window.addEventListener("message", handleSignature);
+
+    return () => {
+      window.removeEventListener("message", handleSignature);
+    };
+  }, []);
+
   const handleChange = (field) => (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -3596,7 +3615,7 @@ export function UserAdd({ onAdd }) {
       console.log(options)
       setResourceOptions(options);
     }catch(error){
-      console.error("Failed to fetch resources:", err);
+      console.error("Failed to fetch resources:", error);
     }
 
   } 
@@ -3610,11 +3629,12 @@ export function UserAdd({ onAdd }) {
     if (!selectedFile) return "";
     const formDataUpload = new FormData();
     formDataUpload.append("file", selectedFile);
-
+    console.log("Uploading file:", selectedFile);
     try {
       const res = await ApiCustomer.post("/api/upload", formDataUpload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      console.log("Upload response:", res.data);
       return res.data.url;
     } catch (error) {
       console.error("Upload failed:", error);
@@ -3623,7 +3643,8 @@ export function UserAdd({ onAdd }) {
   };
 
   const handleSubmit = async () => {
-    const { Email, Username, Password, Name } = formData;
+    // return console.log(formData);
+    const { Email, Username, Password, Name, Role, ResourceId, Phone, } = formData;
     if (!Email || !Username || !Password || !Name) {
       Swal.fire({
         title: "Data tidak lengkap",
@@ -3637,14 +3658,34 @@ export function UserAdd({ onAdd }) {
     }
 
     try {
-      const uploadedPhoto = await uploadImage();
+      const formDataToSend = new FormData();
+      formDataToSend.append("Email", Email);
+      formDataToSend.append("Username", Username);
+      formDataToSend.append("Password", Password);
+      formDataToSend.append("Name", Name);
+      formDataToSend.append("Role", Role);
+      formDataToSend.append("ResourceId", ResourceId);
+      formDataToSend.append("Phone", Phone);
+      formDataToSend.append("Signature", signature);
+
+      if (Password) formDataToSend.append("NewPassword", Password);
+
+      // File upload (baru)
+      if (selectedFile) {
+        formDataToSend.append("ProfilePhoto", selectedFile);
+      }
 
       const payload = {
-        ...formData,
-        ProfilePhoto: uploadedPhoto,
+        ...formDataToSend,
       };
 
-      await ApiCustomer.post("/api/user", payload);
+      // return console.log("Form Data to Send:", formDataToSend);
+
+      await ApiCustomer.post("/api/user", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       Swal.fire({
         icon: "success",
@@ -3684,6 +3725,22 @@ export function UserAdd({ onAdd }) {
       });
     }
   };
+
+  const handleOpenSignaturePad = () => {
+      const sigWindow = window.open("/signature-pad", "Signature Pad", "width=600,height=400");
+  
+      window.addEventListener("message", (event) => {
+        if (event.data.type === "signature") {
+          setSignature(event.data.signature); // save base64 signature
+          toast.success("Signature captured successfully!",
+            {
+              description: "Signature Caputred Successfully",
+              position:"top-center"
+            }
+          );
+        }
+      });
+    };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -3763,20 +3820,28 @@ export function UserAdd({ onAdd }) {
           <div>
             <Label>Phone</Label>
             <Input
-              type="tel"
+              type="text"
               value={formData.Phone}
               onChange={handleChange("Phone")}
-              placeholder="Contoh: 081234567890"
             />
           </div>
           <div>
             <Label>Signature</Label>
-            <Input
-              type="text"
-              value={formData.Signature}
-              onChange={handleChange("Signature")}
-              placeholder="Contoh: Tanda tangan digital"
-            />
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleOpenSignaturePad}
+            >
+              Tulis Tanda Tangan
+            </Button>
+
+            {signatureImage && (
+              <img
+                src={signatureImage}
+                alt="Signature Preview"
+                className="mt-2 w-24 h-24 rounded-md"
+              />
+            )}
           </div>
           <div>
             <Label>Foto Profil</Label>
@@ -3806,7 +3871,8 @@ export function UserEdit({ IDUser, onUpdate }) {
   const [isOpen, setIsOpen] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-
+  const [signatureImage, setSignatureImage] = useState("");
+  const [signature, setSignature] = useState("");
   const [resource, setResource] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
   const fetchDataResource = async() => {
@@ -3817,10 +3883,9 @@ export function UserEdit({ IDUser, onUpdate }) {
         value: res.ResourceId,
         accounts: res.resourceAccounts, // kamu bisa pakai ini nanti kalau mau tampilkan info akun juga
       }));
-      console.log(options)
       setResourceOptions(options);
     }catch(error){
-      console.error("Failed to fetch resources:", err);
+      console.error("Failed to fetch resources:", error );
     }
 
   } 
@@ -3855,7 +3920,9 @@ export function UserEdit({ IDUser, onUpdate }) {
         Signature: data.Signature || "",
       });
 
-      setPreviewPhoto(data.ProfilePhoto || null);
+      setPreviewPhoto(data.ProfilePhoto || "");
+      setSignatureImage(data.Signature || "");
+      setSignature(data.Signature || "");
     } catch (error) {
       console.error("Error fetching User information:", error);
     }
@@ -3865,6 +3932,8 @@ export function UserEdit({ IDUser, onUpdate }) {
     setFormData(defaultFormData);
     setPreviewPhoto(null);
     setSelectedFile(null);
+    setSignatureImage("");
+    setSignature("");
   };
 
   useEffect(() => {
@@ -3906,6 +3975,25 @@ export function UserEdit({ IDUser, onUpdate }) {
     }
   };
 
+  const handleOpenSignaturePad = () => {
+    const sigWindow = window.open("/signature-pad", "Signature Pad", "width=600,height=400");
+    window.addEventListener("message", (event) => {
+      if (event.data.type === "signature") {
+        setSignatureImage(event.data.signature);
+        setSignature(event.data.signature);
+        
+        setFormData((prev) => ({
+          ...prev,
+          Signature: event.data.signature,
+        }) );
+
+        toast.success("Signature captured successfully!", {
+          position: "top-center",
+        });
+      }
+    });
+  };
+
   const handleUpdate = async () => {
     const { Email, Username, Password, Name, Role, ResourceId, Phone, Signature } = formData;
 
@@ -3939,7 +4027,7 @@ export function UserEdit({ IDUser, onUpdate }) {
       if (selectedFile) {
         formDataToSend.append("ProfilePhoto", selectedFile);
       }
-
+      
       await ApiCustomer.patch(`/api/user/${IDUser}`, formDataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -4061,11 +4149,20 @@ export function UserEdit({ IDUser, onUpdate }) {
           </div>
           <div>
             <Label>Signature</Label>
-            <Input
-              type="text"
-              value={formData.Signature}
-              onChange={handleChange("Signature")}
-            />
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleOpenSignaturePad}
+            >
+              Open Signature Pad
+            </Button>
+            {signatureImage && (
+              <img
+                src={signatureImage}
+                alt="Signature Preview"
+                className="mt-2 w-24 h-24 rounded-md"
+              />
+            )}
           </div>
           <div>
             <Label>Profile Photo</Label>
@@ -4959,7 +5056,7 @@ export function ResourceEdit({ ResourceId, onUpdate }) {
 
     return {
       Name: formData.Name,
-      serviceCenterName: toNull(formData.ServiceCenterName),
+      ServiceCenterName: toNull(formData.ServiceCenterName),
       ResourceCode:
         formData.ResourceCode !== "" && formData.ResourceCode !== null
           ? Number(formData.ResourceCode)
@@ -6936,7 +7033,8 @@ export function ResourceAccountAdd() {
     const fetchResources = async () => {
       try {
         const response = await ApiCustomer.get("/api/resources"); 
-        setResources(response.data.data);
+        setResources(response.data.data || []);
+        console.log("Fetched resources:", response.data.data);
       } catch (error) {
         console.error("Error fetching resources:", error);
       }
@@ -7033,6 +7131,7 @@ export function ResourceAccountAdd() {
 }
 
 export function ResourceAccountEdit({ ResourceAccountId, onUpdate, resources }) {
+  console.log("ResourceAccountId di Edit:", resources);
   const [resourceAccount, setResourceAccount] = useState(null);
   const [name, setName] = useState("");
   const [resourceId, setResourceId] = useState("");
@@ -8553,7 +8652,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
           ApiCustomer.get("/api/booking"),
           ApiCustomer.get("/api/resources"),
           ApiCustomer.get("/api/resource-account"),
-          ApiCustomer.get("/api/users?role=ce"),
+          ApiCustomer.get("/api/user?role=ce"),
           ApiCustomer.get("/api/booking-status"),
         ]);
 

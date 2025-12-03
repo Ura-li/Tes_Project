@@ -116,6 +116,11 @@ export function AppSidebar({
             icon: Wrench
           },
           {
+            title: "Resource",
+            url: "/app/master/Resource_table",
+            icon: Server
+          }, 
+          {
             title: "Resource Account",
             url: "/app/master/ResourceAccount",
             icon: User
@@ -155,11 +160,6 @@ export function AppSidebar({
             url: "/app/master/Part_table",
             icon: Hammer
           },  
-          {
-            title: "Resource",
-            url: "/app/master/Resource_table",
-            icon: Server
-          }, 
           {
             title: "Repair Class Code",
             url: "/app/master/repairClassCode",
