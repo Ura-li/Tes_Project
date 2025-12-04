@@ -304,23 +304,23 @@ export function ChartRadialText({
   const total = radialchartdata.reduce((sum, d) => sum + d.value, 0);
 
   return (
-    <Card className="flex   p-0 m-0 gap-0 h-fit shadow-none border-0 ring-0 ">
+    <Card className="flex dark:bg-transparent  p-0 m-0 gap-0 h-fit shadow-none border-0 ring-0 ">
       {/* <CardHeader className="items-center pb-0 bg-amber-100">
         <CardTitle>Cases Overview</CardTitle>
         <CardDescription>Today’s activity</CardDescription>
       </CardHeader> */}
 
-      <CardContent className="pb-0 flex flex-col lg:flex-row justify-center m-0 p-0 gap-2">
+      <CardContent className="pb-0 flex flex-col lg:flex-row justify-center m-0 p-0 gap-5">
         <RadialBarChart
           width={220}
-          height={190}
+          height={180}
           data={radialchartdata}
           startAngle={90}
           endAngle={-270}
           innerRadius={60}
           outerRadius={100}
         >
-          <RadialBar dataKey="value" background cornerRadius={6} />
+          <RadialBar dataKey="value" background cornerRadius={6}/>
           <PolarRadiusAxis tick={false} axisLine={false}>
             <Label
               content={({ viewBox }) =>
@@ -351,14 +351,14 @@ export function ChartRadialText({
             />
           </PolarRadiusAxis>
         </RadialBarChart>
-      <CardFooter className="grid  items-center justify-center gap-2 text-xs text-gray-600">
+      <CardFooter className="grid  items-center justify-center text-xs text-gray-600 font-semibold dark:text-gray-400">
         {radialchartdata.map((d) => (
           <div key={d.name} className="flex items-center gap-2">
             <span
               className="w-3 h-3 rounded-full"
               style={{ background: d.fill }}
             ></span>
-            {d.name}: <span className="font-semibold">{d.value}</span>
+            {d.name} : {d.value}
           </div>
         ))}
       </CardFooter>

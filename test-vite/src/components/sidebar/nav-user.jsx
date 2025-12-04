@@ -69,7 +69,7 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="bg-white data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+              className="bg-white dark:bg-gray-700 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={`${API_BASE}${user.avatar}` || "/default-avatar.png"} alt={user.name} />
                 <AvatarFallback className="bg-cyan-700 rounded-lg text-white font-semibold">{user.name?.[0]?.toUpperCase()}</AvatarFallback>
@@ -117,7 +117,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout} className={"cursor-pointer bg-red-300 "}>
+            <DropdownMenuItem onClick={logout} className={"cursor-pointer bg-red-300 dark:bg-gray-700 "}>
             <span  className="flex items-center gap-2">
               <LogOut className="w-5 h-5" />
               <span>Log out</span>

@@ -155,7 +155,8 @@ export const Case = () => {
   const fetchCsr = useServiceCaseStore((s) => s.fetchCsr);
   const fetchActionLog = useServiceCaseStore((s) => s.fetchActionLog);
   const fetchOtcCode = useServiceCaseStore((s) => s.fetchOtcCode);
-
+  const fetchInvoiceData = useServiceCaseStore((s) => s.fetchInvoiceData);
+  const fetchDPData = useServiceCaseStore((s) => s.fetchDPData);
  useEffect(() => {
   if (!caseId) return;
 
@@ -191,6 +192,8 @@ export const Case = () => {
         fetchCsr(),
         fetchActionLog(),
         fetchOtcCode(),
+        fetchDPData(),
+        fetchInvoiceData(),
       ]);
 
       await new Promise((resolve) => setTimeout(resolve, 500));

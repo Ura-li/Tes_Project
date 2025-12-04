@@ -35,7 +35,7 @@ import { Link } from "react-router";
               className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild >
-                  <SidebarMenuButton tooltip={item.title} >
+                  <SidebarMenuButton tooltip={item.title} className="dark:bg-transparent dark:hover:bg-slate-500">
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                     <ChevronRight
@@ -46,7 +46,7 @@ import { Link } from "react-router";
                   <SidebarMenuSub>
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton asChild disabled={subItem.disabled} className={'text-gray-200 text-[1rem] hover:text-black'}>
+                        <SidebarMenuSubButton asChild disabled={subItem.disabled} className={'text-gray-200 text-[1rem] hover:text-black dark:hover:bg-slate-500 dark:text-white '}>
                           <Link to={subItem.url}>
                           {subItem.icon && <subItem.icon />}
                             <span className="">{subItem.title}</span>

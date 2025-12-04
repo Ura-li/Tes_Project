@@ -80,7 +80,8 @@ const InvoiceDialog = () => {
   const invoiceLoading = useServiceCaseStore((s) => s.invoiceLoading);
   const fetchInvoiceData = useServiceCaseStore((s) => s.fetchInvoiceData);
   const caseDetails = useServiceCaseStore((s) => s.caseDetails);
-
+  
+  const totalDpAmount = useServiceCaseStore((s) => s.totalDpAmount());
   const quotation = invoiceData?.quotation;
   const invoice = invoiceData?.invoice;
 
@@ -93,14 +94,16 @@ const InvoiceDialog = () => {
 
   const grandTotalNumber = useMemo(() => {
     if (!quotation?.grandTotal) return 0;
-    const parsed = Number(quotation.grandTotal);
+    let parsed = Number(quotation.grandTotal);
+    if(totalDpAmount !== 0) parsed = parsed - Number(totalDpAmount)
+      console.log("Berkurang", parsed, totalDpAmount)
     return Number.isNaN(parsed) ? 0 : parsed;
-  }, [quotation]);
+  }, [quotation, totalDpAmount]);
 
   // fetch invoice data whenever dialog is opened
   useEffect(() => {
     if (!open || !caseDetails?.CaseID) return;
-    fetchInvoiceData();
+    // fetchInvoiceData();
   }, [open, caseDetails?.CaseID, fetchInvoiceData]);
 
   useEffect(() => {
@@ -260,7 +263,7 @@ const InvoiceDialog = () => {
           </CaseField>
           <CaseField label="DP" lock>
             <Input
-              value={formatAccountingRupiah(0)}
+              value={formatAccountingRupiah(totalDpAmount)}
               readOnly
             />
           </CaseField>
@@ -272,7 +275,7 @@ const InvoiceDialog = () => {
           </CaseField>
           <CaseField label="Grand Total (After VAT)" lock>
             <Input
-              value={formatAccountingRupiah(quotation?.grandTotal)}
+              value={formatAccountingRupiah(grandTotalNumber)}
               readOnly
             />
           </CaseField>
@@ -417,8 +420,16 @@ const InvoiceDialog = () => {
           <strong>Quotation No:</strong> {quotation?.quotationNo || "-"}
         </p>
         <p>
+          <strong>Quotation Total:</strong>{" "}
+          {formatAccountingRupiah(quotation.grandTotal)}
+        </p>
+        <p>
+          <strong>DP Total:</strong>{" "}
+          {formatAccountingRupiah(totalDpAmount)}
+        </p>
+        <p>
           <strong>Grand Total:</strong>{" "}
-          {formatAccountingRupiah(quotation?.grandTotal)}
+          {formatAccountingRupiah(grandTotalNumber)}
         </p>
         <p>
           <strong>Amount Receive:</strong>{" "}

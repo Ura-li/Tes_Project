@@ -21,6 +21,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { twMerge } from "tailwind-merge";
 
 export const SearchCommandBlock = ({
   options = [],
@@ -112,7 +113,7 @@ const handleClear = () => {
           {allowClear && !readOnly && (
             <button
               type="button"
-              className="ml-auto inline-flex items-center justify-center rounded-full p-1 hover:bg-gray-100"
+              className="ml-auto inline-flex items-center justify-center rounded-full p-1 hover:bg-gray-100 dark:hover:bg-black"
               aria-label="Clear selection"
               onClick={(e) => {
                 e.stopPropagation(); // don't trigger startSearchMode
@@ -140,7 +141,7 @@ const handleClear = () => {
           {open && !readOnly && (
             <CommandList
               ref={dropdownRef}
-              className={`absolute z-50 w-full border rounded-md bg-white shadow-lg max-h-60 overflow-y-auto ${
+              className={`absolute z-50 w-full border rounded-md bg-white dark:bg-black shadow-lg max-h-60 overflow-y-auto ${
                 positionAbove ? "bottom-full mb-2" : "top-full mt-2"
               }`}
             >
@@ -171,7 +172,7 @@ const handleClear = () => {
 };
 
    
-export function SelectBar({ id, onChange, value, options, placeholder,readOnly }) {
+export function SelectBar({ id, onChange, value, options, placeholder,readOnly, className }) {
   return (
     <Select
       value={value}
@@ -187,7 +188,7 @@ export function SelectBar({ id, onChange, value, options, placeholder,readOnly }
       }}
       disabled={readOnly}
     >
-      <SelectTrigger className="w-full border-black p-3 text-md">
+      <SelectTrigger className={twMerge(`w-full border-black p-3 text-md, ${className}`)}>
         <SelectValue placeholder={placeholder || "Select an option"} />
       </SelectTrigger>
       <SelectContent>
@@ -238,7 +239,8 @@ export function ComboboxDemo({
   setValue,
   options,
   placeholder,
-  disabled
+  disabled,
+  className
 }) {
   const [open, setOpen] = useState(false)
   const selectedName = value?.name || ""
@@ -249,7 +251,7 @@ export function ComboboxDemo({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between overflow-hidden"
+          className={twMerge(`w-full justify-between overflow-hidden ${className}`)}
           disabled={disabled}
         >
           {selectedName
@@ -428,7 +430,7 @@ export function ComboboxDemo({
     )
   }
 
-export function SelectYN({ value, onValueChange, readOnly }) {
+export function SelectYN({ value, onValueChange, readOnly, className }) {
   return (
     <Select
       value={value }
@@ -436,7 +438,7 @@ export function SelectYN({ value, onValueChange, readOnly }) {
       disabled={readOnly}   // 👈 disable dropdown if readOnly
     >
       <SelectTrigger
-        className="w-full hover:shadow-lg border-b-0 p-3"
+        className={twMerge(`w-full hover:shadow-lg border-b-0 p-3, ${className}`)}
         disabled={readOnly} // 👈 also disable trigger button
       >
         <span>{value }</span>
