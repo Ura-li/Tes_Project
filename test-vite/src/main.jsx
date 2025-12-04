@@ -7,6 +7,7 @@ import { DraftProvider } from "./components/DraftContext";
 import { Loader2 } from "lucide-react";
 import { ViewCase } from "./pages/ViewCase";
 import { AuthProvider } from "./context/auth-context";
+import { TeamProvider } from "./context/team-context";
 
 
 
@@ -101,6 +102,7 @@ window.Buffer = Buffer;
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
+    <TeamProvider>
     <BrowserRouter>
       <DraftProvider>
         <Suspense fallback={<Loading/>}>
@@ -351,6 +353,7 @@ createRoot(document.getElementById("root")).render(
         </Suspense>
       </DraftProvider>
     </BrowserRouter>
+    </TeamProvider>
     </AuthProvider>
   </StrictMode>
 );

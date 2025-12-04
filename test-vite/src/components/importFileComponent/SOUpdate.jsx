@@ -18,6 +18,8 @@ export function SOTemplateButton() {
 }
 
 
+//ONGOING, NOT FINISHED YET
+// -miku21
 export function SOImport() {
     const [file, setFile] = useState(null)
 

@@ -53,6 +53,7 @@ export async function POST(request) {
       warranty,
       flags = {},
       references = {},
+      resources,
     } = await request.json();
 
     if (!caseData) {
@@ -83,11 +84,13 @@ export async function POST(request) {
       eowDate: warrantyEowDate = null,
     } = warranty || {};
 
+// return console.log(resources)
     const result = await prisma.$transaction(async (tx) => {
       let productNumber = initialProductNumber ?? null;
       let companyId = initialCompanyId ?? null;
       let contactId = initialContactId ?? null;
       let assetId = initialAssetId ?? null;
+      let savedResourceId = resources ?? null;
 
       // --- Product (optional new create) ---
       if (isNewProduct) {
@@ -340,6 +343,21 @@ export async function POST(request) {
         throw new HttpError(400, "Asset information is required.");
       }
 
+      // --- get Resource Data
+      let resourceDataCode
+      if(savedResourceId){
+        const dataResource = await tx.resource.findUnique({
+          where: {
+            ResourceId: savedResourceId
+          },
+          select:{
+            ResourceCode: true
+          }
+        })
+        resourceDataCode = dataResource.ResourceCode
+      }
+      // return resourceDataCode
+
       // --- Case creation ---
       if (!contactId || !assetId) {
         throw new HttpError(
@@ -355,7 +373,8 @@ export async function POST(request) {
         throw new HttpError(400, "CreatedBy is required in caseData.");
       }
 
-      const caseId = await generateID("C-", "caseinformation", "CaseID", tx);
+      
+      const caseId = await generateID(resourceDataCode, "caseinformation", "CaseID", tx);
 
       const casePayload = {
         CaseID: caseId,
@@ -403,6 +422,8 @@ export async function POST(request) {
         productNumber,
       };
     });
+    
+    // return console.log("debug", result)
 
     await notifySocket(
       "case:created",

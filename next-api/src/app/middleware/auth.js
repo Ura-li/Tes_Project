@@ -7,11 +7,13 @@ export function getTokenUserId(request) {
   try {
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '');
+    return console.log("TOKEN AUTH : ", authHeader, token)
     if (!token) return null;
 
     const decoded = jwt.verify(token, JWT_SECRET);
     return decoded.id || null;
-  } catch {
+  } catch (err) {
+    console.error("Error fetching token : ",err);
     return null;
   }
 }
