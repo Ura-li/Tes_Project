@@ -4,10 +4,14 @@ import Swal from "sweetalert2";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import ApiCustomer from "@/api";
+import { formatDateForInput, formatDateForMySQL } from "../../lib/utils";
 
-export function SOTemplateButton() {
+export function SOTemplateButton(
+    target = ''
+) {
+    // return console.log(target.target)
   const handleDownload = () => {
-    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/api/import/materialorder`;
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/api/import/materialorder?targetStatus=${target.target}`;
   };
 
   return (
@@ -20,7 +24,10 @@ export function SOTemplateButton() {
 
 //ONGOING, NOT FINISHED YET
 // -miku21
-export function SOImport() {
+export function SOImport(
+    target,
+    dateRMA
+) {
     const [file, setFile] = useState(null)
 
     const handleFileUpload = (e) =>{
@@ -35,15 +42,16 @@ export function SOImport() {
 
         const formData = new FormData();
         formData.append("file",file);
-
+        formData.append("targetStatus", target.target)
+        formData.append("dateRMA", formatDateForMySQL(target.dateRMA))
         try{
-            const response = await ApiCustomer.post("/api/import/part-information",formData);
-            const result = response.json();
+            const response = await ApiCustomer.post("/api/import/materialorder",formData);
+            const result = response.data;
 
             if(result.success){
-                toast(`${result.data.data.message}`)
+                toast(`${result.message}`)
             }else{
-                toast.warning(`${result.data.data.message}`)
+                toast.warning(`${result.message}`)
             }
         }catch(err){
             toast.warning("Failed to import data")
