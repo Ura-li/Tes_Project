@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   qrCode: {
-    width: 50,
-    height: 50,
+    width: 45,
+    height: 45,
   },
   logo: {
     width: 60,
@@ -78,8 +78,7 @@ const styles = StyleSheet.create({
   },
   rightSection: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
   },
   rightSection2: {
     flex: 1,
@@ -89,20 +88,20 @@ const styles = StyleSheet.create({
   },
   label: {
     width: "30%",
-    fontSize: 9,
+    fontSize: 8,
   },
   label2: {
     width: "20%",
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 'bold',
   },
   value: {
     width: "68%",
-    fontSize: 9,
+    fontSize: 8,
   },
   colon: {
     width: "2%",
-    fontSize: 9,
+    fontSize: 8,
   },
   value2: {
     width: '80%',
@@ -208,10 +207,10 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => 
           alignItems: "center",
           marginBottom: 4,
           padding: 3,
+          borderBottom: 1,
         }}
       >
         <Image src="/hp.png" style={[styles.logo, { padding: 2 }]} />
-        {console.log("QR PDF : ", qrcode)}
         <View>
           <Text style={styles.sectionHeader}>PT.JAVA ABADI GEMILANG</Text>
           <Text style={styles.textSmall}>
@@ -229,7 +228,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => 
       </View>
 
       <Section title="Case Info">
-        <View style={{ display: "flex", flexDirection: "row" }}>
+        <View style={{ display: "flex", flexDirection: "row"}}>
           <View style={styles.leftSection}>
             <Text style={styles.label}>Case Type</Text>
             <Text style={styles.colon}>:</Text>
@@ -255,19 +254,24 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => 
             <Text style={[styles.value]}>
               {caseDetails?.ProblemDescription ?? "N/A"}
             </Text>
-
-            <Text style={styles.label}>Note</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {caseDetails?.CaseProductNote ?? "N/A"}
-            </Text>
           </View>
 
           <View style={styles.rightSection}>
             <Text style={[styles.textSmall, styles.bold]}>
               {caseDetails?.CaseID ?? "N/A"}
             </Text>
+            <View style={{borderBottom : 1, borderTop: 1, padding: 2}}>
             <Image src={qrcode} style={styles.qrCode} />
+            </View>
+          </View>
+        </View>
+        <View style={{display: 'flex', flexDirection: "row",}}>
+          <View style={styles.leftSection}>
+            <Text style={{width: '15%', fontSize: 8}}>Note</Text>
+            <Text style={{width: '1%', fontSize: 8}}>:</Text>
+            <Text style={{width: '84%', fontSize: 8, textAlign: 'justify'}}>
+              {caseDetails?.CaseProductNote ?? "N/A"}
+            </Text>
           </View>
         </View>
       </Section>
@@ -512,7 +516,7 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => 
         </Link>
       </Text>
 
-      <Text style={[styles.textSmall, { marginBottom: 20 }]}>
+      <Text style={[styles.textSmall, { marginBottom: 10 }]}>
         • Apabila dikemudian hari membutuhkan bantuan teknis, silahkan klik{" "}
         <Link style={styles.link} src="https://hp.care/digital-ID">
           https://hp.care/digital-ID

@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useMemo} from "react";
+import React, { useState, useEffect , useMemo, use, useCallback} from "react";
 import ApiCustomer from "@/api";
 import { ContactEdit, ContactDelete } from "@/components/model/sc-modal";
 import { CompanyEdit, CompanyDelete } from "@/components/model/sc-modal";
@@ -57,6 +57,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
+import { ComboboxDemo } from "@/components/sc-select";
 import { Cancel } from "@radix-ui/react-alert-dialog";
 // import PDFButton from "./components/PDFButton";
 // import ServiceRequestPDF from "./components/service-request-form";
@@ -78,16 +79,16 @@ export const Contact_table = () => {
   });
 
   // Filters
-  const [selectedCompany, setSelectedCompany] = useState("");
-  const [selectedSalutation, setSelectedSalutation] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-  const [selectedZipCode, setSelectedZipCode] = useState("");
-  const [picNameSearch, setPicNameSearch] = useState("");
-  const [picEmailSearch, setPicEmailSearch] = useState("");
-  const [picPhoneSearch, setPicPhoneSearch] = useState("");
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [selectedSalutation, setSelectedSalutation] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedState, setSelectedState] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedZipCode, setSelectedZipCode] = useState(null);
+  const [picNameSearch, setPicNameSearch] = useState(null);
+  const [picEmailSearch, setPicEmailSearch] = useState(null);
+  const [picPhoneSearch, setPicPhoneSearch] = useState(null);
   // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -127,34 +128,103 @@ export const Contact_table = () => {
   }, []);
 
   // Dropdown options
-  const uniqueCompanies = useMemo(() => ["", ...new Set(contacts.map(c => c.Company).filter(Boolean).sort())], [contacts]);
-  const uniqueSalutations = useMemo(() => ["", ...new Set(contacts.map(c => c.Salutation).filter(Boolean).sort())], [contacts]);
-  const uniqueLanguages = useMemo(() => ["", ...new Set(contacts.map(c => c.PreferredLanguage).filter(Boolean).sort())], [contacts]);
-  const uniqueCountries = useMemo(() => ["", ...new Set(contacts.map(c => c.Country).filter(Boolean).sort())], [contacts]);
+  const companyOptions = useMemo(() => {
+    const companies = contacts
+      .map((c) => c.Company)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(companies)]
+    return unique.map((name, index) => ({
+      id: `company-${index}`,
+      name,
+    }))
+  }, [contacts])
 
-  const uniqueStates = useMemo(() => {
-    const states = contacts.filter(c =>
-      !selectedCountry || c.Country === selectedCountry
-    ).map(c => c.StateProvince).filter(Boolean);
-    return ["", ...new Set(states.sort())];
-  }, [contacts, selectedCountry]);
+  const salutationOptions = useMemo(() => {
+    const salutations = contacts
+      .map((c) => c.Salutation)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(salutations)]
+    return unique.map((name, index) => ({
+      id: `salutation-${index}`,
+      name,
+    }))
+  }, [contacts])
 
-  const uniqueCities = useMemo(() => {
-    const cities = contacts.filter(c =>
-      (!selectedCountry || c.Country === selectedCountry) &&
-      (!selectedState || c.StateProvince === selectedState)
-    ).map(c => c.City).filter(Boolean);
-    return ["", ...new Set(cities.sort())];
-  }, [contacts, selectedCountry, selectedState]);
+  const languageOptions = useMemo(() => {
+    const langs = contacts
+      .map((c) => c.PreferredLanguage)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(langs)]
+    return unique.map((name, index) => ({
+      id: `lang-${index}`,
+      name,
+    }))
+  }, [contacts])
 
-  const uniqueZipCodes = useMemo(() => {
-    const zips = contacts.filter(c =>
-      (!selectedCountry || c.Country === selectedCountry) &&
-      (!selectedState || c.StateProvince === selectedState) &&
-      (!selectedCity || c.City === selectedCity)
-    ).map(c => c.ZipPostalCode).filter(Boolean);
-    return ["", ...new Set(zips.sort())];
-  }, [contacts, selectedCountry, selectedState, selectedCity]);
+  const countryOptions = useMemo(() => {
+    const countries = contacts
+      .map((c) => c.Country)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(countries)]
+    return unique.map((name, index) => ({
+      id: `country-${index}`,
+      name,
+    }))
+  }, [contacts])
+
+  const stateOptions = useMemo(() => {
+    const states = contacts
+      .filter(
+        (c) => !selectedCountry?.name || c.Country === selectedCountry.name
+      )
+      .map((c) => c.StateProvince)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(states)]
+    return unique.map((name, index) => ({
+      id: `state-${index}`,
+      name,
+    }))
+  }, [contacts, selectedCountry])
+
+  const cityOptions = useMemo(() => {
+    const cities = contacts
+      .filter(
+        (c) =>
+          (!selectedCountry?.name || c.Country === selectedCountry.name) &&
+          (!selectedState?.name || c.StateProvince === selectedState.name)
+      )
+      .map((c) => c.City)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(cities)]
+    return unique.map((name, index) => ({
+      id: `city-${index}`,
+      name,
+    }))
+  }, [contacts, selectedCountry, selectedState])
+
+  const zipCodeOptions = useMemo(() => {
+    const zips = contacts
+      .filter(
+        (c) =>
+          (!selectedCountry?.name || c.Country === selectedCountry.name) &&
+          (!selectedState?.name || c.StateProvince === selectedState.name) &&
+          (!selectedCity?.name || c.City === selectedCity.name)
+      )
+      .map((c) => c.ZipPostalCode)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(zips)]
+    return unique.map((name, index) => ({
+      id: `zip-${index}`,
+      name,
+    }))
+  }, [contacts, selectedCountry, selectedState, selectedCity])
 
   // Filtering (search + dropdown)
   const filteredData = useMemo(() => {
@@ -165,13 +235,13 @@ export const Contact_table = () => {
 
       return (
         matchesSearch &&
-        (!selectedCompany || contact.Company === selectedCompany) &&
-        (!selectedSalutation || contact.Salutation === selectedSalutation) &&
-        (!selectedLanguage || contact.PreferredLanguage === selectedLanguage) &&
-        (!selectedCountry || contact.Country === selectedCountry) &&
-        (!selectedState || contact.StateProvince === selectedState) &&
-        (!selectedCity || contact.City === selectedCity) &&
-        (!selectedZipCode || contact.ZipPostalCode === selectedZipCode) &&
+        (!selectedCompany?.name || contact.Company === selectedCompany.name) &&
+        (!selectedSalutation?.name || contact.Salutation === selectedSalutation.name) &&
+        (!selectedLanguage?.name || contact.PreferredLanguage === selectedLanguage.name) &&
+        (!selectedCountry?.name || contact.Country === selectedCountry.name) &&
+        (!selectedState?.name || contact.StateProvince === selectedState.name) &&
+        (!selectedCity?.name || contact.City === selectedCity.name) &&
+        (!selectedZipCode?.name || contact.ZipPostalCode === selectedZipCode.name) &&
         (!picNameSearch || (contact.PIC_Name && contact.PIC_Name.toLowerCase().includes(picNameSearch.toLowerCase()))) &&
         (!picEmailSearch || (contact.PIC_Email && contact.PIC_Email.toLowerCase().includes(picEmailSearch.toLowerCase()))) &&
         (!picPhoneSearch || (contact.PIC_Phone && contact.PIC_Phone.toLowerCase().includes(picPhoneSearch.toLowerCase())))
@@ -263,8 +333,21 @@ export const Contact_table = () => {
     setGoToPageInput("");
   };
 
+    const handleResetFilters = () => {
+    setSearchTerm("");
+    setSelectedCompany("null");
+    setSelectedSalutation("null");
+    setSelectedLanguage("null");
+    setSelectedCountry("null");
+    setSelectedState("null");
+    setSelectedCity("null");
+    setSelectedZipCode("null");
+    setSortConfig({ key: "Company", direction: "asc" });
+    setCurrentPage(1);
+  };
+
   return (
-    <div className="grid p-6 grid-cols-1 w-full h-full rounded-2xl">
+    <div className="grid p-6 grid-cols-1 w-full  rounded-2xl">
       <h2 className="mb-4 text-xl sm:text-2xl font-bold">📊 Contact Management</h2>
 
       {/* Search + Filters */}
@@ -278,40 +361,125 @@ export const Contact_table = () => {
         />
       </div>
         {/* Dropdown filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-6 w-full">
-        <select value={selectedCompany} onChange={(e) => setSelectedCompany(e.target.value)} className="p-2 border rounded-lg shadow-sm">
-          <option value="">All Companies</option>
-          {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select value={selectedSalutation} onChange={(e) => setSelectedSalutation(e.target.value)} className="p-2 border rounded-lg shadow-sm">
-          <option value="">All Salutations</option>
-          {uniqueSalutations.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className="p-2 border rounded-lg shadow-sm">
-          <option value="">All Languages</option>
-          {uniqueLanguages.map(l => <option key={l} value={l}>{l}</option>)}
-        </select>
-        <select value={selectedCountry} onChange={(e) => { setSelectedCountry(e.target.value); setSelectedState(""); setSelectedCity(""); setSelectedZipCode(""); }} className="p-2 border rounded-lg shadow-sm">
-          <option value="">All Countries</option>
-          {uniqueCountries.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select value={selectedState} onChange={(e) => { setSelectedState(e.target.value); setSelectedCity(""); setSelectedZipCode(""); }} className="p-2 border rounded-lg shadow-sm" disabled={!selectedCountry}>
-          <option value="">All States</option>
-          {uniqueStates.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <select value={selectedCity} onChange={(e) => { setSelectedCity(e.target.value); setSelectedZipCode(""); }} className="p-2 border rounded-lg shadow-sm" disabled={!selectedState}>
-          <option value="">All Cities</option>
-          {uniqueCities.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select value={selectedZipCode} onChange={(e) => setSelectedZipCode(e.target.value)} className="p-2 border rounded-lg shadow-sm" disabled={!selectedCity}>
-          <option value="">All Zip Codes</option>
-          {uniqueZipCodes.map(z => <option key={z} value={z}>{z}</option>)}
-        </select>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-6 w-full">
+       <ComboboxDemo
+          id="company"
+          value={selectedCompany}
+          setValue={(val) => {
+            setSelectedCompany(val?.name ? val : null)
+            setCurrentPage(1)
+          }}
+          options={companyOptions}
+          placeholder="🏢 All Companies"
+          disabled={false}
+        />
+
+        {/* Salutation */}
+        <ComboboxDemo
+          id="salutation"
+          value={selectedSalutation}
+          setValue={(val) => {
+            setSelectedSalutation(val?.name ? val : null)
+            setCurrentPage(1)
+          }}
+          options={salutationOptions}
+          placeholder="🙋 All Salutations"
+          disabled={false}
+        />
+
+        {/* Language */}
+        <ComboboxDemo
+          id="language"
+          value={selectedLanguage}
+          setValue={(val) => {
+            setSelectedLanguage(val?.name ? val : null)
+            setCurrentPage(1)
+          }}
+          options={languageOptions}
+          placeholder="🌐 All Languages"
+          disabled={false}
+        />
+
+        {/* Country */}
+        <ComboboxDemo
+          id="country"
+          value={selectedCountry}
+          setValue={(val) => {
+            setSelectedCountry(val?.name ? val : null)
+            setSelectedState(null)
+            setSelectedCity(null)
+            setSelectedZipCode(null)
+            setCurrentPage(1)
+          }}
+          options={countryOptions}
+          placeholder="🌍 All Countries"
+          disabled={false}
+        />
+
+        {/* State */}
+        <ComboboxDemo
+          id="state"
+          value={selectedState}
+          setValue={(val) => {
+            setSelectedState(val?.name ? val : null)
+            setSelectedCity(null)
+            setSelectedZipCode(null)
+            setCurrentPage(1)
+          }}
+          options={stateOptions}
+          placeholder="🗺 All States"
+          disabled={!selectedCountry?.name && contacts.length > 0}
+        />
+
+        {/* City */}
+        <ComboboxDemo
+          id="city"
+          value={selectedCity}
+          setValue={(val) => {
+            setSelectedCity(val?.name ? val : null)
+            setSelectedZipCode(null)
+            setCurrentPage(1)
+          }}
+          options={cityOptions}
+          placeholder="🏙 All Cities"
+          disabled={
+            ((!selectedCountry?.name && contacts.length > 0) ||
+              (!selectedState?.name && contacts.length > 0))
+          }
+        />
+
+        {/* Zip */}
+        <ComboboxDemo
+          id="zip"
+          value={selectedZipCode}
+          setValue={(val) => {
+            setSelectedZipCode(val?.name ? val : null)
+            setCurrentPage(1)
+          }}
+          options={zipCodeOptions}
+          placeholder="📮 All Zip Codes"
+          disabled={
+            ((!selectedCountry?.name && contacts.length > 0) ||
+              (!selectedState?.name && contacts.length > 0) ||
+              (!selectedCity?.name && contacts.length > 0))
+          }
+        />
+        <div className="flex item-center gap-1">
+        <button
+          onClick={handleResetFilters}
+          className="px-4 py-2 text-sm font-semibold text-white rounded-lg shadow-md
+                       bg-slate-500 hover:bg-slate-600
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-600 dark:hover:bg-slate-500 dark:focus:ring-sky-500"
+        >
+          Reset Filters
+        </button>
+      </div>
       </div>
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="rounded-2xl shadow overflow-scroll max-h-[70vh] w-full">
+      <div className="rounded-2xl shadow  max-h-[70vh] w-full h-fit">
         <Table className="w-full border-collapse min-w-[1200px]">
           <TableHeader className="sticky z-10 top-0 text-xs sm:text-sm">
             <TableRow>
@@ -527,39 +695,59 @@ export const Company_table = () => {
   const [sortConfig, setSortConfig] = useState({ key: "Company", direction: "asc" });
 
   // filter
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-  const [selectedZipCode, setSelectedZipCode] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedState, setSelectedState] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedZipCode, setSelectedZipCode] = useState(null);
 
-  const uniqueCountries = useMemo(() => {
-    const countries = companies.map((c) => c.Country).filter(Boolean);
-    return ["", ...new Set(countries.sort())];
-  }, [companies]);
+  const countryOptions = useMemo(() => {
+    const countries = companies.map((c) => c.Country).filter(Boolean).sort()
+      const unique = [...new Set(countries)]
+        return unique.map((name, index) => ({
+          id: `country-${index}`,
+          name,
+        }))
+      }, [companies])
 
-  const uniqueStates = useMemo(() => {
+  const statesOptions = useMemo(() => {
     const states = companies
-      .filter((c) => !selectedCountry || c.Country === selectedCountry)
+      .filter((c) => !selectedCountry?.name || c.Country === selectedCountry.name)
       .map((c) => c.StateProvince)
-      .filter(Boolean);
-    return ["", ...new Set(states.sort())];
-  }, [companies, selectedCountry]);
+      .filter(Boolean)
+      .sort()
+        const unique = [...new Set(states)]
+        return unique.map((name, index) => ({
+          id: `state-${index}`,
+          name,
+        }))
+      }, [companies, selectedCountry])
 
-  const uniqueCities = useMemo(() => {
-    const cities = companies
-      .filter((c) => (!selectedCountry || c.Country === selectedCountry) && (!selectedState || c.StateProvince === selectedState))
-      .map((c) => c.City)
-      .filter(Boolean);
-    return ["", ...new Set(cities.sort())];
-  }, [companies, selectedCountry, selectedState]);
+  const cityOptions = useMemo(() => {
+    const cities = companies
+      .filter((c) => (!selectedCountry?.name || c.Country === selectedCountry.name) &&
+                     (!selectedState?.name || c.StateProvince === selectedState.name))
+      .map((c) => c.City)
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(cities)]
+    return unique.map((name, index) => ({
+      id: `city-${index}`,
+      name,
+    }))
+  }, [companies, selectedCountry, selectedState])
 
-  const uniqueZipCodes = useMemo(() => {
-    const zipCodes = companies
-      .filter((c) => (!selectedCountry || c.Country === selectedCountry) && (!selectedState || c.StateProvince === selectedState) && (!selectedCity || c.City === selectedCity))
+  const zipCodeOptions = useMemo(() => {
+    const zips = companies
+      .filter((c) => (!selectedCountry?.name || c.Country === selectedCountry.name) && (!selectedState?.name || c.StateProvince === selectedState.name) && (!selectedCity?.name || c.City === selectedCity.name))
       .map((c) => c.ZipPostalCode)
-      .filter(Boolean);
-    return ["", ...new Set(zipCodes.sort())];
-  }, [companies, selectedCountry, selectedState, selectedCity]);
+      .filter(Boolean)
+      .sort()
+    const unique = [...new Set(zips)]
+    return unique.map((name, index) => ({
+      id: `zip-${index}`,
+      name,
+    }))
+  }, [companies, selectedCountry, selectedState, selectedCity])
 
   // debounce search
   useEffect(() => {
@@ -609,10 +797,10 @@ export const Company_table = () => {
     const matchesSearch = Object.values(c).some((val) =>
       val?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     );
-    const matchesCountry = !selectedCountry || c.Country === selectedCountry;
-    const matchesState = !selectedState || c.StateProvince === selectedState;
-    const matchesCity = !selectedCity || c.City === selectedCity;
-    const matchesZipCode = !selectedZipCode || c.ZipPostalCode === selectedZipCode;
+    const matchesCountry = !selectedCountry?.name || c.Country === selectedCountry.name;
+    const matchesState = !selectedState?.name || c.StateProvince === selectedState.name;
+    const matchesCity = !selectedCity?.name || c.City === selectedCity.name;
+    const matchesZipCode = !selectedZipCode?.name || c.ZipPostalCode === selectedZipCode.name;
     return matchesSearch && matchesCountry && matchesState && matchesCity && matchesZipCode;
   });
 
@@ -669,10 +857,10 @@ export const Company_table = () => {
 
   const handleResetFilters = () => {
     setSearchTerm("");
-    setSelectedCountry("");
-    setSelectedState("");
-    setSelectedCity("");
-    setSelectedZipCode("");
+    setSelectedCountry("null");
+    setSelectedState("null");
+    setSelectedCity("null");
+    setSelectedZipCode("null");
     setSortConfig({ key: "Company", direction: "asc" });
     setCurrentPage(1);
   };
@@ -701,90 +889,56 @@ export const Company_table = () => {
       
       {/* Filters */}
       <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <select
-          className="p-2 text-sm border rounded-lg shadow-sm
-                     bg-white border-slate-300 text-slate-800
-                     focus:outline-none focus:ring-2 focus:ring-sky-400
-                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+        <ComboboxDemo
+          id="country"
           value={selectedCountry}
-          onChange={(e) => {
-            setSelectedCountry(e.target.value);
-            setSelectedState("");
-            setSelectedCity("");
-            setSelectedZipCode("");
+          setValue={(val) => {
+            setSelectedCountry(val?.name ?val : null)
+            setSelectedState("null");
+            setSelectedCity("null");
+            setSelectedZipCode("null");
             setCurrentPage(1);
           }}
-        >
-          <option value="">🌍 All Countries</option>
-          {uniqueCountries.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-        <select
-          className="p-2 text-sm border rounded-lg shadow-sm
-                     bg-white border-slate-300 text-slate-800
-                     focus:outline-none focus:ring-2 focus:ring-sky-400
-                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500
-                     disabled:opacity-60"
+          options={countryOptions}
+          placeholder="🌍 All Countries"
+          disabled={false}
+        />
+        <ComboboxDemo
+          id="state"
           value={selectedState}
-          onChange={(e) => {
-            setSelectedState(e.target.value);
-            setSelectedCity("");
-            setSelectedZipCode("");
+          setValue={(val) => {
+            setSelectedState(val?.name ?val : null)
+            setSelectedCity("null");
+            setSelectedZipCode("null");
             setCurrentPage(1);
           }}
-          disabled={!selectedCountry && companies.length > 0}
-        >
-          <option value="">🗺 All States</option>
-          {uniqueStates.map((state) => (
-            <option key={state} value={state}>
-              {state}
-            </option>
-          ))}
-        </select>
-        <select
-          className="p-2 text-sm border rounded-lg shadow-sm
-                     bg-white border-slate-300 text-slate-800
-                     focus:outline-none focus:ring-2 focus:ring-sky-400
-                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500
-                     disabled:opacity-60"
+          options={statesOptions}
+          placeholder="🏞 All States "
+          disabled={!selectedCountry?.name && companies.length > 0}
+        />
+        <ComboboxDemo
+          id="city"
           value={selectedCity}
-          onChange={(e) => {
-            setSelectedCity(e.target.value);
-            setSelectedZipCode("");
+          setValue={(val) => {
+            setSelectedCity(val?.name ?val : null)
+            setSelectedZipCode("null");
             setCurrentPage(1);
           }}
-          disabled={(!selectedCountry && companies.length > 0) || (!selectedState && companies.length > 0)}
-        >
-          <option value="">🏙 All Cities</option>
-          {uniqueCities.map((city) => (
-            <option key={city} value={city}>
-              {city}
-            </option>
-          ))}
-        </select>
-        <select
-          className="p-2 text-sm border rounded-lg shadow-sm
-                     bg-white border-slate-300 text-slate-800
-                     focus:outline-none focus:ring-2 focus:ring-sky-400
-                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500
-                     disabled:opacity-60"
+          options={cityOptions}
+          placeholder="🏙 All Cities"
+          disabled={(!selectedCountry?.name && companies.length > 0) || (!selectedState?.name && companies.length > 0)}
+        />
+        <ComboboxDemo
+          id="zip"
           value={selectedZipCode}
-          onChange={(e) => {
-            setSelectedZipCode(e.target.value);
+          setValue={(val) => {
+            setSelectedZipCode(val?.name ?val : null)
             setCurrentPage(1);
           }}
-          disabled={(!selectedCountry && companies.length > 0) || (!selectedState && companies.length > 0) || (!selectedCity && companies.length > 0)}
-        >
-          <option value="">📪 All Zip Codes</option>
-          {uniqueZipCodes.map((zip) => (
-            <option key={zip} value={zip}>
-              {zip}
-            </option>
-          ))}
-        </select>
+          options={zipCodeOptions}
+          placeholder="📮 All Zip Codes"
+          disabled={(!selectedCountry?.name && companies.length > 0) || (!selectedState?.name && companies.length > 0) || (!selectedCity?.name && companies.length > 0)}
+        />
         {/* Reset Filter Button */}
         <div className="flex items-center">
         <button
@@ -1343,7 +1497,7 @@ const EnumToLabel = {
         className="w-full sm:w-1/3 p-2 mb-4 text-sm border rounded-lg
                    bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
                    focus:outline-none focus:ring-2 focus:ring-sky-400
-                   dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500"
+                   dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-gray-500"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -1359,7 +1513,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueHW.map((hw) => (
               <option key={hw} value={hw}>
@@ -1377,7 +1531,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueProduct.map((prod) => (
               <option key={prod} value={prod}>
@@ -1395,7 +1549,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueCreatedName.map((name) => (
               <option key={name} value={name}>
@@ -1413,7 +1567,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueOwner.map((owner) => (
               <option key={owner} value={owner}>
@@ -1431,7 +1585,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueWorkGroup.map((wg) => (
               <option key={wg} value={wg}>
@@ -1448,7 +1602,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                       bg-white border-slate-300 text-slate-800
                       focus:outline-none focus:ring-2 focus:ring-sky-400
-                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueCaseType.map((ct) => (
               <option key={ct} value={ct}>
@@ -1466,7 +1620,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                       bg-white border-slate-300 text-slate-800
                       focus:outline-none focus:ring-2 focus:ring-sky-400
-                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueWarrantyType.map((wt) => (
               <option key={wt} value={wt}>
@@ -1485,7 +1639,7 @@ const EnumToLabel = {
             className="p-2 text-sm border rounded-lg
                       bg-white border-slate-300 text-slate-800
                       focus:outline-none focus:ring-2 focus:ring-sky-400
-                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
           >
             {uniqueWarrantyStatus.map((ws) => (
               <option key={ws} value={ws}>
@@ -1502,7 +1656,7 @@ const EnumToLabel = {
           <SelectTrigger id="status" className="w-48 p-2 text-sm border rounded-lg
                          bg-white border-slate-300 text-slate-800
                          focus:outline-none focus:ring-2 focus:ring-sky-400
-                         dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500">
+                         dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500">
             <SelectValue>{openClose}</SelectValue>
           </SelectTrigger>
           <SelectContent className="bg-white dark:bg-slate-800 dark:text-slate-100">
@@ -1653,7 +1807,7 @@ const EnumToLabel = {
             className="p-1 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
-                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
             value={itemsPerPage === sortedData.length ? "all" : itemsPerPage}
             onChange={(e) => {
               const value = e.target.value;
@@ -1717,7 +1871,7 @@ const EnumToLabel = {
                 className="w-16 p-1 text-sm text-center border rounded-lg
                            bg-white border-slate-300 text-slate-800
                            focus:outline-none focus:ring-2 focus:ring-sky-400
-                           dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-sky-500"
+                           dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
                 value={goToPageInput}
                 onChange={(e) => setGoToPageInput(e.target.value)}
               />
@@ -1745,13 +1899,16 @@ export const Assets_table = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [goToPageInput, setGoToPageInput] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // dropdown filters
-  const [selectedProductLine, setSelectedProductLine] = useState("");
-  const [selectedWarrantyStatus, setSelectedWarrantyStatus] = useState("");
+  const [selectedProductLine, setSelectedProductLine] = useState(null);
+  const [selectedWarrantyStatus, setSelectedWarrantyStatus] = useState(null);
+  const [selectedProductNumber, setSelectedProductNumber] = useState(null);
 
   // sorting
   const [sortConfig, setSortConfig] = useState({ key: "AssetID", direction: "asc" });
@@ -1775,10 +1932,10 @@ export const Assets_table = () => {
       didOpen: () => Swal.showLoading(),
     });
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
+      try {
       const LIMIT = 1000;
       const first = await ApiCustomer.get(`/api/asset-information?page=1&limit=${LIMIT}`);
       const firstData = first?.data?.data || [];
@@ -1796,14 +1953,14 @@ export const Assets_table = () => {
       console.log("All assets fetched:", all);
       setAssets(all);
       setFilteredAssets(all);
-    } catch (err) {
-      console.error("Error fetching asset data:", err);
-      setError("Failed to fetch data");
-    } finally {
-      setLoading(false);
-      Swal.close();
-    }
-  };
+        } catch (err) {
+          console.error("Error fetching asset data:", err);
+          setError("Failed to fetch data");
+        } finally {
+          setLoading(false);
+          Swal.close();
+        }
+      };
 
   useEffect(() => {
     fetchAllAssets();
@@ -1818,6 +1975,32 @@ export const Assets_table = () => {
     () => ["", ...new Set(assets.map(a => a?.Warranty_Status).filter(Boolean).sort())],
     [assets]
   );
+  const uniqueProductNumbers = useMemo(
+  () => [
+    ...new Set(
+      assets
+        ?.map(a => a?.ProductNumber)
+        .filter(Boolean)
+        .sort()
+    )
+  ].map((v, i) => ({ id: i, name: v })),
+  [assets]
+);
+
+  const productLineOptions = useMemo(() =>
+    uniqueProductLines
+      .filter(v => v !== "")
+      .map((v, index) => ({ id: index + 1, name: v })),
+    [uniqueProductLines]
+  );
+
+  const warrantyStatusOptions = useMemo(() =>
+    uniqueWarrantyStatus
+      .filter(v => v !== "")
+      .map((v, index) => ({ id: index + 1, name: v })),
+    [uniqueWarrantyStatus]
+  );
+
 
 
   useEffect(() => {
@@ -1826,14 +2009,18 @@ export const Assets_table = () => {
   const next = assets.filter(a => {
     const productLine = a?.product_information?.ProductLine ?? "";
     const warranty = a?.Warranty_Status ?? "";
+    const serial = a?.SerialNumber ?? "";
+    const productName = a?.product_information?.ProductName ?? "";
+    const productNumber = a?.ProductNumber ?? "";
 
     // FILTER: Product Line
-    const fLine = !selectedProductLine || productLine === selectedProductLine;
+    const fLine = !selectedProductLine || productLine === selectedProductLine.name;
 
     // FILTER: Warranty
-    const fWarranty = !selectedWarrantyStatus || warranty === selectedWarrantyStatus;
+    const fWarranty = !selectedWarrantyStatus || warranty === selectedWarrantyStatus.name;
+    const fProductNumber = !selectedProductNumber || productNumber === selectedProductNumber.name;
 
-    if (!(fLine && fWarranty)) return false;
+    if (!(fLine && fWarranty && fProductNumber)) return false;
 
     // SEARCH
     if (!q) return true;
@@ -1844,6 +2031,8 @@ export const Assets_table = () => {
       a?.ProductNumber,
       productLine,
       warranty,
+      productName,
+      productNumber,
       a?.site_account?.Company,
       `${a?.contact_information?.FirstName ?? ""} ${a?.contact_information?.LastName ?? ""}`,
     ]
@@ -1855,7 +2044,7 @@ export const Assets_table = () => {
 
     setFilteredAssets(next);
     setCurrentPage(1);
-  }, [debouncedSearchTerm, assets, selectedProductLine, selectedWarrantyStatus]);
+  }, [debouncedSearchTerm, assets, selectedProductLine, selectedWarrantyStatus, selectedProductNumber]);
 
 
   // sorting function
@@ -1935,6 +2124,7 @@ export const Assets_table = () => {
   const resetFilters = () => {
     setSelectedProductLine("");
     setSelectedWarrantyStatus("");
+    setSelectedProductNumber(null);
     setSearchTerm("");
     setCurrentPage(1);
     setSortConfig({ key: "AssetID", direction: "asc" });
@@ -1962,37 +2152,36 @@ export const Assets_table = () => {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 mb-4">
-        
-        {/* Product Line */}
-        <select 
-          className="p-2 text-sm border rounded min-w-[280px]
-                     bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
-                     focus:outline-none focus:ring-2 focus:ring-sky-400
-                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500" 
-          value={selectedProductLine} 
-          onChange={(e) => setSelectedProductLine(e.target.value)}
-        >
-          <option value="">Filter by Product Line</option>
-          {uniqueProductLines.map(v => (
-            <option key={v} value={v}>{v || "—"}</option>
-          ))}
-        </select>
-
-        {/* Warranty Status */}
-        <select 
-          className="p-2 text-sm border rounded min-w-[280px]
-                     bg-white border-slate-300 text-slate-800 placeholder:text-slate-400
-                     focus:outline-none focus:ring-2 focus:ring-sky-400
-                     dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-sky-500" 
-          value={selectedWarrantyStatus} 
-          onChange={(e) => setSelectedWarrantyStatus(e.target.value)}
-        >
-          <option value="">Filter by Warranty Status</option>
-          {uniqueWarrantyStatus.map(v => (
-            <option key={v} value={v}>{v || "—"}</option>
-          ))}
-        </select>
-
+        <div className="w-[220px]">
+        <ComboboxDemo
+          id="productline"
+          value={selectedProductLine}
+          setValue={setSelectedProductLine}
+          options={productLineOptions}
+          placeholder="Filter by Product Line"
+          disabled={false}
+        />
+        </div>
+        <div className="w-[220px]">
+        <ComboboxDemo
+          id="warrantystatus"
+          value={selectedWarrantyStatus}
+          setValue={setSelectedWarrantyStatus}
+          options={warrantyStatusOptions}
+          placeholder="Filter by Warranty Status"
+          disabled={false}
+        />
+        </div>
+        <div className="w-[220px]">
+        <ComboboxDemo
+          id="productnumber"
+          value={selectedProductNumber}
+          setValue={setSelectedProductNumber}
+          options={uniqueProductNumbers}
+          placeholder="Filter by Product Number"
+          disabled={false}
+        />
+        </div>
         <button
           onClick={resetFilters}
           className="px-3 py-2 text-sm font-semibold text-white rounded shadow-md
@@ -2177,10 +2366,10 @@ export const Product_table = () => {
   const [goToPageInput, setGoToPageInput] = useState("");
 
   // filters
-  const [selectedLine, setSelectedLine] = useState("");
-  const [selectedType, setSelectedType] = useState("");
-  const [selectedGroup, setSelectedGroup] = useState("");
-  const [selectedTower, setSelectedTower] = useState("");
+  const [selectedLine, setSelectedLine] = useState(null);
+  const [selectedType, setSelectedType] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [selectedTower, setSelectedTower] = useState(null);
 
   // modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -2194,7 +2383,7 @@ export const Product_table = () => {
   // total info dari server
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-
+  
   const handleSort = (key) => {
     setSortConfig((prev) => {
       if (prev.key === key) {
@@ -2237,10 +2426,10 @@ export const Product_table = () => {
           page: pageToLoad,
           limit: itemsPerPage,
           search: debouncedSearchTerm,
-          line: selectedLine,
-          type: selectedType,
-          group: selectedGroup,
-          tower: selectedTower,
+          line: selectedLine?.name || "",
+          type: selectedType?.name || "",
+          group: selectedGroup?.name || "",
+          tower: selectedTower?.name || "",
         },
       });
 
@@ -2299,42 +2488,42 @@ export const Product_table = () => {
   // Sumber untuk unique values filter (kalau kosong, pakai products page sekarang)
   const filterBase = filterSource.length > 0 ? filterSource : products;
 
+  const uniqueLines = useMemo(
+    () => [...new Set(filterBase.map((item) => item.ProductLine || ""))],
+    [filterBase]
+  );
+
+  const uniqueTypes = useMemo(
+    () => [...new Set(filterBase.map((item) => item.product_type?.ProductType || ""))],
+    [filterBase]
+  );
+
+  const uniqueGroups = useMemo(
+    () => [...new Set(filterBase.map((item) => item.product_type?.ProductGroup || ""))],
+    [filterBase]
+  );
+
+  const uniqueTowers = useMemo(
+    () => [...new Set(filterBase.map((item) => item.product_type?.ProductTower || ""))],
+    [filterBase]
+  );
   // unique filters
-  const uniqueLines = useMemo(() => {
-    const set = new Set(
-      filterBase
-        .map((p) => p?.ProductLine)
-        .filter((v) => v !== null && v !== undefined && v !== "")
-    );
-    return ["", ...Array.from(set)].sort();
-  }, [filterBase]);
-
-  const uniqueTypes = useMemo(() => {
-    const set = new Set(
-      filterBase
-        .map((p) => p?.product_type?.ProductType)
-        .filter((v) => v !== null && v !== undefined && v !== "")
-    );
-    return ["", ...Array.from(set)].sort();
-  }, [filterBase]);
-
-  const uniqueGroups = useMemo(() => {
-    const set = new Set(
-      filterBase
-        .map((p) => p?.product_type?.ProductGroup)
-        .filter((v) => v !== null && v !== undefined && v !== "")
-    );
-    return ["", ...Array.from(set)].sort();
-  }, [filterBase]);
-
-  const uniqueTowers = useMemo(() => {
-    const set = new Set(
-      filterBase
-        .map((p) => p?.product_type?.ProductTower)
-        .filter((v) => v !== null && v !== undefined && v !== "")
-    );
-    return ["", ...Array.from(set)].sort();
-  }, [filterBase]);
+  const lineOptions = useMemo(
+    () => uniqueLines.map((v, i) => ({ id: i, name: v || "-"})),
+    [uniqueLines]
+  );
+  const typeOptions = useMemo(
+    () => uniqueTypes.map((v, i) => ({ id: i, name: v || "-"})),
+    [uniqueTypes]
+  );
+  const groupOptions = useMemo(
+    () => uniqueGroups.map((v, i) => ({ id: i, name: v || "—" })),
+    [uniqueGroups]
+  );
+  const towerOptions = useMemo(
+    () => uniqueTowers.map((v, i) => ({ id: i, name: v || "—" })),
+    [uniqueTowers]
+  );
 
   // Sorting hanya untuk data 1 page (di client)
   const sortedProducts = useMemo(() => {
@@ -2370,10 +2559,10 @@ export const Product_table = () => {
   const hasData = sortedProducts.length > 0;
 
   const resetFilters = () => {
-    setSelectedLine("");
-    setSelectedType("");
-    setSelectedGroup("");
-    setSelectedTower("");
+    setSelectedLine(null);
+    setSelectedType(null);
+    setSelectedGroup(null);
+    setSelectedTower(null);
     setSearchTerm("");
     setCurrentPage(1);
     // itemsPerPage biarkan, user mungkin sudah pilih
@@ -2411,66 +2600,34 @@ export const Product_table = () => {
 
       {/* Filters */}
       <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+        <ComboboxDemo
+          id="line"
+          placeholder="All Product Line"
           value={selectedLine}
-          onChange={(e) => {
-            setSelectedLine(e.target.value);
-          }}
-        >
-          <option value="">All Product Line</option>
-          {uniqueLines.map((v, idx) => (
-            <option key={`line-${idx}-${v || "empty"}`} value={v}>
-              {v || "—"}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          setValue={(val) => setSelectedLine(val)}
+          options={lineOptions}
+        />
+        <ComboboxDemo
+          id="type"
+          placeholder="All Product Type"
           value={selectedType}
-          onChange={(e) => {
-            setSelectedType(e.target.value);
-          }}
-        >
-          <option value="">All Product Type</option>
-          {uniqueTypes.map((v, idx) => (
-            <option key={`type-${idx}-${v || "empty"}`} value={v}>
-              {v || "—"}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          setValue={(val) => setSelectedType(val)}
+          options={typeOptions}
+        />
+        <ComboboxDemo
+          id="group"
+          placeholder="All Product Group"
           value={selectedGroup}
-          onChange={(e) => {
-            setSelectedGroup(e.target.value);
-          }}
-        >
-          <option value="">All Product Group</option>
-          {uniqueGroups.map((v, idx) => (
-            <option key={`group-${idx}-${v || "empty"}`} value={v}>
-              {v || "—"}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+          setValue={(val) => setSelectedGroup(val)}
+          options={groupOptions}
+        />
+        <ComboboxDemo
+          id="tower"
+          placeholder="All Product Tower"
           value={selectedTower}
-          onChange={(e) => {
-            setSelectedTower(e.target.value);
-          }}
-        >
-          <option value="">All Product Tower</option>
-          {uniqueTowers.map((v, idx) => (
-            <option key={`tower-${idx}-${v || "empty"}`} value={v}>
-              {v || "—"}
-            </option>
-          ))}
-        </select>
-
+          setValue={(val) => setSelectedTower(val)}
+          options={towerOptions}
+        />
         <button
           onClick={resetFilters}
           className="px-3 py-2 bg-gray-400 text-white rounded-lg shadow hover:bg-gray-500"
@@ -4558,6 +4715,16 @@ const sortedData = useMemo(() => {
     setGoToPageInput("");
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
+  };
+
   return (
     <div className="p-6">
       <h2 className="mb-6 text-2xl font-bold">📊 User Table</h2>
@@ -4674,7 +4841,16 @@ const sortedData = useMemo(() => {
                   {/* Tampilkan data Phone di sini */}
                   <TableCell className="p-2 border">{UserItem.Phone}</TableCell>
                   {/* Tampilkan data Signature di sini */}
-                  <TableCell className="p-2 border"><img src={UserItem.Signature} /></TableCell>
+                  <TableCell className="p-2 border">{UserItem.Signature ? (
+                    <button
+                      className="text-blue-600 underline text-xs"
+                      onClick={() => handleViewSignature(
+                        UserItem.Signature.startsWith("data:image")
+                          ? UserItem.Signature
+                        : `data:image/png;base64,${UserItem.Signature}`)} 
+                      >View Signature</button>
+                      ) :("-")}
+                      </TableCell>
                   <TableCell className="p-2 border">
                     {/* {console.log(preview?.ProfilePhoto)} */}
                     {UserItem?.ProfilePhoto ? (
@@ -4683,8 +4859,8 @@ const sortedData = useMemo(() => {
                       "No Photo"
                     )}
                   </TableCell>
-                  <TableCell className="p-2 border">{UserItem.CreatedAt}</TableCell>
-                  <TableCell className="p-2 border">{UserItem.UpdatedAt}</TableCell>
+                  <TableCell className="p-2 border">{formatDate(UserItem.CreatedAt)}</TableCell>
+                  <TableCell className="p-2 border">{formatDate(UserItem.UpdatedAt)}</TableCell>
                   <TableCell className="flex items-center justify-center gap-2 p-2 border">
                     <UserEdit
                       IDUser={UserItem.IDUser}
@@ -4714,8 +4890,12 @@ const sortedData = useMemo(() => {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="w-[90%] max-w-md bg-white rounded-2xl shadow-lg p-6">
               <h3 className="mb-4 text-lg font-semibold text-center">🖋 Signature</h3>
-              <div className="p-3 mb-4 text-sm text-gray-700 bg-gray-100 rounded-md max-h-[300px] overflow-y-auto">
-                {selectedSignature}
+              <div className="flex justify-center mb-4">
+                <img
+                  src={selectedSignature}
+                  alt="Signature"
+                  className="max-w-full max-h-[300px] object-contain border rounded-lg"
+                />
               </div>
               <div className="flex justify-center">
                 <button
@@ -5208,6 +5388,8 @@ export const Resource_table = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -5230,12 +5412,12 @@ export const Resource_table = () => {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  const fetchResourceDataTable = async () => {
+  const fetchResourceDataTable = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     Swal.fire({
-      title: "Memuat Data Resource...",
+      title: "Memuat Data Resources...",
       text: "Mohon tunggu sebentar",
       allowOutsideClick: false,
       allowEscapeKey: false,
@@ -5245,110 +5427,110 @@ export const Resource_table = () => {
     });
 
     try {
-      const response = await ApiCustomer.get("/api/resources");
+      const response = await ApiCustomer.get("/api/resources", {
+        params: {
+          keyword: debouncedSearchTerm,
+          page: currentPage,
+          limit: itemsPerPage,
+        },
+      });
+
       if (response.data.success) {
-        setResourceData(response.data.data);
+        const resources = response.data.data;          // array
+        const meta = response.data.meta;               // pagination
+
+        setResourceData(resources || []);
+        setTotalCount(meta?.totalCount || 0);
+        setTotalPages(meta?.totalPages || 1);
+
         Swal.close();
       } else {
         setError("Failed to fetch Resource data");
         Swal.close();
         Swal.fire({
           title: "Error!",
-          text: "Gagal mengambil data Resource.",
+          text: "Gagal mengambil data Resources.",
           icon: "error",
           confirmButtonText: "OK",
         });
       }
-    } catch (err) {
-      console.error("Error fetching Resource data:", err);
-      setError("Error fetching data");
+    } catch (error) {
+      console.error("Error fetching resources:", error);
+      setError("An error occurred while fetching Resource data");
       Swal.close();
       Swal.fire({
         title: "Error!",
-        text: "Gagal mengambil data Resource.",
+        text: "Terjadi kesalahan saat mengambil data Resources.",
         icon: "error",
         confirmButtonText: "OK",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [debouncedSearchTerm, currentPage, itemsPerPage]);
 
+  // Panggil fetch saat dependency berubah
   useEffect(() => {
     fetchResourceDataTable();
-  }, []);
+  }, [fetchResourceDataTable]);
 
-  // 🔹 Filter data based on debounced search
-  const filteredResourceTable = useMemo(() => {
-    return ResourceData.filter((item) =>
-      Object.values(item).some((value) =>
-        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      )
-    );
-  }, [ResourceData, debouncedSearchTerm]);
+    const sortedData = useMemo(() => {
+      const sorted = [...ResourceData];
+      if (sortConfig.key) {
+        sorted.sort((a, b) => {
+          let aVal = a[sortConfig.key];
+          let bVal = b[sortConfig.key];
 
-  // 🔹 Sorting
-  const sortedData = useMemo(() => {
-    const sorted = [...filteredResourceTable];
-    if (sortConfig.key) {
-      sorted.sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
+          if (aVal === null || aVal === undefined) aVal = "";
+          if (bVal === null || bVal === undefined) bVal = "";
 
-        if (aVal === null || aVal === undefined) aVal = "";
-        if (bVal === null || bVal === undefined) bVal = "";
+          if (typeof aVal === "string") aVal = aVal.toLowerCase();
+          if (typeof bVal === "string") bVal = bVal.toLowerCase();
 
-        if (typeof aVal === "string") aVal = aVal.toLowerCase();
-        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+          if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+          if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+          return 0;
+        });
+      }
+      return sorted;
+    }, [ResourceData, sortConfig]);
 
-        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-      });
-    }
-    return sorted;
-  }, [filteredResourceTable, sortConfig]);
-
-  // 🔹 Calculate total pages
-  const totalPages = Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
-
-  // 🔹 Get current page data
-  const currentData = sortedData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // 🔹 Sorting handler
-  const handleSort = (key) => {
-    setSortConfig((prev) => {
-      if (prev.key === key) {
+    const handleSort = (key) => {
+      setSortConfig((prev) => {
+        if (prev.key === key) {
+          return {
+            key,
+            direction: prev.direction === "asc" ? "desc" : "asc",
+          };
+        }
         return {
           key,
-          direction: prev.direction === "asc" ? "desc" : "asc",
+          direction: "asc",
         };
-      }
-      return { key, direction: "asc" };
-    });
-  };
+      });
+    };
 
-  // 🔹 Sort icon
-  const getSortIcon = (key) => {
-    if (sortConfig.key !== key)
-      return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
-    return sortConfig.direction === "asc" ? (
-      <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
-    ) : (
-      <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
-    );
-  };
-  
-  // 🔹 Go to page handler
-  const handleGoToPage = (e) => {
-    e.preventDefault();
-    const page = Number(goToPageInput);
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
-    setGoToPageInput("");
-  };
+    const getSortIcon = (key) => {  
+      if (sortConfig.key !== key)
+        return <ArrowUpDown className="inline w-4 h-4 ml-1 opacity-50" />;
+
+      return sortConfig.direction === "asc" ? (
+        <ArrowUp className="inline w-4 h-4 ml-1 text-blue-600" />
+      ) : (
+        <ArrowDown className="inline w-4 h-4 ml-1 text-blue-600" />
+      );
+    };
+
+    const handleGoToPage = (e) => {
+      e.preventDefault();
+      const page = Number(goToPageInput);
+      if (page >= 1 && page <= totalPages) setCurrentPage(page);
+      setGoToPageInput("");
+    };
+    const currentData = sortedData;
+
+    const startIndex = totalCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+    const endIndex = Math.min(currentPage * itemsPerPage, totalCount);
 
   return (
     <div className="p-6">
@@ -5388,6 +5570,76 @@ export const Resource_table = () => {
               >
                 Name {getSortIcon("Name")}
               </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ServiceCenterName")}
+              >
+                Service Center Name {getSortIcon("ServiceCenterName")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ResourceCode")}
+              >
+                ResourceCode {getSortIcon("ResourceCode")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer">
+                Logo
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Phone")}
+              >
+                Phone {getSortIcon("Phone")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Mobile")}
+              >
+                Mobile {getSortIcon("Mobile")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Fax")}
+              >
+                Fax {getSortIcon("Fax")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Email")}
+              >
+                Email {getSortIcon("Email")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("Country")}
+              >
+                Country {getSortIcon("Country")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("StateProvince")}
+              >
+                State/Province {getSortIcon("StateProvince")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("City")}
+              >
+                City {getSortIcon("City")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("ZipPostalCode")}
+              >
+                Zip/Postal Code {getSortIcon("ZipPostalCode")}
+              </TableHead>
+              <TableHead 
+                className="p-3 text-center border cursor-pointer"
+                onClick={() => handleSort("AddressLine")}
+              >
+                Address Line {getSortIcon("AddressLine")}
+              </TableHead>
               <TableHead className="p-3 text-center border">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -5403,6 +5655,18 @@ export const Resource_table = () => {
                     {ResourceItem.ResourceId}
                   </TableCell>
                   <TableCell className="p-2 border">{ResourceItem.Name}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.ServiceCenterName}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.ResourceCode}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.ResourceLogo ? (<img src={ResourceItem.ResourceLogo} alt="Resource Logo" className="h-8 mx-auto object-contain" />) : ("-")}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.Phone}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.Mobile}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.Fax}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.Email}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.Country}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.StateProvince}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.City}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.ZipPostalCode}</TableCell>
+                  <TableCell className="p-2 border">{ResourceItem.AddressLine}</TableCell>
                   <TableCell className="flex items-center justify-center gap-2 p-2 border">
                     <ResourceEdit
                       ResourceId={ResourceItem.ResourceId}
@@ -5457,9 +5721,8 @@ export const Resource_table = () => {
 
         {/* Info total data */}
         <div className="text-sm text-gray-600">
-          Showing <b>{(currentPage - 1) * itemsPerPage + 1}</b> –{" "}
-          <b>{Math.min(currentPage * itemsPerPage, sortedData.length)}</b> of{" "}
-          <b>{sortedData.length}</b> resources
+          Showing <b>{startIndex}</b> – <b>{endIndex}</b> of{" "}
+          <b>{totalCount}</b> resources
         </div>
 
         {/* Pagination + Go to page */}

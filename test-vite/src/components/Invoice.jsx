@@ -31,7 +31,14 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   sectionHeader: {
+    textAlign:"center",
     fontSize: 11,
+    fontWeight: 'bold',
+  },
+  Header: {
+    textDecoration: "underline",
+    textAlign:"center",
+    fontSize: 15,
     fontWeight: 'bold',
   },
   textSmall: {
@@ -174,8 +181,6 @@ table: {
     paddingHorizontal: 10,
     paddingBottom: 8,
   },
-
-
 });
 
 const Section = ({ title, children }) => (
@@ -195,14 +200,14 @@ const List = ({ items }) => (
   </View>
 )
 
-export const InvoiceDp = ({
+export const Invoice = ({
   caseDetails,
   customerSignature,
   materialItems = {},
   initialData = {},
 }) => (
   <Document>
-    <Page size="A4" style={styles.container}>
+    <Page  size="A4" style={styles.container}>
       <View
         style={{
           flexDirection: "row",
@@ -227,120 +232,82 @@ export const InvoiceDp = ({
             Telp : (+6221) 081318521007 / 081318521006 - HP : 0811970666
           </Text>
         </View>
-        {/* <Text style={[styles.sectionHeader]}>INVOICE DP</Text> */}
       </View>
 
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          borderWidth: 1,
-          borderColor: "#ccc",
-          borderRadius: 4,
-        }}
-      >
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            columnGap: 5,
-            borderBottom: 1,
-            padding: 2,
-            paddingHorizontal: "10%",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={[
-              styles.leftSection,
-              { flexDirection: "column", alignItems: "center" },
-            ]}
-          >
-            <Text style={[styles.textSmall, styles.bold]}>INVOICE</Text>
-             <View style={{borderWidth: 2, padding: 2}}>
-                <Image src="/random_qr.png" style={styles.qrCode} />
-             </View>
-          </View>
-          <View style={[styles.rightSection2, { alignItems: "center" }]}>
-            <Text style={styles.label}>Case ID</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>{caseDetails?.CaseID ?? "N/A"}</Text>
+      <Text style={[styles.Header]}>INVOICE</Text>
 
-            <Text style={styles.label}>Invoice no.</Text>
-            <Text style={styles.colon}>:</Text>
+      <Section title="Case Info">
+        <View style={{ display: "flex", flexDirection: "row" }}>
+          <View style={styles.leftSection}>
+            <Text style={[styles.label, { fontWeight: "bold", fontSize: 12 }]}>
+              No. Invoice
+            </Text>
+            <Text style={[styles.colon, { fontWeight: "bold", fontSize: 10 }]}>
+              :
+            </Text>
             <Text style={[styles.value, { fontWeight: "bold", fontSize: 10 }]}>
-              {"N55450"}
+              {/* {initialData?.quotationNo ?? null}\ */}
+              {"KK.25.11.0072"}
             </Text>
 
-            <Text style={styles.label}>Date</Text>
+            <Text style={styles.label}>Case Type</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>{caseDetails?.CaseType ?? "N/A"}</Text>
+
+            <Text style={styles.label}>Warranty Status</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={[styles.value]}>
+              {caseDetails?.asset_information?.WarrantyOTCCode?.Description ??
+                "N/A"}
+            </Text>
+
+            <Text style={styles.label}>Received Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
               {caseDetails?.CreatedOn
                 ? new Date(caseDetails.CreatedOn).toLocaleString()
                 : "N/A"}
             </Text>
-          </View>
-        </View>
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            columnGap: 5,
-            paddingHorizontal: "10%",
-            paddingVertical: "2%",
-          }}
-        >
-          <View style={styles.leftSection}>
-            <Text style={styles.label}>Received from</Text>
+
+            <Text style={styles.label}>Quotation Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
-              {caseDetails?.contact_information?.FirstName ||
-              caseDetails?.contact_information?.LastName
-                ? `${caseDetails?.contact_information?.FirstName || ""} ${
-                    caseDetails?.contact_information?.LastName || ""
-                  }`.trim()
-                : "N/A"}{" "}
+              {/* {initialData?.quotationDate
+                ? new Date(initialData.quotationDate).toLocaleDateString()
+                : "N/A"} */}
+              {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate ? 
+              new Date (caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate).toLocaleString() : "N/A" 
+              }
             </Text>
-            <Text style={styles.label}>For the amount of</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>IDR .00</Text>
-            <Text style={styles.label}>In settlement of</Text>
+
+            <Text style={styles.label}>Problem Desc</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
-              DP for services Notebook/Laptop{" "}
-              {caseDetails?.asset_information?.product_information
-                ?.ProductName ?? "N/A"}{" "}
-              S/N: {caseDetails?.asset_information?.SerialNumber ?? "N/A"}
-            </Text>
-            <Text style={styles.label}>Payment type</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              {/* need variable for payment type */}
-              transfer
-            </Text>
-            <Text style={styles.label}>Dp amount</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>Rp. 666.000, from .00</Text>
-          </View>
-        </View>
-        <View style={{ alignItems: "flex-end", paddingHorizontal: "10%" }}>
-          <View style={{ flexDirection: "column", alignItems: "center" }}>
-            <Text style={[styles.textSmall, { marginBottom: 10 }]}>
-              DATE HERE
-            </Text>
-            <Image
-              src={caseDetails?.createdByUser?.Signature}
-              style={{ width: 120, height: 60 }}
-            />
-            <Text style={styles.textSmall}>
-              --------------------------------------------
-            </Text>
-            <Text style={styles.textSmall}>
-              {caseDetails?.createdByUser?.Name}
+              {caseDetails?.ProblemDescription ?? "N/A"}
             </Text>
           </View>
+
+           <View style={styles.rightSection}>
+                      <Text style={[styles.textSmall, styles.bold]}>
+                        {caseDetails?.CaseID ?? "N/A"}
+                      </Text>
+                      <View style={{borderBottom : 1, borderTop: 1, padding: 2}}>
+                      <Image src="/random_qr.png" style={styles.qrCode} />
+                      </View>
+                    </View>
         </View>
-      </View>
+
+          <View style={{display: 'flex', flexDirection: "row",}}>
+                   <View style={styles.leftSection}>
+                     <Text style={{width: '15%', fontSize: 8}}>Note</Text>
+                     <Text style={{width: '1%', fontSize: 8}}>:</Text>
+                     <Text style={{width: '84%', fontSize: 8, textAlign: 'justify'}}>
+                       {caseDetails?.CaseProductNote ?? "N/A"}
+                     </Text>
+                   </View>
+                 </View>
+
+      </Section>
 
       <Section title="Customer">
         {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Customer</Text> */}
@@ -434,8 +401,7 @@ export const InvoiceDp = ({
         </View>
       </Section>
 
-      <Section title="Product">
-        {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text> */}
+      {/* <Section title="Product">
         <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
           <View style={styles.leftSection}>
             <Text style={styles.label}>Serial no</Text>
@@ -502,7 +468,7 @@ export const InvoiceDp = ({
           <Text style={styles.tableCell}>-</Text>
           <Text style={styles.tableCell}>-</Text>
         </View>
-      )}
+      )} */}
 
       {/* PARTS TABLE */}
       <View style={[styles.table, { marginTop: 10 }]}>
@@ -533,13 +499,7 @@ export const InvoiceDp = ({
             wo.materialorder.flatMap((mo) =>
               mo.materialorderlineitems.map((line, index) => (
                 <View style={styles.tableRow} key={line.LineItemID}>
-                  <Text
-                    style={[
-                      styles.tableCell,
-                      styles.partsColNo,
-                      styles.alignCenter,
-                    ]}
-                  >
+                  <Text style={[styles.tableCell, styles.partsColNo, styles.alignCenter]}>
                     {index + 1}
                   </Text>
 
@@ -564,9 +524,7 @@ export const InvoiceDp = ({
                   </Text>
 
                   <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-                    {formatAccountingRupiah(
-                      Number(line.Price) * Number(line.Quantity)
-                    ) || 0}
+                    {formatAccountingRupiah(Number(line.Price) * Number(line.Quantity)) || 0}
                   </Text>
                 </View>
               ))
@@ -584,30 +542,25 @@ export const InvoiceDp = ({
           </View>
         )}
 
-        {/* Footer rows  perfectly aligned with header columns */}
+
+        {/* Footer rows – perfectly aligned with header columns */}
 
         {/* Labor Fee: colspan=5 */}
         <View style={styles.tableRow}>
           <Text
             style={[styles.tableCell, styles.partsColSpan5, styles.alignRight]}
           >
-            Labor Fee :
+            Labor Fee : 
           </Text>
-          <Text style={[styles.tableCell, styles.partsColUnitPrice]}>
-            {formatAccountingRupiah(
-              caseDetails?.workorder[0]?.materialorder[0]
-                ?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation
-                ?.LaborFee
-            )}
+          <Text style={[styles.tableCell, styles.partsColUnitPrice]} >
+            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
           </Text>
           <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah(
-              caseDetails?.workorder[0]?.materialorder[0]
-                ?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation
-                ?.LaborFee
-            )}
+            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
           </Text>
         </View>
+
+       
 
         {/* Sub Total: colspan=6 */}
         <View style={styles.tableRow}>
@@ -617,14 +570,25 @@ export const InvoiceDp = ({
             Sub Total :
           </Text>
           <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah(
-              caseDetails?.workorder[0]?.materialorder[0]
-                ?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation
-                ?.Subtotal
-            )}
+            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal)}
           </Text>
         </View>
 
+        {/* VAT: colspan=6 */}
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan6, styles.alignRight]}
+          >
+            VAT :
+          </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+          {caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue ? 
+            formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VATAmount)  : "0"
+          }
+          </Text>
+        </View>
+
+      
         {/* Total: colspan=6 */}
         <View style={styles.tableRow}>
           <Text
@@ -633,18 +597,144 @@ export const InvoiceDp = ({
             Total :
           </Text>
           <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah(
-              caseDetails?.workorder[0]?.materialorder[0]
-                ?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation
-                ?.GrandTotal
-            )}
+            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal)}
+          </Text>
+        </View>
+
+       {/* DP: colspan=6 */}
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan6, styles.alignRight]}
+          >
+            DP :
+          </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+            {formatAccountingRupiah((caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) / 2)}
+          </Text>
+        </View>
+
+       {/* DP: colspan=6 */}
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan6, styles.alignRight]}
+          >
+            Balance Due :
+          </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+            {formatAccountingRupiah((caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) / 2)}
           </Text>
         </View>
       </View>
 
-      <Text style={styles.textSmall}>
-        * This PDF DP auto generated by system.
-      </Text>
+
+      <View style={{ display: "flex", flexDirection: "row", columnGap: 2 }} >
+        <View style={styles.leftSection} >
+          <Text style={{ fontSize: 10, width: "10%", fontWeight: "bold" }}>
+            Note
+          </Text>
+          <Text style={styles.colon}>:</Text>
+          <Text style={[styles.value]}>
+           
+          </Text>
+        </View>
+      </View>
+        {/* <Section title="Terms and Conditions" >
+          <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
+            <View style={styles.leftSection}>
+              <Text style={styles.label}>Validity</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                7 (seven) calender days
+              </Text>
+              <Text style={styles.label}>Delivery Time</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                2 (two) weeks from date of PO confirmation & subject to spare part availibility
+              </Text>
+              <Text style={styles.label}>Payment</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                Cash or transfer
+              </Text>
+              <Text style={styles.label}>Warranty</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                1 (one) month for the same part
+              </Text>
+              <Text style={styles.label}>Cancellation Fee</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={[styles.value]}>
+                Rp. 121.000,
+              </Text>
+              <Text style={styles.label}>Others</Text>
+              <Text style={styles.colon}>:</Text>
+              <List items={[
+                "Defective part(s) should be returned to HP",
+                "No cancellation accepted after PO confirmation (full quotation charge will apply after PO confirmation)",
+                "Any damaged part(s) that has been replaced shall be the property of HP Indonesia (Suku cadang yang rusak pada barang yang diperbaiki akan menjadi milik HP Indonesia)",
+              ]}/>
+            </View>
+          </View>
+        </Section> */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            
+          }}
+        >
+          <View style={{ flexDirection: "column", alignItems: "center" }} >
+            <Text style={[styles.textSmall, { marginTop: 15,  }]}>Jakarta, 28 November 2025</Text>
+            <Image src={caseDetails?.createdByUser?.Signature} style={{ width: 120, height: 60 }} />
+            <Text style={styles.textSmall}>
+              {"AUDYA"}
+            </Text>
+            <Text style={styles.textSmall}>
+              -----------------------------------------
+            </Text>
+            <Text style={[styles.textSmall]}>
+              Cashier 
+            </Text>
+          </View>
+          {/* <View style={{ flexDirection: "column", alignItems: "center" }} >
+            <Text style={[styles.textSmall, { marginBottom: 10 }]}>
+              Accepted by
+            </Text>
+            <Image src={customerSignature} style={{ width: 120, height: 60 }} />
+            <Text style={styles.textSmall}>
+              --------------------------------------------
+            </Text>
+            <Text style={styles.textSmall}>
+              {caseDetails?.contact_information?.FirstName ||
+              caseDetails?.contact_information?.LastName
+                ? `${caseDetails?.contact_information?.FirstName || ""} ${
+                    caseDetails?.contact_information?.LastName || ""
+                  }`.trim()
+                : "N/A"}
+            </Text>
+          </View> */}
+      </View>
+          <Text style={[styles.textSmall, {marginTop: 10}]}>
+            * Harga sudah termasuk PPN.
+          </Text>
+          <View 
+          style={{
+            flexDirection: "column",
+          }}
+        >
+          <Text style={styles.textSmall}>
+            Transfer Payment To : 
+          </Text>
+          <Text style={styles.textSmall}>
+            BCA-KCP Artha Gading
+          </Text>
+          <Text style={styles.textSmall}>
+            A/N : PT. JAVA ABADI GEMILANG
+          </Text>
+          <Text style={styles.textSmall}>
+            A/C : 8400039195
+          </Text>
+        </View>
     </Page>
   </Document>
 );

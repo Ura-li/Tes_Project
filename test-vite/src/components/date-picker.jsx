@@ -190,7 +190,7 @@ export default function DatePicker({
             onKeyDown={(e) => e.key === "Enter" && handleDateInputSubmit()}
             placeholder="MMDDYYYY"
             readOnly={readOnly}
-            className={cn("border rounded-md text-sm px-3 py-2 w-full focus:ring-2 focus:ring-blue-500")}
+            className={cn("border rounded-md text-sm px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 dark:text-white")}
           />
           <PopoverTrigger asChild>
             <button type="button" className="absolute right-2 top-2 text-gray-500 hover:text-blue-500" disabled={readOnly}>
@@ -259,17 +259,17 @@ export default function DatePicker({
               onKeyDown={(e) => e.key === "Enter" && handleTimeInputSubmit()}
               placeholder="HHMMa"
               readOnly={readOnly}
-              className={cn("border rounded-md text-sm px-3 py-2 w-full focus:ring-2 focus:ring-blue-500")}
+              className={cn("border rounded-md text-sm px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 dark:text-white")}
             />
             <PopoverTrigger asChild>
-              <button type="button" className="absolute right-2 top-2 text-gray-500 hover:text-blue-500" disabled={readOnly}>
+              <button type="button" className="absolute right-2 top-2 text-gray-500 hover:text-blue-500 " disabled={readOnly}>
                 <Clock className="h-5 w-5" />
               </button>
             </PopoverTrigger>
           </div>
 
           <PopoverContent className="max-h-[220px] overflow-y-auto p-0 w-36 rounded-2xl shadow-xl">
-            <ul className="divide-y divide-gray-100">
+            <ul className="divide-y divide-gray-100 dark:divide-transparent">
               {timeOptions.map(({ hour, minute, label }) => {
                 const isSelected = getHours(value) === hour && getMinutes(value) === minute;
                 return (
@@ -277,8 +277,8 @@ export default function DatePicker({
                     <button
                       onClick={() => handleTimeSelect(hour, minute)}
                       className={cn(
-                        "w-full text-left px-3 py-2 text-sm hover:bg-blue-100",
-                        isSelected && "bg-blue-500 text-white font-semibold"
+                        "w-full text-left px-3 py-2 text-sm hover:bg-blue-100 dark:hover:bg-gray-700",
+                        isSelected && "bg-blue-500 text-white font-semibold dark:bg-slate-500"
                       )}
                     >
                       {label}

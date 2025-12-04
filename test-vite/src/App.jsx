@@ -114,7 +114,7 @@ export function GlobalSearchBar() {
           placeholder="Search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="border bg-white/50 dark:bg-slate-700/40 dark:text-slate-100 dark:border-slate-500 dark:placeholder:text-slate-300 pr-8"
+          className="border bg-white/50 dark:bg-slate-700/40 dark:text-slate-100 dark:border-slate-500 dark:placeholder:text-slate-300 pr-20"
         />
         {loading ? <Loader2 className=' animate-spin'></Loader2> : ""}
       </span>
@@ -159,11 +159,12 @@ const App = () => {
             style={{
               "--sidebar-width": "11rem",
               "--sidebar-width-mobile": "20rem",
+              
             }}
           >
             <AppSidebar />
             <SidebarInset className={"w-full"}>
-              <header className="  flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64) h-16 border-b border-b-slate-200 dark:border-b-slate-600">
+              <header className="  flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600">
                 <div className="flex items-center gap-4 p-4">
                   <SidebarTrigger className="-ml-1" />
                   <Breadcrumbs />

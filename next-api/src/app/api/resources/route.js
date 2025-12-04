@@ -5,47 +5,59 @@ export async function GET(request) {
   try {
     // Ambil parameter pencarian & pagination dari URL
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('keyword') || '';  // Ambil kata kunci pencarian
-    const page = parseInt(searchParams.get('page')) || 1;  // Halaman saat ini
-    const limit = parseInt(searchParams.get('limit')) || 10;  // Batas data per halaman
+    const search = searchParams.get("keyword") || "";  // Ambil kata kunci pencarian
+    const page = parseInt(searchParams.get("page")) || 1;  // Halaman saat ini
+    const limit = parseInt(searchParams.get("limit")) || 10;  // Batas data per halaman
 
-    console.log('Query Params:', { search, page, limit });
+    const skip = (page - 1) * limit;
 
+    const where = search
+      ? {
+        OR: [
+          { ResourceId: { contains: search } },
+          { Name: { contains: search } },
+          { ServiceCenterName: { contains: search } },
+          { City: { contains: search } },
+          { StateProvince: { contains: search } },
+          { Country: { contains: search } },
+          { Phone: { contains: search } },
+          { Mobile: { contains: search } },
+          { Email: { contains: search } },
+          ], 
+        }
+      : undefined;
     // Hitung jumlah total data yang cocok dengan pencarian
-    const totalCount = await prisma.resource.count({
-      where: search
-        ? {
-            Name: { contains: search }  // Sesuaikan dengan field nama pada tabel Resource
-          }
-        : undefined
-    });
+    const totalCount = await prisma.resource.count({ where });
 
     console.log('Total Data:', totalCount);
 
-    // Hitung offset berdasarkan halaman
-    const skip = (page - 1) * limit;
-
     // Ambil data Resources dengan filter dan pagination
     const resources = await prisma.resource.findMany({
-      where: search
-        ? {
-            Name: { contains: search }  // Sesuaikan dengan field nama pada tabel Resource
-          }
-        : undefined,
-      skip: skip,
+      where,
+      skip,
       take: limit,
-      orderBy: { Name: 'asc' },  // Sorting berdasarkan nama
+      orderBy: { ResourceId: 'asc',
+      },
       include: {
-        resourceAccounts: true
-      }
+        resourceAccounts: true,
+        bookingDetails: true,
+        users: true,
+      },
     });
 
+    const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+    const currentPage = page;
     return NextResponse.json({
       success: true,
-      message: 'List Data Subk Technician',
+      message: 'List Data Resources',
       data: resources,
-      totalPages: Math.ceil(totalCount / limit),
-      currentPage: page
+      meta: {
+        totalCount,
+        totalPages,
+        currentPage,
+        pageSize: limit,
+      },
+
     });
   } catch (error) {
     console.error('🔥 ERROR in GET API:', error);
@@ -62,28 +74,50 @@ export async function GET(request) {
 }
 
 export async function POST(req) {
-  const body = await req.json();
-  const { ResourceId, Name } = body;
+    try {
+        const body = await req.json();
 
-  if (!ResourceId || !Name) {
-    return NextResponse.json({
-      success: false,
-      error: 'ResourceId and Name are required.'
-    }, { status: 400 });
-  }
+    const { ResourceId, Name, ServiceCenterName, ResourceCode, ResourceLogo, Phone, Mobile, Fax, Email, City, StateProvince, Country, ZipPostalCode, AddressLine, } = body;
 
-  try {
-    const Resources = await prisma.resource.create({
+    if (!ResourceId || !Name) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "ResourceId and Name are required fields.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const newResource = await prisma.resource.create({
       data: {
         ResourceId,
-        Name
+        Name,
+        ServiceCenterName,
+        ResourceCode,
+        ResourceLogo,
+        Phone,
+        Mobile,
+        Fax,
+        Email,
+        City,
+        StateProvince,
+        Country,
+        ZipPostalCode,
+        AddressLine,
       },
     });
 
-    return NextResponse.json({ success: true, data: Resources });
+    return NextResponse.json({ success: true, message: "Resource created successfully", data: newResource });
   } catch (error) {
-    console.error("Resource creation error:", error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error("🔥 ERROR in POST API:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to create resource",
+        error: error.message,
+      },
+      { status: 500 }
+    );
   }
 }
-

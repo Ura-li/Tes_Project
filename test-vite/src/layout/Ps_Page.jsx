@@ -111,7 +111,7 @@ export default function ProductStorage() {
   
 </div>
 
-<CardFooter className="items-center  flex gap-4">
+<CardFooter className="items-center flex gap-4">
   <button
     className="px-2 bg-gray-300 rounded disabled:opacity-50 cursor-pointer"
     onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
