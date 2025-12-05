@@ -5,25 +5,11 @@ import { getTokenUserId } from "@/app/middleware/auth";
 let userIdProvider = () => null;
 
 const prisma = new PrismaClient({
-  log: [
-    {
-      emit: "stdout", //change to event if want to activate below 
-      level: "query",
-    },
-    {
-      emit: "stdout",
-      level: "error",
-    },
-    {
-      emit: "stdout",
-      level: "info",
-    },
-    {
-      emit: "stdout",
-      level: "warn",
-    },
-  ],
+  log: process.env.NODE_ENV === "production"
+    ? ["error", "warn"]
+    : ["query", "error", "info", "warn"],
 });
+
 
 
 prisma.$on("query", (e) => {
