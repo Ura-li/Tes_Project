@@ -54,7 +54,7 @@ const chartConfig = {
 
 export function ChartArea({data}) {
   return (
-    <Card>
+    <Card className="dark:bg-gradient-to-bl dark:from-slate-900 dark:via-slate-800 dark:to-slate-800 dark:to-10% via-80% from-20%">
       <CardHeader>
         <CardTitle>Area Chart - Open And Closed Case</CardTitle>
         <CardDescription>
@@ -136,7 +136,7 @@ export function ChartBar({data, month}) {
   console.log("data",data)
 console.log("tes",chartData);
   return (
-    <Card>
+    <Card className="dark:bg-gradient-to-bl dark:from-slate-900 dark:via-slate-800 dark:to-slate-800 dark:to-10% via-80% from-20%">
       <CardHeader>
         <CardTitle>Bar Chart - Open And Closed Case</CardTitle>
         <CardDescription>{monthName} 2025</CardDescription>
@@ -226,7 +226,7 @@ export function ChartPie() {
   }, [caseData])
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col dark:bg-gradient-to-bl dark:from-slate-900 dark:via-slate-800 dark:to-slate-800 dark:to-10% via-80% from-20%">
       <CardHeader className="items-center pb-0">
         <CardTitle>Pie Chart - Open And Closed Case</CardTitle>
         <CardDescription>Open & Close</CardDescription>
@@ -351,7 +351,7 @@ export function ChartRadialText({
             />
           </PolarRadiusAxis>
         </RadialBarChart>
-      <CardFooter className="grid  items-center justify-center text-xs text-gray-600 font-semibold dark:text-gray-400">
+      <CardFooter className="grid items-center justify-center text-xs text-gray-600 font-semibold dark:text-gray-400">
         {radialchartdata.map((d) => (
           <div key={d.name} className="flex items-center gap-2">
             <span

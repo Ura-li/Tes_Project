@@ -319,7 +319,7 @@ const InvoiceDialog = () => {
 
           <CaseField label="Tanggal Terima">
             <Input
-              type="date"
+              type="datetime-local"
               value={form.amountReceiveDate}
               onChange={(e) =>
                 handleChange("amountReceiveDate", e.target.value)

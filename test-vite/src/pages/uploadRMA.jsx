@@ -7,14 +7,14 @@ import { Input } from "../components/ui/input";
 
 export const UploadRma = () => {
     return (
-        <>
+        <div className="bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% h-full">
         <div className="p-2 mt-2">
-            <Card>
+            <Card className={"bg-gradient-to-t dark:from-slate-800 dark:via-slate-700 dark:to-slate-900 dark:border-2 dark:border-gray-600"}>
                 <CardHeader>
                     <CardTitle>Update RMA status by export/import SO/RMA no.</CardTitle>
                 <hr className="border-green-500 "/>
                 </CardHeader>
-                <CardContent className={"grid grid-cols-2 gap-2"}>
+                <CardContent className={"grid grid-cols-2 gap-2 "}>
                     <CaseField label={"Company"} star>
                         <SearchCommandBlock
                             options={[
@@ -23,13 +23,15 @@ export const UploadRma = () => {
                                 "Kakasi",
                                 "Beban",
                             ]}
+                            className={"dark:bg-transparent dark:border-gray-500 dark:border-2"}
                         />
                     </CaseField>
                     <CaseField label={"RMA Date"} star>
-                        <DatePicker/>
+                        <DatePicker className={"dark:bg-transparent dark:border-gray-500 dark:border-2 dark:rounded-md"}/>
                     </CaseField>
                     <CaseField label={"RMA Status"} star>
                         <SearchCommandBlock
+                        className={"dark:bg-transparent dark:border-gray-500 dark:border-2 dark:rounded-md"}
                             options={[
                                 "Naruto",
                                 "Sasuke",
@@ -39,10 +41,10 @@ export const UploadRma = () => {
                         />
                     </CaseField>
                     <CaseField label={"SO / RMA no"} star>
-                        <Input type={"file"}/>
+                        <Input type={"file"} className={"dark:bg-transparent dark:border-gray-500 dark:border-2 dark:rounded-md dark:text-gray-400"}/>
                     </CaseField>
                 </CardContent>
-                <CardContent className={"border-2 m-2 rounded-md p-2 space-y-2 text-sm"}>
+                <CardContent className={"border-2 m-2 rounded-md p-2 space-y-2 text-sm dark:border-gray-400"}>
                     <div className="flex flex-col italic">
                     <span className="uppercase">format for part in & on hand ce</span>
                     <span className="uppercase">column a so no.</span>
@@ -88,6 +90,6 @@ export const UploadRma = () => {
                 </CardContent>
             </Card>
         </div>
-        </>
+        </div>
     )
 }

@@ -26,7 +26,7 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
   const onChangeCaseNote = (field, value)  => setCaseNoteField(field, value);
   const handleSave = (redirect = true) => saveAll({ redirect })
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 3;
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = notesList.slice(startIndex, startIndex + itemsPerPage) 
@@ -100,7 +100,7 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
                                 {Array.isArray(currentData) && currentData.length > 0 ? (
                                   currentData.map((n,i) => (
                                     
-                                    <TableRow key={n.NoteID} className={``}>
+                                    <TableRow key={n.NoteID}>
                                       <TableCell>{n.CreatedOn ? format(new Date(n.CreatedOn), 'yyyy-MM-dd HH:mm') : '-'}</TableCell>
                                       <TableCell>{n.createdByUser?.Name || n.CreatedBy || '-'}</TableCell>
                                       <TableCell>{n.LogType || '-'}</TableCell>

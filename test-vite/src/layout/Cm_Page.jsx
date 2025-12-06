@@ -272,8 +272,9 @@ export default function CashManagement() {
 
 
     return (
-      <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3">
-        <Card className={"rounded-sm"}>
+    <div className="bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% h-full">
+      <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3 ">
+        <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"}>
           <CardHeader className={"grid grid-cols-2 items-start"}>
             {!preview.ProfilePhoto && (
               <div className="flex justify-start">
@@ -308,15 +309,15 @@ export default function CashManagement() {
           </CardHeader>
           <CardContent className={"ml-4 flex gap-1 flex-col"}>
             <CardTitle className={"text-xl"}>{user?.name || "User"}</CardTitle>
-            <span className="text-gray-400">{user?.email}</span>
-            <span className="text-sm text-gray-500">{userData.Phone}</span>
+            <span className="text-gray-400 dark:text-gray-300">{user?.email}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-300">{userData.Phone}</span>
           </CardContent>
-          <span className="text-xs text-center text-gray-500 ">
+          <span className="text-xs text-center text-gray-500 dark:text-gray-400">
             Latest Login: {new Date().toLocaleString()}
           </span>
         </Card>
 
-        <Card className={"rounded-sm col-span-2 row-span-2"}>
+        <Card className={"rounded-sm col-span-2 row-span-2 dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-700 dark:to-slate-800"}>
           <CardHeader>
             <CardTitle className={"text-2xl"}>Quotation</CardTitle>
 
@@ -325,12 +326,12 @@ export default function CashManagement() {
           <CardContent className={"grid gap-3 overflow-y-auto"}>
             {loading
               ? Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-20 w-full rounded-lg" />
+                  <Skeleton key={i} className="h-20 w-full rounded-lg dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600 dark:border-2" />
                 ))
               : caseData.map((c) => (
                   <Card
                     key={c.CaseID}
-                    className="p-3 border-l-4 hover:scale-[0.99] rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400 bg-white cursor-pointer"
+                    className="p-3 border-l-4 hover:scale-[0.99] rounded-lg shadow-sm hover:shadow-lg transition-all border-2 bg-white cursor-pointer dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600 dark:border-2 dark:hover:border-teal-600"
                     onClick={() => navigate(`/app/case/${c.CaseID}`)}
                   >
                     <div className="flex flex-wrap items-center gap-2 ">
@@ -350,12 +351,12 @@ export default function CashManagement() {
                                 <Badge className="px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     {STATUS_ENUM_TO_LABEL[c.CaseStatus]}
                                 </Badge>
-                                <p className='ml-auto text-xs text-gray-500 '>{c.CreatedOn}</p>
+                                <p className='ml-auto text-xs text-gray-500 dark:text-gray-300'>{c.CreatedOn}</p>
                                 </div>
                                 <p className={cn("font-medium truncate mt-1", !c.CaseSubject && 'text-red-500')}>{c.CaseSubject || "No Subject"}</p>
                                 <div className=" text-gray-500 mt-1 flex justify-between">
-                                <p className='text-md'>{c.CaseID}</p>
-                                <p className='text-md  font-semibold'>{c.UpdateOn ? new Date(c.UpdateOn).toLocaleString("id-ID") : "No Update"}</p>
+                                <p className='text-md dark:text-gray-300'>{c.CaseID}</p>
+                                <p className='text-md  font-semibold dark:text-gray-300'>{c.UpdateOn ? new Date(c.UpdateOn).toLocaleString("id-ID") : "No Update"}</p>
                                 </div>
                                 {/* TODO FOR SLAMET : ADD A MF COLOR IN DIS BUTON */}
                                 {/* <Button
@@ -376,7 +377,7 @@ export default function CashManagement() {
                 </CardContent>
             </Card>
 
-        <Card className={"rounded-sm"}>
+        <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-br dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"}>
           <CardHeader>
             <CardTitle>Notifications</CardTitle>
           </CardHeader>
@@ -400,6 +401,7 @@ export default function CashManagement() {
                 />
             )}
 
-        </div>
+      </div>
+    </div>
     )
 }

@@ -542,7 +542,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
           `/api/dp-information?caseId=${caseDetails.CaseID}`
         )
         const data = response.data?.data;
-
+        console.log("DATA TS DP",data)
         const arrayData = Array.isArray(data)
           ? data
           : data
