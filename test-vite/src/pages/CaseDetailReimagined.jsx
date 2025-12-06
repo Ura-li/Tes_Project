@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useMediaQuery } from 'react-responsive'
 
+
 // ... STATUS ENUMS etc (same as before)
 
 export const TabsServiceCaseDetails = () => {
@@ -988,7 +989,8 @@ function fieldMO(caseDetails) {
       .join(", ") || "-";
 console.log("CHeCK CASe daTA",caseDetails)
 
-  
+    const isTechRole = ["ce", "celead", "apo", "admin"].includes(user?.role);
+
   return (
     <>
       <div className="flex items-center border-1 sticky top-15 z-5 bg-gray-50 dark:dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 overflow-auto">
@@ -1019,12 +1021,14 @@ console.log("CHeCK CASe daTA",caseDetails)
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+       { (isTechRole && caseDetails?.CaseStatus !== "Close") && (
         <BtnModalsServiceCatalog
           open={openWorkOrder}
           setOpen={(open) => setOpenWorkOrder(open)}
           caseDetails={caseDetails}
           serviceCatalogType={serviceCatalogType}
         />
+      )}
       </div>
       <div>
         {/* <QuotationDialog

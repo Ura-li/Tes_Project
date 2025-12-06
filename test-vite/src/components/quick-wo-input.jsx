@@ -279,16 +279,16 @@ export function QuickWOInput ({
                 <CaseField label="Company Name" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.companyName} readOnly/> </CaseField>
                 <CaseField label="Address Line2" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.addressLine2} readOnly/> </CaseField>
                 <CaseField label="Timezone" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.timezone} readOnly/> </CaseField>
-                <CaseField label="Contact First Name" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.contactFirstName} onChange={e => handleChangeServciceDeliveryAddress(e.target.value)} /> </CaseField>
-                <CaseField label="Address Line3" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.addressLine3} onChange={e => handleChangeServciceDeliveryAddress(e.target.value)} /> </CaseField>
+                <CaseField label="Contact First Name" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.contactFirstName} onChange={e => handleChangeServciceDeliveryAddress("contactFirstName")} /> </CaseField>
+                <CaseField label="Address Line3" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.addressLine3} onChange={e => handleChangeServciceDeliveryAddress("addressLine3")} /> </CaseField>
                 <CaseField label="Service Territory" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.serviceTerritory} readOnly/> </CaseField>
                 <CaseField label="Contact Last Name" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.contactLastName} readOnly/> </CaseField>
                 <CaseField label="City" className={''}  lock> <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.city} readOnly/> </CaseField>
                 <CaseField label="Business Segment" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.businessSegment} readOnly/> </CaseField>
-                <CaseField label="Phone Number" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.phoneNumber} onChange={e => handleChangeServciceDeliveryAddress(e.target.value)} /> </CaseField>
+                <CaseField label="Phone Number" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.phoneNumber} onChange={e => handleChangeServciceDeliveryAddress("phoneNumber")} /> </CaseField>
                 <CaseField label="State Or Province" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.stateOrProvince} readOnly/> </CaseField>
                 <CaseField label="Longitude" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.longitude} readOnly/> </CaseField>
-                <CaseField label="Email Address" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.email} onChange={e => handleChangeServciceDeliveryAddress(e.target.value)} /> </CaseField>
+                <CaseField label="Email Address" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.email} onChange={e => handleChangeServciceDeliveryAddress("email")} /> </CaseField>
                 <CaseField label="Country/Region" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.countryOrRegion} readOnly/> </CaseField>
                 <CaseField label="Latitude" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.latitude} readOnly/> </CaseField>
               </CardContent>

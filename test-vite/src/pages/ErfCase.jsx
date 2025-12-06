@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 
 export const ErfCase = () => {
-  const [caseData, setCaseData] = useState([])
+  const [caseData, setCaseData] = useState([])  
   const [selectedFiles, setSelectedFiles] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
   const PAGE_SIZE = 5 
@@ -22,7 +22,7 @@ export const ErfCase = () => {
   const fetchData = async () => {
     try {
       const response = await ApiCustomer.get('/api/case-information')
-      const data = response.data.data.filter(c => c.CaseStatus == 'Close')
+      const data = response.data.data.filter(c => c.CaseStatus == 'Close' && c.caseinformation?.ErfDoc === null)
       setCaseData(data)
       return data
     } catch (err) {
