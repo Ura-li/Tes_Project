@@ -166,12 +166,7 @@ export const Case = () => {
   const loadCaseData = async () => {
     try {
       setLoading(false)
-      Swal.fire({
-        title: "Loading...",
-        text: "Mohon tunggu sebentar",
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-      });
+
 
       const response = await ApiCustomer.get(
         `/api/case-information/${caseId}`
@@ -208,7 +203,7 @@ export const Case = () => {
         showConfirmButton: false,
       });
     } finally {
-      Swal.close();
+      // Swal.close();
       setLoading(true)
     }
   };
