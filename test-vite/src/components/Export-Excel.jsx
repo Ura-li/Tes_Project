@@ -208,7 +208,7 @@ export const ExportExcelPart = ({}) => {
     <div>
       <Button
         onClick={exportToExcelPart}
-        className={"bg-blue-400 text-white hover:bg-blue-300 cursor-pointer"}
+        className={"bg-blue-400 text-white hover:bg-blue-300 cursor-pointer dark:bg-gradient-to-b dark:border-2 dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%"}
       >
         Export to Excel
       </Button>

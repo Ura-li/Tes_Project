@@ -139,7 +139,7 @@ export default function FrontDesk_Page() {
                   className="w-20 h-20 rounded-full border-4 border-white shadow-md -mb-10"
                 />
               ) : (
-                <div className="w-20 h-20 flex items-center justify-center rounded-full border-4 border-white shadow-md -mb-10 bg-cyan-100">
+                <div className="w-20 h-20 flex items-center justify-center rounded-full border-4 border-white shadow-md mb-10 bg-cyan-100">
                   <span className="text-3xl font-bold text-cyan-600">?</span>
                 </div>
               )}

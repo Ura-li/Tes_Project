@@ -137,13 +137,37 @@ export const ServiceMaterialApo = () => {
                   <span className="font-semibold">{lineItems.length}</span>
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex justify-between items-center pt-0 gap-5">
+              <CardContent className="flex justify-between w-full">
                 <h1>{materialOrder?.Description}</h1>
                 <div>
-                  <span className="font-semibold">Order Status:</span>{" "}
-                  {materialOrder?.OrderStatus}
+                  <span className="font-semibold">Order Status:</span>
+                  {lineItems.map((items) => (
+                    <div
+                      key={items.lineItemID}
+     
+                    >
+                    <SearchCommandBlock
+                      value={items.Status}
+                      onChange={(newStatus) =>
+                            handleStatusChange(
+                              items.LineItemID,
+                              newStatus
+                            )
+                          }
+                      placeholder="Select status"
+                      options={[
+                        { value: "New", label: "New" },
+                        { value: "Ordered", label: "Ordered" },
+                        { value: "Shipped", label: "Shipped" },
+                        { value: "BackOrdered", label: "BackOrdered" },
+                        { value: "Closed", label: "Closed" },
+                        { value: "Cancelled", label: "Cancelled" },
+                      ]}
+                      disabled={!canEditapo}
+                    />
                 </div>
-
+              ))}
+                </div>
               </CardContent>
             </Card>
               {/* <div className=" border-t bg-gray-50 w-full overflow-x-auto ">

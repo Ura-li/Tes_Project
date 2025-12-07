@@ -468,6 +468,7 @@ export const TabsServiceCaseDetails = () => {
                 customerSignature={signature}
                 materialItems={fieldMO(caseDetails)}
                 initialData={quotationInitialData || {}}
+                qrcode={qrCodeImg}
               />
             ).toBlob();
              const fileName = `DP-${
@@ -521,6 +522,7 @@ export const TabsServiceCaseDetails = () => {
                 customerSignature={signature}
                 materialItems={fieldMO(caseDetails)}
                 initialData={quotationInitialData || {}}
+                qrcode={qrCodeImg}
               />
             ).toBlob();
              const fileName = `Invoice-${
@@ -831,6 +833,16 @@ const hiddenButtons = isResponsive
           CaseID: caseDetails?.CaseID,
           CreatedBy: user?.id,
         })
+
+        const actionLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${caseDetails.CaseID}`,
+          ReferenceId: ``,
+          model: "Case",
+          dataOld: caseDetails.CaseStatus,
+          dataNew: caseUpdate.data.data.CaseStatus,
+          changedBy: user?.id,
+          logDescription: `Approve : Change Case ${caseDetails.CaseID} Status from ${caseDetails.CaseStatus} to ${caseUpdate.data.data.CaseStatus}`
+        })
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -998,6 +1010,7 @@ console.log("CHeCK CASe daTA",caseDetails)
           <Button
             key={index}
             onClick={btn.onClick}
+            hidden={btn.hidden}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
@@ -1584,7 +1597,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
         </div>
       )}
 
-      <Card className="border-0 dark:rounded-none bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% ">
+      <Card className="border-0 dark:rounded-none bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
         <Tabs defaultValue="case_info">
           <CardHeader className="sticky top-24 z-5 w-full border-b bg-white shadow-sm flex flex-col dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
@@ -1621,7 +1634,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       : ownerUserData?.Role === "ps"
                       ? "Owner Ps"
                       : ownerUserData?.Role === "apv"
-                      ? "Owner Aprovel"
+                      ? "Owner Approvel"
                       : ownerUserData?.Role === "user"
                       ? "User"
                       : "None"}
@@ -1706,10 +1719,10 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   <CaseField
                     label="Case Subject"
                     span={3}
-                    childClass={" col-span-3"}
+                    childClass={"col-span-3"}
                     lock={!canEditFd}
                   >
-                    <div className="ml-8 w-full">
+                    <div className="ml-8 w-full" id="case-subject">
                       <Textarea
                         value={caseForm?.CaseSubject}
                         onChange={(e) =>
@@ -1837,6 +1850,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     lock={!canEdit}
                   >
                     <SearchCommandBlock
+                      id="case-status"
                       value={
                         STATUS_ENUM_TO_LABEL[caseForm?.CaseStatus] ||
                         "--Select--"
@@ -1865,7 +1879,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       }}
                       placeholder="--Select--"
                       options={statusOptions}
-                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                     />
                   </CaseField>
                   <CaseField
@@ -1910,6 +1924,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     lock={!canEditFd}
                   >
                     <SearchCommandBlock
+                      id="case-type"
                       value={caseForm?.CaseType}
                       onChange={onChangeCase("CaseType")}
                       placeholder="--Select--"
@@ -1924,7 +1939,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     lock={!canEditFd}
                     childClass={" col-span-3"}
                   >
-                    <div className="ml-8 w-full">
+                    <div className="ml-8 w-full" id="problem-desc">
                       <Textarea
                         value={caseForm?.ProblemDescription}
                         onChange={(e) =>
@@ -1945,6 +1960,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   >
                     {/* <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={caseDetails.CasePriority}/> */}
                     <SearchCommandBlock
+                      id="case-priority"
                       value={caseForm?.CasePriority}
                       onChange={onChangeCase("CasePriority")}
                       options={[
@@ -2271,7 +2287,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
               <CardContent>
                 <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
                   {/* LEFT COLUMN - Issue Description */}
-                  <div className="space-y-6">
+                  <div className="space-y-6" id="customer-issue">
                     <textarea
                       className={cn(
                         "w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50 dark:bg-gray-500/10 dark:border-gray-400",
@@ -2362,6 +2378,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                                 </Select> */}
 
                       <SearchCommandBlock
+                        id="log-type"
                         value={caseNoteFormData?.LogType}
                         onChange={(val) => onChangeCaseNote("LogType", val)}
                         options={["Notes Log", "Phone Log"]}
@@ -2372,6 +2389,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
                     <CaseField label="Action Type">
                       <SearchCommandBlock
+                        id="action-type"
                         value={caseNoteFormData?.ActionType}
                         onChange={(val) => onChangeCaseNote("ActionType", val)}
                         placeholder="--Select--"
@@ -2412,6 +2430,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
                     <CaseField label="Notes" star>
                       <textarea
+                        id="notes"
                         className="w-full h-full min-h-[100px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 shadow-sm dark:bg-gray-500/10 dark:border-gray-400"
                         value={caseNoteFormData?.Note || ""}
                         onChange={(e) =>
@@ -2668,7 +2687,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       options={[
                         { id: 1, name: "Add Info By WA" },
                         { id: 2, name: "Revision To WA" },
-                        { id: 3, name: "New", disable: true },
+                        { id: 3, name: "New"},
                       ]}
                       value={entitlementStatus.WarrantyApprovalStatus}
                       onChange={handleEntitlementStatus(
@@ -3559,7 +3578,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent>
-                  {console.log("WOI INVOICCENYA GA NOGNOL",invoiceSummary, invoiceData)}
+                  
                   {invoiceLoading ? (
                     <p className="text-sm text-muted-foreground">
                       Memuat data invoice...

@@ -11,7 +11,7 @@ export function SOTemplateButton() {
   };
 
   return (
-    <Button onClick={handleDownload}>
+    <Button onClick={handleDownload} className={"dark:bg-gradient-to-b dark:border-2 dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50% dark:text-white"}>
       Download SO Template
     </Button>
   );

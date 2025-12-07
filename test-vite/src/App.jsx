@@ -36,6 +36,7 @@ import { GlobalLogListener } from './components/GlobalLogListener'
 import { SocketInitializer } from './components/SocketInitializer'
 import { ThemeProvider } from './context/theme-context'
 import { ThemeToggle } from './components/ThemeToggle'
+import { ButtonTour } from './components/driver-tour'
 
 export function Breadcrumbs() {
   const location = useLocation();
@@ -175,6 +176,7 @@ const App = () => {
                 </div>
                 <div className="flex items-center gap-2 pr-4">
                   {/* tombol light/dark */}
+                  <ButtonTour/>
                   <ThemeToggle />
                   <SheetBar />
                 </div>

@@ -343,7 +343,7 @@ export const FlowCaseData = (user) => {
                     className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500"
                     id="Finish"
                   /> 
-                  <Label htmlFor="Finish" className={"font-[700]"}>
+                  <Label htmlFor="Finish" className={"font-[700]"} >
                     Show Finished Case
                   </Label>
                   <Switch

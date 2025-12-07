@@ -111,9 +111,10 @@ export default function ApoLanding() {
    
   const navigate = useNavigate();
     return (
+      <div className="bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
         <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3">
-            <Card className={"rounded-sm"}>
-                <CardHeader className={"grid grid-cols-2 items-start"}>
+            <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"}>
+                <CardHeader className={"grid grid-cols-2 items-start "}>
                     {!preview.ProfilePhoto && (
                     <div className="flex justify-start">
                         <div className="w-30 h-30 rounded-full border-4 border-white shadow-md text-center">
@@ -140,26 +141,26 @@ export default function ApoLanding() {
                     <div className="flex justify-end">
                     <Badge
                         variant={"outline"}
-                        className={user.role === "apo" ? "bg-amber-200" : "bg-gray-200"}
+                        className={user.role === "apo" ? "bg-amber-200 dark:text-gray-700" : "bg-gray-200 dark:text-gray-700"}
                         >
                         {user.role}
                     </Badge>
                     </div>
                 </CardHeader>
-                <CardContent className={"ml-4 flex gap-1 flex-col"}>
+                <CardContent className={"ml-4 flex gap-1 flex-col "}>
                     <CardTitle className={"text-xl"}>{user?.name || "User"}</CardTitle>
-                    <span className="text-gray-400">{user?.email}</span> 
-                    <span className='text-sm text-gray-500'>{userData.Phone}</span>
+                    <span className="text-gray-400 dark:text-gray-400">{user?.email}</span> 
+                    <span className='text-sm text-gray-500 dark:text-gray-400'>{userData.Phone}</span>
                 </CardContent>
-                <span className="text-xs text-center text-gray-500 ">
+                <span className="text-xs text-center text-gray-500 dark:text-gray-300">
                     Latest Login: {new Date().toLocaleString()}
                 </span>
             </Card>
 
-             <Card className={"rounded-sm col-span-2 row-span-2 "}>
+             <Card className={"rounded-sm col-span-2 row-span-2 dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-700 dark:to-slate-800"}>
                 <CardHeader>
                     <CardTitle className={"text-2xl"}>Recent Cases</CardTitle>
-                    <hr />
+                    <hr className="dark:border-gray-300"/>
                 </CardHeader>
                 <CardContent className={"grid gap-3 max-h-[calc(100vh-200px)] overflow-y-auto grid-cols-2"}>
                      {loading
@@ -169,7 +170,7 @@ export default function ApoLanding() {
               : caseData.map((c) => (
                 <Card
                   key={c.CaseID}
-                  className="p-3 border-l-4 hover:scale-[0.99] rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400 bg-white cursor-pointer"
+                  className="p-3 border-l-4 hover:scale-[0.99] rounded-lg shadow-sm hover:shadow-lg transition-all border-teal-400 bg-white cursor-pointer dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-800"
                   onClick={() => navigate(`/app/case/${c.CaseID}`)}
                 >
                   <div className="flex flex-wrap items-center gap-2">
@@ -190,15 +191,15 @@ export default function ApoLanding() {
                   </div>
                   <p className="font-medium truncate mt-1">{c.CaseSubject}</p>
                   <div className="text-xs text-gray-500 mt-1 flex justify-between">
-                    <p>{c.CaseID}</p>
-                    <span>{c.CreatedOn}</span>
+                    <p className="dark:text-gray-400">{c.CaseID}</p>
+                    <span className="dark:text-gray-400">{c.CreatedOn}</span>
                   </div>
                 </Card>
               ))}
                 </CardContent>
             </Card>
 
-            <Card className={"rounded-sm"}>
+            <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-br dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"}>
                 <CardHeader>
                     <CardTitle>Notifications</CardTitle>
                 </CardHeader>
@@ -207,5 +208,6 @@ export default function ApoLanding() {
                 </CardContent>
             </Card> 
         </div>
+      </div>
     )
 }
