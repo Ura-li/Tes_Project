@@ -153,6 +153,7 @@ export const Case = () => {
   );
   const fetchGtc = useServiceCaseStore((s) => s.fetchGtc);
   const fetchCsr = useServiceCaseStore((s) => s.fetchCsr);
+  const fetchProduct = useServiceCaseStore((s) => s.fetchProduct);
   const fetchActionLog = useServiceCaseStore((s) => s.fetchActionLog);
   const fetchOtcCode = useServiceCaseStore((s) => s.fetchOtcCode);
   const fetchInvoiceData = useServiceCaseStore((s) => s.fetchInvoiceData);
@@ -179,6 +180,7 @@ export const Case = () => {
       await Promise.allSettled([
         fetchCustomerData(),
         fetchAssetInformation(),
+        fetchProduct(),
         fetchCaseNotes(),
         fetchOwnerUserData(),
         fetchWorkOrders(),

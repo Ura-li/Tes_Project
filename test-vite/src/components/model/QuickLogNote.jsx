@@ -26,7 +26,7 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
   const onChangeCaseNote = (field, value)  => setCaseNoteField(field, value);
   const handleSave = (redirect = true) => saveAll({ redirect })
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 2;
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = notesList.slice(startIndex, startIndex + itemsPerPage) 

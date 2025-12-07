@@ -757,7 +757,7 @@ export const ServiceWork = () => {
                 {canEditapo || user.role === "admin" ? (
                   <NewBookableResourceBooking
                     CaseID={caseInformation?.CaseID}
-                    WOID={workOrders.WOID}
+                    WOID={workOrder.WOID}
                     CreatedBy={user.id}
                     RequestedDateTimeCustomer={
                       SLA.requestedDateTimeCustomer

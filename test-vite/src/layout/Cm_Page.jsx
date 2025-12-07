@@ -353,7 +353,7 @@ export default function CashManagement() {
                                 </Badge>
                                 <p className='ml-auto text-xs text-gray-500 dark:text-gray-300'>{c.CreatedOn}</p>
                                 </div>
-                                <p className={cn("font-medium truncate mt-1", !c.CaseSubject && 'text-red-500')}>{c.CaseSubject || "No Subject"}</p>
+                                <p className={cn("font-medium truncate mt-1 text-wrap", !c.CaseSubject && 'text-red-500')}>{c.CaseSubject || "No Subject"}</p>
                                 <div className=" text-gray-500 mt-1 flex justify-between">
                                 <p className='text-md dark:text-gray-300'>{c.CaseID}</p>
                                 <p className='text-md  font-semibold dark:text-gray-300'>{c.UpdateOn ? new Date(c.UpdateOn).toLocaleString("id-ID") : "No Update"}</p>

@@ -100,6 +100,7 @@ interface ServiceCaseState {
   fetchMaterialOrders: () => Promise<void>;
   fetchGtc: () => Promise<void>;
   fetchCsr: () => Promise<void>;
+  fetchProduct: () => Promise<void>;
   fetchCase: () => Promise<void>;
   fetchActionLog: () => Promise<void>;
   fetchOtcCode: () => Promise<void>;
@@ -533,7 +534,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     }
   },
 
-    fetchDPData: async () =>{
+  fetchDPData: async () =>{
       const { caseDetails } = get();
       if(!caseDetails?.CaseID) return
       set({dpLoading: true})
@@ -566,7 +567,21 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       } finally {
         set({dpLoading: false})
       }
-    },
+  },
+
+  fetchProduct: async () => {
+    const {caseDetails} = get();
+    if (!caseDetails) return;
+    try {
+      const resProduct = await ApiCustomer.get(`/api/product-information/${caseDetails.asset_information.product_information.ProductNumber}`)
+      set({productForm: {
+        HWPC: resProduct.data.data.HWPC || "",
+        ProductTypeID: resProduct.data.data.ProductTypeID || "",
+      }})
+    } catch (err) {
+      toast.error("Gagal mengambil data product");
+    }
+  },
 
   // --------------- saveAll (replacement for handleSave) --------------
   saveAll: async ({ redirect = true } = {}) => {
@@ -757,7 +772,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
                 }
               );
 
-              if (entitlementStatus.needWarrantyApproval === true) {
+              if ((entitlementStatus.needWarrantyApproval === true && ownerUserData?.Role === 'fd') || ownerUserData?.Role === 'apv') {
                   const getAsset = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`);
                   const fieldAsset = getAsset.data.data;
                   const status = fieldAsset.asset_warranty[0]?.WarrantyApprovalStatus;

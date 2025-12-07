@@ -833,6 +833,16 @@ const hiddenButtons = isResponsive
           CaseID: caseDetails?.CaseID,
           CreatedBy: user?.id,
         })
+
+        const actionLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${caseDetails.CaseID}`,
+          ReferenceId: ``,
+          model: "Case",
+          dataOld: caseDetails.CaseStatus,
+          dataNew: caseUpdate.data.data.CaseStatus,
+          changedBy: user?.id,
+          logDescription: `Approve : Change Case ${caseDetails.CaseID} Status from ${caseDetails.CaseStatus} to ${caseUpdate.data.data.CaseStatus}`
+        })
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -1000,6 +1010,7 @@ console.log("CHeCK CASe daTA",caseDetails)
           <Button
             key={index}
             onClick={btn.onClick}
+            hidden={btn.hidden}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
@@ -1623,7 +1634,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       : ownerUserData?.Role === "ps"
                       ? "Owner Ps"
                       : ownerUserData?.Role === "apv"
-                      ? "Owner Aprovel"
+                      ? "Owner Approvel"
                       : ownerUserData?.Role === "user"
                       ? "User"
                       : "None"}
@@ -2676,7 +2687,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       options={[
                         { id: 1, name: "Add Info By WA" },
                         { id: 2, name: "Revision To WA" },
-                        { id: 3, name: "New", disable: true },
+                        { id: 3, name: "New"},
                       ]}
                       value={entitlementStatus.WarrantyApprovalStatus}
                       onChange={handleEntitlementStatus(

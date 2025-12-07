@@ -265,20 +265,13 @@ export const Invoice = ({
             <Text style={styles.label}>Received Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
-              {caseDetails?.CreatedOn
-                ? new Date(caseDetails.CreatedOn).toLocaleString()
-                : "N/A"}
+              {formatDate(caseDetails?.CreatedOn) || "N/A"}
             </Text>
 
             <Text style={styles.label}>Quotation Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
-              {/* {initialData?.quotationDate
-                ? new Date(initialData.quotationDate).toLocaleDateString()
-                : "N/A"} */}
-              {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate ? 
-              new Date (caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate).toLocaleString() : "N/A" 
-              }
+              {formatDate(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate) || "N/A"}
             </Text>
 
             <Text style={styles.label}>Problem Desc</Text>
@@ -623,9 +616,9 @@ export const Invoice = ({
             Balance Due :
           </Text>
           <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah((caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) -  (caseDetails?.down_payment_table.reduce((sum, row) => 
-              sum + Number(row.DPAmount) || 0, 0
-            )))}
+            {(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) - (caseDetails?.down_payment_table.reduce((sum, row) => sum + Number(row.DPAmount), 0)) ? 
+                            formatAccountingRupiah((caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) - (caseDetails?.down_payment_table.reduce((sum, row) => sum + Number(row.DPAmount), 0))) : "0"
+                          }
           </Text>
         </View>
       </View>
