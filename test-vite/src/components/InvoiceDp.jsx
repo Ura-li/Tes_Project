@@ -9,7 +9,7 @@ import {
   Link,
 } from "@react-pdf/renderer";
 import React from "react";
-import { formatAccountingRupiah } from "../lib/utils";
+import { formatAccountingRupiah, formatDate } from "../lib/utils";
 
 Font.register({
   family: "Helvetice",
@@ -200,8 +200,10 @@ export const InvoiceDp = ({
   customerSignature,
   materialItems = {},
   initialData = {},
+  qrcode
 }) => (
   <Document>
+    {caseDetails?.down_payment_table?.map((dp, index) => (
     <Page size="A4" style={styles.container}>
       <View
         style={{
@@ -227,7 +229,6 @@ export const InvoiceDp = ({
             Telp : (+6221) 081318521007 / 081318521006 - HP : 0811970666
           </Text>
         </View>
-        {/* <Text style={[styles.sectionHeader]}>INVOICE DP</Text> */}
       </View>
 
       <View
@@ -258,7 +259,7 @@ export const InvoiceDp = ({
           >
             <Text style={[styles.textSmall, styles.bold]}>INVOICE</Text>
              <View style={{borderWidth: 2, padding: 2}}>
-                <Image src="/random_qr.png" style={styles.qrCode} />
+                <Image src={qrcode} style={styles.qrCode} />
              </View>
           </View>
           <View style={[styles.rightSection2, { alignItems: "center" }]}>
@@ -269,18 +270,17 @@ export const InvoiceDp = ({
             <Text style={styles.label}>Invoice no.</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value, { fontWeight: "bold", fontSize: 10 }]}>
-              {"N55450"}
+               {dp?.DPInvoiceNo}
             </Text>
 
             <Text style={styles.label}>Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
-              {caseDetails?.CreatedOn
-                ? new Date(caseDetails.CreatedOn).toLocaleString()
-                : "N/A"}
+                {formatDate(dp?.DPDate) || "N/A"}
             </Text>
           </View>
         </View>
+
         <View
           style={{
             display: "flex",
@@ -303,30 +303,34 @@ export const InvoiceDp = ({
             </Text>
             <Text style={styles.label}>For the amount of</Text>
             <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>IDR .00</Text>
+            <Text style={[styles.value, {fontWeight: "bold"}]}>
+                {formatAccountingRupiah(dp?.DPAmount) || "N/A"}
+            </Text>
             <Text style={styles.label}>In settlement of</Text>
             <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>
-              DP for services Notebook/Laptop{" "}
+            <Text style={[styles.value, {whiteSpace: "pre-line"}]}>
+              DP for services Notebook/Laptop
               {caseDetails?.asset_information?.product_information
-                ?.ProductName ?? "N/A"}{" "}
-              S/N: {caseDetails?.asset_information?.SerialNumber ?? "N/A"}
+                ?.ProductName ?? "N/A"}{"  "}
+                S/N: <Text style={{fontWeight: "bold"}}>
+                  {caseDetails?.asset_information?.SerialNumber ?? "N/A"}
+                </Text>
             </Text>
             <Text style={styles.label}>Payment type</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
-              {/* need variable for payment type */}
-              transfer
+              {dp?.PaymentType ?? "N/A"}
             </Text>
             <Text style={styles.label}>Dp amount</Text>
             <Text style={styles.colon}>:</Text>
-            <Text style={[styles.value]}>Rp. 666.000, from .00</Text>
+            <Text style={[styles.value]}>{formatAccountingRupiah(caseDetails?.down_payment_table.slice(0, index + 1).reduce((sum, item) => sum + Number(item.DPAmount || 0), 0))}, from {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal)}
+            </Text>
           </View>
         </View>
         <View style={{ alignItems: "flex-end", paddingHorizontal: "10%" }}>
           <View style={{ flexDirection: "column", alignItems: "center" }}>
             <Text style={[styles.textSmall, { marginBottom: 10 }]}>
-              DATE HERE
+              {formatDate(dp?.CreatedOn) || "N/A"}
             </Text>
             <Image
               src={caseDetails?.createdByUser?.Signature}
@@ -342,8 +346,7 @@ export const InvoiceDp = ({
         </View>
       </View>
 
-      <Section title="Customer">
-        {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Customer</Text> */}
+      {/* <Section title="Customer">
         <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
           <View style={styles.leftSection}>
             <Text style={styles.label}>Company</Text>
@@ -432,7 +435,7 @@ export const InvoiceDp = ({
             </Text>
           </View>
         </View>
-      </Section>
+      </Section> */}
 
       <Section title="Product">
         {/* <Text style={[styles.textSmall, { fontWeight: 'bold', marginTop: 20 }]}>Product</Text> */}
@@ -483,7 +486,7 @@ export const InvoiceDp = ({
         </View>
       </Section>
 
-      <View style={[styles.tableRow, styles.tableHeader]}>
+      {/* <View style={[styles.tableRow, styles.tableHeader]}>
         <Text style={styles.tableHeaderCell}>Accessories</Text>
         <Text style={styles.tableHeaderCell}>Note</Text>
         <Text style={styles.tableHeaderCell}>CT/ SN Code</Text>
@@ -502,7 +505,7 @@ export const InvoiceDp = ({
           <Text style={styles.tableCell}>-</Text>
           <Text style={styles.tableCell}>-</Text>
         </View>
-      )}
+      )} */}
 
       {/* PARTS TABLE */}
       <View style={[styles.table, { marginTop: 10 }]}>
@@ -624,6 +627,18 @@ export const InvoiceDp = ({
             )}
           </Text>
         </View>
+        <View style={styles.tableRow}>
+          <Text
+            style={[styles.tableCell, styles.partsColSpan6, styles.alignRight]}
+          >
+            VAT :
+          </Text>
+          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
+             {caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue ? 
+                       formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VATAmount)  : "0"
+                     }
+          </Text>
+        </View>
 
         {/* Total: colspan=6 */}
         <View style={styles.tableRow}>
@@ -646,5 +661,7 @@ export const InvoiceDp = ({
         * This PDF DP auto generated by system.
       </Text>
     </Page>
+    ))
+    }
   </Document>
 );

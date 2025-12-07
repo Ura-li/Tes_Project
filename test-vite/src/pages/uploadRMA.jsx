@@ -39,14 +39,14 @@ export const UploadRma = () => {
     const [dateRMA,setDateRMA] = useState(null);
     
     return (
-        <>
+        <div className="bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% h-full">
         <div className="p-2 mt-2">
-            <Card>
+            <Card className={"bg-gradient-to-t dark:from-slate-800 dark:via-slate-700 dark:to-slate-900 dark:border-2 dark:border-gray-600"}>
                 <CardHeader>
                     <CardTitle>Update RMA status by export/import SO/RMA no.</CardTitle>
                 <hr className="border-green-500 "/>
                 </CardHeader>
-                <CardContent className={"grid grid-cols-2 gap-2"}>
+                <CardContent className={"grid grid-cols-2 gap-2 "}>
                     <CaseField label={"Company"} star>
                         <SearchCommandBlock
                             options={resource?.teams}
@@ -58,12 +58,14 @@ export const UploadRma = () => {
 
                             renderLabel={(team) => `${team.name} - ${team.plan ?? ""}`}
                             placeholder="Search Company"
+                            className={"dark:bg-transparent dark:border-gray-500 dark:border-2"}
                         />
                     </CaseField>
                     <CaseField label={"RMA Date"} star>
                         <DatePicker
                             value={dateRMA}
                             onChange={setDateRMA}
+                            className={"dark:bg-transparent dark:border-gray-500 dark:border-2 dark:rounded-md"}
                         />
                         {console.log("WOI ", dateRMA)}
                     </CaseField>
@@ -75,6 +77,7 @@ export const UploadRma = () => {
                             getValue={(status) => status.value}
                             renderLabel={(status) => status.label}
                             placeholder="Search Status"
+                            className={"dark:bg-transparent dark:border-gray-500 dark:border-2 dark:rounded-md"}
                         />
                     </CaseField>
                     {selectedRMAStatus !== "" && (
@@ -94,7 +97,7 @@ export const UploadRma = () => {
                         </>
                     )}
                 </CardContent>
-                <CardContent className={"border-2 m-2 rounded-md p-2 space-y-2 text-sm"}>
+                <CardContent className={"border-2 m-2 rounded-md p-2 space-y-2 text-sm dark:border-gray-400"}>
                     <div className="flex flex-col italic">
                     <span className="uppercase">format for part in & on hand ce</span>
                     <span className="uppercase">column a so no.</span>
@@ -141,6 +144,6 @@ export const UploadRma = () => {
                 </CardContent>
             </Card>
         </div>
-        </>
+        </div>
     )
 }

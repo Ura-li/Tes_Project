@@ -80,6 +80,7 @@ export async function GET(request, { params }) {
                     owner: true
                 }
             },
+            down_payment_table: true,
             casephotos: true,
             global_trade_check: true,
             caseresolution: true,

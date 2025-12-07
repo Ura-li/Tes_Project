@@ -1334,7 +1334,7 @@ export default function NewCaseForm() {
 
 
         {/* Quick Search */}
-        <Card className={'w-full dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600 dark:border-purple-700'}>
+        <Card className={'w-full dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600 dark:border-purple-700'} id="quickSearch">
           <CardContent className="pt-4 flex w-full gap-6 flex-col lg:flex-row">
             {/* Serial Number Search */}
             <div className="space-y-2 flex-1">

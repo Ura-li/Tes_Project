@@ -10,6 +10,7 @@ import {
   Font,
   Link,
 } from '@react-pdf/renderer';
+import { formatDate } from '../lib/utils';
 
 // Example custom font (optional)
 Font.register({
@@ -213,7 +214,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =
           <Text style={styles.label}>Received Date</Text>
           <Text style={styles.colon}>:</Text>
           <Text style={[styles.value]}>
-            {caseDetails?.CreatedOn ? new Date(caseDetails.CreatedOn).toLocaleDateString() : 'N/A'}
+             {formatDate(caseDetails?.CreatedOn) || "N/A"}
           </Text>
 
           <Text style={styles.label}>Problem Desc</Text>

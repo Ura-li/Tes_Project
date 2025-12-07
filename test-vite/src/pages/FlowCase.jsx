@@ -331,7 +331,7 @@ export const FlowCaseData = (user) => {
             <div className="sticky top-13 dark:bg-transparent bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <div className=" flex h-14 w-full items-center gap-3 px-4  place-content-between ">
                 {isToggleUser &&
-                <div className='flex gap-3 items-center'>
+                <div className="flex gap-3 items-center bg-secondary px-3 py-2 rounded-md">
                   <Switch
                     checked={filterFinish === false}
                     onCheckedChange={(checked) => {
@@ -343,7 +343,7 @@ export const FlowCaseData = (user) => {
                     className=" hover:bg-blue-500 hover:ring-1 hover:ring-blue-500"
                     id="Finish"
                   /> 
-                  <Label htmlFor="Finish" className={"font-[700]"}>
+                  <Label htmlFor="Finish" className={"font-[700]"} >
                     Show Finished Case
                   </Label>
                   <Switch
