@@ -204,7 +204,7 @@ export function SOImport({ target, dateRMA }) {
                     >
                     {/* Index */}
                     <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap">
-                        {row.index}
+                        {(row.index - 1)}
                     </TableCell>
 
                     {/* SO Number */}
