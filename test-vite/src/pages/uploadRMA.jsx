@@ -3,10 +3,8 @@ import { Card, CardContent, CardTitle, CardHeader} from "../components/ui/card";
 import CaseField from "../components/CaseField";
 import { SearchCommandBlock } from "../components/sc-select";
 import DatePicker from "../components/date-picker";
-import { Input } from "../components/ui/input";
 import { useTeam } from "../context/team-context";
 import { SOImport, SOTemplateButton } from "../components/importFileComponent/SOUpdate";
-import { se } from "date-fns/locale";
 
 export const RMA_STATUS_OPTIONS = [
   { value: "InOutCE", label: "In & On Hand CE" },
