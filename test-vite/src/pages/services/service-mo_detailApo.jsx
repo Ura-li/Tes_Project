@@ -591,10 +591,10 @@ useEffect(() => {
       ) : (
         ""
       )}
-      <Card className="mt-2 rounded-none">
+      <Card className="mt-2 rounded-none border-none">
         <CardContent className={"p-0"}>
           <Tabs defaultValue="mo_details">
-            <Card className={"p-2"}>
+            <Card className={"p-2 rounded-none"}>
               <CardTitle className="text-xl ">
                 {moLineItems.MOID} - {moLineItems.LineItemID}
               </CardTitle>
