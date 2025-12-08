@@ -1459,7 +1459,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
 
   return (
     <>
-      <div className="flex items-center border-1 ">
+      <div className="flex items-center border-1 sticky top-13 bg-white z-10 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600">
         {buttons.map((btn, index) => (
           <Button
             key={index}

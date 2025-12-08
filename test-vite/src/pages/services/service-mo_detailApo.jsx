@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/table";
 import { Link } from "react-router";
 import Swal from "sweetalert2";
-
+import { Textarea } from "../../components/ui/textarea";
 import { useParams } from "react-router";
 // import Select from 'react-select';
 import debounce from "lodash.debounce";
@@ -570,14 +570,14 @@ useEffect(() => {
   }
 
   return (
-    <>
+    <div className="bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
       {moLineItems.Status === "Closed" ? (
-        <div className="p-4 my-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
+        <div className="p-4  text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
           This material order line is <strong>read-only</strong> because it is{" "}
           <strong>Closed</strong>.
           </div>
           ) : moLineItems.Status === "Cancelled" ? (
-        <div className="p-4 my-2 text-red-700 bg-red-100 border-l-4 border-red-500">
+        <div className="p-4  text-red-700 bg-red-100 border-l-4 border-red-500">
           This material order line is <strong>read-only</strong> because it is{" "}
           <strong>Cancelled</strong>.
         </div>
@@ -591,17 +591,17 @@ useEffect(() => {
       ) : (
         ""
       )}
-      <Card className="mt-2 rounded-none border-none">
+      <Card className="mt-2 rounded-none border-none bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
         <CardContent className={"p-0"}>
           <Tabs defaultValue="mo_details">
-            <Card className={"p-2 rounded-none"}>
+            <Card className={"p-2 rounded-none dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600"}>
               <CardTitle className="text-xl ">
                 {moLineItems.MOID} - {moLineItems.LineItemID}
               </CardTitle>
               <CardTitle className="text-sm">
                 Material Order Line Item . Information
               </CardTitle>
-              <TabsList className="gap-2 bg-white">
+              <TabsList className="sm:w-full  gap-2  bg-white dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 dark:rounded-none">
                 {tabs.map((tab, index) =>
                   tab.component ? (
                     <div key={index}>{tab.component}</div>
@@ -611,6 +611,7 @@ useEffect(() => {
                       variant={"underline"}
                       value={tab.value}
                       disabled={tab.disable}
+                      className="dark:text-white text-center flex justify-center"
                       hidden={tab.hidden}
                     >
                       {tab.label}
@@ -625,15 +626,15 @@ useEffect(() => {
               value="mo_details"
               className={"p-2 flex flex-col"}
             >
-              <Card className="rounded-md ">
+              <Card className="rounded-md dark:bg-gradient-to-tl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
                 <CardHeader>
                   <CardTitle className={"text-lg "}>MO Order Details</CardTitle>
-                  <hr />
+                  <hr className="dark:border-gray-400"/>
                 </CardHeader>
                 <CardContent className="grid grid-cols-4 gap-5">
                   <CaseField label={"MO Order Name"} lock>
                     <Input
-                      variant={"invisible"}
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       value={MODetailInput.moOrderName}
                       readOnly
                     />
@@ -641,7 +642,7 @@ useEffect(() => {
 
                   <CaseField label={"Part/Product Number"} lock>
                     <Input
-                      variant={"invisible"}
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       value={MODetailInput.partNumber}
                     />
                   </CaseField>
@@ -656,7 +657,7 @@ useEffect(() => {
 
                   <CaseField label={"Sales Order Number"} lock>
                     <Input
-                      variant={"invisible"}
+                     className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       value={moLineItems?.materialorder?.SalesOrderNumber}
                       placeholder= "---"
                       readOnly
@@ -668,13 +669,14 @@ useEffect(() => {
                       value={MODetailInput.UEFICode}
                       onChange={handleChange("UEFICode")}
                       options={["None", "FID", "Non-FID"]}
+                       className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                     />
                   </CaseField>
 
                   {MODetailInput?.UEFICode == "FID" && (
                     <CaseField label={"UEFI Number"} lock>
                       <Input
-                        variant={"invisible"}
+                       className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         value={MODetailInput.UEFI_NO}
                         placeholder= "---"
                         onChange={handleChange("UEFI_NO")}
@@ -686,21 +688,21 @@ useEffect(() => {
                   <CaseField label={"RoHS"} lock>
                     <Input
                       value={MODetailInput.rohs ? "Yes" : "No"}
-                      variant={"invisible"}
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
 
                   <CaseField label={"Returnability Flag"} lock>
                     <Input
                       value={MODetailInput.returnabilityFlag ? "Yes" : "No"}
-                      variant={"invisible"}
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
 
                   
                   <CaseField label={"Description"}  lock >
-                    <textarea
-                      className="w-full h-10 pt-2 pl-3 resize-none border-none rounded-md focus:outline-none focus:ring-1"
+                    <Textarea
+                      className="ring-1 ring-gray-300 bg-gray-50 italic dark:bg-gray-500/10 dark:border-gray-400"
                       name="description"
                       value={MODetailInput.description}
                       onChange={handleChange}
@@ -872,16 +874,17 @@ useEffect(() => {
               value="mo_failure"
               className={" flex flex-col gap-4 p-2"}
             >
-              <Card className="flex-col">
+              <Card className="flex-col dark:bg-gradient-to-tl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
                 <CardHeader>
                   <CardTitle className="text-lg">
                     Failure & Usage Details
                   </CardTitle>
-                  <hr />
+                  <hr className="dark:border-gray-400"/>
                 </CardHeader>
                 <CardContent className="grid items-center grid-cols-4 gap-6 m-1">
                   <CaseField label="CT Validation" star={canEditCE} lock={!canEditCE}>
                     <SearchCommandBlock
+                    className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                     value={MODetailInput.CTValidation === true ? "Pass" : MODetailInput.CTValidation === false ? "Fail" : ""}
                     onChange={(val) => {
                       handleChange("CTValidation")(
@@ -905,6 +908,7 @@ useEffect(() => {
                     placeholder="Search Failure..."
                     options={searchResults}
                     readOnly={!canEditCE}
+                    className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                   />
 
         {/* Show dropdown only if results exist and input is focused */}
@@ -930,7 +934,7 @@ useEffect(() => {
 
                     <CaseField label="Return CT Key" star={canEditCE} lock={!canEditCE}>
                     <Input
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       name="removedPartNumber"
                       value={MODetailInput.removedPartNumber}
                       onChange={handleChange('removedPartNumber')}
@@ -941,7 +945,7 @@ useEffect(() => {
                   
                   <CaseField label="New CT Key" star={canEditCE} lock={!canEditCE}>
                     <Input
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       name="removedSerialNumber"
                       value={MODetailInput.removedSerialNumber}
                       onChange={handleChange('removedSerialNumber')}
@@ -950,12 +954,12 @@ useEffect(() => {
                   </CaseField>
 
                   <CaseField label="Additional Failure Code" lock>
-                    <Input variant="invisible" placeholder="---" 
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" 
                     />
                   </CaseField>
 
                   <CaseField label="Part Usage Code" lock >
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
 
                   <CaseField label="Part Used" star={canEditCE} lock={!canEditCE}>
@@ -974,6 +978,7 @@ useEffect(() => {
                     lock={!canEditCE}
                     >
                     <SearchCommandBlock
+                    className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                       value={
                         MODetailInput.PartReturnStatusId !== null
                           ? MODetailInput.PartReturnStatusId.toString()
@@ -993,7 +998,7 @@ useEffect(() => {
                     hide={!isDOASelected}
                   >
                     <Input
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       name="DOAReason"
                       value={MODetailInput.DOAReason}
                       onChange={handleChange("DOAReason")}
@@ -1009,6 +1014,7 @@ useEffect(() => {
                         accept="image/*"
                         onChange={handlePhotoUpload}
                         disabled={!canEditCE}
+                        className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       />
                   </CaseField>
                   
@@ -1024,6 +1030,7 @@ useEffect(() => {
                       placeholder="Select reason"
                       options={GOOD_RETURN_REASON_OPTIONS}
                       // readOnly={!canEdit}
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                     />
                   </CaseField>
                   <div className="col-span-4 flex flex-col gap-2 pl-10">
@@ -1070,12 +1077,12 @@ useEffect(() => {
                   </div>
 
                   <CaseField label="Part Order Consumption Comment" lock className={"hidden"} >
-                    <Input variant="invisible" placeholder="---" hidden/>
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" hidden/>
                   </CaseField>
 
                   <CaseField label="Removed Part Desc" lock className={"hidden"}>
                     <Input
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       name="removedPartDescription"
                       value={MODetailInput.removedPartDescription}
                       onChange={handleChange}
@@ -1093,66 +1100,66 @@ useEffect(() => {
                 </CardHeader>
                 <CardContent className="grid items-center grid-cols-6 gap-10 m-1">
                   <CaseField label="Returnable Code" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
 
                   <CaseField label="Return Type Code Identifier" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
 
                   <CaseField label="Return Instructions" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
 
                   <CaseField label="Return Tracking Number" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
 
                   <CaseField label="Return Override Flag" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
 
                   <CaseField label="Return Ovveride Reason" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
 
 
                   <CaseField label="RMA Identifier" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
 
                   <CaseField label="Return Deadline" lock>
-                    <Input variant="invisible" placeholder="---" />
+                    <Input className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                   </CaseField>
                 </CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="mo_attachments" className={"p-2"}>
-              <Card className="flex-col">
+              <Card className="flex-col dark:bg-gradient-to-tl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
                 <CardContent className="grid gap-5">
                   <span className="text-xl font-bold">Timeline</span>
                   <CaseField className="flex font-bold">
                     <Input
                       placeholder="Search Timeline"
-                      className="text-sm font-medium"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     ></Input>
                   </CaseField>
                   <span className="text-xl font-bold">Create a note</span>
                   <div>
                     <Input
                       type="text"
-                      className="border-1"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder="Tittle"
                     ></Input>
-                    <textarea
+                    <Textarea
                       placeholder="Note"
-                      className="w-full h-20 pt-2 pl-3 mt-2 resize-none border-1"
-                    ></textarea>
-                    <Button variant="outline" className="mr-3">
+                      className="ring-1 mt-2 ring-gray-300 bg-gray-50 italic dark:bg-gray-500/10 dark:border-gray-400"
+                    ></Textarea>
+                    <Button variant="outline"  className={'mt-2 mr-3 cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}>
                       Add note
                     </Button>
-                    <Button variant="outline">Cancel</Button>
+                    <Button variant="outline" className=" className={'cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}">Cancel</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1160,7 +1167,7 @@ useEffect(() => {
           </Tabs>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 };
 

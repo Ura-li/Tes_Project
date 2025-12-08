@@ -82,7 +82,7 @@ export const MaterialOrder = () => {
 
   if (loading && !materialOrder) {
     return (
-      <div className="p-4 space-y-4">
+      <div className="p-2 h-full space-y-6 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600">
         <Skeleton className="h-6 w-1/4" />
         <Skeleton className="h-10 w-1/2" />
         <Skeleton className="h-32 w-full" />
