@@ -123,7 +123,7 @@ export const ServiceMaterialApo = () => {
 
       <TabsServiceMO />
 
-      <Card className="mt-2 rounded-none">
+      <Card className="mt-2 rounded-none border-none">
         <CardContent className="p-0">
           <Tabs defaultValue="mo_info">
             {/* Header card */}
