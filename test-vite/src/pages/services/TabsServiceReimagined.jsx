@@ -52,6 +52,8 @@ import {
   Settings,
   CopyX,
   CopyXIcon,
+  CircleArrowLeft,
+  CircleChevronLeft,
 } from "lucide-react";
 
 import { SelectYN } from "../../components/sc-select";
@@ -144,11 +146,11 @@ export const TabsServiceWO = () => {
 
   const buttons = [
     {
-      icon: ArrowLeftFromLine,
+      icon: CircleArrowLeft,
       label: "",
       onClick: () => navigate(`/app/case/${workOrders.CaseID}`),
     },
-    { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
+    // { icon: SquareArrowOutUpRight, label: "", onClick: () => alert("not now") },
     { icon: Save, label: "Save", onClick: () => handleSave() },
     {
       icon: FileSymlink,
@@ -592,11 +594,11 @@ export const TabsServiceMO = ({
 
   const buttons = [
     {
-      icon: ArrowLeftFromLine,
+      icon: CircleChevronLeft,
       label: "",
       onClick: () => navigate(`/app/work/${materialOrder.WOID}`),
     },
-    { icon: SquareArrowOutUpRight, label: "" },
+    // { icon: SquareArrowOutUpRight, label: "" },
     {
       icon: Save,
       label: "Save",

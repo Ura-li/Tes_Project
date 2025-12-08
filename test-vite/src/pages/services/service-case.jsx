@@ -51,6 +51,7 @@ import {
   Settings,
   CopyX,
   CopyXIcon,
+  CircleChevronLeft,
 } from "lucide-react";
 
 import { SelectYN } from "../../components/sc-select";
@@ -1254,11 +1255,11 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
 
   const buttons = [
     {
-      icon: ArrowLeftFromLine,
+      icon: CircleChevronLeft,
       label: "",
       onClick: () => navigate(`/app/material-order/${MOLineDetails.MOID}`),
     },
-    { icon: SquareArrowOutUpRight, label: "", },
+    // { icon: SquareArrowOutUpRight, label: "", },
     { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
     {
       icon: CopyXIcon,
