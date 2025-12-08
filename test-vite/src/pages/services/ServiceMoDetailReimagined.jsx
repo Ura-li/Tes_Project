@@ -127,7 +127,7 @@ export const ServiceMaterialApo = () => {
         <CardContent className="p-0">
           <Tabs defaultValue="mo_info">
             {/* Header card */}
-            <Card className="flex flex-row gap-3 p-4 h-25">
+            <Card className="flex flex-row gap-3 p-4 h-25 rounded-none">
               <CardHeader>
                 <CardTitle className="text-xl">
                   {materialOrder?.MOID} for {materialOrder?.WOID}
