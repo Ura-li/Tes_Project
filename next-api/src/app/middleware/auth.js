@@ -8,6 +8,9 @@ export function getTokenUserId(request) {
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '');
     return console.log("TOKEN AUTH : ", authHeader, token)
+    //WAIT, THIS IS NOT USED????
+    //AND IT STILL WORK?
+    //THEN THIS FUNCTION IS NOT USE?
     if (!token) return null;
 
     const decoded = jwt.verify(token, JWT_SECRET);
