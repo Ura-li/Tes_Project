@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 
-import prisma  from "../../../../prisma/client";
+import prisma, { setUserIdProvider }  from "../../../../prisma/client";
+
 
 import { generateID } from "@/utils/generateID";
 import { notifySocket } from "../../../../lib/SocketClient";
+import { getTokenUserId } from "@/app/middleware/auth";
 // import * as XLSX from 'xlsx';
 
 export async function GET(request) {
   //get search parameter
+
   const { searchParams } = new URL(request.url);
 
   const exportExcel = searchParams.get("export") === "excel";
@@ -17,6 +20,11 @@ export async function GET(request) {
   const excludeStatusesRaw = searchParams.get("excludeStatuses");
   const excludeStatuses = excludeStatusesRaw ? excludeStatusesRaw.split(',') : null;
   const Owner = searchParams.get("IDUser");
+  const resourceTarget = searchParams.get("resource");
+  // return console.log("ID ",resource)
+
+
+  // const resourceTarget = searchParams.get("resource");
 
   //prisma query filter
   const filters = {};
@@ -42,9 +50,30 @@ export async function GET(request) {
       CaseStatus: "InActive",
     },
   });
+
+  const tenantFilters = {};
+  if (resourceTarget) {
+    tenantFilters.OR = [
+      {
+        createdByUser: {
+          ResourceId: resourceTarget,
+        },
+      },
+      {
+        ownerUser: {
+          ResourceId: resourceTarget,
+        },
+      },
+    ];
+  }
+
+  const finalWhere = {
+    ...filters,
+    ...(Object.keys(tenantFilters).length > 0 ? tenantFilters : {}),
+  }
   //get all data
   const case_information = await prisma.caseinformation.findMany({
-    where: Object.keys(filters).length > 0 ? filters : undefined,
+    where: Object.keys(finalWhere).length > 0 ? finalWhere : undefined,
     include: {
       asset_information: {
         select: {

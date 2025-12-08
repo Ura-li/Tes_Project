@@ -9,6 +9,7 @@ import { CaseField } from "@/pages/services/service-case";
 import { ExportExcelPart } from "@/components/Export-Excel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SOImport, SOTemplateButton } from "../components/importFileComponent/SOUpdate";
+import { toast } from "sonner";
 
 export default function Logistik() {
     const { user } = useAuth();
@@ -130,8 +131,6 @@ export default function Logistik() {
                 <CardHeader className={"flex flex-row gap-2 justify-between"}>
                     <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
                     <div className="flex gap-2">
-                    <ExportExcelPart />
-                    <SOTemplateButton />
                     <select
                       value={filterStatus}
                       onChange={(e) => {
@@ -160,6 +159,15 @@ export default function Logistik() {
                         `/app/material-order/${m.MOID}`
                       )
                     }
+                    onContextMenu={(e) => {
+                      e.preventDefault(); // Stop browser context menu
+
+                      const textToCopy = `${m.SalesOrderNumber} / ${m.RMANumber}`;
+                      navigator.clipboard.writeText(textToCopy);
+
+                      // optional toast
+                      toast.success("SO & RMA copied!");
+                    }}
                   >
                     <CardHeader className="p-1 px-2">
                       <div className="flex flex-row justify-between ">

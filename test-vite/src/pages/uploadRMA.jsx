@@ -1,11 +1,42 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardTitle, CardHeader} from "../components/ui/card";
 import CaseField from "../components/CaseField";
 import { SearchCommandBlock } from "../components/sc-select";
 import DatePicker from "../components/date-picker";
-import { Input } from "../components/ui/input";
+import { useTeam } from "../context/team-context";
+import { SOImport, SOTemplateButton } from "../components/importFileComponent/SOUpdate";
+
+export const RMA_STATUS_OPTIONS = [
+  { value: "InOutCE", label: "In & On Hand CE" },
+  { value: "ReturnLogistic", label: "Return via Logistic" },
+  { value: "ReturnDHL", label: "Return to DHL/SC" },
+  { value: "FullCharge", label: "Full Charge" },
+];
 
 export const UploadRma = () => {
+    /**
+     * THIS FOR LATER
+     * FOR NOW, UPDATE ALL DATA
+     */
+    const resource = useTeam();
+    const ActiveResource = resource.activeTeam?.id
+    console.log(resource)
+    
+
+    //SCB Company
+    const [selectedTeam, setSelectedTeam] = useState("");
+    // const [searchText, setSearchText] = useState("");
+
+    //SCB STATUS
+    const [selectedRMAStatus, setSelectedRMAStatus] = useState("");
+
+    useEffect(()=>{
+        if(ActiveResource) setSelectedTeam(ActiveResource)
+    },[ActiveResource])
+
+    //DATEPICKER
+    const [dateRMA,setDateRMA] = useState(null);
+    
     return (
         <div className="bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% h-full">
         <div className="p-2 mt-2">
@@ -17,32 +48,52 @@ export const UploadRma = () => {
                 <CardContent className={"grid grid-cols-2 gap-2 "}>
                     <CaseField label={"Company"} star>
                         <SearchCommandBlock
-                            options={[
-                                "Naruto",
-                                "Sasuke",
-                                "Kakasi",
-                                "Beban",
-                            ]}
+                            options={resource?.teams}
+                            value={selectedTeam}
+                            onChange={setSelectedTeam}
+                            // onSearchInputChange={setSearchText}
+
+                            getValue={(team) => team.id}
+
+                            renderLabel={(team) => `${team.name} - ${team.plan ?? ""}`}
+                            placeholder="Search Company"
                             className={"dark:bg-transparent dark:border-gray-500 dark:border-2"}
                         />
                     </CaseField>
                     <CaseField label={"RMA Date"} star>
-                        <DatePicker className={"dark:bg-transparent dark:border-gray-500 dark:border-2 dark:rounded-md"}/>
+                        <DatePicker
+                            value={dateRMA}
+                            onChange={setDateRMA}
+                            className={"dark:bg-transparent dark:border-gray-500 dark:border-2 dark:rounded-md"}
+                        />
                     </CaseField>
                     <CaseField label={"RMA Status"} star>
                         <SearchCommandBlock
-                        className={"dark:bg-transparent dark:border-gray-500 dark:border-2 dark:rounded-md"}
-                            options={[
-                                "Naruto",
-                                "Sasuke",
-                                "Kakasi",
-                                "Beban",
-                            ]}
+                            options={RMA_STATUS_OPTIONS}
+                            value={selectedRMAStatus}
+                            onChange={setSelectedRMAStatus}
+                            getValue={(status) => status.value}
+                            renderLabel={(status) => status.label}
+                            placeholder="Search Status"
+                            className={"dark:bg-transparent dark:border-gray-500 dark:border-2 dark:rounded-md"}
                         />
                     </CaseField>
-                    <CaseField label={"SO / RMA no"} star>
-                        <Input type={"file"} className={"dark:bg-transparent dark:border-gray-500 dark:border-2 dark:rounded-md dark:text-gray-400"}/>
-                    </CaseField>
+                    {selectedRMAStatus !== "" && (
+                        <>
+                            <CaseField>
+                                <SOTemplateButton
+                                    target={selectedRMAStatus}
+                                    />
+                            </CaseField>
+                            <CaseField label={"SO / RMA no"} star>
+                                <SOImport
+                                    target={selectedRMAStatus}
+                                    dateRMA={dateRMA}
+
+                                />
+                            </CaseField>
+                        </>
+                    )}
                 </CardContent>
                 <CardContent className={"border-2 m-2 rounded-md p-2 space-y-2 text-sm dark:border-gray-400"}>
                     <div className="flex flex-col italic">
@@ -56,6 +107,7 @@ export const UploadRma = () => {
                     <span className="uppercase">format for return to warehouse / full charge</span>
                     <span className="uppercase">column a so no.</span>
                     <span className="uppercase">column b ct code bad / part s/n</span>
+                    <span className="uppercase">column c awb out no.</span>
                     </div>
                     <div className="flex flex-col italic">
                     <span className="uppercase">format for return to logistic</span>

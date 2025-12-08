@@ -1,5 +1,5 @@
 import * as React from "react"
-import { ChevronsUpDown, Plus } from "lucide-react"
+import { Building, ChevronsUpDown, Plus } from "lucide-react"
 
 import {
   DropdownMenu,
@@ -16,16 +16,22 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useTeam } from "../../context/team-context"
 
 export function TeamSwitcher({
-  teams
+  // teams
 }) {
   const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+  // const [activeTeam, setActiveTeam] = React.useState(teams[0])
+  const { teams, activeTeam, setActiveTeam, loading} = useTeam();
+
+  if(loading) return null;
 
   if (!activeTeam) {
     return null
   }
+
+  const DefaultIcon = Building;
 
   return (
     <SidebarMenu>
@@ -37,7 +43,11 @@ export function TeamSwitcher({
               className="bg-white dark:bg-gray-700 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <div
                 className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <activeTeam.logo className="size-4" />
+                {/* <activeTeam.logo className="size-4" /> */}
+                {activeTeam.logo 
+                ? <img src={activeTeam.logo} alt="" className="size-4" />
+                : <DefaultIcon className="size-4"/>
+                }
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{activeTeam.name}</span>
@@ -52,13 +62,15 @@ export function TeamSwitcher({
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}>
             <DropdownMenuLabel className="text-muted-foreground text-xs">
-              Teams
+              Service Center
             </DropdownMenuLabel>
             {teams.map((team, index) => (
-              <DropdownMenuItem key={team.name} onClick={() => setActiveTeam(team)} className="gap-2 p-2">
+              <DropdownMenuItem key={team.id} onClick={() => setActiveTeam(team)} className="gap-2 p-2">
                 <div className="flex size-6 items-center justify-center rounded-xs border">
-                  <team.logo className="size-4 shrink-0 "/>
-                  
+                  {/* <team.logo className="size-4 shrink-0 "/> */}
+                  {team.logo
+                  ? <img src={team.logo} className="size-4" />
+                  : <DefaultIcon className="size-4" />}
                 </div>
                 {team.name}
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>

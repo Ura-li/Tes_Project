@@ -338,7 +338,7 @@ model materialorder {
   AWB_InCode  String? @db.VarChar(100)
   AWB_OutCode String? @db.VarChar(100)
 
-  ReadyForClosureDate        DateTime?         @db.DateTime(0)
+  ReadyForClosureDate        DateTime?         @db.DateTime(0) // Part out Hand CE Date
   ShippingPriority           ShippingPriority? @default(MEDIUM)
   CustomerInducedDamage      Boolean?          @default(false)
   AccidentalDamageProtection Boolean?          @default(false)
@@ -395,8 +395,8 @@ model materialorderlineitems {
   MainComponent           String?                    @db.VarChar(100)
 
   SerialNumber           String? @db.VarChar(100)
-  RemovedPartNumber      String? @db.VarChar(100)
-  RemovedSerialNumber    String? @db.VarChar(100)
+  RemovedPartNumber      String? @db.VarChar(100) //RETURN CT KEY (BAD CT)
+  RemovedSerialNumber    String? @db.VarChar(100) //NEW CT KEY (NEW CT)
   RemovedPartDescription String? @db.Text
 
   UEFICode UEFICode?

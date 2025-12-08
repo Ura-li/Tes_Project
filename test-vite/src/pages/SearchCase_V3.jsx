@@ -280,6 +280,7 @@ export default function NewCaseForm() {
 
   // Global state
   const [loading, setLoading] = useState(false);
+  const savedTeamId = localStorage.getItem("activeTeamId");
 
   // Step toggles (cards on a single page)
   const [showCustomerCard, setShowCustomerCard] = useState(false);
@@ -1212,6 +1213,7 @@ export default function NewCaseForm() {
         warranty: { status: warrantySearchValue, eowDate: normalizedEowDate },
         flags,
         references,
+        resources: savedTeamId
       };
 
       const res = await ApiCustomer.post(

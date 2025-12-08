@@ -4,10 +4,12 @@ import prisma from "../../prisma/client";
 // ID generation sees writes within the same transaction/connection.
 export async function generateID(prefix, modelName, idField, client = prisma) {
   // Cari ID terakhir berdasarkan urutan DESC
+  const prefixStr = String(prefix);
+
   const lastRecord = await client[modelName].findFirst({
     where: {
       [idField]: {
-        startsWith: prefix,
+        startsWith: prefixStr,
       },
     },
     orderBy: {
@@ -22,12 +24,13 @@ export async function generateID(prefix, modelName, idField, client = prisma) {
 
   if (lastRecord) {
     // Ambil angka dari ID terakhir, misalnya dari "C-0010" ambil 10
-    const lastNumber = parseInt(lastRecord[idField].replace(prefix, "").replace("-", ""), 10);
+    const lastNumber = parseInt(lastRecord[idField].replace(prefixStr, "").replace("-", ""), 10);
     nextNumber = lastNumber + 1;
   }
 
-  const paddedNumber = String(nextNumber).padStart(4, "0");
-  const newID = `${prefix}${paddedNumber}`;
+  const paddedNumber = String(nextNumber).padStart(7, "0");
+  const newID = `${prefixStr}${paddedNumber}`;
+  // return console.log(newID, paddedNumber, prefixStr, prefix)
 
   console.log(`GeneratedID : ${newID}`);
   return newID;

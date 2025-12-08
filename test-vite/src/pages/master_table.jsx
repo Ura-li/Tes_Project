@@ -1137,6 +1137,8 @@ export const Company_table = () => {
 };
 
 export const Case_table = () => {
+  const { user } = useAuth();
+  // return console.log("TOKEN CASE US",user);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
@@ -1174,11 +1176,29 @@ export const Case_table = () => {
 
   // 🔹 Fetch data
   const fetchCaseDataTable = async () => {
+    /**
+     * THIS IS THE TEMPORARY FIX
+     * THE RESOURCE ID IS EXPOSED WHILE DOING THIS
+     * I TRY ANOTHER METHOD WHEN THIS IS DONE
+     *  -miku21
+     */
+    const isAdmin = user.role === 'admin';
+    const savedTeamId = localStorage.getItem("activeTeamId");
+
     const baseurl = `/api/case-information`;
-    const url =
-      openClose === "All"
-        ? baseurl
-        : `/api/case-information?CaseStatus=${openClose}`;
+    const params = new URLSearchParams();
+    if (openClose !== "All") {
+      params.append("CaseStatus", openClose);
+    }
+
+    // purely optional debug param:
+    
+    if (user?.resource && !isAdmin) {
+      params.append("resource", !isAdmin ? user.resource : savedTeamId);
+    }
+
+
+    const url = params.toString() ? `${baseurl}?${params.toString()}` : baseurl;
 
     Swal.fire({
       title: "Memuat Data Case....",
@@ -1429,7 +1449,6 @@ const sortedData = useMemo(() => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
     setGoToPageInput("");
   };
-const { user } = useAuth();
 
 const EnumToLabel = {
   New : "New",
