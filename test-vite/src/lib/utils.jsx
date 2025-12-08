@@ -2,7 +2,7 @@ export function parseNoteText(note) {
   if (!note) return null;
 
   // Regex cari [WARNING] dan potong kalimatnya
-  const parts = note.split(/(\[WARNING\]|\[NOTICE\]|\[PRINT\]|\[QUOTATION\])/g);
+  const parts = note.split(/(\[WARNING\]|\[NOTICE\]|\[PRINT\]|\[QUOTATION\]|\[INVOICE\]|\[DP\]|\[RMA\])/g);
 
   return parts.map((part, idx) => {
     if (part === "[WARNING]") {
@@ -27,6 +27,24 @@ export function parseNoteText(note) {
       return(
         <span key={idx} className="text-gray-400 font-semibold">
           ⚠️ QUOTATION NOTICE
+        </span>
+      )
+    } else if(part === "[INVOICE]"){
+      return(
+        <span key={idx} className="text-gray-400 font-semibold">
+          ⚠️ INVOICE
+        </span>
+      )
+    } else if(part === "[DP]"){
+      return(
+        <span key={idx} className="text-gray-400 font-semibold">
+          ⚠️ DP NOTICE
+        </span>
+      )
+    } else if(part === "[RMA]"){
+      return(
+        <span key={idx} className="text-gray-400 font-semibold">
+          ⚠️ Update RMA Notice
         </span>
       )
     }
