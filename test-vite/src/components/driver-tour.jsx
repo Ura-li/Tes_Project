@@ -102,7 +102,7 @@ export const ButtonTour = () => {
     
     return (
         <>
-            <Button variant={"outline"} className={"cursor-pointer dark:border-b-slate-500 dark:bg-gradient-to-b dark:from-slate-600 dark:via-slate-800 dark:to-slate-700"} onClick={() => driverObj.drive()}>
+            <Button title={"Guidline"} variant={"outline"} className={"cursor-pointer dark:border-b-slate-500 dark:bg-gradient-to-b dark:from-slate-600 dark:via-slate-800 dark:to-slate-700"} onClick={() => driverObj.drive()}>
                 <OctagonAlert/>
             </Button>
         </>

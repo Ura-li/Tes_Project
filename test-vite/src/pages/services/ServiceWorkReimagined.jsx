@@ -159,7 +159,7 @@ export const ServiceWork = () => {
   return (
     <>
       {workOrder?.SystemStatus === "CLOSED_POSTED" && (
-        <div className="p-4 my-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
+        <div className="p-4  text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
           This work order is <strong>read-only</strong> because it is{" "}
           <strong>Closed</strong>.
         </div>
@@ -167,9 +167,9 @@ export const ServiceWork = () => {
 
       {workOrder?.WOID && caseInformation?.CaseID && <TabsServiceWO />}
 
-      <Card className="p-0 mt-2 border-0 rounded-none">
+      <Card className=" border-0 rounded-none bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
         <Tabs defaultValue="wo_summary">
-          <CardHeader className="flex flex-col gap-3 border-2 w-full p-2 sticky z-30 top-22 bg-white">
+          <CardHeader className="flex flex-col gap-3 border-2 w-full p-2 sticky z-30 top-22 bg-white dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
               <CardTitle className="text-xl pl-2">
                 {workOrder?.WOID || "---"}
@@ -183,25 +183,25 @@ export const ServiceWork = () => {
                 </span>
               </CardTitle>
               <CardTitle className="flex flex-row gap-4 items-center">
-                <div className="flex flex-col ">
-                  <h1 className="text-blue-500">
+                <div className="flex flex-col dark:text-gray-300">
+                  <h1 className="text-blue-500 dark:text-white">
                     {ownerWorkOrder?.Name || "---"}
                   </h1>
                   <p className="text-sm font-light ">Owner Ce</p>
                 </div>
-                <div className="flex flex-col ">
-                  <h1 className="text-blue-500">---</h1>
+                <div className="flex flex-col dark:text-gray-300">
+                  <h1 className="text-blue-500 dark:text-white">---</h1>
                   <p className="text-sm font-light ">Queue</p>
                 </div>
-                <div className="flex flex-col ">
-                  <h1 className="text-blue-500">
+                <div className="flex flex-col dark:text-gray-300">
+                  <h1 className="text-blue-500 dark:text-white">
                     {customerData.MainAccount?.Salutation}{" "}
                     {customerData.MainAccount?.FirstName}{" "}
                     {customerData.MainAccount?.LastName}
                   </h1>
                   <p className="text-sm font-light">Contact</p>
                 </div>
-                <div className="flex flex-col ">
+                <div className="flex flex-col dark:text-gray-300">
                   <Select
                     onValueChange={setSelectedSiteOption}
                     defaultValue="first"
@@ -221,31 +221,34 @@ export const ServiceWork = () => {
                 </div>
               </CardTitle>
             </div>
+            
+            <div>
 
-            <TabsList className="bg-gray-100 w-full flex gap-4">
+            <TabsList className="border-t bg-gray-100 w-full flex gap-4 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 dark:rounded-none">
               {tabs.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   variant={"simple"}
                   value={tab.value}
-                  className="text-sm font-medium"
+                  className="text-sm font-medium dark:border-b-slate-500 dark:text-gray-300"
                 >
                   {tab.label}
                 </TabsTrigger>
               ))}
             </TabsList>
+            </div>
           </CardHeader>
 
           {/* ========= TAB: WO SUMMARY ========= */}
-          <TabsContent value="wo_summary" className="p-1">
+          <TabsContent value="wo_summary" className="p-2 ">
             {/* ... your existing JSX (unchanged) ... */}
             {/* General + Entitlement + Material Orders + Modal */}
             {/* only change was openServiceCatalog and the handlers we already edited */}
             <div className="flex flex-col md:flex-row gap-4">
-              <Card className="rounded-md flex-1/3">
+              <Card className="rounded-md flex-1/3 dark:bg-gradient-to-tl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
                 <CardHeader>
                   <CardTitle className="text-lg ">General</CardTitle>
-                  <hr />
+                  <hr className="dark:bg-gray-400"/>
                 </CardHeader>
                 <CardContent className="grid items-center grid-cols-2 lg:grid-cols-4 gap-6">
                   <div
@@ -268,6 +271,7 @@ export const ServiceWork = () => {
                       // value={WOGeneral.WorkOrderDescription}
                       // onChange={handleWOGeneral('WorkOrderDescription')}
                       // placeholder="---"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       value={workOrder?.caseinformation?.CaseSubject}
                     />
                   </CaseField>
@@ -275,7 +279,7 @@ export const ServiceWork = () => {
                   <CaseField label="Work Order Number" lock>
                     <Input
                       
-                      className=""
+                      className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                       value={WOGeneral.WorkOrderNumber || "---"}
                       readOnly
                     />
@@ -283,6 +287,7 @@ export const ServiceWork = () => {
 
                   <CaseField label="System Status" lock={!canaddce}>
                     <SearchCommandBlock
+                    className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                       value={WOGeneral?.SystemStatus}
                       onChange={(val) => handleWOGeneral("SystemStatus")(val)}
                       options={statusOptions}
@@ -291,7 +296,7 @@ export const ServiceWork = () => {
 
                   <CaseField label="Shipment Country" lock={!canaddce}>
                     <SearchCommandBlock
-                      
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                       value={WOGeneral.ShipmentCountry}
                       onChange={handleWOGeneral("ShipmentCountry")}
                       placeholder="---"
@@ -315,7 +320,7 @@ export const ServiceWork = () => {
                   <CaseField label="Work Order Type" lock>
                     <Input
                       
-                      className=""
+                      className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                       value={WOGeneral.WorkOrderType || "---"}
                       onChange={handleWOGeneral("WorkOrderType")}
                       readOnly
@@ -327,13 +332,14 @@ export const ServiceWork = () => {
                       value={WOGeneral.ShipmentState}
                       onChange={handleWOGeneral("ShipmentState")}
                       placeholder="---"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                     />
                   </CaseField>
 
                   <CaseField label="Priority" lock>
                     <Input
                       
-                      className=""
+                      className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                       value={WOGeneral.Priority || "---"}
                       onChange={handleWOGeneral("Priority")}
                     />
@@ -342,7 +348,7 @@ export const ServiceWork = () => {
                   <CaseField label="Patner Case Id" lock>
                     <Input
                       
-                      className=""
+                      className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                       value={"---"}
                       readOnly
                     />
@@ -350,7 +356,7 @@ export const ServiceWork = () => {
 
                   <CaseField label="Recommended Resource" lock>
                     <Input
-                      
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       value={WOGeneral.RecommendedResource}
                       onChange={handleWOGeneral("RecommendedResource")}
                       placeholder="---"
@@ -361,7 +367,7 @@ export const ServiceWork = () => {
                   <CaseField label="Patner Status" lock>
                     <Input
                       
-                      className=""
+                      className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                       value={"---"}
                       readOnly
                     />
@@ -370,14 +376,14 @@ export const ServiceWork = () => {
                   <CaseField label="Sub-Status" lock={KeyRound}>
                     <Input
                       
-                      className=""
+                      className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                       value={WOGeneral.SubStatus}
                       onChange={handleWOGeneral("SubStatus")}
                       placeholder="---"
                     />
                   </CaseField>
                   <CaseField label="Work Order Instruction" lock>
-                    <Input  placeholder="---" readOnly />
+                    <Input  placeholder="---" readOnly className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                   </CaseField>
 
                   <Accordion
@@ -440,12 +446,12 @@ export const ServiceWork = () => {
               </Card>
 
               <div className="flex flex-col flex-1 gap-4">
-                <Card className="rounded-sm ">
+                <Card className="rounded-sm dark:bg-gradient-to-t dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
                   <CardContent className="grid items-center grid-cols-2">
                     <CaseField label="Incoming Channel" lock>
                       <Input
                         
-                        className=""
+                        className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                         value={WOGeneral.IncomingChannel}
                         onChange={handleWOGeneral("IncomingChannel")}
                       />
@@ -466,7 +472,7 @@ export const ServiceWork = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="rounded-md ">
+                <Card className="rounded-md dark:bg-gradient-to-tr dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
                   <CardHeader>
                     <CardTitle className="text-lg ">
                       Entitlement and Modifier
@@ -477,7 +483,7 @@ export const ServiceWork = () => {
                     <CaseField label="Entitlement" lock>
                       <Input
                         
-                        className=""
+                        className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                         value={"---"}
                         readOnly
                       />
@@ -485,14 +491,14 @@ export const ServiceWork = () => {
                     <CaseField label="Offer" lock>
                       <Input
                         
-                        className=""
+                        className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                         value={"---"}
                         readOnly
                       />
                     </CaseField>
                     <CaseField label="Warranty Status" lock>
                       <Input
-                        
+                        className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                         value={
                           workOrder.caseinformation?.otcCodeTable
                             ?.Description || "---"
@@ -503,7 +509,7 @@ export const ServiceWork = () => {
                     <CaseField label="Authorizing Employee" lock>
                       <Input
                         
-                        className=""
+                        className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                         value={"---"}
                         readOnly
                       />
@@ -511,7 +517,7 @@ export const ServiceWork = () => {
                     <CaseField label="Coverage Window Used" lock>
                       <Input
                         
-                        className=""
+                        className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                         value={"---"}
                         readOnly
                       />
@@ -566,18 +572,21 @@ export const ServiceWork = () => {
                 </Card>
               </div>
             </div>
-            <Card className="flex-col mt-5">
+            <Card className="flex-col mt-5 dark:bg-gradient-to-bl dark:from-slate-600 dark:via-slate-800 dark:to-slate-700 dark:border-gray-700 dark:border-4">
               <CardHeader>
                 <div className="flex justify-between">
                   <CardTitle className="text-lg ">
                     Material Order Information
                   </CardTitle>
                   <Button
+                    variant={"outline"}
                     size="sm"
                     onClick={openServiceCatalog}
                     disabled={!canaddce}
+                    className={'cursor-pointer dark:text-white dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}
                   >
-                    <Plus className="mr-2" size={16} /> Create Material Order
+                    <Plus className="mr-2" size={16} /> 
+                    Create Material Order
                   </Button>
                 </div>
                 <hr />
@@ -586,12 +595,12 @@ export const ServiceWork = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">Order Number</TableHead>
-                      <TableHead>Case ID</TableHead>
-                      <TableHead>Created On</TableHead>
-                      <TableHead>Order Status</TableHead>
-                      <TableHead>Order Type</TableHead>
-                      <TableHead>Ready For Closure</TableHead>
+                      <TableHead className="w-[100px] dark:text-white">Order Number</TableHead>
+                      <TableHead className="dark:text-white">Case ID</TableHead>
+                      <TableHead className="dark:text-white">Created On</TableHead>
+                      <TableHead className="dark:text-white">Order Status</TableHead>
+                      <TableHead className="dark:text-white">Order Type</TableHead>
+                      <TableHead className="dark:text-white">Ready For Closure</TableHead>
                     </TableRow>
                   </TableHeader>
 
@@ -605,16 +614,16 @@ export const ServiceWork = () => {
                             }
                             className={
                               material.OrderStatus === "New"
-                                ? "cursor-pointer bg-green-100"
+                                ? "cursor-pointer bg-green-100 dark:bg-green-600 dark:hover:bg-gray-500 dark:text-gray-300"
                                 : material.OrderStatus === "Shipped"
-                                ? "cursor-pointer bg-yellow-100"
+                                ? "cursor-pointer bg-yellow-100 dark:bg-yellow-600 dark:hover:bg-gray-500 dark:text-gray-300"
                                 : material.OrderStatus === "Ordered"
-                                ? "cursor-pointer bg-blue-100"
+                                ? "cursor-pointer bg-blue-100 dark:bg-blue-600 dark:hover:bg-gray-500 dark:text-gray-300"
                                 : material.OrderStatus === "Closed"
-                                ? "cursor-pointer bg-gray-100"
+                                ? "cursor-pointer bg-gray-100 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-300"
                                 : material.OrderStatus === "BackOrdered"
-                                ? "cursor-pointer bg-purple-100"
-                                : "cursor-pointer bg-red-100"
+                                ? "cursor-pointer bg-purple-100 dark:bg-purple-600 dark:hover:bg-gray-500 dark:text-gray-300"
+                                : "cursor-pointer bg-red-100 dark:bg-red-600 dark:hover:bg-gray-500 dark:text-gray-300"
                             }
                           >
                             <TableCell className="font-medium">
@@ -648,10 +657,10 @@ export const ServiceWork = () => {
 
           {/* ========= TAB: WO BOOKINGS ========= */}
           <TabsContent value="wo_bookings" className="p-1">
-            <Card className="flex-col rounded-md">
+            <Card className="flex-col rounded-md dark:bg-gradient-to-tl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
               <CardHeader>
                 <CardTitle>WO Bookings</CardTitle>
-                <hr />
+                <hr className="dark:border-gray-400"/>
               </CardHeader>
               <CardContent
                 className={
@@ -751,7 +760,7 @@ export const ServiceWork = () => {
               </CardContent>
             </Card>
 
-            <Card className="flex-col mt-5 rounded-md">
+            <Card className="flex-col mt-5 rounded-md dark:bg-gradient-to-bl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
               <span className="ml-5 text-xl font-bold">Booking </span>
               <CardContent className="grid">
                 {canEditapo || user.role === "admin" ? (
@@ -772,17 +781,17 @@ export const ServiceWork = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">Resource</TableHead>
-                      <TableHead>Account</TableHead>
-                      <TableHead>Booking</TableHead>
-                      <TableHead>Reschedule</TableHead>
-                      <TableHead>Reschedule Reason</TableHead>
-                      <TableHead>Start Time</TableHead>
-                      <TableHead>Estimated Arrival Time (ETA)</TableHead>
-                      <TableHead>Actual Arrival Time</TableHead>
-                      <TableHead>End Time</TableHead>
-                      <TableHead>Created On</TableHead>
-                      <TableHead>Created By</TableHead>
+                      <TableHead className="w-[100px] dark:text-white">Resource</TableHead>
+                      <TableHead className="dark:text-white">Account</TableHead>
+                      <TableHead className="dark:text-white">Booking</TableHead>
+                      <TableHead className="dark:text-white">Reschedule</TableHead>
+                      <TableHead className="dark:text-white">Reschedule Reason</TableHead>
+                      <TableHead className="dark:text-white">Start Time</TableHead>
+                      <TableHead className="dark:text-white">Estimated Arrival Time (ETA)</TableHead>
+                      <TableHead className="dark:text-white">Actual Arrival Time</TableHead>
+                      <TableHead className="dark:text-white">End Time</TableHead>
+                      <TableHead className="dark:text-white">Created On</TableHead>
+                      <TableHead className="dark:text-white">Created By</TableHead>
                     </TableRow>
                   </TableHeader>
 
@@ -794,7 +803,7 @@ export const ServiceWork = () => {
                           onClick={() =>
                             navigate(`/app/bookings/${booking.BookingId}`)
                           }
-                          className="cursor-pointer hover:bg-gray-300"
+                          className="cursor-pointer hover:bg-gray-700 dark:text-gray-400"
                         >
                           <TableCell>
                             {booking.bookingDetails?.[0].resource?.Name || "-"}

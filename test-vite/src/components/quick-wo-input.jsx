@@ -197,7 +197,6 @@ export function QuickWOInput ({
     }));
   };
   
-  console.log("SLA IN QUICK WO INPUT : ",SLA)
   // Simpel update PATCH
   // const handleSave = async () => {
   //   await ApiCustomer.patch(`/api/work-order/${WOID}`, {
@@ -267,30 +266,30 @@ export function QuickWOInput ({
             TODO :
             Make this available in Contact Individual
             */}
-            <Card className="flex-col">  
+            <Card className="flex-col dark:bg-gradient-to-t dark:from-slate-700 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">  
               <CardHeader>
                 <CardTitle className='text-lg'>Service Delivery Address</CardTitle>
-                <hr />
+                <hr className="dark:border-gray-400"/>
               </CardHeader>
               <CardContent className="grid grid-cols-6 gap-5 m-1">
-                <CaseField label="Choose Address" className={''} lock ><Input variant={'invisible'} value="Site Account address"/></CaseField>
-                <CaseField label="Address Line1" className={''}  lock> <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.addressLine1} readOnly/> </CaseField>
-                <CaseField label="Postal Code" className={''}  lock> <Input variant={'invisible'}  className="" value={ServiceDeliveryAddress.postalCode} readOnly/> </CaseField>
-                <CaseField label="Company Name" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.companyName} readOnly/> </CaseField>
-                <CaseField label="Address Line2" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.addressLine2} readOnly/> </CaseField>
-                <CaseField label="Timezone" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.timezone} readOnly/> </CaseField>
-                <CaseField label="Contact First Name" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.contactFirstName} onChange={e => handleChangeServciceDeliveryAddress("contactFirstName")} /> </CaseField>
-                <CaseField label="Address Line3" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.addressLine3} onChange={e => handleChangeServciceDeliveryAddress("addressLine3")} /> </CaseField>
-                <CaseField label="Service Territory" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.serviceTerritory} readOnly/> </CaseField>
-                <CaseField label="Contact Last Name" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.contactLastName} readOnly/> </CaseField>
-                <CaseField label="City" className={''}  lock> <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.city} readOnly/> </CaseField>
-                <CaseField label="Business Segment" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.businessSegment} readOnly/> </CaseField>
-                <CaseField label="Phone Number" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.phoneNumber} onChange={e => handleChangeServciceDeliveryAddress("phoneNumber")} /> </CaseField>
-                <CaseField label="State Or Province" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.stateOrProvince} readOnly/> </CaseField>
-                <CaseField label="Longitude" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.longitude} readOnly/> </CaseField>
-                <CaseField label="Email Address" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.email} onChange={e => handleChangeServciceDeliveryAddress("email")} /> </CaseField>
-                <CaseField label="Country/Region" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.countryOrRegion} readOnly/> </CaseField>
-                <CaseField label="Latitude" className={''} lock > <Input variant={'invisible'} className="" value={ServiceDeliveryAddress.latitude} readOnly/> </CaseField>
+                <CaseField label="Choose Address" className={''} lock ><Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2" value="Site Account address"/></CaseField>
+                <CaseField label="Address Line1" className={''}  lock> <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.addressLine1} readOnly/> </CaseField>
+                <CaseField label="Postal Code" className={''}  lock> <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"   value={ServiceDeliveryAddress.postalCode} readOnly/> </CaseField>
+                <CaseField label="Company Name" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.companyName} readOnly/> </CaseField>
+                <CaseField label="Address Line2" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.addressLine2} readOnly/> </CaseField>
+                <CaseField label="Timezone" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.timezone} readOnly/> </CaseField>
+                <CaseField label="Contact First Name" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.contactFirstName} onChange={e => handleChangeServciceDeliveryAddress("contactFirstName")} /> </CaseField>
+                <CaseField label="Address Line3" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.addressLine3} onChange={e => handleChangeServciceDeliveryAddress("addressLine3")} /> </CaseField>
+                <CaseField label="Service Territory" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.serviceTerritory} readOnly/> </CaseField>
+                <CaseField label="Contact Last Name" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.contactLastName} readOnly/> </CaseField>
+                <CaseField label="City" className={''}  lock> <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.city} readOnly/> </CaseField>
+                <CaseField label="Business Segment" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.businessSegment} readOnly/> </CaseField>
+                <CaseField label="Phone Number" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.phoneNumber} onChange={e => handleChangeServciceDeliveryAddress("phoneNumber")} /> </CaseField>
+                <CaseField label="State Or Province" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.stateOrProvince} readOnly/> </CaseField>
+                <CaseField label="Longitude" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.longitude} readOnly/> </CaseField>
+                <CaseField label="Email Address" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.email} onChange={e => handleChangeServciceDeliveryAddress("email")} /> </CaseField>
+                <CaseField label="Country/Region" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.countryOrRegion} readOnly/> </CaseField>
+                <CaseField label="Latitude" className={''} lock > <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"  value={ServiceDeliveryAddress.latitude} readOnly/> </CaseField>
               </CardContent>
             </Card>
 
@@ -336,35 +335,35 @@ export function QuickWOInput ({
             </Card>
 
             
-            <Card className={"mt-5"}>
+            <Card className={"mt-5 dark:bg-gradient-to-b dark:from-slate-700 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4"}>
               <CardHeader>
                 <CardTitle className={"text-lg"}>Repair Action</CardTitle>
-                <hr />
+                <hr className="dark:border-gray-400"/>
               </CardHeader>
               <CardContent className={"grid grid-cols-4 gap-2"}>
                 <CaseField label={"Problem category"} lock>
-                  <Input value={workOrderData?.ServiceType?.ProblemCategory || ""}/>
+                  <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2" value={workOrderData?.ServiceType?.ProblemCategory || ""}/>
                 </CaseField>
                 <CaseField label={"Delay code"} lock>
-                  <Input value={workOrderData?.DelayCode || ""}/>
+                  <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2" value={workOrderData?.DelayCode || ""}/>
                 </CaseField>
                 <CaseField label={"Service type"} lock>
-                  <Input value={workOrderData?.ServiceType?.ServiceTypeName || ""}/>
+                  <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2" value={workOrderData?.ServiceType?.ServiceTypeName || ""}/>
                 </CaseField>
                 <CaseField label={"NMU"} lock>
-                  <Input value={workOrderData?.NMU?.NMUDesc}/>
+                  <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2" value={workOrderData?.NMU?.NMUDesc}/>
                 </CaseField>
                 <CaseField label={"NMU item"} lock>
-                  <Input value={workOrderData?.NMUItem?.itemName} />
+                  <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2" value={workOrderData?.NMUItem?.itemName} />
                 </CaseField>
                 <CaseField label={"Defec desc"} lock>
-                  <Textarea value={workOrderData?.DefectDesc}/>
+                  <Textarea className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base dark:bg-gray-500/10 dark:border-gray-400" value={workOrderData?.DefectDesc}/>
                 </CaseField>
                 <CaseField label={"CE analysis"} lock>
-                  <Textarea value={workOrderData?.CEAnalysis}/>
+                  <Textarea className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base dark:bg-gray-500/10 dark:border-gray-400" value={workOrderData?.CEAnalysis}/>
                 </CaseField>
                 <CaseField label={"Repair Action"} lock>
-                  <Textarea value={workOrderData?.RepairAction}/>
+                  <Textarea className=" border-none italic ring-1 ring-gray-400 bg-gray-50 text-base dark:bg-gray-500/10 dark:border-gray-400" value={workOrderData?.RepairAction}/>
                 </CaseField>
               </CardContent>
             </Card>

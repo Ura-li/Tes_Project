@@ -107,15 +107,15 @@ export const ServiceMaterialApo = () => {
 
   // ----------------- RENDER -----------------
   return (
-    <div>
+    <div className="bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
       {/* Status banners */}
       {materialOrder?.OrderStatus === "Closed" ? (
-        <div className="p-4 my-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
+        <div className="p-4  text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
           This material order is <strong>read-only</strong> because it is{" "}
           <strong>Closed</strong>.
         </div>
       ) : materialOrder?.OrderStatus === "Cancelled" ? (
-        <div className="p-4 my-2 text-red-700 bg-red-100 border-l-4 border-red-500">
+        <div className="p-4  text-red-700 bg-red-100 border-l-4 border-red-500">
           This material order is <strong>read-only</strong> because it is{" "}
           <strong>Cancelled</strong>.
         </div>
@@ -123,11 +123,11 @@ export const ServiceMaterialApo = () => {
 
       <TabsServiceMO />
 
-      <Card className="mt-2 rounded-none">
+      <Card className="mt-2 rounded-none border-none bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
         <CardContent className="p-0">
           <Tabs defaultValue="mo_info">
             {/* Header card */}
-            <Card className="flex flex-row gap-3 p-4 h-25">
+            <Card className="flex flex-row gap-3 p-4 h-25 rounded-none dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600">
               <CardHeader>
                 <CardTitle className="text-xl">
                   {materialOrder?.MOID} for {materialOrder?.WOID}
@@ -139,7 +139,7 @@ export const ServiceMaterialApo = () => {
               </CardHeader>
               <CardContent className="flex justify-between w-full">
                 <h1>{materialOrder?.Description}</h1>
-                <div>
+                {/* <div>
                   <span className="font-semibold">Order Status:</span>
                   {lineItems.map((items) => (
                     <div
@@ -167,7 +167,7 @@ export const ServiceMaterialApo = () => {
                     />
                 </div>
               ))}
-                </div>
+                </div> */}
               </CardContent>
             </Card>
               {/* <div className=" border-t bg-gray-50 w-full overflow-x-auto ">
@@ -194,14 +194,15 @@ export const ServiceMaterialApo = () => {
             {/* MAIN CONTENT */}
             <div className="p-2">
               {/* ========== ORDER INFO ========== */}
-              <Card className="rounded-md">
+              <Card className="rounded-md dark:bg-gradient-to-tl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
                 <CardHeader>
                   <CardTitle className="text-lg">Order Information</CardTitle>
-                  <hr />
+                  <hr className="dark:border-gray-400"/>
                 </CardHeader>
                 <CardContent className="grid items-center grid-cols-2 md:grid-cols-4 gap-5">
                   <CaseField label={"Case ID"} lock>
                     <Input
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       type="text"
                       value={materialOrder?.workorder?.CaseID || ""}
                       readOnly
@@ -210,6 +211,7 @@ export const ServiceMaterialApo = () => {
 
                   <CaseField label={"Resource Name"} lock>
                     <Input
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       type="text"
                       value={
                         materialOrder?.workorder?.bookings?.[0]
@@ -221,6 +223,7 @@ export const ServiceMaterialApo = () => {
 
                   <CaseField label={"Contact"} lock>
                     <Input
+                    className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       type="text"
                       value={
                         materialOrder?.workorder?.caseinformation
@@ -234,6 +237,7 @@ export const ServiceMaterialApo = () => {
 
                   <CaseField label={"Service Offer ID"} lock>
                     <Input
+                    className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       type="text"
                       value={
                         materialOrder?.workorder?.serviceCatalog
@@ -245,6 +249,7 @@ export const ServiceMaterialApo = () => {
 
                   <CaseField label={"Work Order"} lock>
                     <Input
+                    className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       type="text"
                       value={materialOrder?.WOID || ""}
                       readOnly
@@ -253,6 +258,7 @@ export const ServiceMaterialApo = () => {
 
                   <CaseField label={"Service Description"} lock>
                     <Input
+                    className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       type="text"
                       value={
                         materialOrder?.workorder?.serviceCatalog
@@ -264,6 +270,7 @@ export const ServiceMaterialApo = () => {
 
                   <CaseField label={"Order Number"} lock>
                     <Input
+                    className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       type="text"
                       value={materialOrder?.MOID || ""}
                       readOnly
@@ -276,6 +283,7 @@ export const ServiceMaterialApo = () => {
                     lock={!canEditapo}
                   >
                     <Input
+                    className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       type="text"
                       value={materialInfo.SalesOrderNumber}
                       placeholder="---"
@@ -285,6 +293,7 @@ export const ServiceMaterialApo = () => {
 
                   <CaseField label={"Order Type"} lock>
                     <Input
+                    className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       type="text"
                       value={materialOrder?.OrderType || ""}
                       readOnly
@@ -297,7 +306,7 @@ export const ServiceMaterialApo = () => {
                     lock={!canEditapo}
                   >
                     <Input
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder="---"
                       value={materialInfo.RMANumber}
                       onChange={handleInfoChange("RMANumber")}
@@ -314,6 +323,7 @@ export const ServiceMaterialApo = () => {
                       onChange={handleInfoChange("RMAStatus")}
                       placeholder="Select RMA Status"
                       options={RMA_STATUS_OPTIONS}
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                     />
                   </CaseField>
 
@@ -368,7 +378,7 @@ export const ServiceMaterialApo = () => {
                     lock={!canEditapo}
                   >
                     <Input
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder="---"
                       value={materialInfo.AWB_InCode || ""}
                       onChange={handleInfoChange("AWB_InCode")}
@@ -381,7 +391,7 @@ export const ServiceMaterialApo = () => {
                     lock={!canEditapo}
                   >
                     <Input
-                      variant="invisible"
+                      className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder="---"
                       value={materialInfo.AWB_OutCode || ""}
                       onChange={handleInfoChange("AWB_OutCode")}
@@ -481,20 +491,20 @@ export const ServiceMaterialApo = () => {
               </Card>
 
               {/* Booking summary table */}
-              <Card className="flex-col mt-5">
+              <Card className="flex-col mt-5 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600">
                 <span className="ml-5 text-xl font-bold">Booking</span>
                 <CardContent className="grid">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[100px]">
+                        <TableHead className="w-[100px] dark:text-white">
                           Order Number
                         </TableHead>
-                        <TableHead>Case ID</TableHead>
-                        <TableHead>Created On</TableHead>
-                        <TableHead>Order Status</TableHead>
-                        <TableHead>Order Type</TableHead>
-                        <TableHead>Ready For Closure</TableHead>
+                        <TableHead className="dark:text-white">Case ID</TableHead>
+                        <TableHead className="dark:text-white">Created On</TableHead>
+                        <TableHead className="dark:text-white">Order Status</TableHead>
+                        <TableHead className="dark:text-white">Order Type</TableHead>
+                        <TableHead className="dark:text-white">Ready For Closure</TableHead>
                       </TableRow>
                     </TableHeader>
 
@@ -504,16 +514,16 @@ export const ServiceMaterialApo = () => {
                           key={materialOrder.MOID}
                           className={
                             materialOrder.OrderStatus === "New"
-                              ? "cursor-pointer bg-green-100"
+                              ? "cursor-pointer bg-green-100 dark:bg-green-600 dark:hover:bg-gray-500 dark:text-gray-300"
                               : materialOrder.OrderStatus === "Shipped"
-                              ? "cursor-pointer bg-yellow-100"
+                              ? "cursor-pointer bg-yellow-100 dark:bg-yellow-600 dark:hover:bg-gray-500 dark:text-gray-300"
                               : materialOrder.OrderStatus === "Ordered"
-                              ? "cursor-pointer bg-blue-100"
+                              ? "cursor-pointer bg-blue-100 dark:bg-blue-600 dark:hover:bg-gray-500 dark:text-gray-300"
                               : materialOrder.OrderStatus === "Closed"
-                              ? "cursor-pointer bg-gray-100"
+                              ? "cursor-pointer bg-gray-100 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-300"
                               : materialOrder.OrderStatus === "BackOrdered"
-                              ? "cursor-pointer bg-purple-100"
-                              : "cursor-pointer bg-red-100"
+                              ? "cursor-pointer bg-purple-100 dark:bg-purple-600 dark:hover:bg-gray-500 dark:text-gray-300"
+                              : "cursor-pointer bg-red-100 dark:bg-red-600 dark:hover:bg-gray-500 dark:text-gray-300"
                           }
                         >
                           <TableCell>{materialOrder.MOID}</TableCell>
@@ -536,7 +546,7 @@ export const ServiceMaterialApo = () => {
               </Card>
 
               {/* Material Order Line Items */}
-              <Card className="flex-col mt-7">
+              <Card className="flex-col mt-7 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600">
                 <span className="ml-5 text-xl font-bold">
                   Material Order Line Items
                 </span>
@@ -544,20 +554,20 @@ export const ServiceMaterialApo = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[100px]">
+                        <TableHead className="w-[100px] dark:text-white">
                           Mo Line Item
                         </TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>ATP</TableHead>
-                        <TableHead>Part No</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Delivery</TableHead>
-                        <TableHead>Promise</TableHead>
-                        <TableHead>Expected</TableHead>
-                        <TableHead>Tracking</TableHead>
-                        <TableHead>Ship</TableHead>
-                        <TableHead>Storage</TableHead>
-                        <TableHead>Offered</TableHead>
+                        <TableHead className="dark:text-white">Status</TableHead>
+                        <TableHead className="dark:text-white">ATP</TableHead>
+                        <TableHead className="dark:text-white">Part No</TableHead>
+                        <TableHead className="dark:text-white">Description</TableHead>
+                        <TableHead className="dark:text-white">Delivery</TableHead>
+                        <TableHead className="dark:text-white">Promise</TableHead>
+                        <TableHead className="dark:text-white">Expected</TableHead>
+                        <TableHead className="dark:text-white">Tracking</TableHead>
+                        <TableHead className="dark:text-white">Ship</TableHead>
+                        <TableHead className="dark:text-white">Storage</TableHead>
+                        <TableHead className="dark:text-white">Offered</TableHead>
                       </TableRow>
                     </TableHeader>
 
@@ -570,16 +580,16 @@ export const ServiceMaterialApo = () => {
                           }
                           className={
                             lineitem.Status === "New"
-                              ? "cursor-pointer bg-green-100"
+                              ? "cursor-pointer bg-green-100 dark:bg-green-600 dark:hover:bg-gray-500 dark:text-gray-300"
                               : lineitem.Status === "Shipped"
-                              ? "cursor-pointer bg-yellow-100"
+                              ? "cursor-pointer bg-yellow-100 dark:bg-yellow-600 dark:hover:bg-gray-500 dark:text-gray-300"
                               : lineitem.Status === "Ordered"
-                              ? "cursor-pointer bg-blue-100"
+                              ? "cursor-pointer bg-blue-100 dark:bg-blue-600 dark:hover:bg-gray-500 dark:text-gray-300"
                               : lineitem.Status === "Closed"
-                              ? "cursor-pointer bg-gray-100"
+                              ? "cursor-pointer bg-gray-100 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-300"
                               : lineitem.Status === "BackOrdered"
-                              ? "cursor-pointer bg-purple-100"
-                              : "cursor-pointer bg-red-100"
+                              ? "cursor-pointer bg-purple-100 dark:bg-purple-600 dark:hover:bg-gray-500 dark:text-gray-300"
+                              : "cursor-pointer bg-red-100 dark:bg-red-600 dark:hover:bg-gray-500 dark:text-gray-300"
                           }
                         >
                           <TableCell className="font-medium">
