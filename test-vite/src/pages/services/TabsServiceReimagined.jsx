@@ -434,6 +434,7 @@ export const TabsServiceMO = ({
   const materialOrder = useMaterialOrderStore((s) => s.materialOrder);
   const updatedLineItems = useMaterialOrderStore((s) => s.updatedLineItems);
   const materialInfo = useMaterialOrderStore((s) => s.materialInfo);
+  const lineItems = useMaterialOrderStore((s) => s.lineItems);
   const saveMaterialOrderStore = useMaterialOrderStore(
     (s) => s.saveMaterialOrder
   );
@@ -520,7 +521,7 @@ export const TabsServiceMO = ({
           // Validation: all MO line items must be Closed
           try {
             const listRes = await ApiCustomer.get(
-              `/api/material-order/material-order-line-items?MOID=${materialOrders.MOID}`
+              `/api/material-order/material-order-line-items?MOID=${lineItems.MOID}`
             );
             const items = Array.isArray(listRes.data?.data)
               ? listRes.data.data
@@ -538,6 +539,7 @@ export const TabsServiceMO = ({
             }
           } catch (e) {
             Swal.close();
+            console.error("Error validating line items:", e);
             return Swal.fire({
               icon: "error",
               title: "Validation Failed",
@@ -545,7 +547,7 @@ export const TabsServiceMO = ({
             });
           }
           const res = await ApiCustomer.patch(
-            `/api/material-order/${materialOrders.MOID}`,
+            `/api/material-order/${materialOrder.MOID}`,
             {
               OrderStatus: "Closed",
             }
@@ -555,13 +557,13 @@ export const TabsServiceMO = ({
               user: getUserFromToken(),
             };
             const updateLog = await ApiCustomer.post("/api/actionlog", {
-              CaseId: `${materialOrders.workorder?.CaseID}`,
-              ReferenceId: `${materialOrders.MOID}`,
+              CaseId: `${materialOrder.workorder?.CaseID}`,
+              ReferenceId: `${materialOrder.MOID}`,
               model: "Material Orders",
-              dataOld: materialOrders.OrderStatus,
+              dataOld: materialOrder.OrderStatus,
               dataNew: res.data.data.OrderStatus,
               changedBy: token.user.id,
-              logDescription: `Edit : Changed Material Order ${materialOrders.MOID} from ${materialOrders.OrderStatus} to ${res.data.data.OrderStatus}`,
+              logDescription: `Edit : Changed Material Order ${materialOrder.MOID} from ${materialOrder.OrderStatus} to ${res.data.data.OrderStatus}`,
             });
             Swal.fire({
               icon: "success",
@@ -570,7 +572,7 @@ export const TabsServiceMO = ({
               timer: 2000,
               showConfirmButton: false,
             }).then(() => {
-              navigate(`/app/work/${materialOrders.WOID}`);
+              navigate(`/app/work/${materialOrder.WOID}`);
             });
           } else {
             Swal.fire({

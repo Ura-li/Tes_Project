@@ -139,7 +139,7 @@ export const ServiceMaterialApo = () => {
               </CardHeader>
               <CardContent className="flex justify-between w-full">
                 <h1>{materialOrder?.Description}</h1>
-                <div>
+                {/* <div>
                   <span className="font-semibold">Order Status:</span>
                   {lineItems.map((items) => (
                     <div
@@ -167,7 +167,7 @@ export const ServiceMaterialApo = () => {
                     />
                 </div>
               ))}
-                </div>
+                </div> */}
               </CardContent>
             </Card>
               {/* <div className=" border-t bg-gray-50 w-full overflow-x-auto ">
