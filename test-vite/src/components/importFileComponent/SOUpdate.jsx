@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import ApiCustomer from "@/api";
 import { formatDateForInput, formatDateForMySQL } from "../../lib/utils";
 
+import { useAuth } from "@/context/auth-context";
+
 export function SOTemplateButton(
     target = ''
 ) {
@@ -28,6 +30,7 @@ export function SOImport(
     target,
     dateRMA
 ) {
+    const { user } = useAuth();
     const [file, setFile] = useState(null)
 
     const handleFileUpload = (e) =>{
@@ -44,6 +47,7 @@ export function SOImport(
         formData.append("file",file);
         formData.append("targetStatus", target.target)
         formData.append("dateRMA", formatDateForMySQL(target.dateRMA))
+        formData.append("changedBy", user.id);
         try{
             const response = await ApiCustomer.post("/api/import/materialorder",formData);
             const result = response.data;

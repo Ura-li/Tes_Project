@@ -8,6 +8,32 @@ export const config = {
     bodyParser: false,
   },
 };
+
+const CASE_STATUS_BY_ORDER_STATUS = {
+  Ordered: "PartOrder",
+  Shipped: "PartAvailable",
+};
+const CASE_INFO_SELECT = {
+  CaseID: true,
+  CaseSubject: true,
+  Owner: true,
+  CreatedBy: true,
+  ownerUser: {
+    select: {
+      IDUser: true,
+      Name: true,
+      Email: true,
+    },
+  },
+  createdByUser: {
+    select: {
+      IDUser: true,
+      Name: true,
+      Email: true,
+    },
+  },
+};
+
 function parseExcelDate(value) {
   if (!value) return null;
   if (value instanceof Date) return value; // sudah Date
@@ -122,6 +148,7 @@ export async function POST(req) {
     const file = formData.get("file");
     const targetStatus = formData.get("targetStatus");
     const dateRMA = formData.get("dateRMA");
+    const changedBy = formData.get("changedBy");
 
     if (!file) {
       return NextResponse.json({
@@ -176,6 +203,8 @@ export async function POST(req) {
         };
 
         // Mapping for special cases
+
+        
         const mappings = {
           InOutCE: () => ({
             MOTarget: {
@@ -226,6 +255,9 @@ export async function POST(req) {
         }
         // return console.log(updatedFieldMOLITarget, updatedFieldMOTarget);
 
+        /**
+         * IMPORT KONTOL SATU SATU ANJENG
+         */
         const result = await prisma.$transaction(async (tx) => {
           const mo = await tx.materialorder.findFirst({
             where: {
@@ -241,6 +273,13 @@ export async function POST(req) {
             return;
           }
 
+          const wo = await tx.workorder.findFirst({
+            where: {WOID: mo.WOID },
+            include: {
+                caseinformation: true
+            }
+          })
+
           const moli = await tx.materialorderlineitems.findMany({
             where: {
               MOID: mo.MOID,
@@ -255,6 +294,10 @@ export async function POST(req) {
             errors.push({ soNumber, message: "MO Not Available" });
             return;
           }
+
+          const originalOrderStatus = mo.OrderStatus;
+          const originalSO = mo.SalesOrderNumber ?? null;
+          const originalRMA = mo.RMANumber ?? null;
 
           const updateMo = await tx.materialorder.updateMany({
             where: {
@@ -273,11 +316,91 @@ export async function POST(req) {
               data: updatedFieldMOLITarget,
             });
             console.log(`Updated LineItemID ${item.LineItemID}`);
+            /**
+             * TODO FOR SLAMET
+             * MAPPING TARGET RMA STATUS
+             * (NB : Miku21 Mager bikin ginian)
+             * --miku21
+             */
+            await tx.casenotes.create({
+              data: {
+                CaseID: wo.caseinformation.CaseID,
+                LogType: "System Import Logistic",
+                ActionType: "Action Plan",
+                VisibleExternally: true,
+                MinutesSpent: 0,
+                Note: `[RMA] Update RMA (${targetStatus}) : ${mo.MOID}-${item.LineNumber}; SO : ${soNumber} (CSV), ${mo.SalesOrderNumber} (Case); RMA : ${updatedFields.RMANumber} (CSV), ${mo.RMANumber} (Case) (${item.LineNumber})`,
+                CreatedBy: Number(changedBy),
+              },
+            }); 
           }
+
+          const latestItems = await tx.materialorderlineitems.findMany({
+            where: {
+                MOID: mo.MOID
+            }
+          })
+
+          const allMatch = (status) => latestItems.length > 0 && latestItems.every((x) => x.Status === status);
+
+          let derivedStatus = mo.OrderStatus;
+          if (allMatch("Shipped")) derivedStatus = "Shipped";
+          else if (allMatch("Ordered")) derivedStatus = "Ordered";
+          else if (allMatch("Cancelled")) derivedStatus = "Cancelled";
+          else if (allMatch("Closed")) derivedStatus = "Closed";
+          else if (allMatch("Submitted")) derivedStatus = "Submitted";
+          else if (allMatch("New")) derivedStatus = "New";
+          else if (allMatch("BackOrdered")) derivedStatus = "BackOrdered";
+
+          if(derivedStatus !== originalOrderStatus) {
+            await tx.materialorder.update({
+              where:{ MOID: mo.MOID},
+              data: { OrderStatus: derivedStatus }
+            })
+          }
+
+          //case status & owner update
+          const targetCaseStatus = CASE_STATUS_BY_ORDER_STATUS[derivedStatus]
+          const currentCaseStatus = wo?.caseinformation?.CaseStatus ?? null;
+
+          let caseOwnerId = null;
+          if(targetCaseStatus === "PartAvailable"){
+            caseOwnerId = wo?.OwnerID ?? null
+          }
+          // return {caseOwnerId, targetCaseStatus}
+
+          if(
+            targetCaseStatus && 
+            targetCaseStatus !== currentCaseStatus && 
+            wo?.caseinformation?.CaseID
+          ) {
+            await tx.caseinformation.update({
+              where: { CaseID: wo.caseinformation.CaseID },
+              data: {
+                CaseStatus: targetCaseStatus,
+                ...(caseOwnerId ? {Owner: caseOwnerId} : {})
+              }
+            })
+
+            await tx.actionLog.create({
+              data: {
+                CaseId: wo.caseinformation.CaseID,
+                model: "Case",
+                dataOld: currentCaseStatus ?? "Unknown",
+                dataNew: targetCaseStatus,
+                changedBy: Number(changedBy),
+                logDescription: `Import: change status ${currentCaseStatus} -> ${targetCaseStatus}`,
+              }
+            })
+          }
+
+           
+
 
           successes.push({ soNumber, updatedLines: moli.length });
           
         });
+        // return console.log(result);
       } catch (error) {
         console.log(error);
         errors.push({ soNumber, message: error.message });

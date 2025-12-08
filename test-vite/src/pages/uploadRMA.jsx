@@ -23,6 +23,7 @@ export const UploadRma = () => {
     const resource = useTeam();
     const ActiveResource = resource.activeTeam?.id
     console.log(resource)
+    
 
     //SCB Company
     const [selectedTeam, setSelectedTeam] = useState("");
@@ -67,7 +68,6 @@ export const UploadRma = () => {
                             onChange={setDateRMA}
                             className={"dark:bg-transparent dark:border-gray-500 dark:border-2 dark:rounded-md"}
                         />
-                        {console.log("WOI ", dateRMA)}
                     </CaseField>
                     <CaseField label={"RMA Status"} star>
                         <SearchCommandBlock
