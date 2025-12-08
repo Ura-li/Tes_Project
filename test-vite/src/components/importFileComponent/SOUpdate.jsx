@@ -5,6 +5,14 @@ import ApiCustomer from "@/api";
 import { formatDateForMySQL } from "../../lib/utils";
 
 import { useAuth } from "@/context/auth-context";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 
 export function SOTemplateButton({ target = "" }) {
   const handleDownload = () => {
@@ -155,66 +163,89 @@ export function SOImport({ target, dateRMA }) {
 
       {previewRows.length > 0 && (
         <div className="w-full overflow-auto rounded-md border border-dashed border-slate-300 dark:border-slate-600">
-          <table className="min-w-full text-xs">
-            <thead className="bg-slate-100 dark:bg-slate-800">
-              <tr>
+
+            <Table className="min-w-full border-collapse text-xs sm:text-sm">
+            <TableHeader className="sticky z-10 top-0 bg-gray-100/95 dark:bg-slate-800/95">
+                <TableRow className="text-slate-800 dark:text-slate-100">
                 {columns.map((col) => (
-                  <th key={col.key} className="px-3 py-2 text-left font-semibold">
+                    <TableHead
+                    key={col.key}
+                    className="p-3 text-xs font-semibold text-left border border-slate-200 dark:border-slate-700 whitespace-nowrap"
+                    >
                     {col.label}
-                  </th>
+                    </TableHead>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {previewRows.map((row) => {
+                </TableRow>
+            </TableHeader>
+
+            <TableBody>
+                {previewRows.map((row, i) => {
                 const inputs = row.inputs || {};
                 const matched = row.matched;
-                const awb =
-                  inputs.awbOut ||
-                  inputs.awbIn ||
-                  inputs.awb ||
-                  inputs.AWB_OutCode ||
-                  inputs.AWB_InCode ||
-                  "";
 
-                const ctOrPart =
-                  inputs.removedSerial || inputs.removedPart || "";
+                const awb =
+                    inputs.awbOut ||
+                    inputs.awbIn ||
+                    inputs.awb ||
+                    inputs.AWB_OutCode ||
+                    inputs.AWB_InCode ||
+                    "";
+
+                const ctOrPart = inputs.removedSerial || inputs.removedPart || "";
 
                 return (
-                  <tr
+                    <TableRow
                     key={`${row.index}-${inputs.soNumber || inputs.rmaNumber}`}
-                    className="odd:bg-white even:bg-slate-50 dark:odd:bg-slate-900 dark:even:bg-slate-800"
-                  >
-                    <td className="px-3 py-2 whitespace-nowrap">{row.index}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">
-                      {inputs.soNumber || "-"}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
-                      {inputs.rmaNumber || "-"}
-                    </td>
-                    <td className="px-3 py-2">{ctOrPart || "-"}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">
-                      {awb || "-"}
-                    </td>
-                    <td className="px-3 py-2">
-                      {matched ? (
+                    className={`hover:bg-blue-50/70 dark:hover:bg-slate-700 
+                        ${i % 2 === 0 
+                        ? "bg-white dark:bg-slate-900" 
+                        : "bg-gray-50 dark:bg-slate-800/80"
+                        }`}
+                    >
+                    {/* Index */}
+                    <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap">
+                        {row.index}
+                    </TableCell>
+
+                    {/* SO Number */}
+                    <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap">
+                        {inputs.soNumber || "-"}
+                    </TableCell>
+
+                    {/* RMA Number */}
+                    <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap">
+                        {inputs.rmaNumber || "-"}
+                    </TableCell>
+
+                    {/* CT or Part */}
+                    <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap">
+                        {ctOrPart || "-"}
+                    </TableCell>
+
+                    {/* AWB */}
+                    <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap">
+                        {awb || "-"}
+                    </TableCell>
+
+                    {/* Matched MO/Case */}
+                    <TableCell className="p-3 border border-slate-200 dark:border-slate-800">
+                        {matched ? (
                         <div className="flex flex-col text-green-600 dark:text-green-400">
-                          <span>
-                            MO: {matched.MOID} ({row.matchSource})
-                          </span>
-                          <span>Case: {matched.CaseID || "-"}</span>
+                            <span>MO: {matched.MOID} ({row.matchSource})</span>
+                            <span>Case: {matched.CaseID || "-"}</span>
                         </div>
-                      ) : (
+                        ) : (
                         <span className="text-red-500">Not Found</span>
-                      )}
-                    </td>
-                  </tr>
+                        )}
+                    </TableCell>
+                    </TableRow>
                 );
-              })}
-            </tbody>
-          </table>
+                })}
+            </TableBody>
+            </Table>
         </div>
-      )}
+        )}
+
     </div>
   );
 }
