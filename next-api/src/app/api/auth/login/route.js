@@ -79,6 +79,7 @@ export async function POST(request) {
                 email: user.Email,
                 role: user.Role,
                 name: user.Name,
+                resource: user.ResourceId,
                 avatar: user.ProfilePhoto || ""
             },
             JWT_SECRET,
@@ -98,6 +99,7 @@ export async function POST(request) {
                 name: user.Name,
                 email: user.Email,
                 role: user.Role,
+                resource: user.ResourceId,
                 profile: user.ProfilePhoto
             }
         });
