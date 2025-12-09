@@ -204,7 +204,6 @@ export async function POST(req) {
 
         // Mapping for special cases
 
-        
         const mappings = {
           InOutCE: () => ({
             MOTarget: {
@@ -241,9 +240,9 @@ export async function POST(req) {
               ...baseMOTarget,
               ReadyForClosureDate: dateRMA,
             },
-            MOLITarget: {
-              RemovedSerialNumber: String(updatedFields.RemovedSerialNumber).trim(),
-            },
+            // MOLITarget: {
+            //   RemovedSerialNumber: String(updatedFields.RemovedSerialNumber).trim(),
+            // },
           }),
         };
 
@@ -253,6 +252,9 @@ export async function POST(req) {
           updatedFieldMOTarget = MOTarget;
           updatedFieldMOLITarget = MOLITarget;
         }
+
+        // return console.log(updatedFields)
+
         // return console.log(updatedFieldMOLITarget, updatedFieldMOTarget);
 
         /**
@@ -315,6 +317,7 @@ export async function POST(req) {
               },
               data: updatedFieldMOLITarget,
             });
+            console.log("MOLI", updatedMoli)
             console.log(`Updated LineItemID ${item.LineItemID}`);
             /**
              * TODO FOR SLAMET
@@ -397,15 +400,15 @@ export async function POST(req) {
            
 
 
-          successes.push({ soNumber, updatedLines: moli.length });
+          successes.push({ soNumber, updatedLines: moli.length, moli });
           
         });
-        // return console.log(result);
       } catch (error) {
         console.log(error);
         errors.push({ soNumber, message: error.message });
       }
     }
+    console.log(successes);
     return NextResponse.json({
       success: errors.length === 0,
       message: `Processed ${sheet.length} rows.`,
