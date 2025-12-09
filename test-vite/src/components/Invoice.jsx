@@ -185,7 +185,7 @@ table: {
 });
 
 const Section = ({ title, children }) => (
-  <View minPresenceAhead={100} style={styles.sectionContainer}>
+  <View minPresenceAhead={120} style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.sectionContent}>{children}</View>
   </View>
