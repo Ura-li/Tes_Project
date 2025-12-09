@@ -1325,6 +1325,9 @@ export const ServiceCase = () => {
 
   const entitlementStatus = useServiceCaseStore((s) => s.entitlementStatus);
   const setEntitlementField = useServiceCaseStore((s) => s.setEntitlementField);
+  const setEntitlementFieldSilent = useServiceCaseStore(
+    (s) => s.setEntitlementFieldSilent
+  );
 
   const productForm = useServiceCaseStore((s) => s.productForm);
   const setProductFormField = useServiceCaseStore((s) => s.setProductFormField);
@@ -1419,31 +1422,31 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
     // Set OTC and EOW from asset
     if (assetInformation.Warranty_Status) {
-      setEntitlementField("OTCCode", assetInformation.Warranty_Status);
+      setEntitlementFieldSilent("OTCCode", assetInformation.Warranty_Status);
     }
     if (assetInformation.EOW_Date) {
-      setEntitlementField("EOW_Date", new Date(assetInformation.EOW_Date));
+      setEntitlementFieldSilent("EOW_Date", new Date(assetInformation.EOW_Date));
     }
 
     const w = assetInformation.asset_warranty?.[0];
     if (w) {
-      setEntitlementField("needWarrantyApproval", true);
+      setEntitlementFieldSilent("needWarrantyApproval", true);
       if (w.PurchaseDate)
-        setEntitlementField("PurchaseDate", new Date(w.PurchaseDate));
+        setEntitlementFieldSilent("PurchaseDate", new Date(w.PurchaseDate));
       if (w.WarrantyCardDate)
-        setEntitlementField(
+        setEntitlementFieldSilent(
           "WarrantyCardDate",
           new Date(w.WarrantyCardDate)
         );
-      setEntitlementField("WarrantyApprovalStatus", w.WarrantyApprovalStatus);
-      setEntitlementField("EndUserName", w.EndUserName);
-      setEntitlementField("EndUserPhone", w.EndUserPhone);
-      setEntitlementField("EndUserAddress", w.EndUserAddress);
-      setEntitlementField("POPDocument", w.POPDocument);
-      setEntitlementField("WarrantyCard", w.WarrantyCard);
-      setEntitlementField("PhotoUnit", w.PhotoUnit);
+      setEntitlementFieldSilent("WarrantyApprovalStatus", w.WarrantyApprovalStatus);
+      setEntitlementFieldSilent("EndUserName", w.EndUserName);
+      setEntitlementFieldSilent("EndUserPhone", w.EndUserPhone);
+      setEntitlementFieldSilent("EndUserAddress", w.EndUserAddress);
+      setEntitlementFieldSilent("POPDocument", w.POPDocument);
+      setEntitlementFieldSilent("WarrantyCard", w.WarrantyCard);
+      setEntitlementFieldSilent("PhotoUnit", w.PhotoUnit);
     }
-  }, [assetInformation, setEntitlementField]);
+  }, [assetInformation, setEntitlementFieldSilent]);
 
   // ------- status options by role (same logic as before, but using store) -------
   // const labelToStatusEnum = useMemo(
@@ -2553,7 +2556,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   <CaseField label="Serial Number" lock>
                     <Input
                       value={assetInformation?.SerialNumber}
-                      className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder={"---"}
                       className={"hover:text-blue-600 dark:hover:text-blue-600 dark:hover:cursor-pointer hover:cursor-pointer dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       onClick={() => {

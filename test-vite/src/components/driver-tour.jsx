@@ -8,7 +8,10 @@ import "driver.js/dist/driver.css";
 
 export const ButtonTour = () => {
     const location = useLocation()
-    const {user} = useAuth()
+    const {user, loading } = useAuth()
+      if (loading || !user) {
+    return null; 
+  }
 
     const TextList = ({ list }) => {
     return list.map((item, index) => `<div>${index + 1}. ${item}</div>`).join("");
