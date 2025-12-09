@@ -3503,30 +3503,35 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         <span className="font-bold">Sparepart {i + 1}</span>
                         <div className="grid grid-cols-2">
                           <CaseField label={"Vendor part no"} lock>
-                            <Input value={"-"} />
+                            <Input value={"-"} className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                           </CaseField>
                           <CaseField label={"HP part no"} lock>
                             <Input
+                              className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={quo.materialorderlineitems[0]?.PartNumber}
                             />
                           </CaseField>
                           <CaseField label={"Part name"} lock>
                             <Input
+                            className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={quo.materialorderlineitems[0]?.Description}
                             />
                           </CaseField>
                           <CaseField label={"QTY"} lock>
                             <Input
+                            className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={quo.materialorderlineitems[0]?.Quantity}
                             />
                           </CaseField>
                           <CaseField label={"Price"} lock>
                               <Input
+                              className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                                 value={formatAccountingRupiah(quo.materialorderlineitems[0]?.Price)}
                               />
                            </CaseField>
                           <CaseField label={"Part category"} lock>
                             <Input
+                            className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={
                                 quo.materialorderlineitems[0]
                                   ?.servicecatalog_parts?.Keyword
@@ -3535,6 +3540,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           </CaseField>
                           <CaseField label={"Part approved"} lock>
                             <Input
+                            className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={
                                 quo.materialorderlineitems[0]
                                   ?.quotation_lineitem[0]?.Approved === true
@@ -3545,6 +3551,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           </CaseField>
                           <CaseField label={"Bad CT code"} lock>
                             <Input
+                            className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={
                                 quo.materialorderlineitems[0]?.RemovedPartNumber
                               }
@@ -3587,12 +3594,13 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <CaseField label={"Quotation No"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={invoiceQuotation?.quotationNo || "-"}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Invoice No"} lock>
-                        <Input value={invoiceSummary.invoiceNo} readOnly />
+                        <Input value={invoiceSummary.invoiceNo} readOnly className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                       </CaseField>
                        <CaseField label={"Total Harga Sparepart"} lock>
                         {
@@ -3602,18 +3610,21 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
                         })}
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(totalquoLineItemPrice)}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Labor Fee"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Subtotal"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(
                             invoiceQuotation?.subtotal
                           )}
@@ -3622,6 +3633,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       </CaseField>
                       <CaseField label={"VAT value (%)"} lock> 
                         <Input 
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue 
                             ? caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue + "%" 
                             : "---"}
@@ -3630,6 +3642,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         
                       <CaseField label={"Total + VAT"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(
                             invoiceQuotation.grandTotal
                           )}
@@ -3638,12 +3651,14 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       </CaseField>
                       <CaseField label={"DP"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(totalDpAmount)}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Balance Due"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(
                             grandTotalNumber
                           )}
@@ -3652,6 +3667,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       </CaseField>
                       <CaseField label={"Amount Receive"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(
                             invoiceSummary.amountReceive
                           )}
@@ -3660,6 +3676,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       </CaseField>
                       <CaseField label={"Amount Difference"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(
                             invoiceSummary.amountDiff
                           )}
@@ -3672,30 +3689,34 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         hide={!invoiceSummary.amountDiffReason}
                       >
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={invoiceSummary.amountDiffReason || "-"}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Payment Type"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={invoiceSummary.paymentType || "-"}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Tanggal Terima"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatDate(invoiceSummary.amountReceiveDate)}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Notifikasi"} lock>
-                        <Input value={invoiceNotificationLabel} readOnly />
+                        <Input className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={invoiceNotificationLabel} readOnly />
                       </CaseField>
                       <CaseField label={"Catatan"} lock span={2}>
                         <Textarea
                           value={invoiceSummary.amountReceiveNote || "-"}
                           rows={3}
                           readOnly
+                          className="ring-1 mt-2 ring-gray-300 bg-gray-50 italic dark:bg-gray-500/10 dark:border-gray-400"
                         />
                       </CaseField>
                     </div>

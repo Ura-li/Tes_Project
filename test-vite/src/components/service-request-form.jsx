@@ -60,8 +60,8 @@ const styles = StyleSheet.create({
     height: 45,
   },
   logo: {
-    width: 60,
-    height: 60,
+    width: 65,
+    height: 65,
   },
   link: {
     fontSize: 7,
@@ -211,21 +211,19 @@ const ServiceRequestPDF = ({ nama, caseDetails, customerSignature, qrcode }) => 
           borderBottom: 1,
         }}
       >
-        <Image src="/hp.png" style={[styles.logo, { padding: 2 }]} />
+        <Image src="/Javag.jpeg" style={[styles.logo]} />
+        <View style={{ flex: 1, justifyContent: "space-between", flexDirection: "row" }}>
         <View>
           <Text style={styles.sectionHeader}>PT.JAVA ABADI GEMILANG</Text>
-          <Text style={styles.textSmall}>
-            Prudential Centre Kota Casablanka Lt. 5 Unit C- E, Jl. Casablanca
-          </Text>
-          <Text style={styles.textSmall}>Kav.88</Text>
-          <Text style={styles.textSmall}>
-            Jakarta Selatan, 12870, Indonesia
+          <Text style={[styles.textSmall, {flexWrap: 'wrap', maxWidth: 200}]}>
+            {caseDetails?.createdByUser?.resource?.AddressLine}
           </Text>
           <Text style={styles.textSmall}>
-            Telp : (+6221) 081318521007 / 081318521006 - HP : 0811970666
+            Telp : {caseDetails?.createdByUser?.resource?.Phone}
           </Text>
         </View>
-        <Text style={[styles.sectionHeader]}>SERVICE REQUEST FORM</Text>
+        <Text style={[styles.sectionHeader,{marginTop: 20}]}>SERVICE REQUEST FORM</Text>
+        </View>
       </View>
 
       <Section title="Case Info">
