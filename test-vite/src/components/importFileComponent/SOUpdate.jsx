@@ -21,6 +21,7 @@ export function SOTemplateButton({ target = "" }) {
 
   return (
     <Button
+    variant="outline"
       onClick={handleDownload}
       className={
         "dark:bg-gradient-to-b dark:border-2 dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50% dark:text-white"
@@ -143,10 +144,10 @@ export function SOImport({ target, dateRMA }) {
     <div className="flex flex-col items-start space-y-4 w-full">
       <div className="flex items-center space-x-3">
         <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
-        <Button variant="outline" onClick={() => handlePreview()}>
+        <Button variant="outline" onClick={() => handlePreview()} className={"dark:bg-gradient-to-b dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-2 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50% dark:text-white"}>
           {previewLoading ? "Previewing..." : "Preview Import"}
         </Button>
-        <Button onClick={handleImport}>Import Asset Data</Button>
+        <Button variant="outline" onClick={handleImport} className={"dark:bg-gradient-to-b dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-2 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50% dark:text-white"} >Import Asset Data</Button>
       </div>
 
       {previewError && (

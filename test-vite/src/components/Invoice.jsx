@@ -736,6 +736,14 @@ export const Invoice = ({
           <Text style={styles.textSmall}>
             A/C : 8400039195
           </Text>
+           <View style={{display: 'flex', alignItems: 'flex-end'}}>
+              <View style={{flexDirection: 'row', alignItems:'center', gap: 10}}>
+              <Text style={{fontSize: 10, fontWeight: 'bold'}}>
+                Partner Of 
+              </Text>
+                <Image src="/hp.png" style={{ width: 34, height: 34 }} />
+              </View>
+            </View>
         </View>
     </Page>
   </Document>

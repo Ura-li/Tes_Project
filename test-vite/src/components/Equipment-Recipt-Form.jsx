@@ -466,6 +466,14 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =
       </Text>
       <Text style={{ borderBottom: '1px solid #ccc' }}></Text>
       <Text style={styles.textSmall}>Tanda tangan Anda merupakan persetujuan terhadap syarat-syarat perbaikan di balik halaman ini</Text>
+       <View style={{display: 'flex', alignItems: 'flex-end'}}>
+        <View style={{flexDirection: 'row', alignItems:'center', gap: 10}}>
+        <Text style={{fontSize: 10, fontWeight: 'bold'}}>
+          Partner Of 
+        </Text>
+          <Image src="/hp.png" style={{ width: 34, height: 34 }} />
+        </View>
+      </View>
     </Page>
   </Document>
 );
