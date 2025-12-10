@@ -1148,14 +1148,14 @@ export const Case_table = () => {
   const [openClose, setOpenClose] = useState("All");
 
   // 🔹 Filter states
-  const [selectedHW, setSelectedHW] = useState("All");
-  const [selectedProduct, setSelectedProduct] = useState("All");
-  const [selectedCreatedName, setSelectedCreatedName] = useState("All");
-  const [selectedOwner, setSelectedOwner] = useState("All");
-  const [selectedWorkGroup, setSelectedWorkGroup] = useState("All");
-  const [selectedCaseType, setSelectedCaseType] = useState("All");
-  const [selectedWarrantyType, setSelectedWarrantyType] = useState("All");
-  const [selectedWarrantyStatus, setSelectedWarrantyStatus] = useState("All");
+  const [selectedHW, setSelectedHW] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedCreatedName, setSelectedCreatedName] = useState(null);
+  const [selectedOwner, setSelectedOwner] = useState(null);
+  const [selectedWorkGroup, setSelectedWorkGroup] = useState(null);
+  const [selectedCaseType, setSelectedCaseType] = useState(null);
+  const [selectedWarrantyType, setSelectedWarrantyType] = useState(null);
+  const [selectedWarrantyStatus, setSelectedWarrantyStatus] = useState(null);
 
   // 🔹 Sort state
   const [sortConfig, setSortConfig] = useState({
@@ -1255,6 +1255,62 @@ export const Case_table = () => {
     ),
   ];
 
+  const hwOptions = useMemo(
+    () =>
+      uniqueHW
+      .filter((v) => v && v !== "All")
+      .map((v, i) => ({ id: 1, name: v})),
+    [caseData]
+  );
+  const productOptions = useMemo(
+    () =>
+      uniqueProduct
+      .filter((v) => v && v !== "All")
+      .map((v, i) => ({ id: i, name: v })),
+    [caseData]
+  );
+    const createdNameOptions = useMemo(
+    () =>
+      uniqueCreatedName
+      .filter((v) => v && v !== "All")
+      .map((v, i) => ({ id: i, name: v })),
+    [caseData]
+  );
+    const ownerOptions = useMemo(
+    () =>
+      uniqueOwner
+      .filter((v) => v && v !== "All")
+      .map((v, i) => ({ id: i, name: v })),
+    [caseData]
+  );
+    const workGroupOptions = useMemo(
+    () =>
+      uniqueWorkGroup
+      .filter((v) => v && v !== "All")
+      .map((v, i) => ({ id: i, name: v })),
+    [caseData]
+  );
+    const caseTypeOptions = useMemo(
+    () =>
+      uniqueCaseType
+      .filter((v) => v && v !== "All")
+      .map((v, i) => ({ id: i, name: v })),
+    [caseData]
+  );
+    const warrantyTypeOptions = useMemo(
+    () =>
+      uniqueWarrantyType
+      .filter((v) => v && v !== "All")
+      .map((v, i) => ({ id: i, name: v })),
+    [caseData]
+  );
+    const warrantyStatusOptions = useMemo(
+    () =>
+      uniqueWarrantyStatus
+      .filter((v) => v && v !== "All")
+      .map((v, i) => ({ id: i, name: v })),
+    [caseData]
+  );
 
   // 🔹 Filtering
   const filteredData = caseData
@@ -1263,34 +1319,38 @@ export const Case_table = () => {
         value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       )
     )
-    .filter((item) => (selectedHW === "All" ? true : item.HW === selectedHW))
-    .filter((item) =>
-      selectedProduct === "All" ? true : item.ProductName === selectedProduct
+    .filter((item) => 
+      selectedHW ? item.HW === selectedHW.name :true
     )
     .filter((item) =>
-      selectedCreatedName === "All" ? true : item.CreatedName === selectedCreatedName
+      selectedProduct ? item.ProductName === selectedProduct.name : true
     )
-    .filter((item) => (selectedOwner === "All" ? true : item.Owner === selectedOwner))
     .filter((item) =>
-      selectedWorkGroup === "All" ? true : item.WorkGroup === selectedWorkGroup
+      selectedCreatedName ? item.CreatedName === selectedCreatedName : true
+    )
+    .filter((item) => 
+      selectedOwner ? item.Owner === selectedOwner.name : true
+    )
+    .filter((item) =>
+      selectedWorkGroup ? item.WorkGroup === selectedWorkGroup.name : true
     )
     .filter((item) => {
-    if (selectedWarrantyType === "All") return true;
+    if (!selectedWarrantyType) return true;
     const wType =
       item.caseinformation?.asset_information?.WarrantyOTCCode?.WarrantyCondition;
-    return wType === selectedWarrantyType;
+    return wType === selectedWarrantyType.name;
     })
     .filter((item) => {
-    if (selectedCaseType === "All") return true;
+    if (!selectedCaseType) return true;
       const cType = item.caseinformation?.CaseType;
-      return cType === selectedCaseType;
+      return cType === selectedCaseType.name;
     })
     // ➕ Filter Warranty Status
     .filter((item) => {
-      if (selectedWarrantyStatus === "All") return true;
+      if (!selectedWarrantyStatus) return true;
       const wStatus =
         item.caseinformation?.asset_information?.WarrantyOTCCode?.Description;
-      return wStatus === selectedWarrantyStatus;
+      return wStatus === selectedWarrantyStatus.name;
     });
   
     // 🔹 Parser khusus tanggal format "dd/MM/yyyy, HH.mm.ss"
@@ -1390,14 +1450,14 @@ const sortedData = useMemo(() => {
 
   // 🔹 Reset filters
   const resetFilters = () => {
-    setSelectedHW("All");
-    setSelectedProduct("All");
-    setSelectedCreatedName("All");
-    setSelectedOwner("All");
-    setSelectedWorkGroup("All");
-    setSelectedCaseType("All");
-    setSelectedWarrantyType("All");     
-    setSelectedWarrantyStatus("All");
+    setSelectedHW(null);
+    setSelectedProduct(null);
+    setSelectedCreatedName(null);
+    setSelectedOwner(null);
+    setSelectedWorkGroup(null);
+    setSelectedCaseType(null);
+    setSelectedWarrantyType(null);     
+    setSelectedWarrantyStatus(null);
   };
 
   // 🔹 Handle sort
@@ -1488,146 +1548,122 @@ const EnumToLabel = {
         {/* HW */}
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Filter by HW</label>
-          <select
+          <ComboboxDemo 
+            id="hw"
             value={selectedHW}
-            onChange={(e) => setSelectedHW(e.target.value)}
+            setValue={setSelectedHW}
+            options={hwOptions}
+            placeholder="All HW"
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
                        dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
-          >
-            {uniqueHW.map((hw) => (
-              <option key={hw} value={hw}>
-                {hw}
-              </option>
-            ))}
-          </select>
+          />
         </div>
         {/* Product */}
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Filter by Product Name</label>
-          <select
+          <ComboboxDemo
+            id="product"
             value={selectedProduct}
-            onChange={(e) => setSelectedProduct(e.target.value)}
+            setValue={setSelectedProduct}
+            options={productOptions}
+            placeholder="All Product Name"
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
                        dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
-          >
-            {uniqueProduct.map((prod) => (
-              <option key={prod} value={prod}>
-                {prod}
-              </option>
-            ))}
-          </select>
+          />
         </div>
         {/* Created Name */}
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Filter by Created Name</label>
-          <select
+          <ComboboxDemo
+            id="createdName"
             value={selectedCreatedName}
-            onChange={(e) => setSelectedCreatedName(e.target.value)}
+            setValue={setSelectedCreatedName}
+            options={createdNameOptions}
+            placeholder="All Created Name"
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
                        dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
-          >
-            {uniqueCreatedName.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
+          />
         </div>
         {/* Owner */}
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Filter by Owner</label>
-          <select
+          <ComboboxDemo
+            id="owner"
             value={selectedOwner}
-            onChange={(e) => setSelectedOwner(e.target.value)}
+            setValue={setSelectedOwner}
+            options={ownerOptions}
+            placeholder="All Owner"
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
                        dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
-          >
-            {uniqueOwner.map((owner) => (
-              <option key={owner} value={owner}>
-                {owner}
-              </option>
-            ))}
-          </select>
+          />
         </div>
         {/* WorkGroup */}
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Filter by WorkGroup</label>
-          <select
+          <ComboboxDemo
+            id="workgroup"
             value={selectedWorkGroup}
-            onChange={(e) => setSelectedWorkGroup(e.target.value)}
+            setValue={setSelectedWorkGroup}
+            options={workGroupOptions}
+            placeholder="All Work Group"
             className="p-2 text-sm border rounded-lg
                        bg-white border-slate-300 text-slate-800
                        focus:outline-none focus:ring-2 focus:ring-sky-400
                        dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
-          >
-            {uniqueWorkGroup.map((wg) => (
-              <option key={wg} value={wg}>
-                {wg}
-              </option>
-            ))}
-          </select>
+          />
         </div>
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Filter by Case Type</label>
-          <select
+          <ComboboxDemo
+            id="caseType"
             value={selectedCaseType}
-            onChange={(e) => setSelectedCaseType(e.target.value)}
+            setValue={setSelectedCaseType}
+            options={caseTypeOptions}
+            placeholder="All Case Type"
             className="p-2 text-sm border rounded-lg
-                      bg-white border-slate-300 text-slate-800
-                      focus:outline-none focus:ring-2 focus:ring-sky-400
-                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
-          >
-            {uniqueCaseType.map((ct) => (
-              <option key={ct} value={ct}>
-                {ct}
-              </option>
-            ))}
-          </select>
+                       bg-white border-slate-300 text-slate-800
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
+          />
         </div>
         {/* Warranty Type */}
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Filter by Warranty Type</label>
-          <select
+          <ComboboxDemo
+            id="warrantyType"
             value={selectedWarrantyType}
-            onChange={(e) => setSelectedWarrantyType(e.target.value)}
+            setValue={setSelectedWarrantyType}
+            options={warrantyTypeOptions}
+            placeholder="All Warranty Type"
             className="p-2 text-sm border rounded-lg
-                      bg-white border-slate-300 text-slate-800
-                      focus:outline-none focus:ring-2 focus:ring-sky-400
-                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
-          >
-            {uniqueWarrantyType.map((wt) => (
-              <option key={wt} value={wt}>
-                {wt}
-              </option>
-            ))}
-          </select>
+                       bg-white border-slate-300 text-slate-800
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
+          />
         </div>
 
         {/* Warranty Status */}
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Filter by Warranty Status</label>
-          <select
+          <ComboboxDemo
+            id="warrantyStatus"
             value={selectedWarrantyStatus}
-            onChange={(e) => setSelectedWarrantyStatus(e.target.value)}
+            setValue={setSelectedWarrantyStatus}
+            options={warrantyStatusOptions}
+            placeholder="All Warranty Status"
             className="p-2 text-sm border rounded-lg
-                      bg-white border-slate-300 text-slate-800
-                      focus:outline-none focus:ring-2 focus:ring-sky-400
-                      dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
-          >
-            {uniqueWarrantyStatus.map((ws) => (
-              <option key={ws} value={ws}>
-                {ws}
-              </option>
-            ))}
-          </select>
+                       bg-white border-slate-300 text-slate-800
+                       focus:outline-none focus:ring-2 focus:ring-sky-400
+                       dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:focus:ring-gray-500"
+          />
         </div>
 
          {/* Toggle status */}
@@ -3089,6 +3125,8 @@ export const WarrantyService_table = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [goToPageInput, setGoToPageInput] = useState("");
 
+  const [selectedWarrantyCondition, setSelectedWarrantyCondition] = useState(null);
+  const [selectedCaseType, setSelectedCaseType] = useState(null);
   // Sorting
   const [sortConfig, setSortConfig] = useState({
     key: "Service_offerID",
@@ -3145,6 +3183,23 @@ export const WarrantyService_table = () => {
     fetchWarrantyServiceDataTable();
   }, []);
 
+    const caseTypeOptions = useMemo(() => {
+      const unique = Array.from(
+        new Set(
+          WarrantyServiceData
+          .map(item => item.CaseTypeServices)
+          .filter(Boolean)
+        )
+      );
+      return unique.map((name, i) => ({ id: i, name }));
+    }, [WarrantyServiceData]);
+
+    const warrantyConditionOptions = useMemo(() => {
+      const unique = Array.from(
+        new Set(WarrantyServiceData.map(item => item.WarrantyCondition))
+      )
+      return unique.map((name, i) => ({ id: i, name }))
+    }, [WarrantyServiceData])
   // === Filtering & Sorting Logic ===
   const handleSort = (key) => {
     setSortConfig((prev) => {
@@ -3161,8 +3216,16 @@ export const WarrantyService_table = () => {
         value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
+    
+    const WarrantyConditionFiltered = filteredData.filter(item =>
+      selectedWarrantyCondition ? item.WarrantyCondition === selectedWarrantyCondition.name : true
+    );
 
-    const sorted = [...filteredData];
+    const caseTypeFiltered = WarrantyConditionFiltered.filter(item =>
+      selectedCaseType ? item.CaseTypeServices === selectedCaseType.name : true
+    );
+
+    const sorted = [...caseTypeFiltered];
     if (sortConfig.key) {
       sorted.sort((a, b) => {
         const valA = a[sortConfig.key];
@@ -3178,7 +3241,7 @@ export const WarrantyService_table = () => {
       });
     }
     return sorted;
-  }, [WarrantyServiceData, searchTerm, sortConfig]);
+  }, [WarrantyServiceData, searchTerm, sortConfig, selectedWarrantyCondition, selectedCaseType]);
 
   const renderSortIcon = (key) => {
     if (sortConfig.key !== key)
@@ -3204,6 +3267,13 @@ export const WarrantyService_table = () => {
     setGoToPageInput("");
   };
 
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setSelectedWarrantyCondition(null);
+    setSelectedCaseType(null);
+    setSortConfig({ key: "Service_offerID", direction: "asc"});
+    setCurrentPage(1);
+  }
   // === Render Section ===
   const navigate = useNavigate();
 
@@ -3222,6 +3292,35 @@ export const WarrantyService_table = () => {
         />
         <WarrantyServiceAdd /> {/* Tombol Add di samping input search */}
       </div>
+        <div className="flex gap-4 mb-4">
+          <ComboboxDemo
+          id="warranty-condition"
+          value={selectedWarrantyCondition}
+          setValue={setSelectedWarrantyCondition}
+          options={warrantyConditionOptions}
+          placeholder="filter by Warranty Conditions"
+          className="w-full sm:w-1/3"
+          />
+          <ComboboxDemo 
+          id="case-type"
+          value={selectedCaseType}
+          setValue={setSelectedCaseType}
+          options={caseTypeOptions}
+          placeholder="filter by Case Type"
+          className="w-full sm:w-1/3"
+          />
+          <div className="flex item-center gap-1">
+            <button
+              onClick={handleResetFilters}
+              className="px-4 py-2 text-sm font-semibold text-white rounded-lg shadow-md
+                          bg-slate-500 hover:bg-slate-600
+                          focus:outline-none focus:ring-2 focus:ring-sky-400
+                          dark:bg-slate-600 dark:hover:bg-slate-500 dark:focus:ring-sky-500"
+            >
+              Reset Filters
+            </button>
+          </div>
+        </div>
 
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
@@ -3429,8 +3528,8 @@ export const Mo_table = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const [selectedType, setSelectedType] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedType, setSelectedType] = useState(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -3514,8 +3613,13 @@ export const Mo_table = () => {
       const matchesSearch = Object.values(item).some((value) =>
         value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
       );
-      const matchesStatus = selectedStatus ? item.OrderStatus === selectedStatus : true;
-      const matchesType = selectedType ? item.OrderType === selectedType : true;
+
+      const matchesStatus = selectedStatus 
+        ? item.OrderStatus === selectedStatus.name 
+        : true;
+      const matchesType = selectedType 
+        ? item.OrderType === selectedType.name 
+        : true;
       return matchesSearch && matchesStatus && matchesType;
     });
 
@@ -3546,6 +3650,20 @@ export const Mo_table = () => {
     ...new Set(MaterialOrderData.map((item) => item.OrderType)),
   ].filter(Boolean).sort(), [MaterialOrderData]);
 
+  const statusOptions = useMemo(() => {
+    return uniqueStatuses.map((status, index) => ({
+      id: index + 1,
+      name: status,
+    }));
+  }, [uniqueStatuses]);
+
+  const typeOptions = useMemo(() => {
+    return uniqueTypes.map((type, index) => ({
+      id: index + 1,
+      name: type,
+    }));
+  }, [uniqueTypes]);
+
   // === Pagination Logic ===
   const totalPages = Math.ceil(getSortedData.length / itemsPerPage) || 1;
   const currentData = getSortedData.slice(
@@ -3562,21 +3680,21 @@ export const Mo_table = () => {
 
   const resetFilters = () => {
     setSearchTerm("");
-    setSelectedStatus("");
-    setSelectedType("");
+    setSelectedStatus(null);
+    setSelectedType(null);
     setCurrentPage(1);
   };
 
   // === Render Section ===
   const navigate = useNavigate();
   const formatDate = (dateString) => {
-    if (!dateString) return "-"; // jika null atau undefined
+    if (!dateString) return "-"; 
     const date = new Date(dateString);
     if (isNaN(date)) return dateString; // fallback jika bukan format valid
 
     return date.toLocaleString("id-ID", {
       day: "2-digit",
-      month: "long",
+      month: "2-digit",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
@@ -3587,7 +3705,7 @@ export const Mo_table = () => {
       <h2 className="mb-6 text-2xl font-bold">📊 Material Order Table</h2>
 
       {/* Filters */}
-      <div className="flex flex-col mb-6 space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
+      <div className="flex flex-col mb-6 space-y-4 ">
         <input
           type="text"
           placeholder="🔍 Search..."
@@ -3595,42 +3713,38 @@ export const Mo_table = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <select
+        <div className="flex flex-wrap items-center gap-3">
+        <div className="w-full sm:w-48">
+        <ComboboxDemo 
+          id="orderStatusFilter"
           value={selectedStatus}
-          onChange={(e) => {
-            setSelectedStatus(e.target.value);
+          setValue={(val) => {
+            setSelectedStatus(val);
             setCurrentPage(1);
           }}
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-        >
-          <option value="">All Order Status</option>
-          {uniqueStatuses.map((status, idx) => (
-            <option key={idx} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
-        <select
+          options={statusOptions}
+          placeholder="Filter By Order Status"
+        />
+        </div>
+        <div className="w-full sm:w-48">
+        <ComboboxDemo
+          id="orderTypeFilter"
           value={selectedType}
-          onChange={(e) => {
-            setSelectedType(e.target.value);
+          setValue={(val) => {
+            setSelectedType(val);
             setCurrentPage(1);
           }}
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-        >
-          <option value="">All Order Types</option>
-          {uniqueTypes.map((type, idx) => (
-            <option key={idx} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
+          options={typeOptions}
+          placeholder="Filter By Order type"
+        />
+        </div>
         <button
           onClick={resetFilters}
           className="px-4 py-2 text-white bg-gray-500 rounded-lg shadow-sm hover:bg-gray-600"
         >
           Reset Filters
         </button>
+        </div>
       </div>
 
       {error && <p className="mb-4 text-red-500">{error}</p>}
@@ -3875,11 +3989,11 @@ export const Wo_table = () => {
   const [goToPageInput, setGoToPageInput] = useState("");
 
   // 🔹 filter states
-  const [filterWorkOrderType, setFilterWorkOrderType] = useState("");
-  const [filterSystemStatus, setFilterSystemStatus] = useState("");
-  const [filterShipmentCountry, setFilterShipmentCountry] = useState("");
-  const [filterShipmentState, setFilterShipmentState] = useState("");
-  const [filterOwner, setFilterOwner] = useState("");
+  const [selectedWorkOrderType, setSelectedWorkOrderType] = useState(null);
+  const [selectedSystemStatus, setSelectedSystemStatus] = useState(null);
+  const [selectedShipmentCountry, setSelectedShipmentCountry] = useState(null);
+  const [selectedShipmentState, setSelectedShipmentState] = useState(null);
+  const [selectedOwner, setSelectedOwner] = useState(null);
 
   // 🔹 sorting state
   const [sortConfig, setSortConfig] = useState({
@@ -3908,39 +4022,44 @@ export const Wo_table = () => {
   const navigate = useNavigate();
 
   // Ambil unique values untuk dropdown filter, menggunakan useMemo untuk performa
-  const uniqueWorkOrderType = useMemo(
-    () => [
-      "",
-      ...new Set(WorkOrderData.map((d) => d.WorkOrderType).filter(Boolean)),
-    ],
+  const workOrderTypeOptions = useMemo(
+    () => [...new Set(WorkOrderData.map(d => d.WorkOrderType || ""))]
+      .map((v, i) => ({
+        id: i,
+        name: v || "-",
+      })),
     [WorkOrderData]
   );
-  const uniqueSystemStatus = useMemo(
-    () => [
-      "",
-      ...new Set(WorkOrderData.map((d) => d.SystemStatus).filter(Boolean)),
-    ],
+  const systemStatusOptions = useMemo(
+    () => [...new Set(WorkOrderData.map(d => d.SystemStatus || ""))]
+      .map((v, i) => ({ 
+        id: i, 
+        name: v || "-"
+      })),
     [WorkOrderData]
   );
-  const uniqueShipmentCountry = useMemo(
-    () => [
-      "",
-      ...new Set(WorkOrderData.map((d) => d.ShipmentCountry).filter(Boolean)),
-    ],
+  const shipmentCountryOptions = useMemo(
+    () => [...new Set(WorkOrderData.map(d => d.ShipmentCountry || ""))]
+      .map((v, i) => ({
+        id: i,
+        name: v || "-"
+      })),
     [WorkOrderData]
   );
-  const uniqueShipmentState = useMemo(
-    () => [
-      "",
-      ...new Set(WorkOrderData.map((d) => d.ShipmentState).filter(Boolean)),
-    ],
+  const shipmentStateOptions = useMemo(
+    () => [...new Set(WorkOrderData.map(d => d.ShipmentState || ""))]
+      .map((v, i) => ({
+        id: i,
+        name: v || "-"
+      })),
     [WorkOrderData]
   );
-  const uniqueOwner = useMemo(
-    () => [
-      "",
-      ...new Set(WorkOrderData.map((d) => d.owner?.Name).filter(Boolean)),
-    ],
+  const ownerOptions = useMemo(
+    () => [...new Set(WorkOrderData.map(d => d.owner?.Name || ""))]
+      .map((v, i) => ({
+        id: i,
+        name: v || "-"
+      })),
     [WorkOrderData]
   );
 
@@ -4007,12 +4126,18 @@ export const Wo_table = () => {
     return WorkOrderData.filter((item) => {
       const matchSearch = Object.values(item).some((value) =>
         value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      );
-      const matchWorkOrderType = filterWorkOrderType ? item.WorkOrderType === filterWorkOrderType : true;
-      const matchSystemStatus = filterSystemStatus ? item.SystemStatus === filterSystemStatus : true;
-      const matchShipmentCountry = filterShipmentCountry ? item.ShipmentCountry === filterShipmentCountry : true;
-      const matchShipmentState = filterShipmentState ? item.ShipmentState === filterShipmentState : true;
-      const matchOwner = filterOwner ? item.owner?.Name === filterOwner : true;
+      ) || 
+      item.owner?.Name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      const matchWorkOrderType = selectedWorkOrderType?.name 
+        ? item.WorkOrderType === selectedWorkOrderType.name : true;
+      const matchSystemStatus = selectedSystemStatus?.name 
+        ? item.SystemStatus === selectedSystemStatus.name : true;
+      const matchShipmentCountry = selectedShipmentCountry?.name 
+        ? item.ShipmentCountry === selectedShipmentCountry.name : true;
+      const matchShipmentState = selectedShipmentState ?.name
+        ? item.ShipmentState === selectedShipmentState.name : true;
+      const matchOwner = selectedOwner?.name 
+        ? item.owner?.Name === selectedOwner.name : true;
 
       return (
         matchSearch &&
@@ -4026,11 +4151,11 @@ export const Wo_table = () => {
   }, [
     WorkOrderData,
     debouncedSearchTerm,
-    filterWorkOrderType,
-    filterSystemStatus,
-    filterShipmentCountry,
-    filterShipmentState,
-    filterOwner,
+    selectedWorkOrderType,
+    selectedSystemStatus,
+    selectedShipmentCountry,
+    selectedShipmentState,
+    selectedOwner,
   ]);
 
   // 🔹 Sorting logic, menggunakan useMemo
@@ -4093,6 +4218,14 @@ export const Wo_table = () => {
     setGoToPageInput("");
   };
 
+  const resetWoFilters = () => {
+    setSelectedWorkOrderType(null);
+    setSelectedSystemStatus(null);
+    setSelectedShipmentCountry(null);
+    setSelectedShipmentState(null);
+    setSelectedOwner(null);
+    setCurrentPage(1);
+  }
   return (
     <div className="p-6">
       <h2 className="mb-6 text-2xl font-bold">📊 Work Order Table</h2>
@@ -4105,84 +4238,65 @@ export const Wo_table = () => {
           className="p-2 border rounded-lg shadow-sm w-full md:w-1/3 focus:ring-2 focus:ring-blue-400"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <div className="flex flex-wrap gap-2">
-          <select
-            className="p-2 border rounded-lg shadow-sm"
-            value={filterWorkOrderType}
-            onChange={(e) => {
-              setFilterWorkOrderType(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="">All Work Order Types</option>
-            {uniqueWorkOrderType.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-          <select
-            className="p-2 border rounded-lg shadow-sm"
-            value={filterSystemStatus}
-            onChange={(e) => {
-              setFilterSystemStatus(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="">All System Status</option>
-            {uniqueSystemStatus.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-          <select
-            className="p-2 border rounded-lg shadow-sm"
-            value={filterShipmentCountry}
-            onChange={(e) => {
-              setFilterShipmentCountry(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="">All Shipment Countries</option>
-            {uniqueShipmentCountry.map((country) => (
-              <option key={country} value={country}>
-                {country}
-              </option>
-            ))}
-          </select>
-          <select
-            className="p-2 border rounded-lg shadow-sm"
-            value={filterShipmentState}
-            onChange={(e) => {
-              setFilterShipmentState(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="">All Shipment States</option>
-            {uniqueShipmentState.map((state) => (
-              <option key={state} value={state}>
-                {state}
-              </option>
-            ))}
-          </select>
-          <select
-            className="p-2 border rounded-lg shadow-sm"
-            value={filterOwner}
-            onChange={(e) => {
-              setFilterOwner(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="">All Owners</option>
-            {uniqueOwner.map((owner) => (
-              <option key={owner} value={owner}>
-                {owner}
-              </option>
-            ))}
-          </select>
+        />     
         </div>
+        <div className="grid gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <ComboboxDemo
+            id="workOrderType"
+            placeholder="all work Order Types"
+            value={selectedWorkOrderType}
+            setValue={(v) => {
+              setSelectedWorkOrderType(v);
+              setCurrentPage(1);
+            }}
+            options={workOrderTypeOptions}
+          />
+          <ComboboxDemo
+            id="systemStatus"
+            placeholder="all System Status"
+            value={selectedSystemStatus}
+            setValue={(v) => {
+              setSelectedSystemStatus(v);
+              setCurrentPage(1);
+            }}
+            options={systemStatusOptions}
+          />
+          <ComboboxDemo
+            id="shipmentCountry"
+            placeholder="all shipment Countries"
+            value={selectedShipmentCountry}
+            setValue={(v) => {
+              setSelectedShipmentCountry(v);
+              setCurrentPage(1);
+            }}
+            options={shipmentCountryOptions}
+          />
+          <ComboboxDemo
+            id="shipmentState"
+            placeholder="all shipment State"
+            value={selectedShipmentState}
+            setValue={(v) => {
+              setSelectedShipmentState(v);
+              setCurrentPage(1);
+            }}
+            options={shipmentStateOptions}
+          />
+          <ComboboxDemo
+            id="owner"
+            placeholder="all owner"
+            value={selectedOwner}
+            setValue={(v) => {
+              setSelectedOwner(v);
+              setCurrentPage(1);
+            }}
+            options={ownerOptions}
+          />
+          <button
+            onClick={resetWoFilters}
+            className="px-3 py-2 bg-gray-400 text-white rounded-lg shadow hover:bg-gray-500"
+          >
+            Reset Filter
+          </button>
       </div>
 
       {error && <p className="mb-4 text-red-500">{error}</p>}
@@ -4545,8 +4659,11 @@ export const User_table = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [goToPageInput, setGoToPageInput] = useState("");
 
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [selectedResource, setSelectedResource] = useState(null);
   const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [selectedSignature, setSelectedSignature] = useState(null);
+  const [filterSource, setFilterSource] = useState([]);
 
   const handleViewSignature = (signature) => {
     setSelectedSignature(signature);
@@ -4585,10 +4702,15 @@ export const User_table = () => {
     });
 
     try {
-      const response = await ApiCustomer.get("/api/user");
+      const response = await ApiCustomer.get("/api/user", {
+        params: {
+          search: debouncedSearchTerm,
+          role: selectedRole?.name || "",
+          resource: selectedResource?.id ||"",
+        },
+      });
       if (response.data.success) {
         setUserData(response.data.data);
-        console.log(response.data.data)
         Swal.close();
       } else {
         setError("Failed to fetch User data");
@@ -4617,15 +4739,45 @@ export const User_table = () => {
 
   useEffect(() => {
     fetchUserDataTable();
-  }, []);
+  }, [debouncedSearchTerm, selectedResource, selectedRole]);
+
+  const roleOptions = useMemo (() => {
+    const uniqueRoles = [...new Set(UserData.map((u) => u.Role || ""))].filter(
+      (r) => r
+    );
+    return uniqueRoles.map((r, idx) => ({ id: idx, name: r }));
+  }, [UserData]);
+
+  const resourceOptions = useMemo(() => {
+    const map = new Map();
+    UserData.forEach((u) => {
+      if (u.resource?.ResourceId) {
+        map.set(u.resource.ResourceId, u.resource.Name || u.resource.ResourceId);
+      }
+    });
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [UserData]);
 
   // 🔹 Filter data based on debounced search
   const filteredUserTable = useMemo(() => {
-    return UserData.filter((item) =>
-      Object.values(item).some((value) =>
-        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      )
-    );
+    const term = debouncedSearchTerm.toLowerCase();
+    if (!term) return UserData;
+
+    return UserData.filter((item) => {
+      const fields = [
+        item.IDUser,
+        item.Email,
+        item.Username,
+        item.Name,
+        item.Role,
+        item.Phone,
+        item.resource?.Name,
+      ];
+      
+      return fields.some((value) =>
+        value?.toString().toLowerCase().includes(term)
+      );
+    });
   }, [UserData, debouncedSearchTerm]);
 
   // 🔹 Sorting logic
@@ -4723,7 +4875,35 @@ const sortedData = useMemo(() => {
         {/* Add User Button */}
         <UserAdd />
       </div>
-
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <ComboboxDemo
+          id="role-filter"
+          value={selectedRole}
+          setValue={setSelectedRole}
+          options={roleOptions}
+          placeholder="All Roles"
+          className="w-full sm:w-56 p-2 border rounded-lg shadow-sm"
+          />
+        <ComboboxDemo
+          id="resource-filter"
+          value={selectedResource}
+          setValue={setSelectedResource}
+          options={resourceOptions}
+          placeholder="All Resource"
+          className="w-full sm:w-56 p-2 border rounded-lg shadow-sm"
+        />
+        <button
+          onClick={() => {
+            setSelectedRole(null);
+            setSelectedResource(null);
+            setSearchTerm("");
+            setCurrentPage(1);
+          }}
+          className="px-3 py-2 bg-gray-400 text-white rounded-lg shadow hover:bg-gray-500"
+        >
+          Reset Filter
+        </button>
+      </div>
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table with fixed header and scrollable body */}

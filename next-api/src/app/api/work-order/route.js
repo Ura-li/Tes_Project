@@ -21,6 +21,9 @@ export async function GET(request) {
                 {
                 CaseID: { contains: search },
                 },
+                {
+                owner: { Name: {contains: search}}
+                }
             ];
         }
         if (caseID) {
