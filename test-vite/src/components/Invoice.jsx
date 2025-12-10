@@ -64,8 +64,8 @@ const styles = StyleSheet.create({
     height: 45,
   },
   logo: {
-    width: 60,
-    height: 60,
+    width: 65,
+    height: 65,
   },
   
   leftSection: {
@@ -185,7 +185,7 @@ table: {
 });
 
 const Section = ({ title, children }) => (
-  <View minPresenceAhead={100} style={styles.sectionContainer}>
+  <View minPresenceAhead={120} style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.sectionContent}>{children}</View>
   </View>
@@ -220,20 +220,18 @@ export const Invoice = ({
           borderBottom: 1,
         }}
       >
-        <Image src="/hp.png" style={[styles.logo, { padding: 2 }]} />
+        <Image src="/Javag.jpeg" style={[styles.logo, { padding: 2 }]} />
+      
         <View>
           <Text style={styles.sectionHeader}>PT.JAVA ABADI GEMILANG</Text>
-          <Text style={styles.textSmall}>
-            Prudential Centre Kota Casablanka Lt. 5 Unit C- E, Jl. Casablanca
-          </Text>
-          <Text style={styles.textSmall}>Kav.88</Text>
-          <Text style={styles.textSmall}>
-            Jakarta Selatan, 12870, Indonesia
+          <Text style={[styles.textSmall, {flexWrap: 'wrap', maxWidth: 200}]}>
+            {caseDetails?.createdByUser?.resource?.AddressLine}
           </Text>
           <Text style={styles.textSmall}>
-            Telp : (+6221) 081318521007 / 081318521006 - HP : 0811970666
+            Telp : {caseDetails?.createdByUser?.resource?.Phone}
           </Text>
         </View>
+              
       </View>
 
       <Text style={[styles.Header]}>INVOICE</Text>
@@ -684,9 +682,14 @@ export const Invoice = ({
             <Text style={[styles.textSmall, { marginTop: 15,  }]}>
               {formatDate(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.invoicetable[0]?.CreatedOn)}
             </Text>
-            <Image src={caseDetails?.createdByUser?.Signature} style={{ width: 120, height: 60 }} />
+            <Image style={{ width: 120, height: 60 }} />
             <Text style={styles.textSmall}>
-              {"AUDYA"}
+              {
+                caseDetails?.createdByUser?.ResourceId == 'IDY_SB Kokas' ?  "AUDYA" : 
+                caseDetails?.createdByUser?.ResourceId == 'IDY_SB Mangga Dua' ?  "CRUSSITA" : 
+                caseDetails?.createdByUser?.ResourceId == 'IDY_SB Gubeng' ?  "ELLY" :
+                "N/A"
+              }
             </Text>
             <Text style={styles.textSmall}>
               -----------------------------------------
@@ -733,6 +736,14 @@ export const Invoice = ({
           <Text style={styles.textSmall}>
             A/C : 8400039195
           </Text>
+           <View style={{display: 'flex', alignItems: 'flex-end'}}>
+              <View style={{flexDirection: 'row', alignItems:'center', gap: 10}}>
+              <Text style={{fontSize: 10, fontWeight: 'bold'}}>
+                Partner Of 
+              </Text>
+                <Image src="/hp.png" style={{ width: 34, height: 34 }} />
+              </View>
+            </View>
         </View>
     </Page>
   </Document>

@@ -60,8 +60,8 @@ const styles = StyleSheet.create({
     height: 45,
   },
   logo: {
-    width: 60,
-    height: 60,
+    width: 65,
+    height: 65,
   },
   link: {
     fontSize: 7,
@@ -185,15 +185,19 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =
   <Document>
     <Page size="A4" style={styles.container}>
       <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', marginBottom: 4, padding: 3, borderBottom: 1,  }}>
-        <Image src="/hp.png" style={[styles.logo,{padding: 2  }]} />
+        <Image src="/Javag.jpeg" style={[styles.logo,{padding: 2  }]} />
+      <View style={{ flex: 1, justifyContent: "space-between", flexDirection: "row" }}>
         <View>
           <Text style={styles.sectionHeader}>PT.JAVA ABADI GEMILANG</Text>
-          <Text style={styles.textSmall}>Prudential Centre Kota Casablanka Lt. 5 Unit C- E, Jl. Casablanca</Text>
-          <Text style={styles.textSmall}>Kav.88</Text>
-          <Text style={styles.textSmall}>Jakarta Selatan, 12870, Indonesia</Text>
-          <Text style={styles.textSmall}>Telp : (+6221) 081318521007 / 081318521006 - HP : 0811970666</Text>
+          <Text style={[styles.textSmall, {flexWrap: 'wrap', maxWidth: 200}]}>
+            {caseDetails?.createdByUser?.resource?.AddressLine}
+          </Text>
+          <Text style={styles.textSmall}>
+            Telp : {caseDetails?.createdByUser?.resource?.Phone}
+          </Text>
         </View>
-        <Text style={[styles.sectionHeader]}>EQUIPMENT RECIPT FORM</Text>
+        <Text style={[styles.sectionHeader, {marginTop: 20}]}>EQUIPMENT RECIPT FORM</Text>
+        </View>
       </View>
 
       <Section title="Case Info">
@@ -462,6 +466,14 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =
       </Text>
       <Text style={{ borderBottom: '1px solid #ccc' }}></Text>
       <Text style={styles.textSmall}>Tanda tangan Anda merupakan persetujuan terhadap syarat-syarat perbaikan di balik halaman ini</Text>
+       <View style={{display: 'flex', alignItems: 'flex-end'}}>
+        <View style={{flexDirection: 'row', alignItems:'center', gap: 10}}>
+        <Text style={{fontSize: 10, fontWeight: 'bold'}}>
+          Partner Of 
+        </Text>
+          <Image src="/hp.png" style={{ width: 34, height: 34 }} />
+        </View>
+      </View>
     </Page>
   </Document>
 );

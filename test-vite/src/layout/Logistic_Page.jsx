@@ -131,6 +131,7 @@ export default function Logistik() {
                 <CardHeader className={"flex flex-row gap-2 justify-between"}>
                     <CardTitle className={"text-2xl"}>Sparepart</CardTitle>
                     <div className="flex gap-2">
+                    <ExportExcelPart/>
                     <select
                       value={filterStatus}
                       onChange={(e) => {
@@ -237,14 +238,14 @@ export default function Logistik() {
         </CardFooter>
             </Card>
 
-            <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-tl dark:from-slate-900 dark:via-slate-700 dark:to-slate-800"}>
-                <CardHeader>
-                    <CardTitle>Notifications</CardTitle>
-                </CardHeader>
-                <CardContent className={"overflow-y-auto space-y-3"}>
-                    <NotificationCard />
-                </CardContent>
-            </Card> 
+        <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-tl dark:from-slate-900 dark:via-slate-700 dark:to-slate-800"}>
+            <CardHeader>
+                <CardTitle>Notifications</CardTitle>
+            </CardHeader>
+            <CardContent className={"overflow-y-auto space-y-3"}>
+                <NotificationCard />
+            </CardContent>
+        </Card> 
         </div>
       </div>
     )
