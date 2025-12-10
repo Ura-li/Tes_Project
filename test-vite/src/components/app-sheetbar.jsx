@@ -22,7 +22,7 @@ export function SheetBar({
   return (
     <Sheet open={sheetopen} onOpenChange={setSheetOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" className={"dark:border-b-slate-500 dark:bg-gradient-to-b dark:from-slate-600 dark:via-slate-800 dark:to-slate-700"}><Bell className='h-5'></Bell></Button>
+        <Button title={"Notification"} variant="outline" className={"cursor-pointer dark:border-b-slate-500 dark:bg-gradient-to-b dark:from-slate-600 dark:via-slate-800 dark:to-slate-700"}><Bell className='h-5'></Bell></Button>
       </SheetTrigger>
       <SheetContent className={"dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"}>
         <SheetHeader>

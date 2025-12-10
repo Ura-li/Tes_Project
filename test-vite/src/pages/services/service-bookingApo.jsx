@@ -504,9 +504,9 @@ async function fetchBooking() {
   
 
   return (
-    <div>
+    <div className='bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%'>
       {/* Quick actions header */}
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-2 bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
         {/* <Button variant="secondary" onClick={handleUpdate}>Save</Button> */}
         {/* <Button variant="default" onClick={handleComplete} disabled={!canCompleteBooking()}>
           Mark Completed
@@ -517,18 +517,18 @@ async function fetchBooking() {
         bookingData={bookingData}
         handleComplete={handleComplete}
       />
-    <Card className="mt-2 rounded-none">
+    <Card className="mt-2 rounded-none bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
       {/* <Button onClick={handleUpdate}>Save</Button> */}
       
       <Tabs value={tab} onValueChange={setTab}>
-        <CardHeader className={"flex flex-col border-2 p-2 gap-3 w-full"}>
+        <CardHeader className={"flex flex-col  p-2 gap-3 w-full bg-gradient-to-t dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"}>
           <CardTitle className="text-xl ">
             New Bookable Resource Booking
           </CardTitle>
           <CardTitle className="text-sm">
             Bookable Resource Booking . Information
           </CardTitle>
-          <TabsList className="bg-white ">
+          <TabsList hidden={true}>
             <TabsTrigger
               variant={"underline"}
               value="book_info"
@@ -557,11 +557,11 @@ async function fetchBooking() {
         </CardHeader>
 
         <TabsContent value="book_info" className="columns-2 space-y-4">
-          <Card className="">
+          <Card className="dark:bg-gradient-to-tl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
             <CardContent className="grid grid-cols-2 gap-3">
               <CaseField label={"Name"} lock span={2}>
                 <Input
-                  variant={"invisible"}
+                  className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                   placeholder="---"
                   value={
                     resourceId !== "" ||
@@ -573,7 +573,7 @@ async function fetchBooking() {
               </CaseField>
               <CaseField label={"Resource"} span={2} lock={!canEdit} star={user.role === "ce"}>
                 <Input
-                  variant={"invisible"}
+                  className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                   placeholder="---"
                   value={resourceName}
                   onChange={(e) => {
@@ -607,7 +607,7 @@ async function fetchBooking() {
               </CaseField>
                 <CaseField label={"Account"} lock span={2}>
                   <Input
-                    variant={"invisible"}
+                    className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                     placeholder="---"
                     value={accountName}
                     onChange={(e) => {
@@ -641,7 +641,7 @@ async function fetchBooking() {
               
               <CaseField label={"Subk Technician Name"} span={2}  lock={!canEdit} star={user.role === "ce"}>
                 <Input
-                  variant={"invisible"}
+                  className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                   placeholder="---"
                   value={subkEngineerName}
                   onChange={(e) => {
@@ -655,7 +655,7 @@ async function fetchBooking() {
                     {searchResultsSubkTechnician.map((tech) => (
                       <li
                         key={tech.SubkTechnicianId}
-                        className="p-2 cursor-pointer hover:bg-gray-200"
+                        className="p-2 cursor-pointer hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-gray-600"
                         onClick={() => {
                           console.log("USER IN SUBK CLICK : ",tech);
                           setSubkEngineerName(tech.Name);
@@ -671,7 +671,7 @@ async function fetchBooking() {
               </CaseField>
               <CaseField label={"Subk Technician Learner ID"} lock={!canEdit}  span={2}>
                 <Input
-                  variant={"invisible"}
+                  className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                   value={subkEngineerId}
                   placeholder="---"
                   onChange={(e) => setSubkEngineerId(e.target.value)}
@@ -681,7 +681,7 @@ async function fetchBooking() {
                     {searchResultsSubkTechnicianLearner.map((learn) => (
                       <li
                         key={learn.id}
-                        className="p-2 cursor-pointer hover:bg-gray-200"
+                        className="p-2 cursor-pointer hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-gray-600"
                         onClick={() => {
                           setSubkTechnicianLearnerName(learn.name);
                           setSubkTechnicianLearnerId(learn.id);
@@ -705,11 +705,12 @@ async function fetchBooking() {
                   value={bookingStatusId}          
                   onChange={setBookingStatusId}
                   options={bookingStatusOptions}
+                  className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                 >
                 </SearchCommandBlock>
               </CaseField>
               <CaseField label={"Work Order"} lock span={2}>
-                <Input variant={"invisible"} value={workOrderNumber} readOnly />
+                <Input className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2" value={workOrderNumber} readOnly />
               </CaseField>
               <div className="grid items-center grid-cols-3 col-span-3 p-3 ring-1 gap-2">
                 <CaseField
@@ -814,14 +815,15 @@ async function fetchBooking() {
             </CardContent>
           </Card>
 
-          <Card className=" ">
+          <Card className="dark:bg-gradient-to-bl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
             <CardHeader>
               <CardTitle className="text-lg ">SLA Jeopardy</CardTitle>
-              <hr />
+              <hr className='dark:border-gray-400'/>
             </CardHeader>
             <CardContent className="grid grid-cols-3 gap-6">
               <CaseField label={'Schedule Jeopardy'} span={2} lock>
               <Input
+                  className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                   type="text"
                   value={scheduleJeopardy}
                   onChange={(e) => setScheduleJeopardy(e.target.value)}
@@ -839,12 +841,12 @@ async function fetchBooking() {
             </CardContent>
           </Card>
 
-          <Card className="break-inside-avoid-column flex gap-2">
+          <Card className="break-inside-avoid-column flex gap-2 dark:bg-gradient-to-tr dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
             <CardHeader>
               <CardTitle className="text-lg ">
                 Booking Dates in User Time
               </CardTitle>
-              <hr />
+              <hr className='dark:border-gray-400'/>
             </CardHeader>
             <CardContent className="grid grid-cols-3 gap-6">
               <CaseField label={"Start Time"} span={2} lock={!canEdit} star >
@@ -869,6 +871,7 @@ async function fetchBooking() {
               <CaseField label={"Duration"} lock={!canEdit} span={2}  >
                 <div className='flex flex-row gap-2'>
                 <Input
+                className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                   type="number"
                   value={durationInMinutesUserTime}
                   onChange={(e) => {handleDurationUserChange(e.target.value ? parseInt(e.target.value, 10) : null)}}
@@ -913,12 +916,12 @@ async function fetchBooking() {
            
           </Card>
 
-          <Card className="flex ">
+          <Card className="flex dark:bg-gradient-to-br dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
             <CardHeader>
               <CardTitle className="text-lg ">
                 Booking Dates in Customer Time Zone
               </CardTitle>
-              <hr />
+              <hr className='dark:border-gray-400'/>
             </CardHeader>
             <CardContent className="grid items-center grid-cols-3 gap-6">
               <CaseField label={'Start Time (Customer)'} lock={!canEdit} span={2}  >
@@ -947,9 +950,6 @@ async function fetchBooking() {
               </CaseField>
             </CardContent>
           </Card>
-
- 
-         
         </TabsContent>
 
         <TabsContent value="field_service">

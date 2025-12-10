@@ -77,16 +77,16 @@ export default function Landing() {
         setMonthlyChartData(months);
     }, [caseData]);
     return (
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            <div className="grid auto-rows-min gap-4 md:grid-cols-3 p-3">
-                <div className="aspect-video rounded-xl bg-muted/50" >
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0 bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
+            <div className="grid auto-rows-min gap-4 md:grid-cols-3 p-3 ">
+                <div className="aspect-video rounded-xl bg-muted/50 dark:border-slate-600 dark:border-r-6" >
                     <ChartArea data={monthlyChartData}></ChartArea>
                     {/* <ChartLine data={monthlyChartData}></ChartLine> */}
                 </div>
-                <div className="aspect-video rounded-xl bg-muted/50" >
+                <div className="aspect-video rounded-xl bg-muted/50 dark:border-slate-600 dark:border-r-6" >
                     <ChartBar accessibilityLayer data={weeklyChartData}></ChartBar>
                 </div>
-                <div className="aspect-video rounded-xl bg-muted/50" >
+                <div className="aspect-video rounded-xl bg-muted/50 dark:border-slate-600 dark:border-r-6" >
                     <ChartPie></ChartPie>
                 </div>
             </div>

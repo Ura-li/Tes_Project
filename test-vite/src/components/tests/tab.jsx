@@ -938,7 +938,7 @@ export const TabsBooking = ({
   };
   return (
     <>
-      <div className="border-1 flex items-center ">
+      <div className="border-1 flex items-center dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 overflow-auto">
         {buttons.map((btn, index) => (
           <Button
             key={index}

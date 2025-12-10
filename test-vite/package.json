@@ -43,6 +43,7 @@
     "date-fns-tz": "^3.2.0",
     "debounce.lodash": "^1.0.0",
     "embla-carousel-react": "^8.6.0",
+    "driver.js": "^1.4.0",
     "express": "^4.21.2",
     "html2canvas-pro": "^1.5.11",
     "http-status-codes": "^2.3.0",

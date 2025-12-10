@@ -17,6 +17,15 @@ export function DatePickertoDateOrNull(dateString) {
   return isNaN(date) ? null : date;
 }
 
+/**
+ * Format a date string to 'YYYY-MM-DD HH:MM:SS' for MySQL DATETIME
+ * Handles timezone correctly
+ */
+export function formatDateForMySQL(dateString){
+  const date = new Date(dateString);
+
+  return date.toISOString()
+}
 
 export function formatDate(dateString) {
   if (!dateString) return "-";

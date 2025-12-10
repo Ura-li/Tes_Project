@@ -35,6 +35,7 @@ export const SearchCommandBlock = ({
   className,
   allowClear = true,
   clearValue = "",
+  id
 }) => {
   const [open, setOpen] = useState(false);
   const [positionAbove, setPositionAbove] = useState(false);
@@ -105,6 +106,7 @@ const handleClear = () => {
     <div className="relative w-full">
       {showSelectedPill ? (
           <div
+            id={id}
             className="flex border rounded-md  ring-1 px-2 py-2  gap-2 items-center justify-start   cursor-pointer"
             onClick={startSearchMode}
           >

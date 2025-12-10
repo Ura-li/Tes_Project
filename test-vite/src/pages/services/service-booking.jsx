@@ -330,12 +330,12 @@ export function ServiceBooking ({BookingId , woid}) {
   }, 500); // 500ms delay
 
   return (
-    <div>
+    <div className=''>
       <TabsBooking
         handleUpdate={handleUpdate}
         bookingData={bookingData}
       />
-    <Card className="mt-2 rounded-none ">
+    <Card className="mt-2 rounded-none">
       {/* <Button onClick={handleUpdate}>Save</Button> */}
       
       <Tabs value={tab} onValueChange={setTab}>
@@ -926,13 +926,13 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="text-blue-600 hover:text-blue-800">
+        <Button variant="outline" className="text-blue-600 hover:text-blue-800 cursor-pointer dark:text-white dark:bg-gradient-to-b dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%">
           <PlusCircle className="mr-2" />
           Tambah Booking Baru
         </Button>
       </DialogTrigger>
-      <Label className="text-red-400">*</Label>
-      <DialogContent>
+      {/* <Label className="text-red-400">*</Label> */}
+      <DialogContent className="dark:text-white dark:bg-gradient-to-l dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 dark:border-b-slate-600 ">
         <DialogHeader>
           <DialogTitle>Add New Booking</DialogTitle>
           <DialogDescription>
@@ -941,7 +941,7 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
         </DialogHeader>
         <h1>Anda yakin ingin menambahkan booking baru?</h1>
         <DialogFooter>
-          <Button onClick={handleCreateBooking} disabled={loading}>
+          <Button onClick={handleCreateBooking} disabled={loading} className="dark:text-white dark:bg-gradient-to-b dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%">
             {loading ? 'Membuat...' : 'Ya, Tambah'}
           </Button>
         </DialogFooter>

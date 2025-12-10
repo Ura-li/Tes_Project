@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useMediaQuery } from 'react-responsive'
 
+
 // ... STATUS ENUMS etc (same as before)
 
 export const TabsServiceCaseDetails = () => {
@@ -467,6 +468,7 @@ export const TabsServiceCaseDetails = () => {
                 customerSignature={signature}
                 materialItems={fieldMO(caseDetails)}
                 initialData={quotationInitialData || {}}
+                qrcode={qrCodeImg}
               />
             ).toBlob();
              const fileName = `DP-${
@@ -520,6 +522,7 @@ export const TabsServiceCaseDetails = () => {
                 customerSignature={signature}
                 materialItems={fieldMO(caseDetails)}
                 initialData={quotationInitialData || {}}
+                qrcode={qrCodeImg}
               />
             ).toBlob();
              const fileName = `Invoice-${
@@ -830,6 +833,16 @@ const hiddenButtons = isResponsive
           CaseID: caseDetails?.CaseID,
           CreatedBy: user?.id,
         })
+
+        const actionLog = await ApiCustomer.post("/api/actionlog",{
+          CaseId: `${caseDetails.CaseID}`,
+          ReferenceId: ``,
+          model: "Case",
+          dataOld: caseDetails.CaseStatus,
+          dataNew: caseUpdate.data.data.CaseStatus,
+          changedBy: user?.id,
+          logDescription: `Approve : Change Case ${caseDetails.CaseID} Status from ${caseDetails.CaseStatus} to ${caseUpdate.data.data.CaseStatus}`
+        })
         Swal.fire({
           icon: "success",
           title: "Updated!",
@@ -988,7 +1001,8 @@ function fieldMO(caseDetails) {
       .join(", ") || "-";
 console.log("CHeCK CASe daTA",caseDetails)
 
-  
+    const isTechRole = ["ce", "celead", "apo", "admin"].includes(user?.role);
+
   return (
     <>
       <div className="flex items-center border-1 sticky top-15 z-5 bg-gray-50 dark:dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 overflow-auto">
@@ -996,6 +1010,7 @@ console.log("CHeCK CASe daTA",caseDetails)
           <Button
             key={index}
             onClick={btn.onClick}
+            hidden={btn.hidden}
             variant="link"
             className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
           >
@@ -1019,12 +1034,14 @@ console.log("CHeCK CASe daTA",caseDetails)
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+       { (isTechRole && caseDetails?.CaseStatus !== "Close") && (
         <BtnModalsServiceCatalog
           open={openWorkOrder}
           setOpen={(open) => setOpenWorkOrder(open)}
           caseDetails={caseDetails}
           serviceCatalogType={serviceCatalogType}
         />
+      )}
       </div>
       <div>
         {/* <QuotationDialog
@@ -1308,6 +1325,9 @@ export const ServiceCase = () => {
 
   const entitlementStatus = useServiceCaseStore((s) => s.entitlementStatus);
   const setEntitlementField = useServiceCaseStore((s) => s.setEntitlementField);
+  const setEntitlementFieldSilent = useServiceCaseStore(
+    (s) => s.setEntitlementFieldSilent
+  );
 
   const productForm = useServiceCaseStore((s) => s.productForm);
   const setProductFormField = useServiceCaseStore((s) => s.setProductFormField);
@@ -1402,31 +1422,31 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
     // Set OTC and EOW from asset
     if (assetInformation.Warranty_Status) {
-      setEntitlementField("OTCCode", assetInformation.Warranty_Status);
+      setEntitlementFieldSilent("OTCCode", assetInformation.Warranty_Status);
     }
     if (assetInformation.EOW_Date) {
-      setEntitlementField("EOW_Date", new Date(assetInformation.EOW_Date));
+      setEntitlementFieldSilent("EOW_Date", new Date(assetInformation.EOW_Date));
     }
 
     const w = assetInformation.asset_warranty?.[0];
     if (w) {
-      setEntitlementField("needWarrantyApproval", true);
+      setEntitlementFieldSilent("needWarrantyApproval", true);
       if (w.PurchaseDate)
-        setEntitlementField("PurchaseDate", new Date(w.PurchaseDate));
+        setEntitlementFieldSilent("PurchaseDate", new Date(w.PurchaseDate));
       if (w.WarrantyCardDate)
-        setEntitlementField(
+        setEntitlementFieldSilent(
           "WarrantyCardDate",
           new Date(w.WarrantyCardDate)
         );
-      setEntitlementField("WarrantyApprovalStatus", w.WarrantyApprovalStatus);
-      setEntitlementField("EndUserName", w.EndUserName);
-      setEntitlementField("EndUserPhone", w.EndUserPhone);
-      setEntitlementField("EndUserAddress", w.EndUserAddress);
-      setEntitlementField("POPDocument", w.POPDocument);
-      setEntitlementField("WarrantyCard", w.WarrantyCard);
-      setEntitlementField("PhotoUnit", w.PhotoUnit);
+      setEntitlementFieldSilent("WarrantyApprovalStatus", w.WarrantyApprovalStatus);
+      setEntitlementFieldSilent("EndUserName", w.EndUserName);
+      setEntitlementFieldSilent("EndUserPhone", w.EndUserPhone);
+      setEntitlementFieldSilent("EndUserAddress", w.EndUserAddress);
+      setEntitlementFieldSilent("POPDocument", w.POPDocument);
+      setEntitlementFieldSilent("WarrantyCard", w.WarrantyCard);
+      setEntitlementFieldSilent("PhotoUnit", w.PhotoUnit);
     }
-  }, [assetInformation, setEntitlementField]);
+  }, [assetInformation, setEntitlementFieldSilent]);
 
   // ------- status options by role (same logic as before, but using store) -------
   // const labelToStatusEnum = useMemo(
@@ -1580,7 +1600,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
         </div>
       )}
 
-      <Card className="border-0 dark:rounded-none bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% ">
+      <Card className="border-0 dark:rounded-none bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
         <Tabs defaultValue="case_info">
           <CardHeader className="sticky top-24 z-5 w-full border-b bg-white shadow-sm flex flex-col dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
@@ -1617,7 +1637,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       : ownerUserData?.Role === "ps"
                       ? "Owner Ps"
                       : ownerUserData?.Role === "apv"
-                      ? "Owner Aprovel"
+                      ? "Owner Approvel"
                       : ownerUserData?.Role === "user"
                       ? "User"
                       : "None"}
@@ -1702,10 +1722,10 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   <CaseField
                     label="Case Subject"
                     span={3}
-                    childClass={" col-span-3"}
+                    childClass={"col-span-3"}
                     lock={!canEditFd}
                   >
-                    <div className="ml-8 w-full">
+                    <div className="ml-8 w-full" id="case-subject">
                       <Textarea
                         value={caseForm?.CaseSubject}
                         onChange={(e) =>
@@ -1833,6 +1853,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     lock={!canEdit}
                   >
                     <SearchCommandBlock
+                      id="case-status"
                       value={
                         STATUS_ENUM_TO_LABEL[caseForm?.CaseStatus] ||
                         "--Select--"
@@ -1861,7 +1882,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       }}
                       placeholder="--Select--"
                       options={statusOptions}
-                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
+                      className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                     />
                   </CaseField>
                   <CaseField
@@ -1906,6 +1927,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     lock={!canEditFd}
                   >
                     <SearchCommandBlock
+                      id="case-type"
                       value={caseForm?.CaseType}
                       onChange={onChangeCase("CaseType")}
                       placeholder="--Select--"
@@ -1920,7 +1942,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     lock={!canEditFd}
                     childClass={" col-span-3"}
                   >
-                    <div className="ml-8 w-full">
+                    <div className="ml-8 w-full" id="problem-desc">
                       <Textarea
                         value={caseForm?.ProblemDescription}
                         onChange={(e) =>
@@ -1941,6 +1963,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   >
                     {/* <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={caseDetails.CasePriority}/> */}
                     <SearchCommandBlock
+                      id="case-priority"
                       value={caseForm?.CasePriority}
                       onChange={onChangeCase("CasePriority")}
                       options={[
@@ -2267,7 +2290,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
               <CardContent>
                 <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
                   {/* LEFT COLUMN - Issue Description */}
-                  <div className="space-y-6">
+                  <div className="space-y-6" id="customer-issue">
                     <textarea
                       className={cn(
                         "w-full h-48 resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 bg-gray-50 dark:bg-gray-500/10 dark:border-gray-400",
@@ -2358,6 +2381,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                                 </Select> */}
 
                       <SearchCommandBlock
+                        id="log-type"
                         value={caseNoteFormData?.LogType}
                         onChange={(val) => onChangeCaseNote("LogType", val)}
                         options={["Notes Log", "Phone Log"]}
@@ -2368,6 +2392,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
                     <CaseField label="Action Type">
                       <SearchCommandBlock
+                        id="action-type"
                         value={caseNoteFormData?.ActionType}
                         onChange={(val) => onChangeCaseNote("ActionType", val)}
                         placeholder="--Select--"
@@ -2408,6 +2433,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
                     <CaseField label="Notes" star>
                       <textarea
+                        id="notes"
                         className="w-full h-full min-h-[100px] resize-none border rounded-md p-3 text-sm ring-1 ring-gray-300 shadow-sm dark:bg-gray-500/10 dark:border-gray-400"
                         value={caseNoteFormData?.Note || ""}
                         onChange={(e) =>
@@ -2530,7 +2556,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   <CaseField label="Serial Number" lock>
                     <Input
                       value={assetInformation?.SerialNumber}
-                      className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       placeholder={"---"}
                       className={"hover:text-blue-600 dark:hover:text-blue-600 dark:hover:cursor-pointer hover:cursor-pointer dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       onClick={() => {
@@ -2664,7 +2689,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       options={[
                         { id: 1, name: "Add Info By WA" },
                         { id: 2, name: "Revision To WA" },
-                        { id: 3, name: "New", disable: true },
+                        { id: 3, name: "New"},
                       ]}
                       value={entitlementStatus.WarrantyApprovalStatus}
                       onChange={handleEntitlementStatus(
@@ -3480,30 +3505,35 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         <span className="font-bold">Sparepart {i + 1}</span>
                         <div className="grid grid-cols-2">
                           <CaseField label={"Vendor part no"} lock>
-                            <Input value={"-"} />
+                            <Input value={"-"} className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                           </CaseField>
                           <CaseField label={"HP part no"} lock>
                             <Input
+                              className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={quo.materialorderlineitems[0]?.PartNumber}
                             />
                           </CaseField>
                           <CaseField label={"Part name"} lock>
                             <Input
+                            className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={quo.materialorderlineitems[0]?.Description}
                             />
                           </CaseField>
                           <CaseField label={"QTY"} lock>
                             <Input
+                            className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={quo.materialorderlineitems[0]?.Quantity}
                             />
                           </CaseField>
                           <CaseField label={"Price"} lock>
                               <Input
+                              className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                                 value={formatAccountingRupiah(quo.materialorderlineitems[0]?.Price)}
                               />
                            </CaseField>
                           <CaseField label={"Part category"} lock>
                             <Input
+                            className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={
                                 quo.materialorderlineitems[0]
                                   ?.servicecatalog_parts?.Keyword
@@ -3512,6 +3542,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           </CaseField>
                           <CaseField label={"Part approved"} lock>
                             <Input
+                            className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={
                                 quo.materialorderlineitems[0]
                                   ?.quotation_lineitem[0]?.Approved === true
@@ -3522,6 +3553,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           </CaseField>
                           <CaseField label={"Bad CT code"} lock>
                             <Input
+                            className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                               value={
                                 quo.materialorderlineitems[0]?.RemovedPartNumber
                               }
@@ -3555,7 +3587,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent>
-                  {console.log("WOI INVOICCENYA GA NOGNOL",invoiceSummary, invoiceData)}
+                  
                   {invoiceLoading ? (
                     <p className="text-sm text-muted-foreground">
                       Memuat data invoice...
@@ -3564,12 +3596,13 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <CaseField label={"Quotation No"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={invoiceQuotation?.quotationNo || "-"}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Invoice No"} lock>
-                        <Input value={invoiceSummary.invoiceNo} readOnly />
+                        <Input value={invoiceSummary.invoiceNo} readOnly className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                       </CaseField>
                        <CaseField label={"Total Harga Sparepart"} lock>
                         {
@@ -3579,18 +3612,21 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
                         })}
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(totalquoLineItemPrice)}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Labor Fee"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Subtotal"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(
                             invoiceQuotation?.subtotal
                           )}
@@ -3599,6 +3635,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       </CaseField>
                       <CaseField label={"VAT value (%)"} lock> 
                         <Input 
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue 
                             ? caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue + "%" 
                             : "---"}
@@ -3607,6 +3644,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         
                       <CaseField label={"Total + VAT"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(
                             invoiceQuotation.grandTotal
                           )}
@@ -3615,12 +3653,14 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       </CaseField>
                       <CaseField label={"DP"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(totalDpAmount)}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Balance Due"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(
                             grandTotalNumber
                           )}
@@ -3629,6 +3669,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       </CaseField>
                       <CaseField label={"Amount Receive"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(
                             invoiceSummary.amountReceive
                           )}
@@ -3637,6 +3678,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       </CaseField>
                       <CaseField label={"Amount Difference"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatAccountingRupiah(
                             invoiceSummary.amountDiff
                           )}
@@ -3649,30 +3691,34 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         hide={!invoiceSummary.amountDiffReason}
                       >
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={invoiceSummary.amountDiffReason || "-"}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Payment Type"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={invoiceSummary.paymentType || "-"}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Tanggal Terima"} lock>
                         <Input
+                        className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                           value={formatDate(invoiceSummary.amountReceiveDate)}
                           readOnly
                         />
                       </CaseField>
                       <CaseField label={"Notifikasi"} lock>
-                        <Input value={invoiceNotificationLabel} readOnly />
+                        <Input className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={invoiceNotificationLabel} readOnly />
                       </CaseField>
                       <CaseField label={"Catatan"} lock span={2}>
                         <Textarea
                           value={invoiceSummary.amountReceiveNote || "-"}
                           rows={3}
                           readOnly
+                          className="ring-1 mt-2 ring-gray-300 bg-gray-50 italic dark:bg-gray-500/10 dark:border-gray-400"
                         />
                       </CaseField>
                     </div>
@@ -3731,7 +3777,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         </CaseField>
 
                         <CaseField label="DP Date">
-                          {console.log(row)}
+                          {/* {console.log(row)} */}
                           <DatePicker
                             value={DatePickertoDateOrNull(row.DpDate)}
                             onChange={(e) =>

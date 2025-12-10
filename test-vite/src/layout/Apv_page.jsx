@@ -76,8 +76,9 @@ export default function Approvel() {
 
 
     return (
-        <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3">
-            <Card className={"rounded-sm"}>
+      <div className="bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
+        <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3 ">
+            <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"}>
                 <CardHeader className={"grid grid-cols-2 items-start"}>
                     {!preview.ProfilePhoto && (
                     <div className="flex justify-start">
@@ -113,15 +114,15 @@ export default function Approvel() {
                 </CardHeader>
                 <CardContent className={"ml-4 flex gap-1 flex-col"}>
                     <CardTitle className={"text-xl"}>{user?.name || "User"}</CardTitle>
-                    <span className="text-gray-400">{user?.email}</span> 
-                    <span className='text-sm text-gray-500'>{userData.Phone}</span>
+                    <span className="text-gray-400 dark:text-gray-300">{user?.email}</span> 
+                    <span className='text-sm text-gray-500 dark:text-gray-300'>{userData.Phone}</span>
                 </CardContent>
-                <span className="text-xs text-center text-gray-500">
+                <span className="text-xs text-center text-gray-500 dark:text-gray-400">
                     Latest Login: {new Date().toLocaleString()}
                 </span>
             </Card>
 
-             <Card className={"rounded-sm col-span-2 row-span-2"}>
+             <Card className={"rounded-sm col-span-2 row-span-2 dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-700 dark:to-slate-800"}>
                 <CardHeader className={"flex flex-row gap-2 justify-between"}>
                     <CardTitle className={"text-2xl"}>Approval</CardTitle>
                     {/* <div className="flex gap-2">
@@ -143,11 +144,11 @@ export default function Approvel() {
                 </CardHeader>
                 <CardContent className={"grid gap-5 "}>
                 {loading ? Array.from({ length:4 }).map((_,i) => (
-                  <Skeleton key={i} className="h-20 w-full rounded-md"/>
+                  <Skeleton key={i} className="h-20 w-full rounded-md dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600 dark:border-2"/>
                 )) : currentData.map((c) => (
                     <div
                       key={c.CaseID}
-                      className="rounded-sm hover:bg-gray-50 cursor-pointer  ring-1  ring-gray-400 px-2 py-1"
+                      className="rounded-sm hover:bg-gray-50 cursor-pointer  border-2  dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600 dark:border-2 dark:hover:border-purple-600 px-2 py-1"
                       onClick={() =>
                         navigate(
                           `/app/case/${c.CaseID}`
@@ -193,26 +194,26 @@ export default function Approvel() {
         {/* Pagination Controls */}
         <CardFooter className="items-center flex gap-4">
           <button
-            className=" px-2 bg-gray-300 rounded disabled:opacity-50 cursor-pointer"
+            className=" px-2 bg-gray-300 rounded disabled:opacity-50 cursor-pointer dark:text-gray-300 dark:bg-gray-500"
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
           >
             Previous
           </button>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-gray-600 dark:text-gray-400">
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className=" px-2 bg-gray-300 rounded disabled:opacity-50 cursor-pointer"
+            className=" px-2 bg-gray-300 rounded disabled:opacity-50 cursor-pointer dark:text-gray-300 dark:bg-gray-500"
             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
             disabled={currentPage === totalPages}
           >
             Next
           </button>
         </CardFooter>
-        </Card>
+            </Card>
 
-            <Card className={"rounded-sm"}>
+            <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-tl dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"}>
                 <CardHeader>
                     <CardTitle>Notifications</CardTitle>
                 </CardHeader>
@@ -221,5 +222,6 @@ export default function Approvel() {
                 </CardContent>
             </Card> 
         </div>
+      </div>
     )
 }

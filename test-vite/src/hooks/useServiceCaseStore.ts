@@ -7,9 +7,18 @@ import { getUserFromToken } from "../lib/utils/auth";
 
 // --- small helper ---
 const hasAnyNonEmptyValue = (obj: any = {}) =>
-  Object.values(obj).some(
-    (v) => v !== undefined && v !== null && String(v).trim() !== ""
-  );
+  Object.values(obj).some((v) => {
+    if (v === undefined || v === null) return false;
+
+    // only "true" counts as filled
+    if (typeof v === "boolean") return v === true;
+
+    // date counts if it's a valid date
+    if (v instanceof Date) return !isNaN(v.getTime());
+
+    // everything else → string check
+    return String(v).trim() !== "";
+  });
 
 interface ServiceCaseState {
   // core
@@ -66,6 +75,10 @@ interface ServiceCaseState {
   invoiceDialogOpen: boolean;
   signature: string | null;
 
+  // is dirty checkers
+  isDirty: boolean;
+
+
   // ---- actions ----
   initFromCaseDetails: (caseDetails: any) => void;
 
@@ -73,6 +86,7 @@ interface ServiceCaseState {
   setGtcFormField: (field: string, value: any) => void;
   setCsrFormField: (field: string, value: any) => void;
   setEntitlementField: (field: string, value: any) => void;
+  setEntitlementFieldSilent: (field: string, value: any) => void;
   setProductFormField: (field: string, value: any) => void;
   setCaseNoteField: (field: string, value: any) => void;
   
@@ -100,6 +114,7 @@ interface ServiceCaseState {
   fetchMaterialOrders: () => Promise<void>;
   fetchGtc: () => Promise<void>;
   fetchCsr: () => Promise<void>;
+  fetchProduct: () => Promise<void>;
   fetchCase: () => Promise<void>;
   fetchActionLog: () => Promise<void>;
   fetchOtcCode: () => Promise<void>;
@@ -110,6 +125,9 @@ interface ServiceCaseState {
   saveAll: (opts?: { redirect?: boolean }) => Promise<boolean>;
 
   //DP 
+
+  setDirty: (dirty: boolean) => void;
+
 }
 
 export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
@@ -211,8 +229,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   },
 
   dpList: [
-    // SET TO NULL FIRST 
-
+    // SET TO NULL FIRST
     // {
     //   tempId: `${Date.now()}-${Math.random()}`,
     //   InvoiceNo: null,
@@ -223,10 +240,14 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     //   isPersisted: false,
     // },
   ],
+  isDirty: false,
+  setDirty: (dirty) => set({ isDirty: dirty }),
+
   // ------------ simple setters -------------
   initFromCaseDetails: (caseDetails) =>
     set((state) => ({
       caseDetails,
+      isDirty: false,
       caseForm: {
         ...state.caseForm,
         CaseStatus: caseDetails.CaseStatus,
@@ -248,24 +269,45 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     })),
 
   setCaseFormField: (field, value) =>
-    set((state) => ({ caseForm: { ...state.caseForm, [field]: value } })),
+    set((state) => ({
+      caseForm: { ...state.caseForm, [field]: value },
+      isDirty: true,
+    })),
   setGtcFormField: (field, value) =>
-    set((state) => ({ gtcForm: { ...state.gtcForm, [field]: value } })),
+    set((state) => ({
+      gtcForm: { ...state.gtcForm, [field]: value },
+      isDirty: true,
+    })),
   setCsrFormField: (field, value) =>
-    set((state) => ({ csrForm: { ...state.csrForm, [field]: value } })),
+    set((state) => ({
+      csrForm: { ...state.csrForm, [field]: value },
+      isDirty: true,
+    })),
   setEntitlementField: (field, value) =>
     set((state) => ({
       entitlementStatus: { ...state.entitlementStatus, [field]: value },
+      isDirty: true,
     })),
+    
+  setEntitlementFieldSilent: (field, value) =>
+    set((state) => ({
+      entitlementStatus: { ...state.entitlementStatus, [field]: value },
+    })),
+
   setProductFormField: (field, value) =>
-    set((state) => ({ productForm: { ...state.productForm, [field]: value } })),
+    set((state) => ({
+      productForm: { ...state.productForm, [field]: value },
+      isDirty: true,
+    })),
   setCaseNoteField: (field, value) =>
     set((state) => ({
       caseNoteFormData: { ...state.caseNoteFormData, [field]: value },
+      isDirty: true,
     })),
   setDpFormData: (field, value) =>
     set((state) => ({
       dpDataForm: { ...state.dpDataForm, [field]: value },
+      isDirty: true,
     })),
 
   addDpRow: () =>
@@ -279,7 +321,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         DpNote: "",
         isPersisted: false,
       };
-      return { dpList: [...state.dpList, newRow] };
+      return { dpList: [...state.dpList, newRow], isDirty: true };
     }),
 
   removeDpRow: (tempId) =>
@@ -288,6 +330,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       // if (state.dpList.length === 1) return state;
       return {
         dpList: state.dpList.filter((row) => row.tempId !== tempId),
+        isDirty: true,
       };
     }),
 
@@ -295,17 +338,17 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     const { dpList } = get();
     return dpList.reduce((sum, row) => {
       const amt = parseFloat(row.DpAmount) || 0;
-      console.log("TOTAL DP AMMOUNT ",sum, amt)
+      console.log("TOTAL DP AMMOUNT ", sum, amt);
       return sum + amt;
     }, 0);
   },
-
 
   setDpField: (tempId, field, value) =>
     set((state) => ({
       dpList: state.dpList.map((row) =>
         row.tempId === tempId ? { ...row, [field]: value } : row
       ),
+      isDirty: true,
     })),
 
   setSelectedSymptom: (value) => set({ selectedSymptom: value }),
@@ -319,8 +362,6 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   setOpenDialogQuotation: (open) => set({ openDialogQuotation: open }),
   setInvoiceDialogOpen: (open) => set({ invoiceDialogOpen: open }),
   setOwnerUserData: (data) => set({ ownerUserData: data }),
-
-  
 
   // ------------- fetchers -----------------
   fetchCustomerData: async () => {
@@ -533,40 +574,54 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     }
   },
 
-    fetchDPData: async () =>{
-      const { caseDetails } = get();
-      if(!caseDetails?.CaseID) return
-      set({dpLoading: true})
-      try {
-        const response = await ApiCustomer.get(
-          `/api/dp-information?caseId=${caseDetails.CaseID}`
-        )
-        const data = response.data?.data;
+  fetchDPData: async () => {
+    const { caseDetails } = get();
+    if (!caseDetails?.CaseID) return;
+    set({ dpLoading: true });
+    try {
+      const response = await ApiCustomer.get(
+        `/api/dp-information?caseId=${caseDetails.CaseID}`
+      );
+      const data = response.data?.data;
+      console.log("DATA TS DP", data);
+      const arrayData = Array.isArray(data) ? data : data ? [data] : [];
+      const mapped = arrayData.map((dp: any) => ({
+        tempId: dp.dpInvoiceNo, // stable key
+        InvoiceNo: dp.dpInvoiceNo,
+        DpAmount: dp.dpAmount ?? "",
+        DpDate: dp.dpDate ?? null, // string is fine, your DatePicker helper converts it
+        PaymentType: dp.paymentType ?? "",
+        DpNote: dp.dpNote ?? "",
+        isPersisted: true,
+      }));
 
-        const arrayData = Array.isArray(data)
-          ? data
-          : data
-          ? [data]
-          : [];
-        const mapped = arrayData.map((dp: any) => ({
-          tempId: dp.dpInvoiceNo,           // stable key
-          InvoiceNo: dp.dpInvoiceNo,
-          DpAmount: dp.dpAmount ?? "",
-          DpDate: dp.dpDate ?? null,        // string is fine, your DatePicker helper converts it
-          PaymentType: dp.paymentType ?? "",
-          DpNote: dp.dpNote ?? "",
-          isPersisted: true,
-        }));
+      set({ dpList: mapped ?? null });
+      return data;
+    } catch (error: any) {
+      console.error("Failed Fetch DP", error);
+      toast.error(error?.response?.data?.message ?? "Gagal mengambil Data DP");
+    } finally {
+      set({ dpLoading: false });
+    }
+  },
 
-        set({ dpList : mapped ?? null })
-        return data;
-      } catch (error: any) {
-        console.error("Failed Fetch DP", error);
-        toast.error(error?.response?.data?.message ?? "Gagal mengambil Data DP")
-      } finally {
-        set({dpLoading: false})
-      }
-    },
+  fetchProduct: async () => {
+    const { caseDetails } = get();
+    if (!caseDetails) return;
+    try {
+      const resProduct = await ApiCustomer.get(
+        `/api/product-information/${caseDetails.asset_information.product_information.ProductNumber}`
+      );
+      set({
+        productForm: {
+          HWPC: resProduct.data.data.HWPC || "",
+          ProductTypeID: resProduct.data.data.ProductTypeID || "",
+        },
+      });
+    } catch (err) {
+      toast.error("Gagal mengambil data product");
+    }
+  },
 
   // --------------- saveAll (replacement for handleSave) --------------
   saveAll: async ({ redirect = true } = {}) => {
@@ -583,11 +638,14 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       setOwnerUserData,
       toggleRefresh,
       dpList,
-      dpDataForm
+      dpDataForm,
+      setDirty,
+      isDirty,
     } = get();
     // console.log(dpList, dpDataForm);
     // return false
-    
+console.log("[saveAll] isDirty =", isDirty);
+
     if (!caseDetails) return false;
 
     try {
@@ -618,26 +676,33 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       const dpEdited = dpList.some(
         (row) =>
           !row.isPersisted &&
-          (
-            row.DpAmount.trim() !== "" ||
+          (row.DpAmount.trim() !== "" ||
             row.DpDate !== null ||
             row.PaymentType.trim() !== "" ||
-            row.DpNote.trim() !== ""
-          )
+            row.DpNote.trim() !== "")
       );
 
-      const hasIntentToSave =
-        noteFilled ||
-        gtcEdited ||
-        entitlementEdited ||
-        csrEdited ||
-        caseEdited ||
-        productEdited ||
-        dpEdited;
-
-        //fungsi not working
+const hasIntentToSave = isDirty;
+      //fungsi not working
       if (!hasIntentToSave) {
-        alert("Tidak ada data yang disimpan.");
+        const confirm = await Swal.fire({
+        title: "Empty change",
+        text: "Tidak ada perubahan yang perlu disimpan.",
+        icon: "info",
+      });
+  return false;
+      }
+
+      const confirm = await Swal.fire({
+        title: "Simpan perubahan?",
+        text: "Perubahan akan disimpan ke database.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Simpan",
+        cancelButtonText: "Batal",
+      });
+
+      if (!confirm.isConfirmed) {
         return false;
       }
 
@@ -659,7 +724,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         "CSR",
         "CASE",
         "PRODUCT",
-        "PAYMENT"
+        "PAYMENT",
       ] as const) {
         switch (target) {
           case "NOTE": {
@@ -757,33 +822,45 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
                 }
               );
 
-              if (entitlementStatus.needWarrantyApproval === true) {
-                  const getAsset = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`);
-                  const fieldAsset = getAsset.data.data;
-                  const status = fieldAsset.asset_warranty[0]?.WarrantyApprovalStatus;
+              if (
+                (entitlementStatus.needWarrantyApproval === true &&
+                  ownerUserData?.Role === "fd") ||
+                ownerUserData?.Role === "apv"
+              ) {
+                const getAsset = await ApiCustomer.get(
+                  `/api/asset-information/${caseDetails.AssetID}`
+                );
+                const fieldAsset = getAsset.data.data;
+                const status =
+                  fieldAsset.asset_warranty[0]?.WarrantyApprovalStatus;
 
-                  let newOwner = null;
+                let newOwner = null;
 
-                  switch (status) {
-                    case "Revision To WA":
-                      newOwner = caseDetails.CreatedBy;
-                      break;
+                switch (status) {
+                  case "Revision To WA":
+                    newOwner = caseDetails.CreatedBy;
+                    break;
 
-                    case "Add Info By WA":
-                    case "New":
-                    default:
-                      const userTarget = await ApiCustomer.get(`/api/user?role=apv`);
-                      const OwnerApv = userTarget.data.data[0];
-                      newOwner = OwnerApv?.IDUser;
-                      break;
-                  }
-
-                  if (newOwner) {
-                    await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`, {
-                      Owner: newOwner
-                    });
-                  }
+                  case "Add Info By WA":
+                  case "New":
+                  default:
+                    const userTarget = await ApiCustomer.get(
+                      `/api/user?role=apv`
+                    );
+                    const OwnerApv = userTarget.data.data[0];
+                    newOwner = OwnerApv?.IDUser;
+                    break;
                 }
+
+                if (newOwner) {
+                  await ApiCustomer.patch(
+                    `/api/case-information/${caseDetails.CaseID}`,
+                    {
+                      Owner: newOwner,
+                    }
+                  );
+                }
+              }
               Object.assign(dataToUpdate, entitlementStatus);
               savedModules.push("Entitlement");
             }
@@ -1002,7 +1079,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
             break;
           }
 
-          case "PAYMENT":{
+          case "PAYMENT": {
             const newRows = dpList.filter((row) => {
               const hasAnyField =
                 (row.DpAmount && row.DpAmount.toString().trim() !== "") ||
@@ -1010,10 +1087,10 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
                 (row.PaymentType && row.PaymentType.toString().trim() !== "") ||
                 (row.DpNote && row.DpNote.toString().trim() !== "");
 
-              return !row.isPersisted && hasAnyField
-            })
+              return !row.isPersisted && hasAnyField;
+            });
 
-            if(newRows.length === 0) break;
+            if (newRows.length === 0) break;
             const user = getUserFromToken();
 
             const payload = {
@@ -1021,12 +1098,15 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
               createdBy: user?.id,
               dps: newRows.map((row) => ({
                 dpAmount: row.DpAmount,
-                dpDate: row.DpDate,       // make sure this is string / ISO or whatever parseDate expects
+                dpDate: row.DpDate, // make sure this is string / ISO or whatever parseDate expects
                 paymentType: row.PaymentType,
                 dpNote: row.DpNote,
               })),
-            }
-            const response = await ApiCustomer.post(`/api/dp-information`, payload);
+            };
+            const response = await ApiCustomer.post(
+              `/api/dp-information`,
+              payload
+            );
 
             dataToUpdate.dp = response.data.data;
             savedModules.push("DP");
@@ -1035,7 +1115,9 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         }
       }
 
-      if (savedModules.length > 0 && redirect) {
+      if (savedModules.length > 0) {
+        setDirty(false);
+        if (redirect) {
         await Swal.fire({
           icon: "success",
           title: "Berhasil Disimpan",
@@ -1044,11 +1126,14 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
           showConfirmButton: false,
         });
         toggleRefresh();
+      } else {
+         Swal.close();
+      }
         return true;
       }
 
       Swal.close();
-      return savedModules.length > 0;
+      return false;
     } catch (error: any) {
       console.error("failed:", error);
       Swal.fire({

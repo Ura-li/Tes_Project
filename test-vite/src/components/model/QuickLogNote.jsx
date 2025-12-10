@@ -26,7 +26,7 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
   const onChangeCaseNote = (field, value)  => setCaseNoteField(field, value);
   const handleSave = (redirect = true) => saveAll({ redirect })
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 2;
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = notesList.slice(startIndex, startIndex + itemsPerPage) 
@@ -34,7 +34,7 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className={"min-w-5xl"}>
+        <DialogContent className={"min-w-5xl dark:bg-gray-800"}>
           <DialogHeader className={"px-2 border-b-2 font-bold italic"}>
             <DialogTitle>Modal Quick Log Note</DialogTitle>
           </DialogHeader>
@@ -51,6 +51,7 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
                                 "Phone Log"
                                ]}
                                 placeholder="--Select--"
+                                className={"dark:ring-1 dark:bg-transparent"}
                               />
                             </CaseField>
           
@@ -68,6 +69,7 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
                                   "CE/Partner Assist",
                                   "Customer Email",
                                 ]}
+                                className={"dark:ring-1 dark:bg-transparent"}
                                 
                               />
                             </CaseField>
@@ -86,21 +88,20 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
                           </div>
                           <div className=" rounded-2xl shadow-xl">
                             <Table >
-                              <TableHeader className={'bg-slate-300 '}>
+                              <TableHeader className={'bg-slate-300 dark:bg-slate-600'}>
                                 <TableRow>
-                                  <TableHead>Created On</TableHead>
-                                  <TableHead>Created By</TableHead>
-                                  <TableHead>Log Type</TableHead>
-                                  <TableHead>Action Type</TableHead>
-                                  <TableHead>Role</TableHead>
-                                  <TableHead>Note</TableHead>
+                                  <TableHead className={"dark:text-white"}>Created On</TableHead>
+                                  <TableHead className={"dark:text-white"}>Created By</TableHead>
+                                  <TableHead className={"dark:text-white"}>Log Type</TableHead>
+                                  <TableHead className={"dark:text-white"}>Action Type</TableHead>
+                                  <TableHead className={"dark:text-white"}>Role</TableHead>
+                                  <TableHead className={"dark:text-white"}>Note</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
                                 {Array.isArray(currentData) && currentData.length > 0 ? (
                                   currentData.map((n,i) => (
-                                    
-                                    <TableRow key={n.NoteID} className={``}>
+                                    <TableRow key={n.NoteID} className={"dark:text-gray-400"}>
                                       <TableCell>{n.CreatedOn ? format(new Date(n.CreatedOn), 'yyyy-MM-dd HH:mm') : '-'}</TableCell>
                                       <TableCell>{n.createdByUser?.Name || n.CreatedBy || '-'}</TableCell>
                                       <TableCell>{n.LogType || '-'}</TableCell>
@@ -121,16 +122,16 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
         
         <div className='flex justify-between'>
         <div className='flex gap-2 items-center'>
-          <Button variant={"outline"} className={"cursor-pointer"} onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}>
+          <Button variant={"outline"} className={"cursor-pointer dark:bg-gradient-to-bl dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 dark:border-2"} onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}>
             Previous
           </Button>
 
           <span>Page {currentPage} of {totalPage}</span>
 
-          <Button  variant={"outline"} className={"cursor-pointer"} onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPage))} disabled={currentPage === totalPage}>Next</Button>
+          <Button  variant={"outline"} className={"cursor-pointer dark:bg-gradient-to-tl dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 dark:border-2"} onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPage))} disabled={currentPage === totalPage}>Next</Button>
         </div>
         <div>
-          <Button variant={"outline"} onClick={() => handleSave()}>Save</Button>
+          <Button variant={"outline"} className="cursor-pointer dark:bg-gradient-to-bl dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 dark:border-2" onClick={() => handleSave()}>Save</Button>
         </div>
         </div>
         </DialogContent>

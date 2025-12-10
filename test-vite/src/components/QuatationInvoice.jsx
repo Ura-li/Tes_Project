@@ -9,7 +9,7 @@ import {
   Link,
 } from "@react-pdf/renderer";
 import React from "react";
-import { formatAccountingRupiah } from "../lib/utils";
+import { formatAccountingRupiah, formatDate } from "../lib/utils";
 
 Font.register({
   family: "Helvetice",
@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
     height: 45,
   },
   logo: {
-    width: 60,
-    height: 60,
+    width: 65,
+    height: 65,
   },
   
   leftSection: {
@@ -179,7 +179,7 @@ table: {
 });
 
 const Section = ({ title, children }) => (
-  <View minPresenceAhead={100} style={styles.sectionContainer}>
+  <View minPresenceAhead={120} style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.sectionContent}>{children}</View>
   </View>
@@ -214,21 +214,19 @@ export const QuotationInvoice = ({
           borderBottom: 1,
         }}
       >
-        <Image src="/hp.png" style={[styles.logo, { padding: 2 }]} />
+        <Image src="/Javag.jpeg" style={[styles.logo, { padding: 2 }]} />
+       <View style={{ flex: 1, justifyContent: "space-between", flexDirection: "row" }}>
         <View>
           <Text style={styles.sectionHeader}>PT.JAVA ABADI GEMILANG</Text>
-          <Text style={styles.textSmall}>
-            Prudential Centre Kota Casablanka Lt. 5 Unit C- E, Jl. Casablanca
-          </Text>
-          <Text style={styles.textSmall}>Kav.88</Text>
-          <Text style={styles.textSmall}>
-            Jakarta Selatan, 12870, Indonesia
+          <Text style={[styles.textSmall, {flexWrap: 'wrap', maxWidth: 200}]}>
+            {caseDetails?.createdByUser?.resource?.AddressLine}
           </Text>
           <Text style={styles.textSmall}>
-            Telp : (+6221) 081318521007 / 081318521006 - HP : 0811970666
+            Telp : {caseDetails?.createdByUser?.resource?.Phone}
           </Text>
         </View>
-        <Text style={[styles.sectionHeader]}>QUOTATION / PROFORMA INVOICE</Text>
+           <Text style={[styles.sectionHeader, {marginTop: 20}]}>QUOTATION / PROFORMA INVOICE</Text>
+        </View>
       </View>
 
       <Section title="Case Info">
@@ -259,20 +257,13 @@ export const QuotationInvoice = ({
             <Text style={styles.label}>Received Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
-              {caseDetails?.CreatedOn
-                ? new Date(caseDetails.CreatedOn).toLocaleString()
-                : "N/A"}
+                {formatDate(caseDetails?.CreatedOn) || "N/A"}
             </Text>
 
             <Text style={styles.label}>Quotation Date</Text>
             <Text style={styles.colon}>:</Text>
             <Text style={[styles.value]}>
-              {/* {initialData?.quotationDate
-                ? new Date(initialData.quotationDate).toLocaleDateString()
-                : "N/A"} */}
-              {caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate ? 
-              new Date (caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate).toLocaleString() : "N/A" 
-              }
+              {formatDate(caseDetails.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.QuotationDate) || "N/A"}
             </Text>
 
             <Text style={styles.label}>Problem Desc</Text>
@@ -603,7 +594,9 @@ export const QuotationInvoice = ({
             DP :
           </Text>
           <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah((caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) / 2)}
+              {formatAccountingRupiah(caseDetails?.down_payment_table.reduce((sum, row) => 
+                          sum + Number(row.DPAmount) || 0, 0
+                ))}
           </Text>
         </View>
 
@@ -615,20 +608,21 @@ export const QuotationInvoice = ({
             Balance Due :
           </Text>
           <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah((caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) / 2)}
+              {(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) - (caseDetails?.down_payment_table.reduce((sum, row) => sum + Number(row.DPAmount), 0)) ? 
+                formatAccountingRupiah((caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) - (caseDetails?.down_payment_table.reduce((sum, row) => sum + Number(row.DPAmount), 0))) : "0"
+              }
           </Text>
         </View>
       </View>
 
 
-      <View style={{ display: "flex", flexDirection: "row", columnGap: 2 }} >
+      <View style={{ display: "flex", flexDirection: "row", columnGap: 2, marginBottom: 30}} >
         <View style={styles.leftSection} >
           <Text style={{ fontSize: 10, width: "10%", fontWeight: "bold" }}>
             Note
           </Text>
           <Text style={styles.colon}>:</Text>
           <Text style={[styles.value]}>
-           
           </Text>
         </View>
       </View>
@@ -712,6 +706,14 @@ export const QuotationInvoice = ({
           <Text style={styles.textSmall}>
             * This PDF Quotation auto generated by system.
           </Text>
+        <View style={{display: 'flex', alignItems: 'flex-end'}}>
+          <View style={{flexDirection: 'row', alignItems:'center', gap: 10}}>
+          <Text style={{fontSize: 10, fontWeight: 'bold'}}>
+            Partner Of 
+          </Text>
+            <Image src="/hp.png" style={{ width: 34, height: 34 }} />
+          </View>
+        </View>
     </Page>
   </Document>
 );

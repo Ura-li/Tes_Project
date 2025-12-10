@@ -5897,119 +5897,258 @@ console.log("Asset Info OTC : ",isOutWarranty)
        
        
         return (
-          <DialogContent className=" w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
-    max-h-[90vh] overflow-y-auto
+          <DialogContent
+            className=" w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
+    max-h-[90vh] 
     flex flex-col justify-center
     gap-0 p-0 bg-white
-    [&>button]:hidden rounded-none">
-            <DialogHeader className={"p-2 mt-30"}>
+    [&>button]:hidden rounded-none"
+          >
+            <DialogHeader className={"p-2 "}>
               <div className="flex items-end justify-end">
-                <Button className={'bg-transparent '}><ExternalLink color="black"></ExternalLink></Button>
+                <Button className={"bg-transparent "}>
+                  <ExternalLink color="black"></ExternalLink>
+                </Button>
                 <DialogClose asChild>
-                  <Button type="button" variant="secondary" className={'hover:bg-gray-200 active:bg-gray-700'}>
-                  <XIcon/>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className={"hover:bg-gray-200 active:bg-gray-700"}
+                  >
+                    <XIcon />
                   </Button>
                 </DialogClose>
               </div>
-              <DialogTitle className={'text-blue-600 text-2xl'}>Service Catalog</DialogTitle>
-              <DialogDescription>Select parts required for the repair.</DialogDescription>
+              <DialogTitle className={"text-blue-600 text-2xl"}>
+                Service Catalog
+              </DialogTitle>
+              <DialogDescription>
+                Select parts required for the repair.
+              </DialogDescription>
             </DialogHeader>
-  <div className="flex flex-col sm:flex-row justify-between gap-3">
-  {/* Kolom kiri  */}
-  <div className=" bg-gray-200 p-2 space-y-1 h-[5em]">
-    <div className="flex">
-      <p className="font-medium w-40">Service OfferID</p>
-      <p>: {effectiveWarrantyService?.Service_offerID ?? '-'}</p>
-    </div>
-    <div className="flex">
-      <p className="font-medium w-40">Service Description</p>
-      <p>: {effectiveWarrantyService?.Service_description ?? '-'}</p>
-    </div>
-  </div>
+            <div className="flex flex-col sm:flex-row justify-between gap-3">
+              {/* Kolom kiri  */}
+              <div className=" bg-gray-200 p-2 space-y-1 h-[5em]">
+                <div className="flex">
+                  <p className="font-medium w-40">Service OfferID</p>
+                  <p>: {effectiveWarrantyService?.Service_offerID ?? "-"}</p>
+                </div>
+                <div className="flex">
+                  <p className="font-medium w-40">Service Description</p>
+                  <p>
+                    : {effectiveWarrantyService?.Service_description ?? "-"}
+                  </p>
+                </div>
+              </div>
 
-  {/* Kolom kanan  */}
-  <div className=" bg-gray-200 grid grid-cols-2 gap-x-2 gap-y-1 p-2">
-    <p>Product Number</p>
-    <p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
-    <p>Product Name</p>
-    <p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
-    <p>Serial Number</p>
-    <p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
-    <p>Warranty Status</p>
-    <p>: {assetForWorkOrderCreation?.Warranty_Status} - {assetForWorkOrderCreation?.WarrantyOTCCode?.Description}</p>
-    <p>Currency</p>
-    <p>:</p>
-  </div>
-</div>
+              {/* Kolom kanan  */}
+              <div className=" bg-gray-200 grid grid-cols-2 gap-x-2 gap-y-1 p-2">
+                <p>Product Number</p>
+                <p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
+                <p>Product Name</p>
+                <p>
+                  :{" "}
+                  {assetForWorkOrderCreation?.product_information
+                    ?.ProductName || "-"}
+                </p>
+                <p>Serial Number</p>
+                <p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
+                <p>Warranty Status</p>
+                <p>
+                  : {assetForWorkOrderCreation?.Warranty_Status} -{" "}
+                  {assetForWorkOrderCreation?.WarrantyOTCCode?.Description}
+                </p>
+                <p>Currency</p>
+                <p>:</p>
+              </div>
+            </div>
 
-<div className="flex items-center justify-end mt-3 gap-2">
-  <Label htmlFor="orderability">Orderability</Label>
-  <Switch id="orderability" />
-</div>
+            <div className="flex items-center justify-end mt-3 gap-2">
+              <Label htmlFor="orderability">Orderability</Label>
+              <Switch id="orderability" />
+            </div>
 
-
-            <Tabs
-            defaultValue="parts"
-            className={'h-[50vh] '}
-            >
-              <TabsList className={'py-5 px-0 bg-white'}>
-                <TabsTrigger variant={'fullsize'} value="parts" className={'cursor-pointer '}>Parts</TabsTrigger>
-                <TabsTrigger variant={'fullsize'} value="snr" className={'cursor-pointer  text-blue-500'} hidden>SNR</TabsTrigger>
+            <Tabs defaultValue="parts" className={"h-[50vh] "}>
+              <TabsList className={"py-5 px-0 bg-white"}>
+                <TabsTrigger
+                  variant={"fullsize"}
+                  value="parts"
+                  className={"cursor-pointer "}
+                >
+                  Parts
+                </TabsTrigger>
+                <TabsTrigger
+                  variant={"fullsize"}
+                  value="snr"
+                  className={"cursor-pointer  text-blue-500"}
+                  hidden
+                >
+                  SNR
+                </TabsTrigger>
               </TabsList>
-              <TabsContent value="parts"
-                className={'overflow-y-auto'}
-              > 
-                <Table>
+              <TabsContent value="parts" className={"overflow-y-auto"}>
+                <Table className={"max-h-[400px] overflow-y-auto"}>
                   <TableHeader>
-                    <TableRow className={'bg-gray-300 '}>
-                      <TableHead className={'font-black text-black'}>Select</TableHead>
-                      <TableHead className={'font-black text-black p-2'}>
+                    <TableRow className={"bg-gray-300 "}>
+                      <TableHead className={"font-black text-black"}>
+                        Select
+                      </TableHead>
+                      <TableHead className={"font-black text-black p-2"}>
                         Parts #
                         <span className="flex items-center">
                           <Input
-                            className={'bg-white font-medium'}
+                            className={"bg-white font-medium"}
                             value={partNumberSearch}
-                            onChange={(e) => setPartNumberSearch(e.target.value)}
+                            onChange={(e) =>
+                              setPartNumberSearch(e.target.value)
+                            }
                           />
-                          <XIcon className="cursor-pointer" onClick={() => setPartNumberSearch("")} />
+                          <XIcon
+                            className="cursor-pointer"
+                            onClick={() => setPartNumberSearch("")}
+                          />
                         </span>
                       </TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black"
+                        }
+                      >
                         Keyword
                         <span className="flex items-center">
                           <Input
-                            className={'  whitespace-break-spaces bg-white font-medium'}
+                            className={
+                              "  whitespace-break-spaces bg-white font-medium"
+                            }
                             value={keywordSearch}
                             onChange={(e) => setKeywordSearch(e.target.value)}
                           />
-                          <XIcon className="cursor-pointer" onClick={() => setKeywordSearch("")} />
+                          <XIcon
+                            className="cursor-pointer"
+                            onClick={() => setKeywordSearch("")}
+                          />
                         </span>
                       </TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black"
+                        }
+                      >
                         Part Description
                         <span className="flex items-center">
                           <Input
-                            className={'  whitespace-break-spaces bg-white font-medium'}
+                            className={
+                              "  whitespace-break-spaces bg-white font-medium"
+                            }
                             value={descriptionSearch}
-                            onChange={(e) => setDescriptionSearch(e.target.value)}
+                            onChange={(e) =>
+                              setDescriptionSearch(e.target.value)
+                            }
                           />
-                          <XIcon className="cursor-pointer" onClick={() => setDescriptionSearch("")} />
+                          <XIcon
+                            className="cursor-pointer"
+                            onClick={() => setDescriptionSearch("")}
+                          />
                         </span>
                       </TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Orderability</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black '}>Restriction Reason</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>CRS</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>ROHS</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Retrunable</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black '}>Hard roll</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black '}>Dangerous Goods</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black '}>Lithium Battery</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Oversize</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Heavy</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Price</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black '}>Friegh Price</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Tax</TableHead>
-                      <TableHead className={'  whitespace-break-spaces font-black text-black'}>Total</TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black"
+                        }
+                      >
+                        Orderability
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black "
+                        }
+                      >
+                        Restriction Reason
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black"
+                        }
+                      >
+                        CRS
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black"
+                        }
+                      >
+                        ROHS
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black"
+                        }
+                      >
+                        Retrunable
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black "
+                        }
+                      >
+                        Hard roll
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black "
+                        }
+                      >
+                        Dangerous Goods
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black "
+                        }
+                      >
+                        Lithium Battery
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black"
+                        }
+                      >
+                        Oversize
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black"
+                        }
+                      >
+                        Heavy
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black"
+                        }
+                      >
+                        Price
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black "
+                        }
+                      >
+                        Friegh Price
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black"
+                        }
+                      >
+                        Tax
+                      </TableHead>
+                      <TableHead
+                        className={
+                          "  whitespace-break-spaces font-black text-black"
+                        }
+                      >
+                        Total
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -6026,8 +6165,9 @@ console.log("Asset Info OTC : ",isOutWarranty)
                         <TableRow
                           key={index}
                           onClick={toggleRow}
-                          className={`cursor-pointer ${isChecked ? "bg-blue-100" : ""
-                            }`}
+                          className={`cursor-pointer ${
+                            isChecked ? "bg-blue-100" : ""
+                          }`}
                         >
                           <TableCell>
                             <Checkbox
@@ -6041,15 +6181,25 @@ console.log("Asset Info OTC : ",isOutWarranty)
                           <TableCell>{part.PartNumber}</TableCell>
                           <TableCell>{part.Keyword}</TableCell>
                           <TableCell>{part.PartDescription}</TableCell>
-                          <TableCell>{part.Orderability ? "Yes" : "No"}</TableCell>
+                          <TableCell>
+                            {part.Orderability ? "Yes" : "No"}
+                          </TableCell>
                           <TableCell>{part.ResistrictionReason}</TableCell>
                           <TableCell>{part.Csr ? "Y" : "N"}</TableCell>
                           <TableCell>{part.Rohs}</TableCell>
-                          <TableCell>{part.Returnable_Flag ? "true" : "false"}</TableCell>
+                          <TableCell>
+                            {part.Returnable_Flag ? "true" : "false"}
+                          </TableCell>
                           <TableCell>{part.Hardrolls}</TableCell>
-                          <TableCell>{part.Dangerousgoods ? "true" : "false"}</TableCell>
-                          <TableCell>{part.Lithiumbattry ? "true" : "false"}</TableCell>
-                          <TableCell>{part.Oversize ? "true" : "false"}</TableCell>
+                          <TableCell>
+                            {part.Dangerousgoods ? "true" : "false"}
+                          </TableCell>
+                          <TableCell>
+                            {part.Lithiumbattry ? "true" : "false"}
+                          </TableCell>
+                          <TableCell>
+                            {part.Oversize ? "true" : "false"}
+                          </TableCell>
                           <TableCell>{part.Heavy ? "true" : "false"}</TableCell>
                           <TableCell>{part.Price}</TableCell>
                           <TableCell>{part.Freightprice}</TableCell>
@@ -6059,11 +6209,11 @@ console.log("Asset Info OTC : ",isOutWarranty)
                       );
                     })}
 
-                {/* pagination row */}
-                <TableRow>
-                  <TableCell colSpan="100%">
-                    <Pagination className="flex justify-start">
-                      <PaginationContent>
+                    {/* pagination row */}
+                    <TableRow>
+                      <TableCell colSpan="100%">
+                        <Pagination className="flex justify-start">
+                          <PaginationContent>
                             <PaginationItem>
                               <PaginationPrevious
                                 placeholder="First"
@@ -6110,7 +6260,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
                             </PaginationItem>
                             <PaginationItem>
                               <PaginationNext
-                              placeholder="Last"
+                                placeholder="Last"
                                 href="#"
                                 onClick={(e) => {
                                   e.preventDefault();
@@ -6118,17 +6268,16 @@ console.log("Asset Info OTC : ",isOutWarranty)
                                 }}
                               />
                             </PaginationItem>
-                             <div className="flex gap-3 p-1 items-center">
-                    Total Page
-                    <span className='border-2 p-1 rounded-md shadow-2xl'>
-                      {totalPages}
-                    </span>
-                  </div>
+                            <div className="flex gap-3 p-1 items-center">
+                              Total Page
+                              <span className="border-2 p-1 rounded-md shadow-2xl">
+                                {totalPages}
+                              </span>
+                            </div>
                           </PaginationContent>
                         </Pagination>
                       </TableCell>
                     </TableRow>
-
                   </TableBody>
                 </Table>
               </TabsContent>
@@ -6136,10 +6285,22 @@ console.log("Asset Info OTC : ",isOutWarranty)
                 <p>tes</p>
               </TabsContent>
             </Tabs>
-  
-            <DialogFooter className={'p-4'}>
-              <Button variant={'search'} className=""  onClick={() => setCurrentStep(1)}>Previous</Button>
-              <Button variant={'search'} className=""  onClick={() => setCurrentStep(3)}>Next</Button>
+
+            <DialogFooter className={"p-4"}>
+              <Button
+                variant={"search"}
+                className=""
+                onClick={() => setCurrentStep(1)}
+              >
+                Previous
+              </Button>
+              <Button
+                variant={"search"}
+                className=""
+                onClick={() => setCurrentStep(3)}
+              >
+                Next
+              </Button>
             </DialogFooter>
           </DialogContent>
         );

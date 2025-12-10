@@ -51,6 +51,7 @@ import {
   Settings,
   CopyX,
   CopyXIcon,
+  CircleChevronLeft,
 } from "lucide-react";
 
 import { SelectYN } from "../../components/sc-select";
@@ -88,6 +89,7 @@ import ServiceRequestPDF from '../../components/service-request-form'; // adjust
 import { useAuth } from "@/context/auth-context";
 
 import RepairActionDialog from "@/components/model/RepairActionModal";
+import { useWorkOrderStore } from "../../hooks/useWorkOrderStore";
 
 function formatDateForInput(dateString) {
   if (!dateString) return "";
@@ -624,6 +626,7 @@ export const TabsServiceWO = ({ workOrders, SLA, setSLA, WOGeneral }) => {
   //modal handle repair action
   const [openRepairDialog, setOpenRepairDialog] = useState(false);
   const [onCancelWo, setOnCancelWo] = useState(false)
+
 
   const handleSave = async () => {
     try {
@@ -1252,11 +1255,11 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
 
   const buttons = [
     {
-      icon: ArrowLeftFromLine,
+      icon: CircleChevronLeft,
       label: "",
       onClick: () => navigate(`/app/material-order/${MOLineDetails.MOID}`),
     },
-    { icon: SquareArrowOutUpRight, label: "", },
+    // { icon: SquareArrowOutUpRight, label: "", },
     { icon: Save, label: "Save", onClick: () => saveMOLI(LineItemID) },
     {
       icon: CopyXIcon,
@@ -1456,7 +1459,7 @@ export const TabsServiceMOLineItems = ({ MOLineDetails, LineItemID, moLineItems 
 
   return (
     <>
-      <div className="flex items-center border-1 ">
+      <div className="flex items-center border-1 sticky top-13 bg-white z-10 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600">
         {buttons.map((btn, index) => (
           <Button
             key={index}

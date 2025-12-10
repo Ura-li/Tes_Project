@@ -80,12 +80,17 @@ export async function GET(request, { params }) {
                     owner: true
                 }
             },
+            down_payment_table: true,
             casephotos: true,
             global_trade_check: true,
             caseresolution: true,
             accessory: true,
             otcCodeTable: true,
-            createdByUser: true
+            createdByUser: {
+                include: {
+                    resource: true,
+                }
+            }
             // casenotes_casenotes_CaseIDTocaseinformation: true,
         }
     });
