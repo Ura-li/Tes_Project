@@ -118,8 +118,8 @@ interface ServiceCaseState {
   fetchCase: () => Promise<void>;
   fetchActionLog: () => Promise<void>;
   fetchOtcCode: () => Promise<void>;
-  fetchInvoiceData: () => Promise<void>;
-  fetchDPData: () => Promise<void>;
+  fetchInvoiceData: (opts? : {force? : boolean}) => Promise<any | void>;
+  fetchDPData: (opts? : {force? : boolean}) => Promise<any | void>;
 
   // save
   saveAll: (opts?: { redirect?: boolean }) => Promise<boolean>;
@@ -338,7 +338,6 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     const { dpList } = get();
     return dpList.reduce((sum, row) => {
       const amt = parseFloat(row.DpAmount) || 0;
-      console.log("TOTAL DP AMMOUNT ", sum, amt);
       return sum + amt;
     }, 0);
   },
@@ -553,30 +552,109 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     }
   },
 
-  fetchInvoiceData: async () => {
-    const { caseDetails } = get();
-    if (!caseDetails?.CaseID) return;
-    set({ invoiceLoading: true });
-    try {
-      const response = await ApiCustomer.get(
-        `/api/invoice-information?caseId=${caseDetails.CaseID}`
-      );
-      const data = response.data?.data;
-      set({ invoiceData: data ?? null });
-      return data;
-    } catch (error: any) {
-      console.error("Failed to fetch invoice:", error);
-      toast.error(
-        error?.response?.data?.message ?? "Gagal mengambil data invoice."
-      );
-    } finally {
-      set({ invoiceLoading: false });
-    }
-  },
+//  fetchInvoiceData: async () => {
+//    const { caseDetails } = get();
+//    if (!caseDetails?.CaseID) return;
+//    set({ invoiceLoading: true });
+//    try {
+//      const response = await ApiCustomer.get(
+//        `/api/invoice-information?caseId=${caseDetails.CaseID}`
+//      );
+//      const data = response.data?.data;
+//      set({ invoiceData: data ?? null });
+//      return data;
+//    } catch (error: any) {
+//      console.error("Failed to fetch invoice:", error);
+//      toast.error(
+//        error?.response?.data?.message ?? "Gagal mengambil data invoice."
+//      );
+//    } finally {
+//      set({ invoiceLoading: false });
+//    }
+//  },
 
-  fetchDPData: async () => {
-    const { caseDetails } = get();
+  fetchInvoiceData: async (opts) => {
+  const { caseDetails, invoiceData } = get();
+  if (!caseDetails?.CaseID) return;
+
+  const force = opts?.force ?? false;
+
+  // ---- simple cache check ----
+  if (!force && invoiceData && invoiceData.__caseId === caseDetails.CaseID) {
+    // Already have data for this CaseID, just reuse
+    return invoiceData;
+  }
+
+  set({ invoiceLoading: true });
+  try {
+    const response = await ApiCustomer.get(
+      `/api/invoice-information?caseId=${caseDetails.CaseID}`
+    );
+    const data = response.data?.data ?? null;
+
+    // attach metadata for cache check
+    const wrapped = { ...data, __caseId: caseDetails.CaseID };
+
+    set({ invoiceData: wrapped });
+    return wrapped;
+  } catch (error: any) {
+    console.error("Failed to fetch invoice:", error);
+    toast.error(
+      error?.response?.data?.message ?? "Gagal mengambil data invoice."
+    );
+  } finally {
+    set({ invoiceLoading: false });
+  }
+},
+
+
+	//  fetchDPData: async () => {
+	//    const { caseDetails } = get();
+	//    if (!caseDetails?.CaseID) return;
+	//    set({ dpLoading: true });
+	//    try {
+	//      const response = await ApiCustomer.get(
+	//        `/api/dp-information?caseId=${caseDetails.CaseID}`
+	//      );
+	//      const data = response.data?.data;
+	//      console.log("DATA TS DP", data);
+	//      const arrayData = Array.isArray(data) ? data : data ? [data] : [];
+	//      const mapped = arrayData.map((dp: any) => ({
+	//        tempId: dp.dpInvoiceNo, // stable key
+	//        InvoiceNo: dp.dpInvoiceNo,
+	//        DpAmount: dp.dpAmount ?? "",
+	//        DpDate: dp.dpDate ?? null, // string is fine, your DatePicker helper converts it
+	//        PaymentType: dp.paymentType ?? "",
+	//        DpNote: dp.dpNote ?? "",
+	//        isPersisted: true,
+	//      }));
+	//
+	//      set({ dpList: mapped ?? null });
+	//      return data;
+	//    } catch (error: any) {
+	//      console.error("Failed Fetch DP", error);
+	//      toast.error(error?.response?.data?.message ?? "Gagal mengambil Data DP");
+	//    } finally {
+	//      set({ dpLoading: false });
+	//    }
+//  },
+
+  fetchDPData: async (opts) => {
+    const { caseDetails, dpList } = get();
     if (!caseDetails?.CaseID) return;
+    const force = opts?.force ?? false;
+
+  // if we already mapped persisted DP rows for this case and not forcing, skip
+  const alreadyHydrated =
+    !force &&
+    Array.isArray(dpList) &&
+    dpList.length > 0 &&
+    dpList.every((dp: any) => dp.isPersisted);
+
+  if (alreadyHydrated) {
+    return dpList;
+  }
+
     set({ dpLoading: true });
     try {
       const response = await ApiCustomer.get(
@@ -595,8 +673,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         isPersisted: true,
       }));
 
-      set({ dpList: mapped ?? null });
-      return data;
+      set({ dpList: mapped ?? [] });
+      return mapped;
     } catch (error: any) {
       console.error("Failed Fetch DP", error);
       toast.error(error?.response?.data?.message ?? "Gagal mengambil Data DP");
@@ -604,6 +682,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       set({ dpLoading: false });
     }
   },
+
 
   fetchProduct: async () => {
     const { caseDetails } = get();

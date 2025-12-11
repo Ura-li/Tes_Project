@@ -93,6 +93,7 @@ export const TabsServiceCaseDetails = () => {
   const fetchInvoiceData = useServiceCaseStore((s) => s.fetchInvoiceData);
   const fetchDPData = useServiceCaseStore((s) => s.fetchDPData)
   const saveAll = useServiceCaseStore((s) => s.saveAll);
+  const isDirty = useServiceCaseStore((s) => s.isDirty)
 
   // ---- local only (still fine to keep) ----
   const [quotationInitialData, setQuotationInitialData] = useState(null);
@@ -652,7 +653,7 @@ export const TabsServiceCaseDetails = () => {
     return true;
   };
 
-
+console.log("CHeCK dirty mind",isDirty)
   const saveAndCloseCase = async (cancell = false) => {
     setCancelState(cancell); //default initialization
     // Role guard: only FD can close a Case
@@ -744,8 +745,10 @@ export const TabsServiceCaseDetails = () => {
           text: 'Unable to verify Work/Material Orders for this Case.',
         });
       }
+     if (isDirty) {
       const success = await handleSave(false);
       if (!success) return; 
+     }
       const res = await ApiCustomer.patch(
         `/api/case-information/${caseDetails.CaseID}`,
         {
@@ -999,7 +1002,6 @@ function fieldMO(caseDetails) {
     ]
       .filter(Boolean)
       .join(", ") || "-";
-console.log("CHeCK CASe daTA",caseDetails)
 
     const isTechRole = ["ce", "celead", "apo", "admin"].includes(user?.role);
 
@@ -1381,7 +1383,6 @@ export const ServiceCase = () => {
     if (!invoiceQuotation?.grandTotal) return 0;
     let parsed = Number(invoiceQuotation.grandTotal);
     if(totalDpAmount !== 0) parsed = parsed - Number(totalDpAmount)
-      console.log("Berkurang ", parsed, totalDpAmount)
     return Number.isNaN(parsed) ? 0 : parsed;
   }, [invoiceQuotation, totalDpAmount]);
 
@@ -3748,7 +3749,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
                 <CardContent className="space-y-3 ">
                   {dpList.length > 0 ? dpList.map((row) => (
-                    <Card key={row.tempId} className="border shadow-sm dark:bg-radial-[at_70%_20%] dark:from-slate-600 dark:via-slate-800 dark:to-slate-700 dark:border-gray-700 dark:border-4">
+                    <Card key={`${row.tempId}-${row.DpDate}`} className={"border shadow-sm dark:bg-radial-[at_70%_20%] dark:from-slate-600 dark:via-slate-800 dark:to-slate-700 dark:border-gray-700 dark:border-4", row.isPersisted && "shadow-sm shadow-gray-200 bg-gray-200"}>
                       <CardHeader className="flex flex-row items-center justify-between py-2 px-4">
                         <CardTitle className="text-sm font-semibold">
                           Invoice No: {row.InvoiceNo || "-"}
@@ -3765,7 +3766,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         )}
                       </CardHeader>
                       <CardContent className="grid grid-cols-2 gap-3 px-4 pb-4 ">
-                        <CaseField label="DP Amount">
+                        <CaseField label="DP Amount" lock={row.isPersisted}>
                           <Input
                             value={row.DpAmount}
                             onChange={(e) =>
@@ -3775,7 +3776,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           />
                         </CaseField>
 
-                        <CaseField label="DP Date">
+                        <CaseField label="DP Date" lock={row.isPersisted} >
                           {/* {console.log(row)} */}
                           <DatePicker
                             value={DatePickertoDateOrNull(row.DpDate)}
@@ -3785,7 +3786,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           />
                         </CaseField>
 
-                        <CaseField label="Payment Type">
+                        <CaseField label="Payment Type" lock={row.isPersisted} >
                           <SearchCommandBlock
                             value={row.PaymentType}
                             onChange={(val) =>
@@ -3801,7 +3802,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           />
                         </CaseField>
 
-                        <CaseField label="DP Note" span={2}>
+                        <CaseField label="DP Note" span={2} lock={row.isPersisted} >
                           <Textarea
                             value={row.DpNote}
                             onChange={(e) =>
