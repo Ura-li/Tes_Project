@@ -562,13 +562,13 @@ export const TabsServiceCaseDetails = () => {
   btn.roles.includes(user.role)
 );
 
-const visibleButtons = isResponsive
-  ? allowedButtons.slice(0, -4)   
-  : allowedButtons;              
+// const visibleButtons = isResponsive
+//   ? allowedButtons.slice(0, -4)   
+//   : allowedButtons;              
 
-const hiddenButtons = isResponsive
-  ? allowedButtons.slice(-4)      
-  : [];
+// const hiddenButtons = isResponsive
+//   ? allowedButtons.slice(-4)      
+//   : [];
 
   
   const handleInvoiceOpenChange = (nextOpen = true) => {
@@ -1006,7 +1006,7 @@ console.log("CHeCK CASe daTA",caseDetails)
   return (
     <>
       <div className="flex items-center border-1 sticky top-15 z-5 bg-gray-50 dark:dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 overflow-auto">
-         {visibleButtons.map((btn, index) => (
+         {allowedButtons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
@@ -1019,7 +1019,7 @@ console.log("CHeCK CASe daTA",caseDetails)
           </Button>
         ))}
 
-        {hiddenButtons.length > 0 && (
+        {/* {hiddenButtons.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md dark:bg-transparent dark:text-gray-400">
               ...
@@ -1041,7 +1041,7 @@ console.log("CHeCK CASe daTA",caseDetails)
           caseDetails={caseDetails}
           serviceCatalogType={serviceCatalogType}
         />
-      )}
+      )} */}
       </div>
       <div>
         {/* <QuotationDialog
