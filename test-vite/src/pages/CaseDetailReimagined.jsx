@@ -1041,7 +1041,7 @@ console.log("CHeCK CASe daTA",caseDetails)
           caseDetails={caseDetails}
           serviceCatalogType={serviceCatalogType}
         />
-      )} */}
+      )}
       </div>
       <div>
         {/* <QuotationDialog
