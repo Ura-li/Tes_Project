@@ -1025,7 +1025,7 @@ console.log("CHeCK CASe daTA",caseDetails)
               ...
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {hiddenButtons.map((btn, index) => (
+              {allowedButtons.map((btn, index) => (
                 <DropdownMenuItem key={index} onClick={btn.onClick}>
                   <btn.icon className="inline-block w-4 h-4 mr-2" />
                   {btn.label}
@@ -1033,7 +1033,7 @@ console.log("CHeCK CASe daTA",caseDetails)
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
+        )} */}
        { (isTechRole && caseDetails?.CaseStatus !== "Close") && (
         <BtnModalsServiceCatalog
           open={openWorkOrder}
@@ -1578,8 +1578,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
   // ---- compute hidden tab for OOW ----
   const hiddenOowTab =
-    caseDetails.asset_information?.WarrantyOTCCode?.Description !==
-    "Trade (OOW)";
+    caseDetails.asset_information?.WarrantyOTCCode?.OTCCode !== "01T";
 
   const tabs = [
     { value: "case_info", label: "Case & Customer" },
