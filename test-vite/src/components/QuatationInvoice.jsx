@@ -483,7 +483,6 @@ export const QuotationInvoice = ({
           caseDetails.workorder.flatMap((wo) =>
             wo.materialorder.flatMap((mo) =>
               mo.materialorderlineitems.map((line, index) => (
-                line.Status === 'Cancelled' ? "N/A" :
                 <View style={styles.tableRow} key={line.LineItemID}>
                   <Text style={[styles.tableCell, styles.partsColNo, styles.alignCenter]}>
                     {index + 1}

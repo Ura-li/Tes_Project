@@ -451,6 +451,18 @@ export const TabsServiceCaseDetails = () => {
           icon: CoinsIcon,
           label: "DP",
            onClick: async () => {
+            await ApiCustomer.post("/api/case-information/case-notes", {
+              LogType: "System Info",
+              ActionType: "Request DP",
+              Template: "INVOICE DP Requested",
+              VisibleExternally: false,
+              MinutesSpent: 0,
+              Note: `[PRINT] DP requested by ${user?.role} - ${
+                user?.name || "Unknown User"
+              }`,
+              CaseID: caseDetails?.CaseID,
+              CreatedBy: user?.id,
+            });
             const blob = await pdf(
               <InvoiceDp
                 caseDetails={caseDetails}
