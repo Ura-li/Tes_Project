@@ -684,14 +684,14 @@ console.log("[saveAll] isDirty =", isDirty);
 
 const hasIntentToSave = isDirty;
       //fungsi not working
-      if (!hasIntentToSave) {
-        const confirm = await Swal.fire({
-        title: "Empty change",
-        text: "Tidak ada perubahan yang perlu disimpan.",
-        icon: "info",
-      });
-  return false;
-      }
+  //     if (!hasIntentToSave) {
+  //       const confirm = await Swal.fire({
+  //       title: "Empty change",
+  //       text: "Tidak ada perubahan yang perlu disimpan.",
+  //       icon: "info",
+  //     });
+  // return false;
+  //     }
 
       const confirm = await Swal.fire({
         title: "Simpan perubahan?",
