@@ -313,7 +313,7 @@ export const ServiceWork = () => {
                         "Australia",
                         "Brazil",
                       ]}
-                      readOnly={!canaddce}
+                      readOnly={!canaddce || user?.role === "apo"}
                     />
                   </CaseField>
 
