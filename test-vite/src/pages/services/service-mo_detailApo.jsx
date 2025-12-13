@@ -929,7 +929,7 @@ useEffect(() => {
             )}
           </ul>
         )}
-      </div>
+      </div>  
     </CaseField>
 
                     <CaseField label="Return CT Key" star={canEditCE} lock={!canEditCE}>
