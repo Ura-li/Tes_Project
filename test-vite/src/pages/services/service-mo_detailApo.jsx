@@ -524,33 +524,51 @@ useEffect(() => {
   const handleInputChange = (value) => {
     setInputValue(value);
     fetchFailures(value);
-    setMODetailInput((prev) => ({
+    const failureId = Number(value);
+
+    if (Number.isNaN(failureId)) return;
+    setMODetailInput(prev => {
+    let next = {
       ...prev,
-      failureId: value ? parseInt(value, 10) : null,
-    }));
+      failureId,
+      isQuantityUsedDisabled: false,
+    };
+
+    if (failureId === 6) {
+      next.isQuantityUsedDisabled = true;
+    } 
+    else if (failureId === 7) {
+      next.QuantityUsed = false;
+    } 
+    else if (failureId === 8) {
+      next.QuantityUsed = true;
+    }
+
+    return next;
+  });
   };
 
-  const handleSelect = (selected) => {
-    setInputValue(selected.label);
-    setSearchResults([
-      selected,
-      ...searchResults.filter((opt) => opt.value !== selected.value),
-    ]);
-    setMODetailInput((prev) => ({
-      ...prev,
-      failureId: selected.value,
-      failureName: selected.label,
-    }));
-    console.log("selected.value", selected.value);
-  };
+  // const handleSelect = (selected) => {
+  //   setInputValue(selected.label);
+  //   setSearchResults([
+  //     selected,
+  //     ...searchResults.filter((opt) => opt.value !== selected.value),
+  //   ]);
+  //   setMODetailInput((prev) => ({
+  //     ...prev,
+  //     failureId: selected.value,
+  //     failureName: selected.label,
+  //   }));
+  //   console.log("selected.value", selected.value);
+  // };
 
-  const handleFocus = () => {
-    setIsFocused(true);
-  };
+  // const handleFocus = () => {
+  //   setIsFocused(true);
+  // };
 
-  const handleBlur = () => {
-    setTimeout(() => setIsFocused(false), 150);
-  };
+  // const handleBlur = () => {
+  //   setTimeout(() => setIsFocused(false), 150);
+  // };
 
   const tabs = [
     { value: "mo_details", label: "MO Details" },
@@ -912,7 +930,7 @@ useEffect(() => {
                   />
 
         {/* Show dropdown only if results exist and input is focused */}
-        {isFocused && (
+        {/* {isFocused && (
           <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg ">
             {searchResults.length > 0 ? (
               searchResults.map((opt) => (
@@ -928,7 +946,7 @@ useEffect(() => {
               <li className="p-3 text-gray-500">No results found</li>
             )}
           </ul>
-        )}
+        )} */}
       </div>
     </CaseField>
 
@@ -965,9 +983,14 @@ useEffect(() => {
                   <CaseField label="Part Used" star={canEditCE} lock={!canEditCE}>
                     <div className="flex items-center gap-2">
                       <Switch
-                        checked={Boolean(MODetailInput.QuantityUsed)}
-                        onCheckedChange={handleQuantityUsedToggle}
-                        disabled={!canEditCE}
+                          checked={!!MODetailInput.QuantityUsed}
+                          onCheckedChange={(checked) =>
+                            setMODetailInput(prev => ({
+                              ...prev,
+                              QuantityUsed: checked,
+                            }))
+                          }
+                          disabled={!canEditCE || MODetailInput.isQuantityUsedDisabled}
                       />
                       <span>{MODetailInput.QuantityUsed ? "Used" : "Not Used"}</span>
                     </div>
