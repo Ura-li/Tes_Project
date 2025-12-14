@@ -126,6 +126,7 @@ import { useServiceCaseStore } from '@/hooks/useServiceCaseStore';
 
 //? This is the new one comment this when the old one is in use
 import { TabsServiceCaseDetails } from './CaseDetailReimagined';
+import { useUnsavedChangesGuard } from '../hooks/useUnsavedChangesGuard';
 
 export const Case = () => {
   const { user } = useAuth();
@@ -158,6 +159,7 @@ export const Case = () => {
   const fetchOtcCode = useServiceCaseStore((s) => s.fetchOtcCode);
   const fetchInvoiceData = useServiceCaseStore((s) => s.fetchInvoiceData);
   const fetchDPData = useServiceCaseStore((s) => s.fetchDPData);
+//    useUnsavedChangesGuard();
  useEffect(() => {
   if (!caseId) return;
 
@@ -190,7 +192,7 @@ export const Case = () => {
         fetchActionLog(),
         fetchOtcCode(),
         fetchDPData(),
-        fetchInvoiceData(),
+        fetchInvoiceData({force: true}),
       ]);
 
       await new Promise((resolve) => setTimeout(resolve, 500));
