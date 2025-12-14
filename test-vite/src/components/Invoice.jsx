@@ -680,7 +680,7 @@ export const Invoice = ({
           }}
         >
           <View style={{ flexDirection: "column", alignItems: "center" }} >
-            <Text style={[styles.textSmall, { marginTop: 15,  }]}>
+            <Text style={[styles.textSmall, { marginTop: 10,  }]}>
               {formatDate(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.invoicetable[0]?.CreatedOn)}
             </Text>
             <Image style={{ width: 120, height: 60 }} />
