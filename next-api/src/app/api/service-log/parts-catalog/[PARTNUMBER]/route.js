@@ -124,7 +124,7 @@ export async function PATCH(request, { params }) {
 
 // DELETE Part by PartNumber
 export async function DELETE(_, { params }) {
-  const partNumber = decodeURIComponent(params?.PartNumber || "");
+  const partNumber = decodeURIComponent(params?.PARTNUMBER || "");
 
   if (!partNumber) {
     return NextResponse.json(
