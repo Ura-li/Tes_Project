@@ -1276,6 +1276,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
     StateProvince: "",
     Country: "",
     ZipPostalCode: "",
+    NPWP: "",
   });
   const [isOpen, setIsOpen] = useState(false);
   const requiredFields = ["Company", "Email", "PrimaryPhone", "AddressLine1", "City", "Country", "ZipPostalCode"];
@@ -1296,6 +1297,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         StateProvince: data?.StateProvince || "",
         Country: data?.Country || "",
         ZipPostalCode: data?.ZipPostalCode || "",
+        NPWP: data?.NPWP || "",
       });
     } catch (error) {
       console.error("Error fetching company information:", error);
@@ -1321,6 +1323,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         StateProvince: "",
         Country: "",
         ZipPostalCode: "",
+        NPWP: "",
       });
     }
   }, [isOpen]);
@@ -1445,6 +1448,10 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
           <div>
             <Label htmlFor="ZipPostalCode">Zip/Postal Code <Label className="text-red-600">*</Label></Label>
             <Input id="ZipPostalCode" value={formData.ZipPostalCode} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="NPWP"> NPWP </Label>
+            <Input id="NPWP" value={formData.NPWP} onChange={handleChange} autoComplete="off"/>
           </div>
         </div>
 

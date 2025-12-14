@@ -1003,6 +1003,10 @@ export const Company_table = () => {
                   onClick={() => handleSort("ZipPostalCode")}>
                 Zip/Postal Code {getSortIcon("ZipPostalCode")}
               </TableHead>
+              <TableHead className="p-3 text-xs font-semibold text-center border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap"
+                  onClick={() => handleSort("NPWP")}>
+                NPWP {getSortIcon("NPWP")}
+              </TableHead>
               <TableHead className="p-3 text-sm font-semibold text-center border border-slate-200 dark:border-slate-700 whitespace-nowrap">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -1024,6 +1028,7 @@ export const Company_table = () => {
                   <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.StateProvince}</TableCell>
                   <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.City}</TableCell>
                   <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.ZipPostalCode}</TableCell>
+                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.NPWP}</TableCell>
                   <TableCell className="flex items-center justify-center gap-2 p-3 border border-slate-200 dark:border-slate-800">
                     <CompanyEdit siteAccountId={c.SiteAccountID} onUpdate={fetchCompanies}/>
                     <CompanyDelete siteAccountId={c.SiteAccountID}
