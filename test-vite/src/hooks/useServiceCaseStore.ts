@@ -695,6 +695,13 @@ const hasIntentToSave = isDirty;
         cancelButtonText: "Batal",
       });
 
+        if (caseNoteFormData.Note === "") {
+          toast.info("Isi Note terlebih dahulu", {
+            position: 'top-center',
+          })
+          return false;
+        }
+
       if (!confirm.isConfirmed) {
         return false;
       }
