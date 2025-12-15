@@ -335,13 +335,13 @@ export const Contact_table = () => {
 
     const handleResetFilters = () => {
     setSearchTerm("");
-    setSelectedCompany("null");
-    setSelectedSalutation("null");
-    setSelectedLanguage("null");
-    setSelectedCountry("null");
-    setSelectedState("null");
-    setSelectedCity("null");
-    setSelectedZipCode("null");
+    setSelectedCompany(null);
+    setSelectedSalutation(null);
+    setSelectedLanguage(null);
+    setSelectedCountry(null);
+    setSelectedState(null);
+    setSelectedCity(null);
+    setSelectedZipCode(null);
     setSortConfig({ key: "Company", direction: "asc" });
     setCurrentPage(1);
   };
@@ -479,78 +479,78 @@ export const Contact_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="rounded-2xl shadow  max-h-[70vh] w-full h-fit">
+      <div className="rounded-2xl shadow  max-h-[70vh] w-full overflow-auto">
         <Table className="w-full border-collapse min-w-[1200px]">
-          <TableHeader className="sticky z-10 top-0 text-xs sm:text-sm">
+          <TableHeader className="sticky z-10 top-0 text-xs sm:text-sm bg-gray-200/95 dark:bg-slate-900">
             <TableRow>
-              <TableHead className="p-3 text-sm font-semibold text-left border">No</TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ContactID")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border">No</TableHead>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("ContactID")}>
                 Contact ID {getSortIcon("ContactID")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Company")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Company")}>
                 Company {getSortIcon("Company")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Salutation")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Salutation")}>
                 Salutation {getSortIcon("Salutation")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("FirstName")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("FirstName")}>
                 First Name {getSortIcon("FirstName")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("LastName")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("LastName")}>
                 Last Name {getSortIcon("LastName")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Email")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Email")}>
                 Email {getSortIcon("Email")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PreferredLanguage")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("PreferredLanguage")}>
                 Preferred Language {getSortIcon("PreferredLanguage")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Phone")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Phone")}>
                 Phone {getSortIcon("Phone")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Mobile")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Mobile")}>
                 Mobile {getSortIcon("Mobile")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("WorkPhone")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("WorkPhone")}>
                 Work Phone {getSortIcon("WorkPhone")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("WorkExtension")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("WorkExtension")}>
                 Work Extension {getSortIcon("WorkExtension")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("OtherPhone")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("OtherPhone")}>
                 Other Phone {getSortIcon("OtherPhone")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("OtherExtension")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("OtherExtension")}>
                 Other Extension {getSortIcon("OtherExtension")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Fax")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Fax")}>
                 Fax {getSortIcon("Fax")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("AddressLine1")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("AddressLine1")}>
                 Address Line 1 {getSortIcon("AddressLine1")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("AddressLine2")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("AddressLine2")}>
                 Address Line 2 {getSortIcon("AddressLine2")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("City")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("City")}>
                 City {getSortIcon("City")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("StateProvince")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("StateProvince")}>
                 State/Province {getSortIcon("StateProvince")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("Country")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("Country")}>
                 Country {getSortIcon("Country")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("ZipPostalCode")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("ZipPostalCode")}>
                 Zip/Postal Code {getSortIcon("ZipPostalCode")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Name")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("PIC_Name")}>
                 PIC Name {getSortIcon("PIC_Name")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Email")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("PIC_Email")}>
                 PIC Email {getSortIcon("PIC_Email")}
               </TableHead>
-              <TableHead className="p-3 text-sm font-semibold text-left border cursor-pointer" onClick={() => handleSort("PIC_Phone")}>
+              <TableHead className="p-3 text-sm font-semibold text-center border cursor-pointer" onClick={() => handleSort("PIC_Phone")}>
                 PIC Phone {getSortIcon("PIC_Phone")}
               </TableHead>
               <TableHead className="p-3 text-sm font-semibold text-center border">Actions</TableHead>
@@ -618,7 +618,6 @@ export const Contact_table = () => {
               }
             }}
           >
-            <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={25}>25</option>
             <option value={50}>50</option>
@@ -956,7 +955,7 @@ export const Company_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="relative w-full overflow-x-auto overflow-y-auto max-h-[75vh]
+      <div className="relative w-full max-h-[75vh] overflow-x-auto overflow-y-auto 
                       bg-white/95 dark:bg-slate-900/90
                       rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
         <Table className="min-w-full border-collapse text-xs sm:text-sm">
@@ -1010,7 +1009,7 @@ export const Company_table = () => {
               <TableHead className="p-3 text-sm font-semibold text-center border border-slate-200 dark:border-slate-700 whitespace-nowrap">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="">
+          <TableBody className=" overflow-auto max-h-[65vh]">
             {currentData.length > 0 ? (
               currentData.map((c, i) => (
                 <TableRow key={c.SiteAccountID}
@@ -1022,7 +1021,7 @@ export const Company_table = () => {
                   <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Email}</TableCell>
                   <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.PrimaryPhone}</TableCell>
                   <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.WhatsappNo}</TableCell>
-                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.AddressLine1}</TableCell>
+                  <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-normal break-words align-top max-w-[260px] sm:max-w-[320px]">{c.AddressLine1}</TableCell>
                   <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.AddressLine2}</TableCell>
                   <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.Country}</TableCell>
                   <TableCell className="p-3 border border-slate-200 dark:border-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{c.StateProvince}</TableCell>
@@ -1147,7 +1146,7 @@ export const Case_table = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5); // ⬅️ Tambahan fitur 1
+  const [itemsPerPage, setItemsPerPage] = useState(10); // ⬅️ Tambahan fitur 1
   const [goToPageInput, setGoToPageInput] = useState(""); // ⬅️ Tambahan fitur 2
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -1861,7 +1860,6 @@ const EnumToLabel = {
               }
             }}
           >
-            <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={25}>25</option>
             <option value={50}>50</option>
@@ -2244,34 +2242,34 @@ export const Assets_table = () => {
           <TableHeader className="sticky top-0 z-10 bg-gray-100/95 dark:bg-slate-800/95">
             <TableRow className="text-slate-800 dark:text-slate-100">
               <TableHead className="p-2 border border-slate-200 dark:border-slate-700 text-center">No</TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("AssetID")}>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap text-center" onClick={() => handleSort("AssetID")}>
                 Asset ID {renderSortIcon("AssetID")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("SerialNumber")}>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap text-center" onClick={() => handleSort("SerialNumber")}>
                 Serial Number {renderSortIcon("SerialNumber")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("ProductName")}>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap text-center" onClick={() => handleSort("ProductName")}>
                 Product Name {renderSortIcon("ProductName")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("ProductNumber")}>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap text-center" onClick={() => handleSort("ProductNumber")}>
                 Product Number {renderSortIcon("ProductNumber")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("ProductLine")}>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap text-center" onClick={() => handleSort("ProductLine")}>
                 Product Line {renderSortIcon("ProductLine")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("SiteAccountID")}>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap text-center" onClick={() => handleSort("SiteAccountID")}>
                 Site Account ID {renderSortIcon("SiteAccountID")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("ContactID")}>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap text-center" onClick={() => handleSort("ContactID")}>
                 Contact ID {renderSortIcon("ContactID")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("Warranty_Status")}>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap text-center" onClick={() => handleSort("Warranty_Status")}>
                 Warranty Status {renderSortIcon("Warranty_Status")}
               </TableHead>
-              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap" onClick={() => handleSort("EOW_Date")}>
+              <TableHead className="p-2 border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap text-center" onClick={() => handleSort("EOW_Date")}>
                 EOW Date {renderSortIcon("EOW_Date")}
               </TableHead>
-              <TableHead className="p-2 border">Actions</TableHead>
+              <TableHead className="p-2 borderborder-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -2971,7 +2969,7 @@ export const ProductType_table = () => {
   };
 
   return (
-    <div className="p-6grid grid-flow-row">
+    <div className="p-6 grid grid-flow-row">
       <h2 className="mb-4 text-xl font-bold">Product Type Table</h2>
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <input
@@ -2990,7 +2988,7 @@ export const ProductType_table = () => {
       {error && <p className="text-red-500">{error}</p>}
 
       {/* ✅ MODIFIED: Table wrapper for scrolling */}
-      <div className="bg-white rounded-lg shadow overflow-scroll max-h-[60vh]">
+      <div className="relative w-full overflow-x-auto max-h-[60vh] bg-white rounded-2xl shadow-md border">
         <Table className="w-full border-collapse">
           {/* ✅ MODIFIED: Sticky header */}
           <TableHeader className="sticky top-0 z-10">
@@ -5187,12 +5185,14 @@ export const Part_table = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [goToPageInput, setGoToPageInput] = useState(""); // 🔹 New state for "Go to"
 
+  const [selectedKeyword, setSelectedKeyword] = useState(null);
+
   // 🔹 state sorting
   const [sortConfig, setSortConfig] = useState({
     key: "PartNumber",
     direction: "asc",
   });
-
+  
   // 🔹 Debounce search term
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -5247,15 +5247,34 @@ export const Part_table = () => {
   useEffect(() => {
     fetchPartDataTable();
   }, []);
+  const keywordOptions = useMemo (() => {
+    return [
+      ...new Set(
+        PartData.map((p) => p.Keyword)
+        .filter(Boolean)
+        .sort()
+      )
+    ].map((v, i) => ({
+      id: i + 1,
+      name: v,
+    }));
+  }, [PartData]);
 
   // 🔹 Filter data berdasarkan pencarian (using debounced search term)
   const filteredPartTable = useMemo(() => {
-    return PartData.filter((item) =>
-      Object.values(item).some((value) =>
-        value?.toString().toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      )
-    );
-  }, [PartData, debouncedSearchTerm]);
+    const q = debouncedSearchTerm.toLowerCase();
+    return PartData.filter((item) => {
+      const keywordMatch =
+        !selectedKeyword || item.Keyword === selectedKeyword.name;
+
+      if (!keywordMatch) return false;
+      if (!q) return true;
+    
+     return Object.values(item).some((value) =>
+        value?.toString().toLowerCase().includes(q)
+      );
+    });
+  }, [PartData, debouncedSearchTerm, selectedKeyword]);
 
   // 🔹 Sorting
   const sortedData = useMemo(() => {
@@ -5317,13 +5336,19 @@ export const Part_table = () => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
     setGoToPageInput("");
   };
+  const resetFilters = () => {
+    setSearchTerm("");
+    setSelectedKeyword(null);
+    setCurrentPage(1);
+    setSortConfig({ key: "PartNumber", direction: "asc" });
+  };
 
   return (
     <div className="p-6">
       <h2 className="mb-6 text-2xl font-bold">📊 Part Table</h2>
 
       {/* Flexbox container for search input and Add button */}
-      <div className="flex flex-wrap items-center gap-2 mb-4 ">
+      <div className="flex flex-wrap items-center gap-2 mb-2 ">
         {/* Search Input */}
         <input
           type="text"
@@ -5333,9 +5358,28 @@ export const Part_table = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         {/* Add Part Button */}
-        <PartAdd />
+
+          <PartAdd />
         <PartImport />
         <PartTemplateButton />
+      </div>
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <div className="w-[220px]">
+          <ComboboxDemo
+            id="keyword"
+            value={selectedKeyword}
+            setValue={setSelectedKeyword}
+            options={keywordOptions}
+            placeholder="All Keywords"
+            className="w-full p-2 border rounded-lg shadow-sm"
+          />
+        </div>
+          <button
+            onClick={resetFilters}
+            className="ml-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+          >
+            Reset Filters
+          </button>
       </div>
 
       {error && <p className="mb-4 text-red-500">{error}</p>}
@@ -6967,9 +7011,9 @@ export const BookingsTable = () => {
   const [goToPageInput, setGoToPageInput] = useState("");
 
   // filters
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const [selectedJeopardy, setSelectedJeopardy] = useState("");
-  const [selectedCreatedBy, setSelectedCreatedBy] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedJeopardy, setSelectedJeopardy] = useState(null);
+  const [selectedCreatedBy, setSelectedCreatedBy] = useState(null);
 
   // sort config (default: BookingId DESC)
   const [sortConfig, setSortConfig] = useState({
@@ -7018,16 +7062,25 @@ export const BookingsTable = () => {
   }, []);
 
   // derive unique options
-  const uniqueStatus = useMemo(() => {
-    const all = bookingData.map((b) => b.BookingStatus?.Description).filter(Boolean);
-    return ["", ...Array.from(new Set(all)).sort()];
+  const statusOptions = useMemo(() => {
+    const all = bookingData.map(b => b.BookingStatus?.Description).filter(Boolean);
+    return [...new Set(all)].map((v, i) => ({
+      id: i,
+      name: v,
+    }));
   }, [bookingData]);
 
-  const uniqueJeopardy = ["", "Yes", "No"];
+  const jeopardyOptions = [
+    { id: 1, name: "Yes" },
+    { id: 2, name: "No" },
+  ];
 
-  const uniqueCreatedBy = useMemo(() => {
-    const all = bookingData.map((b) => b.createdByUser?.Username).filter(Boolean);
-    return ["", ...Array.from(new Set(all)).sort()];
+  const createdByOptions = useMemo(() => {
+    const all = bookingData.map(b => b.createdByUser?.Username).filter(Boolean);
+    return [...new Set(all)].map((v, i) => ({
+      id: i,
+      name: v,
+    }));
   }, [bookingData]);
 
   // filter + search
@@ -7037,9 +7090,9 @@ export const BookingsTable = () => {
       const jeopardy = item.ScheduleJeopardy ? "Yes" : "No";
       const createdBy = item.createdByUser?.Username ?? "";
 
-      const fStatus = !selectedStatus || status === selectedStatus;
-      const fJeopardy = !selectedJeopardy || jeopardy === selectedJeopardy;
-      const fCreated = !selectedCreatedBy || createdBy === selectedCreatedBy;
+      const fStatus = !selectedStatus || status === selectedStatus.name;
+      const fJeopardy = !selectedJeopardy || jeopardy === selectedJeopardy.name;
+      const fCreated = !selectedCreatedBy || createdBy === selectedCreatedBy.name;
       if (!(fStatus && fJeopardy && fCreated)) return false;
 
       // search
@@ -7087,9 +7140,9 @@ export const BookingsTable = () => {
   );
 
   const resetFilters = () => {
-    setSelectedStatus("");
-    setSelectedJeopardy("");
-    setSelectedCreatedBy("");
+    setSelectedStatus(null);
+    setSelectedJeopardy(null);
+    setSelectedCreatedBy(null);
     setSearchTerm("");
     setCurrentPage(1);
   };
@@ -7142,54 +7195,39 @@ export const BookingsTable = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+      <div className="grid gap-4 mb-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
+        <ComboboxDemo
+          id="status"
+          placeholder="All Status"
           value={selectedStatus}
-          onChange={(e) => {
-            setSelectedStatus(e.target.value);
+          setValue={(val) => {
+            setSelectedStatus(val);
             setCurrentPage(1);
           }}
-        >
-          <option value="">All Status</option>
-          {uniqueStatus.map((v) => (
-            <option key={v} value={v}>
-              {v || "—"}
-            </option>
-          ))}
-        </select>
+          options={statusOptions}
+        />
 
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+        <ComboboxDemo
+          id="jeopardy"
+          placeholder="All Jeopardy"
           value={selectedJeopardy}
-          onChange={(e) => {
-            setSelectedJeopardy(e.target.value);
+          setValue={(val) => {
+            setSelectedJeopardy(val);
             setCurrentPage(1);
           }}
-        >
-          <option value="">All Jeopardy</option>
-          {uniqueJeopardy.map((v) => (
-            <option key={v} value={v}>
-              {v || "—"}
-            </option>
-          ))}
-        </select>
+          options={jeopardyOptions}
+        />
 
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+        <ComboboxDemo
+          id="createdBy"
+          placeholder="All Created By"
           value={selectedCreatedBy}
-          onChange={(e) => {
-            setSelectedCreatedBy(e.target.value);
+          setValue={(val) => {
+            setSelectedCreatedBy(val);
             setCurrentPage(1);
           }}
-        >
-          <option value="">All Created By</option>
-          {uniqueCreatedBy.map((v) => (
-            <option key={v} value={v}>
-              {v || "—"}
-            </option>
-          ))}
-        </select>
+          options={createdByOptions}
+        />
 
         <button
           onClick={resetFilters}
@@ -7390,8 +7428,8 @@ export const BookingDetailsTable = () => {
   const navigate = useNavigate();
 
   // filters
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const [selectedChangedBy, setSelectedChangedBy] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedChangedBy, setSelectedChangedBy] = useState(null);
 
   // sorting config
   const [sortConfig, setSortConfig] = useState({
@@ -7480,31 +7518,52 @@ export const BookingDetailsTable = () => {
   // Optional: sort alphabetically by description
   return unique.sort((a, b) => a.Description.localeCompare(b.Description));
 }, [bookingDetailsData]);
-
+  const statusOptions = useMemo(() => 
+    uniqueStatus.map((s) => ({
+      id: s.BookingStatusId,
+      name: s.Description,
+    })),
+    [uniqueStatus]
+  );
 
   console.log("bookingDetailsData :", bookingDetailsData);
   console.log("Unique Status:", uniqueStatus);
 
-  const uniqueChangedBy = useMemo(() => {
-    const all = bookingDetailsData.map((b) => b.ChangedBy).filter(Boolean);
-    return ["", ...Array.from(new Set(all)).sort()];
-  }, [bookingDetailsData]);
+  const changedByOptions = useMemo(() => 
+    users.map((u) => ({
+      id: u.IDUser,
+      name: u.Username,
+    })),
+    [users]
+  );
 
-  console.log("Unique ChangedBy:", uniqueChangedBy);
+  console.log("Unique ChangedBy:", changedByOptions);
+
 
   // filter + search
   const filteredData = bookingDetailsData.filter((item) => {
-    const status = item.Status ?? "";
+    const statusId = item.BookingStatusId ?? item.Status?.BookingStatusId ?? "";
     const changedBy = item.ChangedBy ?? "";
 
-    const fStatus = !selectedStatus || status === selectedStatus;
+    const fStatus = 
+      !selectedStatus || String(statusId) === String(selectedStatus.id);
     const fChangedBy =
-      !selectedChangedBy || changedBy.toString() === selectedChangedBy.toString();
+      !selectedChangedBy || String(changedBy) === String(selectedChangedBy.id);
 
     if (!(fStatus && fChangedBy)) return false;
 
     // search with debounced term
-    const haystack = Object.values(item).join(" ").toLowerCase();
+    const haystack = [
+      item.BookingDetailId,
+      item.BookingId,
+      item.ResourceId,
+      item.ResourceAccountId,
+      item.Status?.Description,
+      item.ChangedBy,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
     return haystack.includes(debouncedSearchTerm.toLowerCase());
   });
 
@@ -7538,8 +7597,8 @@ export const BookingDetailsTable = () => {
   );
 
   const resetFilters = () => {
-    setSelectedStatus("");
-    setSelectedChangedBy("");
+    setSelectedStatus(null);
+    setSelectedChangedBy(null);
     setSearchTerm("");
     setCurrentPage(1);
   };
@@ -7586,38 +7645,28 @@ export const BookingDetailsTable = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-6">
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+      <div className="grid gap-4 mb-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+        <ComboboxDemo
+          id="status"
+          placeholder="All Status"
           value={selectedStatus}
-          onChange={(e) => {
-            setSelectedStatus(e.target.value);
+          setValue={(val) => {
+            setSelectedStatus(val);
             setCurrentPage(1);
           }}
-        >
-          <option value="">All Status</option>
-          {uniqueStatus.map((status) => (
-            <option key={status.BookingStatusId} value={status.BookingStatusId}>
-              {status.Description || "—"}
-            </option>
-          ))}
-        </select>
+          options={statusOptions}
+        />
 
-        <select
-          className="p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+        <ComboboxDemo
+          id="changedBy"
+          placeholder="All Changed By"
           value={selectedChangedBy}
-          onChange={(e) => {
-            setSelectedChangedBy(e.target.value);
+          setValue={(val) => {
+            setSelectedChangedBy(val);
             setCurrentPage(1);
           }}
-        >
-          <option value="">All Changed By</option>
-          {uniqueChangedBy.map((v) => (
-            <option key={v} value={v}>
-              {v || "—"}
-            </option>
-          ))}
-        </select>
+          options={changedByOptions}
+        />
 
         <button
           onClick={resetFilters}
@@ -9221,6 +9270,7 @@ export const OTCCodeTable = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+        <OTCAdd onUpdate={fetchOTCCode} />
 
         {/* ✅ Filter WarrantyCondition */}
         <select
@@ -9236,7 +9286,6 @@ export const OTCCodeTable = () => {
           <option value="OutWarranty">Out Warranty</option>
         </select>
 
-        <OTCAdd onUpdate={fetchOTCCode} />
       </div>
 
       {loading && <p>Loading data...</p>}
