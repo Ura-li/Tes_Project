@@ -125,7 +125,7 @@ export const TabsServiceCaseDetails = () => {
       setQrCodeImg(base64);
 
       }catch(error){
-      toast.error("Error generating QR code",error);
+      toast.error(error?.response?.data?.message ?? "Error generating QR code");
       }
   }
   
@@ -141,7 +141,7 @@ export const TabsServiceCaseDetails = () => {
           });
         }
       catch{(error) => {
-        toast.error("Error in Downloading QRcode",error);
+        toast.error(error?.response?.data?.message ?? "Error in Downloading QRcode");
       }};
     }
   useEffect(()=>{
@@ -753,7 +753,7 @@ export const TabsServiceCaseDetails = () => {
         toast.error("Error",res.data.message)
       }
     } catch (error) {
-      toast.error("Failed to update!",error)
+      toast.error(error?.response?.data?.message ?? "Failed to update!")
     }
   };
      const Approve = async () => {
@@ -816,7 +816,7 @@ export const TabsServiceCaseDetails = () => {
           window.location.reload()
         })
       } catch (error) {
-          toast.error("Updated Failed",error)
+          toast.error(error?.response?.data?.message ?? "Updated Failed")
       }
     }
 
@@ -3129,9 +3129,8 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
                             toast.success("Photos uploaded!");
                             setPhotos([]); // reset preview lokal
-                          } catch (e) {
-                            console.error(e);
-                            toast.error("Photo upload failed");
+                          } catch (err) {
+                            toast.error(err?.response?.data?.message ?? "Photo upload failed");
                           }
                         }}
                       >

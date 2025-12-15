@@ -26,9 +26,8 @@ export default function ProductStorage() {
       setCaseData(fetchAllCase);
       const valueFilter = fetchAllCase.filter(c => c.caseinformation?.StorageLocationStore && (c?.caseinformation?.Owner === user.id || c?.caseinformation?.CreatedBy === user.id))
       setCaseData(valueFilter);
-      setError(false)
     } catch (error) {
-      toast.error("Gagal Fetch Data", error);
+      toast.error(error?.response?.data?.message ?? "Gagal Fetch Data")
     } finally {
       setRenderer(false);
     }

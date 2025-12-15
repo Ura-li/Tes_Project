@@ -215,7 +215,7 @@ export const ServiceMoDetailApo = () => {
         const response = await ApiCustomer.get("/api/part-return-status");
         setPartReturnStatuses(response.data?.data ?? []);
       } catch (error) {
-        toast.error("Failed to fetch Part Return Statuses:", error);
+        toast.error(error?.response?.data?.message ?? "Failed to fetch Part Return Statuses:");
       }
     };
 
@@ -467,7 +467,7 @@ export const ServiceMoDetailApo = () => {
         }
       );
     } catch (error) {
-      toast.error("Error updating Material Order Line Item:", error);
+      toast.error(error?.response?.data?.message ?? "Error updating Material Order Line Item");
     }
   };
 

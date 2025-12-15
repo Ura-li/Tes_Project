@@ -385,8 +385,10 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         next.Type = "Individual";
       }
       set({ customerData: next });
-    } catch (err) {
-      toast.error("Gagal mengambil data customer",err);
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ?? "Gagal mengambil data customer",
+      );
     }
   },
 
@@ -398,8 +400,10 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         `/api/asset-information/${caseDetails.AssetID}`
       );
       set({ assetInformation: resAsset.data.data });
-    } catch (err) {
-      toast.error("Gagal mengambil data asset",err);
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ?? "Gagal mengambil data asset",
+      );
     }
   },
 
@@ -412,8 +416,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       );
       const list = Array.isArray(res.data?.data) ? res.data.data : [];
       set({ notesList: list });
-    } catch (err) {
-      toast.error("Error in fetchCaseNotes:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Error in fetch Case Notes");
       set({ notesList: [] });
     }
   },
@@ -424,8 +428,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     try {
       const response = await ApiCustomer.get(`/api/user/${caseDetails.Owner}`);
       set({ ownerUserData: response.data.data });
-    } catch (error) {
-      toast.error("WRONG THING IN FETCH OWNER", error);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message ?? "WRONG THING IN FETCH OWNER");
     }
   },
 
@@ -447,8 +451,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         );
         set({ materialOrders: moRes.data.data || [] });
       }
-    } catch (err) {
-      toast.error("Failed to fetch work orders:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Failed to fetch work orders");
     }
   },
 
@@ -459,8 +463,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       const woidList = workOrders.map((wo: any) => wo.WOID).join(",");
       const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
       set({ materialOrders: res.data.data || [] });
-    } catch (err) {
-      toast.error("Failed to fetch Material orders:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Failed to fetch Material orders");
     }
   },
 
@@ -469,8 +473,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     try {
       const gtcData = caseDetails?.global_trade_check;
       set({ gtcForm: gtcData ?? gtcForm });
-    } catch (err) {
-      toast.error("Error fetching GTC:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Error fetching GTC");
     }
   },
 
@@ -497,8 +501,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
           },
         });
       }
-    } catch (err) {
-      toast.error("Error fetching CSR:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Error fetching CSR");
     }
   },
 
@@ -510,8 +514,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         `/api/case-information/${caseDetails.CaseID}`
       );
       set({ caseForm: { ...caseForm, ...res.data.data } });
-    } catch (err) {
-      toast.error("Error fetching case:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Error fetching case");
     }
   },
 
@@ -523,8 +527,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         `/api/actionlog?caseId=${caseDetails.CaseID}`
       );
       set({ actionLogs: actionlog.data.data || [] });
-    } catch (error) {
-      toast.error("Error fetching ActionLog:", error);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message ?? "Error fetching ActionLog");
     }
   },
 
@@ -532,8 +536,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     try {
       const res = await ApiCustomer.get("/api/otc-code");
       set({ otcCode: res.data.data || [] });
-    } catch (err) {
-      toast.error("Failed to fetch OTC Code:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Failed to fetch OTC Code");
     }
   },
 
@@ -626,8 +630,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
           ProductTypeID: resProduct.data.data.ProductTypeID || "",
         },
       });
-    } catch (err) {
-      toast.error("Gagal mengambil data product");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Gagal mengambil data product");
     }
   },
 
@@ -1063,15 +1067,8 @@ const hasIntentToSave = isDirty;
                     );
                   }
                 }
-              } catch (err) {
-                toast.error("Gagal update case:", err);
-                Swal.fire({
-                  icon: "error",
-                  title: "Error",
-                  text: "Gagal menyimpan data case.",
-                  allowOutsideClick: false,
-                  allowEscapeKey: false,
-                });
+              } catch (err: any) {
+                toast.error("Update gagal",err)
               }
             }
             break;
@@ -1133,7 +1130,6 @@ const hasIntentToSave = isDirty;
       Swal.close();
       return false;
     } catch (error: any) {
-      toast.error("failed:", error);
       Swal.fire({
         icon: "error",
         title: error.message,

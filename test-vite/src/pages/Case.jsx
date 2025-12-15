@@ -127,7 +127,6 @@ import { useServiceCaseStore } from '@/hooks/useServiceCaseStore';
 //? This is the new one comment this when the old one is in use
 import { TabsServiceCaseDetails } from './CaseDetailReimagined';
 import { useUnsavedChangesGuard } from '../hooks/useUnsavedChangesGuard';
-import { toast } from 'sonner';
 
 export const Case = () => {
   const { user } = useAuth();
@@ -198,7 +197,6 @@ export const Case = () => {
 
       await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error) {
-      toast.error("Gagal memuat data:", error);
       Swal.fire({
         icon: "error",
         title: "Gagal memuat data",
