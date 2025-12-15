@@ -20,12 +20,10 @@ export const UploadRma = () => {
      */
     const resource = useTeam();
     const ActiveResource = resource.activeTeam?.id
-    console.log(resource)
     
 
     //SCB Company
     const [selectedTeam, setSelectedTeam] = useState("");
-    // const [searchText, setSearchText] = useState("");
 
     //SCB STATUS
     const [selectedRMAStatus, setSelectedRMAStatus] = useState("");
@@ -51,7 +49,6 @@ export const UploadRma = () => {
                             options={resource?.teams}
                             value={selectedTeam}
                             onChange={setSelectedTeam}
-                            // onSearchInputChange={setSearchText}
 
                             getValue={(team) => team.id}
 

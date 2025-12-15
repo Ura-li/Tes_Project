@@ -914,7 +914,6 @@ const openPopup = () => {
       icon: StepBack,
       label: "SRF",
       onClick: async () => {
-        // return console.log(user);
         await ApiCustomer.post("/api/case-information/case-notes", {
           LogType: "System Info",
           ActionType: "Request SRF",

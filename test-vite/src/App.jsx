@@ -22,12 +22,9 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router'
 import Lorem from './pages/Lorem'
-
 import ApiCustomer from './api'
-
 import {Outlet} from "react-router"
 import debounce from 'lodash.debounce';
 import { SheetProvider } from './context/sheet-context'
@@ -158,9 +155,8 @@ const App = () => {
         <SheetProvider>
           <SidebarProvider
             style={{
-              "--sidebar-width": "11rem",
-              "--sidebar-width-mobile": "20rem",
-              
+              "--sidebar-width": "15rem",
+              "--sidebar-width-mobile": "20rem",    
             }}
           >
             <AppSidebar />

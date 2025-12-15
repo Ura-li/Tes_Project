@@ -47,77 +47,9 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
         { key: "over15", label: ">15" },
     ];
 
-    
-
     const handleChange = (field, value) => {
         setFilters(prev => ({ ...prev, [field]: value }));
     };
-
-    // const dataTime = [
-    //     {
-    //         status: "Finish Repair",
-    //         data: {
-    //             within4: [],
-    //             within8: [],
-    //             within15: [],
-    //             over15: [],
-    //         }
-    //     },
-    //     {
-    //         status: "NEW_POPDoc",
-    //         data: {
-    //             within4: [],
-    //             within8: [],
-    //             within15: [],
-    //             over15: [],
-    //         }
-    //     },
-    //     {
-    //         status: "Close",
-    //         data: {
-    //             within4: [],
-    //             within8: [],
-    //             within15: [],
-    //             over15: [],
-    //         },
-    //         hide: filterClose
-    //     },
-    // ]
-
-
-    
-    // const getDaysAgo = (val) => {
-    //     const date = val ? (val instanceof Date ? val : new Date(val)) : null;
-    //     if (!date || isNaN(date)) return Infinity;
-    //     return Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
-    // };
-    // let groupedDataTime = [];
-
-    // if (caseData) {
-    //     groupedDataTime = dataTime.map((t) => {
-    //         const filt = caseData.filter((data) =>
-    //             data.UpdatedActionLogs[0]?.dataNew === t.status
-    //         );
-
-    //         const groupedCases = {
-    //             within4: [],
-    //             within8: [],
-    //             within15: [],
-    //             over15: [],
-    //         };
-
-    //         filt.forEach((c) => {
-    //             const days = getDaysAgo(c.UpdateOn);
-    //             if (days <= 4) groupedCases.within4.push(c);
-    //             else if (days <= 8) groupedCases.within8.push(c);
-    //             else if (days <= 15) groupedCases.within15.push(c);
-    //             else groupedCases.over15.push(c);
-    //         });
-
-    //         t.data = groupedCases;
-    //     });
-    // }
-
     return (
         <Sidebar side="right" variant="sidebar" className={cn("z-10 top-16 h-full", className)}>
             <Tabs defaultValue="search" className="w-full h-full dark:bg-gradient-to-t   dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-13% dark:from-4%">
@@ -224,10 +156,6 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                                                 <TableHead className={''}> &gt; 15  </TableHead>
                                             </TableRow>
                                             <TableRow>
-                                                {/* <TableCell className={'p-2'} onClick={''}>{dataTime[idx]?.data?.within4?.length || ''}</TableCell>
-                                                <TableCell className={'p-2'} onClick={''}>{dataTime[idx]?.data?.within8?.length || ''} </TableCell>
-                                                <TableCell className={'p-2'} onClick={''}>{dataTime[idx]?.data?.within15?.length || ''} </TableCell>
-                                                <TableCell className={'p-2'} onClick={''}>{dataTime[idx]?.data?.over15?.length || ''} </TableCell> */}
                                                 {["within4","within8","within15","over15"].map((key) => (
                                                     <TableCell
                                                         key={key}
@@ -256,48 +184,6 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
                             </SidebarGroup>
                             
                         ))}
-                        {/* {groupedDataTime?.map((group, idx) => (
-                            <div key={group.status}>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead
-                                                colSpan={5}
-                                                className="text-center font-semibold text-black text-[15px] ring-4 ring-teal-500"
-                                            >
-                                                {group.status}
-                                            </TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-
-                                    <TableBody>
-                                        <TableRow>
-                                            {timeRanges.map((r) => (
-                                                <TableHead key={r.key} className="text-center">
-                                                    {r.label}
-                                                </TableHead>
-                                            ))}
-                                        </TableRow>
-
-                                        <TableRow>
-                                            {timeRanges.map((r) => (
-                                                <TableCell
-                                                    key={r.key}
-                                                    className={cn(
-                                                        "p-2 text-center cursor-pointer hover:bg-teal-100",
-                                                        filters.TimeLength === r.key && "bg-teal-200 font-semibold"
-                                                    )}
-                                                    onClick={() => handleChange("TimeLength", filters.TimeLength === r.key ? "" : r.key)}
-                                                >
-                                                    {group.data?.[r.key]?.length || 0}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        ))} */}
-
                         <SidebarGroup hidden={!filterClose}>
                             <SidebarGroupContent className={'italic text-center text-gray-500 dark:text-gray-400'}>
                                 == Closed Case Data Hidden ==

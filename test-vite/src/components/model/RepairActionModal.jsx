@@ -48,9 +48,8 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
       const res = await ApiCustomer.get(`/api/service-type?ProblemCategory=${problemCategory}`);
       const list = res.data?.data || [];
       setServiceTypeList(list)
-      console.log("LIST : ",list)
     } catch (e) {
-      console.error("Search Service Type failed", e);
+      toast.error("Search Service Type failed", e);
       setServiceTypeList([])
     }
   }
@@ -61,7 +60,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
       setNMUList(list);
       setNMUNotFound(list.length === 0);
     } catch (e) {
-      console.error("Search NMU failed", e);
+      toast.error("Search NMU failed", e);
       setNMUList([]);
       setNMUNotFound(true);
     }
@@ -74,7 +73,7 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
       setNMUItemList(list);
       setNMUItemNotFound(list.length === 0);
     } catch (e) {
-      console.error("Search NMU failed", e);
+      toast.error("Search NMU failed", e);
       setNMUItemList([]);
       setNMUItemNotFound(true);
     }
@@ -90,7 +89,6 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
   useEffect(()=>{
     if(isOutWarranty){
       const targetServiceType = onCancelWo ? "Cancel Repair" : "Standard Replacement / Failure (Part Used)"
-      console.log(targetServiceType);
       const target = serviceTypeList.find(
         item => item.ServiceTypeName === targetServiceType
       );
@@ -106,7 +104,6 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
     setSelectedNMU(foundNMU);
 
     if (foundNMU) {
-      console.log("THIS CHANGED", foundNMU);
       setNMUItemNeed(foundNMU.ItemNeeded);
       setNMUVersionNeed(foundNMU.VersionNeeded);
       if(foundNMU.ItemNeeded === true){
@@ -127,15 +124,9 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
     const now = new Date()
 
     const diffDays = Math.floor((now - createdDate) / (1000*60 *60*24))
-    // console.log("THIS CASE HACE : ",diffDays)
-    // console.log("THIS CASE HACE : ",diffDays > 3)
     setShowDelayCode(diffDays >= 3);
   }, [workOrders?.CreatedOn])
 
-  /**
-   * TODO FOR SLAMET :
-   * ENUM TO LABEL DELAY CODE
-   */
   const delayCodeEnumToLabel = {
     PartBackOrder: "Part Back Order",
     IntermittentCase: "Intermitten Case",
@@ -202,7 +193,6 @@ export const RepairActionDialog = ({ open, onOpenChange, onSubmit, canEdit, onCa
     setStep("form"); // back to form
   };
   
-console.log(formData);
   return (
     <Dialog open={open} onOpenChange={(o) => {
       if (!o) setStep("form"); // reset on close
@@ -247,7 +237,6 @@ console.log(formData);
                     "Hardware",
                     "Software"
                     ]}
-                  // onSearchInputChange={searchNMU}
                   readOnly={!canEdit}
                 />
               </CaseField>
@@ -263,14 +252,8 @@ console.log(formData);
                     label: item.ServiceTypeName,
                     value: item.ServiceTypeId,
                   }))}
-                  // onSearchInputChange={searchNMU}
                   readOnly={!canEdit}
                 />
-                {/* <Input
-                  id="ServiceType"
-                  value={workOrders?.serviceCatalog?.warranty_services?.Service_description || ""}
-                  onChange={(e) => handleChange("serviceType", e.target.value)}
-                /> */}
               </CaseField>
               <CaseField label="Defect desc" star={canEdit} lock={!canEdit}>
                 <Textarea
@@ -301,7 +284,6 @@ console.log(formData);
                       label: item.NMUDesc,
                       value: item.NMUId,
                     }))}
-                    // onSearchInputChange={searchNMU}
                     readOnly={!canEdit}
                   />
               </CaseField>
@@ -320,7 +302,6 @@ console.log(formData);
                     label: item.itemName,
                     value: item.id,
                   }))}
-                  // onSearchInputChange={searchNMU}
                   readOnly={!canEdit}
                 />
               </CaseField>
@@ -344,7 +325,6 @@ console.log(formData);
                   }}
                   placeholder="Search Delay Code..."
                   options={Object.values(delayCodeEnumToLabel)}
-                  // onSearchInputChange={searchNMU}
                   readOnly={!canEdit}
                 />
               </CaseField>

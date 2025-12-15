@@ -48,6 +48,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TabsServiceWO } from "./TabsServiceReimagined";
+import { toast } from "sonner";
 
 export const ServiceWork = () => {
   const user = getUserFromToken();
@@ -146,7 +147,7 @@ export const ServiceWork = () => {
       }
       return true;
     } catch (err) {
-      console.error("Error validating RequestedDateTimeCustomer:", err);
+      toast.error("Error validating RequestedDateTimeCustomer:", err);
       Swal.fire({
         icon: "error",
         title: "Validation Error",
@@ -267,10 +268,6 @@ export const ServiceWork = () => {
 
                   <CaseField label="Work Order Description" lock span={3}>
                     <Input
-                      
-                      // value={WOGeneral.WorkOrderDescription}
-                      // onChange={handleWOGeneral('WorkOrderDescription')}
-                      // placeholder="---"
                       className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       value={workOrder?.caseinformation?.CaseSubject}
                     />
@@ -278,7 +275,6 @@ export const ServiceWork = () => {
 
                   <CaseField label="Work Order Number" lock>
                     <Input
-                      
                       className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                       value={WOGeneral.WorkOrderNumber || "---"}
                       readOnly
@@ -319,7 +315,6 @@ export const ServiceWork = () => {
 
                   <CaseField label="Work Order Type" lock>
                     <Input
-                      
                       className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                       value={WOGeneral.WorkOrderType || "---"}
                       onChange={handleWOGeneral("WorkOrderType")}
@@ -328,7 +323,6 @@ export const ServiceWork = () => {
                   </CaseField>
                   <CaseField label="Shipment State" lock={!canaddce}>
                     <Input
-                      
                       value={WOGeneral.ShipmentState}
                       onChange={handleWOGeneral("ShipmentState")}
                       placeholder="---"
@@ -338,7 +332,6 @@ export const ServiceWork = () => {
 
                   <CaseField label="Priority" lock>
                     <Input
-                      
                       className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
                       value={WOGeneral.Priority || "---"}
                       onChange={handleWOGeneral("Priority")}

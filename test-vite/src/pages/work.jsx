@@ -50,8 +50,7 @@ export const Work = () => {
   try {
     await fetchWorkOrderBundle(woid);
   } finally {
-    // Swal.close();\
-    console.log("Fetch work order bundle completed.");
+    
   }
     };
 
