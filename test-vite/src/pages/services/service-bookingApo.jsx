@@ -46,6 +46,7 @@ import { TabsBooking } from '../../components/tests/tab';
 import { getUserFromToken } from "@/lib/utils/auth";
 import CaseField from '@/components/CaseField';
 import { useAuth } from '@/context/auth-context';
+import { toast } from 'sonner';
 
 
 function formatDateForInput(dateString) {
@@ -147,7 +148,6 @@ async function fetchBooking() {
   try {
     const response = await ApiCustomer.get(`/api/bookings/${bookingid}`);
     const data = response.data; // <- Harusnya langsung .data, BUKAN .data.booking
-    console.log("data fetch booking : ",data)
     setBookingData(response.data);
     
     // Set field-field yang kamu butuhkan
@@ -158,8 +158,6 @@ async function fetchBooking() {
     setSubkTechnicianName(data?.bookingDetails?.[0]?.subkTechnician?.Name || "");
     setSubkTechnicianId(data?.bookingDetails?.[0]?.subkTechnician?.SubkTechnicianId || "");
     
-    // setSubkEngineerName(data?.bookingDetails?.[0]?.engineer?.Name || "");
-    // setSubkEngineerId(data?.bookingDetails?.[0]?.engineer?.IDUser || "");
 
     setSubkEngineerName(data?.bookingDetails[0]?.subkTechnician?.Name || "");
     setSubkEngineerId(data?.bookingDetails[0]?.subkTechnician?.SubkTechnicianId || "");
@@ -190,7 +188,6 @@ async function fetchBooking() {
     setTotalInProgressDurationInMinutes(data?.TotalInProgressDurationInMinutes || 0);
     setTotalBreakDurationInMinutes(data?.TotalBreakDurationInMinutes || 0);
   } catch (error) {
-    console.error("Failed to fetch booking data:", error);
     Swal.fire({
     icon: 'error',
     title: 'Gagal memuat data',
@@ -285,7 +282,6 @@ async function fetchBooking() {
       ActualArrivalTimeUserTime: DateHelper.toDB(actualArrivalTimeUserTime || null),
     };
     
-    console.log("Booking Data : ",updatedBookingData)
     await setBookingData(updatedBookingData);
     try {
       await ApiCustomer.patch(`/api/bookings/${bookingid}`, {
@@ -313,13 +309,12 @@ async function fetchBooking() {
         window.location.href = `/app/work/${bookingData.WOID}`
       })
     } catch (error) {
-      console.error("Error updating booking:", error);
+      toast.error("Error updating booking:", error);
     }
   };
 
   const handleSearchResource = debounce(async (keyword) => {
-    
-    console.log('Debounced keyword:', keyword); // <-- ADD THIS
+    // <-- ADD THIS
     if (!keyword) {
       setSearchResultsResource([]);
       return;
@@ -330,9 +325,8 @@ async function fetchBooking() {
         params: { keyword }
       });
       setSearchResultsResource(response.data.data);
-      console.log("Search Result Resource : ",response.data)
     } catch (error) {
-      console.error("Error fetching Subk Technician search:", error);
+      toast.error("Error fetching Subk Technician search:", error);
     }
   }, 500); 
 
@@ -348,9 +342,8 @@ async function fetchBooking() {
         ...prev,
         ResourceAccountId: data.ResourceAccountId                            
       }))
-      console.log("Accpunt : ",data)
     } catch (error) {
-      console.error("Error fetching Subk Technician search:", error);
+      toast.error("Error fetching Subk Technician search:", error);
     }
   }
   
@@ -365,9 +358,9 @@ async function fetchBooking() {
         params: { keyword }
       });
       setSearchResultsAccount(response.data);
-      console.log("a")
+    
     } catch (error) {
-      console.error("Error fetching Subk Technician search:", error);
+      toast.error("Error fetching Subk Technician search:", error);
     }
   }, 500); 
 
@@ -400,7 +393,7 @@ async function fetchBooking() {
       
       setSearchResultsSubkTechnician(filtered);
     } catch (error) {
-      console.error("Error fetching Subk Technician search:", error);
+      toast.error("Error fetching Subk Technician search:", error);
     }
   }, 500); 
 
@@ -416,7 +409,7 @@ async function fetchBooking() {
       });
       setSearchResultsSubkTechnicianLearner(response.data);
     } catch (error) {
-      console.error("Error fetching Subk Technician search:", error);
+      toast.error("Error fetching Subk Technician search:", error);
     }
   }, 500); // 500ms delay
 
@@ -431,12 +424,8 @@ async function fetchBooking() {
         const diffHours = Math.max(diffMs / (1000 * 60 * 60), 0);
 
         setDurationInMinutesUserTime(diffHours);
-
-        console.log("Start Time : ", startTime);
-        console.log("End Time   : ", endTime);
-        console.log("Duration   : ", diffHours, "menit");
       } else {
-        console.warn("Invalid Date:", startTimeUserTime, endTimeUserTime);
+        toast.warning("Invalid Date:", startTimeUserTime, endTimeUserTime);
       }
     }
   }, [endTimeUserTime, startTimeUserTime])
@@ -465,7 +454,6 @@ async function fetchBooking() {
   }
 
 
-  console.log("booking data is ther ",bookingData?.workorder?.caseinformation)
 
 
   let canEdit;
@@ -491,10 +479,9 @@ async function fetchBooking() {
       }));
 
       setBookingStatusOptions(mapOptionbookingStatus);
-      console.log("Booking Status Options:", mapOptionbookingStatus);
 
     } catch (error) {
-      console.error('Error fetching booking status options:', error);
+      toast.error('Error fetching booking status options:', error);
     }
   };
   useEffect(() => {
@@ -507,10 +494,6 @@ async function fetchBooking() {
     <div className='bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%'>
       {/* Quick actions header */}
       <div className="flex items-center gap-2 mb-2 bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
-        {/* <Button variant="secondary" onClick={handleUpdate}>Save</Button> */}
-        {/* <Button variant="default" onClick={handleComplete} disabled={!canCompleteBooking()}>
-          Mark Completed
-        </Button> */}
       </div>
       <TabsBooking
         handleUpdate={handleUpdate}
@@ -518,7 +501,6 @@ async function fetchBooking() {
         handleComplete={handleComplete}
       />
     <Card className="mt-2 rounded-none bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
-      {/* <Button onClick={handleUpdate}>Save</Button> */}
       
       <Tabs value={tab} onValueChange={setTab}>
         <CardHeader className={"flex flex-col  p-2 gap-3 w-full bg-gradient-to-t dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"}>
@@ -612,7 +594,6 @@ async function fetchBooking() {
                     value={accountName}
                     onChange={(e) => {
                       setAccountName(e.target.value);
-                      // handleSearchAccount(e.target.value);
                     }}
                     readOnly
                   />
@@ -645,7 +626,6 @@ async function fetchBooking() {
                   placeholder="---"
                   value={subkEngineerName}
                   onChange={(e) => {
-                    console.log("Subuk Tech Name in APO : ",e)
                     setSubkEngineerName(e.target.value);
                     handleSearchSubkTechnician(e.target.value);
                   }}
@@ -657,7 +637,6 @@ async function fetchBooking() {
                         key={tech.SubkTechnicianId}
                         className="p-2 cursor-pointer hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-gray-600"
                         onClick={() => {
-                          console.log("USER IN SUBK CLICK : ",tech);
                           setSubkEngineerName(tech.Name);
                           setSubkEngineerId(tech.SubkTechnicianId);
                           setSearchResultsSubkTechnician([]); // Clear suggestions
@@ -860,7 +839,6 @@ async function fetchBooking() {
                 ></DatePicker>
               </CaseField>
               <CaseField label={"End Time"} lock={!canEdit} span={2} >
-                {/* {console.log("END TIME IN RETURN LOOPING", endTimeUserTime)} */}
                 <DatePicker
                   value={endTimeUserTime ? new Date(endTimeUserTime) : ""}
                   onChange={
@@ -1001,7 +979,7 @@ const CheckRequestedDateTimeCustomer = async (rawDateTime) => {
     }
 
     const formatted = formatDateForInput(rawDateTime);
-    console.log('Formatted:', formatted); //  Debug output
+ 
 
     const isValidFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(formatted);
     if (!isValidFormat) {
@@ -1037,7 +1015,6 @@ const CheckRequestedDateTimeCustomer = async (rawDateTime) => {
 
     return true;
   } catch (error) {
-    console.error('Error saat validasi tanggal:', error);
     await Swal.fire({
       icon: 'error',
       title: "Terjadi kesalahan",
@@ -1061,7 +1038,7 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
       setLoading(true);
       
       const isValid = await CheckRequestedDateTimeCustomer(RequestedDateTimeCustomer);
-      console.log("Validasi result:", isValid);
+     
       if (!isValid) return;
 
       
@@ -1085,7 +1062,7 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
         navigate(`/app/bookings/${BookingId}`);
       }
     } catch (error) {
-      console.error('Gagal membuat booking:', error);
+      toast.error('Gagal membuat booking:', error);
     } finally {
       setLoading(false);
     }
