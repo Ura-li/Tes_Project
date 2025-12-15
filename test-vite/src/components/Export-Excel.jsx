@@ -14,7 +14,6 @@ export const ExportExcel = ({ caseData }) => {
     const fetchCases = async () => {
       const res = await ApiCustomer.get("/api/case-information");
       const json = res.data
-      console.log("JSON DATA FETCH CASE EXCEL : ",json);
       const transformed = json.data.map((c) => {
         // Get accessories string
         const accessories =
@@ -146,7 +145,6 @@ export const ExportExcelPart = ({}) => {
     const fetchMo = async () => {
       const res = await ApiCustomer.get("/api/mo-detaill");
       const json = res.data
-      console.log("Json MO Data : ", json)
       const transformed = json.data.map((m) => {
       return {
        Moid: m.MOID || "N/A",

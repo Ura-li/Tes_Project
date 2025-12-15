@@ -19,6 +19,7 @@ import Swal from 'sweetalert2'
 import { STATUS_ENUM_TO_LABEL } from './CaseDetail'
 import { Label } from '@/components/ui/label'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 
 
 
@@ -75,16 +76,6 @@ export const FlowCaseData = (user) => {
 
         return mainfilter;
         });
-      
-      // const sortedCases = filtercases.sort((a, b) => {
-      //   const dateAraw = a.caseinformation.ActionLog[0]?.ChangeAt;
-      //   const dateBraw = b.caseinformation.ActionLog[0]?.ChangeAt;
-
-      //   const dateA = dateAraw ? (dateAraw instanceof Date ? dateAraw : new Date(dateAraw)) : new Date(0);
-      //   const dateB = dateBraw ? (dateBraw instanceof Date ? dateBraw : new Date(dateBraw)) : new Date(0);
-
-      //   return dateB - dateA; // newest first
-      // });
 
       const sortedCases = filtercases.sort((a, b) => {
         const dateAraw = a.UpdateOn;
@@ -105,7 +96,7 @@ export const FlowCaseData = (user) => {
         title: 'Error',
         text: 'Gagal memuat data. Silakan coba lagi.',
       });
-      console.error('Error fetching case data:', error);
+      toast.error('Error fetching case data:', error);
       setError(true);
       throw error;
     } finally {
@@ -290,7 +281,6 @@ export const FlowCaseData = (user) => {
   }
 
   const finishedCases = caseData.filter(c => c.CaseStatus === "FinishRepair");
-  // console.log(caseData)
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 6;
   // if the window width size more than 2400px set page size to 12

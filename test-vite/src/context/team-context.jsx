@@ -1,12 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import ApiCustomer from "../api";
 import { useAuth } from "./auth-context";
+import { toast } from "sonner";
 
 const TeamContext = createContext();
 
 export function TeamProvider({children}) {
     const { user } = useAuth();
-    console.log("USER", user)
     const [teams, setTeams] = useState([]);
     const [activeTeam, setActiveTeam] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -18,7 +18,6 @@ export function TeamProvider({children}) {
             try {
                 const res = await ApiCustomer.get('/api/resources?limit=1000');
                 const response = res.data.data;
-                // console.log("RES CONTEXT", response)
                 const mapped = response.map(r => ({
                     id: r.ResourceId,
                     name: r.Name, 
@@ -35,7 +34,6 @@ export function TeamProvider({children}) {
                     const defaultFromJWT = mapped.find(
                         (t) => t.id === user.resource
                     );
-                    console.log("DEFC JWT",defaultFromJWT, mapped)
                     if (defaultFromJWT) {
                         setActiveTeam(defaultFromJWT);
                         return;
@@ -45,7 +43,7 @@ export function TeamProvider({children}) {
                 setActiveTeam(mapped[0]);   
 
             } catch (error) {
-                console.error("Failed to load Teams,", error);
+                toast.error("Failedd to load Teams",error)
             } finally{
                 setLoading(false)
             }

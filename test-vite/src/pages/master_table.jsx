@@ -59,8 +59,8 @@ import {
 } from "@/components/ui/table";
 import { ComboboxDemo } from "@/components/sc-select";
 import { Cancel } from "@radix-ui/react-alert-dialog";
-// import PDFButton from "./components/PDFButton";
-// import ServiceRequestPDF from "./components/service-request-form";
+import { toast } from "sonner";
+
 export const Contact_table = () => {
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -115,7 +115,7 @@ export const Contact_table = () => {
       const response = await ApiCustomer.get(`/api/contact-information`);
       setContacts(response.data.data || []);
     } catch (err) {
-      console.error("Error fetching contact data:", err);
+      toast.error("Error fetching contact data:", err);
       setError("Failed to fetch data");
     } finally {
       setLoading(false);
@@ -774,7 +774,7 @@ export const Company_table = () => {
       setCompanies(res.data.data);
       Swal.close();
     } catch (err) {
-      console.error("Error fetching company data:", err);
+      toast.error("Error fetching company data:", err);
       setError("Failed to fetch data");
       Swal.fire({
         title: "Error!",
@@ -1143,7 +1143,6 @@ export const Company_table = () => {
 
 export const Case_table = () => {
   const { user } = useAuth();
-  // return console.log("TOKEN CASE US",user);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [currentPage, setCurrentPage] = useState(1);
@@ -1226,7 +1225,7 @@ export const Case_table = () => {
       }
       Swal.close();
     } catch (err) {
-      console.error("Error fetching case data:", err);
+      toast.error("Error fetching case data:",err)
       setError("Error fetching data");
       Swal.close();
       Swal.fire({
@@ -1552,7 +1551,6 @@ const EnumToLabel = {
     <div className="grid p-6 grid-cols-1 w-full rounded-2xl
                     bg-slate-50 text-slate-800
                     dark:bg-slate-900/60 dark:text-slate-100">  
-      {/* <h2 className="mb-4 text-xl font-bold">ID Daily Aging Cases Javag FY</h2> */}
       <h2 className="mb-4 text-2xl font-semibold">View All The Case</h2>
 
       {/* Search */}
@@ -1990,12 +1988,10 @@ export const Assets_table = () => {
       if (totalPages === 1 && Array.isArray(first?.data) && !first?.data?.data) {
         all = first.data;
       }
-
-      console.log("All assets fetched:", all);
       setAssets(all);
       setFilteredAssets(all);
         } catch (err) {
-          console.error("Error fetching asset data:", err);
+          toast.error("Error fetching asset data:", err);
           setError("Failed to fetch data");
         } finally {
           setLoading(false);
@@ -2176,7 +2172,7 @@ export const Assets_table = () => {
       <h2 className="mb-2 text-2xl font-bold">📦 Asset Information</h2>
 
       {/* Search + Reset */}
-      <div className="flex flex-wrap items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 ">
         <input
           type="text"
           placeholder="🔍 Search asset..."

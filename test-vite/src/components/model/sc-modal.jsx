@@ -225,11 +225,8 @@ export function BtnModalContact({
 
     const [provinces, setProvinces] = useState([]);
     const [cities, setCities] = useState([]);
-    console.log("CHECK DATA FORM BTN MOdAL",selectedContact)
 
   //set modal state 
-  console.log("Company Data in Modal Contact : ",companyData)
-  
   const isControlled = externalOpen !== undefined;
   const [internalOpen, setInternalOpen] = useState(false);
   const open = isControlled ? externalOpen : internalOpen;
@@ -321,18 +318,15 @@ export function BtnModalContact({
   // Function to fetch updated contacts
   const fetchContacts = async (companyId) => {
     try {
-      console.log("Fetching contacts for Company ID:", companyId); //  Debugging
       const response = await ApiCustomer.get(`/api/contact-information?SiteAccountID=${companyId}`);
-      console.log("response Fetch Contacts: ", response.data)
       return response.data.data; //  Return updated contacts
     } catch (error) {
-      console.error("Error fetching contacts:", error);
+      toast.error("Error fetching contacts:", error);
       return [];
     }
   };
   // Handle form submission
   const handlerContactSubmit = async () => {
-    console.log("formDataContact", formDataContact);
     try {
         Swal.fire({
         title: 'Saving...',
@@ -352,7 +346,6 @@ export function BtnModalContact({
         responseMessage = 'Kontak berhasil diperbarui!';
       } else {
         //  Add new contact
-        console.log("Selected Company in ModalContactSubmit : ", selectedCompany)
         await ApiCustomer.post("/api/contact-information", formDataContact);
         responseMessage = 'Kontak berhasil ditambahkan!';
       }
@@ -373,12 +366,11 @@ export function BtnModalContact({
         if (selectedCompany?.SiteAccountID) {
           const updatedContacts = await fetchContacts(selectedCompany.SiteAccountID);
           setSelectedContact(updatedContacts);
-          console.log("Updated Selected Contacts:", updatedContacts);
         }
       }, 300); 
   
     } catch (error) {
-      console.error("Error adding contact:", error);
+      toast.error("Error adding contact:", error);
       Swal.fire({
         icon: 'error',
         title: 'Gagal!',
@@ -393,7 +385,6 @@ export function BtnModalContact({
   // make the 'same in account information' button :
   const handleCopyFromAccount = () => {
     if (companyData == null) return;
-  
     const fieldsToCopy = [
       "AddressLine1",
       "AddressLine2",
@@ -632,7 +623,6 @@ export function BtnModalAsset({
   onOpenChange : externalOnChange,
 }) {
   //set asset
-  console.log("BtnModalAsset ContactID : ",contactID)
   const [assets, setAssets] = useState([])
   //prevent infinite loop of calling fetchDataAssets
   useEffect(() => {
@@ -687,8 +677,6 @@ export function BtnModalAsset({
     if (!contactID) return;
     fetchUnownedAssets();
     fetchDataAssets();
-    console.log("selectedContactForCase : ",selectedContactForCase)
-    console.log('ContactIDFromSelectedContact')
   }, [contactID, currentPage, searchAsset]);
 
   const fetchDataAssets = async () => {
@@ -704,7 +692,7 @@ export function BtnModalAsset({
       return response.data.data;
     } catch (error) {
       setError("Failed to load asset data.");
-      console.error("Error fetching assets:", error);
+      toast.error("Error fetching assets:", error);
       return []; //  Return an empty array instead of `undefined`
     } finally{
       setLoading(false);
@@ -722,10 +710,9 @@ export function BtnModalAsset({
         query += `ContactID=${contactID}`
       }
       const response = await ApiCustomer.get(`/api/asset-information?${query}`);
-      console.log("response Fetch Contacts: ", response.data)
       return response.data.data; //  Return updated contacts
     } catch (error) {
-      console.error("Error fetching contacts:", error);
+      toast.error("Error fetching contacts:", error);
       return [];
     }
   }
@@ -734,13 +721,12 @@ export function BtnModalAsset({
   const fetchUnownedAssets = async () => {
     setLoadingUnowned(true);
     try {
-      console.log("Search Unowned : ",searchUnowned)
       const response = await ApiCustomer.get(`/api/asset-information/kepemilikan/unowned`, {
         params: {page: 1, limit: 10, search: searchUnowned},
       });
       setUnownedAssets(response.data.data);
     } catch (error) {
-      console.error("Error fetching unowned assets:", error);
+      toast.error("Error fetching unowned assets:", error);
     }
     setLoadingUnowned(false);
   };
@@ -787,7 +773,7 @@ export function BtnModalAsset({
         showConfirmButton: false,
         allowEscapeKey: false,
       });
-      console.error("Terjadi kesalahan : ", error);
+      toast.error("Terjadi kesalahan : ", error);
     }
   };
   
@@ -1037,7 +1023,7 @@ export function AssetEdit({ assetId, onUpdate }) {
         EOW_Date: data?.EOW_Date ? data.EOW_Date.split("T")[0] : "",
       });
     } catch (error) {
-      console.error("Error fetching asset information:", error);
+      toast.error("Error fetching asset information:", error);
     }
   };
 
@@ -1089,7 +1075,7 @@ export function AssetEdit({ assetId, onUpdate }) {
       onUpdate();
       setIsOpen(false);
     } catch (error) {
-      console.error("Error updating asset:", error);
+      toast.error("Error updating asset:", error);
       Swal.fire({
         icon: "error",
         title: "Update Failed",
@@ -1300,7 +1286,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
         NPWP: data?.NPWP || "",
       });
     } catch (error) {
-      console.error("Error fetching company information:", error);
+      toast.error("Error fetching company information:", error);
     }
   };
 
@@ -1377,7 +1363,7 @@ export function CompanyEdit({ siteAccountId, onUpdate }) {
       setIsOpen(false);
       
     } catch (error) {
-      console.error("Error updating company:", error);
+      toast.error("Error updating company:", error);
       Swal.fire({
         icon: 'error',
         title: 'Update Failed',
@@ -1595,7 +1581,7 @@ export function ContactEdit({ contactID, onUpdate }) {
       setPicEmail(data?.PIC_Email || "");
       setPicPhone(data?.PIC_Phone || "");
     } catch (error) {
-      console.error("Error fetching contact information:", error);
+      toast.error("Error fetching contact information:", error);
     }
   };
 
@@ -1653,7 +1639,7 @@ export function ContactEdit({ contactID, onUpdate }) {
       onUpdate();
       setIsOpen(false);
     } catch (error) {
-      console.error("Error updating contact:", error);
+      toast.error("Error updating contact:", error);
       Swal.fire({
         icon: "error",
         title: "Update Failed",
@@ -1787,7 +1773,7 @@ export function ContactDelete ({ contactID }) {
         await Swal.fire('Berhasil!', 'Kontak berhasil dihapus.', 'success');
         window.location.reload();
       } catch (error) {
-        console.error("Error deleting contact:", error);
+        toast.error("Error deleting contact:", error);
         await Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus.', 'error');
       }
     }
@@ -1823,7 +1809,7 @@ export function ContactDelete ({ contactID }) {
           const response = await ApiCustomer.get("/api/product-type");
           setProductTypes(response.data.data || []);
         } catch (err) {
-          console.error("Failed to fetch product types:", err);
+          toast.error("Failed to fetch product types:", err);
         }
       }
       fetchProductTypes();
@@ -1854,7 +1840,6 @@ export function ContactDelete ({ contactID }) {
 
       try {
         const response = await ApiCustomer.post("/api/product-information", formDataProduct);
-        console.log("Success:", response.data);
         Swal.fire({
           icon: 'success',
           title: 'Berhasil!',
@@ -1865,7 +1850,7 @@ export function ContactDelete ({ contactID }) {
           allowEscapeKey: false,
         }).then(() => window.location.reload());
       } catch (err) {
-        console.error("Error saving product:", err);
+        toast.error("Error saving product:", err);
         Swal.fire({
           title: "Error!",
           text: "Failed to save Product. Please try again.",
@@ -1969,7 +1954,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
           HWPC: data.HWPC || "",
         });
       } catch (err) {
-        console.error("Error fetch product:", err);
+        toast.error("Error fetch product:", err);
       }
     };
 
@@ -1978,7 +1963,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
         const res = await ApiCustomer.get("/api/product-type");
         setProductTypes(res.data.data || []);
       } catch (err) {
-        console.error("Error fetch product types:", err);
+        toast.error("Error fetch product types:", err);
       }
     };
 
@@ -2022,7 +2007,7 @@ export function ProductEdit({ ProductNumber, onUpdate }) {
 
 
     } catch (err) {
-      console.error("Error update:", err);
+      toast.error("Error update:", err);
       Swal.fire({ icon: "error", title: "Failed", text: "Update failed, please try again." });
     }
   };
@@ -2105,8 +2090,6 @@ export function ProductDelete ({ ProductNumber, isModalOpen, setIsModalOpen, onU
     if (result.isConfirmed) {
       try {
         const response = await ApiCustomer.delete(`/api/product-information/${ProductNumber}`);
-  
-        console.log("Server Response:", response.data);
         if (response.status === 409 || response.data.success === false) {
           //  Restriction triggered - Show alert message
           Swal.fire({
@@ -2202,8 +2185,6 @@ export function ProductTypeAdd () {
     
       try {
         const response = await ApiCustomer.post("/api/product-type", formDataProductType);
-        console.log("Success:", response.data);
-    
         Swal.fire({
           icon: 'success',
           title: 'Berhasil!',
@@ -2217,7 +2198,7 @@ export function ProductTypeAdd () {
         });
 
       } catch (err) {
-        console.error("Error saving product type: ", err);
+        toast.error("Error saving product type: ", err);
     
         Swal.fire({
           title: "Error!",
@@ -2305,7 +2286,7 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
       setProductGroup(data?.ProductGroup || "");
       setProductType(data?.ProductType || "");
     } catch (error) {
-      console.error("Error fetching productType information:", error);
+      toast.error("Error fetching productType information:", error);
     }
   };
 
@@ -2357,7 +2338,7 @@ export function ProductTypeEdit({ ProductTypeID, onUpdate }) {
       setIsOpen(false); 
   
     } catch (error) {
-      console.error("Error updating productType:", error);
+      toast.error("Error updating productType:", error);
   
       Swal.fire({
         icon: 'error',
@@ -2445,8 +2426,6 @@ export function ProductTypeDelete ({ ProductTypeID, isModalOpen, setIsModalOpen,
     if (result.isConfirmed) {
       try {
         const response = await ApiCustomer.delete(`/api/product-type/${ProductTypeID}`);
-  
-        console.log("Server Response:", response.data);
         if (response.status === 409 || response.data.success === false) {
           //  Restriction triggered - Show alert message
           Swal.fire({
@@ -2573,7 +2552,6 @@ export function WarrantyServiceAdd() {
         "/api/warranty-services",
         formDataWarrantyService
       );
-      console.log("Success:", response.data);
 
       Swal.fire({
         icon: "success",
@@ -2587,7 +2565,7 @@ export function WarrantyServiceAdd() {
         window.location.reload();
       });
     } catch (err) {
-      console.error("Error saving warranty service: ", err);
+      toast.error("Error saving warranty service: ", err);
 
       Swal.fire({
         title: "Error!",
@@ -2754,7 +2732,7 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
       setWarrantyCondition(data?.WarrantyCondition || "");
       setCaseTypeServices(data?.CaseTypeServices || "");
     } catch (error) {
-      console.error("Error fetching Warranty Service information:", error);
+      toast.error("Error fetching Warranty Service information:", error);
     }
   };
 
@@ -2823,7 +2801,7 @@ export function WarrantyServiceEdit({ Service_offerID, onUpdate }) {
       onUpdate();
       setIsOpen(false);
     } catch (error) {
-      console.error("Error updating Warranty Service:", error);
+      toast.error("Error updating Warranty Service:", error);
       Swal.close();
       Swal.fire({
         icon: "error",
@@ -2943,8 +2921,6 @@ export function WarrantyServiceDelete ({ Service_offerID, isModalOpen, setIsModa
     if (result.isConfirmed) {
       try {
         const response = await ApiCustomer.delete(`/api/warranty-services/${Service_offerID}`);
-        
-        console.log("Server Response:", response.data);
         if (response.status === 409 || response.data.success === false) {
           //  Restriction triggered - Show alert message
           Swal.fire({
@@ -3041,7 +3017,7 @@ export function MaterialOrderEdit({ MOID, onUpdate }) {
       setOwner(data?.Owner || "");
   
     } catch (error) {
-      console.error("Error fetching Material Order information:", error);
+      toast.error("Error fetching Material Order information:", error);
     }
   };
   
@@ -3120,7 +3096,7 @@ export function MaterialOrderEdit({ MOID, onUpdate }) {
       onUpdate();
       setIsOpen(false);
     } catch (error) {
-      console.error("Error updating Material Order:", error);
+      toast.error("Error updating Material Order:", error);
   
       Swal.close();
   
@@ -3197,8 +3173,6 @@ export function MaterialOrderDelete ({ MOID, isModalOpen, setIsModalOpen, onUpda
     if (result.isConfirmed) {
       try {
         const response = await ApiCustomer.delete(`/api/mo-detaill/${MOID}`);
-        
-        console.log("Server Response:", response.data);
         if (response.status === 409 || response.data.success === false) {
           //  Restriction triggered - Show alert message
           Swal.fire({
@@ -3329,7 +3303,7 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
         IncomingChannel: data.IncomingChannel || "",
       });
     } catch (error) {
-      console.error("Error fetching Work Order information:", error);
+      toast.error("Error fetching Work Order information:", error);
     }
   };
 
@@ -3395,7 +3369,7 @@ export function WorkOrderEdit({ WOID, onUpdate }) {
       onUpdate();   
       setIsOpen(false); 
     } catch (error) {
-      console.error("Error updating Work Order:", error);
+      toast.error("Error updating Work Order:", error);
   
       Swal.close(); 
       Swal.fire({
@@ -3502,8 +3476,6 @@ export function WorkOrderDelete ({ WOID, isModalOpen, setIsModalOpen, onUpdate }
     if (result.isConfirmed) {
       try {
         const response = await ApiCustomer.delete(`/api/work-order/${WOID}`);
-        
-        console.log("Server Response:", response.data);
         if (response.status === 409 || response.data.success === false) {
           // Restriction triggered - Show alert message
           Swal.fire({
@@ -3619,10 +3591,9 @@ export function UserAdd({ onAdd }) {
         value: res.ResourceId,
         accounts: res.resourceAccounts, // kamu bisa pakai ini nanti kalau mau tampilkan info akun juga
       }));
-      console.log(options)
       setResourceOptions(options);
     }catch(error){
-      console.error("Failed to fetch resources:", error);
+      toast.error("Failed to fetch resources:", error);
     }
 
   } 
@@ -3636,21 +3607,18 @@ export function UserAdd({ onAdd }) {
     if (!selectedFile) return "";
     const formDataUpload = new FormData();
     formDataUpload.append("file", selectedFile);
-    console.log("Uploading file:", selectedFile);
     try {
       const res = await ApiCustomer.post("/api/upload", formDataUpload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      console.log("Upload response:", res.data);
       return res.data.url;
     } catch (error) {
-      console.error("Upload failed:", error);
+      toast.error("Upload failed:", error);
       return "";
     }
   };
 
   const handleSubmit = async () => {
-    // return console.log(formData);
     const { Email, Username, Password, Name, Role, ResourceId, Phone, } = formData;
     if (!Email || !Username || !Password || !Name) {
       Swal.fire({
@@ -3686,8 +3654,6 @@ export function UserAdd({ onAdd }) {
         ...formDataToSend,
       };
 
-      // return console.log("Form Data to Send:", formDataToSend);
-
       await ApiCustomer.post("/api/user", formDataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -3721,7 +3687,7 @@ export function UserAdd({ onAdd }) {
       setSelectedFile(null);
       setPreviewPhoto(null);
     } catch (err) {
-      console.error("Gagal tambah user:", err);
+      toast.error("Gagal tambah user:", err);
       Swal.fire({
         title: "Error! Gagal menambahkan user.",
         text: err.response.data.error,
@@ -3892,7 +3858,7 @@ export function UserEdit({ IDUser, onUpdate }) {
       }));
       setResourceOptions(options);
     }catch(error){
-      console.error("Failed to fetch resources:", error );
+      toast.error("Failed to fetch resources:", error );
     }
 
   } 
@@ -3931,7 +3897,7 @@ export function UserEdit({ IDUser, onUpdate }) {
       setSignatureImage(data.Signature || "");
       setSignature(data.Signature || "");
     } catch (error) {
-      console.error("Error fetching User information:", error);
+      toast.error("Error fetching User information:", error);
     }
   };
 
@@ -3977,7 +3943,7 @@ export function UserEdit({ IDUser, onUpdate }) {
       });
       return res.data.url;
     } catch (error) {
-      console.error("Image upload failed:", error);
+      toast.error("Image upload failed:", error);
       return formData.ProfilePhoto;
     }
   };
@@ -4053,7 +4019,7 @@ export function UserEdit({ IDUser, onUpdate }) {
       onUpdate?.();
       setIsOpen(false);
     } catch (error) {
-      console.error("Error updating user:", error);
+      toast.error("Error updating user:", error);
       Swal.fire({
         title: "Error",
         text: "Gagal memperbarui data!",
@@ -4207,8 +4173,6 @@ const handleDelete = async () => {
   if (result.isConfirmed) {
     try {
       const response = await ApiCustomer.delete(`/api/user/${IDUser}`);
-      
-      console.log("Server Response:", response.data);
       if (response.status === 409 || response.data.success === false) {
         //  Restriction triggered - Show alert message
         Swal.fire({
@@ -4479,7 +4443,7 @@ export function PartEdit({ PartNumber, onUpdate }) {
       const res = await ApiCustomer.get(`/api/service-log/parts-catalog/${PartNumber}`);
       setFormData(res.data.data || defaultFormData);
     } catch (e) {
-      console.error("Fetch failed", e);
+      toast.error("Fetch failed", e);
     }
   };
 
@@ -4664,8 +4628,6 @@ export function PartDelete ({ PartNumber, isModalOpen, setIsModalOpen, onUpdate 
     if (result.isConfirmed) {
       try {
         const response = await ApiCustomer.delete(`/api/service-log/parts-catalog/${PartNumber}`);
-        
-        console.log("Server Response:", response.data);
         if (response.status === 409 || response.data.success === false) {
           //  Restriction triggered - Show alert message
           Swal.fire({
@@ -4817,7 +4779,6 @@ export function ResourceAdd () {
      const payload = buildPayLoad();
      try {
        const response = await ApiCustomer.post("/api/resources", payload);
-       console.log("Success:", response.data);
    
        Swal.fire({
          icon: 'success',
@@ -4832,7 +4793,7 @@ export function ResourceAdd () {
        });
 
      } catch (err) {
-       console.error("Error saving Resource", err);
+       toast.error("Error saving Resource", err);
    
        Swal.fire({
          title: "Error!",
@@ -5020,7 +4981,7 @@ export function ResourceEdit({ ResourceId, onUpdate }) {
         ResourceCode: data.ResourceCode != null ? String(data.ResourceCode): "",
       });
     } catch (e) {
-      console.error("Fetch failed", e);
+      toast.error("Fetch failed", e);
       Swal.fire({
         icon: "error",
         title: "Fetch failed",
@@ -5110,7 +5071,6 @@ export function ResourceEdit({ ResourceId, onUpdate }) {
         setIsOpen(false);
       });
     } catch (e) {
-      console.error(e);
       Swal.fire({
         icon: "error",
         title: "Gagal",
@@ -5301,9 +5261,6 @@ export function BtnModalsServiceCatalog({
   WOID = undefined
 }) {
   const {user} = useAuth();
-
-  // console.log("USer", user)
-  // console.log("USer", caseDetails)
   useEffect(() => {
     // Resetting modal state when serviceCatalogType changes
     setCurrentStep(1);
@@ -5338,14 +5295,13 @@ export function BtnModalsServiceCatalog({
   //product information
   const fetchDataAssets = async () => {
     try {
-      console.log("Case Details in ervice Order",caseDetails)
       const assetId = caseDetails?.AssetID;
       if (!assetId) return null;
       const response = await ApiCustomer.get(`/api/asset-information/${caseDetails.AssetID}`)
    
       return response.data.data
     }catch(e){
-      console.error("error fetching Asset: ", e)
+      toast.error("error fetching Asset: ", e)
     }
   }
 
@@ -5354,7 +5310,7 @@ export function BtnModalsServiceCatalog({
       const res = await ApiCustomer.get(`/api/user?role=${role}`);
       setRoleAssign(res.data.data);
     } catch (err) {
-      console.error("Error fetching role: ", err);
+      toast.error("Error fetching role: ", err);
     }
   };
 
@@ -5368,11 +5324,11 @@ export function BtnModalsServiceCatalog({
     setError(null);
     try{
       const response = await ApiCustomer.get(`/api/service-log/warranty-services`)
-      console.log("Warranty Service Response:", response.data);
+      
       return response.data.data;
     }catch(e){
       setError("Failed to load Warranty Service")
-      console.error("error fetching Service Offer: ", e)
+      toast.error("error fetching Service Offer: ", e)
     }finally{
       setLoading(false)
     }
@@ -5380,7 +5336,6 @@ export function BtnModalsServiceCatalog({
   
   useEffect(() => {
     fetchDataServiceOffer().then((data) => {
-      console.log("Data received for warrantyOffer:", data);
       if (data) setWarrantyOffer(data);
     });
     fetchDataAssets().then((data) => {
@@ -5401,10 +5356,9 @@ export function BtnModalsServiceCatalog({
 
         if (woData?.serviceCatalog?.warranty_services) {
           setWoWarrantyService(woData.serviceCatalog.warranty_services);
-          console.log("WODATA : ",woData.serviceCatalog.warranty_services);
         }
       } catch (err) {
-        console.error("Error fetching WO Warranty:", err);
+        toast.error("Error fetching WO Warranty:", err);
       }
     };
 
@@ -5413,22 +5367,6 @@ export function BtnModalsServiceCatalog({
 
 
   const [selected, setSelected] = useState("DepotRepair"); 
-
-  //handles Warranty Service
-  // const [selectedWarrantyServices, setSelectedWarrantyServices] = useState([]);
-  // const handlerWarrantyServices = (service, checked) => {
-  //   if (checked) {
-  //     setSelectedWarrantyServices((prev) => [...prev, service])
-  //   }else{
-  //     setSelectedWarrantyServices((prev) => 
-  //       prev.filter((item) => item.Service_offerID !==service.Service_offerID)
-  //     )
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   console.log("Selected Services:", selectedWarrantyServices);
-  // }, [selectedWarrantyServices]);
   
   const [selectedWarrantyServices, setSelectedWarrantyServices] = useState(null);
   const [woWarrantyService, setWoWarrantyService] = useState(null);
@@ -5438,7 +5376,6 @@ export function BtnModalsServiceCatalog({
     };
 
   useEffect(() => {
-    console.log("Selected Services:", selectedWarrantyServices);
   }, [selectedWarrantyServices]);
   
   //part state
@@ -5450,7 +5387,7 @@ export function BtnModalsServiceCatalog({
       setPartCatalog(response.data.data)
       return response.data.data
     }catch(e){
-      console.error("Err :",e)
+      toast.error("Err :",e)
     }
   }
 
@@ -5508,9 +5445,6 @@ export function BtnModalsServiceCatalog({
 
   
   useEffect(() => {
-    console.log("Selected Parts:", selectedPartCatalog);
-    console.log("Selected Warranty:", selectedWarrantyServices);
-    
     handlerPriceConfirmServices();
   }, [selectedPartCatalog]);
   
@@ -5519,7 +5453,6 @@ export function BtnModalsServiceCatalog({
 
   const isOutWarranty =
     assetForWorkOrderCreation?.Warranty_Status === "01T";
-console.log("Asset Info OTC : ",isOutWarranty)
     
   const filteredWarrantyOffers = warrantyOffer.filter(
     (service) =>
@@ -5585,8 +5518,6 @@ console.log("Asset Info OTC : ",isOutWarranty)
   const [TotalTaxConfirmServices, setTotalTaxConfirmServices] = useState(0)
   const [totalConfirmServices, setTotalConfirmServices] = useState(0)
   const effectiveWarrantyService = selectedWarrantyServices ?? woWarrantyService;
-  // console.log("EFEKTIF SELECTED WS",selectedWarrantyServices)
-  // console.log("EFEKTIF WO WS",woWarrantyService)
   const handlerPriceConfirmServices = () =>{
     let serviceTotal = selectedWarrantyServices ? (parseFloat(selectedWarrantyServices.Price) || 0) : 0;
 
@@ -5597,7 +5528,6 @@ console.log("Asset Info OTC : ",isOutWarranty)
   
     if(assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
       const subTotal = serviceTotal + partsTotal;
-      console.log("SubTotal Confirm Services : ",subTotal)
       setSubTotalConfirmServices(subTotal.toFixed(2));
     }else{
       setSubTotalConfirmServices(0);
@@ -5659,7 +5589,6 @@ console.log("Asset Info OTC : ",isOutWarranty)
           ? await (async () => {
               const createdMOIDs = [];
               for (const part of selectedPartCatalog) {
-                // const note = `[NOTICE] Order Part\nOrder Part : ${part.PartNumber} - ${part.PartDescription}\n${part.Price ? `Harga : Rp. ${part.Price}\n` : ''}${part.RemovedPartNumber ? `Return CT Key : ${part.RemovedPartNumber}\n` : ''}Requested to APO : ${assignApo}`;
                 const r = await ApiCustomer.post("/api/material-order", {
                   WOID: WOID,
                   selectedPartCatalog: [{ ...part, qty: part.qty || 1 }],
@@ -5682,10 +5611,6 @@ console.log("Asset Info OTC : ",isOutWarranty)
               OwnerID: data.user.id,
               assignApo: assignApo,
             });
-        console.log(selected)
-
-  
-      
         Swal.close(); 
       
         // Close loading after success
@@ -5730,7 +5655,7 @@ console.log("Asset Info OTC : ",isOutWarranty)
           }
         });
       } catch (err) {
-        console.error("Order Creation Failed:", err);
+        toast.error("Order Creation Failed:", err);
         Swal.fire({
           title: "Error!",
           text: "Failed to create order",
@@ -5781,13 +5706,8 @@ console.log("Asset Info OTC : ",isOutWarranty)
       }
     };
 
-    
-
     // Skip warranty step when creating MO from WO
     const effectiveStep = ((WOID || serviceCatalogType === 'wo-add-mo') && currentStep === 1) ? 2 : currentStep;
-    
-
-
 
     switch (effectiveStep) {
       case 1:
@@ -5814,7 +5734,6 @@ console.log("Asset Info OTC : ",isOutWarranty)
             <div className="flex justify-between gap-4 p-2 my-2 ">
               <DialogTitle>Step 1: Select From List of Service Options</DialogTitle>
               <div className="grid grid-cols-2 p-2 bg-gray-300 gap-x-10">
-                
                 <p>Product Number</p><p>: {assetForWorkOrderCreation?.ProductNumber || "-"}</p>
                 <p>Product Name</p><p>: {assetForWorkOrderCreation?.product_information?.ProductName || "-"}</p>
                 <p>Serial Number</p><p>: {assetForWorkOrderCreation?.SerialNumber || "-"}</p>
@@ -6354,16 +6273,12 @@ console.log("Asset Info OTC : ",isOutWarranty)
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {/* {selectedWarrantyServices.map((service, index) => {
-                    return ( */}
-                    
                       <TableRow>
                         <TableCell>{effectiveWarrantyService?.Service_offerID ?? '-'}</TableCell>
                         <TableCell>{effectiveWarrantyService.Service_description}</TableCell>
                         <TableCell>{effectiveWarrantyService.CTat_RTime}</TableCell>
                         <TableCell>{effectiveWarrantyService.Shipping_Fee}</TableCell>
                         <TableCell>1</TableCell>
-                        {/* <TableCell>{effectiveWarrantyService.Tax}</TableCell> */}
                         <TableCell>{assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? effectiveWarrantyService.Price : 0}</TableCell>
                       </TableRow>
                     {/* )
@@ -6381,7 +6296,6 @@ console.log("Asset Info OTC : ",isOutWarranty)
                     {showUEFINumberHeader  && (
                       <TableHead className={'font-bold text-black'}>UEFI Number</TableHead>
                     )}
-                    {/* <TableHead className={'font-bold text-black'}>Tax</TableHead> */}
                     <TableHead className={'font-bold text-black'}>Price</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -6440,7 +6354,6 @@ console.log("Asset Info OTC : ",isOutWarranty)
                           ): (
                             null
                           )}
-                        {/* <TableCell>{part.Tax}</TableCell> */}
                         <TableCell>{assetForWorkOrderCreation?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty" ? part.Total : 0}</TableCell>
                       </TableRow>
                     )
@@ -6690,21 +6603,18 @@ export function ServiceCatalogPartEdit({ PartNumber, onUpdate }) {
     try {
       const response = await ApiCustomer.get(`/api/servicecatalog-parts/${PartNumber}`);
       const data = response.data.data;
-      console.log("Data Dari API", data);
-
       setPartData((prev) => ({
         ...prev,
         ...data,
       }));
     } catch (error) {
-      console.error("Error fetching part data:", error);
+      toast.error("Error fetching part data:", error);
     }
   };
 
   useEffect(() => {
     if (PartNumber && isOpen) {
       fetchPart();
-      console.log("Sialan");
     }
   }, [PartNumber, isOpen]);
 
@@ -6718,7 +6628,7 @@ export function ServiceCatalogPartEdit({ PartNumber, onUpdate }) {
       onUpdate();
       setIsOpen(false);
     } catch (error) {
-      console.error("Error updating part:", error);
+      toast.error("Error updating part:", error);
     }
   };
 
@@ -6793,7 +6703,7 @@ export function ServiceCatalogPartDelete({ PartNumber, onUpdate }) {
         onUpdate(); 
       }
     } catch (error) {
-      console.error("Error deleting part:", error);
+      toast.error("Error deleting part:", error);
     }
   };
 
@@ -7082,8 +6992,8 @@ export function BtnModalsPartAdd({
               }}
             >Add Part</Button>
             <Button variant={'search'} onClick={() => { setTempSelectedParts([]); 
-    setPartNumberInput("");
-    setPartNumberSearch(""); }}>Clear</Button>
+            setPartNumberInput("");
+            setPartNumberSearch(""); }}>Clear</Button>
             <Button variant={'search'} onClick={() => setOpen2(false)}>Cancel</Button>
           </DialogFooter>
       </DialogContent>
@@ -7227,9 +7137,8 @@ export function ResourceAccountAdd() {
       try {
         const response = await ApiCustomer.get("/api/resources"); 
         setResources(response.data.data || []);
-        console.log("Fetched resources:", response.data.data);
       } catch (error) {
-        console.error("Error fetching resources:", error);
+        toast.error("Error fetching resources:", error);
       }
     };
 
@@ -7259,7 +7168,6 @@ export function ResourceAccountAdd() {
 
     try {
       const response = await ApiCustomer.post("/api/resource-account", formData);
-      console.log("Success:", response.data);
       Swal.fire({
         icon: 'success',
         title: 'Berhasil!',
@@ -7271,7 +7179,6 @@ export function ResourceAccountAdd() {
         window.location.reload();
       });
     } catch (error) {
-      console.error("Error saving ResourceAccount:", error);
       Swal.fire({
         title: "Error!",
         text: "Gagal menyimpan ResourceAccount. Silakan coba lagi.",
@@ -7324,7 +7231,6 @@ export function ResourceAccountAdd() {
 }
 
 export function ResourceAccountEdit({ ResourceAccountId, onUpdate, resources }) {
-  console.log("ResourceAccountId di Edit:", resources);
   const [resourceAccount, setResourceAccount] = useState(null);
   const [name, setName] = useState("");
   const [resourceId, setResourceId] = useState("");
@@ -7388,7 +7294,6 @@ export function ResourceAccountEdit({ ResourceAccountId, onUpdate, resources }) 
       })
 
     } catch (error) {
-      console.error("Error updating ResourceAccount:", error);
       Swal.fire({
         title: "Update Failed",
         text: "Could not update ResourceAccount. Please try again.",
@@ -7520,7 +7425,7 @@ export function SubkTechnicianAdd() {
       const res = await ApiCustomer.get("/api/resource-account?limit=1000"); 
       setResourceAccounts(res.data.data); 
     } catch (error) {
-      console.error("Failed to fetch resource accounts:", error);
+      toast.error("Failed to fetch resource accounts:", error);
     }
   };
   useEffect(() => {
@@ -7555,8 +7460,6 @@ export function SubkTechnicianAdd() {
         Name: formData.Name,
         ResourceAccountId: formData.ResourceAccountId || null,
       });
-
-      console.log("Success:", response.data);
       Swal.fire({
         icon: 'success',
         title: 'Berhasil!',
@@ -7568,7 +7471,6 @@ export function SubkTechnicianAdd() {
         window.location.reload();
       });
     } catch (error) {
-      console.error("Error saving SubkTechnician:", error);
       Swal.fire({
         title: "Error!",
         text: "Gagal menyimpan SubkTechnician. Silakan coba lagi.",
@@ -7636,7 +7538,7 @@ export function SubkTechnicianEdit({ SubkTechnicianId, onUpdate }) {
       setName(data?.Name || "");
       setResourceAccountId(data?.ResourceAccountId || "");
     } catch (error) {
-      console.error("Error fetching SubkTechnician:", error);
+      toast.error("Error fetching SubkTechnician:", error);
     }
   };
 
@@ -7646,7 +7548,7 @@ export function SubkTechnicianEdit({ SubkTechnicianId, onUpdate }) {
       const res = await ApiCustomer.get("/api/resource-account?limit=1000");
       setResourceAccounts(res.data.data);
     } catch (error) {
-      console.error("Failed to fetch resource accounts:", error);
+      toast.error("Failed to fetch resource accounts:", error);
     }
   };
 
@@ -7704,7 +7606,6 @@ export function SubkTechnicianEdit({ SubkTechnicianId, onUpdate }) {
       onUpdate(); 
       setIsOpen(false);
     } catch (error) {
-      console.error("Error updating SubkTechnician:", error);
       Swal.fire({
         title: "Update Failed",
         text: "Could not update SubkTechnician. Please try again.",
@@ -7863,8 +7764,6 @@ export function SymptomCodeAdd({ onUpdate }) {
 
     try {
       const response = await ApiCustomer.post("/api/symptom-codes", formData);
-
-      console.log("Success:", response.data);
       Swal.fire({
         icon: 'success',
         title: 'Berhasil!',
@@ -7876,7 +7775,6 @@ export function SymptomCodeAdd({ onUpdate }) {
         onUpdate?.();
       });
     } catch (error) {
-      console.error("Error saving Symptom Code:", error);
       Swal.fire({
         title: "Error!",
         text: "Gagal menyimpan data. Silakan coba lagi.",
@@ -7939,7 +7837,7 @@ export function SymptomCodeEdit({ SymptomCodeID, onUpdate }) {
         QualityCodes: data?.QualityCodes || "",
       });
     } catch (error) {
-      console.error("Error fetching Symptom Code:", error);
+      toast.error("Error fetching Symptom Code:", error);
     }
   };
 
@@ -7975,7 +7873,6 @@ export function SymptomCodeEdit({ SymptomCodeID, onUpdate }) {
         onUpdate?.();
       })
     } catch (error) {
-      console.error("Error updating Symptom Code:", error);
       Swal.fire({
         icon: "error",
         title: "Update Failed",
@@ -8121,7 +8018,7 @@ export function BookingsAdd({ onUpdate }) {
         const res = await ApiCustomer.get("/api/user");
         setUsers(res.data.data || []);
       } catch (error) {
-        console.error("Failed to load users:", error);
+        toast.error("Failed to load users:", error);
       }
     };
     fetchUsers();
@@ -8179,7 +8076,6 @@ export function BookingsAdd({ onUpdate }) {
         onUpdate?.();
       });
     } catch (error) {
-      console.error("Error saving Booking:", error);
       Swal.fire({
         title: "Error!",
         text: "Gagal menyimpan data. Silakan coba lagi.",
@@ -8297,7 +8193,7 @@ export function BookingsEdit({ BookingId, onUpdate }) {
         const res = await ApiCustomer.get("/api/user");
         setUsers(res.data.data || []);
       } catch (err) {
-        console.error("Failed to load users:", err);
+        toast.error("Failed to load users:", err);
       }
     };
     fetchUsers();
@@ -8331,7 +8227,7 @@ export function BookingsEdit({ BookingId, onUpdate }) {
         CreatedBy: data.CreatedBy?.toString() || "", // supaya dropdown CreatedBy ke-select
       });
     } catch (error) {
-      console.error("Error fetching booking:", error);
+      toast.error("Error fetching booking:", error);
     }
   };
 
@@ -8388,7 +8284,6 @@ export function BookingsEdit({ BookingId, onUpdate }) {
       setIsOpen(false);
       onUpdate?.();
     } catch (error) {
-      console.error("Error updating booking:", error);
       Swal.fire({
         icon: "error",
         title: "Update Failed",
@@ -8644,7 +8539,7 @@ export function BookingDetailsAdd({ onUpdate }) {
         setEngineers(engineerRes.data.data || []);
         setStatuses(statusRes.data.data || []);
       } catch (error) {
-        console.error("Dropdown fetch failed:", error);
+        toast.error("Dropdown fetch failed:", error);
       }
     };
     fetchDropdowns();
@@ -8692,7 +8587,6 @@ export function BookingDetailsAdd({ onUpdate }) {
          showConfirmButton: false });
        onUpdate?.();
     } catch (error) {
-      console.error("ERROR in BookingDetails POST:", error);
       Swal.fire({ 
         icon: "error", 
         title: "Failed", 
@@ -8855,7 +8749,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
         setEngineers(engineerRes.data.data || []);
         setStatuses(statusRes.data.data || []);
       } catch (error) {
-        console.error("Dropdown fetch failed:", error);
+        toast.error("Dropdown fetch failed:", error);
       }
     };
     fetchDropdowns();
@@ -8885,7 +8779,7 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
         ChangedBy: data.ChangedBy || "",
       });
     } catch (error) {
-      console.error("Error fetching booking detail:", error);
+      toast.error("Error fetching booking detail:", error);
     }
   };
 
@@ -8934,7 +8828,6 @@ export function BookingDetailsEdit({ BookingDetailId, onUpdate }) {
       setIsOpen(false);
       onUpdate?.();
     } catch (error) {
-      console.error("Error updating booking detail:", error);
       Swal.fire({
         icon: "error",
         title: "Update Failed",
@@ -9162,8 +9055,6 @@ export function BookingStatusAdd({ onUpdate }) {
 
     try {
       const response = await ApiCustomer.post("/api/booking-status", formData);
-      console.log("Success:", response.data);
-
       Swal.fire({
         icon: "success",
         title: "Berhasil!",
@@ -9177,7 +9068,6 @@ export function BookingStatusAdd({ onUpdate }) {
         setFormData({ Description: "" }); // reset form
       });
     } catch (err) {
-      console.error("Error saving Booking Status:", err);
       Swal.fire({
         title: "Error!",
         text: "Failed to save Booking Status. Please try again.",
@@ -9279,7 +9169,6 @@ export function BookingStatusEdit({ BookingStatusId, onUpdate }) {
       setOpen(false);
       onUpdate?.();
     } catch (err) {
-      console.error("Error update:", err);
       Swal.fire({
         icon: "error",
         title: "Failed",
@@ -9431,7 +9320,6 @@ export function RepairClassCodeAdd() {
         window.location.reload();
       });
     } catch (error) {
-      console.error("Failed to save repairClassCode:", error);
       Swal.fire({
         icon: "error",
         title: "Failed",
@@ -9498,7 +9386,7 @@ export function RepairClassCodeEdit({ Code }) {
       setDefinition(data.Definition || "");
       setPaymentEligibility(data.PaymentEligibility || "");
     } catch (error) {
-      console.error("Error fetching data:", error);
+      toast.error("Error fetching data:", error);
     }
   };
 
@@ -9539,7 +9427,6 @@ export function RepairClassCodeEdit({ Code }) {
         window.location.reload();
       });
     } catch (error) {
-      console.error("Update error:", error);
       Swal.fire({
         icon: "error",
         title: "Update Failed",
@@ -9698,7 +9585,7 @@ export function ServiceCatalogAdd() {
         setWarranties(warrantyRes.data.data);
         setParts(partRes.data.data);
       } catch (error) {
-        console.error("Failed to fetch dropdown data", error);
+        toast.error("Failed to fetch dropdown data", error);
       }
     };
 
@@ -9750,7 +9637,6 @@ export function ServiceCatalogAdd() {
       });
 
     } catch (err) {
-      console.error("Error saving Service Catalog", err);
       Swal.fire({
         title: "Error!",
         text: "Failed to save Service Catalog. Please try again.",
@@ -9882,7 +9768,7 @@ export function ServiceCatalogEdit({ ServiceCatalogID, onUpdate }) {
           Total: data.Total || ''
         });
       } catch (error) {
-        console.error("Failed to fetch edit data", error);
+        toast.error("Failed to fetch edit data", error);
       }
     };
 
@@ -9921,7 +9807,6 @@ export function ServiceCatalogEdit({ ServiceCatalogID, onUpdate }) {
       setOpen(false);
       if (onUpdate) onUpdate();
     } catch (err) {
-      console.error("Error updating Service Catalog", err);
       Swal.fire({
         icon: "error",
         title: "Error!",
@@ -10119,8 +10004,6 @@ export function ServiceTypeAdd() {
 
     try {
       const response = await ApiCustomer.post("/api/service-type", formData);
-      console.log("✅ Success:", response.data);
-
       Swal.fire({
         icon: "success",
         title: "Success!",
@@ -10132,7 +10015,6 @@ export function ServiceTypeAdd() {
         window.location.reload();
       });
     } catch (error) {
-      console.error("❌ Error saving ServiceType:", error);
       Swal.fire({
         title: "Error!",
         text: "Failed to save Service Type. Please try again.",
@@ -10214,7 +10096,7 @@ export function ServiceTypeEdit({ ServiceTypeId, onUpdate }) {
         ProblemCategory: data?.ProblemCategory || "",
       });
     } catch (error) {
-      console.error("Error fetching ServiceType:", error);
+      toast.error("Error fetching ServiceType:", error);
     }
   };
 
@@ -10262,7 +10144,6 @@ export function ServiceTypeEdit({ ServiceTypeId, onUpdate }) {
         setIsOpen(false);
       });
     } catch (error) {
-      console.error("Error updating ServiceType:", error);
       Swal.fire({
         title: "Update Failed",
         text: "Could not update ServiceType. Please try again.",
@@ -10414,7 +10295,6 @@ export function OTCAdd({ onUpdate }) {
     }
 
     try {
-      console.log("Form Data : ",formData)
       await ApiCustomer.post("/api/otc-code", formData);
       Swal.fire({
         icon: "success",
@@ -10427,7 +10307,6 @@ export function OTCAdd({ onUpdate }) {
         window.location.reload();
       })
     } catch (error) {
-      console.error("Error saving OTC Code:", error);
       Swal.fire({
         title: "Error!",
         text: "Gagal menyimpan data. Silakan coba lagi.",
@@ -10540,7 +10419,6 @@ export function OTCEdit({ OTCCode, onUpdate }) {
         setOpen(false);
       });
     } catch (error) {
-      console.error("Error updating OTC Code:", error);
       Swal.fire({
         title: "Error!",
         text: "Gagal memperbarui data. Silakan coba lagi.",
@@ -10699,10 +10577,7 @@ export function CrsAdd() {
     }
 
     try {
-      console.log("Form Data : ", formData);
-
       await ApiCustomer.post("/api/caseResolution", formData);
-
       Swal.fire({
         icon: "success",
         title: "Berhasil!",
@@ -10714,7 +10589,6 @@ export function CrsAdd() {
         window.location.reload(); 
       });
     } catch (error) {
-      console.error("Error saving Case Resolution:", error);
       Swal.fire({
         title: "Error!",
         text: "Gagal menyimpan data. Silakan coba lagi.",
@@ -10815,7 +10689,6 @@ export function CrsEdit({ id_csr, onUpdate }) {
           customerRequestedCloseDate: formatDateForInput(data.customerRequestedCloseDate),
         });
       } catch (error) {
-        console.error("Error fetching Case Resolution:", error);
         Swal.fire({
            icon: 'error',
            title: 'Gagal Mengambil data',
@@ -10860,7 +10733,6 @@ export function CrsEdit({ id_csr, onUpdate }) {
         setOpen(false);
       });
     } catch (error) {
-      console.error("Error updating:", error);
       Swal.fire("Error", "Gagal memperbarui data", "error");
     }
   };
@@ -11024,7 +10896,6 @@ export function NmuAdd() {
         window.location.reload();
       });
     } catch (error) {
-      console.error("Failed to save NMU:", error);
       Swal.fire({
         icon: "error",
         title: "Failed",
@@ -11100,7 +10971,7 @@ export function NmuEdit({ NMUId, onUpdate }) {
         setVersionNeeded(Boolean(data.VersionNeeded));
       }
     } catch (error) {
-      console.error("Error fetching NMU data:", error);
+      toast.error("Error fetching NMU data:", error);
     }
   };
 
@@ -11142,7 +11013,6 @@ export function NmuEdit({ NMUId, onUpdate }) {
         if (onUpdate) onUpdate();
       });
     } catch (error) {
-      console.error("Update error:", error);
       Swal.fire({
         icon: "error",
         title: "Update Failed",
@@ -11344,7 +11214,6 @@ export function NmuItemAdd() {
         window.location.reload();
       });
     } catch (error) {
-      console.error("Gagal simpan NMU Item:", error);
       Swal.fire({
         icon: "error",
         title: "Failed",
@@ -11418,7 +11287,7 @@ export function NmuItemEdit({ id, onUpdate }) {
         setNmuList(res.data.data);
       }
     } catch (error) {
-      console.error("Gagal ambil data NMU:", error);
+      toast.error("Gagal ambil data NMU:", error);
     }
   };
 
@@ -11433,7 +11302,7 @@ export function NmuItemEdit({ id, onUpdate }) {
         });
       }
     } catch (error) {
-      console.error("Gagal ambil data NMU Item:", error);
+      toast.error("Gagal ambil data NMU Item:", error);
     }
   };
 
@@ -11478,7 +11347,6 @@ export function NmuItemEdit({ id, onUpdate }) {
         if (onUpdate) onUpdate();
       });
     } catch (error) {
-      console.error("Gagal update NMU Item:", error);
       Swal.fire({
         icon: "error",
         title: "Failed",
@@ -11658,8 +11526,6 @@ export function FailureAdd () {
    
      try {
        const response = await ApiCustomer.post("/api/failure", formDataFailure);
-       console.log("Success:", response.data);
-   
        Swal.fire({
          icon: 'success',
          title: 'Berhasil!',
@@ -11673,8 +11539,6 @@ export function FailureAdd () {
        });
 
      } catch (err) {
-       console.error("Error saving Failure", err);
-   
        Swal.fire({
          title: "Error!",
          text: "Failed to save Failure. Please try again.",
@@ -11728,7 +11592,7 @@ export function FailureEdit({ FailureId, onUpdate }) {
       const res = await ApiCustomer.get(`/api/failure/${FailureId}`);
       setFormData(res.data.data || defaultFormData);
     } catch (e) {
-      console.error("Fetch failed", e);
+      toast.error("Fetch failed", e);
     }
   };
 
@@ -11766,7 +11630,6 @@ export function FailureEdit({ FailureId, onUpdate }) {
         setIsOpen(false);
       });
     } catch (e) {
-      console.error(e);
       Swal.fire({
         icon: "error",
         title: "Gagal",
@@ -11897,149 +11760,6 @@ export function FailureDelete({ FailureId, isModalOpen, setIsModalOpen, onUpdate
 }
 
 
-
-
-//! Home Page Modals
-
-// export function FindCase({}){
-// const [openInfo, setOpenInfo] = useState(false);
-// const [findingCase, setFindingCase] = useState({
-//   Caseid: '',
-//   Phoneno: '',
-// })
-
-// const handleInputChange = (e) => {
-//     const { id, value } = e.target;
-//     setFindingCase((prev) => ({
-//       ...prev,
-//       [id]: value,
-//     }));
-//   };
-
-// const [caseData, setCaseData] = useState({})
-// console.log(caseData);
-//     const findcase = async () => {
-//     const baseurl = `/api/case-information/${findingCase.Caseid}`;
-//     Swal.fire({
-//       title: "Memuat Data Case....",
-//       text: "Mohon Tunggu Sebentar",
-//       allowOutsideClick: false,
-//       allowEscapeKey: false,
-//       didOpen: () => {
-//         Swal.showLoading();
-//       },
-//     });
-    
-//     try {
-//       const response = await ApiCustomer.get(baseurl);
-//       console.log("TJEdata",response.data.data.site_account.Company);
-//       console.log("DAta",response.data.data);
-//       if (response.data.success && response.data.data.contact_information.Mobile === findingCase.Phoneno) {
-//         setCaseData(response.data.data);
-//         setOpenInfo(true);
-//       Swal.close(); 
-//       } else {
-//         Swal.fire({
-//         title: "Error!",
-//         text: "Case Tidak Ditemukan",
-//         icon: "error",
-//         timer:2000,
-//         timerProgressBar: true,
-        
-//       });
-//       }
-
-//     } catch (err) {
-//       console.error("Error fetching case data:", err);
-//       setError("Error fetching data");
-
-//       Swal.close(); 
-
-//       Swal.fire({
-//         title: "Error!",
-//         text: "Gagal mengambil data Case.",
-//         icon: "error",
-//         confirmButtonText: "OK",
-//       });
-//     }
-//   };
-//   return(
-//     <>
-//     <Dialog>
-//       <DialogTrigger asChild>
-//         <Button variant={'outline'} className={'text-white bg-green-600 hover:bg-emerald-700 hover:text-green-300'} >Search Case</Button>
-//       </DialogTrigger>
-//       <DialogContent className={'flex   max-w-screen min-w-[60%] h-[fit]'}>
-//         <DialogHeader className={'flex flex-1 flex-col'}>
-//           <DialogTitle className={'text-2xl'}>Search The Case</DialogTitle>
-//           <DialogDescription>Input Case ID and Phone Number To search Case</DialogDescription>
-//           <div className="flex gap-10">
-//             <Label htmlFor='Caseid'> Case ID</Label>
-//             <Input variant={'outline'} className={'flex-1/2'} id='Caseid'value={findingCase.Caseid} onChange={handleInputChange} placeholder={'example : C-0000'}/>
-//           </div>
-//           <div className="flex gap-10">
-//             <Label htmlFor='Phoneno'> Phone Number</Label>
-//             <Input variant={'outline'} className={'flex-1/2'} id='Phoneno' value={findingCase.Phoneno} onChange={handleInputChange} />
-//           </div>
-//           <Button variant={'search'} onClick={findcase}>Find Case</Button>
-//           {openInfo? <Card>
-//             <CardContent className={'flex flex-col justify-center items-center gap-4'}>
-//               <CardTitle className={'flex items-center gap-6'} >Print Into PDF <ArchiveIcon/> </CardTitle>
-//               <Button onClick={async() => {
-//                       const blob = await pdf(<ServiceRequestPDF caseDetails={caseData}  />).toBlob();
-//                       const url = URL.createObjectURL(blob);
-//                       const link = document.createElement('a');
-//                       link.href = url;
-//                       link.download = 'Service_Request_Form.pdf';
-//                       document.body.appendChild(link);
-//                       link.click();
-//                       document.body.removeChild(link);
-//               }} > Download </Button>
-//             </CardContent>
-//           </Card> : ''}
-//         </DialogHeader>
-//            <DialogFooter className={'grid grid-cols-2 w-full flex-1'}>
-//             <CardTitle className={'text-2xl col-span-2'}>Case Information</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>Case status </CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseStatus || 'N/A'}</CardTitle>
-
-//             {/* <CardTitle className={'p-2 bg-gray-100'}>Bench Start Repair, Onsite Repair</CardTitle> */}
-
-//             <CardTitle className={'p-2 bg-gray-100'}>Case ID 	</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseID || 'N/A'} </CardTitle>
-
-//             <CardTitle className={'p-2 bg-gray-100'}>Reference case 	</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CaseSubject || 'N/A'} </CardTitle>
-
-//             <CardTitle className={'p-2 bg-gray-100'}>Warranty status 	 	</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>Out Warranty</CardTitle>
-
-//             <CardTitle className={'p-2 bg-gray-100'}>Customer company 	</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.site_account?.Company || 'N/A'}</CardTitle>
-
-//             <CardTitle className={'p-2 bg-gray-100'}>Customer name 	    </CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.contact_information?.FirstName || caseData?.contact_information?.LastName
-//               ? `${caseData?.contact_information?.FirstName || ''} ${caseData?.contact_information?.LastName || ''}`.trim()
-//               : 'N/A'}	</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>Received date 	 </CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.CreatedOn ? new Date(caseData.CreatedOn).toLocaleDateString() : 'N/A'}</CardTitle>
-
-//             <CardTitle className={'text-2xl col-span-2 whitespace-nowrap'}>Product Information</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>Serial no. 	 	</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.SerialNumber ?? 'N/A'}</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>Product type 	 	</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.product_information?.product_type?.ProductType ?? 'N/A'}</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>Product no. 	 </CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.ProductNumber ?? 'N/A'}</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>Product name 	 	</CardTitle>
-//             <CardTitle className={'p-2 bg-gray-100'}>{caseData?.asset_information?.product_information?.ProductName ?? 'N/A'}</CardTitle>
-//           </DialogFooter> 
-//       </DialogContent>
-//     </Dialog>
-//     </>
-//   )
-// }
-
 export function FindCase() {
   const [openInfo, setOpenInfo] = useState(false);
   const [findingCase, setFindingCase] = useState({ Caseid: "", Phoneno: "" });
@@ -12064,9 +11784,6 @@ export function FindCase() {
 
     try {
       const response = await ApiCustomer.get(baseurl);
-      console.log("TJEdata", response.data.data.site_account.Company);
-      console.log("DAta", response.data.data);
-      console.log("check the condition", response.data.data.contact_information.Mobile )
       if (response.data.success && response.data.data.contact_information.Mobile === findingCase.Phoneno) {
         setCaseData(response.data.data);
         setOpenInfo(true);
@@ -12083,7 +11800,7 @@ export function FindCase() {
       }
 
     } catch (err) {
-      console.error("Error fetching case data:", err);
+      toast.error("Error fetching case data:", err);
 
       Swal.close();
 
@@ -12237,39 +11954,3 @@ export function FindCase() {
     </Dialog>
   );
 }
-
-
-// export function Profile({
-//   className
-// }) {
-//   const [open, setOpen] = useState(false);
-//   const [profileData, setProfileData] = useState({
-//     Email: "",
-//     Username: "",
-//     Name: "",
-//     Role: "",
-//     ProfilePicture: "",
-//   });
-//   const [newProfilePicture, setNewProfilePicture] = useState(null);
-
-//   return (
-//     <Dialog open={open} onOpenChange={setOpen}>
-//       <DialogTrigger asChild>
-//         <Button variant="outline" className={cn(
-//           "w-full justify-start text-left font-normal",
-//           className
-//         )}>
-//           <User className="mr-2" />
-//           Open
-//         </Button>
-//       </DialogTrigger>
-//       <DialogContent className="max-w-md">
-//       <DialogHeader>
-        
-//       </DialogHeader>
-//       <DialogFooter>
-//       </DialogFooter>
-//       </DialogContent>
-//     </Dialog>
-//   );
-// }

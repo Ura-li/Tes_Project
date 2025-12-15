@@ -37,7 +37,6 @@ export default function FrontDesk_Page() {
     { name: "Open", value: casevaluedata || 0, fill: "#3B82F6" },
     { name: "InActive", value: inactivecasevaluedata || 0, fill: "#FACC15" },
     { name: "Closed", value: closecasevaluedata || 0, fill: "#10B981" },
-    // { name: "Pending", value: 5, fill: "#F97316" },
   ];
 
 
@@ -61,7 +60,6 @@ export default function FrontDesk_Page() {
       const response = await ApiCustomer.get('/api/case-information');
       const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`);
       const resFetchUserData = fecthUserData.data.data;
-      console.log("Fetch user data : ", user)
       setUserData({
         ...userData,
         Username: resFetchUserData.Username,
@@ -80,15 +78,6 @@ export default function FrontDesk_Page() {
       const valueFilterInActiveCase = response.data.data.filter(c => c?.CaseStatus == 'InActive' && c?.caseinformation?.CreatedBy == user.id)
       const valueFilterCloseCase = response.data.data.filter(c => c?.CaseStatus == 'Close' && c?.caseinformation?.CreatedBy == user.id)
       const filtercases = response.data.data.filter(c => c?.CaseStatus !== 'Close' && c?.caseinformation?.Owner == user.id);
-      // const rawDate = filtercases[0]?.caseinformation?.ActionLog[0]?.ChangeAt;
-      // let newdate;
-      // if (rawDate) {
-      //   const dateObj = rawDate instanceof Date ? rawDate : new Date(rawDate);
-      //   console.log("Readable:", dateObj.toLocaleString("id-ID"));
-      //   newdate = dateObj.toLocaleString("id-ID");
-      // } else {
-      //   console.log("No date available");
-      // }
       const sortedCases = filtercases.sort((a, b) => {
         const dateAraw = a.UpdateOn;
         const dateBraw = b.UpdateOn;
@@ -155,10 +144,6 @@ export default function FrontDesk_Page() {
           <CardFooter className="flex flex-col gap-2 items-center">
             <Badge
               variant="outline"
-              // className={`capitalize ${user.role === "admin"
-              //     ? "bg-amber-200 text-amber-800"
-              //     : "bg-gray-200 text-gray-700"
-              //   }`}
             >
               {user.role}
             </Badge>

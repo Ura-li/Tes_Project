@@ -296,8 +296,6 @@ export default function NewCaseForm() {
     format(new Date(), "yyyy-MM-dd")
   );
   const [caseSubject, setCaseSubject] = useState("");
-  const [caseIdManual, setCaseIdManual] = useState("");
-  const [caseIdManualDate, setCaseIdManualDate] = useState("");
   const [referenceCase, setReferenceCase] = useState("");
   const [caseStatus, setCaseStatus] = useState("Open");
   const [caseType, setCaseType] = useState("Bench");
@@ -383,7 +381,6 @@ export default function NewCaseForm() {
   const [productTypeId, setProductTypeId] = useState(undefined);
   const [productLine, setProductLine] = useState("");
   const [productNo, setProductNo] = useState("");
-  // const [HWPCCode, setHWPCCode] = useState("");
   const [productName, setProductName] = useState("");
   const [vendor, setVendor] = useState("");
 
@@ -397,7 +394,6 @@ export default function NewCaseForm() {
 
   // Warranty
   const [warrantySearchValue, setWarrantySearchValue] = useState("");
-  // console.log("warrantySearchValue : ",warrantySearchValue)
   const [warrantyOptions, setWarrantyOptions] = useState([]);
 
   const [selectWarrantyCodeStatus, setSelectWarrantyCodeStatus] = useState("")
@@ -533,15 +529,13 @@ export default function NewCaseForm() {
             params: { search: q}
           })
           const list = response.data?.data || []
-          console.log("WArranty Lis : ", list)
           const option = response.data?.data.map((res)=>({
             label: res.Description,
             value: res.OTCCode
           }))
-          console.log("warranry List map : ",option)
           setWarrantyOptions(option);
         } catch (error) {
-          console.error("Failed fetch warranty:", error);
+          toast.error("Failed fetch warranty:",error)
           setWarrantyOptions([]);
         }
       }, 400)
@@ -576,20 +570,17 @@ export default function NewCaseForm() {
       const response = await ApiCustomer.get(`/api/product-type`, {
         params: { ProductTower: tower, ProductGroup: group },
       });
-      console.log("Product Type List : ", response);
       setProductTypeList(response.data.data || []);
     } catch (err) {
+      toast.error("Fetching product type error:",err)
       setProductTypeList([]);
     }
   };
-
-  
 
   // ----------------------------
   // Effects
   // ----------------------------
 
-  
   useEffect(() => {
     if (warrantyOptions.length > 0 && warrantySearchValue) {
       const matched = warrantyOptions.find(
@@ -653,7 +644,6 @@ export default function NewCaseForm() {
   // Auto-fill product when asset selected
   useEffect(() => {
     if (selectedAsset?.product_information) {
-      console.log("selected asset ", selectedAsset)
       const p = selectedAsset.product_information;
       setSelectedProduct(p);
       setProductNo(p.ProductNumber);
@@ -675,10 +665,7 @@ export default function NewCaseForm() {
   //auto fill waranty when asset selected
   useEffect(() => {
     if(selectedAsset?.Warranty_Status){
-      console.log("EOW DATE :",selectedAsset.EOW_Date)
       if (selectedAsset.EOW_Date) {
-        console.log("EOW DATE :",selectedAsset.EOW_Date)
-        console.log("FORMATTED EOW DATE :",formatDateForInput(selectedAsset.EOW_Date))
         setEowDate(formatDateForInput(selectedAsset.EOW_Date));
       }
 
@@ -771,8 +758,6 @@ export default function NewCaseForm() {
 
           const latestCase = sortedCases[0]; // Ambil yang terbaru
 
-          console.log("Has Open Case: ", latestCase);
-
           setLastCase(latestCase); // Simpan ke state
           setMustRerepair(true);
         } else {
@@ -780,11 +765,10 @@ export default function NewCaseForm() {
           setLastCase([]); // Clear last case jika tidak ada case terbuka
         }
       } catch (e) {
-        console.error("Check open case failed", e);
+        toast.error("Check open case failed",e)
       }
     })();
   }, [selectedAsset]);
-
 
   // Auto-fill customer when customer field selected
   useEffect(() => {
@@ -800,7 +784,6 @@ export default function NewCaseForm() {
 
       if(ct.PIC_Name){
         setUsePIC(true);
-        console.log("DATA CT : ",ct)
         setContactPICName(ct.PIC_Name)
         setContactPICEmail(ct.PIC_Email)
         setContactPICPhone(ct.PIC_Phone)
@@ -812,8 +795,6 @@ export default function NewCaseForm() {
 
       const provObj = provContact.find((p) => p.name === ct.StateProvince);
       setContactStateProvince(provObj ? provObj : { id: "", name: ct.StateProvince });
-      console.log(provObj)
-      console.log(ct.StateProvince)
 
       // City (convert string -> object) -> city list harus sesuai province id
       if (provObj?.id) {
@@ -832,7 +813,6 @@ export default function NewCaseForm() {
       setContactZipPostalCode(ct.ZipPostalCode);
     }
   }, [selectedContact])
-
 
   // Auto-fill Company when contact selected (if any)
   useEffect(() => {
@@ -862,10 +842,10 @@ export default function NewCaseForm() {
       try {
         const checkAssetAffiliatedContact = await ApiCustomer.get(`/api/asset-information?ContactID=${selectedContact.ContactID}`)
         const listAffiliatedAsset = checkAssetAffiliatedContact.data.data || [];
-        console.log(selectedContact, listAffiliatedAsset)
         setAssetResults(listAffiliatedAsset);
       } catch (err) {
         console.error(err);
+        toast.error("Select contact failed:",err)
       }
     })()
   }, [selectedContact]);
@@ -889,10 +869,8 @@ export default function NewCaseForm() {
         const json = await res.json();
         setProvContact(json ?? []);
         setProvCompany(json ?? []);
-        console.log("Province :", res)
-        console.log("json :", json)
       } catch (e) {
-        console.warn("EMSIFA provinces fetch failed");
+        toast.warning("EMSIFA provinces fetch failed")
       }
     })();
     fetchWarrantyStatus();
@@ -933,8 +911,6 @@ export default function NewCaseForm() {
       }
     })();
   }, [companyStateProvince]);
-
-
 
   // ----------------------------
   // Accessory handlers
@@ -1012,7 +988,6 @@ export default function NewCaseForm() {
     setContactPICEmail(contactEmail || "");
     setContactPICPhone(contactPhone || "");
   };
-
 
   // ----------------------------
   // Create Case
@@ -1254,13 +1229,12 @@ export default function NewCaseForm() {
           logDescription: `New Case : ${caseId}`,
         });
       } catch (e) {
-        console.warn("ActionLog failed", e);
+        toast.warning("ActionLog failed",e)
       }
 
       //case note
       try {
         const userData = user?.user;
-        console.log("CASE NOT RUNNING")
         await ApiCustomer.post("/api/case-information/case-notes", {
           CaseID: `${caseId}`,
           LogTye: 'NotesLog',
@@ -1271,7 +1245,7 @@ export default function NewCaseForm() {
           CreatedBy: user?.id
         })
       } catch (error) {
-        console.warn("Case Note failed, ", error)
+        toast.warning("Case Note failed,",error)
       }
       
       //if rerepair, add note
@@ -1288,7 +1262,7 @@ export default function NewCaseForm() {
             CreatedBy: user?.id
           })
         } catch (e) {
-          console.warn("Case Note failed, ", e)
+          toast.warning("Case Note failed",e)
           
         }
       }
@@ -1320,22 +1294,12 @@ export default function NewCaseForm() {
   // ----------------------------
   // UI
   // ----------------------------
-
   return (
-    <div className="bg-[#e8eaeb] p-2 space-y-2 dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
+    <div  className="bg-[#e8eaeb] p-2 space-y-2 dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
       {/* Header */}
-      {/* <div className="flex items-center justify-between pb-4 border-b"> */}
-      {/* <div className="sticky top-[3.25rem] z-30  bg-[#0077B6] rounded-b-xl border-b p-3 flex flex-wrap gap-2 justify-between">
-        <h1 className="text-2xl font-bold ">Create Case </h1>
-      
-      </div> */}
-      {/* </div> */}
-
-
-
         {/* Quick Search */}
         <Card className={'w-full dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600 dark:border-purple-700'} id="quickSearch">
-          <CardContent className="pt-4 flex w-full gap-6 flex-col lg:flex-row">
+          <CardContent className="flex w-full gap-6 flex-col lg:flex-row">
             {/* Serial Number Search */}
             <div className="space-y-2 flex-1">
             <Label className={'text-lg'}>Serial Number</Label>
@@ -1386,7 +1350,7 @@ export default function NewCaseForm() {
                 <Checkbox
                   id="isNewAsset"
                   checked={isNewAsset}
-                  className={"ring-2 bg-gray-100 dark:bg-transparent dark:data-[state=checked]:bg-white"}
+                  className={"m-1 ring-2 bg-gray-100 dark:bg-transparent dark:data-[state=checked]:bg-white"}
                   onCheckedChange={(v) => {
                     setIsNewAsset(Boolean(v));
                   }
@@ -1410,7 +1374,7 @@ export default function NewCaseForm() {
                   }}
                   className={"dark:text-white dark:border-gray-400"}
                 />
-                <Button variant="outline" type="button" onClick={() => searchCustomer.flush()} className={"dark:bg-cyan-700 dark:bg-cyan-700 cursor-pointer dark:border-gray-400"}>
+                <Button variant="outline" type="button" onClick={() => searchCustomer.flush()} className={"dark:bg-cyan-700 cursor-pointer dark:border-gray-400"}>
                   <Search className="w-4 h-4" />
                 </Button>
               </div>
@@ -1471,7 +1435,7 @@ export default function NewCaseForm() {
                 <Checkbox
                   id="createCustomer"
                   checked={isNewContact}
-                  className={"ring-2 bg-gray-100 dark:bg-transparent dark:data-[state=checked]:bg-white"}
+                  className={"m-1  ring-2 bg-gray-100 dark:bg-transparent dark:data-[state=checked]:bg-white"}
                   onCheckedChange={(v) => {
                     setIsNewContact(Boolean(v));
                   }
@@ -1492,27 +1456,19 @@ export default function NewCaseForm() {
             <CardTitle>1) Case</CardTitle>
             <CardDescription>Diisi setelah pilih serial/customer.</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="space-y-2">
               <Label>Received Date <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-              <Input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
-            </div>
-            <div className="hidden">
-              <Label>Case ID Manual</Label>
-              <Input value={caseIdManual} onChange={(e) => setCaseIdManual(e.target.value)} />
-            </div>
-            <div className="hidden">
-              <Label>Case ID Manual Date</Label>
-              <Input type="date" value={caseIdManualDate} onChange={(e) => setCaseIdManualDate(e.target.value)} />
-            </div>
-            <div className="md:col-span-2">
+              <Input type="date" value={receivedDate} onChange={(e) => setReceivedDate(e.target.value)} className={"ring-1 ring-gray-400 dark:text-white  mt-2 rounded-md dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2 "}/>
+          
               <Label>Reference Case</Label>
-              <Input value={referenceCase} onChange={(e) => setReferenceCase(e.target.value)} className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
+              <Input value={referenceCase} onChange={(e) => setReferenceCase(e.target.value)} className={"ring-1 ring-gray-400 dark:text-white  mt-2 rounded-md dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
             </div>
-            <div className="flex flex-col gap-2">
+            
+            <div className="space-y-2 col-span-2">
               <Label>Case Status <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
               <Select value={caseStatus} onValueChange={setCaseStatus}>
-                <SelectTrigger className={"ring-1 rounded-sm w-full dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
+                <SelectTrigger className={"ring-1 ring-gray-400 rounded-sm w-full dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
                   <SelectValue placeholder="Select Case Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1521,11 +1477,10 @@ export default function NewCaseForm() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="flex flex-col gap-2">
+            
               <Label>Case Type <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
               <Select value={caseType} onValueChange={setCaseType}>
-                <SelectTrigger className={"ring-1 rounded-sm w-full  dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
+                <SelectTrigger className={"ring-1 ring-gray-400  rounded-sm w-full  dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
                   <SelectValue placeholder="Select Case Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1541,27 +1496,33 @@ export default function NewCaseForm() {
                   <p>Case created at: {formatDate(lastCase.caseinformation.CreatedOn)}</p>
                 </div>
               )}
+
             </div>
+            
+            <div className=" space-y-2">
+              <Label>Case Subject <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
+              <Textarea type="text" rows={3} value={caseSubject} onChange={(e) => setCaseSubject(e.target.value)} className={"ring-1 ring-gray-400  dark:bg-gray-500/10 dark:border-gray-400"}/>
+            </div>
+
+            <div className="space-y-2 col-span-2">
+              <Label>Problem Description <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
+              <Textarea rows={3} value={problemDesc} onChange={(e) => setProblemDesc(e.target.value)} className={"ring-1 ring-gray-400  dark:bg-gray-500/10 dark:border-gray-400"}/>
+            </div>
+
+            <div className="md:col-span-3 space-y-2">
+              <Label>Case Note <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
+              <Textarea rows={3} value={caseNote} onChange={(e) => setCaseNote(e.target.value)} className={"ring-1 ring-gray-400  dark:bg-gray-500/10 dark:border-gray-400"}/>
+            </div>
+
             <div className="md:col-span-3">
               <div className="flex items-center gap-2 mt-2">
                 <Checkbox id="kci" checked={kciFlag} onCheckedChange={(v) => setKciFlag(Boolean(v))} className={"ring-2 bg-gray-100 dark:bg-transparent dark:data-[state=checked]:bg-white"}/>
                 <Label htmlFor="kci">KCI Flag</Label>
               </div>
             </div>
-            <div className="md:col-span-3 space-y-2">
-              <Label>Case Subject <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-              <Textarea type="text" value={caseSubject} onChange={(e) => setCaseSubject(e.target.value)} className={" dark:bg-gray-500/10 dark:border-gray-400"}/>
-            </div>
-            <div className="md:col-span-3 space-y-2">
-              <Label>Problem Description <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-              <Textarea rows={3} value={problemDesc} onChange={(e) => setProblemDesc(e.target.value)} className={"dark:bg-gray-500/10 dark:border-gray-400"}/>
-            </div>
-            <div className="md:col-span-3 space-y-2">
-              <Label>Case Note <Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-              <Textarea rows={3} value={caseNote} onChange={(e) => setCaseNote(e.target.value)} className={"dark:bg-gray-500/10 dark:border-gray-400"}/>
-            </div>
           </CardContent>
         </Card>
+
         {/* 2) Customer / Company */}
         <Card className="rounded-2xl p-[20px]  shadow-2xl   break-inside-avoid dark:bg-gradient-to-tr dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50% dark:border-purple-700" id='customer'>
           <CardHeader>
@@ -1571,7 +1532,13 @@ export default function NewCaseForm() {
               <Checkbox
                 id="incCompany"
                 checked={showCompanySection}
-                onCheckedChange={(v) => setShowCompanySection(Boolean(v))}
+                onCheckedChange={(v) => {
+                  const checked = Boolean(v);
+                  setShowCompanySection(checked);
+                  if (checked) {
+                    copyCompanyFromContact();
+                  }
+                }}
                 className={"ring-2 bg-gray-100 dark:bg-transparent dark:data-[state=checked]:bg-white"}
               />
               <Label htmlFor="incCompany" className={'font-[700]'}>Termasuk dalam company</Label>
@@ -1585,7 +1552,7 @@ export default function NewCaseForm() {
                   <Label className="col-span-1">Salutation<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <div className="col-span-2">
                     <Select value={contactSalutation} onValueChange={setContactSalutation}>
-                      <SelectTrigger>
+                      <SelectTrigger className={"ring-1 ring-gray-400 rounded-sm"}>
                         <SelectValue placeholder="Mr / Mrs" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1595,52 +1562,51 @@ export default function NewCaseForm() {
                     </Select>
                   </div>
                 </div>
+                {showCompanySection && (
+                <div className="grid grid-cols-3 gap-2 items-center ">
+                  <Label className="col-span-1">Nama Company<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
+                  <Input className={"dark:text-white col-span-2 ring-1 rounded-sm ring-gray-400 dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="Cari / isi nama company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                </div>
+                )}
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Nama Customer<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <div className="col-span-2 grid grid-cols-2 gap-2">
-                    <Input placeholder="First Name" value={contactFirstName} onChange={(e) => setContactFirstName(e.target.value)} className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
-                    <Input placeholder="Last Name" value={contactLastName} onChange={(e) => setContactLastName(e.target.value)} className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
+                    <Input placeholder="First Name" value={contactFirstName} onChange={(e) => setContactFirstName(e.target.value)} className={"dark:text-white ring-1 rounded-sm ring-gray-400  dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
+                    <Input placeholder="Last Name" value={contactLastName} onChange={(e) => setContactLastName(e.target.value)} className={"dark:text-white  ring-1 rounded-sm  ring-gray-400  dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">No. Telepon<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                  <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
+                  <Input className={"dark:text-white ring-1 rounded-sm col-span-2 dark:hover:border-transparent dark:focus:border-transparent  ring-gray-400  dark:focus:rounded-lg dark:p-2"} value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">No. Whatsapp</Label>
-                  <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactMobile} onChange={(e) => setContactMobile(e.target.value)} />
+                  <Input className={"dark:text-white ring-1 rounded-sm col-span-2 dark:hover:border-transparent dark:focus:border-transparent  ring-gray-400  dark:focus:rounded-lg dark:p-2"} value={contactMobile} onChange={(e) => setContactMobile(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Email<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                  <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+                  <Input className={"dark:text-white ring-1 rounded-sm col-span-2 dark:hover:border-transparent dark:focus:border-transparent  ring-gray-400  dark:focus:rounded-lg dark:p-2"} type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Alamat<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                  <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactAddressLine1} onChange={(e) => setContactAddressLine1(e.target.value)} />
+                  <Input className={"dark:text-white ring-1 rounded-sm col-span-2  dark:hover:border-transparent dark:focus:border-transparent  ring-gray-400  dark:focus:rounded-lg dark:p-2"} value={contactAddressLine1} onChange={(e) => setContactAddressLine1(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Country<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                  <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="Indonesia / other" value={contactCountry} onChange={(e) => setContactCountry(e.target.value)} />
+                  <Input className={"dark:text-white  col-span-2 ring-1 rounded-sm dark:hover:border-transparent dark:focus:border-transparent  ring-gray-400  dark:focus:rounded-lg dark:p-2"} placeholder="Indonesia / other" value={contactCountry} onChange={(e) => setContactCountry(e.target.value)} />
                 </div>
                 {/* Province/City (Indonesia via EMSIFA) */}
                 {contactCountry.toLowerCase() === 'indonesia' ? (
                   <div className="grid grid-cols-3 gap-2 items-center">
                     <Label className="col-span-1">Province<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                     <div className="col-span-2">
-                      {/* <SelectBarState
-                        id="contactStateProvince"
-                        value={contactStateProvince}
-                        onChange={setContactStateProvince}
-                        options={provContact}
-                        placeholder="Select a Province"
-                      /> */}
                       <ComboboxDemo
                         id="contactStateProvince"
                         value={contactStateProvince}
                         setValue={setContactStateProvince}
                         options={provContact}
                         placeholder="Select a Province"
-                        className={"dark:border-gray-400 dark:bg-transparent"}
+                        className={" dark:bg-transparent ring-1 ring-gray-400 rounded-sm"}
                         />
                     </div>
                   </div>
@@ -1650,7 +1616,7 @@ export default function NewCaseForm() {
                       State / Region<Label className="text-red-600 dark:text-[#FF8A80]">*</Label>
                     </Label>
                     <Input
-                      className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                      className={"dark:text-white ring-1 ring-gray-400 rounded-sm col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       value={contactStateProvince}
                       onChange={(e) => setContactStateProvince(e.target.value)}
                       placeholder="e.g. Tokyo, California, etc."
@@ -1669,25 +1635,17 @@ export default function NewCaseForm() {
                         options={cityContact}
                         placeholder="Select a City"
                         disabled={!contactStateProvince || cityContact.length === 0}
-                        className={"dark:border-gray-400 dark:bg-transparent"}
+                        className={"border-1 border-gray-400 rounded-sm dark:bg-transparent"}
                       />
-                      {/* <SelectBarState
-                        id="contactCity"
-                        value={contactCity}
-                        onChange={setContactCity}
-                        options={cityContact}
-                        placeholder="Select a City"
-                        disabled={!contactStateProvince || cityContact.length === 0}
-                      /> */}
                     </div>
                   </div>
                 ): (
                   <div className="grid grid-cols-3 gap-2 items-center">
                     <Label className="col-span-1">
-                      City / Area<Label className="text-red-600 dark:text-[#FF8A80]">*</Label>
+                      City / Area <Label className="text-red-600 dark:text-[#FF8A80]">*</Label>
                     </Label>
                     <Input
-                      className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                      className={"dark:text-white ring-1 ring-gray-400 ronded-sm col-span-2  dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                       value={contactCity}
                       onChange={(e) => setContactCity(e.target.value)}
                       placeholder="e.g. Jakarta, Berlin, New York..."
@@ -1696,11 +1654,17 @@ export default function NewCaseForm() {
                 )}
                 <div className="grid grid-cols-3 gap-2 items-center">
                   <Label className="col-span-1">Zip Code<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                  <Input className={"col-span-2 dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactZipPostalCode} onChange={(e) => setContactZipPostalCode(e.target.value)} />
+                  <Input className={"col-span-2 dark:text-white ring-1 ring-gray-400 rounded-sm dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={contactZipPostalCode} onChange={(e) => setContactZipPostalCode(e.target.value)} />
                 </div>
 
+                {showCompanySection && (
+                <div className="grid grid-cols-3 gap-2 items-center">
+                    <Label className="col-span-1">NPWP<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
+                    <Input className={"dark:text-white ring-1 ring-gray-400 rounded-sm col-span-2 dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyNPWP} onChange={(e) => setCompanyNPWP(e.target.value)} />
+                </div>
+                )}
+
                 {/* PIC Information */}
-                
                 <div className="space-y-2 border-2 p-2 rounded dark:border-gray-400 dark:rounded-sm">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
@@ -1751,17 +1715,13 @@ export default function NewCaseForm() {
               {/* Company (optional) */}
                 {showCompanySection && (
                 <div className="space-y-2 border-2 p-2 dark:border-gray-400 dark:rounded-sm">
-                  <div className="flex justify-end">
+                  <div className="flex justify-end" hidden>
                     <Button type="button" variant="outline" size="sm" onClick={copyCompanyFromContact} className={'cursor-pointer dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}>
                       Same as contact information
                     </Button>
                   </div>
 
                   <div className="space-y-2 w-full">
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">Nama Company<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                      <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="Cari / isi nama company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
-                    </div>
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Email Company<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)} />
@@ -1786,13 +1746,6 @@ export default function NewCaseForm() {
                     <div className="grid grid-cols-3 gap-2 items-center">
                       <Label className="col-span-1">Province (ID)<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <div className="col-span-2">
-                        {/* <SelectBarState
-                          id="CompanyStateProvince"
-                          value={companyStateProvince}
-                          onChange={setCompanyStateProvince}
-                          options={provCompany}
-                          placeholder="Select a Province"
-                        /> */}
                         <ComboboxDemo
                           id="CompanyStateProvince"
                           value={companyStateProvince}
@@ -1821,13 +1774,6 @@ export default function NewCaseForm() {
                       <div className="grid grid-cols-3 gap-2 items-center">
                         <Label className="col-span-1">City (ID)<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                         <div className="col-span-2">
-                          {/* <SelectBarState
-                            id="CompanyCity"
-                            value={companyCity}
-                            onChange={setCompanyCity}
-                            options={cityCompany}
-                            placeholder="Select a City"
-                          /> */}
                           <ComboboxDemo
                             id="CompanyCity"
                             value={companyCity}
@@ -1855,18 +1801,13 @@ export default function NewCaseForm() {
                       <Label className="col-span-1">Zip Code<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                       <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyZipPostalCode} onChange={(e) => setCompanyZipPostalCode(e.target.value)} />
                     </div>
-                    <div className="grid grid-cols-3 gap-2 items-center">
-                      <Label className="col-span-1">NPWP<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                      <Input className={"dark:text-white dark:border-b-gray-400 col-span-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={companyNPWP} onChange={(e) => setCompanyNPWP(e.target.value)} />
-                    </div>
                   </div>
                 </div>
                 )}
             </div>
           </CardContent>
         </Card>
-        {/* {showCustomerCard && (
-              )} */}
+      
         {/* 3) Product */}
         <Card className="rounded-2xl p-[20px]  shadow-2xl   break-inside-avoid dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%  dark:border-purple-700" id='product'>
           <CardHeader>
@@ -1879,7 +1820,7 @@ export default function NewCaseForm() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Serial No.<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                <Input value={selectedAsset?.SerialNumber || serialQuery} readOnly={!!selectedAsset} onChange={(e) => setSerialQuery(e.target.value)} className={"dark:text-white dark:border-b-gray-400  dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
+                <Input value={selectedAsset?.SerialNumber || serialQuery} readOnly={!!selectedAsset} onChange={(e) => setSerialQuery(e.target.value)} className={"dark:text-white ring-1 ring-gray-400 rounded-sm dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                 <Button variant="outline" asChild className={'w-full dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}>
                   <a
                     href="https://support.hp.com/id-en/check-warranty"
@@ -1902,7 +1843,7 @@ export default function NewCaseForm() {
                     setProductQuery(v);
                     searchProduct(v);
                   }}
-                  className={"dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
+                  className={"dark:text-white ring-1 ring-gray-400 rounded-sm dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}
                 />
                 <div className="mt-2 flex items-center gap-2">
                   <Checkbox
@@ -1945,7 +1886,7 @@ export default function NewCaseForm() {
                 <div className="flex flex-col gap-2">
                   <Label>Product Tower<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <Select value={productTower} onValueChange={setProductTower}>
-                    <SelectTrigger className={"ring-1 rounded-sm w-full dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
+                    <SelectTrigger className={"ring-1 ring-gray-400 rounded-sm w-full dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
                       <SelectValue placeholder="IPG / PSG" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1957,7 +1898,7 @@ export default function NewCaseForm() {
                 <div className="flex flex-col gap-2">
                   <Label>Product Group<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
                   <Select value={productGroup} onValueChange={setProductGroup}>
-                    <SelectTrigger className={"ring-1 rounded-sm w-full dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
+                    <SelectTrigger className={"ring-1 ring-gray-400  rounded-sm w-full dark:ring-gray-400 dark:focus:ring-[#1776bb]"}>
                       <SelectValue placeholder="Commercial / Consumer" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1979,7 +1920,7 @@ export default function NewCaseForm() {
                       value={productTypeId || null}
                       onValueChange={setProductTypeId}
                     >
-                      <SelectTrigger className="w-full ring-1 rounded-sm dark:ring-gray-400 dark:focus:ring-[#1776bb]">
+                      <SelectTrigger className="w-full ring-1 ring-gray-400 rounded-sm dark:ring-gray-400 dark:focus:ring-[#1776bb]">
                         <SelectValue placeholder="Select Product Type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1996,19 +1937,20 @@ export default function NewCaseForm() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label>Product Line<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                  <Input value={productLine} onChange={(e) => setProductLine(e.target.value)} className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
+                  <Input value={productLine} onChange={(e) => setProductLine(e.target.value)} className={"dark:text-white ring-1 ring-gray-400 mt-2 rounded-sm dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                 </div>
                 <div>
                   <Label>Product No<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                  <Input value={productNo} onChange={(e) => setProductNo(e.target.value)} className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
+                  <Input value={productNo} onChange={(e) => setProductNo(e.target.value)} className={"dark:text-white ring-1 ring-gray-400 mt-2 rounded-sm dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                 </div>
                 <div>
                   <Label>Product Name<Label className="text-red-600 dark:text-[#FF8A80]">*</Label></Label>
-                  <Input value={productName} onChange={(e) => setProductName(e.target.value)} className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
+                  <Input value={productName} onChange={(e) => setProductName(e.target.value)} className={"dark:text-white ring-1 ring-gray-400 mt-2 rounded-sm dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"}/>
                 </div>
               </div>
             </CardContent>
-          </Card>
+        </Card>
+
           {/* 4) Warranty */}
           <Card className="rounded-2xl space-y-0.5 p-[17px]  shadow-2xl break-inside-avoid col-span-3 dark:bg-gradient-to-l dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%  dark:border-purple-700  scroll-mt-[120px] " id='warranty'>
             <CardHeader>
@@ -2028,19 +1970,19 @@ export default function NewCaseForm() {
                     setWarrantySearchValue(val);   // update field search
                     fetchWarrantyStatus(val); // trigger fetch API
                   }}
-                  className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
+                  className={"dark:bg-transparent ring-1 ring-gray-400 "}
                   placeholder="Warranty Option..."
                 />
               </div>
               <div>
                 <Label>EOW Date</Label>
-                <Input type="date" variant={"default"} value={eowDate} onChange={(e) => setEowDate(e.target.value)} className={"mt-2 dark:ring-1 dark:ring-gray-400  dark:text-white"} />
+                <Input type="date" variant={"default"} value={eowDate} onChange={(e) => setEowDate(e.target.value)} className={"mt-2 ring-1 ring-gray-400 dark:text-white"} />
               </div>
               {
               warrantySearchValue === "01T" &&
               (
-            <div className="">
-                <Label>Need Warranty Approval</Label>
+            <div >
+                <Label className={"whitespace-nowrap"}>Need Warranty Approval</Label>
                 <div className="flex items-center gap-2 mt-2">
                   <Checkbox
                     id="needWarrantyApproval"
@@ -2055,6 +1997,7 @@ export default function NewCaseForm() {
               }
             </CardContent>
           </Card>
+
           {/* 5) Accessory */}
           <Card className="rounded-2xl p-[20px]  shadow-2xl break-inside-avoid col-span-3   scroll-mt-[120px] dark:bg-gradient-to-l dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%  dark:border-purple-700" id='accessories'>
             <CardHeader>
@@ -2063,10 +2006,9 @@ export default function NewCaseForm() {
             </CardHeader>
             <CardContent className="space-y-3">
               {accessories.map((row, idx) => (
-                
                   <React.Fragment key={row.id || idx}>
-                <div  className="grid grid-cols-12 gap-2 items-center ring-1 p-3 rounded-2xl">
-                  <div className="col-span-12 md:col-span-4">
+                <div  className="grid grid-cols-2 gap-2 items-center ring-1 p-3 rounded-2xl">
+                  <div className="col-span-4">
                     <Label className="text-xs">Accessory Name</Label>
                     <SearchCommandBlock
                       value={row.name}
@@ -2092,22 +2034,22 @@ export default function NewCaseForm() {
                         "Stylus Pen",
                         "Toner Catridge"
                       ]}
-                      className={"dark:bg-transparent dark:ring-gray-400 dark:ring-1 mt-2"}
+                      className={"dark:bg-transparent ring-gray-400 ring-1 mt-2"}
                     />
                   </div>
-                  <div className="col-span-12 md:col-span-6">
+                  <div className="col-span-6">
                     <Label className="text-xs">Note</Label>
                     <Input
-                      className={"dark:ring-gray-400 dark:ring-1 mt-2 dark:text-white dark:p-2"}
+                      className={"ring-gray-400 ring-1 mt-2 dark:text-white dark:p-2"}
                       value={row.note}
                       onChange={(e) => updateAccessory(row.id, "note", e.target.value)}
                     />
                   </div>
                   <div className="col-span-10 md:col-span-10">
                     <Label className="text-xs">CT/SN</Label>
-                    <Input value={row.code} onChange={(e) => updateAccessory(row.id, "code", e.target.value)} className={"dark:ring-gray-400 dark:ring-1 mt-2 dark:text-white dark:p-2"}/>
+                    <Input value={row.code} onChange={(e) => updateAccessory(row.id, "code", e.target.value)} className={"ring-gray-400 ring-1 mt-2 dark:text-white dark:p-2"}/>
                   </div>
-                  <div className="col-span-2 flex justify-end pt-5">
+                  <div className="flex col-span-10 justify-end">
                     <Button type="button" variant="ghost" size="icon" onClick={() => removeAccessory(row.id)} disabled={accessories.length === 1}>
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -2122,6 +2064,7 @@ export default function NewCaseForm() {
               </Button>
             </CardContent>
           </Card>
+
           {/* 6) Photos */}
           <Card className="rounded-2xl p-[20px]  shadow-2xl break-inside-avoid col-span-3   scroll-mt-[120px] dark:bg-gradient-to-l dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%  dark:border-purple-700" id='photos'>
             <CardHeader>
@@ -2155,7 +2098,6 @@ export default function NewCaseForm() {
         </div>
 
       {/* RIGHT SUMMARY PANEL */}
-
 
       {/* Footer */}
       <div className="sticky bottom-0 bg-background/90 py-3 dark:bg-slate-700  dark:backdrop-blur dark:supports-[backdrop-filter]:bg-background/20">
