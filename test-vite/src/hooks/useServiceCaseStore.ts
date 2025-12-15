@@ -823,9 +823,7 @@ const hasIntentToSave = isDirty;
               );
 
               if (
-                (entitlementStatus.needWarrantyApproval === true &&
-                  ownerUserData?.Role === "fd") ||
-                ownerUserData?.Role === "apv"
+                (entitlementStatus.needWarrantyApproval === true && caseDetails.CaseStatus === "NEW_POPDoc") 
               ) {
                 const getAsset = await ApiCustomer.get(
                   `/api/asset-information/${caseDetails.AssetID}`
