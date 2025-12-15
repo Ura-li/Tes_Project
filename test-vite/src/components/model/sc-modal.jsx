@@ -5887,9 +5887,9 @@ console.log("Asset Info OTC : ",isOutWarranty)
 
   
             <DialogFooter className={'p-4'}>
-             <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
+             <Button  className="" onClick={() => setOpen(false)}>Cancel</Button>
             <Button 
-              variant={'search'} 
+              
               onClick={() => setCurrentStep(2)} 
               disabled={!selectedWarrantyServices}
               className={!selectedWarrantyServices ? "opacity-50 cursor-not-allowed" : ""}
@@ -5906,12 +5906,11 @@ console.log("Asset Info OTC : ",isOutWarranty)
         return (
           <DialogContent
             className=" w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-7xl
-    max-h-[90vh] 
     flex flex-col justify-center
     gap-0 p-0 bg-white
     [&>button]:hidden rounded-none"
           >
-            <DialogHeader className={"p-2 "}>
+            <DialogHeader className={" "}>
               <div className="flex items-end justify-end">
                 <Button className={"bg-transparent "}>
                   <ExternalLink color="black"></ExternalLink>
@@ -5970,10 +5969,10 @@ console.log("Asset Info OTC : ",isOutWarranty)
               </div>
             </div>
 
-            <div className="flex items-center justify-end mt-3 gap-2">
-              <Label htmlFor="orderability">Orderability</Label>
-              <Switch id="orderability" />
-            </div>
+            {/* <div className="flex items-center justify-end mt-3 gap-2"> */}
+              {/* <Label htmlFor="orderability">Orderability</Label> */}
+              {/* <Switch id="orderability" /> */}
+            {/* </div> */}
 
             <Tabs defaultValue="parts" className={"h-[50vh] "}>
               <TabsList className={"py-5 px-0 bg-white"}>
@@ -6293,16 +6292,14 @@ console.log("Asset Info OTC : ",isOutWarranty)
               </TabsContent>
             </Tabs>
 
-            <DialogFooter className={"p-4"}>
+            <DialogFooter className={"p-2"}>
               <Button
-                variant={"search"}
                 className=""
                 onClick={() => setCurrentStep(1)}
               >
                 Previous
               </Button>
               <Button
-                variant={"search"}
                 className=""
                 onClick={() => setCurrentStep(3)}
               >
@@ -6466,10 +6463,10 @@ console.log("Asset Info OTC : ",isOutWarranty)
             
   
             <DialogFooter className={' sm:justify-start p-2 items-center gap-10'}>
-              <Button variant={'search'} className="" onClick={() => setCurrentStep(2)}>Previous</Button>
-              <Button variant={'search'} className="" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button variant={'search'} className="" onClick={() => setModalPart(true)}>Add Part</Button>
-              <Button variant={'search'} className="" onClick={createOrder}>Create Order</Button>
+              <Button  className="" onClick={() => setCurrentStep(2)}>Previous</Button>
+              <Button  className="" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button  className="" onClick={() => setModalPart(true)}>Add Part</Button>
+              <Button  className="" onClick={createOrder}>Create Order</Button>
               
               <Label htmlFor="incident" className={'font-bold whitespace-nowrap'}>Incident Type</Label>
               
