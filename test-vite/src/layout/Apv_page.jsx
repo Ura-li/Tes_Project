@@ -7,6 +7,7 @@ import { NotificationCard } from "@/components/NotificationCard";
 import { useNavigate } from "react-router";
 import { CaseField } from "@/pages/services/service-case";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 
 export default function Approvel() {
@@ -30,8 +31,6 @@ export default function Approvel() {
             setCaseData(fetchCase.data.data);      
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
-
-            console.log("Fetch Case Data : ", fetchCase.data.data)
             setUserData({
                 ...userData,
                 Username: resFetchUserData.Username,
@@ -48,7 +47,7 @@ export default function Approvel() {
           const valueFilterCase = fetchCase.data.data.filter(c =>  c?.CaseStatus === "NEW_POPDoc")
          setCaseData(valueFilterCase)            
         } catch (err) {
-            console.error(err);
+            toast.error("Fething data: ",err);
         }finally {
             setLoading(false);
         }
@@ -69,7 +68,6 @@ export default function Approvel() {
     const orderB = b.CaseID;
     return orderB.localeCompare(orderA);
   })
-  console.log("Sorted Data:", sortedData);
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = sortedData.slice(startIndex, startIndex + itemsPerPage);
@@ -125,22 +123,6 @@ export default function Approvel() {
              <Card className={"rounded-sm col-span-2 row-span-2 dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-700 dark:to-slate-800"}>
                 <CardHeader className={"flex flex-row gap-2 justify-between"}>
                     <CardTitle className={"text-2xl"}>Approval</CardTitle>
-                    {/* <div className="flex gap-2">
-                    <select
-                      value={filterStatus}
-                      onChange={(e) => {
-                        setFilterStatus(e.target.value)
-                        setCurrentPage(1)
-                      }}
-                      className="focus:ring-2 focus:ring-blue-400 ring-2 ring-blue-400 p-1 rounded-sm"
-                    >
-                      {["All", "New", "Ordered", "Shipped", "Closed", "BackOrdered", "Cancelled"].map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-                  </div> */}
                 </CardHeader>
                 <CardContent className={"grid gap-5 "}>
                 {loading ? Array.from({ length:4 }).map((_,i) => (

@@ -37,7 +37,6 @@ import { Link } from "react-router";
 import Swal from "sweetalert2";
 import { Textarea } from "../../components/ui/textarea";
 import { useParams } from "react-router";
-// import Select from 'react-select';
 import debounce from "lodash.debounce";
 import ApiCustomer from "@/api";
 import { TabsServiceMOLineItems } from "./service-case";
@@ -52,6 +51,7 @@ import {
 import CaseField from "@/components/CaseField";
 import { useAuth } from "@/context/auth-context";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
 const GOOD_RETURN_REASON_OPTIONS = [
   { value: "AdminIssue", label: "Admin Issue" },
@@ -154,7 +154,6 @@ export const ServiceMoDetailApo = () => {
         `/api/material-order/material-order-line-items/${lineItemID}`
       );
       const data = res.data.data;
-      console.log("MOLI ITEM", data);
 
       setMoLineItems(data);
       setMODetailInput({
@@ -200,7 +199,6 @@ export const ServiceMoDetailApo = () => {
       });
       updateDraft("moliId", data.lineItemID);
     } catch (err) {
-      console.error("Failed to fetch Material Line Items orders:", err);
       Swal.fire("Error", "Failed to fetch Material Line Items", "error");
     } finally {
       Swal.close();
@@ -217,7 +215,7 @@ export const ServiceMoDetailApo = () => {
         const response = await ApiCustomer.get("/api/part-return-status");
         setPartReturnStatuses(response.data?.data ?? []);
       } catch (error) {
-        console.error("Failed to fetch Part Return Statuses:", error);
+        toast.error(error?.response?.data?.message ?? "Failed to fetch Part Return Statuses:");
       }
     };
 
@@ -320,7 +318,6 @@ export const ServiceMoDetailApo = () => {
         }));
       }
     } catch (error) {
-      console.error("Failed to upload PhotoPartUnit:", error);
       Swal.fire(
         "Upload Failed",
         error.response?.data?.message || "Failed to upload unit photo.",
@@ -364,7 +361,7 @@ export const ServiceMoDetailApo = () => {
           { params: { path: currentPath } },
         );
       } catch (error) {
-        console.warn("Failed to delete PhotoPartUnit file:", error);
+        toast.warning("Failed to delete PhotoPartUnit file:", error);
       }
     }
   };
@@ -469,10 +466,8 @@ export const ServiceMoDetailApo = () => {
           OtherReason: MODetailInput.otherReason,
         }
       );
-
-      console.log("Material Order Line Item updated successfully.");
     } catch (error) {
-      console.error("Error updating Material Order Line Item:", error);
+      toast.error(error?.response?.data?.message ?? "Error updating Material Order Line Item");
     }
   };
 
@@ -482,7 +477,6 @@ export const ServiceMoDetailApo = () => {
 
 useEffect(() => {
   ApiCustomer.get("/api/failure/options").then((res) => {
-    console.log("RES",res);
     const defaultOptions = res.data.map((f, index) => ({
       value: f.FailureId.toString(), 
       label: (
@@ -524,32 +518,28 @@ useEffect(() => {
   const handleInputChange = (value) => {
     setInputValue(value);
     fetchFailures(value);
-    setMODetailInput((prev) => ({
+    const failureId = Number(value);
+
+    if (Number.isNaN(failureId)) return;
+    setMODetailInput(prev => {
+    let next = {
       ...prev,
-      failureId: value ? parseInt(value, 10) : null,
-    }));
-  };
+      failureId,
+      isQuantityUsedDisabled: false,
+    };
 
-  const handleSelect = (selected) => {
-    setInputValue(selected.label);
-    setSearchResults([
-      selected,
-      ...searchResults.filter((opt) => opt.value !== selected.value),
-    ]);
-    setMODetailInput((prev) => ({
-      ...prev,
-      failureId: selected.value,
-      failureName: selected.label,
-    }));
-    console.log("selected.value", selected.value);
-  };
+    if (failureId === 6) {
+      next.isQuantityUsedDisabled = true;
+    } 
+    else if (failureId === 7) {
+      next.QuantityUsed = false;
+    } 
+    else if (failureId === 8) {
+      next.QuantityUsed = true;
+    }
 
-  const handleFocus = () => {
-    setIsFocused(true);
-  };
-
-  const handleBlur = () => {
-    setTimeout(() => setIsFocused(false), 150);
+    return next;
+  });
   };
 
   const tabs = [
@@ -618,7 +608,6 @@ useEffect(() => {
                     </TabsTrigger>
                   )
                 )}
-                {/* <SelectBarRelated></SelectBarRelated> */}
               </TabsList>
             </Card>
 
@@ -910,27 +899,8 @@ useEffect(() => {
                     readOnly={!canEditCE}
                     className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                   />
-
-        {/* Show dropdown only if results exist and input is focused */}
-        {isFocused && (
-          <ul className="absolute z-10 w-full mt-1 overflow-y-auto transition-all duration-200 bg-white border rounded shadow-lg ">
-            {searchResults.length > 0 ? (
-              searchResults.map((opt) => (
-                <li
-                  key={opt.value}
-                  className="p-3 cursor-pointer hover:bg-gray-200"
-                  onMouseDown={() => handleSelect(opt)} // Use onMouseDown to prevent blur before click
-                >
-                  {opt.label}
-                </li>
-              ))
-            ) : (
-              <li className="p-3 text-gray-500">No results found</li>
-            )}
-          </ul>
-        )}
-      </div>  
-    </CaseField>
+              </div>
+            </CaseField>
 
                     <CaseField label="Return CT Key" star={canEditCE} lock={!canEditCE}>
                     <Input
@@ -965,9 +935,14 @@ useEffect(() => {
                   <CaseField label="Part Used" star={canEditCE} lock={!canEditCE}>
                     <div className="flex items-center gap-2">
                       <Switch
-                        checked={Boolean(MODetailInput.QuantityUsed)}
-                        onCheckedChange={handleQuantityUsedToggle}
-                        disabled={!canEditCE}
+                          checked={!!MODetailInput.QuantityUsed}
+                          onCheckedChange={(checked) =>
+                            setMODetailInput(prev => ({
+                              ...prev,
+                              QuantityUsed: checked,
+                            }))
+                          }
+                          disabled={!canEditCE || MODetailInput.isQuantityUsedDisabled}
                       />
                       <span>{MODetailInput.QuantityUsed ? "Used" : "Not Used"}</span>
                     </div>
@@ -994,7 +969,6 @@ useEffect(() => {
                   <CaseField
                     label="DOA Reason"
                     star={isDOASelected}
-                    // lock={!canEdit}
                     hide={!isDOASelected}
                   >
                     <Input
@@ -1029,7 +1003,6 @@ useEffect(() => {
                       onChange={handleChange("GoodReturnReason")}
                       placeholder="Select reason"
                       options={GOOD_RETURN_REASON_OPTIONS}
-                      // readOnly={!canEdit}
                       className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                     />
                   </CaseField>

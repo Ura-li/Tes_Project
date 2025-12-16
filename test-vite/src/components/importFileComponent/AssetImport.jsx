@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import ApiCustomer from "@/api";
+import { Input } from "../ui/input";
 
 export function AssetTemplateButton() {
   const handleDownload = () => {
@@ -11,7 +12,7 @@ export function AssetTemplateButton() {
   };
 
   return (
-    <Button onClick={handleDownload}>
+    <Button variant={"outline"} onClick={handleDownload}>
       Download Product Template
     </Button>
   );
@@ -45,13 +46,12 @@ export function AssetImport() {
             }
         }catch(err){
             toast.warning("Failed to import data")
-            console.error(err)
         }
     }
     return (
-        <div className="flex flex-col items-start space-y-3">
-            <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
-            <Button onClick={handleImport}>Import Asset Data</Button>
+        <div className="flex flex-row items-center gap-2 ">
+            <Input className="ring-1 ring-gray-400 rounded-sm" type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
+            <Button variant={"outline"} onClick={handleImport}>Import Asset Data</Button>
         </div>
     );
 }

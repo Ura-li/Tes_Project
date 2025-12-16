@@ -385,9 +385,10 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         next.Type = "Individual";
       }
       set({ customerData: next });
-    } catch (err) {
-      console.error("Error returning Customer Data : ", err);
-      toast.error("Gagal mengambil data customer");
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ?? "Gagal mengambil data customer",
+      );
     }
   },
 
@@ -399,9 +400,10 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         `/api/asset-information/${caseDetails.AssetID}`
       );
       set({ assetInformation: resAsset.data.data });
-    } catch (err) {
-      console.error("Error returning Asset Data : ", err);
-      toast.error("Gagal mengambil data asset");
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ?? "Gagal mengambil data asset",
+      );
     }
   },
 
@@ -414,8 +416,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       );
       const list = Array.isArray(res.data?.data) ? res.data.data : [];
       set({ notesList: list });
-    } catch (err) {
-      console.error("Error in fetchCaseNotes:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Error in fetch Case Notes");
       set({ notesList: [] });
     }
   },
@@ -426,23 +428,10 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     try {
       const response = await ApiCustomer.get(`/api/user/${caseDetails.Owner}`);
       set({ ownerUserData: response.data.data });
-    } catch (error) {
-      console.error("WRONG THING IN FETCH OWNER", error);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message ?? "WRONG THING IN FETCH OWNER");
     }
   },
-
-  // fetchWorkOrders: async () => {
-  //   const { caseDetails } = get();
-  //   if (!caseDetails) return;
-  //   try {
-  //     const res = await ApiCustomer.get(
-  //       `/api/work-order?CaseID=${caseDetails.CaseID}`
-  //     );
-  //     set({ workOrders: res.data.data || [] });
-  //   } catch (err) {
-  //     console.error("Failed to fetch work orders:", err);
-  //   }
-  // },
 
   fetchWorkOrders: async () => {
     const { caseDetails } = get();
@@ -462,8 +451,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         );
         set({ materialOrders: moRes.data.data || [] });
       }
-    } catch (err) {
-      console.error("Failed to fetch work orders:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Failed to fetch work orders");
     }
   },
 
@@ -474,8 +463,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       const woidList = workOrders.map((wo: any) => wo.WOID).join(",");
       const res = await ApiCustomer.get(`/api/material-order?WOID=${woidList}`);
       set({ materialOrders: res.data.data || [] });
-    } catch (err) {
-      console.error("Failed to fetch Material orders:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Failed to fetch Material orders");
     }
   },
 
@@ -484,8 +473,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     try {
       const gtcData = caseDetails?.global_trade_check;
       set({ gtcForm: gtcData ?? gtcForm });
-    } catch (err) {
-      console.error("Error fetching GTC:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Error fetching GTC");
     }
   },
 
@@ -512,8 +501,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
           },
         });
       }
-    } catch (err) {
-      console.error("Error fetching CSR:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Error fetching CSR");
     }
   },
 
@@ -525,8 +514,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         `/api/case-information/${caseDetails.CaseID}`
       );
       set({ caseForm: { ...caseForm, ...res.data.data } });
-    } catch (err) {
-      console.error("Error fetching case:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Error fetching case");
     }
   },
 
@@ -538,8 +527,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         `/api/actionlog?caseId=${caseDetails.CaseID}`
       );
       set({ actionLogs: actionlog.data.data || [] });
-    } catch (error) {
-      console.error("Error fetching ActionLog:", error);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message ?? "Error fetching ActionLog");
     }
   },
 
@@ -547,31 +536,10 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     try {
       const res = await ApiCustomer.get("/api/otc-code");
       set({ otcCode: res.data.data || [] });
-    } catch (err) {
-      console.error("Failed to fetch OTC Code:", err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Failed to fetch OTC Code");
     }
   },
-
-//  fetchInvoiceData: async () => {
-//    const { caseDetails } = get();
-//    if (!caseDetails?.CaseID) return;
-//    set({ invoiceLoading: true });
-//    try {
-//      const response = await ApiCustomer.get(
-//        `/api/invoice-information?caseId=${caseDetails.CaseID}`
-//      );
-//      const data = response.data?.data;
-//      set({ invoiceData: data ?? null });
-//      return data;
-//    } catch (error: any) {
-//      console.error("Failed to fetch invoice:", error);
-//      toast.error(
-//        error?.response?.data?.message ?? "Gagal mengambil data invoice."
-//      );
-//    } finally {
-//      set({ invoiceLoading: false });
-//    }
-//  },
 
   fetchInvoiceData: async (opts) => {
   const { caseDetails, invoiceData } = get();
@@ -598,7 +566,6 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     set({ invoiceData: wrapped });
     return wrapped;
   } catch (error: any) {
-    console.error("Failed to fetch invoice:", error);
     toast.error(
       error?.response?.data?.message ?? "Gagal mengambil data invoice."
     );
@@ -606,38 +573,6 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     set({ invoiceLoading: false });
   }
 },
-
-
-	//  fetchDPData: async () => {
-	//    const { caseDetails } = get();
-	//    if (!caseDetails?.CaseID) return;
-	//    set({ dpLoading: true });
-	//    try {
-	//      const response = await ApiCustomer.get(
-	//        `/api/dp-information?caseId=${caseDetails.CaseID}`
-	//      );
-	//      const data = response.data?.data;
-	//      console.log("DATA TS DP", data);
-	//      const arrayData = Array.isArray(data) ? data : data ? [data] : [];
-	//      const mapped = arrayData.map((dp: any) => ({
-	//        tempId: dp.dpInvoiceNo, // stable key
-	//        InvoiceNo: dp.dpInvoiceNo,
-	//        DpAmount: dp.dpAmount ?? "",
-	//        DpDate: dp.dpDate ?? null, // string is fine, your DatePicker helper converts it
-	//        PaymentType: dp.paymentType ?? "",
-	//        DpNote: dp.dpNote ?? "",
-	//        isPersisted: true,
-	//      }));
-	//
-	//      set({ dpList: mapped ?? null });
-	//      return data;
-	//    } catch (error: any) {
-	//      console.error("Failed Fetch DP", error);
-	//      toast.error(error?.response?.data?.message ?? "Gagal mengambil Data DP");
-	//    } finally {
-	//      set({ dpLoading: false });
-	//    }
-//  },
 
   fetchDPData: async (opts) => {
     const { caseDetails, dpList } = get();
@@ -661,7 +596,6 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
         `/api/dp-information?caseId=${caseDetails.CaseID}`
       );
       const data = response.data?.data;
-      console.log("DATA TS DP", data);
       const arrayData = Array.isArray(data) ? data : data ? [data] : [];
       const mapped = arrayData.map((dp: any) => ({
         tempId: dp.dpInvoiceNo, // stable key
@@ -676,7 +610,6 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       set({ dpList: mapped ?? [] });
       return mapped;
     } catch (error: any) {
-      console.error("Failed Fetch DP", error);
       toast.error(error?.response?.data?.message ?? "Gagal mengambil Data DP");
     } finally {
       set({ dpLoading: false });
@@ -697,8 +630,8 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
           ProductTypeID: resProduct.data.data.ProductTypeID || "",
         },
       });
-    } catch (err) {
-      toast.error("Gagal mengambil data product");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Gagal mengambil data product");
     }
   },
 
@@ -721,9 +654,6 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
       setDirty,
       isDirty,
     } = get();
-    // console.log(dpList, dpDataForm);
-    // return false
-console.log("[saveAll] isDirty =", isDirty);
 
     if (!caseDetails) return false;
 
@@ -746,9 +676,6 @@ console.log("[saveAll] isDirty =", isDirty);
       });
 
       const entitlementEdited = hasAnyNonEmptyValue(entitlementStatus);
-      // const gtcEdited = gtcForm && Object.keys(gtcForm).length > 0;
-      // const csrEdited = csrForm && Object.keys(csrForm).length > 0;
-      // const productEdited = productForm && Object.keys(productForm).length > 0;
       const gtcEdited = hasAnyNonEmptyValue(gtcForm);
       const csrEdited = hasAnyNonEmptyValue(csrForm);
       const productEdited = hasAnyNonEmptyValue(productForm);
@@ -762,15 +689,6 @@ console.log("[saveAll] isDirty =", isDirty);
       );
 
 const hasIntentToSave = isDirty;
-      //fungsi not working
-  //     if (!hasIntentToSave) {
-  //       const confirm = await Swal.fire({
-  //       title: "Empty change",
-  //       text: "Tidak ada perubahan yang perlu disimpan.",
-  //       icon: "info",
-  //     });
-  // return false;
-  //     }
 
       const confirm = await Swal.fire({
         title: "Simpan perubahan?",
@@ -780,6 +698,13 @@ const hasIntentToSave = isDirty;
         confirmButtonText: "Simpan",
         cancelButtonText: "Batal",
       });
+
+        if (caseNoteFormData.Note === "") {
+          toast.info("Isi Note terlebih dahulu", {
+            position: 'top-center',
+          })
+          return false;
+        }
 
       if (!confirm.isConfirmed) {
         return false;
@@ -902,9 +827,7 @@ const hasIntentToSave = isDirty;
               );
 
               if (
-                (entitlementStatus.needWarrantyApproval === true &&
-                  ownerUserData?.Role === "fd") ||
-                ownerUserData?.Role === "apv"
+                (entitlementStatus.needWarrantyApproval === true && caseDetails.CaseStatus === "NEW_POPDoc") 
               ) {
                 const getAsset = await ApiCustomer.get(
                   `/api/asset-information/${caseDetails.AssetID}`
@@ -1138,21 +1061,14 @@ const hasIntentToSave = isDirty;
                       setOwnerUserData(newOwnerInfo);
                     }
                   } catch (ownerLogError) {
-                    console.error(
+                    toast.error(
                       "Failed to create owner change log:",
                       ownerLogError
                     );
                   }
                 }
-              } catch (err) {
-                console.error("Gagal update case:", err);
-                Swal.fire({
-                  icon: "error",
-                  title: "Error",
-                  text: "Gagal menyimpan data case.",
-                  allowOutsideClick: false,
-                  allowEscapeKey: false,
-                });
+              } catch (err: any) {
+                toast.error("Update gagal",err)
               }
             }
             break;
@@ -1214,7 +1130,6 @@ const hasIntentToSave = isDirty;
       Swal.close();
       return false;
     } catch (error: any) {
-      console.error("failed:", error);
       Swal.fire({
         icon: "error",
         title: error.message,

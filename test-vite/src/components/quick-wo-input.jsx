@@ -116,15 +116,12 @@ export function QuickWOInput ({
   useEffect(() => {
     const fetchDataSiteAccounts = async () => {
       try {
-        
-        console.log('res in quick wo input : ',caseInformation.site_account)
         setSiteAccountInformation(caseInformation.site_account)
       } catch (error) {
         
       }
     }
     fetchDataSiteAccounts();
-    console.log("Site Account Information : ",siteAccountInformation)
   }, [caseInformation?.SiteAccountID])
 
   const [mainAccount, setMainAccount] = useState({
@@ -163,7 +160,6 @@ export function QuickWOInput ({
         workOrderInstruction: wo.WorkOrderInstruction || "...",
       }));
       setMainAccount(newMainAccount);
-      console.log("Main Account : ",mainAccount);
 
     // Now you can safely use newMainAccount
       setServiceDeliveryAddress({

@@ -38,6 +38,7 @@ import { TabsBooking } from '../../components/tests/tab';
 
 import { getUserFromToken } from "@/lib/utils/auth";
 import CaseField from '@/components/CaseField';
+import { toast } from 'sonner';
 
 function formatDateForInput(dateString) {
   if (!dateString) return "";
@@ -123,7 +124,6 @@ export function ServiceBooking ({BookingId , woid}) {
       try {
         const response = await ApiCustomer.get(`/api/bookings/${bookingid}`);
         const data = response.data; // <- Harusnya langsung .data, BUKAN .data.booking
-        console.log("data fetch booking : ",data)
         setBookingData(response.data);
         
         // Set field-field yang kamu butuhkan
@@ -160,7 +160,6 @@ export function ServiceBooking ({BookingId , woid}) {
         setTotalInProgressDurationInMinutes(data?.TotalInProgressDurationInMinutes || 0);
         setTotalBreakDurationInMinutes(data?.TotalBreakDurationInMinutes || 0);
       } catch (error) {
-        console.error("Failed to fetch booking data:", error);
         Swal.fire({
         icon: 'error',
         title: 'Gagal memuat data',
@@ -212,8 +211,6 @@ export function ServiceBooking ({BookingId , woid}) {
       EstimatedArrivalTimeUserTime: estimatedArrivalTimeUserTime || null,
       ActualArrivalTimeUserTime: actualArrivalTimeUserTime || null,
     };
-    
-    console.log("Booking Data : ",updatedBookingData)
     await setBookingData(updatedBookingData);
     try {
       await ApiCustomer.patch(`/api/bookings/${bookingid}`, {
@@ -238,13 +235,11 @@ export function ServiceBooking ({BookingId , woid}) {
         window.location.href = `/work/${bookingData.WOID}`
       })
     } catch (error) {
-      console.error("Error updating booking:", error);
+      toast.error("Error updating booking:", error);
     }
   };
 
   const handleSearchResource = debounce(async (keyword) => {
-    
-    console.log('Debounced keyword:', keyword); // <-- ADD THIS
     if (!keyword) {
       setSearchResultsResource([]);
       return;
@@ -255,9 +250,8 @@ export function ServiceBooking ({BookingId , woid}) {
         params: { keyword }
       });
       setSearchResultsResource(response.data.data);
-      console.log("Search Result Resource : ",response.data)
     } catch (error) {
-      console.error("Error fetching Subk Technician search:", error);
+      toast.error("Error fetching Subk Technician search:", error);
     }
   }, 500); 
 
@@ -273,9 +267,8 @@ export function ServiceBooking ({BookingId , woid}) {
         ...prev,
         ResourceAccountId: data.ResourceAccountId                            
       }))
-      console.log("Accpunt : ",data)
     } catch (error) {
-      console.error("Error fetching Subk Technician search:", error);
+      toast.error("Error fetching Subk Technician search:", error);
     }
   }
   
@@ -290,9 +283,8 @@ export function ServiceBooking ({BookingId , woid}) {
         params: { keyword }
       });
       setSearchResultsAccount(response.data);
-      console.log("a")
     } catch (error) {
-      console.error("Error fetching Subk Technician search:", error);
+      toast.error("Error fetching Subk Technician search:", error);
     }
   }, 500); 
 
@@ -305,10 +297,9 @@ export function ServiceBooking ({BookingId , woid}) {
   
     try {
       const response = await ApiCustomer.get(`/api/user?resource=${resourceId}`);
-      console.log("SubukTechl : ",response.data);
       setSearchResultsSubkTechnician(response.data.data);
     } catch (error) {
-      console.error("Error fetching Subk Technician search:", error);
+      toast.error("Error fetching Subk Technician search:", error);
     }
   }, 500); 
   
@@ -325,7 +316,7 @@ export function ServiceBooking ({BookingId , woid}) {
       });
       setSearchResultsSubkTechnicianLearner(response.data);
     } catch (error) {
-      console.error("Error fetching Subk Technician search:", error);
+      toast.error("Error fetching Subk Technician search:", error);
     }
   }, 500); // 500ms delay
 
@@ -426,7 +417,6 @@ export function ServiceBooking ({BookingId , woid}) {
                     value={accountName}
                     onChange={(e) => {
                       setAccountName(e.target.value);
-                      // handleSearchAccount(e.target.value);
                     }}
                   />
                   {searchResultsAccount.length > 0 && (
@@ -781,11 +771,9 @@ const CheckRequestedDateTimeCustomer = async (WOID) => {
     const woData = res.data.data;
 
     const rawDateTime = woData?.RequestedDateTimeCustomer;
-    console.log("Validasi DB RequestedDateTimeCustomer:", rawDateTime);
 
     // Convert to Date object
     const parsedDate = new Date(rawDateTime);
-    console.log("parsedDate:", parsedDate);
 
     if (!rawDateTime || 
       !(parsedDate  instanceof Date) || 
@@ -804,7 +792,6 @@ const CheckRequestedDateTimeCustomer = async (WOID) => {
     }
 
     const formatted = formatDateForInput(rawDateTime);
-    console.log('Formatted:', formatted); //  Debug output
 
     const isValidFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(formatted);
     if (!isValidFormat) {
@@ -840,7 +827,6 @@ const CheckRequestedDateTimeCustomer = async (WOID) => {
 
     return true;
   } catch (error) {
-    console.error('Error saat validasi tanggal:', error);
     await Swal.fire({
       icon: 'error',
       title: "Terjadi kesalahan",
@@ -864,7 +850,7 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
       setLoading(true);
       
       const isValid = await CheckRequestedDateTimeCustomer(WOID);
-      console.log("Validasi result:", isValid);
+      
       if (!isValid) return;
       //getLogistic
       const getCaseDetail = await ApiCustomer.get(`/api/case-information/${CaseID}`)
@@ -881,27 +867,12 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
       }
       
 
-      console.log("Get Logistic : ",getLogistic);
       /**
        * TODO : CHANGE TIS HIST
       */
 
 
       const response = await ApiCustomer.post('/api/bookings', data);
-      //update case
-      // const updateCaseStatus = await ApiCustomer.patch(`/api/case-information/${CaseID}`, {
-      //   CaseStatus: "PartOrder",
-      //   Owner: selectedLogistic.IDUser
-      // })
-
-      // const updateLogCase = await ApiCustomer.post("/api/actionlog",{
-      //   CaseId: `${caseDetails.CaseID}`,
-      //   model: "Case",
-      //   dataOld: caseDetails.CaseStatus,
-      //   dataNew: "PartOrder",
-      //   changedBy: data.user.id,
-      //   logDescription: `Edit: change status from ${caseDetails.CaseStatus} to PartOrder`
-      // })
       const updateWorkLog = await ApiCustomer.post("/api/actionlog",{
         CaseId: `${CaseID}`,
         ReferenceId: `${data.WOID}`,
@@ -916,7 +887,7 @@ export function NewBookableResourceBooking({ CaseID, WOID, CreatedBy, RequestedD
         navigate(`/app/bookings/${BookingId}`);
       }
     } catch (error) {
-      console.error('Gagal membuat booking:', error);
+      toast.error('Gagal membuat booking:', error);
     } finally {
       setLoading(false);
     }

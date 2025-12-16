@@ -6,6 +6,7 @@ import { useAuth } from '@/context/auth-context';
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { toast } from 'sonner';
 
 export default function ProductStorage() {
   const [caseData, setCaseData] = useState([]);
@@ -25,9 +26,8 @@ export default function ProductStorage() {
       setCaseData(fetchAllCase);
       const valueFilter = fetchAllCase.filter(c => c.caseinformation?.StorageLocationStore && (c?.caseinformation?.Owner === user.id || c?.caseinformation?.CreatedBy === user.id))
       setCaseData(valueFilter);
-      setError(false)
     } catch (error) {
-      console.log("Gagal Fetch Data", error);
+      toast.error(error?.response?.data?.message ?? "Gagal Fetch Data")
     } finally {
       setRenderer(false);
     }
@@ -38,14 +38,12 @@ export default function ProductStorage() {
   },[]);
 
   const filterData = caseData.filter((c) => !selectedStorage || c?.caseinformation?.StorageLocationStore === selectedStorage)
-  console.log("Data Filtering : ",filterData);
 
   const sortData = [...filterData].sort((a,b) => {
     const StorageA = a.CaseID;
     const StorageB = b.CaseID;
     return StorageB.localeCompare(StorageA)
   })
-  console.log("Sorted Data : ", sortData)
   const totalPages = Math.ceil(sortData.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = sortData.slice(startIndex, startIndex + itemsPerPage);
@@ -133,7 +131,7 @@ export default function ProductStorage() {
 
         </div>
       <Sidebar side='right' variant='sidebar' className={"z-1"}>
-        <SidebarHeader className={"bg-blue-500 h-16 dark:bg-gray-800"}/>
+        <SidebarHeader className={"h-16 dark:bg-gray-800"}/>
          <SidebarContent className="bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"> 
           <SidebarGroup>
             <SidebarGroupContent className={"flex flex-col gap-5 p-2 "}>

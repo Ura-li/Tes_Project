@@ -10,8 +10,6 @@ import ApiCustomer from "@/api";
 import { getUserFromToken } from "@/lib/utils/auth";
 import { toast } from "sonner";
 import { BtnModalsServiceCatalog } from "@/components/model/sc-modal";
-// import QuotationDialog from "@/components/model/QuotationModal";
-// import InvoiceDialog from "@/components/model/InvoiceModal";
 import ServiceRequestPDF from "@/components/service-request-form";
 import EquipmentReciptForm from "@/components/Equipment-Recipt-Form";
 import { QuotationInvoice } from "@/components/QuatationInvoice";
@@ -45,7 +43,8 @@ export const TabsServiceCaseDetails = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { open } = useSidebar();
-  const  isResponsive  = useMediaQuery({query: '(min-width: 1824px)'})
+  // TO DO : Slamet 
+  // const  isResponsive  = useMediaQuery({query: '(min-width: 1824px)'})
 
   // ---- pull state from zustand ----
   const caseDetails = useServiceCaseStore((s) => s.caseDetails);
@@ -57,8 +56,6 @@ export const TabsServiceCaseDetails = () => {
     );
   }
   const caseForm = useServiceCaseStore((s) => s.caseForm);
-  // const gtcForm = useServiceCaseStore((s) => s.gtcForm);
-  // const csrForm = useServiceCaseStore((s) => s.csrForm);
   const entitlementStatus = useServiceCaseStore((s) => s.entitlementStatus);
   const productForm = useServiceCaseStore((s) => s.productForm);
   const caseNoteFormData = useServiceCaseStore((s) => s.caseNoteFormData);
@@ -74,9 +71,6 @@ export const TabsServiceCaseDetails = () => {
   const invoiceData = useServiceCaseStore((s) => s.invoiceData);
   const invoiceLoading = useServiceCaseStore((s) => s.invoiceLoading);
 
-  // const setCaseFormField = useServiceCaseStore((s) => s.setCaseFormField);
-  // const setGtcFormField = useServiceCaseStore((s) => s.setGtcFormField);
-  // const setCsrFormField = useServiceCaseStore((s) => s.setCsrFormField);
   const setEntitlementField = useServiceCaseStore((s) => s.setEntitlementField);
   const setProductFormField = useServiceCaseStore((s) => s.setProductFormField);
   const setCaseNoteField = useServiceCaseStore((s) => s.setCaseNoteField);
@@ -121,7 +115,6 @@ export const TabsServiceCaseDetails = () => {
       .then(blob => {
         const reader = new FileReader();
         reader.readAsDataURL(blob);
-        console.log("QR",reader)
         return new Promise((res) => {
           reader.onloadend = () => {
           res(reader.result);
@@ -132,8 +125,7 @@ export const TabsServiceCaseDetails = () => {
       setQrCodeImg(base64);
 
       }catch(error){
-      console.error("Error generating QR code",error);
-
+      toast.error(error?.response?.data?.message ?? "Error generating QR code");
       }
   }
   
@@ -149,7 +141,7 @@ export const TabsServiceCaseDetails = () => {
           });
         }
       catch{(error) => {
-        console.error("Error in Downloading QRcode",error);
+        toast.error(error?.response?.data?.message ?? "Error in Downloading QRcode");
       }};
     }
   useEffect(()=>{
@@ -173,16 +165,6 @@ export const TabsServiceCaseDetails = () => {
       "Signature Pad",
       "width=600,height=400"
     );
-
-    // window.addEventListener("message", (event) => {
-    //   if (event.data.type === "signature") {
-    //     setSignature(event.data.signature);
-    //     toast.success("Signature captured successfully!", {
-    //       description: "Print ERF OR SRF Avaiable",
-    //       position: "top-center",
-    //     });
-    //   }
-    // });
   };
 
   useEffect(() => {
@@ -394,55 +376,55 @@ export const TabsServiceCaseDetails = () => {
       roles: ["admin", "fd", "user", "spv"],
     },
     {
-          icon: CoinsIcon,
-          label: "Quotation Invoice",
-           onClick: async () => {
-            await ApiCustomer.post("/api/case-information/case-notes", {
-              LogType: "System Info",
-              ActionType: "Request QUOTATION INVOICE",
-              Template: "QUOTATION INVOICE Requested",
-              VisibleExternally: false,
-              MinutesSpent: 0,
-              Note: `[PRINT] QUOTATION INVOICE requested by ${user?.role} - ${
-                user?.name || "Unknown User"
-              }`,
-              CaseID: caseDetails?.CaseID,
-              CreatedBy: user?.id,
-            });
-            const blob = await pdf(
-              <QuotationInvoice
-                caseDetails={caseDetails}
-                customerSignature={signature}
-                materialItems={fieldMO(caseDetails)}
-                initialData={quotationInitialData || {}}
-                qrcode={qrCodeImg}
-              />
-            ).toBlob();
-             const fileName = `Quotation-${
-               quotationInitialData?.quotationNo ||
-               caseDetails?.CaseID ||
-               "document"
-             }.pdf`;
-    
-             const url = URL.createObjectURL(blob);
-    
-             // Open a new tab/window
-             const newWindow = window.open("", "_blank");
-    
-             if (!newWindow) return;
-    
-             // Set the tab title
-             newWindow.document.title = fileName;
-    
-             // Fill with a minimal HTML shell and embed the PDF
-             newWindow.document.body.style.margin = "0";
-             const iframe = newWindow.document.createElement("iframe");
-             iframe.src = url;
-             iframe.style.border = "none";
-             iframe.style.width = "100%";
-             iframe.style.height = "100vh";
-    
-             newWindow.document.body.appendChild(iframe);
+      icon: CoinsIcon,
+      label: "Quotation Invoice",
+        onClick: async () => {
+        await ApiCustomer.post("/api/case-information/case-notes", {
+          LogType: "System Info",
+          ActionType: "Request QUOTATION INVOICE",
+          Template: "QUOTATION INVOICE Requested",
+          VisibleExternally: false,
+          MinutesSpent: 0,
+          Note: `[PRINT] QUOTATION INVOICE requested by ${user?.role} - ${
+            user?.name || "Unknown User"
+          }`,
+          CaseID: caseDetails?.CaseID,
+          CreatedBy: user?.id,
+        });
+        const blob = await pdf(
+          <QuotationInvoice
+            caseDetails={caseDetails}
+            customerSignature={signature}
+            materialItems={fieldMO(caseDetails)}
+            initialData={quotationInitialData || {}}
+            qrcode={qrCodeImg}
+          />
+        ).toBlob();
+          const fileName = `Quotation-${
+            quotationInitialData?.quotationNo ||
+            caseDetails?.CaseID ||
+            "document"
+          }.pdf`;
+
+          const url = URL.createObjectURL(blob);
+
+          // Open a new tab/window
+          const newWindow = window.open("", "_blank");
+
+          if (!newWindow) return;
+
+          // Set the tab title
+          newWindow.document.title = fileName;
+
+          // Fill with a minimal HTML shell and embed the PDF
+          newWindow.document.body.style.margin = "0";
+          const iframe = newWindow.document.createElement("iframe");
+          iframe.src = url;
+          iframe.style.border = "none";
+          iframe.style.width = "100%";
+          iframe.style.height = "100vh";
+
+          newWindow.document.body.appendChild(iframe);
           },
           roles: ["admin", "fd", "user", "spv", "cm"],
           hidden: caseDetails.asset_information?.WarrantyOTCCode?.OTCCode === '01T' ? false : true,
@@ -621,7 +603,6 @@ export const TabsServiceCaseDetails = () => {
       // --miku21
       saveAndCloseCase(cancelState);
     } catch (error) {
-      console.error("Failed to save invoice:", error);
       const message =
         error.response?.data?.message ?? "Gagal menyimpan invoice.";
       toast.error(message);
@@ -653,7 +634,6 @@ export const TabsServiceCaseDetails = () => {
     return true;
   };
 
-console.log("CHeCK dirty mind",isDirty)
   const saveAndCloseCase = async (cancell = false) => {
     setCancelState(cancell); //default initialization
     // Role guard: only FD can close a Case
@@ -666,15 +646,6 @@ console.log("CHeCK dirty mind",isDirty)
       });
     }
 
-  //   if (!csrForm.caseResolutionCode || csrForm.caseResolutionCode.trim() === "") {
-  //   Swal.fire({
-  //     icon: "warning",
-  //     title: "Missing Case Resolution",
-  //     text: "You must select a Case Resolution Code before closing the case.",
-  //   });
-  //   return;
-  // }
-  // return console.log(caseDetails?.asset_information?.WarrantyOTCCode?.WarrantyCondition);
   if(caseDetails?.asset_information?.WarrantyOTCCode?.WarrantyCondition === "OutWarranty"){
 
     const invoiceReady = await ensureInvoiceBeforeClose();
@@ -682,8 +653,6 @@ console.log("CHeCK dirty mind",isDirty)
       return;
     }
   }
-
-
 
   const targetStatus = cancell ? "CANCEL" : "CLOSED"
   const targetSystemCaseStatus = cancell ? "Cancel" : "Close"
@@ -781,21 +750,12 @@ console.log("CHeCK dirty mind",isDirty)
           navigate(`/app/viewcase`);
         });
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: res.data.message,
-        });
+        toast.error("Error",res.data.message)
       }
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed to update!",
-        text: error.message || "Something went wrong.",
-      });
+      toast.error(error?.response?.data?.message ?? "Failed to update!")
     }
   };
-
      const Approve = async () => {
       try {
         Swal.fire({
@@ -856,11 +816,7 @@ console.log("CHeCK dirty mind",isDirty)
           window.location.reload()
         })
       } catch (error) {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Updated Failed",
-        });
+          toast.error(error?.response?.data?.message ?? "Updated Failed")
       }
     }
 
@@ -889,7 +845,6 @@ function fieldMO(caseDetails) {
             }
           } catch (error) {
             if (!cancelled) {
-              console.error("Failed to fetch quotation:", error);
               toast.error(
                 error.response?.data?.message ??
                   "Gagal mengambil data quotation."
@@ -926,7 +881,6 @@ function fieldMO(caseDetails) {
         }
         try {
           setQuotationSubmitting(true);
-          // return console.log("Submit : ",payload)
           const apiPayload = {
             ...payload,
             userAssign:
@@ -935,8 +889,6 @@ function fieldMO(caseDetails) {
           if (apiPayload.quoteDecision === "Rejected") {
             apiPayload.userAssign = caseDetails.workorder[0]?.OwnerID;
           }
-
-          console.log("Sending payload:", apiPayload);
           const endpoint = payload.quotationNo
             ? `/api/quotation-information/${payload.quotationNo}`
             : "/api/quotation-information";
@@ -956,7 +908,6 @@ function fieldMO(caseDetails) {
 
           handleQuotationOpenChange(false);
         } catch (error) {
-          console.error("Failed to save quotation:", error);
           const message =
             error.response?.data?.message ?? "Gagal menyimpan quotation.";
           toast.error(message);
@@ -1046,32 +997,9 @@ function fieldMO(caseDetails) {
       )}
       </div>
       <div>
-        {/* <QuotationDialog
-          open={openDialogQuotation}
-          onOpenChange={handleQuotationOpenChange}
-          materialItems={fieldMO(caseDetails)}
-          caseId={caseDetails.CaseID}
-          status={caseDetails.CaseStatus}
-          initialData={quotationInitialData || {}}
-          loading={quotationLoading}
-          submitting={quotationSubmitting}
-          onSubmit={handleQuotationSubmit}
-          createdBy={user}
-          signature={signature}
-          caseDetails={caseDetails}
-        /> */}
         <QuotationDialog />
       </div>
       <div>
-        {/* <InvoiceDialog
-          open={invoiceDialogOpen}
-          onOpenChange={handleInvoiceOpenChange}
-          quotation={invoiceQuotation}
-          invoice={invoiceSummary}
-          loading={invoiceLoading}
-          submitting={invoiceSubmitting}
-          onSubmit={handleInvoiceSubmit}
-        /> */}
         <InvoiceDialog />
       </div>
       <div>
@@ -1123,13 +1051,6 @@ import { SelectYN, SearchCommandBlock, SelectBar } from "@/components/sc-select"
 import CaseField from "@/components/CaseField";
 import { Separator } from "@/components/ui/separator";
 import { parseNoteText } from "@/lib/utils.jsx";
-// import {
-//   STATUS_ENUM_TO_LABEL,
-//   ROLE_STATUS_EXTRAS,
-//   BASE_STATUS_KEYS,
-//   DEFAULT_EXTRA_STATUS_KEYS,
-//   extractRoleFromStatus,
-// } from "./status-helpers"; // <- put your status constants here (or same file)
 
 // icons etc …
 import {
@@ -1303,7 +1224,6 @@ const OptionStorage = [
 
 export const ServiceCase = () => {
   const { user } = useAuth();
-  // const { open } = useSidebar();
   const navigate = useNavigate();
 
 
@@ -1400,17 +1320,6 @@ export const ServiceCase = () => {
 
   // --------- entitlement initial fill when asset info ready ----------
 
-//   const {
-//   dpList,
-//   addDpRow,
-//   removeDpRow,
-//   setDpField,
-// } = useServiceCaseStore((s) => ({
-//   dpList: s.dpList,
-//   addDpRow: s.addDpRow,
-//   removeDpRow: s.removeDpRow,
-//   setDpField: s.setDpField,
-// }));
 const dpList = useServiceCaseStore((s) => s.dpList);
 const addDpRow = useServiceCaseStore((s) => s.addDpRow);
 const removeDpRow = useServiceCaseStore((s) => s.removeDpRow);
@@ -1448,17 +1357,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
       setEntitlementFieldSilent("PhotoUnit", w.PhotoUnit);
     }
   }, [assetInformation, setEntitlementFieldSilent]);
-
-  // ------- status options by role (same logic as before, but using store) -------
-  // const labelToStatusEnum = useMemo(
-  //   () =>
-  //     Object.entries(STATUS_ENUM_TO_LABEL).reduce(
-  //       (acc, [key, val]) => ({ ...acc, [val]: key }),
-  //       {}
-  //     ),
-  //   []
-  // );
-
 
 
   const labelToStatusEnum = Object.entries(STATUS_ENUM_TO_LABEL).reduce((acc, [key, val]) => {
@@ -1511,9 +1409,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
   const handleClick = async (work) => {
 
-    navigate(`/app/work/${work.WOID}`, {
-      // state: { ownerUserData, dataFetchCustomerData }
-    });
+    navigate(`/app/work/${work.WOID}`);
   };
 
   // ------ edit permissions ------
@@ -1779,7 +1675,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     span={2}
                     lock
                   >
-                    {/* {console.log("Bool to check wo owner aaliabe : ", caseDetails?.workorder[0]?.owner?.IDUser)} */}
                     <Input
                       placeholder="---"
                       value={caseDetails.createdByUser?.Name}
@@ -1916,8 +1811,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400 "}
                     />
                   </CaseField>
-                  {/* {assignToForm == true ?? (
-                            )} */}
+
                   <CaseField
                     label="Case Type"
                     open
@@ -1961,7 +1855,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     span={2}
                     lock={!canEditFd}
                   >
-                    {/* <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} value={caseDetails.CasePriority}/> */}
+
                     <SearchCommandBlock
                       id="case-priority"
                       value={caseForm?.CasePriority}
@@ -1996,7 +1890,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     <DatePicker
                       variant="icon"
                       value={createdOn}
-                      // onChange={setCreatedOn}
                     ></DatePicker>
                   </CaseField>
 
@@ -2006,11 +1899,9 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     span={2}
                     lock
                   >
-                    {/* {caseClosedDate ? format(caseClosedDate, "dd/M/yyyy") : "---"} */}
                     <DatePicker
                       variant="icon"
                       value={caseClosedDate}
-                      // onChange={setCaseClosedDate}
                     ></DatePicker>
                   </CaseField>
 
@@ -2039,8 +1930,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                             <span className="gap-[5em]">
                               <DatePicker
                                 variant="icon"
-                                // value={submittedToBase}
-                                // onChange={setsubmittedToBase}
                               ></DatePicker>
                             </span>
                           </CaseField>
@@ -2365,20 +2254,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                 <div className="flex flex-col gap-2">
                   <div className="grid grid-cols-2 gap-4">
                     <CaseField label="Log Type">
-                      {/* <Select
-                                  value={formData?.LogType}
-                                  onValueChange={(val) => onChange("LogType", val)}
-                                >
-                                  <SelectTrigger
-                                    className={"w-[100%] hover:shadow-lg border-b-0 p-3"}
-                                  >
-                                    <SelectValue placeholder="Log Type" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="NotesLog">Notes Log</SelectItem>
-                                    <SelectItem value="PhoneLog">Phone Log</SelectItem>
-                                  </SelectContent>
-                                </Select> */}
 
                       <SearchCommandBlock
                         id="log-type"
@@ -2407,30 +2282,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       />
                     </CaseField>
 
-                    {/* <CaseField label="Template" lock>
-                      <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
-                    </CaseField> */}
-
-                    {/* <CaseField label="Visible Externally">
-                      <SelectYN
-                        value={
-                          caseNoteFormData?.VisibleExternally === undefined ||
-                          caseNoteFormData?.VisibleExternally === null
-                            ? ""
-                            : caseNoteFormData?.VisibleExternally
-                            ? "Yes"
-                            : "No"
-                        }
-                        onValueChange={(val) =>
-                          onChangeCaseNote("VisibleExternally", val === "Yes")
-                        }
-                      ></SelectYN>
-                    </CaseField> */}
-
-                    {/* <CaseField label="Number of Minutes Spent" lock>
-                      <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
-                    </CaseField> */}
-
                     <CaseField label="Notes" star>
                       <textarea
                         id="notes"
@@ -2451,9 +2302,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                           <TableHead>Created By</TableHead>
                           <TableHead>Log Type</TableHead>
                           <TableHead>Action Type</TableHead>
-                          {/* <TableHead>Template</TableHead>
-                                    <TableHead>Visible Externally</TableHead>
-                                    <TableHead>Number of Minutes Spent</TableHead> */}
                           <TableHead>Role</TableHead>
                           <TableHead>Note</TableHead>
                         </TableRow>
@@ -2480,9 +2328,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                               </TableCell>
                               <TableCell>{n.LogType || "-"}</TableCell>
                               <TableCell>{n.ActionType || "-"}</TableCell>
-                              {/* <TableCell>{n.Template || '-'}</TableCell>
-                                        <TableCell>{n.VisibleExternally || '-'}</TableCell>
-                                        <TableCell>{n.MinutesSpent || '-'}</TableCell> */}
                               <TableCell>
                                 {n.createdByUser?.Role || "-"}
                               </TableCell>
@@ -2623,7 +2468,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     <SearchCommandBlock
                       options={otcCode}
                       value={entitlementStatus.OTCCode || "--select--"}
-                      // value={dataWarrantyStatus || "--Select--"}
                       onChange={(value) =>
                         handleEntitlementStatus("OTCCode")(value)
                       }
@@ -2645,7 +2489,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                     span={2}
                   >
                     <SelectYN
-                      // value={caseDetails.CaseStatus === "NEW_POPDoc" ? (WarrantyConditionEnumToLabel[assetInformation?.WarrantyOTCCode?.WarrantyCondition] === 'Out of Warranty' ? "Yes" : WarrantyConditionEnumToLabel[dataFetchAssetInformation?.AssetInformation?.WarrantyOTCCode?.WarrantyCondition] === 'InWarranty' ? "No" : "") : (caseDetails?.IsHWUnderWarranty ? "Yes" : "No")}
                       value={
                         entitlementStatus?.needWarrantyApproval === undefined ||
                         entitlementStatus?.needWarrantyApproval == null 
@@ -2712,9 +2555,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       readOnly={!canEditWarranty}
                     ></DatePicker>
                   </CaseField>
-                  {/* <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Upload Pop Document" className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-2"} span={2}>
-                    <Input type="file"  onChange={(e) => onPickDocuments(e.target.files)} />
-                  </CaseField> */}
+                 
                   <CaseField
                     hide={!entitlementStatus.needWarrantyApproval}
                     label="POP Document"
@@ -2788,6 +2629,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       readOnly={!canEditWarranty}
                     ></DatePicker>
                   </CaseField>
+
                   <CaseField
                     hide={!entitlementStatus.needWarrantyApproval}
                     label="Upload Warranty Card"
@@ -2845,9 +2687,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       />
                     )}
                   </CaseField>
-                  {/* <CaseField hide={!entitlementStatus.needWarrantyApproval}   label="Upload Warranty Card" className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2}>
-                    <Input type="file"  onChange={(e) => onPickWarrantyCards(e.target.files)} />
-                  </CaseField> */}
 
                   <CaseField
                     hide={!entitlementStatus.needWarrantyApproval}
@@ -2864,9 +2703,7 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       readOnly={!canEditWarranty}
                     ></DatePicker>
                   </CaseField>
-                  {/* <CaseField hide={!entitlementStatus.needWarrantyApproval}  label="Upload Photo Unit" className={'col-span-1'} childClass={"col-span-1 sm:col-span-2 md:col-span-1"} span={2}>
-                    <Input type="file"  onChange={(e) => onPickPhotoUnits(e.target.files)} />
-                  </CaseField> */}
+               
                   <CaseField
                     hide={!entitlementStatus.needWarrantyApproval}
                     label="Upload Photo Unit"
@@ -3292,9 +3129,8 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
                             toast.success("Photos uploaded!");
                             setPhotos([]); // reset preview lokal
-                          } catch (e) {
-                            console.error(e);
-                            toast.error("Photo upload failed");
+                          } catch (err) {
+                            toast.error(err?.response?.data?.message ?? "Photo upload failed");
                           }
                         }}
                       >
@@ -3753,7 +3589,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                       <CardHeader className="flex flex-row items-center justify-between py-2 px-4">
                         <CardTitle className="text-sm font-semibold">
                           Invoice No: {row.InvoiceNo || "-"}
-                          {/* {console.log("DP",row)} */}
                         </CardTitle>
                         {!row.isPersisted && (
                           <Button
@@ -3777,7 +3612,6 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                         </CaseField>
 
                         <CaseField label="DP Date" lock={row.isPersisted} >
-                          {/* {console.log(row)} */}
                           <DatePicker
                             value={DatePickertoDateOrNull(row.DpDate)}
                             onChange={(e) =>

@@ -38,8 +38,6 @@ export default function CashManagement() {
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
 
-            console.log("Fetch user data : ", fecthUserData)
-
             setUserData({
                 ...userData,
                 Username: resFetchUserData.Username,
@@ -68,7 +66,7 @@ export default function CashManagement() {
             setCaseData(recentCases);
             return resCaseData.data.data;
         } catch (err) {
-            console.error(err);
+            toast.error("Fetching data:",err);
         } finally {
             setLoading(false)
         }
@@ -99,7 +97,6 @@ export default function CashManagement() {
                 }
             } catch (error) {
                 if (!cancelled) {
-                    console.error("Failed to fetch quotation:", error);
                     toast.error(
                         error.response?.data?.message ?? "Gagal mengambil data quotation.",
                     );
@@ -138,7 +135,6 @@ export default function CashManagement() {
         try {
             setQuotationSubmitting(true);
             const targetAssignUser = payload.quoteDecision === "Rejected" ? selectedCase.caseinformation.workorder[0].OwnerID : user.id !== payload?.userAssign ? payload.userAssign : user.id
-            // return console.log("Submit : ",targetAssignUser)
             const apiPayload = {
                 ...payload,
                 userAssign: targetAssignUser,
@@ -292,13 +288,6 @@ export default function CashManagement() {
                 />
               </div>
             )}
-            {/* <div className="flex justify-start">
-                        <img  
-                            src={user?.avatar || "/default-avatar.png"}
-                            alt="avatar"
-                            className="w-30 h-30 rounded-full border-4 border-white shadow-md text-center"
-                        />
-                    </div> */}
             <div className="flex justify-end">
               <Badge
                 variant={"outline"}
@@ -321,7 +310,7 @@ export default function CashManagement() {
           <CardHeader>
             <CardTitle className={"text-2xl"}>Quotation</CardTitle>
 
-            <hr />
+            <hr className="dark:border-gray-400"/>
           </CardHeader>
           <CardContent className={"grid gap-3 overflow-y-auto"}>
             {loading
@@ -358,19 +347,6 @@ export default function CashManagement() {
                                 <p className='text-md dark:text-gray-300'>{c.CaseID}</p>
                                 <p className='text-md  font-semibold dark:text-gray-300'>{c.UpdateOn ? new Date(c.UpdateOn).toLocaleString("id-ID") : "No Update"}</p>
                                 </div>
-                                {/* TODO FOR SLAMET : ADD A MF COLOR IN DIS BUTON */}
-                                {/* <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="top-3 right-3 z-10"
-                                    onClick={(e) => {
-                                        e.stopPropagation(); 
-                                        setSelectedCase(c);
-                                        setQuotationInitialData(null);
-                                        setQuotationMaterialItems(extractMaterialOrderLineItems(c));
-                                        setShowQuotationDialog(true);
-                                    }}
-                                >Process Quotation</Button> */}
                             </Card>
                         )
                     )}

@@ -33,10 +33,6 @@ export default function Logistik() {
             setMoData(fetchMo.data.data);      
             const fecthUserData = await ApiCustomer.get(`/api/user/${user.id}`)
             const resFetchUserData = fecthUserData.data.data;
-
-            console.log("Fetch user data : ", fecthUserData)
-            console.log("Fetch MO Data : ", fetchMo.data.data)
-
             setUserData({
                 ...userData,
                 Username: resFetchUserData.Username,
@@ -53,7 +49,7 @@ export default function Logistik() {
           const valueFilterPartOrder = fetchMo.data.data.filter(m =>  m?.materialorderlineitems?.[0]?.LineItemID)
          setMoData(valueFilterPartOrder)            
         } catch (err) {
-            console.error(err);
+            toast.error("Fetching data: ",err);
         }finally {
             setLoading(false);
         }
@@ -74,7 +70,6 @@ export default function Logistik() {
     const orderB = b.MOID;
     return orderB.localeCompare(orderA);
   })
-  console.log("Sorted Data:", sortedData);
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = sortedData.slice(startIndex, startIndex + itemsPerPage);
@@ -102,13 +97,6 @@ export default function Logistik() {
                         />
                     </div>
                     )}
-                    {/* <div className="flex justify-start">
-                        <img  
-                            src={user?.avatar || "/default-avatar.png"}
-                            alt="avatar"
-                            className="w-30 h-30 rounded-full border-4 border-white shadow-md text-center"
-                        />
-                    </div> */}
                     <div className="flex justify-end">
                     <Badge
                         variant={"outline"}

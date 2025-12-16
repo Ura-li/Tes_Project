@@ -63,7 +63,7 @@ export const MaterialOrder = () => {
       try {
         await fetchMaterialOrderBundle(moid);
       } finally {
-        if (!cancelled) console.log("Fetch material order bundle completed.");
+        if (!cancelled);
       }
     };
 
@@ -71,7 +71,6 @@ export const MaterialOrder = () => {
 
     return () => {
       cancelled = true;
-      console.log("Fetch material order bundle completed.");
     };
   }, [moid]);
 

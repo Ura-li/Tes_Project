@@ -197,7 +197,6 @@ export const Case = () => {
 
       await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error) {
-      console.error("Gagal memuat data:", error);
       Swal.fire({
         icon: "error",
         title: "Gagal memuat data",
@@ -207,7 +206,6 @@ export const Case = () => {
         showConfirmButton: false,
       });
     } finally {
-      // Swal.close();
       setLoading(true)
     }
   };

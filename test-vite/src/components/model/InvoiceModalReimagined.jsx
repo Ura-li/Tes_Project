@@ -96,7 +96,6 @@ const InvoiceDialog = () => {
     if (!quotation?.grandTotal) return 0;
     let parsed = Number(quotation.grandTotal);
     if(totalDpAmount !== 0) parsed = parsed - Number(totalDpAmount)
-      console.log("Berkurang", parsed, totalDpAmount)
     return Number.isNaN(parsed) ? 0 : parsed;
   }, [quotation, totalDpAmount]);
 

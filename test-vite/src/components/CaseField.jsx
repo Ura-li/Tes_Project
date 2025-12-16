@@ -37,7 +37,7 @@ const CaseField = ({ label, children, lock = false, span = 1, className, childCl
                 {label}
                 {star ? <span className="text-red-400 dark:text-[#FF8A80]">*</span> : ""}
             </Label>
-            <CardTitle className={twMerge(spanMap[span], childClass, "font-semibold items-center flex ")}>
+            <CardTitle className={twMerge(spanMap[span], childClass, "font-semibold items-center flex")}>
                 {modifiedChildren}
             </CardTitle>
         </>
