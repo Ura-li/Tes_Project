@@ -122,7 +122,7 @@ interface ServiceCaseState {
   fetchDPData: (opts? : {force? : boolean}) => Promise<any | void>;
 
   // save
-  saveAll: (opts?: { redirect?: boolean }) => Promise<boolean>;
+  saveAll: (opts?: { redirect?: boolean, onClose?: boolean }) => Promise<boolean>;
 
   //DP 
 
@@ -636,7 +636,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   },
 
   // --------------- saveAll (replacement for handleSave) --------------
-  saveAll: async ({ redirect = true } = {}) => {
+  saveAll: async ({ redirect = true, onClose = false } = {}) => {
     const {
       caseDetails,
       caseForm,
@@ -690,15 +690,20 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
 
 const hasIntentToSave = isDirty;
 
-      const confirm = await Swal.fire({
-        title: "Simpan perubahan?",
-        text: "Perubahan akan disimpan ke database.",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Simpan",
-        cancelButtonText: "Batal",
-      });
-
+      if(!onClose){
+        const confirm = await Swal.fire({
+          title: "Simpan perubahan?",
+          text: "Perubahan akan disimpan ke database.",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Simpan",
+          cancelButtonText: "Batal",
+        });
+        if (!confirm.isConfirmed) {
+          return false;
+        }
+      }
+      
         if (caseNoteFormData.Note === "") {
           toast.info("Isi Note terlebih dahulu", {
             position: 'top-center',
@@ -706,9 +711,6 @@ const hasIntentToSave = isDirty;
           return false;
         }
 
-      if (!confirm.isConfirmed) {
-        return false;
-      }
 
       Swal.fire({
         title: "Saving Case...",

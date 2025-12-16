@@ -240,9 +240,6 @@ export async function POST(req) {
               ...baseMOTarget,
               ReadyForClosureDate: dateRMA,
             },
-            // MOLITarget: {
-            //   RemovedSerialNumber: String(updatedFields.RemovedSerialNumber).trim(),
-            // },
           }),
         };
 
@@ -252,10 +249,6 @@ export async function POST(req) {
           updatedFieldMOTarget = MOTarget;
           updatedFieldMOLITarget = MOLITarget;
         }
-
-        // return console.log(updatedFields)
-
-        // return console.log(updatedFieldMOLITarget, updatedFieldMOTarget);
 
         /**
          * IMPORT KONTOL SATU SATU ANJENG

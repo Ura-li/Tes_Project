@@ -153,7 +153,7 @@ export const TabsServiceCaseDetails = () => {
     return base64
   }
 
-  const handleSave = (redirect = true) => saveAll({ redirect });
+  const handleSave = (redirect = true, onClose = false) => saveAll({ redirect, onClose });
 
   const openServiceCatalog = (type) => {
     setOpenWorkOrder(true, type);
@@ -715,7 +715,7 @@ export const TabsServiceCaseDetails = () => {
         });
       }
      if (isDirty) {
-      const success = await handleSave(false);
+      const success = await handleSave(false, true);
       if (!success) return; 
      }
       const res = await ApiCustomer.patch(
