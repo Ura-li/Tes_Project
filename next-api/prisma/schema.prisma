@@ -263,8 +263,8 @@ model down_payment_table {
 }
 
 model invoicetable {
-  InvoiceNo         String         @id @db.VarChar(8)
-  QuotationNo       String         @db.VarChar(8)
+  InvoiceNo         String         @id 
+  QuotationNo       String         
   quotation         quotationtable @relation(fields: [QuotationNo], references: [QuotationNo], onDelete: Restrict)
   AmountReceive     Decimal        @default(0) @db.Decimal(12, 2) //AWKOAKOWKAOWKOAWK LUPA NAMBAHIN LIMIT DECIMAL AJG
   AmountDiff        Decimal        @default(0) @db.Decimal(12, 2)
@@ -286,7 +286,7 @@ model invoicetable {
 }
 
 model quotationtable {
-  QuotationNo           String             @id @db.VarChar(8)
+  QuotationNo           String             @id
   QuotationType         QuotationType      @default(Simple)
   Currency              String             @default("IDR") @db.VarChar(8)
   LaborFee              Int                @default(0)
@@ -312,7 +312,7 @@ model quotationtable {
 
 model quotation_lineitem {
   id          Int    @id @default(autoincrement())
-  QuotationNo String @db.VarChar(8)
+  QuotationNo String 
   LineItemID  Int
 
   quotation quotationtable         @relation(fields: [QuotationNo], references: [QuotationNo], onDelete: Cascade)
@@ -325,8 +325,8 @@ model quotation_lineitem {
 }
 
 model materialorder {
-  MOID             String              @id @db.VarChar(13)
-  WOID             String?             @db.VarChar(13)
+  MOID             String              @id
+  WOID             String?             
   OrderNumber      String?             @db.VarChar(100)
   OrderStatus      MaterialOrderStatus @default(New)
   OrderType        String?             @db.VarChar(50)
@@ -369,7 +369,7 @@ model materialorder {
 
 model materialorderlineitems {
   LineItemID   Int                         @id @default(autoincrement())
-  MOID         String?                     @db.VarChar(13)
+  MOID         String?                     
   LineNumber   Int?
   PartNumber   String?                     @db.VarChar(100)
   Description  String?                     @db.Text
@@ -728,7 +728,7 @@ model BookingStatus {
 }
 
 model workorder {
-  WOID            String          @id @db.VarChar(13)
+  WOID            String          @id 
   CaseID          String?
   WorkOrderNumber String?         @db.VarChar(100)
   WorkOrderType   String?         @db.VarChar(50)
@@ -863,7 +863,7 @@ model ServiceType {
 
 model workorder_service_delivery {
   ServiceDeliveryID Int       @id @default(autoincrement())
-  WOID              String?   @db.VarChar(13)
+  WOID              String?   
   ServiceType       String?   @db.VarChar(100)
   StartDateTime     DateTime? @db.DateTime(0)
   EndDateTime       DateTime? @db.DateTime(0)
@@ -873,7 +873,7 @@ model workorder_service_delivery {
 
 model workorder_service_delivery_address {
   AddressID        Int     @id @default(autoincrement())
-  WOID             String? @db.VarChar(13)
+  WOID             String? 
   CompanyName      String? @db.VarChar(100)
   ContactFirstName String? @db.VarChar(100)
   ContactLastName  String? @db.VarChar(100)
@@ -897,7 +897,7 @@ model workorder_service_delivery_address {
 
 model workorder_service_delivery_skillset {
   SkillSetID Int     @id @default(autoincrement())
-  WOID       String? @db.VarChar(13)
+  WOID       String?
   SkillCode  String? @db.VarChar(50)
   SkillLevel String? @db.VarChar(50)
 
