@@ -159,13 +159,12 @@ export const Case = () => {
   const fetchOtcCode = useServiceCaseStore((s) => s.fetchOtcCode);
   const fetchInvoiceData = useServiceCaseStore((s) => s.fetchInvoiceData);
   const fetchDPData = useServiceCaseStore((s) => s.fetchDPData);
-//    useUnsavedChangesGuard();
+    useUnsavedChangesGuard();
  useEffect(() => {
   if (!caseId) return;
 
   // still okay to call this here
   updateDraft("caseId", caseId);
-
   const loadCaseData = async () => {
     try {
       setLoading(false)

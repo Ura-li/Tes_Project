@@ -7,7 +7,7 @@ import { cva } from "class-variance-authority";
 //* Test some variant styling method 
 const tabsVariants = cva(
   "cursor-pointer gap-1.5 px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow]  inline-flex flex-1 items-center justifdisabled:pointer-events-none  [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-  
+
   {
     variants: {
       variant: {
@@ -18,8 +18,24 @@ const tabsVariants = cva(
         fullsize:
           "rounded-none data-[state=active]:bg-gray-300 p-5 hover:bg-gray-100",
         simple:
-          " data-[state=active]:border-b-4 border-b-blue-500 px-1.5 py-3 font-semibold text-black text-center justify-center"
-        },
+          " data-[state=active]:border-b-4 border-b-blue-500 px-1.5 py-3 font-semibold text-black text-center justify-center",
+        underline2:
+          "data-[state=active]: data-[state=active]:border-b-5 border-b-blue-900 px-1.5 py-3 font-semibold text-white",
+        cleanPill: [
+          "relative z-10",
+          "flex-1 justify-center rounded-xl",
+          "px-3 py-3 text-sm font-semibold",
+          "text-slate-800/80 dark:text-slate-200/80",
+          "transition-all duration-200",
+          "hover:text-slate-950 dark:hover:text-white",
+          "hover:bg-white/20 dark:hover:bg-white/5",
+          "data-[state=active]:text-slate-950 dark:data-[state=active]:text-white",
+          // keep active clean — pill already indicates active
+          "data-[state=active]:bg-gray-100/40 data-[state=active]:border-l-5 border-green-300 dark:border-fuchsia-300 dark:data-[state=active]:bg-gray-800",
+          // accessible focus (subtle, not a loud ring)
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/40",
+        ].join(" "),
+      },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
@@ -32,7 +48,7 @@ const tabsVariants = cva(
       size: "",
     },
   }
-)
+);
 
 function Tabs({
   className,
