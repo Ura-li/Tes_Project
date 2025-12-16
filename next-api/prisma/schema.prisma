@@ -264,6 +264,7 @@ model down_payment_table {
 
 model invoicetable {
   InvoiceNo         String         @id 
+  INV_No            Int?    @db.Int
   QuotationNo       String         
   quotation         quotationtable @relation(fields: [QuotationNo], references: [QuotationNo], onDelete: Restrict)
   AmountReceive     Decimal        @default(0) @db.Decimal(12, 2) //AWKOAKOWKAOWKOAWK LUPA NAMBAHIN LIMIT DECIMAL AJG
@@ -287,6 +288,7 @@ model invoicetable {
 
 model quotationtable {
   QuotationNo           String             @id
+  Quote_No_Search       Int?  @db.Int
   QuotationType         QuotationType      @default(Simple)
   Currency              String             @default("IDR") @db.VarChar(8)
   LaborFee              Int                @default(0)
@@ -326,6 +328,7 @@ model quotation_lineitem {
 
 model materialorder {
   MOID             String              @id
+  MO_Number       Int?      @db.Int
   WOID             String?             
   OrderNumber      String?             @db.VarChar(100)
   OrderStatus      MaterialOrderStatus @default(New)
@@ -729,6 +732,7 @@ model BookingStatus {
 
 model workorder {
   WOID            String          @id 
+  WO_Number       Int?      @db.Int
   CaseID          String?
   WorkOrderNumber String?         @db.VarChar(100)
   WorkOrderType   String?         @db.VarChar(50)

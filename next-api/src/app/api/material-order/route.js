@@ -330,7 +330,7 @@ export async function POST(request) {
       // }
 
       for (const part of selectedPartCatalog) {
-        const MOID = await generateID("MO-", "materialorder", "MOID", tx);
+        const MOID = await generateID("MO-", "materialorder", "MOID", tx, "MO_Number");
         await tx.materialorder.create({
             data: {
                 MOID,

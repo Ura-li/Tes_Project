@@ -103,7 +103,7 @@ export async function POST(request) {
         // start atomic transaction
         const { WOID, MOIDs, actionLogs } = await prisma.$transaction(async (tx) => {
             //Generate ID
-            const WOID = await generateID("WO-", "workorder", "WOID", tx); 
+            const WOID = await generateID("WO-", "workorder", "WOID", tx, "WO_Number"); 
             console.log("Generated ID:", WOID, typeof WOID);
 
             // 1. Create Work Order
@@ -152,7 +152,7 @@ export async function POST(request) {
             let lineNumber = 1;
 
             for (const part of selectedPartCatalog) {
-                const MOID = await generateID("MO-", "materialorder", "MOID", tx);
+                const MOID = await generateID("MO-", "materialorder", "MOID", tx, "MO_Number");
                 await tx.materialorder.create({
                     data: {
                         MOID,
