@@ -42,23 +42,13 @@ export const MaterialOrder = () => {
   const fetchMaterialOrderBundle = useMaterialOrderStore(
     (s) => s.fetchMaterialOrderBundle
   );
-  // const lastFetchedMoidRef = useRef(null);
   useEffect(() => {
     if (!moid) return;
-
-    // if (lastFetchedMoidRef.current === moid) return;
-    // lastFetchedMoidRef.current = moid;
     
     updateDraft("moid", moid);
     let cancelled = false;
 
     const run = async () => {
-      // Swal.fire({
-      //   title: "Memuat Data...",
-      //   text: "Mohon tunggu sebentar...",
-      //   allowOutsideClick: false,
-      //   didOpen: () => Swal.showLoading(),
-      // });
 
       try {
         await fetchMaterialOrderBundle(moid);
