@@ -112,7 +112,7 @@ export const ServiceWork = () => {
   //     ((user?.role === "ce" || user?.role === "celead") &&
   //       user?.id === workOrder?.OwnerID) ||
   //     user?.role === "admin";
-  // }
+  }
 
   const tabs = [
     { value: "wo_summary", label: "Wo Summary" },
