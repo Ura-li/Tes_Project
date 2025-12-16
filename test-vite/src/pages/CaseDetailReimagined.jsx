@@ -2885,14 +2885,14 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
                   <hr className="dark:border-gray-500"/>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-5 p-3 ">
-                  <div className="grid grid-cols-4 gap-5" hidden>
+                  {/* <div className="grid grid-cols-4 gap-5" hidden>
                     <CaseField label="Incident Type" span={3}>
                       <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                     </CaseField>
                     <CaseField label="Work Order Description" span={3}>
                       <Input className={"dark:text-white dark:border-b-gray-400 mt-2 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"} placeholder="---" />
                     </CaseField>
-                  </div>
+                  </div> */}
 
                   <Table className={"max-w-100 "}>
                     <TableHeader >

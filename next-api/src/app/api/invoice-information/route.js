@@ -263,7 +263,9 @@ export async function POST(request) {
       const invoiceNo = await generateID(
         INVOICE_PREFIX,
         "invoicetable",
-        "InvoiceNo"
+        "InvoiceNo",
+        tx, 
+        "INV_No"
       );
   
       const includeChangedBy = {

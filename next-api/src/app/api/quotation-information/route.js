@@ -321,7 +321,8 @@ export async function POST(request) {
         "Q-",
         "quotationtable",
         "QuotationNo",
-        tx
+        tx,
+        "Quote_No_Search"
       );
 
       await tx.quotationtable.create({

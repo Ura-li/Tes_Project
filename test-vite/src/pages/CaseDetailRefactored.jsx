@@ -189,7 +189,7 @@ export const ServiceCase = () => {
   const [hideAsignTo, setHideAsignTo] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedPhotoPreview, setSelectedPhotoPreview] = useState(null);
-  const [photos, setPhotos] = useState<File[]>([]);
+  const [photos, setPhotos] = useState([]);
 
   // Initial effects – now just call store actions
   useEffect(() => {
@@ -251,3 +251,4 @@ export const ServiceCase = () => {
       setEntitlementField("PhotoUnit")(w.PhotoUnit);
     }
   }, [otcCode, assetInformation, setEntitlementField]);
+}

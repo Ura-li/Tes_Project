@@ -104,14 +104,14 @@ export const ServiceWork = () => {
 
   // permissions
   const editRoles = ["apo", "admin", "ce", "celead"];
-  let canEditapo = false;
-  let canaddce = false;
+  let canEdit = false;
+  // let canEdit = false;
   if (workOrder?.SystemStatus !== "CLOSED_POSTED") {
-    canEditapo = editRoles.includes(user?.role);
-    canaddce =
-      ((user?.role === "ce" || user?.role === "celead") &&
-        user?.id === workOrder?.OwnerID) ||
-      user?.role === "admin";
+    canEdit = editRoles.includes(user?.role);
+  //   canEdit =
+  //     ((user?.role === "ce" || user?.role === "celead") &&
+  //       user?.id === workOrder?.OwnerID) ||
+  //     user?.role === "admin";
   }
 
   const tabs = [
@@ -281,7 +281,7 @@ export const ServiceWork = () => {
                     />
                   </CaseField>
 
-                  <CaseField label="System Status" lock={!canaddce}>
+                  <CaseField label="System Status" lock={!canEdit}>
                     <SearchCommandBlock
                     className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                       value={WOGeneral?.SystemStatus}
@@ -290,7 +290,7 @@ export const ServiceWork = () => {
                     />
                   </CaseField>
 
-                  <CaseField label="Shipment Country" lock={!canaddce}>
+                  <CaseField label="Shipment Country" lock={!canEdit}>
                     <SearchCommandBlock
                       className={"dark:bg-transparent dark:ring-1 dark:ring-gray-400"}
                       value={WOGeneral.ShipmentCountry}
@@ -309,7 +309,7 @@ export const ServiceWork = () => {
                         "Australia",
                         "Brazil",
                       ]}
-                      readOnly={!canaddce || user?.role === "apo"}
+                      readOnly={!canEdit}
                     />
                   </CaseField>
 
@@ -321,7 +321,7 @@ export const ServiceWork = () => {
                       readOnly
                     />
                   </CaseField>
-                  <CaseField label="Shipment State" lock={!canaddce}>
+                  <CaseField label="Shipment State" lock={!canEdit}>
                     <Input
                       value={WOGeneral.ShipmentState}
                       onChange={handleWOGeneral("ShipmentState")}
@@ -575,7 +575,7 @@ export const ServiceWork = () => {
                     variant={"outline"}
                     size="sm"
                     onClick={openServiceCatalog}
-                    disabled={!canaddce}
+                    disabled={!canEdit}
                     className={'cursor-pointer dark:text-white dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-600 dark:to-slate-700 dark:border-b-slate-600 dark:to-60% dark:via-100% dark:from-50%'}
                   >
                     <Plus className="mr-2" size={16} /> 
@@ -662,7 +662,7 @@ export const ServiceWork = () => {
               >
                 <CaseField
                   label={"Requested Date Time (Customer)"}
-                  lock={!canEditapo}
+                  lock={!canEdit}
                   span={2}
                 >
                   <DatePicker
@@ -678,7 +678,7 @@ export const ServiceWork = () => {
 
                 <CaseField
                   label="Early Start Date Time (Customer)"
-                  lock={!canEditapo}
+                  lock={!canEdit}
                   span={2}
                 >
                   <DatePicker
@@ -693,7 +693,7 @@ export const ServiceWork = () => {
 
                 <CaseField
                   label={"Guaranteed Fix Time (Customer)"}
-                  lock={!canEditapo}
+                  lock={!canEdit}
                   span={2}
                 >
                   <DatePicker
@@ -709,7 +709,7 @@ export const ServiceWork = () => {
 
                 <CaseField
                   label="Latest Start Date Time (Customer)"
-                  lock={!canEditapo}
+                  lock={!canEdit}
                   span={2}
                 >
                   <DatePicker
@@ -724,7 +724,7 @@ export const ServiceWork = () => {
 
                 <CaseField
                   label={"Due Date  (Customer)"}
-                  lock={!canEditapo}
+                  lock={!canEdit}
                   span={2}
                 >
                   <DatePicker
@@ -738,7 +738,7 @@ export const ServiceWork = () => {
 
                 <CaseField
                   label="Active Schedule Date"
-                  lock={!canEditapo}
+                  lock={!canEdit}
                   span={2}
                 >
                   <DatePicker
@@ -756,7 +756,7 @@ export const ServiceWork = () => {
             <Card className="flex-col mt-5 rounded-md dark:bg-gradient-to-bl dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
               <span className="ml-5 text-xl font-bold">Booking </span>
               <CardContent className="grid">
-                {canEditapo || user.role === "admin" ? (
+                {canEdit ? (
                   <NewBookableResourceBooking
                     CaseID={caseInformation?.CaseID}
                     WOID={workOrder.WOID}

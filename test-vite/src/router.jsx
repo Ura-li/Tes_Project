@@ -206,6 +206,11 @@ export const Loading = () => (
   </div>
 );
 
+function WithSuspense({ children }) {
+  return <Suspense fallback={<Loading />}>{children}</Suspense>;
+}
+
+
 // --- THE DATA ROUTER ---
 export const router = createBrowserRouter([
   // /app layout and children

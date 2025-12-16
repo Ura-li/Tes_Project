@@ -51,12 +51,12 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
         setFilters(prev => ({ ...prev, [field]: value }));
     };
     return (
-        <Sidebar side="right" variant="sidebar" className={cn("z-10 top-16 h-full", className)}>
-            <Tabs defaultValue="search" className="w-full h-full dark:bg-gradient-to-t   dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-13% dark:from-4%">
+        <Sidebar side="right" variant="sidebar" className={cn("z-10 top-15 h-full", className)}>
+            <Tabs defaultValue="search" className="w-full h-full dark:bg-gradient-to-t   dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-13% dark:from-4% ">
                 <SidebarHeader className="bg-cyan-700 h-14 dark:bg-slate-800">
-                    <TabsList className={'w-full dark:bg-slate-600 dark:text-gray-200'}>
-                        <TabsTrigger value="search" className="w-full justify-center dark:data-[state=active]:bg-gray-500">Search </TabsTrigger>
-                        <TabsTrigger value="Time" className="w-full justify-center dark:data-[state=active]:bg-gray-500">Time </TabsTrigger>
+                    <TabsList className={'w-full h-full p-1 rounded-none bg-white/10 '}>
+                        <TabsTrigger variant={'cleanPill'} value="search" className="w-full justify-center dark:data-[state=active]:bg-gray-500">Search </TabsTrigger>
+                        <TabsTrigger variant={'cleanPill'} value="Time" className="w-full justify-center dark:data-[state=active]:bg-gray-500">Time </TabsTrigger>
                     </TabsList>
                 </SidebarHeader>
                 <TabsContent value="search" className={'max-h-[calc(100vh-8rem)] overflow-y-auto'}>
