@@ -307,7 +307,7 @@ export const TabsServiceCaseDetails = () => {
 
          newWindow.document.body.appendChild(iframe);
       },
-      roles: ["admin", "fd", "user", "spv"],
+      roles: ["admin", "fd", "user", "spv", "ce", "celead"],
     },
     {
       icon: StepBack,

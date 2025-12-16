@@ -421,7 +421,7 @@ export async function POST(request) {
         companyId,
         productNumber,
       };
-    });
+    }, { timeout: 50000 });
     
     // return console.log("debug", result)
 
