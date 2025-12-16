@@ -54,26 +54,26 @@ function toDecimal(value) {
 
 const TARGET_UPDATE_MAPPING = {
   InOutCE: (row) => ({
-    RMANumber: row["RMA No."] || null,
-    RemovedSerialNumber: row["CT Code New"] || null,
-    AWB_InCode: row["AWB No."] || null,
+    RMANumber: row["RMA No."]?.toString().trim() || null,
+    RemovedSerialNumber: row["CT Code New"]?.toString().trim() || null,
+    AWB_InCode: row["AWB No."]?.toString().trim() || null,
   }),
 
   ReturnDHL: (row) => ({
-    RMANumber: row["RMA No."] || null,
-    AWB_OutCode: row["AWB Out No."] || null,
-    RemovedPartNumber: row["CT Code Bad / Part SN"] || null,
+    RMANumber: row["RMA No."]?.toString().trim() || null,
+    AWB_OutCode: row["AWB Out No."]?.toString().trim() || null,
+    RemovedPartNumber: row["CT Code Bad / Part SN"]?.toString().trim() || null,
   }),
 
   FullCharge: (row) => ({
-    RMANumber: row["RMA No."] || null,
-    AWB_OutCode: row["AWB Out No."] || null,
-    RemovedPartNumber: row["CT Code Bad / Part SN"] || null,
+    RMANumber: row["RMA No."]?.toString().trim() || null,
+    AWB_OutCode: row["AWB Out No."]?.toString().trim() || null,
+    RemovedPartNumber: row["CT Code Bad / Part SN"]?.toString().trim() || null,
   }),
 
   ReturnLogistic: (row) => ({
-    RMANumber: row["RMA No."] || null,
-    SalesOrderNumber: row["SO No."] || null,
+    RMANumber: row["RMA No."]?.toString().trim() || null,
+    SalesOrderNumber: row["SO No."]?.toString().trim() || null,
   }),
 };
 
@@ -402,7 +402,7 @@ export async function POST(req) {
 
           successes.push({ soNumber, updatedLines: moli.length, moli });
           
-        });
+        }, {timeout: 50000});
       } catch (error) {
         console.log(error);
         errors.push({ soNumber, message: error.message });
