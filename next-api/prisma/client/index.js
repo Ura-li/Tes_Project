@@ -9,7 +9,7 @@ const prisma = globalForPrisma.prisma || new PrismaClient({
   log: process.env.NODE_ENV === "production"
     ? ["error", "warn"]
     : ["query", "error", "info", "warn"],
-});
+}, {timeout: 50000});
 
 
 

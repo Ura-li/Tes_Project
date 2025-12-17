@@ -955,7 +955,7 @@ export const Company_table = () => {
       {error && <p className="mb-4 text-red-500">{error}</p>}
 
       {/* Table */}
-      <div className="relative w-full max-h-[75vh] overflow-x-auto overflow-y-auto 
+      <div className="relative w-full max-h-[75vh] overflow-auto 
                       bg-white/95 dark:bg-slate-900/90
                       rounded-2xl shadow-md border border-slate-200 dark:border-slate-700">
         <Table className="min-w-full border-collapse text-xs sm:text-sm">

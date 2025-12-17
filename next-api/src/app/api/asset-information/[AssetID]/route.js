@@ -52,6 +52,7 @@ export async function GET(request, { params }) {
 
 import fs from "fs";
 import path from "path";
+import { time } from "console";
 
 export async function PATCH(request, { params }) {
     const assetId = parseInt(params.AssetID);
@@ -200,7 +201,7 @@ export async function PATCH(request, { params }) {
             }
 
             return updatedAsset;
-        });
+        },{timeout: 50000});
         return NextResponse.json(
             {
                 success: true,

@@ -18,6 +18,11 @@ export const ButtonTour = () => {
     };
 
     const StepByPage = {
+        "/app":[
+            {element: '#welcome', roles:['fd'] ,popover: {title: 'Welcome to Aplikasi Service Management',description: "Aplikasi ini digunakan untuk mempermudah proses manajemen layanan pelanggan dan penanganan kasus servis."}},
+            {element: '#dashboard', popover: {title: 'Dashboard Overview',description: "Di sini Anda dapat melihat ringkasan statistik layanan, kasus terbaru, dan tugas yang perlu ditindaklanjuti."}},
+            {element: '#navigation', popover: {title: 'Navigasi Utama',description: "Gunakan menu navigasi untuk mengakses berbagai fitur aplikasi seperti manajemen kasus, pelanggan, dan laporan."}},
+        ],
         "/app/searchcaseproto2": [
             {element: '#quickSearch', popover: {title: 'Menu Search Serial Number & Customer',description: TextList({
                 list: ["Masukkan data Serial Number atau Customer", "Jika data tersebut tidak ada maka checklist Asset Baru dan Customer Baru"]
@@ -40,8 +45,9 @@ export const ButtonTour = () => {
             {element: '#photos', popover: {title: 'Menu Photo (Opsional)',description: "Upload unit jika diperlukan"}},
         ],
         "/app/flowcase": [
-            {element: '#Finish', popover: {title: 'Menu Filter Case Finish',description: ""}},
-            {element: '#Close', popover: {title: 'Menu Filter Case Close',description: ""}},
+            {element: '#Finish', roles:["fd","admin"],  popover: {title: 'Menu Filter Case Finish',description: ""}},
+            {element: '#Close', roles:["fd","admin"], popover: {title: 'Menu Filter Case Close',description: ""}},
+            
         ],
         "/app/case": [
             {element: '#case-subject', roles:["fd","admin"], popover: {title: 'Field Case Subject',description: "Ini Case Subject"}},

@@ -1068,6 +1068,7 @@ const hasIntentToSave = isDirty;
                   }
                 }
               } catch (err: any) {
+                console.error("Error during update:", err);
                 toast.error("Update gagal",err)
               }
             }
