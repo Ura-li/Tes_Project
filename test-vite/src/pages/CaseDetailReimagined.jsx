@@ -1,5 +1,5 @@
 // TabsServiceCaseDetails.tsx (top part, refactored to zustand)
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -1327,8 +1327,15 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
 
 
 
+const currentCaseId = caseDetails?.CaseID;
+
+const entitlementInitializedRef = useRef(false);
+
+
   useEffect(() => {
-    if (!assetInformation) return;
+    if (!assetInformation || entitlementInitializedRef.current) return;
+
+    entitlementInitializedRef.current = true;
 
     // Set OTC and EOW from asset
     if (assetInformation.Warranty_Status) {
@@ -1357,6 +1364,10 @@ const setDpField = useServiceCaseStore((s) => s.setDpField);
       setEntitlementFieldSilent("PhotoUnit", w.PhotoUnit);
     }
   }, [assetInformation, setEntitlementFieldSilent]);
+
+useEffect(() => {
+  entitlementInitializedRef.current = false;
+}, [currentCaseId]);
 
 
   const labelToStatusEnum = Object.entries(STATUS_ENUM_TO_LABEL).reduce((acc, [key, val]) => {

@@ -130,9 +130,44 @@ interface ServiceCaseState {
 
 }
 
+const initialEntitlement = {
+  OTCCode: null,
+  EOW_Date: null,
+  needWarrantyApproval: false,
+  WarrantyApprovalStatus: null,
+  PurchaseDate: null,
+  WarrantyCardDate: null,
+  POPDocument: null,
+  WarrantyCard: null,
+  PhotoUnit: null,
+  EndUserName: "",
+  EndUserPhone: "",
+  EndUserAddress: "",
+};
+
+const initialDpList = [];
+
 export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   // ------------ initial state --------------
   caseDetails: null,
+  entitlementStatus: initialEntitlement,
+  dpList: initialDpList,
+
+  // ---------------- RESETTERS ----------------
+  resetCaseScopedState: () =>
+    set({
+      entitlementStatus: initialEntitlement,
+      dpList: [],
+      invoiceData: null,
+      productForm: {},
+      csrForm: {},
+    }),
+
+  resetEntitlement: () =>
+    set({ entitlementStatus: initialEntitlement }),
+
+  resetDp: () =>
+    set({ dpList: [] }),
 
   caseForm: {
     CaseType: "",
@@ -164,20 +199,20 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     pendingCustomerAction: "",
     customerRequestedCloseDate: "",
   },
-  entitlementStatus: {
-    OTCCode: "",
-    PurchaseDate: "",
-    WarrantyCardDate: "",
-    EOW_Date: "",
-    EndUserName: "",
-    EndUserPhone: "",
-    EndUserAddress: "",
-    WarrantyApprovalStatus: "",
-    needWarrantyApproval: false,
-    POPDocument: "",
-    WarrantyCard: "",
-    PhotoUnit: "",
-  },
+//  entitlementStatus: {
+//    OTCCode: "",
+//    PurchaseDate: "",
+//    WarrantyCardDate: "",
+//    EOW_Date: "",
+//    EndUserName: "",
+//    EndUserPhone: "",
+//    EndUserAddress: "",
+//    WarrantyApprovalStatus: "",
+//    needWarrantyApproval: false,
+//    POPDocument: "",
+//    WarrantyCard: "",
+//    PhotoUnit: "",
+//  },
   productForm: {
     HWPC: "",
     ProductTypeID: "",
@@ -228,7 +263,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     DpNote: "",
   },
 
-  dpList: [
+//  dpList: [
     // SET TO NULL FIRST
     // {
     //   tempId: `${Date.now()}-${Math.random()}`,
@@ -239,7 +274,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
     //   DpNote: "",
     //   isPersisted: false,
     // },
-  ],
+//  ],
   isDirty: false,
   setDirty: (dirty) => set({ isDirty: dirty }),
 
