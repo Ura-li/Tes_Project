@@ -113,7 +113,9 @@ export async function POST(request) {
         const dpInvoiceNo = await generateID(
           DP_PREFIX,
           "down_payment_table",
-          "DPInvoiceNo"
+          "DPInvoiceNo",
+          tx,
+          "ID_DP_table"
         );
 
         const dp = await tx.down_payment_table.create({
