@@ -459,7 +459,7 @@ const QuotationDialog = ({
       await Promise.resolve(onSubmit?.(payload));
       resetForm();
     } catch (error) {
-      console.error("Failed to submit quotation:", error);
+      toast.error("Failed to submit quotation:", error);
     }
   };
 

@@ -1185,9 +1185,8 @@ export const Case_table = () => {
      * I TRY ANOTHER METHOD WHEN THIS IS DONE
      *  -miku21
      */
-    const isAdmin = user.role === 'admin';
+    const isAdmin = user?.role === 'admin';
     const savedTeamId = localStorage.getItem("activeTeamId");
-
     const baseurl = `/api/case-information`;
     const params = new URLSearchParams();
     if (openClose !== "All") {
@@ -1199,7 +1198,6 @@ export const Case_table = () => {
     if (user?.resource && !isAdmin) {
       params.append("resource", !isAdmin ? user.resource : savedTeamId);
     }
-
 
     const url = params.toString() ? `${baseurl}?${params.toString()}` : baseurl;
 

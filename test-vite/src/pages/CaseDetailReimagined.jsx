@@ -365,7 +365,7 @@ export const TabsServiceCaseDetails = () => {
       label: "Service Order",
       onClick: () => openServiceCatalog("serviceorder"),
       roles: ["admin", "ce", "celead"],
-      hidden: caseDetails?.CaseStatus === "Close",
+      hidden: caseDetails.workorder[0]?.SystemStatus == 'OPEN_UNSCHEDULED'  ? true : caseDetails.workorder[0]?.SystemStatus == 'OPEN_SCHEDULED' ? true : caseDetails.workorder[0]?.SystemStatus == 'OPEN_COMPLETED' ? true : false,
     },
     {
       icon: NotebookPen,
@@ -1198,9 +1198,10 @@ const DEFAULT_EXTRA_STATUS_KEYS = ALL_STATUS_KEYS.filter((key) => !BASE_STATUS_K
 const statusEnumToLabelWO = {
   OPEN_UNSCHEDULED: 'Open - Unscheduled',
   OPEN_SCHEDULED: 'Open - Scheduled',
-  OPEN_INPROGRES: 'Open - In Pro  gress',
+  OPEN_INPROGRES: 'Open - In Progress',
   OPEN_COMPLETED: 'Open - Completed',
-  CLOSED_POSTED: 'Closed - Posted'
+  CLOSED_POSTED: 'Closed - Posted',
+  CLOSED_CANCELLED: 'Closed - Cancelled',
   };
   
 // Warranty label map
@@ -2944,15 +2945,15 @@ useEffect(() => {
                               "-"}
                           </TableCell>
 
-                          <TableCell>{work.SubStatus}</TableCell>
+                          <TableCell>{work.SubStatus ? work.SubStatus : "-"}</TableCell>
                           <TableCell>
                             {statusEnumToLabelWO[work.SystemStatus]}
                           </TableCell>
-                          <TableCell>{work.Priority}</TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
+                          <TableCell>{work.Priority ? work.Priority : "-"}</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
                           <TableCell>{work.owner?.Name}</TableCell>
                           <TableCell>{work.owner?.Name}</TableCell>
                           <TableCell>{formatDate(work.CreatedOn)}</TableCell>

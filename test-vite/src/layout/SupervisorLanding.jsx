@@ -4,6 +4,7 @@ import { Case_table } from "../pages/master_table";
 import ApiCustomer from "@/api"
 import { parse } from "date-fns";
 import { Week } from "react-day-picker";
+import { toast } from "sonner";
 
 
 export default function Landing() {
@@ -17,7 +18,7 @@ export default function Landing() {
                 setCaseData(response.data.data);
             }
         } catch (err) {
-            console.error("Failed fetching:", err);
+            toast.error("Failed fetching");
         }
     };
 
@@ -33,19 +34,12 @@ export default function Landing() {
             closed: 0,
             inActive: 0,
         }));
-        // const days = Array.from({ length: 7 }, (_, i) => ({
-        //   week: new Date(0, i).toLocaleString("en-US", { weekday: "short" }),
-        //   open: 0,
-        //   closed: 0,
-        // }));
-        console.log("month", months);
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => ({
             week: day,
             open: 0,
             closed: 0,
             inActive: 0,
         }));
-        console.log("days", days);
 
         const currentYear = new Date().getFullYear();
 
@@ -81,7 +75,7 @@ export default function Landing() {
             <div className="grid auto-rows-min gap-4 md:grid-cols-3 p-3 ">
                 <div className="aspect-video rounded-xl bg-muted/50 dark:border-slate-600 dark:border-r-6" >
                     <ChartArea data={monthlyChartData}></ChartArea>
-                    {/* <ChartLine data={monthlyChartData}></ChartLine> */}
+                
                 </div>
                 <div className="aspect-video rounded-xl bg-muted/50 dark:border-slate-600 dark:border-r-6" >
                     <ChartBar accessibilityLayer data={weeklyChartData}></ChartBar>

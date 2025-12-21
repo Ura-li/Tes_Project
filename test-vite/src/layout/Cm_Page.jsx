@@ -66,7 +66,7 @@ export default function CashManagement() {
             setCaseData(recentCases);
             return resCaseData.data.data;
         } catch (err) {
-            toast.error("Fetching data:",err);
+            toast.error("Failed fetching data");
         } finally {
             setLoading(false)
         }

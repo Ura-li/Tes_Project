@@ -1,6 +1,7 @@
 // useWorkOrderStore.ts
 import { create } from "zustand";
 import ApiCustomer from "../api";
+import { toast } from "sonner";
 	
 type SLAState = {
 	slaJeopardy: string;
@@ -192,7 +193,7 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
 		try {
 			const resWO = await ApiCustomer.get(`/api/work-order/${woid}`);
 			const workOrderData = resWO.data.data;
-
+			console.log("fetch woi",workOrderData )
 			const resMO = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
 			const materialOrders = resMO.data.data || [];
 
@@ -298,7 +299,7 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
 				error: null,
 			});
 		} catch (err: any) {
-			console.error("Failed to fetch work order bundle:", err);
+			toast.error("Failed to fetch work order bundle:", err);
 			set({
 				loading: false,
 				error:

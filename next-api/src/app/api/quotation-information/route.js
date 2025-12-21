@@ -304,9 +304,6 @@ export async function POST(request) {
       vatValue
     );
 
-    console.log("User Assign : ", userAssign);
-    console.log("Body : ", body);
-
     const includeChangedBy = {
       changedByUser: {
           select: {

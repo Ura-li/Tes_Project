@@ -9,8 +9,6 @@ import {
 } from "../helpers";
 
 export async function PATCH(request, { params }) {
-  
-  // return console.log("PATCH",request)
   try {
     const invoiceNo = params?.InvoiceNo;
     if (!invoiceNo) {
