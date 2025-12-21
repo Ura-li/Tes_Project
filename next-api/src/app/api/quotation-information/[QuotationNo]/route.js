@@ -96,7 +96,6 @@ export async function PATCH(request, { params }) {
         { status: 400 },
       );
     }
-    
 
     const lineItemIds = normalizedLineItems.map((item) => item.lineItemId);
     const uniqueLineItemIds = [...new Set(lineItemIds)];
@@ -208,8 +207,6 @@ export async function PATCH(request, { params }) {
       targetStatusCase = 'Pending_Quote';
     }
 
-    
-
     const includeChangedBy = {
       changedByUser: {
           select: {
@@ -220,9 +217,7 @@ export async function PATCH(request, { params }) {
       },
     };
     
-    // return console.log(relatedLineItems)
-    
-
+    // return console.log("Apa ini:",normalizedLineItems)
     const quotation = await prisma.$transaction(async (tx) => {
       const existingLineItems = await tx.quotation_lineitem.findMany({
         where: { QuotationNo },
@@ -257,8 +252,7 @@ export async function PATCH(request, { params }) {
       const oldOwnerName = caseInfo.ownerUser?.Name ?? (caseInfo.Owner != null ? String(caseInfo.Owner) : "-");
       const newOwnerName = newOwnerUser?.Name ?? (userAssign != null ? String(userAssign) : "-");
 
-      
-
+    
       const updated = await tx.quotationtable.update({
         where: { QuotationNo },
         data: {
@@ -312,8 +306,7 @@ export async function PATCH(request, { params }) {
         .map((item) => item.lineItemId);
       
 
-      if (decisionValue === 'Rejected') {
-        
+      if (decisionValue === 'Rejected') {        
         await tx.materialorderlineitems.updateMany({
           where: {
             LineItemID: {
@@ -341,7 +334,7 @@ export async function PATCH(request, { params }) {
             LineItemID: { in: rejectedLineItemIds },
           },
           data:{
-            Status: 'Cancelled'
+            Status: 'Cancelled',
           }
         })
 
@@ -396,11 +389,8 @@ export async function PATCH(request, { params }) {
             where: {MOID: existing.MOID },
             data:{OwnerID: userAssign}
           })
-          
-          // return console.log(moid);
         }),
       );
-      // return console.log("A");
 
       const caseUpdateData = { CaseStatus: targetStatusCase };
       if(targetStatusCase !== "Pending_Quote"){

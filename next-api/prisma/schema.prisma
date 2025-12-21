@@ -986,7 +986,7 @@ enum CaseStatus {
   Open
   InActive
   Close
-  Cancel //KELUPAAN KONTOL
+  Cancel 
   Active
   Monitor
   Pending_Customer_Action

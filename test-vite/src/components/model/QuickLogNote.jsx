@@ -31,6 +31,11 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = notesList.slice(startIndex, startIndex + itemsPerPage) 
   const totalPage = Math.ceil(notesList.length / itemsPerPage)
+
+  const handleClick = () => {
+    handleSave()
+    onOpenChange(false)
+  }
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -131,7 +136,7 @@ export const QuickLogNote = ({ open, onOpenChange }) => {
           <Button  variant={"outline"} className={"cursor-pointer dark:bg-gradient-to-tl dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 dark:border-2"} onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPage))} disabled={currentPage === totalPage}>Next</Button>
         </div>
         <div>
-          <Button variant={"outline"} className="cursor-pointer dark:bg-gradient-to-bl dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 dark:border-2" onClick={() => handleSave()}>Save</Button>
+          <Button variant={"outline"} className="cursor-pointer dark:bg-gradient-to-bl dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 dark:border-2" onClick={() => handleClick()}>Save</Button>
         </div>
         </div>
         </DialogContent>

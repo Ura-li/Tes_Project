@@ -305,7 +305,7 @@ export async function POST(request) {
 
       const formatRupiah = (value) => {
         const number = typeof value === "number" ? value : Number(value);
-        return Number.toLocaleString("id-ID", {
+        return number.toLocaleString("id-ID", {
           style: "currency",
           currency: "IDR",
           minimumFractionDigits: 0,
@@ -320,7 +320,7 @@ export async function POST(request) {
             Template: "",
             VisibleExternally: true,
             MinutesSpent: 0,
-            Note: `[INVOICE] Invoice : \nINVOICE NO : ${invoiceNo}\nAmount Receive : ${formatRupiah(receiveAmount.decimal)}\n${diffAmount.number == 0  && "Amount Diff : "+formatRupiah(amountDiff)+"\nAmount Difference Reason : "+amountDiffReason}\nPayment Type : ${paymentType}\nAmount Receive Date : ${new Date(amountReceiveDate).toLocaleDateString("id-ID")}\nAmount Receive Note : ${amountReceiveNote}\nCreated By : ${user?.Name}`,
+            Note: `[INVOICE] Invoice : \nINVOICE NO : ${invoiceNo}, Amount Receive : ${formatRupiah(receiveAmount.decimal)}, ${diffAmount.number == 0 ? `Amount Diff : ${amountDiff}, Amount Difference Reason : ${amountDiffReason}`: ""}, Payment Type : ${paymentType}\nAmount Receive Date : ${new Date(amountReceiveDate).toLocaleDateString("id-ID")}, Amount Receive Note : ${amountReceiveNote}, Created By : ${user?.Name}`,
             CreatedBy: createdById ?? null,
           },
         });

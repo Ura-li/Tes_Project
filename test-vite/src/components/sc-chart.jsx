@@ -18,6 +18,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import ApiCustomer from "@/api"
+import { toast } from "sonner"
 
 
 const chartData = [
@@ -69,7 +70,6 @@ export function ChartArea({data}) {
             margin={{
               left: 12,
               right: 12,
-              // bottom:12,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -133,8 +133,6 @@ export function ChartArea({data}) {
 
 export function ChartBar({data, month}) {
   const monthName = new Date().toLocaleString('default', { month: 'long' });
-  console.log("data",data)
-console.log("tes",chartData);
   return (
     <Card className="dark:bg-gradient-to-bl dark:from-slate-900 dark:via-slate-800 dark:to-slate-800 dark:to-10% via-80% from-20%">
       <CardHeader>
@@ -178,17 +176,16 @@ console.log("tes",chartData);
 
 export function ChartPie() {
   const [caseData, setCaseData] = useState([])
-  console.log(caseData);
   const fetchCaseData = async () => {
     try{
       const response = await ApiCustomer.get("/api/case-information")
       if (response.data.data){
           setCaseData(response.data.value)
       } else {
-        console.log("something error when fetching data");
+        toast.warning("something error when fetching data")
       }
     } catch (err) {
-      console.log(err,"error this")
+      toast.error("Error this")
     }
   }
   useEffect(() => {
@@ -199,8 +196,6 @@ export function ChartPie() {
     { browser: "Close", visitors: caseData.closed, fill: "var(--chart-close)" },
     { browser: "Open", visitors: caseData.open, fill: "var(--chart-open)" },
     { browser: "InActive", visitors: caseData.inActive, fill: "var(--chart-inactive)" },
-    // { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-    // { browser: "other", visitors: 190, fill: "var(--color-other)" },
   ]
   
   const chartConfig2 = {
