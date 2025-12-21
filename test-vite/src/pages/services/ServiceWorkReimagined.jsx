@@ -229,7 +229,7 @@ export const ServiceWork = () => {
               {tabs.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
-                  variant={"simple"}
+                  variant={"modernUnderline"}
                   value={tab.value}
                   className="text-sm font-medium dark:border-b-slate-500 dark:text-gray-300"
                 >

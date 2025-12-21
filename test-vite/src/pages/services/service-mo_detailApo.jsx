@@ -588,8 +588,8 @@ useEffect(() => {
               <CardTitle className="text-xl ">
                 {moLineItems.MOID} - {moLineItems.LineItemID}
               </CardTitle>
-              <CardTitle className="text-sm">
-                Material Order Line Item . Information
+              <CardTitle className="text-lg">
+                Material Order Line Item  For <strong>{MODetailInput.description}</strong> 
               </CardTitle>
               <TabsList className="sm:w-full  gap-2  bg-white dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 dark:rounded-none">
                 {tabs.map((tab, index) =>
@@ -598,7 +598,7 @@ useEffect(() => {
                   ) : (
                     <TabsTrigger
                       key={index}
-                      variant={"underline"}
+                      variant={"modernUnderline"}
                       value={tab.value}
                       disabled={tab.disable}
                       className="dark:text-white text-center flex justify-center"
@@ -728,7 +728,7 @@ useEffect(() => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Pick Pack Instructions"} open>
+                          <CaseField label={"Pick Pack Instructions"} lock>
                             <Input
                               name="pickPackInstructions"
                               value={MODetailInput.pickPackInstructions}
@@ -738,7 +738,7 @@ useEffect(() => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Customer Response"} open>
+                          <CaseField label={"Customer Response"} lock>
                             <Input
                               name="customerResponse"
                               value={MODetailInput.customerResponse}
@@ -748,7 +748,7 @@ useEffect(() => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Rejected Reason"} open>
+                          <CaseField label={"Rejected Reason"} lock>
                             <Input
                               name="rejectedReason"
                               value={MODetailInput.rejectedReason}
@@ -758,7 +758,7 @@ useEffect(() => {
                             />
                           </CaseField>
 
-                          <CaseField label={"Other Reason"} open>
+                          <CaseField label={"Other Reason"} lock>
                             <Input
                               variant={"invisible"}
                               name="otherReason"

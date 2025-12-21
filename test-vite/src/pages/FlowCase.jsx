@@ -381,9 +381,8 @@ export const FlowCaseData = (user) => {
                       <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
                       <p className="text-sm text-gray-500">{c.SerialNumber} | {c.Primary} | {c.CustomerAccount || "No Company"} | {c.CreatedOn}</p>
                     </div>
-                    <div className="flex flex-col items-center gap-2">  
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="space-x-2">
+                    <div className="flex flex-col items-center gap-2 align-middle">  
+                        <div className="space-x-2 justify-center inline-flex">
                           {c?.caseinformation?.asset_information
                             ?.WarrantyOTCCode?.WarrantyCondition ===
                           "InWarranty" ? (
@@ -407,7 +406,6 @@ export const FlowCaseData = (user) => {
                           )}
                         </div>
                         {c.EstimedTimeFromUpdate}
-                      </div>
                     </div>
                   </Card>
                 ))
@@ -480,6 +478,7 @@ export const FlowCaseData = (user) => {
                       {totalPages}
                     </span>
                   </div>
+		
                 </PaginationContent>
               </Pagination>
               {error ? <h1 className="text-center text-destructive dark:text-red-500">Something went wrong</h1> : ""}

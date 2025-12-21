@@ -958,60 +958,57 @@ function fieldMO(caseDetails) {
 
   return (
     <>
-      <div className="flex items-center border-1 sticky top-15 z-5 bg-gray-50 dark:dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 overflow-auto">
-         {allowedButtons.map((btn, index) => (
-          <Button
-            key={index}
-            onClick={btn.onClick}
-            hidden={btn.hidden}
-            variant="link"
-            className={`rounded-none px-0 py-0  flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5  `}
-          >
-            <btn.icon className="w-4 h-4 dark:text-gray-400" />
-            {btn.label && <span className="text-md dark:text-gray-300">{btn.label}</span>}
-          </Button>
-        ))}
+<div className="grid grid-cols-1 w-full">
+      
+      <div className="sticky top-15 z-20 w-full min-w-0 bg-gray-50 border-b border-gray-200 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600 no-scrollbar">
+        
+        <div className="w-full overflow-x-auto no-scrollbar">
+          
+          <div className="flex items-center min-w-max">
+            
+            {allowedButtons.map((btn, index) => (
+              <Button
+                key={index}
+                onClick={btn.onClick}
+                hidden={btn.hidden}
+                variant="link"
+                // 'shrink-0' ensures buttons don't crush each other
+                className="shrink-0 rounded-none px-3 py-2 flex items-center gap-1.5 transition-all duration-300 hover:bg-gray-200 dark:hover:bg-slate-600"
+              >
+                <btn.icon className="w-4 h-4 dark:text-gray-400" />
+                {btn.label && (
+                  <span className="text-sm font-medium dark:text-gray-300">
+                    {btn.label}
+                  </span>
+                )}
+              </Button>
+            ))}
 
-        {/* {hiddenButtons.length > 0 && (
-          <DropdownMenu>
-            <DropdownMenuTrigger className="px-2 py-1 bg-gray-200 rounded-md dark:bg-transparent dark:text-gray-400">
-              ...
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {allowedButtons.map((btn, index) => (
-                <DropdownMenuItem key={index} onClick={btn.onClick}>
-                  <btn.icon className="inline-block w-4 h-4 mr-2" />
-                  {btn.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )} */}
-       { (isTechRole && caseDetails?.CaseStatus !== "Close") && (
-        <BtnModalsServiceCatalog
-          open={openWorkOrder}
-          setOpen={(open) => setOpenWorkOrder(open)}
-          caseDetails={caseDetails}
-          serviceCatalogType={serviceCatalogType}
-        />
-      )}
+            {(isTechRole && caseDetails?.CaseStatus !== "Close") && (
+              <div className="shrink-0">
+                <BtnModalsServiceCatalog
+                  open={openWorkOrder}
+                  setOpen={(open) => setOpenWorkOrder(open)}
+                  caseDetails={caseDetails}
+                  serviceCatalogType={serviceCatalogType}
+                />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      <div>
+
+      {/* Main Content */}
+      <div className="w-full min-w-0">
         <QuotationDialog />
-      </div>
-      <div>
         <InvoiceDialog />
-      </div>
-      <div>
-        <ServiceCase />
-      </div>
-      <div>
+        <ServiceCase /> 
         <QuickLogNote 
           open={logNoteOpen}
           onOpenChange={setLogNoteOpen}
         />
       </div>
-
+    </div>
       {/* Quotation dialog, Invoice dialog, ServiceCase component, etc
           Here you can either:
           - continue passing props,
@@ -1588,7 +1585,7 @@ useEffect(() => {
             </div>
 
             {/* TABS */}
-            <div className=" border-t bg-gray-50 w-full overflow-x-auto ">
+            <div className=" border-t bg-gray-50 w-full overflow-x-auto h-fit no-scrollbar">
               <TabsList className="sm:w-full w-fit flex gap-4 h-fit p-0  dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 dark:rounded-none">
                 {tabs.map((tab, index) =>
                   tab.component ? (
@@ -1596,7 +1593,7 @@ useEffect(() => {
                   ) : (
                     <TabsTrigger
                       key={index}
-                      variant="simple"
+                      variant="modernUnderline"
                       value={tab.value}
                       disabled={tab.disable}
                       hidden={tab.hidden}
@@ -2492,7 +2489,6 @@ useEffect(() => {
                   </CaseField>
                   <CaseField
                     lock={
-                      entitlementStatus?.needWarrantyApproval ||
                       !canEditWarranty
                     }
                     label="Need warranty approval?"
