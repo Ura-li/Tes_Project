@@ -67,9 +67,9 @@ export const calculateTotals = (lineItems, quantityMap, laborFeeValue, vatValue)
     const priceNumber = Number(item.price);
     return acc + priceNumber * quantity;
   }, 0);
-
+  
   const laborFee =
-    laborFeeValue === undefined || laborFeeValue === null || laborFeeValue === ""
+    laborFeeValue === undefined  || laborFeeValue === null || laborFeeValue === ""
       ? 0
       : Number(laborFeeValue);
 

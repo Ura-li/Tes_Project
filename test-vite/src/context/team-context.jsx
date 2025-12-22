@@ -7,11 +7,9 @@ const TeamContext = createContext();
 
 export function TeamProvider({children}) {
     const { user } = useAuth();
-    const [teams, setTeams] = useState([]);
+    const [teams, setTeams] = useState();
     const [activeTeam, setActiveTeam] = useState(null);
     const [loading, setLoading] = useState(true);
-    
-
 
     useEffect(() => {
         async function fetchTeams() {
@@ -28,17 +26,16 @@ export function TeamProvider({children}) {
 
                 setTeams(mapped);
                 
-                const savedTeamId = localStorage.getItem("activeTeamId");
-
                 if (user?.resource) {
                     const defaultFromJWT = mapped.find(
-                        (t) => t.id === user.resource
+                        (t) => t.id === user?.resource
                     );
                     if (defaultFromJWT) {
                         setActiveTeam(defaultFromJWT);
                         return;
                     }
                 }
+                const savedTeamId = localStorage.getItem("activeTeamId");
 
                 setActiveTeam(mapped[0]);   
 

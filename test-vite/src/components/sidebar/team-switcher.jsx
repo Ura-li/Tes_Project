@@ -1,6 +1,5 @@
 import * as React from "react"
 import { Building, ChevronsUpDown, Plus } from "lucide-react"
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +21,6 @@ export function TeamSwitcher({
   // teams
 }) {
   const { isMobile } = useSidebar()
-  // const [activeTeam, setActiveTeam] = React.useState(teams[0])
   const { teams, activeTeam, setActiveTeam, loading} = useTeam();
 
   if(loading) return null;
@@ -43,7 +41,6 @@ export function TeamSwitcher({
               className="bg-white dark:bg-gray-700 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <div
                 className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                {/* <activeTeam.logo className="size-4" /> */}
                 {activeTeam.logo 
                 ? <img src={activeTeam.logo} alt="" className="size-4" />
                 : <DefaultIcon className="size-4"/>
@@ -67,7 +64,6 @@ export function TeamSwitcher({
             {teams.map((team, index) => (
               <DropdownMenuItem key={team.id} onClick={() => setActiveTeam(team)} className="gap-2 p-2">
                 <div className="flex size-6 items-center justify-center rounded-xs border">
-                  {/* <team.logo className="size-4 shrink-0 "/> */}
                   {team.logo
                   ? <img src={team.logo} className="size-4" />
                   : <DefaultIcon className="size-4" />}

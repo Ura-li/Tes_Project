@@ -6296,7 +6296,7 @@ export function BtnModalsServiceCatalog({
                     {showUEFINumberHeader  && (
                       <TableHead className={'font-bold text-black'}>UEFI Number</TableHead>
                     )}
-                    <TableHead className={'font-bold text-black'}>Price</TableHead>
+                    <TableHead  colSpan={2} className={'font-bold text-black'}>Price</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

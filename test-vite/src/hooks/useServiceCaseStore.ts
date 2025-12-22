@@ -81,7 +81,6 @@ interface ServiceCaseState {
 
   // ---- actions ----
   initFromCaseDetails: (caseDetails: any) => void;
-
   setCaseFormField: (field: string, value: any) => void;
   setGtcFormField: (field: string, value: any) => void;
   setCsrFormField: (field: string, value: any) => void;
@@ -127,7 +126,7 @@ interface ServiceCaseState {
   //DP 
 
   setDirty: (dirty: boolean) => void;
-
+   resetCaseScopedState: () =>  void;
 }
 
 const initialEntitlement = {
@@ -152,23 +151,7 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
   caseDetails: null,
   entitlementStatus: initialEntitlement,
   dpList: initialDpList,
-
-  // ---------------- RESETTERS ----------------
-  resetCaseScopedState: () =>
-    set({
-      entitlementStatus: initialEntitlement,
-      dpList: [],
-      invoiceData: null,
-      productForm: {},
-      csrForm: {},
-    }),
-
-  resetEntitlement: () =>
-    set({ entitlementStatus: initialEntitlement }),
-
-  resetDp: () =>
-    set({ dpList: [] }),
-
+  
   caseForm: {
     CaseType: "",
     CaseStatus: "",
@@ -277,6 +260,23 @@ export const useServiceCaseStore = create<ServiceCaseState>((set, get) => ({
 //  ],
   isDirty: false,
   setDirty: (dirty) => set({ isDirty: dirty }),
+
+  // ---------------- RESETTERS ----------------
+  resetCaseScopedState: () => 
+    set({
+      entitlementStatus: initialEntitlement,
+      dpList: [],
+      invoiceData: null,
+      productForm: {},
+      csrForm: {},
+    }),
+
+  resetEntitlement: () =>
+    set({ entitlementStatus: initialEntitlement }),
+
+  resetDp: () =>
+    set({ dpList: [] }),
+
 
   // ------------ simple setters -------------
   initFromCaseDetails: (caseDetails) =>
