@@ -40,7 +40,7 @@ export function Breadcrumbs() {
   const pathnames = location.pathname.split('/').filter((x) => x);
 
   return (
-    <nav className="text-[10px] w-full sm:text-sm overflow-hidden whitespace-nowrap text-ellipsis">
+    <nav className="text-[10px] w-full sm:text-sm overflow-hidden whitespace-nowrap text-ellipsis" id='breadcrumbs'>
       <Link to="/" className="text-gray-700 font-medium dark:text-gray-300">Home</Link>
       {pathnames.map((segment, index) => {
         const to = '/' + pathnames.slice(0, index + 1).join('/');
@@ -106,7 +106,7 @@ export function GlobalSearchBar() {
 
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative" id='global-search'>
       <span className='flex items-center gap-2'> 
         <Input
           placeholder="Search"
@@ -159,18 +159,18 @@ const App = () => {
               "--sidebar-width-mobile": "20rem",    
             }}
           >
-            <AppSidebar />
-            <SidebarInset className={"w-full"}>
+            <AppSidebar id='sidebar'/>
+            <SidebarInset className={"w-full"} >
               <header className="  flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600">
                 <div className="flex items-center gap-4 p-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <Breadcrumbs />
+                  <SidebarTrigger className="-ml-1" id='icsidebar'/>
+                  <Breadcrumbs/>
                 </div>
                 <div className="flex p-2 items-center gap-2 self-center">
                   <Search />
                   <GlobalSearchBar />
                 </div>
-                <div className="flex items-center gap-2 pr-4">
+                <div className="flex items-center gap-2 pr-4" id='three-button'>
                   {/* tombol light/dark */}
                   <ButtonTour/>
                   <ThemeToggle />

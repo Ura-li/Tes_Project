@@ -115,10 +115,10 @@ export default function FrontDesk_Page() {
 
 
   return (
-    <div className="min-h-[calc(100vh-64px)]  h-full w-full grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
+    <div className="min-h-[calc(100vh-64px)]  h-full w-full grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%" id="dashboard">
       {/* Left Column - Profile */}
       <div className="col-span-1">
-        <Card className="rounded-xl shadow-lg h-full flex flex-col dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700" id="welcome">
+        <Card className="rounded-xl shadow-lg h-full flex flex-col dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700" id="profile">
           <CardHeader className="bg-gradient-to-r from-cyan-500 to-cyan-400 text-white text-center relative dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-500 dark:to-slate-400 dark:to-130% via-70% from-2%">
             <div className="flex flex-col items-center">
               {preview.ProfilePhoto ? (
@@ -156,7 +156,7 @@ export default function FrontDesk_Page() {
 
       {/* Center Column - Chart */}
       <div className="col-span-1 md:col-span-2">
-        <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col dark:border-slate-600 dark:border-r-6  dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-10% via-80% from-20%">
+        <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col dark:border-slate-600 dark:border-r-6  dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-10% via-80% from-20%" id="cases-overview">
           <CardHeader>
             <CardTitle>Cases Overview</CardTitle>
             <CardDescription>Today’s activity</CardDescription>
@@ -169,7 +169,7 @@ export default function FrontDesk_Page() {
 
       {/* Right Column - Notifications */}
       <div className="col-span-1">
-        <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-10% via-90% from-30%">
+        <Card className="rounded-xl shadow-lg p-4 h-full flex flex-col dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-10% via-90% from-30%" id="notifications">
           <CardHeader>
             <CardTitle>Notifications</CardTitle>
           </CardHeader>
@@ -181,7 +181,7 @@ export default function FrontDesk_Page() {
 
       {/* Bottom Row - Recent Cases */}
       <div className="col-span-1 md:col-span-4">
-        <Card className="rounded-xl shadow-lg p-4 h-full dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-tr dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-20% via-80% from-30%">
+        <Card className="rounded-xl shadow-lg p-4 h-full dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-tr dark:from-slate-800 dark:via-slate-700 dark:to-slate-700 dark:to-20% via-80% from-30%" id='recent-case'>
           <CardHeader>
             <CardTitle>Recent Cases</CardTitle>
           </CardHeader>

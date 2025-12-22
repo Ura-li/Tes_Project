@@ -268,9 +268,9 @@ export default function CashManagement() {
 
 
     return (
-    <div className="bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% h-full">
+    <div className="bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% h-full" id='dashboard'>
       <div className="grid mt-4 m-5 gap-5 max-h-[calc(100vh-15px)] grid-rows-2 grid-cols-3 ">
-        <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"}>
+        <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-bl dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"} id='profile'>
           <CardHeader className={"grid grid-cols-2 items-start"}>
             {!preview.ProfilePhoto && (
               <div className="flex justify-start">
@@ -306,7 +306,7 @@ export default function CashManagement() {
           </span>
         </Card>
 
-        <Card className={"rounded-sm col-span-2 row-span-2 dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-700 dark:to-slate-800"}>
+        <Card className={"rounded-sm col-span-2 row-span-2 dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-700 dark:to-slate-800"} id='quotation'>
           <CardHeader>
             <CardTitle className={"text-2xl"}>Quotation</CardTitle>
 
@@ -353,7 +353,7 @@ export default function CashManagement() {
                 </CardContent>
             </Card>
 
-        <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-br dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"}>
+        <Card className={"rounded-sm dark:border-slate-600 dark:border-r-6 dark:bg-gradient-to-br dark:from-slate-800 dark:via-slate-700 dark:to-slate-900"} id='notifications'>
           <CardHeader>
             <CardTitle>Notifications</CardTitle>
           </CardHeader>

@@ -55,8 +55,8 @@ export function SearchBar({ filters, setFilters, className, caseData, filterClos
             <Tabs defaultValue="search" className="w-full h-full dark:bg-gradient-to-t   dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-13% dark:from-4% ">
                 <SidebarHeader className="bg-cyan-700 h-14 dark:bg-slate-800">
                     <TabsList className={'w-full h-full p-1 rounded-none bg-white/10 '}>
-                        <TabsTrigger variant={'cleanPill'} value="search" className="w-full justify-center dark:data-[state=active]:bg-gray-500">Search </TabsTrigger>
-                        <TabsTrigger variant={'cleanPill'} value="Time" className="w-full justify-center dark:data-[state=active]:bg-gray-500">Time </TabsTrigger>
+                        <TabsTrigger variant={'cleanPill'} value="search" className="w-full justify-center dark:data-[state=active]:bg-gray-500" id='case-search'>Search </TabsTrigger>
+                        <TabsTrigger variant={'cleanPill'} value="Time" className="w-full justify-center dark:data-[state=active]:bg-gray-500" id='case-time'>Time </TabsTrigger>
                     </TabsList>
                 </SidebarHeader>
                 <TabsContent value="search" className={'max-h-[calc(100vh-8rem)] overflow-y-auto'}>

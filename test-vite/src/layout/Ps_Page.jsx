@@ -49,9 +49,9 @@ export default function ProductStorage() {
   const currentData = sortData.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className='bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% h-full'>
-    <SidebarProvider className={"min-h-0"}>
-      <div className='w-full'>
+    <div className='bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1% h-full' id='storage-list'>
+    <SidebarProvider className={"min-h-0"} >
+      <div className='w-full' id='storage-card'>
         <div className='flex justify-between p-2'>
         <h1 className='ml-2'>Your Storage</h1>
         <SidebarTrigger/>
@@ -59,7 +59,7 @@ export default function ProductStorage() {
         <div className="p-3 space-y-5">
   {renderer ? (
     Array.from({ length: 4 }).map((_, i) => (
-      <Card key={`skeleton-${i}`} className="p-2 shadow-sm dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600">
+      <Card key={`skeleton-${i}`} className="p-2 shadow-sm dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600" >
         <div className="flex justify-between">
           <Skeleton className="h-5 w-32" />
           <Skeleton className="h-5 w-32" />

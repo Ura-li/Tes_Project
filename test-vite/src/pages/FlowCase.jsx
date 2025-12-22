@@ -315,13 +315,13 @@ export const FlowCaseData = (user) => {
   const navigate = useNavigate();
   return (
     <>
-      <SidebarProvider defaultOpen className={"dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"}>
+      <SidebarProvider defaultOpen className={"dark:bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"} id='your-case'>
         <SidebarInset className={"dark:bg-gradient-to-t dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%"}>
           <div className="flex flex-col w-full ">
             <div className="sticky top-13 dark:bg-transparent bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <div className=" flex h-14 w-full items-center gap-3 px-4  place-content-between ">
                 {isToggleUser &&
-                <div className="flex gap-3 items-center bg-secondary px-3 py-2 rounded-md">
+                <div className="flex gap-3 items-center bg-secondary px-3 py-2 rounded-md" id='case-toggle'>
                   <Switch
                     checked={filterFinish === false}
                     onCheckedChange={(checked) => {
@@ -359,7 +359,7 @@ export const FlowCaseData = (user) => {
               </div>
             </div>
 
-            <div className="space-y-3 p-5">
+            <div className="space-y-3 p-5" >
               {renderer ? (
                 Array.from({ length: 6 }).map((_, i) => (
                   <Card key={i} className="p-4 shadow-sm dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600">
@@ -375,13 +375,13 @@ export const FlowCaseData = (user) => {
                       c.CaseStatus === "Close" ? "border-red-300 bg-fuchsia-100 dark:border-red-600" :
                         c?.caseinformation.Owner !== user.user.id ? "border-blue-300 dark:border-blue-600" : 'dark:border-slate-600'
                     )}
-                    onClick={() => navigate(`/app/case/${c.CaseID}`)}
+                    onClick={() => navigate(`/app/case/${c.CaseID}`)} id='case-card'
                   >
                     <div>
                       <p className="font-semibold">#{c.CaseID} - {c.ProductName}</p>
                       <p className="text-sm text-gray-500">{c.SerialNumber} | {c.Primary} | {c.CustomerAccount || "No Company"} | {c.CreatedOn}</p>
                     </div>
-                    <div className="flex flex-col items-center gap-2">  
+                    <div className="flex flex-col items-center gap-2" id='case-badge'>  
                       <div className="flex flex-col items-center gap-2">
                         <div className="space-x-2">
                           {c?.caseinformation?.asset_information
@@ -413,7 +413,7 @@ export const FlowCaseData = (user) => {
                 ))
               )
             }
-              <Pagination className="flex justify-start">
+              <Pagination className="flex justify-start" id='case-pagination'>
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
