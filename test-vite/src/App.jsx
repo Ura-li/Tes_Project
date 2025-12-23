@@ -117,7 +117,7 @@ export function GlobalSearchBar() {
         {loading ? <Loader2 className=' animate-spin'></Loader2> : ""}
       </span>
       {showResults && results && (
-        <div className="absolute bg-white shadow rounded p-2 z-50 w-full overflow-scroll max-h-96 text-sm dark:bg-slate-800 dark:text-slate-100 dark:border dark:border-slate-600">
+        <div className="absolute bg-white shadow rounded-md p-2 z-50 w-full overflow-scroll max-h-52 mt-1 text-sm dark:bg-slate-800 dark:text-slate-100 dark:border dark:border-slate-600">
           <div>
             <strong>Cases</strong>
             {results.cases.map(c => (
@@ -161,7 +161,7 @@ const App = () => {
           >
             <AppSidebar />
             <SidebarInset className={"w-full"}>
-              <header className="  flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600">
+              <header className="flex sticky top-0 z-10 items-center justify-between px-4 gap-2 bg-gradient-to-r from-hp-50 via-hp-100 to-hp-300 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 w-(screen-64)  dark:border-b-slate-600">
                 <div className="flex items-center gap-4 p-4">
                   <SidebarTrigger className="-ml-1" />
                   <Breadcrumbs />

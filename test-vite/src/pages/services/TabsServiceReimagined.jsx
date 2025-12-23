@@ -146,7 +146,7 @@ export const TabsServiceWO = () => {
 
   const buttons = [
     {
-      icon: CircleArrowLeft,
+      icon: CircleChevronLeft,
       label: "",
       onClick: () => navigate(`/app/case/${workOrders.CaseID}`),
     },
@@ -395,14 +395,14 @@ export const TabsServiceWO = () => {
 
   return (
     <>
-      <div className="flex items-center border-1 sticky top-13 bg-white z-10 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 overflow-auto">
+      <div className="flex items-center border-1 sticky top-13 bg-gray-50 z-10 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 overflow-auto">
         {buttons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
             hidden={btn.hidden}
             variant="link"
-            className="rounded-none px-0 py-0 flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5"
+            className="rounded-none hover:bg-gray-200 flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-2"
           >
             <btn.icon className="w-4 h-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}
@@ -633,14 +633,14 @@ export const TabsServiceMO = ({
 
   return (
     <>
-      <div className="flex items-center border-1 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 overflow-auto">
+      <div className="flex items-center bg-gray-50 border-1 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800  dark:border-b-slate-600 overflow-auto">
         {buttons.map((btn, index) => (
           <Button
             key={index}
             onClick={btn.onClick}
             variant="link"
             hidden={btn.hidden}
-            className="rounded-none px-0 py-0 flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-1.5"
+            className="rounded-none hover:bg-gray-200 flex items-center gap-0.5 transition-all duration-300 has-[>svg]:px-2"
           >
             <btn.icon className="w-4 h-4" />
             {btn.label && <span className="text-md">{btn.label}</span>}

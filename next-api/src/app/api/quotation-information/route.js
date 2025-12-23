@@ -165,7 +165,6 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    // return console.log(body);
     const {
       status,
       quotationType = "Simple",
