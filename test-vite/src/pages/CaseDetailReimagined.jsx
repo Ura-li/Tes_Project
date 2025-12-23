@@ -1112,6 +1112,7 @@ export const STATUS_ENUM_TO_LABEL = {
   Open: "Open",
   InActive: "Inactive",
   Close: "Closed",
+  Cancel: "Cancel",
   Active: "Active",
   Monitor: "Monitor",
   Pending_Customer_Action: "Pending Customer Action",
@@ -1450,7 +1451,7 @@ useEffect(() => {
   let canEditCe = false;
   let canEditWarranty = false;
 
-  if (caseDetails?.CaseStatus !== "Close") {
+  if (caseDetails?.CaseStatus !== "Close" && caseDetails?.CaseStatus !== "Cancel" ) {
     canEdit = caseDetails?.Owner === user?.id || user?.role === "admin";
     canEditFd = user?.role === "fd" || user?.role === "admin";
     canEditApo = user?.role === "apo" || user?.role === "admin";
@@ -1520,10 +1521,10 @@ useEffect(() => {
 
   return (
     <>
-      {caseDetails.CaseStatus === "Close" && (
+      {(caseDetails.CaseStatus === "Close" || caseDetails.CaseStatus === "Cancel") && (
         <div className="p-4 mt-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
           This Case is <strong>read-only</strong> because it is
-          <strong> Closed</strong>.
+          <strong> Closed OR Canceled</strong>.
         </div>
       )}
 
@@ -1573,8 +1574,8 @@ useEffect(() => {
 
                 {/* Queue */}
                 <div className="flex flex-col">
-                  <span className="text-blue-600 font-medium dark:text-white">---</span>
-                  <span className="text-muted-foreground">Queue</span>
+                  <span className="text-blue-600 font-medium dark:text-white">{caseDetails.CaseStatus}</span>
+                  <span className="text-muted-foreground">Status</span>
                 </div>
 
                 {/* Contact */}
