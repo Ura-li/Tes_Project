@@ -39,7 +39,6 @@ export async function POST(request) {
         const parsed = loginSchema.safeParse(body);
 
         if (!parsed.success) {
-            console.log("Zod errors array:", parsed.error.issues);
             const errorMessages = parsed.error.issues.map((err) => ({
                 field: err.path[0],
                 message: err.message
@@ -104,7 +103,6 @@ export async function POST(request) {
             }
         });
     } catch (error) {
-        console.error("🔥 Login Error:", error);
         return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
     }
 }

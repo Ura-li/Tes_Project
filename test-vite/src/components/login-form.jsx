@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth-context";
 
 import ApiCustomer from "@/api";
 import Swal from "sweetalert2";
+import { toast } from "sonner";
 
 export function LoginForm({ className, ...props }) {
   const [identifier, setIdentifier] = useState("");
@@ -29,10 +30,9 @@ export function LoginForm({ className, ...props }) {
         identifier,
         password,
       });
-      console.log("Login success:", res.data);
       const { token } = res.data;
       login(token);
-
+      sessionStorage.removeItem("Username",identifier)
       Swal.fire({
         title: "Success",
         icon: "success",
@@ -44,7 +44,8 @@ export function LoginForm({ className, ...props }) {
         window.location.href = "/app";
       });
     } catch (error) {
-      console.error("Login failed:", error);
+      sessionStorage.setItem("Username",identifier)
+      toast.error("Login failed:", error);
       if (error.response?.data?.errors) {
         // Gabungkan semua pesan error jadi satu string (atau bisa tampilkan satu per satu juga)
         const messages = error.response.data.errors
@@ -72,6 +73,10 @@ export function LoginForm({ className, ...props }) {
     }
   };
 
+  useEffect(() => {
+    setIdentifier(sessionStorage.getItem("Username"))
+  },[])
+
   /**
    * TODO :
    */
@@ -88,8 +93,6 @@ export function LoginForm({ className, ...props }) {
                 </p>
               </div>
               <div className="grid gap-3">
-                {/* <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required /> */}
                 <Label htmlFor="identifier">Username or Email</Label>
                 <Input
                   id="identifier"
@@ -100,14 +103,8 @@ export function LoginForm({ className, ...props }) {
                   required
                 />
               </div>
-             <div className="flex items-center">
+                <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  {/* <a 
-                    href="#"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    Forgot your password?
-                  </a> */}
                 </div>
 
               <div className="grid gap-3">

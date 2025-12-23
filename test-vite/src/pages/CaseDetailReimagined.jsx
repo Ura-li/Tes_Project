@@ -44,7 +44,7 @@ export const TabsServiceCaseDetails = () => {
   const { user } = useAuth();
   const { open } = useSidebar();
   // TO DO : Slamet 
-  // const  isResponsive  = useMediaQuery({query: '(min-width: 1824px)'})
+  const  isResponsive  = useMediaQuery({query: '(max-width: 1824px)'})
 
   // ---- pull state from zustand ----
   const caseDetails = useServiceCaseStore((s) => s.caseDetails);
@@ -545,13 +545,13 @@ export const TabsServiceCaseDetails = () => {
   btn.roles.includes(user.role)
 );
 
-// const visibleButtons = isResponsive
-//   ? allowedButtons.slice(0, -4)   
-//   : allowedButtons;              
+const visibleButtons = isResponsive
+  ? allowedButtons.slice(0, -4)   
+  : allowedButtons;              
 
-// const hiddenButtons = isResponsive
-//   ? allowedButtons.slice(-4)      
-//   : [];
+const hiddenButtons = isResponsive
+  ? allowedButtons.slice(-4)      
+  : [];
 
   
   const handleInvoiceOpenChange = (nextOpen = true) => {
@@ -958,22 +958,22 @@ function fieldMO(caseDetails) {
 
   return (
     <>
-<div className="grid grid-cols-1 w-full">
+  <div className="grid grid-cols-1 w-full">
       
-      <div className="sticky top-15 z-20 w-full min-w-0 bg-gray-50 border-b border-gray-200 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600 no-scrollbar">
+      <div className="sticky top-15 z-5 w-full min-w-0 bg-gray-50 border-b border-gray-200 dark:bg-gradient-to-r dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 dark:border-b-slate-600">
         
         <div className="w-full overflow-x-auto no-scrollbar">
           
           <div className="flex items-center min-w-max">
             
-            {allowedButtons.map((btn, index) => (
+            {visibleButtons.map((btn, index) => (
               <Button
                 key={index}
                 onClick={btn.onClick}
                 hidden={btn.hidden}
                 variant="link"
                 // 'shrink-0' ensures buttons don't crush each other
-                className="shrink-0 rounded-none px-3 py-2 flex items-center gap-1.5 transition-all duration-300 hover:bg-gray-200 dark:hover:bg-slate-600"
+                className="shrink-0 has-[>svg]:px-2 rounded-none flex items-center gap-0.5 transition-all duration-300 hover:bg-gray-200 dark:hover:bg-slate-600 "
               >
                 <btn.icon className="w-4 h-4 dark:text-gray-400" />
                 {btn.label && (
@@ -983,7 +983,30 @@ function fieldMO(caseDetails) {
                 )}
               </Button>
             ))}
+            {hiddenButtons.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="invisible"
+                    className="rounded-none px-3 py-2 hover:bg-gray-200 dark:hover:bg-slate-600"
+                  >
+                    ...
+                  </Button>
+                </DropdownMenuTrigger>
 
+                <DropdownMenuContent align="end" className="w-48">
+                  {hiddenButtons.map((btn, index) => (
+                    <DropdownMenuItem
+                      key={index}
+                      onClick={btn.onClick}
+                    >
+                      <btn.icon/>
+                      <span>{btn.label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+          )}
             {(isTechRole && caseDetails?.CaseStatus !== "Close") && (
               <div className="shrink-0">
                 <BtnModalsServiceCatalog
@@ -1021,7 +1044,6 @@ function fieldMO(caseDetails) {
 
 // ServiceCase.tsx
 import { format } from "date-fns";
-
 import { cn, formatAccountingRupiah, formatDate } from "@/lib/utils";
 import {
   Card,
