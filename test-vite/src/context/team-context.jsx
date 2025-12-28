@@ -35,6 +35,8 @@ export function TeamProvider({children}) {
                         return;
                     }
                 }
+                const savedTeamId = localStorage.getItem("activeTeamId");
+
 
             } catch (error) {
                 toast.error("Failedd to load Teams",error)
