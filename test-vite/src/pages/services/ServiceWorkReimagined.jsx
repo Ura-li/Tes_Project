@@ -1,5 +1,5 @@
 // services/service-work.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { useWorkOrderStore } from "@/hooks/useWorkOrderStore";
@@ -105,13 +105,8 @@ export const ServiceWork = () => {
   // permissions
   const editRoles = ["apo", "admin", "ce", "celead"];
   let canEdit = false;
-  // let canEdit = false;
   if (workOrder?.SystemStatus !== "CLOSED_POSTED") {
     canEdit = editRoles.includes(user?.role);
-  //   canEdit =
-  //     ((user?.role === "ce" || user?.role === "celead") &&
-  //       user?.id === workOrder?.OwnerID) ||
-  //     user?.role === "admin";
   }
 
   const tabs = [
@@ -157,15 +152,116 @@ export const ServiceWork = () => {
     }
   };
 
+
+  // Fungsi Deadline by RDT
+  function Deadline({ target }) {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const targetTime = new Date(target).getTime();
+  if (isNaN(targetTime)) return null;
+  
+  const WoDate = workOrder?.SystemStatus === "CLOSED_POSTED" ? new Date(workOrder.caseinformation?.ActionLog.find(log => log.dataNew === "CLOSED_POSTED").ChangeAt) : 
+                 workOrder?.SystemStatus === "CLOSED_CANCELLED" ? new Date(workOrder.caseinformation?.ActionLog.find(log => log.dataNew === "CLOSED_CANCELLED").ChangeAt) : null
+  let diffMs;
+
+  if (workOrder?.SystemStatus === "CLOSED_POSTED" || workOrder?.SystemStatus === "CLOSED_CANCELLED") {
+    diffMs = WoDate - targetTime;
+  } else {
+    diffMs = targetTime - now;
+  }
+
+  const diffAbs = Math.abs(diffMs);
+  const seconds = Math.floor(diffAbs / 1000) % 60;
+  const minutes = Math.floor(diffAbs / (1000 * 60)) % 60;
+  const hours   = Math.floor(diffAbs / (1000 * 60 * 60)) % 24;
+  const days    = Math.floor(diffAbs / (1000 * 60 * 60 * 24));
+  const diffText = `${days} hari ${hours} jam ${minutes} menit`;
+
+ let status;
+ if (workOrder?.SystemStatus === "CLOSED_POSTED" || workOrder?.SystemStatus === "CLOSED_CANCELLED") {
+  status = diffMs > 0
+    ? "wo-deadline-past"
+    : "wo-deadline-not-past";
+} else {
+  status = now > targetTime ? "lewat" : "belum";
+}
+
   return (
     <>
-      {workOrder?.SystemStatus === "CLOSED_POSTED" && (
-        <div className="p-4  text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500">
-          This work order is <strong>read-only</strong> because it is{" "}
-          <strong>Closed</strong>.
+      {status === "lewat" && (
+        <div className="p-2 bg-red-500 text-white font-bold">
+          Deadline sudah lewat
         </div>
       )}
 
+      {status === "belum" && (
+        <div className="p-2 bg-green-500 text-white font-bold">
+          Deadline belum sampai
+        </div>
+      )}
+
+      {(status === "wo-deadline-past" || status === "wo-deadline-not-past") && (
+        <div className="p-2 text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 font-bold">
+          {workOrder?.SystemStatus === "CLOSED_POSTED" ? "This work order is read-only because it is Closed" : 
+           workOrder?.SystemStatus === "CLOSED_CANCELLED" ? "This work order is read-only because it is Cancelled" : 
+           ""
+          }, your time deadline {diffText} 
+        </div>
+      )}
+    </>
+  );}
+
+  // TAT 
+  function TATDuration({WOData}) {
+    const createdOn  = WOData.caseinformation?.CreatedOn
+    const closedDate = WOData.caseinformation?.CaseClosedDate
+
+    const [now, setNow] = useState(Date.now());
+
+    const isClosed = Boolean(closedDate)
+    useEffect(() => {
+      if (isClosed) return;
+
+      const timer = setInterval(() => {
+        setNow(Date.now())
+      }, 1000);
+
+      return () => clearInterval(timer)
+    }, [isClosed]);
+
+    if (!createdOn) return null;
+      const startMs = new Date(createdOn).getTime();
+      const endMs   = isClosed
+        ? new Date(closedDate).getTime()
+        : now;
+
+      const diffMs = endMs - startMs;
+      const diffAbs = Math.max(diffMs, 0);
+
+      const totalSeconds = Math.floor(diffAbs / 1000);
+      const days    = Math.floor(totalSeconds / 86400);
+      const hours   = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60; 
+
+  return (
+    <div className="p-2 font-mono text-nowrap font-bold">
+        {days} hari {hours} jam {minutes} menit {seconds} detik
+    </div>
+  )}
+
+  return (
+    <>
+     <Deadline target={workOrder.RequestedDateTimeCustomer}/>
+      
       {workOrder?.WOID && caseInformation?.CaseID && <TabsServiceWO />}
 
       <Card className=" border-0 rounded-none bg-gradient-to-t  dark:from-slate-800 dark:via-slate-600 dark:to-slate-800 dark:to-70% dark:via-6% dark:from-1%">
@@ -174,8 +270,8 @@ export const ServiceWork = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
               <CardTitle className="text-xl pl-2">
                 {workOrder?.WOID || "---"}
-                <span className="flex items-center text-sm">
-                  For Case :{" "}
+                <span className="flex items-center text-sm gap-1">
+                  For Case :
                   {workOrder?.CaseID && (
                     <Link to={`/app/case/${workOrder.CaseID}`}>
                       {workOrder.CaseID}
@@ -441,14 +537,7 @@ export const ServiceWork = () => {
               <div className="flex flex-col flex-1 gap-4">
                 <Card className="rounded-sm dark:bg-gradient-to-t dark:from-slate-600 dark:via-slate-800 dark:to-slate-800  dark:border-slate-700 dark:border-4">
                   <CardContent className="grid items-center grid-cols-2">
-                    <CaseField label="Incoming Channel" lock>
-                      <Input
-                        
-                        className="dark:text-white dark:border-b-gray-400 dark:rounded-none dark:hover:border-transparent dark:focus:border-transparent dark:focus:rounded-lg dark:p-2"
-                        value={WOGeneral.IncomingChannel}
-                        onChange={handleWOGeneral("IncomingChannel")}
-                      />
-                    </CaseField>
+                    <TATDuration WOData={workOrder}/>
                     <CaseField
                       label="Currently Worked By"
                       className={"col-span-3 hidden"}

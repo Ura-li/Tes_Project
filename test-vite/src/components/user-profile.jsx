@@ -146,7 +146,6 @@ export function UserProfile() {
             }
 
         } catch (error) {
-            // Swal.fire("Error : " + error);
             toast("Error", {
                 description: error.response?.data?.message || error.message || "Something went wrong",
             });

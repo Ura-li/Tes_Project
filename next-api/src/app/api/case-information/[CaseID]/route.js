@@ -91,7 +91,6 @@ export async function GET(request, { params }) {
                     resource: true,
                 }
             }
-            // casenotes_casenotes_CaseIDTocaseinformation: true,
         }
     });
 
