@@ -193,7 +193,6 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
 		try {
 			const resWO = await ApiCustomer.get(`/api/work-order/${woid}`);
 			const workOrderData = resWO.data.data;
-			console.log("fetch woi",workOrderData )
 			const resMO = await ApiCustomer.get(`/api/material-order?WOID=${woid}`);
 			const materialOrders = resMO.data.data || [];
 

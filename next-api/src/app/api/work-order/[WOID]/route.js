@@ -17,7 +17,7 @@ export async function GET(request, {params}) {
             include: {
               caseinformation: {
                 include: {
-                  otcCodeTable: true,
+                  ActionLog: true,
                 }
               },
               serviceCatalog: {
