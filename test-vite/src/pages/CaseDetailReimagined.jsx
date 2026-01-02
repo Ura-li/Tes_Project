@@ -1433,9 +1433,11 @@ useEffect(() => {
   const fetchUserAssign = async (role) => {
     try {
       const res = await ApiCustomer.get(`/api/user?role=${role}`);
-      setRoleAssign(res.data.data || []);
+      const FetchAllUserByRole = res.data.data || [];
+      const FilterAllUserByRole = FetchAllUserByRole.filter(u => u.ResourceId === user.resource)
+      setRoleAssign(FilterAllUserByRole);      
     } catch (err) {
-      console.error("Error fetching role: ", err);
+      toast.error("Error fetching role");
     }
   };
 
@@ -1800,7 +1802,7 @@ useEffect(() => {
                             try {
                               fetchUserAssign(role);
                             } catch (err) {
-                              console.error("Error fetching role: ", err);
+                              toast.error("Error fetching role");
                             }
                           }
                         } else {
