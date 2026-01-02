@@ -166,7 +166,7 @@ export const ServiceWork = () => {
   }, []);
 
   const targetTime = new Date(target).getTime();
-  if (isNaN(targetTime)) return null;
+  if (!targetTime) return null;
   
   const WoDate = workOrder?.SystemStatus === "CLOSED_POSTED" ? new Date(workOrder.caseinformation?.ActionLog.find(log => log.dataNew === "CLOSED_POSTED").ChangeAt) : 
                  workOrder?.SystemStatus === "CLOSED_CANCELLED" ? new Date(workOrder.caseinformation?.ActionLog.find(log => log.dataNew === "CLOSED_CANCELLED").ChangeAt) : null
