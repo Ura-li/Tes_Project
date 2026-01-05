@@ -1534,8 +1534,10 @@ export default function NewCaseForm() {
                 checked={showCompanySection}
                 onCheckedChange={(v) => {
                   const checked = Boolean(v);
-                  setShowCompanySection(checked);
-                  if (checked) {
+                  if (!contactFirstName) {
+                    toast.info("Tolong lengkapilah data customer terlebih dahulu",{position: 'top-center'})
+                  } else {
+                    setShowCompanySection(checked);
                     copyCompanyFromContact();
                   }
                 }}
