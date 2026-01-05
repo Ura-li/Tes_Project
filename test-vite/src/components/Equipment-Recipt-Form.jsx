@@ -185,7 +185,7 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =
   <Document>
     <Page size="A4" style={styles.container}>
       <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', marginBottom: 4, padding: 3, borderBottom: 1,  }}>
-        <Image src="/Javag.jpeg" style={[styles.logo,{padding: 2  }]} />
+        <Image src="/Javag.jpeg" style={[styles.logo]} />
       <View style={{ flex: 1, justifyContent: "space-between", flexDirection: "row" }}>
         <View>
           <Text style={styles.sectionHeader}>PT.JAVA ABADI GEMILANG</Text>

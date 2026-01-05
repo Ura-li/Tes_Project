@@ -117,7 +117,7 @@ export function GlobalSearchBar() {
         {loading ? <Loader2 className=' animate-spin'></Loader2> : ""}
       </span>
       {showResults && results && (
-        <div className="absolute bg-white shadow rounded p-2 z-50 w-full overflow-scroll max-h-96 text-sm dark:bg-slate-800 dark:text-slate-100 dark:border dark:border-slate-600">
+        <div className="absolute bg-white shadow rounded-md p-2 z-50 w-full overflow-scroll max-h-52 mt-1 text-sm dark:bg-slate-800 dark:text-slate-100 dark:border dark:border-slate-600">
           <div>
             <strong>Cases</strong>
             {results.cases.map(c => (

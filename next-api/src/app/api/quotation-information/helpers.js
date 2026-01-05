@@ -79,7 +79,7 @@ export const calculateTotals = (lineItems, quantityMap, laborFeeValue, vatValue)
       ? 0
       : Number(vatValue);
   const vatAmount = vatRate > 0 ? subtotal * (vatRate / 100) : 0;
-  const grandTotal = subtotal + vatAmount;
+  const grandTotal = Math.ceil((subtotal + vatAmount) / 1000) * 1000;
 
   return {
     subtotal: new Prisma.Decimal(subtotal.toFixed(2)),

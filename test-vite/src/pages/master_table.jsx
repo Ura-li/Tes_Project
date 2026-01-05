@@ -1524,6 +1524,7 @@ const EnumToLabel = {
   Pending_Order: "Pending Order",
   Escalated: "Escalated",
   Quote_Approved: "Quote Approved",
+  Quote_Rejected: "Quote Rejected",
   Pending_Quote: "Pending Quote",
   NEW_AssignCE: "New Assign CE",
   NEW_AssignAPO: "New Assign APO",
