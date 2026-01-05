@@ -546,11 +546,11 @@ export const TabsServiceCaseDetails = () => {
 );
 
 const visibleButtons = isResponsive
-  ? allowedButtons.slice(0, -4)   
+  ? allowedButtons.slice(0, -2)   
   : allowedButtons;              
 
 const hiddenButtons = isResponsive
-  ? allowedButtons.slice(-4)      
+  ? allowedButtons.slice(-2)      
   : [];
 
   

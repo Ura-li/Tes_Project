@@ -195,6 +195,8 @@ const List = ({ items }) => (
   </View>
 )
 
+let counter = 0;
+
 export const QuotationInvoice = ({
   caseDetails,
   customerSignature,
@@ -482,11 +484,11 @@ export const QuotationInvoice = ({
         {caseDetails?.workorder?.length > 0 ? (
           caseDetails.workorder.flatMap((wo) =>
             wo.materialorder.flatMap((mo) =>
-              mo.materialorderlineitems.map((line, index) => (
+              mo.materialorderlineitems.map((line) => (
                 line.Status === 'Cancelled' ? "N/A" :
                 <View style={styles.tableRow} key={line.LineItemID}>
                   <Text style={[styles.tableCell, styles.partsColNo, styles.alignCenter]}>
-                    {index + 1}
+                    {++counter}
                   </Text>
 
                   <Text style={[styles.tableCell, styles.partsColVendor]}>

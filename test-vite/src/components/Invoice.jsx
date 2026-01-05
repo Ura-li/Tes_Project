@@ -201,6 +201,8 @@ const List = ({ items }) => (
   </View>
 )
 
+let counter = 0;
+
 export const Invoice = ({
   caseDetails,
   customerSignature,
@@ -493,7 +495,7 @@ export const Invoice = ({
                 line.Status === 'Cancelled' ? "N/A" :
                 <View style={styles.tableRow} key={line.LineItemID}>
                   <Text style={[styles.tableCell, styles.partsColNo, styles.alignCenter]}>
-                    {index + 1}
+                    {++counter}
                   </Text>
 
                   <Text style={[styles.tableCell, styles.partsColVendor]}>

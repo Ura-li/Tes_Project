@@ -195,6 +195,8 @@ const List = ({ items }) => (
   </View>
 )
 
+let counter = 0;
+
 export const InvoiceDp = ({
   caseDetails,
   customerSignature,
@@ -540,7 +542,7 @@ export const InvoiceDp = ({
                       styles.alignCenter,
                     ]}
                   >
-                    {index + 1}
+                    {++counter}
                   </Text>
 
                   <Text style={[styles.tableCell, styles.partsColVendor]}>

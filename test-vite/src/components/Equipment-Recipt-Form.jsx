@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 4,
     borderColor: "#ccc",
+    textAlign: 'center'
   },
   tableHeaderCell: {
     backgroundColor: "#DEDED1",
@@ -178,6 +179,8 @@ const Table = ({ data }) => (
     ))}
   </View>
 );
+
+let counter = 0
 
 const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =>
 
@@ -388,53 +391,25 @@ const EquipmentReciptForm = ({ nama, caseDetails, customerSignature, qrcode }) =
 
       <Table data={[
         ["NO", "Vendor part NO", "HP Part NO", "Part Name", "NEW CT Code", "QTY"],
-        ...(caseDetails?.workorder?.length > 0 ? caseDetails.workorder.map((item, index ) => [
-          index + 1,
-          'N/A',
-          item.materialorder[0].materialorderlineitems[0].PartNumber ?? 'N/A',
-          item.materialorder[0].materialorderlineitems[0].Description ?? 'N/A',
-          item.materialorder[0].materialorderlineitems[0].RemovedSerialNumber ?? 'N/A',
-          item.materialorder[0].materialorderlineitems[0].Quantity ?? 'N/A',
-        ]) : [["No Data", "-", "-", "-","-", "-"]]),
+        ...(caseDetails.workorder?.length > 0 ? caseDetails.workorder.flatMap(wo => 
+          wo.materialorder.flatMap(mo => mo.materialorderlineitems.map((item) => {
+          if (item.Status === 'Cancelled') {
+            return []
+          }
+          return [
+            ++counter,
+            'N/A',
+            item.PartNumber ?? 'N/A',
+            item.Description ?? 'N/A',
+            item.RemovedSerialNumber ?? 'N/A',
+            item.Quantity ?? 'N/A',
+          ]
+        }))) : [["No Data", "-", "-", "-","-", "-"]]),
       ]}/>
 
     
       <Text style={[styles.textSmall, { fontWeight: 'bold', color: 'black' }]}>Repair Action : </Text>
-      {/* <View style={{ display: 'flex', flexDirection: 'row' }}>
-
-        <View style={styles.leftSection}>
-          <Text style={styles.label2}>Unit Garansi</Text>
-          <Text style={[styles.value2]}>:Lamanya pengerjaan perbaikan sekitar 3 hari kerja (tergantung tersedianya suku cadang)</Text>
-          <Text style={styles.label2}>Unit Tidak Garansi</Text>
-          <Text style={[styles.value2]}>: • Biaya pengecekan dibayar di muka dan tidak dapat dikembalikan. </Text>
-          <Text style={styles.label2}></Text>
-          <Text style={[styles.value2]}>• Surat Penawaran Perbaikan akan dikirim sekitar 3 hari kerja setelah peralatan diterima. Lamanya pengerjaan perbaikan sekitar 3
-            hari kerja setelah persetujuan atas Surat Penawaran Perbaikan (tergantung tersedianya suku cadang)</Text>
-        </View>
-      </View> */}
-      {/* <Text style={[styles.sectionHeader, styles.textCenter]}>Disclaimer Statement</Text>
-
-      <View style={{}}>
-        <Text style={[styles.bold, styles.textSmall]}>Informasi Untuk Pelanggan :</Text>
-        <Text style={[styles.bold, styles.textSmall]}>Saya {caseDetails?.contact_information?.FirstName || caseDetails?.contact_information?.LastName
-          ? `${caseDetails?.contact_information?.FirstName || ''} ${caseDetails?.contact_information?.LastName || ''}`.trim()
-          : 'Customer'} yang bertanda tangan di bawah ini menyetujui bahwa:</Text>
-        <Text style={[styles.bold, styles.textSmall]}>
-          Data yang tersimpan dalam peralatan dapat terhapus selama proses perbaikan peralatan berlangsung. Pada saat dilakukan system atau
-          operating system recovery, setting peralatan akan berubah mengikuti setting awal dari pabrik.
-        </Text>
-        <Text style={styles.textSmall}>
-          Walaupun HP selalu melakukan pencegahan terhadap kerusakan pada Data atau terhapusnya Data, kami sangat menyarankan Pelanggan untuk melakukan
-          Backup Data sendiri sebelum peralatan disampaikan kepada kami. Dengan demikian pelanggan mempunyai Backup Data untuk melakukan Data Recovery jika
-          selama proses perbaikan peralatan berlangsung Data pelanggan terhapus oleh System atau Operating System.
-        </Text>
-        <Text style={styles.textSmall}>
-          HP tidak memberikan jaminan proteksi Data pelanggan dan HP tidak bertanggungjawab jika terjadi kerusakan pada Data atau terhapusnya Data dari peralatan
-          pelanggan.
-        </Text>
-      </View> */}
-
-
+     
       {/* Signature section */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <View style={{ flexDirection: 'column', alignItems: 'center' }}>
