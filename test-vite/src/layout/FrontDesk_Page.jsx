@@ -15,7 +15,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import Swal from 'sweetalert2';
-import { STATUS_ENUM_TO_LABEL } from '@/pages/CaseDetail';
+import { STATUS_ENUM_TO_LABEL } from '@/pages/CaseDetailReimagined';
 
 
 export default function FrontDesk_Page() {

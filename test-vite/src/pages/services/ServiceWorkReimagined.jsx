@@ -121,6 +121,7 @@ export const ServiceWork = () => {
     REPAIR_PROGRESS: "Open - In Progress",
     OPEN_COMPLETED: "Open - Completed",
     CLOSED_POSTED: "Closed - Posted",
+    CLOSED_CANCELLED: "Closed - Cancelled"
   };
 
   const statusOptions = Object.entries(statusEnumToLabelWO).map(
