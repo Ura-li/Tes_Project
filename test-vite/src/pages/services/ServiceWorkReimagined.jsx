@@ -288,8 +288,8 @@ export const ServiceWork = () => {
                   <p className="text-sm font-light ">Owner Ce</p>
                 </div>
                 <div className="flex flex-col dark:text-gray-300">
-                  <h1 className="text-blue-500 dark:text-white">---</h1>
-                  <p className="text-sm font-light ">Queue</p>
+                  <h1 className="text-blue-500 dark:text-white">{statusEnumToLabelWO[WOGeneral?.SystemStatus]}</h1>
+                  <p className="text-sm font-light ">Status</p>
                 </div>
                 <div className="flex flex-col dark:text-gray-300">
                   <h1 className="text-blue-500 dark:text-white">

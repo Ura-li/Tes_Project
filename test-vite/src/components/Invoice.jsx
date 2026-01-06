@@ -11,6 +11,7 @@ import {
 import React from "react";
 import { formatAccountingRupiah } from "../lib/utils";
 import { formatDate } from "../lib/utils";
+import { FormatRupiah } from "./QuatationInvoice";
 
 Font.register({
   family: "Helvetice",
@@ -498,29 +499,31 @@ export const Invoice = ({
                     {++counter}
                   </Text>
 
-                  <Text style={[styles.tableCell, styles.partsColVendor]}>
+                  <Text style={[styles.tableCell, styles.partsColVendor, styles.alignCenter]}>
                     {line.servicecatalog_parts?.VendorPartNumber ?? "N/A"}
                   </Text>
 
-                  <Text style={[styles.tableCell, styles.partsColHp]}>
+                  <Text style={[styles.tableCell, styles.partsColHp, styles.alignCenter]}>
                     {line.PartNumber ?? "N/A"}
                   </Text>
 
-                  <Text style={[styles.tableCell, styles.partsColPartName]}>
+                  <Text style={[styles.tableCell, styles.partsColPartName, styles.alignCenter]}>
                     {line.Description ?? "N/A"}
                   </Text>
 
-                  <Text style={[styles.tableCell, styles.partsColQty]}>
+                  <Text style={[styles.tableCell, styles.partsColQty, styles.alignCenter]}>
                     {line.Quantity ?? "N/A"}
                   </Text>
 
-                  <Text style={[styles.tableCell, styles.partsColUnitPrice]}>
-                    {formatAccountingRupiah(line.Price) ?? "0"}
-                  </Text>
+                  <View style={[styles.tableCell, styles.partsColUnitPrice,{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+                    <Text>Rp.</Text>
+                    {FormatRupiah({value:line.Price}) ?? "0"}
+                  </View>
 
-                  <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-                    {formatAccountingRupiah(Number(line.Price) * Number(line.Quantity)) || 0}
-                  </Text>
+                  <View style={[styles.tableCell, styles.partsColTotalPrice,{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+                    <Text>Rp.</Text>
+                    {FormatRupiah({value:Number(line.Price) * Number(line.Quantity)}) || 0}
+                  </View>
                 </View>
               ))
             )
@@ -547,12 +550,14 @@ export const Invoice = ({
           >
             Labor Fee : 
           </Text>
-          <Text style={[styles.tableCell, styles.partsColUnitPrice]} >
-            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
-          </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee)}
-          </Text>
+          <View style={[styles.tableCell, styles.partsColUnitPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <Text>Rp.</Text>
+            {FormatRupiah({value:caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee})}
+          </View>
+          <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <Text>Rp.</Text>
+            {FormatRupiah({value:caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.LaborFee})}
+          </View>
         </View>
 
        
@@ -564,9 +569,10 @@ export const Invoice = ({
           >
             Sub Total :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal)}
-          </Text>
+          <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <Text>Rp.</Text>
+            {FormatRupiah({value:caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.Subtotal})}
+          </View>
         </View>
 
         {/* VAT: colspan=6 */}
@@ -576,11 +582,10 @@ export const Invoice = ({
           >
             VAT :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-          {caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VatValue ? 
-            formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VATAmount)  : "0"
-          }
-          </Text>
+          <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <Text>Rp.</Text>
+            {FormatRupiah({value:caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.VATAmount})}
+          </View>
         </View>
 
       
@@ -591,9 +596,10 @@ export const Invoice = ({
           >
             Total :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal)}
-          </Text>
+          <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <Text>Rp.</Text>
+            {FormatRupiah({value:caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal})}
+          </View>
         </View>
 
        {/* DP: colspan=6 */}
@@ -603,11 +609,12 @@ export const Invoice = ({
           >
             DP :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {formatAccountingRupiah(caseDetails?.down_payment_table.reduce((sum, row) => 
+          <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <Text>Rp.</Text>
+            {FormatRupiah({value:caseDetails?.down_payment_table.reduce((sum, row) => 
               sum + Number(row.DPAmount) || 0, 0
-            ))}
-          </Text>
+            )})}
+          </View>
         </View>
 
         <View style={styles.tableRow}>
@@ -616,11 +623,12 @@ export const Invoice = ({
           >
             Balance Due :
           </Text>
-          <Text style={[styles.tableCell, styles.partsColTotalPrice]}>
-            {(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) - (caseDetails?.down_payment_table.reduce((sum, row) => sum + Number(row.DPAmount), 0)) ? 
-                            formatAccountingRupiah((caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) - (caseDetails?.down_payment_table.reduce((sum, row) => sum + Number(row.DPAmount), 0))) : "0"
-                          }
-          </Text>
+          <View style={[styles.tableCell, styles.partsColTotalPrice, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <Text>Rp.</Text>
+            {FormatRupiah({value:(caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) - (caseDetails?.down_payment_table.reduce((sum, row) => sum + Number(row.DPAmount), 0)) ? 
+                            (caseDetails?.workorder[0]?.materialorder[0]?.materialorderlineitems[0]?.quotation_lineitem[0]?.quotation?.GrandTotal) - (caseDetails?.down_payment_table.reduce((sum, row) => sum + Number(row.DPAmount), 0)) : 0
+                          })}
+          </View>
         </View>
       </View>
 
