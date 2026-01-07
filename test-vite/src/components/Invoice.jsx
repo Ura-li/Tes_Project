@@ -644,44 +644,6 @@ export const Invoice = ({
           </Text>
         </View>
       </View>
-        {/* <Section title="Terms and Conditions" >
-          <View style={{ display: "flex", flexDirection: "row", columnGap: 5 }}>
-            <View style={styles.leftSection}>
-              <Text style={styles.label}>Validity</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={[styles.value]}>
-                7 (seven) calender days
-              </Text>
-              <Text style={styles.label}>Delivery Time</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={[styles.value]}>
-                2 (two) weeks from date of PO confirmation & subject to spare part availibility
-              </Text>
-              <Text style={styles.label}>Payment</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={[styles.value]}>
-                Cash or transfer
-              </Text>
-              <Text style={styles.label}>Warranty</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={[styles.value]}>
-                1 (one) month for the same part
-              </Text>
-              <Text style={styles.label}>Cancellation Fee</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={[styles.value]}>
-                Rp. 121.000,
-              </Text>
-              <Text style={styles.label}>Others</Text>
-              <Text style={styles.colon}>:</Text>
-              <List items={[
-                "Defective part(s) should be returned to HP",
-                "No cancellation accepted after PO confirmation (full quotation charge will apply after PO confirmation)",
-                "Any damaged part(s) that has been replaced shall be the property of HP Indonesia (Suku cadang yang rusak pada barang yang diperbaiki akan menjadi milik HP Indonesia)",
-              ]}/>
-            </View>
-          </View>
-        </Section> */}
         <View
           style={{
             flexDirection: "row",
