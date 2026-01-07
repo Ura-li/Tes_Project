@@ -29,6 +29,7 @@ import { format } from "date-fns";
 import { ComboboxDemo, SearchCommandBlock, SelectBarState } from "@/components/sc-select";
 import { toast } from "sonner";
 import { formatDateForInput,formatDate } from "@/lib/utils";
+import Swal from "sweetalert2";
 
 /**
  * @fileoverview Create Case page (SearchCase_V3)
@@ -1007,7 +1008,7 @@ export default function NewCaseForm() {
 
   const onCreateCase = async () => {
     if ((!selectedAsset && !isNewAsset) || (!selectedContact && !isNewContact)) {
-      alert("Please select or Create both an Asset and a Contact before creating a case.");
+      toast.warning("Please select or Create both an Asset and a Contact before creating a case.");
       return;
     }
     if(isNewAsset && (!isNewProduct && !selectedProduct)){
@@ -1029,14 +1030,11 @@ export default function NewCaseForm() {
 
       return;
     }
-
     //failsafe is warranty
     if(!warrantySearchValue) {
       toast("Warranty tidak valid")
       return;
     }
-
-
     /**
      * TODO : (FOR SLAMET)
      * ADDING A In Warranty Group
@@ -1073,8 +1071,7 @@ export default function NewCaseForm() {
       const finalProductNumber =
         selectedProduct?.ProductNumber || productNo || null;
 
-      const needsNewCompany =
-        isNewContact && showCompanySection && !selectedCompany;
+      const needsNewCompany = isNewContact && showCompanySection && !selectedCompany;
       const companyPayload = needsNewCompany
         ? {
             Company: companyName,
@@ -1191,10 +1188,18 @@ export default function NewCaseForm() {
         resources: savedTeamId
       };
 
-      const res = await ApiCustomer.post(
-        "/api/case-information/create-case",
-        compositePayload
-      );
+      Swal.fire({
+        title: "Apakah data tersebut sudah benar ?",
+        text: "Tolong check kembali data yang telah di input!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Iya",
+        cancelButtonText: "Tidak"
+      })
+
+      const res = await ApiCustomer.post("/api/case-information/create-case",compositePayload);
       const createdCase = res.data?.data?.case;
       const caseId = createdCase?.CaseID;
       const createdCaseStatus = createdCase?.CaseStatus;
@@ -1262,7 +1267,7 @@ export default function NewCaseForm() {
             CreatedBy: user?.id
           })
         } catch (e) {
-          toast.warning("Case Note failed",e)
+          toast.warning("Case Note failed")
           
         }
       }
@@ -1273,7 +1278,6 @@ export default function NewCaseForm() {
       // Navigate detail
       navigate(`/app/case/${caseId}`);
     } catch (e) {
-      console.error(e);
       if (e.response?.status === 400 || e.response?.status === 409) {
         const msg = e.response?.data?.message || "Invalid input";
         toast.warning(msg, {

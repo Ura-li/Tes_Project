@@ -546,11 +546,11 @@ export const TabsServiceCaseDetails = () => {
 );
 
 const visibleButtons = isResponsive
-  ? allowedButtons.slice(0, -4)   
+  ? allowedButtons.slice(0, -2)   
   : allowedButtons;              
 
 const hiddenButtons = isResponsive
-  ? allowedButtons.slice(-4)      
+  ? allowedButtons.slice(-2)      
   : [];
 
   
@@ -1576,7 +1576,7 @@ useEffect(() => {
 
                 {/* Queue */}
                 <div className="flex flex-col">
-                  <span className="text-blue-600 font-medium dark:text-white">{caseDetails.CaseStatus}</span>
+                  <span className="text-blue-600 font-medium dark:text-white">{STATUS_ENUM_TO_LABEL[caseDetails.CaseStatus]}</span>
                   <span className="text-muted-foreground">Status</span>
                 </div>
 
@@ -3085,7 +3085,7 @@ useEffect(() => {
                             <TableCell>{log.model}</TableCell>
                             <TableCell>{log.CaseId}</TableCell>
                             <TableCell>
-                              {log.changedByUser?.Role} -{" "}
+                              {log.changedByUser?.Role} - {" "}
                               {log.changedByUser?.Name} (
                               {log.changedByUser?.Username})
                             </TableCell>
