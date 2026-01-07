@@ -3089,8 +3089,8 @@ useEffect(() => {
                               {log.changedByUser?.Name} (
                               {log.changedByUser?.Username})
                             </TableCell>
-                            <TableCell>{log.dataOld}</TableCell>
-                            <TableCell>{log.dataNew}</TableCell>
+                            <TableCell>{STATUS_ENUM_TO_LABEL[log.dataOld]}</TableCell>
+                            <TableCell>{STATUS_ENUM_TO_LABEL[log.dataNew]}</TableCell>
                             <TableCell>
                               {new Date(log.ChangeAt).toLocaleString()}
                             </TableCell>

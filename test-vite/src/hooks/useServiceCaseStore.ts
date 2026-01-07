@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import Swal from "sweetalert2";
 import ApiCustomer from "../api";
 import { getUserFromToken } from "../lib/utils/auth";
+import { STATUS_ENUM_TO_LABEL } from "@/pages/CaseDetailReimagined";
 
 // --- small helper ---
 const hasAnyNonEmptyValue = (obj: any = {}) =>
@@ -1017,10 +1018,10 @@ const hasIntentToSave = isDirty;
                     dataOld: oldStatus,
                     dataNew: newStatus,
                     changedBy: token.user.id,
-                    logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${oldStatus} to ${newStatus}`,
+                    logDescription: `Edit : Change Case ${caseDetails.CaseID} Status from ${STATUS_ENUM_TO_LABEL[oldStatus]} to ${STATUS_ENUM_TO_LABEL[newStatus]}`,
                   });
                   const dataActionlog = actionlog.data.data;
-                  const subject = `[Case Update] Case #${caseDetails.CaseID} status berubah dari ${oldStatus} ke ${newStatus}`;
+                  const subject = `[Case Update] Case #${caseDetails.CaseID} status berubah dari ${STATUS_ENUM_TO_LABEL[oldStatus]} ke ${STATUS_ENUM_TO_LABEL[newStatus]}`;
                   const caseLink = `${import.meta.env.VITE_BASE_URL}/app/case/${
                     caseDetails.CaseID
                   }`;
