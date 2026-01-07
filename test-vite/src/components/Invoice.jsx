@@ -671,23 +671,7 @@ export const Invoice = ({
               Cashier 
             </Text>
           </View>
-          {/* <View style={{ flexDirection: "column", alignItems: "center" }} >
-            <Text style={[styles.textSmall, { marginBottom: 10 }]}>
-              Accepted by
-            </Text>
-            <Image src={customerSignature} style={{ width: 120, height: 60 }} />
-            <Text style={styles.textSmall}>
-              --------------------------------------------
-            </Text>
-            <Text style={styles.textSmall}>
-              {caseDetails?.contact_information?.FirstName ||
-              caseDetails?.contact_information?.LastName
-                ? `${caseDetails?.contact_information?.FirstName || ""} ${
-                    caseDetails?.contact_information?.LastName || ""
-                  }`.trim()
-                : "N/A"}
-            </Text>
-          </View> */}
+         
       </View>
           <Text style={[styles.textSmall, {marginTop: 10}]}>
             * Harga sudah termasuk PPN.
