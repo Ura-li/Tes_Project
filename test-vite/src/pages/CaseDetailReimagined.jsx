@@ -756,69 +756,69 @@ const hiddenButtons = isResponsive
       toast.error(error?.response?.data?.message ?? "Failed to update!")
     }
   };
-     const Approve = async () => {
-      try {
-        Swal.fire({
-          title: "Saving...",
-          text: "Please wait while we update",
-          allowEscapeKey: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
+  const Approve = async () => {
+    try {
+      Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update",
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
 
-        const caseUpdate = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`,{
-          CaseStatus: "New",
-          Owner: caseDetails.CreatedBy,
-        })
-        
-        const assetUpdate = await ApiCustomer.patch(`/api/asset-information/${caseDetails.AssetID}`,{
-          Warranty_Status: caseDetails.asset_information?.Warranty_Status,
-          needWarrantyApproval: true,
-          WarrantyApprovalStatus: "Add Info By WA",
-          WarrantyCardDate: caseDetails.asset_information?.asset_warranty[0]?.WarrantyCardDate,
-          PurchaseDate: caseDetails.asset_information?.asset_warranty[0]?.PurchaseDate,
-          POPDocument: caseDetails.asset_information?.asset_warranty[0]?.POPDocument,
-          WarrantyCard: caseDetails.asset_information?.asset_warranty[0]?.WarrantyCard,
-          PhotoUnit: caseDetails.asset_information?.asset_warranty[0]?.PhotoUnit,
-          EndUserName: caseDetails.asset_information?.asset_warranty[0]?.EndUserName,
-          EndUserPhone: caseDetails.asset_information?.asset_warranty[0]?.EndUserPhone,
-          EndUserAddress: caseDetails.asset_information?.asset_warranty[0]?.EndUserAddress,
-        })
+      const caseUpdate = await ApiCustomer.patch(`/api/case-information/${caseDetails.CaseID}`,{
+        CaseStatus: "New",
+        Owner: caseDetails.CreatedBy,
+      })
+      
+      const assetUpdate = await ApiCustomer.patch(`/api/asset-information/${caseDetails.AssetID}`,{
+        Warranty_Status: caseDetails.asset_information?.Warranty_Status,
+        needWarrantyApproval: true,
+        WarrantyApprovalStatus: "Add Info By WA",
+        WarrantyCardDate: caseDetails.asset_information?.asset_warranty[0]?.WarrantyCardDate,
+        PurchaseDate: caseDetails.asset_information?.asset_warranty[0]?.PurchaseDate,
+        POPDocument: caseDetails.asset_information?.asset_warranty[0]?.POPDocument,
+        WarrantyCard: caseDetails.asset_information?.asset_warranty[0]?.WarrantyCard,
+        PhotoUnit: caseDetails.asset_information?.asset_warranty[0]?.PhotoUnit,
+        EndUserName: caseDetails.asset_information?.asset_warranty[0]?.EndUserName,
+        EndUserPhone: caseDetails.asset_information?.asset_warranty[0]?.EndUserPhone,
+        EndUserAddress: caseDetails.asset_information?.asset_warranty[0]?.EndUserAddress,
+      })
 
-        const LogNote = await ApiCustomer.post("/api/case-information/case-notes", {
-          LogType: "System Approved",
-          ActionType: "Approved",
-          Template: "Approve Requested",
-          VisibleExternally: false,
-          MinutesSpent: 0,
-          Note : `Approved by ${user?.role} - ${user?.name || "Uknown User"}`,
-          CaseID: caseDetails?.CaseID,
-          CreatedBy: user?.id,
-        })
+      const LogNote = await ApiCustomer.post("/api/case-information/case-notes", {
+        LogType: "System Approved",
+        ActionType: "Approved",
+        Template: "Approve Requested",
+        VisibleExternally: false,
+        MinutesSpent: 0,
+        Note : `Approved by ${user?.role} - ${user?.name || "Uknown User"}`,
+        CaseID: caseDetails?.CaseID,
+        CreatedBy: user?.id,
+      })
 
-        const actionLog = await ApiCustomer.post("/api/actionlog",{
-          CaseId: `${caseDetails.CaseID}`,
-          ReferenceId: ``,
-          model: "Case",
-          dataOld: caseDetails.CaseStatus,
-          dataNew: caseUpdate.data.data.CaseStatus,
-          changedBy: user?.id,
-          logDescription: `Approve : Change Case ${caseDetails.CaseID} Status from ${caseDetails.CaseStatus} to ${caseUpdate.data.data.CaseStatus}`
-        })
-        Swal.fire({
-          icon: "success",
-          title: "Updated!",
-          text: "Updated Succes",
-          timer: 2000,
-          showConfirmButton: false
-        }).then(() => {
-          window.location.reload()
-        })
-      } catch (error) {
-          toast.error(error?.response?.data?.message ?? "Updated Failed")
-      }
+      const actionLog = await ApiCustomer.post("/api/actionlog",{
+        CaseId: `${caseDetails.CaseID}`,
+        ReferenceId: ``,
+        model: "Case",
+        dataOld: caseDetails.CaseStatus,
+        dataNew: caseUpdate.data.data.CaseStatus,
+        changedBy: user?.id,
+        logDescription: `Approve : Change Case ${caseDetails.CaseID} Status from ${caseDetails.CaseStatus} to ${caseUpdate.data.data.CaseStatus}`
+      })
+      Swal.fire({
+        icon: "success",
+        title: "Updated!",
+        text: "Updated Succes",
+        timer: 2000,
+        showConfirmButton: false
+      }).then(() => {
+        window.location.reload()
+      })
+    } catch (error) {
+        toast.error(error?.response?.data?.message ?? "Updated Failed")
     }
+  }
 
 function fieldMO(caseDetails) {
   return mapMaterialOrdersToQuotationItems(caseDetails);
@@ -3089,8 +3089,8 @@ useEffect(() => {
                               {log.changedByUser?.Name} (
                               {log.changedByUser?.Username})
                             </TableCell>
-                            <TableCell>{log.dataOld}</TableCell>
-                            <TableCell>{log.dataNew}</TableCell>
+                            <TableCell>{STATUS_ENUM_TO_LABEL[log.dataOld]}</TableCell>
+                            <TableCell>{STATUS_ENUM_TO_LABEL[log.dataNew]}</TableCell>
                             <TableCell>
                               {new Date(log.ChangeAt).toLocaleString()}
                             </TableCell>
