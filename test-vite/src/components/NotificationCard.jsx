@@ -16,10 +16,8 @@ export function NotificationCard({ }) {
     };
 
     return (
-
         notifications.map((i) => (
-            <Card className="shadow-md border rounded-xl hover:shadow-lg transition flex dark:border-slate-600 dark:bg-gradient-to-b dark:from-slate-800 dark:via-slate-700 dark:to-slate-800" key={i.token}>                
-            
+            <Card className="shadow-md border rounded-xl hover:shadow-lg transition flex dark:border-slate-600 dark:bg-gradient-to-b dark:from-slate-800 dark:via-slate-700 dark:to-slate-800" key={i.token}>                            
                 <CardHeader className="flex flex-col gap-1">
                     <div className="flex justify-between items-center gap-10">
                         <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeColors[i.type] || "bg-gray-100 text-gray-700"}`}>
